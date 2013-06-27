@@ -1,0 +1,16 @@
+about_resource: nose-selecttests-0.3.zip
+version: 0.3
+download_url: http://pypi.python.org/packages/source/n/nose-selecttests/nose-selecttests-0.3.zip
+
+name: nose-selecttests
+home_url: https://github.com/iElectric/nose-selecttests
+
+dje_license: bsd-new
+license_url: https://github.com/iElectric/nose-selecttests/blob/master/LICENSE
+license_text_file: nose-selecttests.LICENSE
+copyright: Copyright (c) 2012, Domen Kožar
+
+scm_tool: git
+scm_repository: https://github.com/iElectric/nose-selecttests.git
+
+test: 測試

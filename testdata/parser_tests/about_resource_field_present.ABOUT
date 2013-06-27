@@ -1,0 +1,8 @@
+name: Apache HTTP Server
+version: 2.4.3
+date: 2012-08-21
+license_spdx: Apache-2.0
+license_text_file: httpd.LICENSE
+copyright: Copyright 2012 The Apache Software Foundation.
+notice_file: httpd.NOTICE
+about_resource: about_resource.c

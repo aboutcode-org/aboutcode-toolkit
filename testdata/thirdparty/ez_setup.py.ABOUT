@@ -1,0 +1,11 @@
+date: 2013-01-01
+download_url: http://peak.telecommunity.com/dist/ez_setup.py
+version:0.6c11
+
+name: setuptools boostrap
+home_url: http://pypi.python.org/pypi/setuptools
+author: Phillip J. Eby
+
+dje_license: zpl-2.1
+notes: this is not used by default but embedded in virtualenv
+

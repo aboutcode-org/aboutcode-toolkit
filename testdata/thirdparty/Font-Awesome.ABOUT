@@ -1,0 +1,15 @@
+about_resource: Font-Awesome-v3.0.2.zip
+version: 3.0.2
+download_url: https://github.com/FortAwesome/Font-Awesome/archive/v3.0.2.zip
+
+organization: FortAwesome
+name: Font-Awesome
+home_url: http://fortawesome.github.com/Font-Awesome/
+
+dje_license: ofl-1.1 and mit and cc-by-3.0 
+notes: there are several licenses: SIL Open Font License, MIT License, CC BY 3.0 License, Attribution is no longer required in Font Awesome 3.0
+notice_file: Font-Awesome.NOTICE
+
+scm_tool: git
+scm_repository: https://github.com/FortAwesome/Font-Awesome.git
+scm_rev: 13d5dd373cbf3f2bddd8ac2ee8df3a1966a62d09

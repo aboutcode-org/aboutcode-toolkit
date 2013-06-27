@@ -1,0 +1,10 @@
+name: no colon test
+version 0.7.0
+about_resource: about.py
+
+test
+test with no colon
+test with colon:
+test with colon1: test
+
+date: 2013-05-10

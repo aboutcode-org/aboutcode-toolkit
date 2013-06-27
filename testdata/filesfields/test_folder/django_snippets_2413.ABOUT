@@ -1,0 +1,6 @@
+about_resource: django_snippets_2413.py
+version: 2011-04-12
+
+name: Yet another query string template tag
+
+license_text_file: ../django_snippets.LICENSE

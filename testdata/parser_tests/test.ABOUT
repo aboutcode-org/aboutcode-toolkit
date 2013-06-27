@@ -1,0 +1,9 @@
+name: Apache HTTP Server
+home_url: http://httpd.apache.org
+download_url: http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
+version: 2.4.3
+date: 2012-08-21
+license_spdx: Apache-2.0
+license_text_file: httpd.LICENSE
+copyright: Copyright 2012 The Apache Software Foundation.
+notice_file: httpd.NOTICE

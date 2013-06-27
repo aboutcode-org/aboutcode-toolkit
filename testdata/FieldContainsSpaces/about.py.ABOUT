@@ -1,0 +1,7 @@
+name: test space
+version: 0.7.0
+about_resource: about.py
+field with spaces: This is a test case for field with spaces
+
+
+date: 2012-05-29

@@ -1,0 +1,17 @@
+about_resource: okfn-annotator-549159b.zip
+download_url:https://github.com/okfn/annotator/zipball/549159b554411eba18c34ffffe91ba44f7558be6
+version: 549159b554411eba18c34ffffe91ba44f7558be6
+
+home_url:http://okfn.org/projects/annotator/
+name: OKFN Annotator
+organization: OKFN
+
+license_text_file: okfn-annotator.LICENSE
+license_url:http://okfn.org/ip-policy/
+dje_license:mit
+notes: this component includes several other components, not detailed here. 
+ See archive for details and licenses.
+
+scm_tool: git 
+scm_repository:https://github.com/okfn/annotator.git
+scm_rev: 549159b554411eba18c34ffffe91ba44f7558be6

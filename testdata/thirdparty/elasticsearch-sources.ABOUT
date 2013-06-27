@@ -1,0 +1,20 @@
+about_resource: elasticsearch-v0.19.8-g7badcde.tar.gz
+download_url:https://github.com/elasticsearch/elasticsearch/tarball/v0.19.8
+version: 0.19.8
+scm_rev: badcdee74acec84da3de6c6ea55c692aee4a6f9
+
+organization: ElasticSearch and Shay Banon
+name: ElasticSearch
+
+home_url: http://www.elasticsearch.org/
+
+scm_tool:git
+scm_repository: https://github.com/elasticsearch/elasticsearch.git
+
+dje_license:apache-2.0
+notice_file: elasticsearch.NOTICE
+license_text_file: elasticsearch.LICENSE
+copyright: Copyright 2009-2011 ElasticSearch and Shay Banon
+
+notes: Source code for the pre-built binaries we use  
+

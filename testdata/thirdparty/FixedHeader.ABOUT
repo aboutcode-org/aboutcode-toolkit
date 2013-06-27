@@ -1,0 +1,18 @@
+about_resource:FixedHeader-2.0.6.zip
+download_url: http://datatables.net/releases/FixedHeader-2.0.6.zip
+version:2.0.6
+
+name: data tables fixed header
+organization: Allan Jardine
+home_url: http://datatables.net
+description: "Fix" a header at the top of the table, so it scrolls with the table
+author: Allan Jardine (www.sprymedia.co.uk)
+
+dje_license:bsd-new
+license_url: http://datatables.net/license_bsd
+copyright: Copyright 2009-2012 Allan Jardine, all rights reserved.
+
+notes: This source file is free software, under either the GPL v2 license or a
+ BSD style license, available at:
+ http://datatables.net/license_gpl2
+ http://datatables.net/license_bsd

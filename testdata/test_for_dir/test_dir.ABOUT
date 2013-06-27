@@ -1,0 +1,4 @@
+name: test_dir
+version: 123
+about_resource: test_dir
+description: Testing directory

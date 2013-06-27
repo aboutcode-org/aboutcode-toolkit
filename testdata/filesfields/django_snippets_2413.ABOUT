@@ -1,0 +1,13 @@
+about_resource: django_snippets_2413.py
+version: 2011-04-12
+download_url: http://djangosnippets.org/snippets/2413/download/
+
+name: Yet another query string template tag
+home_url: http://djangosnippets.org/snippets/2413/
+
+license_url:http://djangosnippets.org/about/tos/
+license_text_file: django_snippets.LICENSE
+notes: This file was modified to include the line "register = Library()" 
+ without which the template tag is not registered.
+
+ 

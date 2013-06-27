@@ -1,0 +1,4 @@
+name: test_dir
+version: a
+about_resource: ../test_for_dir
+description: This is the ABOUT file referencing all the files/directories in the current directory

@@ -1,0 +1,4 @@
+Resource,name,version,about_file,about_format,date,description,home_url,download_url,readme,readme_file,install,install_file,changelog,changelog_file,news,news_file,news_url,notes,usage,contact,organization,copyright,copyright_file,notice,notice_file,notice_url,license_text,license_text_file,license_url,license_spdx,redistribute_sources,scm_tool,scm_repository,scm_path,scm_tag,scm_branch,scm_rev,checksum_sha1,checksum_md5,checksum_sha256,dje_component,dje_license,dje_organization,warnings,errors
+testdata/haveAboutFile/test1.about,test_name1,1,,,,,,,,,,,,,,,,,,,,,,,,,,license,,,,,,,,,,,,,,,,,
+testdata/haveAboutFile/test2.About,test_name2,2,,,,,http://www.test.com/,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+testdata/haveAboutFile/test3.about,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

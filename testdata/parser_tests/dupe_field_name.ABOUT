@@ -1,0 +1,4 @@
+name: Apache HTTP Server
+version: 2.4.3
+name: Apache HTTP Server dupe
+about_resource: about_file_ref.c

@@ -1,0 +1,5 @@
+about_resource: .
+name: test
+version: test
+
+license_spdx: Apache-2.0

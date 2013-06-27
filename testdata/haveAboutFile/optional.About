@@ -1,0 +1,32 @@
+name: optional
+about_format: 2.0
+date: 2013-1-1
+description: A description for this component.
+home_url: http://msn.com
+download_url: http://msn.com/download
+readme: README STUFF
+install: HOW TO INSTALLInstallation information for this component. You may use install_file when this is a long text or a pre-existing file as INSTALL files are commonly found in code archives.
+changelog: Changelog text for this component. You may use changelog_file when this is a long text or a pre-existing file as CHANGELOG files are commonly found in code archives.
+news: News text for this component. You may use news_file when this is a long text or a pre-existing file as NEWS files are commonly found in code archives. You may use news_url to point to an internet news feed for this component.
+notes: SOME NOTES
+usage: Describe the intended usage
+contact: Davide Berti dberti@nexb.com
+organization: NexB
+copyright: Copyright Davide Berti 2013 statement for this component. You may use copyright_file when this is a long text or to reference a pre-existing file. For instance COPYRIGHT files are commonly found in code archives.
+notice: Text containing a legal notice for this component. You may use notice_file when this is a long text or to reference a pre-existing file. For instance NOTICE files are commonly found in code archives.
+notice_url: http://msn.com/notice
+license_text: License text for this component. You may use license_text_file when this is a long text or to reference a pre-existing file. For instance LICENSE or COPYING files are commonly found in code archives.
+license_url: http://msn.com/license
+license_spdx: The SPDX license short form identifiers for the license of this component. See http://spdx.org/licenses/ for details. You can separate each identifier with an " or " and " and " as defined in the SPDX specification 1.1 to document the relationship between multiple license identifiers, such as a choice of license.
+redistribute_sources: yes
+scm_tool: SCM tool such as git, svn, cvs, etc.
+scm_repository: Typically a URL or some other identifier used by the tool to point to a repository, folder or file, such as an SVN or Git repository URL.
+scm_path: Path to a file, folder or module used by certain SCM pointing inside a repository.
+scm_tag: tag name or path used by certain SCM.
+scm_branch: branch name or path used by certain SCM.
+scm_rev: revision identifier such as a revision hash or version number.
+signature_gpg_file: linux-3.1.7.tar.sign
+checksum_sha1: 87aaf7bc7e8715f0455997bb8c6791aa
+dje_component: The DejaCode Enterprise URN for this component.
+dje_license: The DejaCode Enterprise URNs of the licenses for this component.
+dje_organization: The DejaCode Enterprise URN for this component organization.

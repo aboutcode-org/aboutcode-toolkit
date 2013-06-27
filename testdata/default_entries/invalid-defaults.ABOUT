@@ -1,0 +1,7 @@
+name: distribute
+version: 1.1
+extend_file: distribute.ABOUT
+about_resource: distribute_setup.py
+date:2013-01-08 16:18:48+01:00
+download_url:http://python-distribute.org/distribute_setup.py
+badkey: somevalue

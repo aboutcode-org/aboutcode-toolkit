@@ -1,0 +1,12 @@
+about_resource: underscore.js
+download_url:https://raw.github.com/documentcloud/underscore/1.4.2/underscore.js
+version:1.4.2
+
+name: underscore.js
+home_url: http://underscorejs.org/
+
+scm_tool: git
+scm_repository: git://github.com/documentcloud/underscore.git
+
+dje_license:mit
+license_text_file: underscore.js.LICENSE

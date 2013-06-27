@@ -1,0 +1,22 @@
+about_resource:elasticsearch-0.19.8.zip
+download_url: https://github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.19.8.zip
+version: 0.19.8
+scm_rev: badcdee74acec84da3de6c6ea55c692aee4a6f9
+
+organization: ElasticSearch and Shay Banon
+name: ElasticSearch
+
+home_url: http://www.elasticsearch.org/
+
+scm_tool:git
+scm_repository: https://github.com/elasticsearch/elasticsearch.git
+
+dje_license:apache-2.0
+notice_file: elasticsearch.NOTICE
+license_text_file: elasticsearch.LICENSE
+copyright: Copyright 2009-2011 ElasticSearch and Shay Banon
+
+notes: This a prebuilt version working on all OSes. 
+ The tar.gz works only with POSIX OSses and not Windows. 
+
+
