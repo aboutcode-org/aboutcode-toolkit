@@ -45,12 +45,13 @@ Open and run the installer using all the default options.
 INSTALLATION
 ------------
 Download and save the about.py file from:
-
+https://raw.github.com/dejacode/about-code-tool/master/about.py
 
 TESTS
 -----
 Optionally, to verify that everything works fine you can run the test suite, 
 download the whole repository at:
+https://github.com/pombredanne/about-code-tool/archive/master.zip
 
 Then open a terminal or command prompt, extract the download if needed and run::
 
@@ -65,9 +66,14 @@ The ABOUT tool command syntax is::
     $ python about.py [--options] <input> <output>
 
     [--options]
-        --overwrite     Overwrites the output file if it exists
-        -v,--version    Display current version, license notice, and copyright notice
-        -h,--help       Display syntx help
+    --overwrite     	 Overwrites the output file if it exists
+    -v,--version    	 Display current version, license notice, and copyright notice
+    -h,--help       	 Display syntx help
+    --verbosity  <arg>   Print more or less verbose messages while processing ABOUT files
+    <arg>
+          	0 - Do not print any warning or error messages, just a summary (default)
+            1 - Print error messages
+            2 - Print error and warning messages
 
     <input> - Path location where the .ABOUT file(s) located.
               The location can be pointing to a file or directory.
@@ -86,16 +92,19 @@ information will be saved to the CSV file named "thirdparty_about.csv".
 
 HELP and SUPPORT
 -----------
-If you have a question of find a bug, enter a ticket at:
+If you have a question or find a bug, enter a ticket at:
 
-    https://github.com/dejacode/about
+    https://github.com/dejacode/about-code-tool
 
+For issues, you can use 
+
+	https://github.com/dejacode/about-code-tool/issues
 
 SOURCE CODE
 -----------
 The ABOUT tool is available through GitHub. For the latest version visit:
 
-    https://github.com/dejacode/about
+    https://github.com/dejacode/about-code-tool
 
 
 HACKING
