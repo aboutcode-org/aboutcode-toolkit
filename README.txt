@@ -71,7 +71,7 @@ The ABOUT tool command syntax is::
     -h,--help       	 Display syntx help
     --verbosity  <arg>   Print more or less verbose messages while processing ABOUT files
     <arg>
-    		0 - Do not print any warning or error messages, just a summary (default)
+    		0 - Do not print any warning or error messages, just a total count (default)
             1 - Print error messages
             2 - Print error and warning messages
 
