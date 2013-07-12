@@ -51,7 +51,7 @@ TESTS
 -----
 Optionally, to verify that everything works fine you can run the test suite, 
 download the whole repository at:
-https://github.com/pombredanne/about-code-tool/archive/master.zip
+https://github.com/dejacode/about-code-tool/archive/master.zip
 
 Then open a terminal or command prompt, extract the download if needed and run::
 
