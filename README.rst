@@ -1,20 +1,26 @@
-The ABOUT tool and ABOUT files provide a simple way to document the provenance 
-(origin and license) and other important or interesting information about 
-third-party software components that you use in your project. 
+ABOUT tool
+==========
 
-You start by storing ABOUT files (a small text file with field/value pairs) 
+.. image:: https://travis-ci.org/dejacode/about-code-tool.png?branch=master
+   :target: https://travis-ci.org/dejacode/about-code-tool
+
+The ABOUT tool and ABOUT files provide a simple way to document the
+(origin and license) and other important or interesting information about
+third-party software components that you use in your project.
+
+You start by storing ABOUT files (a small text file with field/value pairs)
 side-by-side with each of the third-party software components you use.
 Each ABOUT file documents one software component origin and license.
 For more information on the ABOUT file format, visit http://www.dejacode.org
-There are many examples of ABOUT files (valid or invalid) in the testdata 
+There are many examples of ABOUT files (valid or invalid) in the testdata/
 directory of the whole repository.
 
-The current version of the ABOUT tool can read these ABOUT files so that you 
+The current version of the ABOUT tool can read these ABOUT files so that you
 can collect and validate the inventory of third-party components that you use.
 
-In future versions, this tool will be able to generate attribution notices and 
-collect redistributable source code used in your project to help you comply 
-with open source licenses requirements. 
+In future versions, this tool will be able to generate attribution notices and
+collect redistributable source code used in your project to help you comply
+with open source licenses requirements.
 
 This version of the ABOUT tool follows the ABOUT specification version 0.8.0 at:
 http://www.dejacode.org/about_spec_v0.8.0.html
@@ -23,16 +29,16 @@ http://www.dejacode.org/about_spec_v0.8.0.html
 REQUIREMENTS
 ------------
 The ABOUT tool has been tested with Python 2.6 or 2.7 on Linux, Mac and Windows.
-You will need to install a Python interpreter if you do not have one already 
+You will need to install a Python interpreter if you do not have one already
 installed.
 
-On Linux and Mac, Python is typically pre-installed. To verify which 
+On Linux and Mac, Python is typically pre-installed. To verify which
 version may be pre-installed, open a terminal and type:
     python --version
     python2.6 --version
     python2.7 --version
 
-On Windows or Mac, you can download Python 2.6 here: 
+On Windows or Mac, you can download Python 2.6 here:
     http://www.python.org/download/releases/2.6.6/
 
 or Python 2.7 here:
@@ -47,9 +53,10 @@ INSTALLATION
 Download and save the about.py file from:
 https://raw.github.com/dejacode/about-code-tool/master/about.py
 
+
 TESTS
 -----
-Optionally, to verify that everything works fine you can run the test suite, 
+Optionally, to verify that everything works fine you can run the test suite,
 download the whole repository at:
 https://github.com/dejacode/about-code-tool/archive/master.zip
 
@@ -60,45 +67,47 @@ Then open a terminal or command prompt, extract the download if needed and run::
 
 USAGE
 -----
-
 The ABOUT tool command syntax is::
 
     $ python about.py [--options] <input> <output>
 
     [--options]
-    --overwrite     	 Overwrites the output file if it exists
-    -v,--version    	 Display current version, license notice, and copyright notice
-    -h,--help       	 Display syntx help
+    --overwrite          Overwrites the output file if it exists
+    -v,--version         Display current version, license notice, and copyright notice
+    -h,--help            Display syntax help
     --verbosity  <arg>   Print more or less verbose messages while processing ABOUT files
     <arg>
-    		0 - Do not print any warning or error messages, just a total count (default)
+            0 - Do not print any warning or error messages, just a total count (default)
             1 - Print error messages
             2 - Print error and warning messages
 
     <input> - Path location where the .ABOUT file(s) located.
               The location can be pointing to a file or directory.
 
-    <output> - Path location where the generated output will be saved. 
-               The <output> must be a path with an output filename ending 
+    <output> - Path location where the generated output will be saved.
+               The <output> must be a path with an output filename ending
                with the ".csv" extension.
 
 Example::
+
     $ python about.py ./thirdparty_code/ thirdparty_about.csv
 
 
-In this example, the .ABOUT files in the directory /thirdparty_code/ will 
-be parsed and validated to collect the data they contain. The collected 
+In this example, the .ABOUT files in the directory /thirdparty_code/ will
+be parsed and validated to collect the data they contain. The collected
 information will be saved to the CSV file named "thirdparty_about.csv".
 
+
 HELP and SUPPORT
------------
+----------------
 If you have a question or find a bug, enter a ticket at:
 
     https://github.com/dejacode/about-code-tool
 
-For issues, you can use 
+For issues, you can use:
 
-	https://github.com/dejacode/about-code-tool/issues
+    https://github.com/dejacode/about-code-tool/issues
+
 
 SOURCE CODE
 -----------
