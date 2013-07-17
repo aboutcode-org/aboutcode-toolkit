@@ -44,6 +44,7 @@ class BasicTest(unittest.TestCase):
             pass
         about.extract_about_info(test_input, test_output, '0')
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('testdata/'))
+        os.remove(test_output)
 
     def test_isvalid_about_file(self):
         self.assertTrue(about.isvalid_about_file("test.About"))
