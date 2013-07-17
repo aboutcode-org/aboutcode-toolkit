@@ -8,7 +8,7 @@ author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
 
 
 home_url: http://dejacode.org
-readme_file: README.txt
+readme_file: README.rst
 changelog_file: CHANGELOG.txt
 
 vcs_tool: git
