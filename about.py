@@ -39,7 +39,7 @@ from collections import namedtuple
 from datetime import datetime
 from email.Parser import HeaderParser
 from os import listdir, walk
-from os.path import exists, dirname, join, abspath, isdir, basename
+from os.path import exists, dirname, join, abspath, isdir, basename, normpath
 from StringIO import StringIO
 
 
@@ -854,8 +854,16 @@ def extract_about_info(input_path, output_path, opt_arg_num):
         warnings += len(about_object.warnings)
         errors += len(about_object.errors)
         #FIXME: why are we doing path sep conversion here?
+        #TODO: For some reasons, the join(input_path, subpath_ doesn't work
+        # if the input_path startswith "../". Therefore, using the "hardcode" 
+        # to add/append the path. Need to update the code later.
         if is_dir:
-            update_path = join(input_path, about_file.partition(input_path)[2]).replace("\\", "/")
+            subpath = about_file.partition(basename(normpath(input_path)))[2]
+            if input_path[-1] == "/":
+                input_path = input_path.rpartition("/")[0]
+            if input_path[-1] == "\\":
+                input_path = input_path.rpartition("\\")[0]
+            update_path = (input_path + subpath).replace("\\", "/")
         else:
             update_path = input_path.replace("\\", "/")
 
