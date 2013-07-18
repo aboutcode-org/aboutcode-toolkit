@@ -30,6 +30,9 @@ import string
 # TODO: version number
 __version__ = ''
 
+
+MANDATORY_FIELDS = ['about_resource', 'name', 'version']
+
 def _exists(file_path):
     """
     Return True if path exists.
@@ -57,7 +60,7 @@ def read_input_and_generate_output(input_file):
                     # The purpose of the replace('\n', '\n ') is used to
                     # format the continuation strings
                     value = line[item].replace('\n', '\n ')
-                    if value:
+                    if value or item in MANDATORY_FIELDS:
                         context += item + ': ' + value + '\n'
                 output_file.write(context)
 
