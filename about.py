@@ -855,7 +855,7 @@ def extract_about_info(input_path, output_path, opt_arg_num):
         errors += len(about_object.errors)
         #FIXME: why are we doing path sep conversion here?
         if is_dir:
-            update_path = join(input_path, basename(about_file)).replace("\\", "/")
+            update_path = join(input_path, about_file.partition(input_path)[2]).replace("\\", "/")
         else:
             update_path = input_path.replace("\\", "/")
 
