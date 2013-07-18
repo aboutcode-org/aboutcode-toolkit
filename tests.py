@@ -34,7 +34,7 @@ class BasicTest(unittest.TestCase):
         self.assertTrue(len(open(tst_fn).read()) > 10)
         shutil.rmtree(tst_fn, ignore_errors=True)
 
-    def test_return_path_is_not_abspath(self):
+    def test_return_path_is_not_abspath_and_contains_subdirs(self):
         import os
         test_input = "testdata/thirdparty/django_snippets_2413.ABOUT"
         test_output = "testdata/output/test_return_path_is_not_abspath.csv"
@@ -43,7 +43,7 @@ class BasicTest(unittest.TestCase):
         except OSError:
             pass
         about.extract_about_info(test_input, test_output, '0')
-        self.assertTrue(open(test_output).read().partition('\n')[2].startswith('testdata/'))
+        self.assertTrue(open(test_output).read().partition('\n')[2].startswith('testdata/thirdparty/django_snippets_2413.ABOUT'))
         os.remove(test_output)
 
     def test_isvalid_about_file(self):
