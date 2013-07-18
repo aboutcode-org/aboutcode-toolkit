@@ -32,6 +32,7 @@ __version__ = ''
 
 
 MANDATORY_FIELDS = ['about_resource', 'name', 'version']
+SKIPPED_FIELDS = ['warnings', 'errors']
 
 def _exists(file_path):
     """
@@ -60,7 +61,7 @@ def read_input_and_generate_output(input_file):
                     # The purpose of the replace('\n', '\n ') is used to
                     # format the continuation strings
                     value = line[item].replace('\n', '\n ')
-                    if value or item in MANDATORY_FIELDS:
+                    if (value or item in MANDATORY_FIELDS) and not item in SKIPPED_FIELDS:
                         context += item + ': ' + value + '\n'
                 output_file.write(context)
 
