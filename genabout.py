@@ -54,6 +54,8 @@ def read_input_and_generate_output(input_file, gen_location):
         except Exception, e:
             print(repr(e))
             sys.exit(errno.EINVAL)
+        if file_location.startswith('/'):
+            file_location = file_location.partition('/')[2]
         location = join(gen_location, file_location)
         about_file_location =''
         if location.lower().endswith('.about'):
