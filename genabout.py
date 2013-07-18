@@ -94,12 +94,15 @@ def main():
     input_file = sys.argv[1]
     gen_location = sys.argv[2]
 
+    if isdir(input_file):
+        print(input_file, ": Input is not a CSV file.")
+        sys.exit(errno.EIO)
     if not _exists(input_file):
         print(input_file, ': Input file does not exist.')
-        sys.exit(0)
+        sys.exit(errno.EIO)
     if not _exists(gen_location):
         print(gen_location, ': Generated location does not exist.')
-        sys.exit(0)
+        sys.exit(errno.EIO)
 
     read_input_and_generate_output(input_file, gen_location)
 
