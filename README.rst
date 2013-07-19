@@ -33,7 +33,8 @@ You will need to install a Python interpreter if you do not have one already
 installed.
 
 On Linux and Mac, Python is typically pre-installed. To verify which
-version may be pre-installed, open a terminal and type:
+version may be pre-installed, open a terminal and type::
+
     python --version
     python2.6 --version
     python2.7 --version
