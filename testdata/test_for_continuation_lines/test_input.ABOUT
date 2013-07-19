@@ -1,0 +1,7 @@
+about_resource: jquery.js
+name: jQuery
+version: 1.2.3
+notes: one
+ two
+ 
+ three

@@ -206,29 +206,11 @@ name: jQuery
         self.assertEqual(expected, result.read())
 
     def test_handles_continuation_lines_correctly(self):
-        text_input = '''
-about_resource: jquery.js
-name: jQuery
-version: 1.2.3
-notes: one
- two
- 
- three
-'''
-
-        expected = \
-'''about_resource: jquery.js
-name: jQuery
-version: 1.2.3
-notes: one
- two
- 
- three
-'''
-
-        about_obj = about.AboutFile()
-        result, warn = about.AboutFile.pre_process(about_obj, StringIO(text_input))
-        self.assertEqual(expected, result.read())
+        about_file = about.AboutFile('testdata/test_for_continuation_lines/text_input.ABOUT')
+        expected = {'about_resource': 'jquery.js',
+                    'version': '1.2.3',
+                    'notes': 'one\ntwo\n\nthree'}
+        self.assertTrue(all(item in about_file.validated_fields.items() for item in expected.items()))
 
     def test_normalize_dupe_field_names(self):
         about_file = about.AboutFile('testdata/parser_tests/dupe_field_name.ABOUT')
