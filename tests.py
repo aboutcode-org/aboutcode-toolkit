@@ -206,7 +206,7 @@ name: jQuery
         self.assertEqual(expected, result.read())
 
     def test_handles_continuation_lines_correctly(self):
-        about_file = about.AboutFile('testdata/test_for_continuation_lines/text_input.ABOUT')
+        about_file = about.AboutFile('testdata/test_for_continuation_lines/test_input.ABOUT')
         expected = {'about_resource': 'jquery.js',
                     'version': '1.2.3',
                     'notes': 'one\ntwo\n\nthree'}
