@@ -16,16 +16,18 @@
 
 from __future__ import with_statement
 
-import unittest
-import about
-from StringIO import StringIO
+import os
+import shutil
 import string
+from StringIO import StringIO
+import tempfile
+import unittest
+
+import about
+
 
 class BasicTest(unittest.TestCase):
-
     def test_simple_about_command_line_can_run(self):
-        import tempfile
-        import shutil
         testpath = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
         tst_fn = testpath.name
         testpath.close()
@@ -35,7 +37,6 @@ class BasicTest(unittest.TestCase):
         shutil.rmtree(tst_fn, ignore_errors=True)
 
     def test_return_path_is_not_abspath_and_contains_subdirs_on_file(self):
-        import os
         test_input = "testdata/thirdparty/django_snippets_2413.ABOUT"
         test_output = "testdata/output/test_return_path_is_not_abspath_on_file.csv"
         try:
@@ -48,7 +49,6 @@ class BasicTest(unittest.TestCase):
         os.remove(test_output)
 
     def test_return_path_is_not_abspath_and_contains_subdirs_on_dir(self):
-        import os
         test_input = "testdata/basic"
         test_output = "testdata/output/test_return_path_is_not_abspath_on_dir.csv"
         try:
@@ -134,7 +134,7 @@ class ParserTest(unittest.TestCase):
     def test_resource_name_does_not_recurse_infinitely3(self):
         self.assertEqual('', about.resource_name(' / '))
 
-    def test_pre_proces_when_user_forgets_colon(self):
+    def test_pre_process_when_user_forgets_colon(self):
         text_input = '''
 about_resource: jquery.js
 name: jQuery
@@ -189,7 +189,7 @@ date: 2013-01-02
             self.assertEqual(expected_warnings[i][0], w.code)
             self.assertEqual(expected_warnings[i][1], w.field_value)
 
-    def test_pre_proces_with_invalid_chars_in_field_name(self):
+    def test_pre_process_with_invalid_chars_in_field_name(self):
         text_input = '''
 about_resource: jquery.js
 name: jQuery
@@ -280,6 +280,7 @@ name: jQuery
         for w in about_file.warnings:
             self.assertEqual(expected_warnings[0], w.code)
             self.assertEqual(expected_warnings[1], w.field_name)
+
 
 class UrlCheckTest(unittest.TestCase):
     def test_check_url__with_network(self):
@@ -436,6 +437,7 @@ about_resource: about.py
         for i, w in enumerate(warn):
             self.assertEqual(expected_warnings[i][0], w.code)
             self.assertEqual(expected_warnings[i][1], w.field_value)
+
 
 if __name__ == "__main__":
     unittest.main()
