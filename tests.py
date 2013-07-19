@@ -42,7 +42,8 @@ class BasicTest(unittest.TestCase):
             os.remove(test_output)
         except OSError:
             pass
-        about.extract_about_info(test_input, test_output, '0')
+        collector = about.AboutCollector()
+        collector.extract_about_info(test_input, test_output, '0')
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('testdata/thirdparty/django_snippets_2413.ABOUT'))
         os.remove(test_output)
 
@@ -54,7 +55,8 @@ class BasicTest(unittest.TestCase):
             os.remove(test_output)
         except OSError:
             pass
-        about.extract_about_info(test_input, test_output, '0')
+        collector = about.AboutCollector()
+        collector.extract_about_info(test_input, test_output, '0')
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('testdata/basic'))
         os.remove(test_output)
 

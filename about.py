@@ -17,7 +17,7 @@
 """
 This is a tool to process ABOUT files as specified at http://dejacode.org
 ABOUT files are small text files to document the origin and license of software
-components. This tool read and validates ABOUT files to collect your software 
+components. This tool read and validates ABOUT files to collect your software
 components inventory
 """
 
@@ -462,7 +462,7 @@ class AboutFile(object):
                 row += [about_object.validated_fields[field]]
             else:
                 row += ['']
-    
+
         warnings = [repr(w) for w in about_object.warnings]
         errors = [repr(e) for e in about_object.errors]
         row += ['\n'.join(warnings), '\n'.join(errors)]
@@ -821,77 +821,78 @@ SPDX_LICENSE_IDS = dict((i.lower(), i) for i in SPDX_LICENSES)
 #=============================================================================
 
 
-def extract_about_info(input_path, output_path, opt_arg_num):
-    """
-    Collects recursively all .ABOUT files in in_path and builds rows for each.
-    Write results in CSV file at output_path
-    """
-    in_path = abspath(input_path)
-    assert exists(in_path)
-    is_dir = False
+class AboutCollector(object):
+    def extract_about_info(self, input_path, output_path, opt_arg_num):
+        """
+        Collects recursively all .ABOUT files in in_path and builds rows for each.
+        Write results in CSV file at output_path
+        """
+        in_path = abspath(input_path)
+        assert exists(in_path)
+        is_dir = False
 
-    files = []
-    if isdir(in_path):
-        is_dir = True
-        for root, _, filenames in walk(in_path):
-            for filename in filenames:
-                files += [join(root, filename)]
-    else:
-        files += [in_path]
-
-    about_data_list = []
-    warnings = errors = 0
-
-    display_error = display_error_and_warning = False
-    if opt_arg_num == '1':
-        display_error = True
-
-    if opt_arg_num == '2':
-        display_error_and_warning = True
-
-    for about_file in filter(isvalid_about_file, files):
-        about_object = AboutFile(about_file)
-        warnings += len(about_object.warnings)
-        errors += len(about_object.errors)
-        #FIXME: why are we doing path sep conversion here?
-        #TODO: For some reasons, the join(input_path, subpath_ doesn't work
-        # if the input_path startswith "../". Therefore, using the "hardcode" 
-        # to add/append the path. Need to update the code later.
-        if is_dir:
-            subpath = about_file.partition(basename(normpath(input_path)))[2]
-            if input_path[-1] == "/":
-                input_path = input_path.rpartition("/")[0]
-            if input_path[-1] == "\\":
-                input_path = input_path.rpartition("\\")[0]
-            update_path = (input_path + subpath).replace("\\", "/")
+        files = []
+        if isdir(in_path):
+            is_dir = True
+            for root, _, filenames in walk(in_path):
+                for filename in filenames:
+                    files += [join(root, filename)]
         else:
-            update_path = input_path.replace("\\", "/")
+            files += [in_path]
 
-        about_data_list.append(about_object.get_about_info(update_path, about_object))
+        about_data_list = []
+        warnings = errors = 0
 
-        if display_error:
-            if about_object.errors:
-                print("ABOUT File: %s" % update_path)
-                print("ERROR: %s\n" % about_object.errors)
-        if display_error_and_warning:
-            if about_object.errors or about_object.warnings:
-                print("ABOUT File: %s" % update_path)
+        display_error = display_error_and_warning = False
+        if opt_arg_num == '1':
+            display_error = True
+
+        if opt_arg_num == '2':
+            display_error_and_warning = True
+
+        for about_file in filter(isvalid_about_file, files):
+            about_object = AboutFile(about_file)
+            warnings += len(about_object.warnings)
+            errors += len(about_object.errors)
+            #FIXME: why are we doing path sep conversion here?
+            #TODO: For some reasons, the join(input_path, subpath_ doesn't work
+            # if the input_path startswith "../". Therefore, using the "hardcode"
+            # to add/append the path. Need to update the code later.
+            if is_dir:
+                subpath = about_file.partition(basename(normpath(input_path)))[2]
+                if input_path[-1] == "/":
+                    input_path = input_path.rpartition("/")[0]
+                if input_path[-1] == "\\":
+                    input_path = input_path.rpartition("\\")[0]
+                update_path = (input_path + subpath).replace("\\", "/")
+            else:
+                update_path = input_path.replace("\\", "/")
+
+            about_data_list.append(about_object.get_about_info(update_path, about_object))
+
+            if display_error:
                 if about_object.errors:
-                    print("ERROR: %s" % about_object.errors)
-                if about_object.warnings:
-                    print("WARNING: %s\n" % about_object.warnings)
+                    print("ABOUT File: %s" % update_path)
+                    print("ERROR: %s\n" % about_object.errors)
+            if display_error_and_warning:
+                if about_object.errors or about_object.warnings:
+                    print("ABOUT File: %s" % update_path)
+                    if about_object.errors:
+                        print("ERROR: %s" % about_object.errors)
+                    if about_object.warnings:
+                        print("WARNING: %s\n" % about_object.warnings)
 
-    write_to_csv(output_path, about_data_list)
-    print("%d errors detected." % errors)
-    print("%d warnings detected.\n" % warnings)
+        self.write_to_csv(output_path, about_data_list)
+        print("%d errors detected." % errors)
+        print("%d warnings detected.\n" % warnings)
 
-def write_to_csv(output_path, about_data_list):
-    with open(output_path, 'wb') as output_file:
-        about_spec_writer = csv.writer(output_file)
-        about_spec_writer.writerow(['about_file'] + MANDATORY_FIELDS +
-                                   OPTIONAL_FIELDS + ['warnings', 'errors'])
-        for row in about_data_list:
-            about_spec_writer.writerow(row)
+    def write_to_csv(self, output_path, about_data_list):
+        with open(output_path, 'wb') as output_file:
+            about_spec_writer = csv.writer(output_file)
+            about_spec_writer.writerow(['about_file'] + MANDATORY_FIELDS +
+                                       OPTIONAL_FIELDS + ['warnings', 'errors'])
+            for row in about_data_list:
+                about_spec_writer.writerow(row)
 
 
 def isvalid_about_file(file_name):
@@ -1009,7 +1010,8 @@ def main(args, opts):
         sys.exit(errno.EEXIST)
 
     if not exists(output_path) or (exists(output_path) and overwrite):
-        extract_about_info(input_path, output_path, opt_arg_num)
+        collector = AboutCollector()
+        collector.extract_about_info(input_path, output_path, opt_arg_num)
     else:
         # we should never reach this
         assert False, "Unsupported option(s)."
