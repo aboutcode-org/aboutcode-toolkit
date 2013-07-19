@@ -97,10 +97,12 @@ def read_input_and_generate_output(input_file, gen_location):
                 output_file.write(context)
 
 def main():
-    # The length is 3 as
-    # 1. the python script itself, genabout.py
-    # 2. input file
-    # 3. location for generation
+    """
+    The main function that take 3 arguments.
+        1. the python script itself, genabout.py
+        2. input file
+        3. location for generation
+    """
     if not len(sys.argv) == 3:
         print(sys.argv[0] + " needs exactly 2 arguments. \n\n \t genabout.py <input_file> <generated_location>")
         sys.exit(0)
