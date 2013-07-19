@@ -822,44 +822,74 @@ SPDX_LICENSE_IDS = dict((i.lower(), i) for i in SPDX_LICENSES)
 
 
 class AboutCollector(object):
-    def extract_about_info(self, input_path, output_path, opt_arg_num):
-        """
-        Collects recursively all .ABOUT files in in_path and builds rows for each.
-        Write results in CSV file at output_path
-        """
-        in_path = abspath(input_path)
-        assert exists(in_path)
-        is_dir = False
+    def __init__(self, input_path, output_path, opt_arg_num):
+        # Setup the input and output paths
+        self.original_input_path = input_path
+        self.input_path = abspath(input_path)
+        assert exists(self.input_path)
+        self.input_path_is_dir = isdir(self.input_path)
+        self.output_path = output_path
 
+        # Setup the verbosity
+        self.display_error = self.display_error_and_warning = False
+        if opt_arg_num == '1':
+            self.display_error = True
+        elif opt_arg_num == '2':
+            self.display_error_and_warning = True
+
+        self.about_files = []
+        self.about_objects = []
+
+        # Running the files collection and objects creation on instantiation
+        self.collect_about_files()
+        self.create_about_objects_from_files()
+
+    def collect_about_files(self):
+        """
+        Collects all .ABOUT files path given an input_path and stores the
+        results in a about_files list on the collector instance.
+        """
         files = []
-        if isdir(in_path):
-            is_dir = True
-            for root, _, filenames in walk(in_path):
+        if self.input_path_is_dir:
+            for root, _, filenames in walk(self.input_path):
                 for filename in filenames:
                     files += [join(root, filename)]
         else:
-            files += [in_path]
+            files = [self.input_path]
 
-        about_data_list = []
-        warnings = errors = 0
+        self.about_files = files
 
-        display_error = display_error_and_warning = False
-        if opt_arg_num == '1':
-            display_error = True
-
-        if opt_arg_num == '2':
-            display_error_and_warning = True
-
-        for about_file in filter(isvalid_about_file, files):
+    def create_about_objects_from_files(self):
+        """
+        Parses each collected files a creates a list of AboutFile objects.
+        """
+        about_objects = []
+        for about_file in filter(isvalid_about_file, self.about_files):
             about_object = AboutFile(about_file)
-            warnings += len(about_object.warnings)
-            errors += len(about_object.errors)
+            about_objects.append(about_object)
+
+        self.about_objects = about_objects
+
+    def extract_about_info(self):
+        """
+        Builds rows for each stored about objects.
+        """
+        about_data_list = []
+        warnings_count = errors_count = 0
+
+        for about_object in self.about_objects:
+            warnings_count += len(about_object.warnings)
+            errors_count += len(about_object.errors)
+
             #FIXME: why are we doing path sep conversion here?
+            #TODO: THis should be refactored in a separate methods.
             #TODO: For some reasons, the join(input_path, subpath_ doesn't work
-            # if the input_path startswith "../". Therefore, using the "hardcode"
-            # to add/append the path. Need to update the code later.
-            if is_dir:
-                subpath = about_file.partition(basename(normpath(input_path)))[2]
+            # if the input_path startswith "../". Therefore, using the
+            # "hardcode" to add/append the path. Need to update the code later.
+            input_path = self.original_input_path
+            if self.input_path_is_dir:
+                subpath = about_object.location.partition(basename(
+                    normpath(input_path)))[2]
                 if input_path[-1] == "/":
                     input_path = input_path.rpartition("/")[0]
                 if input_path[-1] == "\\":
@@ -868,13 +898,14 @@ class AboutCollector(object):
             else:
                 update_path = input_path.replace("\\", "/")
 
-            about_data_list.append(about_object.get_about_info(update_path, about_object))
+            about_data_list.append(about_object.get_about_info(update_path,
+                                                               about_object))
 
-            if display_error:
+            if self.display_error:
                 if about_object.errors:
                     print("ABOUT File: %s" % update_path)
                     print("ERROR: %s\n" % about_object.errors)
-            if display_error_and_warning:
+            if self.display_error_and_warning:
                 if about_object.errors or about_object.warnings:
                     print("ABOUT File: %s" % update_path)
                     if about_object.errors:
@@ -882,17 +913,37 @@ class AboutCollector(object):
                     if about_object.warnings:
                         print("WARNING: %s\n" % about_object.warnings)
 
-        self.write_to_csv(output_path, about_data_list)
-        print("%d errors detected." % errors)
-        print("%d warnings detected.\n" % warnings)
+        self.write_to_csv(about_data_list)
+        if errors_count:
+            print("%d errors detected." % errors_count)
+        if warnings_count:
+            print("%d warnings detected.\n" % warnings_count)
 
-    def write_to_csv(self, output_path, about_data_list):
-        with open(output_path, 'wb') as output_file:
+    def write_to_csv(self, about_data_list):
+        """
+        Write results in CSV file at output_path.
+        """
+        with open(self.output_path, 'wb') as output_file:
             about_spec_writer = csv.writer(output_file)
             about_spec_writer.writerow(['about_file'] + MANDATORY_FIELDS +
                                        OPTIONAL_FIELDS + ['warnings', 'errors'])
             for row in about_data_list:
                 about_spec_writer.writerow(row)
+
+    def generate_attribution(self):
+        try:
+            import jinja2
+        except ImportError:
+            print("""The Jinja2 library is required to generate the attribution
+            You can install the most recent Jinja2 version using easy_install
+            or pip:
+            easy_install Jinja2
+            pip install Jinja2""")
+            return
+
+        # TODO: Put the code to generate attribution here.
+        #for about_object in self.about_objects:
+            # about_object.validated_fields contains the values we need
 
 
 def isvalid_about_file(file_name):
@@ -947,13 +998,11 @@ def main(args, opts):
     for opt, opt_arg in opts:
         invalid_opt = True
         if opt in ('-h', '--help'):
-            invalid_opt = False
             syntax()
             option_usage()
             sys.exit(0)
 
         if opt in ('-v', '--version'):
-            invalid_opt = False
             version()
             sys.exit(0)
 
@@ -1010,8 +1059,8 @@ def main(args, opts):
         sys.exit(errno.EEXIST)
 
     if not exists(output_path) or (exists(output_path) and overwrite):
-        collector = AboutCollector()
-        collector.extract_about_info(input_path, output_path, opt_arg_num)
+        collector = AboutCollector(input_path, output_path, opt_arg_num)
+        collector.extract_about_info()
     else:
         # we should never reach this
         assert False, "Unsupported option(s)."
