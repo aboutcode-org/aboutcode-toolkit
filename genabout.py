@@ -53,7 +53,7 @@ def read_input_and_generate_output(input_file, gen_location):
             file_location = line['about_file']
         except Exception, e:
             print(repr(e))
-            print("The input file does not contain the key 'about_file' which is requireded.")
+            print("The input file does not contain the key 'about_file' which is required.")
             sys.exit(errno.EINVAL)
         if file_location.startswith('/'):
             file_location = file_location.partition('/')[2]
