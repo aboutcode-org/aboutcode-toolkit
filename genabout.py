@@ -42,11 +42,11 @@ def _exists(file_path):
     if file_path:
         return exists(abspath(file_path))
 
-# This function will read the input csv file, get the information and write
-# the information into the .ABOUT file.
-# The current design is to assume the .ABOUT file doesn't exist and do nothing
-# if it does.
 def read_input_and_generate_output(input_file, gen_location):
+    """
+    Read the input csv file, get the information and write the information 
+    into the .ABOUT file.
+    """
     csvfile = csv.DictReader(open(input_file, 'rb'))
     for line in csvfile:
         try:
@@ -97,10 +97,12 @@ def read_input_and_generate_output(input_file, gen_location):
                 output_file.write(context)
 
 def main():
-    # The length is 3 as
-    # 1. the python script itself, genabout.py
-    # 2. input file
-    # 3. location for generation
+    """
+    The main function that take 3 arguments.
+        1. the python script itself, genabout.py
+        2. input file
+        3. location for generation
+    """
     if not len(sys.argv) == 3:
         print(sys.argv[0] + " needs exactly 2 arguments. \n\n \t genabout.py <input_file> <generated_location>")
         sys.exit(0)
