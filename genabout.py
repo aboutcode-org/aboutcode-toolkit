@@ -50,10 +50,10 @@ def read_input_and_generate_output(input_file, gen_location):
     csvfile = csv.DictReader(open(input_file, 'rb'))
     for line in csvfile:
         try:
-            file_location = line['about_file']
+            file_location = line['about_resource']
         except Exception, e:
             print(repr(e))
-            print("The input file does not contain the key 'about_file' which is required.")
+            print("The input file does not contain the key 'about_resource' which is required.")
             sys.exit(errno.EINVAL)
         if file_location.startswith('/'):
             file_location = file_location.partition('/')[2]
@@ -73,13 +73,27 @@ def read_input_and_generate_output(input_file, gen_location):
             print("About file already existed.")
         else:
             with open(about_file_location, 'wb') as output_file:
-                context = ""
+                context = ''
+                try:
+                    if line['name']:
+                        name = line['name']
+                except:
+                    name = ''
+                try:
+                    if line['version']:
+                        version = line['version']
+                except:
+                    version = ''
+                context = 'about_resource: ' + line['about_resource'] + '\n' \
+                            + 'name: ' + name + '\n' \
+                            + 'version: ' + version + '\n\n'
                 for item in sorted(line.iterkeys()):
-                    # The purpose of the replace('\n', '\n ') is used to
-                    # format the continuation strings
-                    value = line[item].replace('\n', '\n ')
-                    if (value or item in MANDATORY_FIELDS) and not item in SKIPPED_FIELDS:
-                        context += item + ': ' + value + '\n'
+                    if not item in MANDATORY_FIELDS:
+                        # The purpose of the replace('\n', '\n ') is used to
+                        # format the continuation strings
+                        value = line[item].replace('\n', '\n ')
+                        if (value or item in MANDATORY_FIELDS) and not item in SKIPPED_FIELDS:
+                            context += item + ': ' + value + '\n'
                 output_file.write(context)
 
 def main():
