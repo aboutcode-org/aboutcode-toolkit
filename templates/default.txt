@@ -1,0 +1,6 @@
+{% for about_object in about_objects %}
+{{ about_object.name }} {{ about_object.version }}
+{{ about_object.copyright }}
+{{ about_object.notice }}
+
+{% endfor %}

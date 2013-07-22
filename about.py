@@ -930,7 +930,7 @@ class AboutCollector(object):
             for row in about_data_list:
                 about_spec_writer.writerow(row)
 
-    def generate_attribution(self, template_path):
+    def generate_attribution(self, template_path='templates/default.txt'):
         """
         Generates an attribution file from a list of ABOUT files
         """
