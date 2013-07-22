@@ -438,12 +438,8 @@ about_resource: about.py
             self.assertEqual(expected_warnings[i][0], w.code)
             self.assertEqual(expected_warnings[i][1], w.field_value)
 
-    def test_generate_attrib(self):
-        expected = \
-'''version:2.4.3
-about_resource:httpd-2.4.3.tar.gz
-name:Apache HTTP Server
-'''
+    def test_generate_attribution(self):
+        expected = u'version:2.4.3about_resource:httpd-2.4.3.tar.gzname:Apache HTTP Server'
         about_collector = about.AboutCollector('testdata/attrib/attrib.ABOUT', None, 0)
         result = about_collector.generate_attribution('testdata/attrib/test.template')
         self.assertEqual(result, expected)

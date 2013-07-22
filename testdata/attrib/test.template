@@ -1,5 +1,5 @@
-{% for dictionary in dictionaries -%}
-{% for key, value in dictionary.iteritems() -%}
-{{key}}:{{value}}
-{% endfor %}
+{% for about_object in about_objects -%}
+    {% for key, value in about_object.iteritems() -%}
+        {{ key }}:{{ value }}
+    {%- endfor %}
 {%- endfor %}

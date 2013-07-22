@@ -947,14 +947,14 @@ class AboutCollector(object):
         env = Environment(loader=FileSystemLoader(template_dir))
         try:
             template = env.get_template(template_name)
-            about_dictionaries = []
-            for about_object in self.about_objects:
-                about_dictionaries += [about_object.validated_fields]
-            return template.render(dictionaries = about_dictionaries)
-
         except TemplateNotFound as e:
-            #TODO: needs to return an error
-            print (e.message)
+            print (e.message)  # TODO: needs to return an error
+            return
+
+        # We only need the fields names and values to render the template
+        about_objects = [about_object.validated_fields
+                         for about_object in self.about_objects]
+        return template.render(about_objects=about_objects)
 
 
 def isvalid_about_file(file_name):
