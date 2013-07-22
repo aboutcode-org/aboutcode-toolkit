@@ -937,11 +937,9 @@ class AboutCollector(object):
         try:
             from jinja2 import Environment, FileSystemLoader, TemplateNotFound
         except ImportError:
-            print("""The Jinja2 library is required to generate the attribution
-            You can install the most recent Jinja2 version using easy_install
-            or pip:
-            easy_install Jinja2
-            pip install Jinja2""")
+            print("""The Jinja2 library is required to generate the attribution.
+            You can install the dependencies using:
+            pip install -r requirements.txt""")
             return
 
         template_dir = dirname(template_path)
