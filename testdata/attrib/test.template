@@ -1,0 +1,5 @@
+{% for dictionary in dictionaries -%}
+{% for key, value in dictionary.iteritems() -%}
+{{key}}:{{value}}
+{% endfor %}
+{%- endfor %}
