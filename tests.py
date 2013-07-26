@@ -205,6 +205,21 @@ name: jQuery
         self.assertEqual('vers|ion', warn[0].field_name)
         self.assertEqual(expected, result.read())
 
+    def test_pre_process_with_spaces_left_of_colon(self):
+        text_input = '''
+about_resource   : jquery.js
+name: jQuery
+version: 1.2.3
+'''
+        expected = \
+'''about_resource: jquery.js
+name: jQuery
+version: 1.2.3
+'''
+        about_obj = about.AboutFile()
+        result, warn = about.AboutFile.pre_process(about_obj, StringIO(text_input))
+        self.assertEqual(expected, result.read())
+
     def test_handles_continuation_lines_correctly(self):
         about_file = about.AboutFile('testdata/test_for_continuation_lines/test_input.ABOUT')
         expected = {'about_resource': 'jquery.js',
