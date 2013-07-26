@@ -128,6 +128,7 @@ class AboutFile(object):
         In the file-like object we remove:
          - blank/empty lines
          - invalid lines that cannot be parsed
+         - spaces around the colon separator
         This also checks for field names with incorrect characters that could
         not be otherwise parsed.
         """
@@ -169,6 +170,8 @@ class AboutFile(object):
                 warnings.append(Warn(IGNORED, field_name, line, msg))
                 last_line_is_field_or_continuation = False
                 continue
+            else:
+                line = field_name + ":" + splitted[1]
 
             # invalid field characters
             invalid_chars = self.invalid_chars_in_field_name(field_name)
