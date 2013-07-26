@@ -933,20 +933,31 @@ class AboutCollector(object):
             for row in about_data_list:
                 about_spec_writer.writerow(row)
 
-    def generate_attribution(self):
+    def generate_attribution(self, template_path='templates/default.txt'):
+        """
+        Generates an attribution file from a list of ABOUT files
+        """
         try:
-            import jinja2
+            from jinja2 import Environment, FileSystemLoader, TemplateNotFound
         except ImportError:
-            print("""The Jinja2 library is required to generate the attribution
-            You can install the most recent Jinja2 version using easy_install
-            or pip:
-            easy_install Jinja2
-            pip install Jinja2""")
+            print("""The Jinja2 library is required to generate the attribution.
+            You can install the dependencies using:
+            pip install -r requirements.txt""")
             return
 
-        # TODO: Put the code to generate attribution here.
-        #for about_object in self.about_objects:
-            # about_object.validated_fields contains the values we need
+        template_dir = dirname(template_path)
+        template_name = basename(template_path)
+        env = Environment(loader=FileSystemLoader(template_dir))
+        try:
+            template = env.get_template(template_name)
+        except TemplateNotFound as e:
+            print (e.message)  # TODO: needs to return an error
+            return
+
+        # We only need the fields names and values to render the template
+        about_objects = [about_object.validated_fields
+                         for about_object in self.about_objects]
+        return template.render(about_objects=about_objects)
 
 
 def isvalid_about_file(file_name):
