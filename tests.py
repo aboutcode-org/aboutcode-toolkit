@@ -69,17 +69,17 @@ class BasicTest(unittest.TestCase):
 class ParserTest(unittest.TestCase):
     def test_valid_chars_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_field_name(string.digits + string.ascii_letters + '_')
+        invalid = about_obj.check_invalid_chars_in_field_name(string.digits + string.ascii_letters + '_')
         self.assertEqual([], invalid)
 
     def test_invalid_chars_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_field_name('_$asafg:')
+        invalid = about_obj.check_invalid_chars_in_field_name('_$asafg:')
         self.assertEqual(['$', ':'], invalid)
 
     def test_invalid_space_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_field_name('_ Hello')
+        invalid = about_obj.check_invalid_chars_in_field_name('_ Hello')
         self.assertEqual([' '], invalid)
 
     def test_valid_chars_in_file_name(self):
@@ -220,12 +220,19 @@ version: 1.2.3
         result, warn = about.AboutFile.pre_process(about_obj, StringIO(text_input))
         self.assertEqual(expected, result.read())
 
-    def test_handles_continuation_lines_correctly(self):
-        about_file = about.AboutFile('testdata/test_for_continuation_lines/test_input.ABOUT')
-        expected = {'about_resource': 'jquery.js',
-                    'version': '1.2.3',
-                    'notes': 'one\ntwo\n\nthree'}
-        self.assertTrue(all(item in about_file.validated_fields.items() for item in expected.items()))
+    def test_handles_last_line_is_a_continuation_line(self):
+        about_obj = about.AboutFile()
+        warnings = []
+        warn = about.AboutFile.check_line_continuation(" Last line is a continuation line.", True)
+        warnings.append(warn)
+        self.assertTrue(warnings == [""], "This should not throw any warning.")
+
+    def test_handles_last_line_is_not_a_continuation_line(self):
+        about_obj = about.AboutFile()
+        warnings = []
+        warn = about.AboutFile.check_line_continuation(" Last line is NOT a continuation line.", False)
+        warnings.append(warn)
+        self.assertTrue(len(warnings) == 1, "This should throw ONLY 1 warning.")
 
     def test_normalize_dupe_field_names(self):
         about_file = about.AboutFile('testdata/parser_tests/dupe_field_name.ABOUT')

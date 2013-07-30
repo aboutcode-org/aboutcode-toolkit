@@ -104,7 +104,7 @@ class AboutFile(object):
         try:
             with open(self.location, "rU") as file_in:
                 #FIXME: we should open the file only once, it is always small enough to be kept in memory
-                no_blank_lines, pre_proc_warnings = self.pre_process(self, file_in)
+                no_blank_lines, pre_proc_warnings = self.pre_process(file_in)
                 self.warnings.extend(pre_proc_warnings)
                 # HeaderParser.parse returns the parsed file as keys and
                 # values (allows for multiple keys, and it doesn't validate)
@@ -120,7 +120,6 @@ class AboutFile(object):
             self.warnings.extend(self.normalize())
             self.validate()
 
-    @staticmethod
     def pre_process(self, file_in):
         """
         Pre-process an ABOUT file before using the email header parser.
@@ -140,13 +139,11 @@ class AboutFile(object):
         for line in file_in.readlines():
             # continuation line
             if line.startswith(' '):
-                if not last_line_is_field_or_continuation:
-                    msg = 'Line does not contain a field or continuation: ignored.'
-                    warnings.append(Warn(IGNORED, None, line, msg))
-                    last_line_is_field_or_continuation = False
-                else:
+                warn = self.check_line_continuation(line, last_line_is_field_or_continuation)
+                if last_line_is_field_or_continuation:
                     about_string += line
-                    last_line_is_field_or_continuation = True
+                if warn:
+                    warnings.append(warn)
                 continue
 
             # empty or blank line
@@ -154,27 +151,26 @@ class AboutFile(object):
                 last_line_is_field_or_continuation = False
                 continue
 
-            # From here, we should have a field line not a field line if there
-            # is no colon
-            if ':' not in line:
-                msg = 'Line does not contain a field: ignored.'
-                warnings.append(Warn(IGNORED, None, line, msg))
+            # From here, we should have a field line and consider not a field
+            # line if there is no colon
+            warn, has_colon = self.check_line_has_colon(line)
+            if not has_colon:
                 last_line_is_field_or_continuation = False
+                warnings.append(warn)
                 continue
 
             # invalid space characters
             splitted = line.split(':', 1)
             field_name = splitted[0].rstrip()
-            if ' ' in field_name:
-                msg = 'Field name contains spaces: line ignored.'
-                warnings.append(Warn(IGNORED, field_name, line, msg))
+            warn = self.check_invalid_space_characters(field_name, line)  
+            if warn:
                 last_line_is_field_or_continuation = False
                 continue
             else:
                 line = field_name + ":" + splitted[1]
 
             # invalid field characters
-            invalid_chars = self.invalid_chars_in_field_name(field_name)
+            invalid_chars = self.check_invalid_chars_in_field_name(field_name)
             if invalid_chars:
                 msg = "Field name contains invalid characters: '%s': line ignored." % ''.join(invalid_chars)
                 warnings.append(Warn(IGNORED, field_name, line, msg))
@@ -187,6 +183,46 @@ class AboutFile(object):
 
         # TODO: we should either yield and not return a stringIO or return a string
         return StringIO(about_string), warnings
+
+    @staticmethod
+    def check_line_continuation(line, continuation):
+        warnings = ""
+        if not continuation:
+            msg = 'Line does not contain a field or continuation: ignored.'
+            warnings = Warn(IGNORED, None, line, msg)
+        return warnings
+
+    @staticmethod
+    def check_line_has_colon(line):
+        warnings = ""
+        has_colon = True
+        if ':' not in line:
+            msg = 'Line does not contain a field: ignored.'
+            warnings = Warn(IGNORED, None, line, msg)
+            has_colon = False
+        return warnings, has_colon
+
+    @staticmethod
+    def check_invalid_space_characters(field_name, line):
+        warnings = ""
+        continuation = ""
+        if ' ' in field_name:
+            msg = 'Field name contains spaces: line ignored.'
+            warnings = Warn(IGNORED, field_name, line, msg)
+        return warnings
+
+    @staticmethod
+    def check_invalid_chars_in_field_name(field_name):
+        """
+        Return a sequence of invalid characters in a field name.
+        From spec 0.8.0:
+            A field name can contain only these US-ASCII characters:
+            <li> digits from 0 to 9 </li>
+            <li> uppercase and lowercase letters from A to Z</li>
+            <li> the _ underscore sign. </li>
+        """
+        supported = string.digits + string.ascii_letters + '_'
+        return [char for char in field_name if char not in supported]
 
     def normalize(self):
         """
@@ -503,18 +539,6 @@ class AboutFile(object):
             if name.lower() in names:
                 names.append(name)
         return names
-
-    def invalid_chars_in_field_name(self, field_name):
-        """
-        Return a sequence of invalid characters in a field name.
-        From spec 0.8.0:
-            A field name can contain only these US-ASCII characters:
-            <li> digits from 0 to 9 </li>
-            <li> uppercase and lowercase letters from A to Z</li>
-            <li> the _ underscore sign. </li>
-        """
-        supported = string.digits + string.ascii_letters + '_'
-        return [char for char in field_name if char not in supported]
 
 def resource_name(resource_path):
     """
