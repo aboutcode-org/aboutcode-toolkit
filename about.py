@@ -205,7 +205,6 @@ class AboutFile(object):
     @staticmethod
     def check_invalid_space_characters(field_name, line):
         warnings = ""
-        continuation = ""
         if ' ' in field_name:
             msg = 'Field name contains spaces: line ignored.'
             warnings = Warn(IGNORED, field_name, line, msg)
