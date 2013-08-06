@@ -69,17 +69,17 @@ class BasicTest(unittest.TestCase):
 class ParserTest(unittest.TestCase):
     def test_valid_chars_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.check_invalid_chars_in_field_name(string.digits + string.ascii_letters + '_')
+        invalid, warnings = about_obj.check_invalid_chars_in_field_name(string.digits + string.ascii_letters + '_', string.digits + string.ascii_letters + '_')
         self.assertEqual([], invalid)
 
     def test_invalid_chars_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.check_invalid_chars_in_field_name('_$asafg:')
+        invalid, warnings = about_obj.check_invalid_chars_in_field_name('_$asafg:', '_$asafg: test')
         self.assertEqual(['$', ':'], invalid)
 
     def test_invalid_space_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.check_invalid_chars_in_field_name('_ Hello')
+        invalid, warnings = about_obj.check_invalid_chars_in_field_name('_ Hello', '_ Hello')
         self.assertEqual([' '], invalid)
 
     def test_valid_chars_in_file_name(self):

@@ -165,15 +165,15 @@ class AboutFile(object):
             warn = self.check_invalid_space_characters(field_name, line)  
             if warn:
                 last_line_is_field_or_continuation = False
+                warnings.append(warn)
                 continue
             else:
                 line = field_name + ":" + splitted[1]
 
             # invalid field characters
-            invalid_chars = self.check_invalid_chars_in_field_name(field_name)
-            if invalid_chars:
-                msg = "Field name contains invalid characters: '%s': line ignored." % ''.join(invalid_chars)
-                warnings.append(Warn(IGNORED, field_name, line, msg))
+            invalid_chars, warn = self.check_invalid_chars_in_field_name(field_name, line)
+            if warn:
+                warnings.append(warn)
                 last_line_is_field_or_continuation = False
                 continue
 
@@ -211,7 +211,7 @@ class AboutFile(object):
         return warnings
 
     @staticmethod
-    def check_invalid_chars_in_field_name(field_name):
+    def check_invalid_chars_in_field_name(field_name, line):
         """
         Return a sequence of invalid characters in a field name.
         From spec 0.8.0:
@@ -221,7 +221,12 @@ class AboutFile(object):
             <li> the _ underscore sign. </li>
         """
         supported = string.digits + string.ascii_letters + '_'
-        return [char for char in field_name if char not in supported]
+        warnings = ""
+        invalid_chars = [char for char in field_name if char not in supported]
+        if invalid_chars:
+            msg = "Field name contains invalid characters: '%s': line ignored." % ''.join(invalid_chars)
+            warnings = Warn(IGNORED, field_name, line, msg)
+        return invalid_chars, warnings
 
     def normalize(self):
         """
