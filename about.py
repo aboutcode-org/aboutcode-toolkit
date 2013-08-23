@@ -162,7 +162,7 @@ class AboutFile(object):
             # invalid space characters
             splitted = line.split(':', 1)
             field_name = splitted[0].rstrip()
-            warn = self.check_invalid_space_characters(field_name, line)  
+            warn = self.check_invalid_space_characters(field_name, line)
             if warn:
                 last_line_is_field_or_continuation = False
                 warnings.append(warn)
@@ -895,9 +895,12 @@ class AboutCollector(object):
         Parses each collected files a creates a list of AboutFile objects.
         """
         about_objects = []
+        identifier = 0
         for about_file in filter(isvalid_about_file, self.about_files):
             about_object = AboutFile(about_file)
+            about_object.unique_identifier = identifier
             about_objects.append(about_object)
+            identifier += 1
 
         self.about_objects = about_objects
 
@@ -961,7 +964,7 @@ class AboutCollector(object):
             for row in about_data_list:
                 about_spec_writer.writerow(row)
 
-    def generate_attribution(self, template_path='templates/default.txt'):
+    def generate_attribution(self, template_path='templates/default.html'):
         """
         Generates an attribution file from a list of ABOUT files
         """

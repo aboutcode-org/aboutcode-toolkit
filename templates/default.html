@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Attribution</title>
+    </head>
+
+    <body>
+        <h1>Attribution for Placeholder, Product Owner</h1>
+        <div>
+
+            <p>For instructions on how to obtain a copy of any source code
+            being made publicly available by Starship Technology related to
+            software used in this product you may send your request in
+            writing to:</p>
+
+            Starship Technology LLC.<br/>
+            OSS Management<br/>
+            7829 Montague Expressway<br/>
+            Santa Clara, CA 95031<br/>
+            USA<br/>
+
+            <p>The Starship Technology website www.dejacode.com also
+            contains information regarding Starship Technology's use of open
+            source. Starship Technology has created the <a href=
+            "http://www.dejacode.org">www.dejacode.org</a> to
+            serve as a portal for interaction with the software
+            community-at-large.</p>
+
+            <p>This document contains additional information regarding
+            licenses, acknowledgments and required copyright notices for
+            open source packages used in this Placeholder
+            product.</p>
+
+            <p>About Placeholder:</p>
+            <pre>Placeholder copyright</pre>
+            <pre>Placeholder notice</pre>
+
+            <p>This Placeholder product contains the following open
+            source software components:</p>
+        </div>
+
+        <div class="oss-table-of-contents">
+            {% for about_object in about_objects %}
+                <p><a href="#component_{{ about_object.unique_identifier }}">{{ about_object.name }}</a></p>
+            {% endfor %}
+        </div>
+
+        <h3>Licenses Used in This Product</h3>
+        <p><a href="">Apache</a></p>
+        <p><a href="">GPL</a></p>
+        <p><a href="">MPL</a></p>
+        <hr>
+
+        {% for about_object in about_objects %}
+            <div class="oss-component" id="component_{{ about_object.pk }}">
+                <h3 class="component-name">{{ about_object.name }}{% if about_object.owner %}, {{ about_object.owner }}{% endif %}</h3>
+                <p>License: Placeholder</p>
+                {% if about_object.notice %}
+                    <pre>{{ about_object.notice }}</pre>
+                {% elif about_object.notice_file %}
+                    <pre>{{ about_object.notice_file }}</pre>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <hr>
+
+        <h3>Licenses Used in This Product</h3>
+        <h3><a id="End">End</a></h3>
+    </body>
+</html>
