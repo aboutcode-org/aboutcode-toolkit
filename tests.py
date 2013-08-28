@@ -375,6 +375,12 @@ class ValidateTest(unittest.TestCase):
         self.assertTrue(about_file.check_is_ascii('!!!'))
         self.assertFalse(about_file.check_is_ascii(u'測試'))
 
+    def test_validate_is_ascii_value(self):
+        about_file = about.AboutFile('testdata/filesfields/non_ascii_field.about')
+        expected_errors = [about.ASCII]
+        self.assertTrue(len(about_file.errors) == 1, "This should throw 1 error")
+        self.assertEqual(about_file.errors[0].code, expected_errors[0])
+
     def test_validate_spdx_licenses(self):
         about_file = about.AboutFile('testdata/spdx_licenses/incorrect_spdx.about')
         expected_errors = [about.SPDX]

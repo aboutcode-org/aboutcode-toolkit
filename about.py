@@ -264,7 +264,7 @@ class AboutFile(object):
         self.validate_mandatory_fields_are_present()
 
         for field_name, value in self.validated_fields.items():
-            self.check_is_ascii(field_name)
+            self.check_is_ascii(self.validated_fields.get(field_name))
             self.validate_known_optional_fields(field_name)
             self.validate_file_field_exists(field_name, value)
             self.validate_url_field(field_name, network_check=False)
@@ -419,15 +419,15 @@ class AboutFile(object):
         except KeyError:
             return
 
-    def check_is_ascii(self, field_name):
+    def check_is_ascii(self, str):
         """
         Return True if string is composed only of US-ASCII characters.
         """
         try:
-            field_name.decode('ascii')
+            str.decode('ascii')
         except (UnicodeEncodeError, UnicodeDecodeError):
-            msg = 'Field name: %s is not valid US-ASCII.' % field_name
-            self.errors.append(Error(ASCII, field_name, None, msg))
+            msg = '%s is not valid US-ASCII.' % str
+            self.errors.append(Error(ASCII, str, None, msg))
             return False
         return True
 
