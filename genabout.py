@@ -69,15 +69,7 @@ def read_input(input_file, gen_location, action_num):
             continue
         if file_location.startswith('/'):
             file_location = file_location.partition('/')[2]
-        location = join(gen_location, file_location)
-        about_file_location =''
-        if location.lower().endswith('.about'):
-            about_file_location = location
-        else:
-            if location[-1] == '/':
-                about_file_location = location.rpartition('/')[0] + '.ABOUT'
-            else:
-                about_file_location = location + '.ABOUT'
+        about_file_location = join(gen_location, file_location)
         dir = dirname(about_file_location)
         if not _exists(dir):
             makedirs(dir)
@@ -118,15 +110,13 @@ def read_input(input_file, gen_location, action_num):
 def gen_output(about_file_location, line):
     with open(about_file_location, 'wb') as output_file:
         context = ''
-        try:
-            if line['name']:
-                name = line['name']
-        except:
+        if line['name']:
+            name = line['name']
+        else:
             name = ''
-        try:
-            if line['version']:
-                version = line['version']
-        except:
+        if line['version']:
+            version = line['version']
+        else:
             version = ''
         context = 'about_resource: ' + line['about_resource'] + '\n' \
                     + 'name: ' + name + '\n' \
