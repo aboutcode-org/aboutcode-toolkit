@@ -52,13 +52,21 @@ def read_input(input_file, gen_location, action_num):
     into the .ABOUT file.
     """
     csvfile = csv.DictReader(open(input_file, 'rb'))
+    error_context = ""
     for line in csvfile:
         try:
-            file_location = line['about_resource']
+            file_location = line['about_file']
         except Exception, e:
             print(repr(e))
-            print("The input file does not contain the key 'about_resource' which is required.")
-            sys.exit(errno.EINVAL)
+            missing_about_file = "One or more 'about_file' field value is missing."
+            print(missing_about_file)
+            error_context += missing_about_file + '\n'
+            continue
+        if not line['about_resource']:
+            missing_about_resource = "'about_file' %s : 'about_resource' is missing." % line['about_file']
+            print(missing_about_resource)
+            error_context += missing_about_resource + '\n'
+            continue
         if file_location.startswith('/'):
             file_location = file_location.partition('/')[2]
         location = join(gen_location, file_location)
@@ -100,6 +108,11 @@ def read_input(input_file, gen_location, action_num):
                 print("This ABOUT file has been regenerated: %s" % about_file_location)
         else:
             gen_output(about_file_location, line)
+    if error_context:
+        error_location = gen_location + 'error.txt' if gen_location.endswith('/') else gen_location + '/error.txt'
+        with open(error_location, 'wb') as error_file:
+            error_file.write(error_context)
+        print("See %s for the error log." % error_location)
 
 
 def gen_output(about_file_location, line):
