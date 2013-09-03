@@ -21,8 +21,10 @@ file location, origin and license of the software components etc.
 """
 
 from __future__ import print_function
+from collections import namedtuple
 from os import makedirs
 from os.path import exists, dirname, join, abspath, isdir
+import about
 import csv
 import errno
 import getopt
@@ -30,7 +32,6 @@ import os
 import string
 import sys
 
-import about
 
 # TODO: version number
 __version__ = '0.8.1'
@@ -39,6 +40,13 @@ __version__ = '0.8.1'
 MANDATORY_FIELDS = ['about_resource', 'name', 'version']
 SKIPPED_FIELDS = ['warnings', 'errors']
 
+Warn = namedtuple('Warn', 'field_name message',)
+Error = namedtuple('Error', 'field_name message',)
+
+
+errors = []
+warnings = []
+
 def _exists(file_path):
     """
     Return True if path exists.
@@ -46,26 +54,30 @@ def _exists(file_path):
     if file_path:
         return exists(abspath(file_path))
 
-def read_input(input_file, gen_location, action_num):
+def read_input(input_file, gen_location, action_num, show_error_num):
     """
     Read the input csv file, get the information and write the information 
     into the .ABOUT file.
     """
     csvfile = csv.DictReader(open(input_file, 'rb'))
-    error_context = ""
+    display_error = False
+    display_warning = False
+    if show_error_num == '1':
+        display_error = True
+    if show_error_num == '2':
+        display_error = True
+        display_warning = True
     for line in csvfile:
         try:
             file_location = line['about_file']
         except Exception, e:
             print(repr(e))
             missing_about_file = "One or more 'about_file' field value is missing."
-            print(missing_about_file)
-            error_context += missing_about_file + '\n'
+            errors.append(Error(None, missing_about_file))
             continue
         if not line['about_resource']:
-            missing_about_resource = "'about_file' %s : 'about_resource' is missing." % line['about_file']
-            print(missing_about_resource)
-            error_context += missing_about_resource + '\n'
+            missing_about_resource = "'about_resource' is missing."
+            errors.append(Error(line['about_file'], missing_about_resource))
             continue
         if file_location.startswith('/'):
             file_location = file_location.partition('/')[2]
@@ -76,7 +88,8 @@ def read_input(input_file, gen_location, action_num):
         # TODO: Create log to indicate which one have been ignored/changed.
         if _exists(about_file_location):
             if action_num == '0':
-                print("ABOUT file already existed: %s" % about_file_location)
+                about_exist = "ABOUT file already existed. Generation is skipped."
+                warnings.append(Warn(about_file_location, about_exist))
             # Overwrites the current ABOUT field value if existed
             elif action_num == '1':
                 about_object = about.AboutFile(about_file_location)
@@ -100,12 +113,29 @@ def read_input(input_file, gen_location, action_num):
                 print("This ABOUT file has been regenerated: %s" % about_file_location)
         else:
             gen_output(about_file_location, line)
-    if error_context:
-        error_location = gen_location + 'error.txt' if gen_location.endswith('/') else gen_location + '/error.txt'
-        with open(error_location, 'wb') as error_file:
-            error_file.write(error_context)
-        print("See %s for the error log." % error_location)
 
+    if errors or warnings:
+        error_location = gen_location + 'error.txt' if gen_location.endswith('/') else gen_location + '/error.txt'
+        errors_num = len(errors)
+        warnings_num = len(warnings)
+        if _exists(error_location):
+            print("error.txt existed and will be replaced.")
+        with open(error_location, 'wb') as error_file:
+            if warnings:
+                for warning_msg in warnings:
+                    if display_warning:
+                        print(str(warning_msg))
+                    error_file.write(str(warning_msg) + '\n')
+            if errors:
+                for error_msg in errors:
+                    if display_error:
+                        print(str(error_msg))
+                    error_file.write(str(error_msg) + '\n')
+            error_file.write('\n' + 'Warnings: %s' % errors_num)
+            error_file.write('\n' + 'Errors: %s' % warnings_num)
+        print('Warnings: %s' % warnings_num)
+        print('Errors: %s' % errors_num)
+        print("See %s for the error/warning log." % error_location)
 
 def gen_output(about_file_location, line):
     with open(about_file_location, 'wb') as output_file:
@@ -166,10 +196,16 @@ Options:
             1 - Overwrites the current ABOUT field value if existed
             2 - Keep the current field value and only add the "new" field and field value
             3 - Replace the ABOUT file with the current generation
+    --verbosity  <arg>   Print more or less verbose messages while processing ABOUT files
+        <arg>
+            0 - Do not print any warning or error messages, just a total count (default)
+            1 - Print error messages
+            2 - Print error and warning messages
 """)
 
 def main(args, opts):
     opt_arg_num = '0'
+    verb_arg_num = '0'
     for opt, opt_arg in opts:
         invalid_opt = True
         if opt in ('-h', '--help'):
@@ -190,6 +226,16 @@ def main(args, opts):
                 sys.exit(errno.EINVAL)
             else:
                 opt_arg_num = opt_arg
+
+        if opt in ('--verbosity'):
+            invalid_opt = False
+            valid_opt_args = ['0', '1', '2']
+            if not opt_arg or not opt_arg in valid_opt_args:
+                print("Invalid option argument.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                verb_arg_num = opt_arg
 
         if invalid_opt:
             assert False, 'Unsupported option.'
@@ -213,11 +259,11 @@ def main(args, opts):
         print(gen_location, ': Generated location does not exist.')
         sys.exit(errno.EIO)
 
-    read_input(input_file, gen_location, opt_arg_num)
+    read_input(input_file, gen_location, opt_arg_num, verb_arg_num)
 
 
 if __name__ == "__main__":
-    longopts = ['help', 'version', 'action=']
+    longopts = ['help', 'version', 'action=', 'verbosity=']
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
     except Exception, e:
