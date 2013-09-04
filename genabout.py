@@ -56,8 +56,7 @@ def _exists(file_path):
 
 def read_input(input_file, gen_location, action_num, show_error_num):
     """
-    Read the input csv file, get the information and write the information 
-    into the .ABOUT file.
+    Read the input csv file and get the information
     """
     csvfile = csv.DictReader(open(input_file, 'rb'))
     display_error = False
@@ -85,7 +84,6 @@ def read_input(input_file, gen_location, action_num, show_error_num):
         dir = dirname(about_file_location)
         if not _exists(dir):
             makedirs(dir)
-        # TODO: Create log to indicate which one have been ignored/changed.
         if _exists(about_file_location):
             if action_num == '0':
                 about_exist = "ABOUT file already existed. Generation is skipped."
@@ -110,7 +108,6 @@ def read_input(input_file, gen_location, action_num, show_error_num):
             elif action_num == '3':
                 os.remove(about_file_location)
                 gen_output(about_file_location, line)
-                print("This ABOUT file has been regenerated: %s" % about_file_location)
         else:
             gen_output(about_file_location, line)
 
@@ -131,13 +128,16 @@ def read_input(input_file, gen_location, action_num, show_error_num):
                     if display_error:
                         print(str(error_msg))
                     error_file.write(str(error_msg) + '\n')
-            error_file.write('\n' + 'Warnings: %s' % errors_num)
-            error_file.write('\n' + 'Errors: %s' % warnings_num)
+            error_file.write('\n' + 'Warnings: %s' % warnings_num)
+            error_file.write('\n' + 'Errors: %s' % errors_num)
         print('Warnings: %s' % warnings_num)
         print('Errors: %s' % errors_num)
         print("See %s for the error/warning log." % error_location)
 
 def gen_output(about_file_location, line):
+    """
+    write the information into the .ABOUT file.
+    """
     with open(about_file_location, 'wb') as output_file:
         context = ''
         if line['name']:
