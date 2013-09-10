@@ -29,7 +29,6 @@ import csv
 import errno
 import getopt
 import os
-import string
 import sys
 
 
@@ -47,12 +46,14 @@ Error = namedtuple('Error', 'field_name message',)
 errors = []
 warnings = []
 
+
 def _exists(file_path):
     """
     Return True if path exists.
     """
     if file_path:
         return exists(abspath(file_path))
+
 
 def read_input(input_file, gen_location, action_num, show_error_num):
     """
@@ -69,7 +70,7 @@ def read_input(input_file, gen_location, action_num, show_error_num):
     for line in csvfile:
         try:
             file_location = line['about_file']
-        except Exception, e:
+        except Exception as e:
             print(repr(e))
             missing_about_file = "One or more 'about_file' field value is missing."
             errors.append(Error(None, missing_about_file))
@@ -134,6 +135,7 @@ def read_input(input_file, gen_location, action_num, show_error_num):
         print('Errors: %s' % errors_num)
         print("See %s for the error/warning log." % error_location)
 
+
 def gen_output(about_file_location, line):
     """
     write the information into the .ABOUT file.
@@ -169,6 +171,7 @@ Syntax:
     Generated Location - the output location where the ABOUT files should be generated
 """)
 
+
 def version():
     print("""
 ABOUT CODE: Version: %s
@@ -202,6 +205,7 @@ Options:
             1 - Print error messages
             2 - Print error and warning messages
 """)
+
 
 def main(args, opts):
     opt_arg_num = '0'
@@ -266,7 +270,7 @@ if __name__ == "__main__":
     longopts = ['help', 'version', 'action=', 'verbosity=']
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
-    except Exception, e:
+    except Exception as e:
         print(repr(e))
         syntax()
         option_usage()

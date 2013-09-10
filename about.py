@@ -37,7 +37,7 @@ import sys
 import urlparse
 from collections import namedtuple
 from datetime import datetime
-from email.Parser import HeaderParser
+from email.parser import HeaderParser
 from os import listdir, walk
 from os.path import exists, dirname, join, abspath, isdir, basename, normpath
 from StringIO import StringIO
@@ -109,10 +109,10 @@ class AboutFile(object):
                 # HeaderParser.parse returns the parsed file as keys and
                 # values (allows for multiple keys, and it doesn't validate)
                 self.parsed = HeaderParser().parse(no_blank_lines)
-        except IOError, e:
+        except IOError as e:
             err_msg = 'Cannot read ABOUT file:' + repr(e)
             self.errors.append(Error(FILE, None, self.location, err_msg))
-        except Exception, e:
+        except Exception as e:
             err_msg = 'Unknown ABOUT processing error:' + repr(e)
             self.errors.append(Error(UNKNOWN, None, self.location, err_msg))
 
@@ -348,7 +348,7 @@ class AboutFile(object):
             with codecs.open(self._location(file_path), 'r', 'utf8', errors='replace') as f:
                 # attempt to read the file to catch codec errors
                 f.readlines()
-        except Exception, e:
+        except Exception as e:
             self.errors.append(Error(FILE, field_name, file_path,
                                      'Cannot read file: %s' % repr(e)))
             return
@@ -445,7 +445,7 @@ class AboutFile(object):
         supported_dateformat = '%Y-%m-%d'
         try:
             return bool(datetime.strptime(date_strings, supported_dateformat))
-        except ValueError, e:
+        except ValueError:
             msg = 'Unsupported date format, use YYYY-MM-DD.'
             self.warnings.append(Warn(DATE, field_name, date_strings, msg))
         return False
@@ -479,7 +479,7 @@ class AboutFile(object):
             http_connection = httplib.HTTPConnection('dejacode.org')
             http_connection.connect()
             return True
-        except socket.error as e:
+        except socket.error:
             return False
 
     def check_url_reachable(self, host, path):
@@ -492,7 +492,7 @@ class AboutFile(object):
             # This is the list of all the HTTP status code
             # http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
             return conn.getresponse().status
-        except (httplib.HTTPException, socket.error) as e:
+        except (httplib.HTTPException, socket.error):
             return False
 
     def get_about_info(self, update_path, about_object):
@@ -1115,7 +1115,7 @@ if __name__ == "__main__":
     longopts = ['help', 'version', 'overwrite', 'verbosity=']
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
-    except Exception, e:
+    except Exception as e:
         print(repr(e))
         syntax()
         option_usage()
