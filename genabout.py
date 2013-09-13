@@ -72,11 +72,11 @@ def read_input(input_file, gen_location, action_num, show_error_num):
             file_location = line['about_file']
         except Exception as e:
             print(repr(e))
-            missing_about_file = "One or more 'about_file' field value is missing."
+            missing_about_file = "One or more 'about_file' field value is missing. Generation is skipped."
             errors.append(Error(None, missing_about_file))
             continue
         if not line['about_resource']:
-            missing_about_resource = "'about_resource' is missing."
+            missing_about_resource = "'about_resource' is missing. Generation is skipped."
             errors.append(Error(line['about_file'], missing_about_resource))
             continue
         if file_location.startswith('/'):
