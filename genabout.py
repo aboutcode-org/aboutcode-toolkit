@@ -68,13 +68,12 @@ def read_input(input_file, gen_location, action_num, show_error_num):
         display_error = True
         display_warning = True
     for line in csvfile:
-        try:
-            file_location = line['about_file']
-        except Exception as e:
-            print(repr(e))
-            missing_about_file = "One or more 'about_file' field value is missing. Generation is skipped."
+        if not line['about_file']:
+            missing_about_file = "'about_file' field value is missing. Generation is skipped."
             errors.append(Error(None, missing_about_file))
             continue
+        else:
+            file_location = line['about_file']
         if not line['about_resource']:
             missing_about_resource = "'about_resource' is missing. Generation is skipped."
             errors.append(Error(line['about_file'], missing_about_resource))
@@ -97,7 +96,8 @@ def read_input(input_file, gen_location, action_num, show_error_num):
                     if not field_name in line.keys():
                         line[field_name] = value
                 os.remove(about_file_location)
-                gen_output(about_file_location, line)
+                output = process_input(line)
+                gen_output(about_file_location, output)
             # Keep the current field value and only add the "new" field and field value
             elif action_num == '2':
                 about_object = about.AboutFile(about_file_location)
@@ -105,12 +105,15 @@ def read_input(input_file, gen_location, action_num, show_error_num):
                     field_name = field_name.lower()
                     line[field_name] = value
                 os.remove(about_file_location)
-                gen_output(about_file_location, line)
+                output = process_input(line)
+                gen_output(about_file_location, output)
             elif action_num == '3':
                 os.remove(about_file_location)
-                gen_output(about_file_location, line)
+                output = process_input(line)
+                gen_output(about_file_location, output)
         else:
-            gen_output(about_file_location, line)
+            output = process_input(line)
+            gen_output(about_file_location, output)
 
     if errors or warnings:
         error_location = gen_location + 'error.txt' if gen_location.endswith('/') else gen_location + '/error.txt'
@@ -136,30 +139,36 @@ def read_input(input_file, gen_location, action_num, show_error_num):
         print("See %s for the error/warning log." % error_location)
 
 
-def gen_output(about_file_location, line):
+def process_input(line):
+    """
+    process the input and covert to the strings format
+    """
+    context = ''
+    if line['name']:
+        name = line['name']
+    else:
+        name = ''
+    if line['version']:
+        version = line['version']
+    else:
+        version = ''
+    context = 'about_resource: ' + line['about_resource'] + '\n' \
+                + 'name: ' + name + '\n' \
+                + 'version: ' + version + '\n\n'
+    for item in sorted(line.iterkeys()):
+        if not item in MANDATORY_FIELDS:
+            # The purpose of the replace('\n', '\n ') is used to
+            # format the continuation strings
+            value = line[item].replace('\n', '\n ')
+            if (value or item in MANDATORY_FIELDS) and not item in SKIPPED_FIELDS:
+                context += item + ': ' + value + '\n'
+    return context
+
+def gen_output(about_file_location, context):
     """
     write the information into the .ABOUT file.
     """
     with open(about_file_location, 'wb') as output_file:
-        context = ''
-        if line['name']:
-            name = line['name']
-        else:
-            name = ''
-        if line['version']:
-            version = line['version']
-        else:
-            version = ''
-        context = 'about_resource: ' + line['about_resource'] + '\n' \
-                    + 'name: ' + name + '\n' \
-                    + 'version: ' + version + '\n\n'
-        for item in sorted(line.iterkeys()):
-            if not item in MANDATORY_FIELDS:
-                # The purpose of the replace('\n', '\n ') is used to
-                # format the continuation strings
-                value = line[item].replace('\n', '\n ')
-                if (value or item in MANDATORY_FIELDS) and not item in SKIPPED_FIELDS:
-                    context += item + ': ' + value + '\n'
         output_file.write(context)
 
 
