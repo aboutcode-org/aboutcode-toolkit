@@ -97,7 +97,7 @@ def read_input(input_file, gen_location, action_num, show_error_num):
                         line[field_name] = value
                 os.remove(about_file_location)
                 output = process_input(line)
-                gen_output(about_file_location, output)
+                write_output(about_file_location, output)
             # Keep the current field value and only add the "new" field and field value
             elif action_num == '2':
                 about_object = about.AboutFile(about_file_location)
@@ -106,14 +106,14 @@ def read_input(input_file, gen_location, action_num, show_error_num):
                     line[field_name] = value
                 os.remove(about_file_location)
                 output = process_input(line)
-                gen_output(about_file_location, output)
+                write_output(about_file_location, output)
             elif action_num == '3':
                 os.remove(about_file_location)
                 output = process_input(line)
-                gen_output(about_file_location, output)
+                write_output(about_file_location, output)
         else:
             output = process_input(line)
-            gen_output(about_file_location, output)
+            write_output(about_file_location, output)
 
     if errors or warnings:
         error_location = gen_location + 'error.txt' if gen_location.endswith('/') else gen_location + '/error.txt'
@@ -164,7 +164,7 @@ def process_input(line):
                 context += item + ': ' + value + '\n'
     return context
 
-def gen_output(about_file_location, context):
+def write_output(about_file_location, context):
     """
     write the information into the .ABOUT file.
     """
