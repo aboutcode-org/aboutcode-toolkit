@@ -96,7 +96,7 @@ def pre_generation(gen_location, input_list, action_num):
                     about_object = about.AboutFile(about_file_location)
                     for field_name, value in about_object.parsed.items():
                         field_name = field_name.lower()
-                        if not field_name in line.keys():
+                        if not field_name in line.keys() or not line[field_name]:
                             line[field_name] = value
                     os.remove(about_file_location)
                 # Keep the current field value and only add the "new" field and field value
