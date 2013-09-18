@@ -1,0 +1,14 @@
+about_file,about_resource,name,version,spec_version,date,description,description_file,home_url,download_url,readme,readme_file,install,install_file,changelog,changelog_file,news,news_file,news_url,notes,notes_file,contact,owner,author,author_file,copyright,copyright_file,notice,notice_file,notice_url,license_text,license_text_file,license_url,license_spdx,redistribute,attribute,track_changes,vcs_tool,vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,checksum_sha1,checksum_md5,checksum_sha256,dje_component,dje_license,dje_organization,warnings,errors
+,,ABOUT tool,0.8.1,,,"This is a tool to process ABOUT files. An ABOUT file provides a 
+simple way to document the provenance (origin and license) 'about' a software 
+component. An ABOUT file is a small text file stored in the codebase 
+side-by-side with the software component that it documents.",,http://dejacode.org,,,README.rst,,,,CHANGELOG.txt,,,,,,,nexB Inc.,"Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez",,"Copyright (c) 2013 nexB, Inc.",," Copyright (c) 2013 nexB, Inc. http://www.nexb.com/ - All rights reserved.
+Licensed under the Apache License, Version 2.0 (the ""License"");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an ""AS IS"" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.",,,,apache2.LICENSE.txt,,Apache-2.0,,,,git,https://github.com/dejacode/about-code-tool.git,,,,,,,,,,,,
