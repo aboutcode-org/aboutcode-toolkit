@@ -1,0 +1,5 @@
+about_resource: elasticsearch-0.19.8.zip
+name: ElasticSearch
+version: 0.19.8
+
+about_file: test_generation/elasticsearch.ABOUT

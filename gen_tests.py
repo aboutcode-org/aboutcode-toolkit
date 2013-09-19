@@ -71,7 +71,7 @@ class GenAboutTest(unittest.TestCase):
         input_list = [[{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool'}]]
         expected_output_list = []
-        output_list = gen.pre_generation(gen_location, input_list, action_num)
+        output_list = gen.pre_generation(gen_location, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list, "This output_list should be empty.")
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warnings.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -85,7 +85,7 @@ class GenAboutTest(unittest.TestCase):
         expected_output_list = [['testdata/test_files_for_genabout/about.py.ABOUT',
                                  {'about_file': 'about.py.ABOUT', 'version': '0.8.2',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
-        output_list = gen.pre_generation(gen_location, input_list, action_num)
+        output_list = gen.pre_generation(gen_location, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -100,7 +100,7 @@ class GenAboutTest(unittest.TestCase):
                                   {'test': 'test sample', 'about_file': 'about.py.ABOUT',
                                     'version': '0.8.1', 'about_resource': '.',
                                      'name': 'ABOUT tool'}]]
-        output_list = gen.pre_generation(gen_location, input_list, action_num)
+        output_list = gen.pre_generation(gen_location, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -114,9 +114,25 @@ class GenAboutTest(unittest.TestCase):
         expected_output_list = [['testdata/test_files_for_genabout/about.py.ABOUT',
                                   {'about_file': 'about.py.ABOUT', 'version': '0.8.2',
                                     'about_resource': '.', 'name': '', 'test': 'test sample'}]]
-        output_list = gen.pre_generation(gen_location, input_list, action_num)
+        output_list = gen.pre_generation(gen_location, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_pre_generation_all_in_one(self):
+        gen = genabout.GenAbout()
+        gen_location = "testdata/test_files_for_genabout/"
+        action_num = '0'
+        input_list = [[{'about_file': 'test_generation/elasticsearch.ABOUT',
+                         'version': '0.19.8',
+                         'about_resource': 'elasticsearch-0.19.8.zip',
+                         'name': 'ElasticSearch'}]]
+        expected_output_list = []
+        output_list = gen.pre_generation(gen_location, input_list, action_num, True)
+        self.assertFalse(os.path.exists('testdata/test_files_for_genabout/test_generation'),
+                          "This directory shouldn't be generaetd as the all_in_one is set to True.")
+        self.assertTrue(expected_output_list == output_list, "This output_list should be empty.")
+        self.assertTrue(len(gen.warnings) == 1, "Should return 1 warnings.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
     def test_format_output(self):

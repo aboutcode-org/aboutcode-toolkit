@@ -65,7 +65,7 @@ class GenAbout(object):
         return components_list
 
 
-    def pre_generation(self, gen_location, input_list, action_num):
+    def pre_generation(self, gen_location, input_list, action_num, all_in_one):
         """
         check the existence of the output location and handle differently
         according to the action_num.
@@ -77,6 +77,9 @@ class GenAbout(object):
                 file_location = line['about_file']
                 if file_location.startswith('/'):
                     file_location = file_location.partition('/')[2]
+                if all_in_one:
+                    # This is to get the filename instead of the file path
+                    file_location = file_location.rpartition('/')[2]
                 about_file_location = join(gen_location, file_location)
                 dir = dirname(about_file_location)
                 if not _exists(dir):
@@ -145,7 +148,8 @@ class GenAbout(object):
         for line in output:
             about_file_location = line[0]
             context = line[1]
-            os.remove(about_file_location)
+            if _exists(about_file_location):
+                os.remove(about_file_location)
             with open(about_file_location, 'wb') as output_file:
                 output_file.write(context)
 
@@ -228,12 +232,17 @@ Options:
             0 - Do not print any warning or error messages, just a total count (default)
             1 - Print error messages
             2 - Print error and warning messages
+    --all-in-one <bool>   Behavior of generating ABOUT files
+        <bool>
+            False - Generate ABOUT files in a project-like structure based on the about_file location (default)
+            True  - Generate all the ABOUT files in the [Generated Location] regardless of the about_file location
 """)
 
 
 def main(args, opts):
     opt_arg_num = '0'
     verb_arg_num = '0'
+    all_in_one = False
     for opt, opt_arg in opts:
         invalid_opt = True
         if opt in ('-h', '--help'):
@@ -265,6 +274,17 @@ def main(args, opts):
             else:
                 verb_arg_num = opt_arg
 
+        if opt in ('--all-in-one'):
+            invalid_opt = False
+            valid_opt_args = ['true', 'false']
+            if not opt_arg or not opt_arg.lower() in valid_opt_args:
+                print("Invalid option argument.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                if opt_arg.lower() == 'true':
+                    all_in_one = True
+
         if invalid_opt:
             assert False, 'Unsupported option.'
 
@@ -289,13 +309,13 @@ def main(args, opts):
 
     gen = GenAbout()
     input_list = gen.read_input(input_file)
-    components_list = gen.pre_generation(gen_location, input_list, opt_arg_num)
+    components_list = gen.pre_generation(gen_location, input_list, opt_arg_num, all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
     gen.warnings_errors_summary(gen_location, verb_arg_num)
 
 if __name__ == "__main__":
-    longopts = ['help', 'version', 'action=', 'verbosity=']
+    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=']
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
     except Exception as e:
