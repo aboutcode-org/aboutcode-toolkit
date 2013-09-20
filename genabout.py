@@ -29,6 +29,7 @@ import csv
 import errno
 import getopt
 import os
+import shutil
 import sys
 
 
@@ -38,8 +39,8 @@ __version__ = '0.8.1'
 MANDATORY_FIELDS = ['about_resource', 'name', 'version']
 SKIPPED_FIELDS = ['warnings', 'errors']
 
-Warn = namedtuple('Warn', 'field_name message',)
-Error = namedtuple('Error', 'field_name message',)
+Warn = namedtuple('Warn', 'field_name field_value message',)
+Error = namedtuple('Error', 'field_name field_value message',)
 
 class GenAbout(object):
     
@@ -52,17 +53,67 @@ class GenAbout(object):
         components_list = []
         for line in csvfile:
             file_list = []
-            if not line['about_file']:
-                missing_about_file = "'about_file' field value is missing. Generation is skipped."
-                self.errors.append(Error(None, missing_about_file))
-                continue
-            if not line['about_resource']:
-                missing_about_resource = "'about_resource' is missing. Generation is skipped."
-                self.errors.append(Error(line['about_file'], missing_about_resource))
-                continue
+            try:
+                if not line['about_file']:
+                    missing_about_file = "'about_file' field value is missing. Generation is skipped."
+                    self.errors.append(Error('about_file', None, missing_about_file))
+                    continue
+            except Exception as e:
+                print(repr(e))
+                print("The input does not have the 'about_file' key which is required.")
+                sys.exit(errno.EINVAL)
+            try:
+                if not line['about_resource']:
+                    missing_about_resource = "'about_resource' is missing. Generation is skipped."
+                    self.errors.append(Error('about_resource', line['about_file'], missing_about_resource))
+                    continue
+            except Exception as e:
+                print(repr(e))
+                print("The input does not have the 'about_resource' key which is required.")
+                sys.exit(errno.EINVAL)
             file_list.append(line)
             components_list.append(file_list)
         return components_list
+
+
+    def verify_license_files(self, input_list, path):
+        """
+        Verify the existence of the 'license text file'
+        """
+        output_list = []
+        for component in input_list:
+            for line in component:
+                if line['license_text_file']:
+                    license_files_list = []
+                    license_file = line['license_text_file']
+                    file_location = line['about_file']
+                    if '/' in file_location:
+                        file_location = file_location.partition('/')[2]
+                    about_file_location = join(path, file_location)
+
+                    about_filename = about_file_location.rpartition('/')[2]
+                    about_parent_dir = about_file_location.rpartition('/')[0]
+                    license_file_path = join(about_parent_dir, license_file)
+                    if _exists(license_file_path):
+                        license_files_list.append(about_filename)
+                        license_files_list.append(license_file_path)
+                        output_list.append(license_files_list)
+                    else:
+                        self.warnings.append(Warn('license_text_file', license_file_path, "License doesn't exist."))
+        return output_list
+
+
+    def copy_license_files(self, gen_location, license_list):
+        """
+        copy the 'license_text_file' into the gen_location
+        """
+        for items in license_list:
+            about_file_name = items[0]
+            license_path = items[1]
+            if not gen_location.endswith('/'):
+                gen_location += '/'
+            output_license_path = gen_location + about_file_name + '-LICENSE.txt'
+            shutil.copy2(license_path, output_license_path)
 
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
@@ -87,7 +138,7 @@ class GenAbout(object):
                 if _exists(about_file_location):
                     if action_num == '0':
                         about_exist = "ABOUT file already existed. Generation is skipped."
-                        self.warnings.append(Warn(about_file_location, about_exist))
+                        self.warnings.append(Warn('about_file', about_file_location, about_exist))
                         continue
                     # Overwrites the current ABOUT field value if existed
                     elif action_num == '1':
@@ -236,6 +287,10 @@ Options:
         <bool>
             False - Generate ABOUT files in a project-like structure based on the about_file location (default)
             True  - Generate all the ABOUT files in the [Generated Location] regardless of the about_file location
+    --copy_license <Path>    Copy the 'license_text_file' into the [Generated Location]
+        <Path>
+            Path to the project location
+                e.g. /home/user/project/
 """)
 
 
@@ -243,6 +298,7 @@ def main(args, opts):
     opt_arg_num = '0'
     verb_arg_num = '0'
     all_in_one = False
+    project_path = ''
     for opt, opt_arg in opts:
         invalid_opt = True
         if opt in ('-h', '--help'):
@@ -285,6 +341,15 @@ def main(args, opts):
                 if opt_arg.lower() == 'true':
                     all_in_one = True
 
+        if opt in ('--copy_license'):
+            invalid_opt = False
+            if not _exists(opt_arg):
+                print("Project location doesn't exist.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                project_path = opt_arg
+
         if invalid_opt:
             assert False, 'Unsupported option.'
 
@@ -309,13 +374,17 @@ def main(args, opts):
 
     gen = GenAbout()
     input_list = gen.read_input(input_file)
+    if project_path:
+        license_list = gen.verify_license_files(input_list, project_path)
+        gen.copy_license_files(gen_location, license_list)
+
     components_list = gen.pre_generation(gen_location, input_list, opt_arg_num, all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
     gen.warnings_errors_summary(gen_location, verb_arg_num)
 
 if __name__ == "__main__":
-    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=']
+    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=']
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
     except Exception as e:

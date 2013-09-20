@@ -132,7 +132,7 @@ class GenAboutTest(unittest.TestCase):
         self.assertFalse(os.path.exists('testdata/test_files_for_genabout/test_generation'),
                           "This directory shouldn't be generaetd as the all_in_one is set to True.")
         self.assertTrue(expected_output_list == output_list, "This output_list should be empty.")
-        self.assertTrue(len(gen.warnings) == 1, "Should return 1 warnings.")
+        self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
     def test_format_output(self):
@@ -145,6 +145,30 @@ class GenAboutTest(unittest.TestCase):
         output = gen.format_output(input_list)
         self.assertTrue(expected_output == output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_verify_license_files_exist(self):
+        gen = genabout.GenAbout()
+        input_list = [[{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
+                         'license_text_file': 'apache2.LICENSE.txt',
+                          'name': 'ABOUT tool', 'about_resource': '.'}]]
+        path = '.'
+        expected_list = [['about.py.ABOUT', './apache2.LICENSE.txt']]
+        output = gen.verify_license_files(input_list, path)
+        self.assertTrue(expected_list == output)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_verify_license_files_not_exist(self):
+        gen = genabout.GenAbout()
+        input_list = [[{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
+                         'license_text_file': 'not_exist.LICENSE.txt',
+                          'name': 'ABOUT tool', 'about_resource': '.'}]]
+        path = '.'
+        expected_list = []
+        output = gen.verify_license_files(input_list, path)
+        self.assertTrue(expected_list == output)
+        self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
 
