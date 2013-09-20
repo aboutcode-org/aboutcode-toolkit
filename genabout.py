@@ -83,23 +83,35 @@ class GenAbout(object):
         output_list = []
         for component in input_list:
             for line in component:
-                if line['license_text_file']:
-                    license_files_list = []
-                    license_file = line['license_text_file']
-                    file_location = line['about_file']
-                    if '/' in file_location:
-                        file_location = file_location.partition('/')[2]
-                    about_file_location = join(path, file_location)
-
-                    about_filename = about_file_location.rpartition('/')[2]
-                    about_parent_dir = about_file_location.rpartition('/')[0]
-                    license_file_path = join(about_parent_dir, license_file)
-                    if _exists(license_file_path):
-                        license_files_list.append(about_filename)
-                        license_files_list.append(license_file_path)
-                        output_list.append(license_files_list)
-                    else:
-                        self.warnings.append(Warn('license_text_file', license_file_path, "License doesn't exist."))
+                try:
+                    if line['license_text_file']:
+                        license_files_list = []
+                        version = ''
+                        try:
+                            version = line['version']
+                        except Exception as e:
+                            pass
+                        license_file = line['license_text_file']
+                        file_location = line['about_file']
+                        if '/' in file_location:
+                            file_location = file_location.partition('/')[2]
+                        about_file_location = join(path, file_location)
+                        about_filename = about_file_location.rpartition('/')[2]
+                        about_component = about_filename.rpartition('.ABOUT')[0]
+                        if version:
+                            about_component += '-' + version
+                        about_parent_dir = about_file_location.rpartition('/')[0]
+                        license_file_path = join(about_parent_dir, license_file)
+                        if _exists(license_file_path):
+                            license_files_list.append(about_component)
+                            license_files_list.append(license_file_path)
+                            output_list.append(license_files_list)
+                        else:
+                            self.warnings.append(Warn('license_text_file', license_file_path, "License doesn't exist."))
+                except Exception as e:
+                    print(repr(e))
+                    print("The input does not have the 'license_text_file' key which is required.")
+                    sys.exit(errno.EINVAL)
         return output_list
 
 
@@ -112,7 +124,7 @@ class GenAbout(object):
             license_path = items[1]
             if not gen_location.endswith('/'):
                 gen_location += '/'
-            output_license_path = gen_location + about_file_name + '-LICENSE.txt'
+            output_license_path = gen_location + about_file_name + '-LICENSE'
             shutil.copy2(license_path, output_license_path)
 
 
