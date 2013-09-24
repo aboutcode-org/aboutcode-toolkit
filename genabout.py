@@ -62,7 +62,7 @@ class GenAbout(object):
                     line['version'] = line[version]
                 except Exception as e:
                     print(repr(e))
-                    print("Please use the '--mapping' option to map the input keys.")
+                    print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
                     sys.exit(errno.EINVAL)
                 if not about_file == 'about_file':
                     del line[about_file]
@@ -130,7 +130,7 @@ class GenAbout(object):
             return about_resource, about_file, name, version
 
 
-    def verify_license_files(self, input_list, path):
+    def verify_license_files(self, input_list, project_path):
         """
         Verify the existence of the 'license text file'
         """
@@ -140,24 +140,18 @@ class GenAbout(object):
                 try:
                     if line['license_text_file']:
                         license_files_list = []
-                        version = ''
-                        try:
-                            version = line['version']
-                        except Exception as e:
-                            pass
+                        is_dir = False
+                        if line['about_file'].endswith('/'):
+                            is_dir = True
                         license_file = line['license_text_file']
                         file_location = line['about_file']
                         if '/' in file_location:
                             file_location = file_location.partition('/')[2]
-                        about_file_location = join(path, file_location)
-                        about_filename = about_file_location.rpartition('/')[2]
-                        about_component = about_filename.rpartition('.ABOUT')[0]
-                        if version:
-                            about_component += '-' + version
-                        about_parent_dir = about_file_location.rpartition('/')[0]
-                        license_file_path = join(about_parent_dir, license_file)
+                        about_parent_dir = os.path.dirname(file_location)
+                        project_parent_dir = os.path.dirname(project_path)
+
+                        license_file_path = join(project_parent_dir, about_parent_dir, license_file)
                         if _exists(license_file_path):
-                            license_files_list.append(about_component)
                             license_files_list.append(license_file_path)
                             output_list.append(license_files_list)
                         else:
@@ -174,11 +168,13 @@ class GenAbout(object):
         copy the 'license_text_file' into the gen_location
         """
         for items in license_list:
-            about_file_name = items[0]
-            license_path = items[1]
+            license_path = items[0]
             if not gen_location.endswith('/'):
                 gen_location += '/'
-            output_license_path = gen_location + about_file_name + '-LICENSE'
+            output_license_path = gen_location + license_path
+            license_parent_dir = os.path.dirname(output_license_path)
+            if not _exists(license_parent_dir):
+                makedirs(license_parent_dir)
             shutil.copy2(license_path, output_license_path)
 
     """ 
@@ -365,10 +361,12 @@ Options:
         <bool>
             False - Generate ABOUT files in a project-like structure based on the about_file location (default)
             True  - Generate all the ABOUT files in the [Generated Location] regardless of the about_file location
-    --copy_license <Path>    Copy the 'license_text_file' into the [Generated Location]
-        <Path>
-            Path to the project location
-                e.g. /home/user/project/
+    --copy_license <path>    Copy the 'license_text_file'
+                                This option is for users who want to generate ABOUT files separate
+                                from the original codebase and want to copy the licenses into the
+                                output location.
+        <path>
+            Project path
     --mapping    Activate the MAPPING.CONFIG
 """)
 
@@ -379,6 +377,7 @@ def main(args, opts):
     all_in_one = False
     project_path = ''
     mapping_config = False
+
     for opt, opt_arg in opts:
         invalid_opt = True
         if opt in ('-h', '--help'):
@@ -423,12 +422,11 @@ def main(args, opts):
 
         if opt in ('--copy_license'):
             invalid_opt = False
-            if not _exists(opt_arg):
-                print("Project location doesn't exist.")
+            project_path = opt_arg
+            if not _exists(project_path):
+                print("The project path doesn't exist.")
                 option_usage()
                 sys.exit(errno.EINVAL)
-            else:
-                project_path = opt_arg
 
         if opt in ('--mapping'):
             invalid_opt = False
@@ -462,7 +460,7 @@ def main(args, opts):
         sys.exit(errno.EIO)
 
     gen = GenAbout()
-    
+
     #gen.extract_licesen_from_url()
 
     input_list = gen.read_input(input_file, mapping_config)

@@ -159,7 +159,7 @@ class GenAboutTest(unittest.TestCase):
                          'license_text_file': 'apache2.LICENSE.txt',
                           'name': 'ABOUT tool', 'about_resource': '.'}]]
         path = '.'
-        expected_list = [['about.py-0.8.1', './apache2.LICENSE.txt']]
+        expected_list = [['apache2.LICENSE.txt']]
         output = gen.verify_license_files(input_list, path)
         self.assertTrue(expected_list == output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
