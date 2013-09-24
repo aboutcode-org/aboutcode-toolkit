@@ -39,11 +39,11 @@ from collections import namedtuple
 from datetime import datetime
 from email.parser import HeaderParser
 from os import listdir, walk
-from os.path import exists, dirname, join, abspath, isdir, basename, normpath
+from os.path import exists, dirname, join, abspath, isdir, basename, normpath, relpath
 from StringIO import StringIO
 
 
-__version__ = '0.8.1'
+__version__ = '0.9.0'
 
 # see http://dejacode.org
 __about_spec_version__ = '0.8.0'
@@ -544,6 +544,16 @@ class AboutFile(object):
                 names.append(name)
         return names
 
+    def license_text(self):
+        try:
+            license_text_path = self.file_fields_locations["license_text_file"]
+            with open(license_text_path, 'rU') as f:
+                return f.read()
+        except Exception as e: 
+            pass
+        #return empty string if the license file does not exist
+        return ""
+
 def resource_name(resource_path):
     """
     Return a resource name based on a posix path, which is either the filename
@@ -964,7 +974,8 @@ class AboutCollector(object):
             for row in about_data_list:
                 about_spec_writer.writerow(row)
 
-    def generate_attribution(self, template_path='templates/default.html'):
+    def generate_attribution(self, template_path='templates/default.html',
+                             sublist = []):
         """
         Generates an attribution file from a list of ABOUT files
         """
@@ -986,10 +997,17 @@ class AboutCollector(object):
             return
 
         # We only need the fields names and values to render the template
-        about_objects = [about_object.validated_fields
-                         for about_object in self.about_objects]
-        return template.render(about_objects=about_objects)
+        about_validated_fields = [about_object.validated_fields 
+                                  for about_object in self.about_objects 
+                                  if not sublist 
+                                  or about_object.about_resource_path in sublist]
 
+        about_license_text = [about_object.license_text() 
+                              for about_object in self.about_objects 
+                              if not sublist 
+                              or about_object.about_resource_path in sublist]
+        return template.render(about_objects = about_validated_fields, 
+                               license_texts = about_license_text)
 
 def isvalid_about_file(file_name):
     """
