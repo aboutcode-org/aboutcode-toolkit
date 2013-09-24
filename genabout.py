@@ -31,7 +31,7 @@ import getopt
 import os
 import shutil
 import sys
-
+import urllib2
 
 __version__ = '0.8.1'
 
@@ -48,12 +48,30 @@ class GenAbout(object):
         self.warnings = []
         self.errors = []
 
-    def read_input(self, input_file):
+    def read_input(self, input_file, mapping):
+        about_resource, about_file, name, version = self.config_mapping(mapping)
         csvfile = csv.DictReader(open(input_file, 'rb'))
         components_list = []
         for line in csvfile:
             file_list = []
             try:
+                try:
+                    line['about_file'] = line[about_file]
+                    line['about_resource'] = line[about_resource]
+                    line['name'] = line[name]
+                    line['version'] = line[version]
+                except Exception as e:
+                    print(repr(e))
+                    print("Please use the '--mapping' option to map the input keys.")
+                    sys.exit(errno.EINVAL)
+                if not about_file == 'about_file':
+                    del line[about_file]
+                if not about_resource == 'about_resource':
+                    del line[about_resource]
+                if not name == 'name':
+                    del line[name]
+                if not version == 'version':
+                    del line[version]
                 if not line['about_file']:
                     missing_about_file = "'about_file' field value is missing. Generation is skipped."
                     self.errors.append(Error('about_file', None, missing_about_file))
@@ -74,6 +92,42 @@ class GenAbout(object):
             file_list.append(line)
             components_list.append(file_list)
         return components_list
+
+
+    @staticmethod
+    def config_mapping(mapping):
+        about_resource = 'about_resource'
+        about_file = 'about_file'
+        name = 'name'
+        version = 'version'
+        if mapping:
+            try:
+                with open('MAPPING.CONFIG', "rU") as file_in:
+                    for line in file_in.readlines():
+                        if not line.startswith('#'):
+                            if line.partition(':')[0] == 'about_resource':
+                                new_value = line.partition(':')[2].strip()
+                                if new_value:
+                                    about_resource = new_value
+                            elif line.partition(':')[0] == 'about_file':
+                                new_value = line.partition(':')[2].strip()
+                                if new_value:
+                                    about_file = new_value
+                            elif line.partition(':')[0] == 'name':
+                                new_value = line.partition(':')[2].strip()
+                                if new_value:
+                                    name = new_value
+                            elif line.partition(':')[0] == 'version':
+                                new_value = line.partition(':')[2].strip()
+                                if new_value:
+                                    version = new_value
+                    return about_resource, about_file, name, version
+            except Exception as e:
+                print(repr(e))
+                print("The 'MAPPING.CONFIG' cannot be opened.")
+                sys.exit(errno.EACCES)
+        else:
+            return about_resource, about_file, name, version
 
 
     def verify_license_files(self, input_list, path):
@@ -127,6 +181,14 @@ class GenAbout(object):
             output_license_path = gen_location + about_file_name + '-LICENSE'
             shutil.copy2(license_path, output_license_path)
 
+    """ 
+    def extract_licesen_from_url(self):
+        # This function needs discussion
+        test = urllib2.urlopen("https://enterprise.dejacode.com/license_library/Demo/gpl-1.0/#license-text")
+        with open('testdata/test_file.txt', 'wb') as output_file:
+            output_file.write(test.read())
+    """
+
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
         """
@@ -140,6 +202,10 @@ class GenAbout(object):
                 file_location = line['about_file']
                 if file_location.startswith('/'):
                     file_location = file_location.partition('/')[2]
+                if not file_location.endswith('.ABOUT'):
+                    if file_location.endswith('/'):
+                        file_location = file_location.rpartition('/')[0]
+                    file_location += '.ABOUT'
                 if all_in_one:
                     # This is to get the filename instead of the file path
                     file_location = file_location.rpartition('/')[2]
@@ -303,6 +369,7 @@ Options:
         <Path>
             Path to the project location
                 e.g. /home/user/project/
+    --mapping    Activate the MAPPING.CONFIG
 """)
 
 
@@ -311,6 +378,7 @@ def main(args, opts):
     verb_arg_num = '0'
     all_in_one = False
     project_path = ''
+    mapping_config = False
     for opt, opt_arg in opts:
         invalid_opt = True
         if opt in ('-h', '--help'):
@@ -362,6 +430,15 @@ def main(args, opts):
             else:
                 project_path = opt_arg
 
+        if opt in ('--mapping'):
+            invalid_opt = False
+            if not _exists('MAPPING.CONFIG'):
+                print("The file 'MAPPING.CONFIG' doesn't exist.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                mapping_config = True
+
         if invalid_opt:
             assert False, 'Unsupported option.'
 
@@ -385,7 +462,10 @@ def main(args, opts):
         sys.exit(errno.EIO)
 
     gen = GenAbout()
-    input_list = gen.read_input(input_file)
+    
+    #gen.extract_licesen_from_url()
+
+    input_list = gen.read_input(input_file, mapping_config)
     if project_path:
         license_list = gen.verify_license_files(input_list, project_path)
         gen.copy_license_files(gen_location, license_list)
@@ -396,7 +476,7 @@ def main(args, opts):
     gen.warnings_errors_summary(gen_location, verb_arg_num)
 
 if __name__ == "__main__":
-    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=']
+    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=', 'mapping']
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
     except Exception as e:

@@ -29,13 +29,13 @@ class GenAboutTest(unittest.TestCase):
     def test_read_input(self):
         gen = genabout.GenAbout()
         test_input = "testdata/test_files_for_genabout/about.csv"
-        list = gen.read_input(test_input)
+        list = gen.read_input(test_input, False)
         self.assertTrue(list, "List shouldn't be empty.")
 
     def test_read_input_missing_about_file(self):
         gen = genabout.GenAbout()
         test_input = "testdata/test_files_for_genabout/missing_about_file.csv"
-        list = gen.read_input(test_input)
+        list = gen.read_input(test_input, False)
         self.assertTrue(len(gen.errors) == 1, "This should return only 1 error.")
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(list, "The list should be empty.")
@@ -43,7 +43,7 @@ class GenAboutTest(unittest.TestCase):
     def test_read_input_missing_about_resource(self):
         gen = genabout.GenAbout()
         test_input = "testdata/test_files_for_genabout/missing_about_resource.csv"
-        list = gen.read_input(test_input)
+        list = gen.read_input(test_input, False)
         self.assertTrue(len(gen.errors) == 1, "This should return only 1 error.")
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(list, "The list should be empty.")
@@ -51,7 +51,7 @@ class GenAboutTest(unittest.TestCase):
     def test_read_input_missing_about_file_and_resource(self):
         gen = genabout.GenAbout()
         test_input = "testdata/test_files_for_genabout/missing_about_file_and_resource.csv"
-        list = gen.read_input(test_input)
+        list = gen.read_input(test_input, False)
         self.assertTrue(len(gen.errors) == 1, "This should return only 1 error.")
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(list, "The list should be empty.")
@@ -59,10 +59,16 @@ class GenAboutTest(unittest.TestCase):
     def test_read_input_valid_and_invalid_rows(self):
         gen = genabout.GenAbout()
         test_input = "testdata/test_files_for_genabout/valid_and_invalid_rows.csv"
-        list = gen.read_input(test_input)
+        list = gen.read_input(test_input, False)
         self.assertTrue(len(gen.errors) == 2, "This should return 2 errors.")
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertTrue(len(list) == 1, "The length of the list should be 1.")
+
+    def test_read_input_with_keys_mapping(self):
+        gen = genabout.GenAbout()
+        test_input = "testdata/test_files_for_genabout/about-mapping-sample.csv"
+        list = gen.read_input(test_input, True)
+        self.assertTrue(list, "List shouldn't be empty.")
 
     def test_pre_generation_about_exists_action_0(self):
         gen = genabout.GenAbout()
