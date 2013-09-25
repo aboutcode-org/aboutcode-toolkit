@@ -545,6 +545,10 @@ class AboutFile(object):
         return names
 
     def license_text(self):
+        '''
+        Returns the license text if the license_text_file field exists and the
+        field value (file) exists
+        '''
         try:
             license_text_path = self.file_fields_locations["license_text_file"]
             with open(license_text_path, 'rU') as f:
@@ -552,6 +556,16 @@ class AboutFile(object):
         except Exception as e: 
             pass
         #return empty string if the license file does not exist
+        return ""
+
+    def notice_text(self):
+        try:
+            notice_text_path = self.file_fields_locations["notice_file"]
+            with open(notice_text_path, 'rU') as f:
+                return f.read()
+        except Exception as e: 
+            pass
+        #return empty string if the notice file does not exist
         return ""
 
 def resource_name(resource_path):
@@ -1006,8 +1020,14 @@ class AboutCollector(object):
                               for about_object in self.about_objects 
                               if not sublist 
                               or about_object.about_resource_path in sublist]
+        about_notice_text = [about_object.notice_text()
+                             for about_object in self.about_objects
+                             if not sublist
+                             or about_object.about_resource_path in sublist]
+
         return template.render(about_objects = about_validated_fields, 
-                               license_texts = about_license_text)
+                               license_texts = about_license_text,
+                               notice_texts = about_notice_text)
 
 def isvalid_about_file(file_name):
     """
