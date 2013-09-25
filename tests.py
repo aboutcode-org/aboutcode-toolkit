@@ -472,5 +472,45 @@ about_resource: about.py
         result = about_collector.generate_attribution('testdata/attrib/test.template')
         self.assertEqual(result, expected)
 
+    def test_license_text_extracted_from_license_text_file(self):
+        expected ='''Tester holds the copyright for test component. Tester relinquishes copyright of
+this software and releases the component to Public Domain.
+
+* Email Test@tester.com for any questions'''
+
+        about_file = about.AboutFile('testdata/attrib/license_text.ABOUT')
+        license_text = about_file.license_text()
+        self.assertEqual(license_text, expected)
+
+    def test_notice_text_extacted_from_notice_text_file(self):
+        expected ='''Test component is released to Public Domain.'''
+        about_file = about.AboutFile('testdata/attrib/license_text.ABOUT')
+        notice_text = about_file.notice_text()
+        self.assertEqual(notice_text, expected)
+
+    def test_license_text_returns_empty_string_when_no_field_present(self):
+        expected = ''
+        about_file = about.AboutFile('testdata/attrib/no_text_file_field.ABOUT')
+        license_text = about_file.license_text()
+        self.assertEqual(license_text, expected)
+
+    def test_notice_text_returns_empty_string_when_no_field_present(self):
+        expected = ''
+        about_file = about.AboutFile('testdata/attrib/no_text_file_field.ABOUT')
+        notice_text = about_file.notice_text()
+        self.assertEqual(notice_text, expected)
+
+    def test_license_text_returns_empty_string_when_ref_file_doesnt_exist(self):
+        expected = ''
+        about_file = about.AboutFile('testdata/attrib/missing_notice_license_files.ABOUT')
+        license_text = about_file.license_text()
+        self.assertEqual(license_text, expected)
+
+    def test_notice_text_returns_empty_string_when_ref_file_doesnt_exist(self):
+        expected = ''
+        about_file = about.AboutFile('testdata/attrib/missing_notice_license_files.ABOUT')
+        notice_text = about_file.notice_text()
+        self.assertEqual(notice_text, expected)
+
 if __name__ == "__main__":
     unittest.main()
