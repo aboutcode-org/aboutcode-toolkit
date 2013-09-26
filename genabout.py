@@ -257,6 +257,8 @@ class GenAbout(object):
                         + 'name: ' + name + '\n' \
                         + 'version: ' + version + '\n\n'
             for item in sorted(about_dict_list.iterkeys()):
+                if item == 'about_file':
+                    continue
                 if not item in MANDATORY_FIELDS:
                     # The purpose of the replace('\n', '\n ') is used to
                     # format the continuation strings
