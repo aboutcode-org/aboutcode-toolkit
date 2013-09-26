@@ -559,6 +559,10 @@ class AboutFile(object):
         return ""
 
     def notice_text(self):
+        '''
+        Returns the text in a notice file if the notice_file field exists in a
+        .ABOUT file and the file that is in the notice_file: field exists
+        '''
         try:
             notice_text_path = self.file_fields_locations["notice_file"]
             with open(notice_text_path, 'rU') as f:
