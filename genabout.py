@@ -50,7 +50,7 @@ class GenAbout(object):
 
     def read_input(self, input_file, mapping):
         about_resource, about_file, name, version = self.config_mapping(mapping)
-        csvfile = csv.DictReader(open(input_file, 'rb'))
+        csvfile = csv.DictReader(open(input_file, 'rU'))
         components_list = []
         for line in csvfile:
             file_list = []
