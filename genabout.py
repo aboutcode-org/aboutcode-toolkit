@@ -184,6 +184,7 @@ class GenAbout(object):
         with open('testdata/test_file.txt', 'wb') as output_file:
             output_file.write(test.read())
             print("test")
+            print("commit2")
     """
 
 
