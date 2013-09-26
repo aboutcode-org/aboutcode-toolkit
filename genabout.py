@@ -183,6 +183,7 @@ class GenAbout(object):
         test = urllib2.urlopen("https://enterprise.dejacode.com/license_library/Demo/gpl-1.0/#license-text")
         with open('testdata/test_file.txt', 'wb') as output_file:
             output_file.write(test.read())
+            print("test")
     """
 
 
