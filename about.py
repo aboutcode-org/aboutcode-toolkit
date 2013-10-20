@@ -24,11 +24,11 @@ components inventory
 from __future__ import print_function
 from __future__ import with_statement
 
+import argparse
 import codecs
 import csv
 import errno
 import fnmatch
-import getopt
 import httplib
 import posixpath
 import socket
@@ -553,7 +553,7 @@ class AboutFile(object):
             license_text_path = self.file_fields_locations["license_text_file"]
             with open(license_text_path, 'rU') as f:
                 return f.read()
-        except Exception as e: 
+        except Exception as e:
             pass
         #return empty string if the license file does not exist
         return ""
@@ -567,7 +567,7 @@ class AboutFile(object):
             notice_text_path = self.file_fields_locations["notice_file"]
             with open(notice_text_path, 'rU') as f:
                 return f.read()
-        except Exception as e: 
+        except Exception as e:
             pass
         #return empty string if the notice file does not exist
         return ""
@@ -881,7 +881,7 @@ SPDX_LICENSE_IDS = dict((i.lower(), i) for i in SPDX_LICENSES)
 
 
 class AboutCollector(object):
-    def __init__(self, input_path, output_path, opt_arg_num):
+    def __init__(self, input_path, output_path, verbosity):
         # Setup the input and output paths
         self.original_input_path = input_path
         self.input_path = abspath(input_path)
@@ -891,9 +891,9 @@ class AboutCollector(object):
 
         # Setup the verbosity
         self.display_error = self.display_error_and_warning = False
-        if opt_arg_num == '1':
+        if verbosity == 1:
             self.display_error = True
-        elif opt_arg_num == '2':
+        elif verbosity == 2:
             self.display_error_and_warning = True
 
         self.about_files = []
@@ -1015,21 +1015,21 @@ class AboutCollector(object):
             return
 
         # We only need the fields names and values to render the template
-        about_validated_fields = [about_object.validated_fields 
-                                  for about_object in self.about_objects 
-                                  if not sublist 
+        about_validated_fields = [about_object.validated_fields
+                                  for about_object in self.about_objects
+                                  if not sublist
                                   or about_object.about_resource_path in sublist]
 
-        about_license_text = [about_object.license_text() 
-                              for about_object in self.about_objects 
-                              if not sublist 
+        about_license_text = [about_object.license_text()
+                              for about_object in self.about_objects
+                              if not sublist
                               or about_object.about_resource_path in sublist]
         about_notice_text = [about_object.notice_text()
                              for about_object in self.about_objects
                              if not sublist
                              or about_object.about_resource_path in sublist]
 
-        return template.render(about_objects = about_validated_fields, 
+        return template.render(about_objects = about_validated_fields,
                                license_texts = about_license_text,
                                notice_texts = about_notice_text)
 
@@ -1040,13 +1040,14 @@ def isvalid_about_file(file_name):
     return fnmatch.fnmatch(file_name.lower(), "*.about")
 
 
-def syntax():
-    print("""
-Syntax:
-    about.py [Options] [Input] [Output]
+SYNTAX = """
     Input can be a file or directory.
     Output must be a file with a .csv extension.
-""")
+"""
+
+
+def syntax():
+    print(SYNTAX)
 
 
 def option_usage():
@@ -1062,10 +1063,8 @@ Options:
             2 - Print error and warning messages
 """)
 
-
-def version():
-    print("""
-ABOUT CODE: Version: %s
+VERSION = """
+ABOUT CODE: Version: {0}
 Copyright (c) 2013 nexB Inc. All rights reserved.
 http://dejacode.org
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -1076,48 +1075,18 @@ Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
-under the License.""" % __version__)
+under the License.""".format(__version__)
 
 
-def main(args, opts):
-    overwrite = False
-    opt_arg_num = '0'
-    for opt, opt_arg in opts:
-        invalid_opt = True
-        if opt in ('-h', '--help'):
-            syntax()
-            option_usage()
-            sys.exit(0)
+def version():
+    print(VERSION)
 
-        if opt in ('-v', '--version'):
-            version()
-            sys.exit(0)
 
-        if opt in ('--verbosity'):
-            invalid_opt = False
-            valid_opt_args = ['0', '1', '2']
-            if not opt_arg or not opt_arg in valid_opt_args:
-                print("Invalid option argument.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-            else:
-                opt_arg_num = opt_arg
-
-        if opt in ('--overwrite'):
-            invalid_opt = False
-            overwrite = True
-
-        if invalid_opt:
-            assert False, 'Unsupported option.'
-
-    if not len(args) == 2:
-        print('Input and output parameters are mandatory.')
-        syntax()
-        option_usage()
-        sys.exit(errno.EINVAL)
-
-    input_path = args[0]
-    output_path = args[1]
+def main(args):
+    overwrite = args.overwrite
+    verbosity = args.verbosity
+    input_path = args.input_path
+    output_path = args.output_path
 
     # TODO: need more path normalization (normpath, expanduser)
     # input_path = abspath(input_path)
@@ -1146,7 +1115,7 @@ def main(args, opts):
         sys.exit(errno.EEXIST)
 
     if not exists(output_path) or (exists(output_path) and overwrite):
-        collector = AboutCollector(input_path, output_path, opt_arg_num)
+        collector = AboutCollector(input_path, output_path, verbosity)
         collector.extract_about_info()
     else:
         # we should never reach this
@@ -1154,13 +1123,21 @@ def main(args, opts):
 
 
 if __name__ == "__main__":
-    longopts = ['help', 'version', 'overwrite', 'verbosity=']
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
-    except Exception as e:
-        print(repr(e))
-        syntax()
-        option_usage()
-        sys.exit(errno.EINVAL)
+    parser = argparse.ArgumentParser(
+        description=SYNTAX, formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('--overwrite', action='store_true',
+                        help='Overwrites the output file if it exists')
+    parser.add_argument('-v', '--version', action='version', version=VERSION,
+                        help='Display current version, license notice, and '
+                             'copyright notice')
+    VERBOSITY = """Print more or fewer verbose messages while processing ABOUT files
+0 - Do not print any warning or error messages, just a total count (default)
+1 - Print error messages
+2 - Print error and warning messages"""
+    parser.add_argument('--verbosity', type=int, choices=[0, 1, 2],
+                        help=VERBOSITY)
+    parser.add_argument('input_path', help='The input path')
+    parser.add_argument('output_path', help='The output path')
+    args = parser.parse_args()
 
-    main(args, opts)
+    main(args)
