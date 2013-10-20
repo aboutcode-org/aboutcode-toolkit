@@ -890,11 +890,11 @@ class AboutCollector(object):
         self.output_path = output_path
 
         # Setup the verbosity
-        self.display_error = self.display_error_and_warning = False
-        if verbosity == 1:
+        self.display_error = self.display_warning = False
+        if verbosity >= 1:
             self.display_error = True
-        elif verbosity == 2:
-            self.display_error_and_warning = True
+        elif verbosity >= 2:
+            self.display_warning = True
 
         self.about_files = []
         self.about_objects = []
@@ -963,15 +963,14 @@ class AboutCollector(object):
             about_data_list.append(about_object.get_about_info(update_path,
                                                                about_object))
 
-            if self.display_error:
-                if about_object.errors:
-                    print("ABOUT File: %s" % update_path)
-                    print("ERROR: %s\n" % about_object.errors)
-            if self.display_error_and_warning:
+            if self.display_error or self.display_warning:
                 if about_object.errors or about_object.warnings:
                     print("ABOUT File: %s" % update_path)
+
+                if self.display_error:
                     if about_object.errors:
-                        print("ERROR: %s" % about_object.errors)
+                        print("ERROR: %s\n" % about_object.errors)
+                if self.display_warning:
                     if about_object.warnings:
                         print("WARNING: %s\n" % about_object.warnings)
 
