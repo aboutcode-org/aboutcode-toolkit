@@ -1045,24 +1045,6 @@ SYNTAX = """
     Output must be a file with a .csv extension.
 """
 
-
-def syntax():
-    print(SYNTAX)
-
-
-def option_usage():
-    print("""
-Options:
-    --overwrite          Overwrites the output file if it exists
-    -v,--version         Display current version, license notice, and copyright notice
-    -h,--help            Display help
-    --verbosity  <arg>   Print more or less verbose messages while processing ABOUT files
-        <arg>
-            0 - Do not print any warning or error messages, just a total count (default)
-            1 - Print error messages
-            2 - Print error and warning messages
-""")
-
 VERSION = """
 ABOUT CODE: Version: {0}
 Copyright (c) 2013 nexB Inc. All rights reserved.
@@ -1077,12 +1059,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
 under the License.""".format(__version__)
 
+VERBOSITY = """Print more or fewer verbose messages while processing ABOUT files
+0 - Do not print any warning or error messages, just a total count (default)
+1 - Print error messages
+2 - Print error and warning messages"""
 
-def version():
-    print(VERSION)
 
-
-def main(args):
+def main(parser, args):
     overwrite = args.overwrite
     verbosity = args.verbosity
     input_path = args.input_path
@@ -1093,25 +1076,24 @@ def main(args):
     output_path = abspath(output_path)
 
     if not exists(input_path):
-        print('Input path does not exist.')
-        option_usage()
+        print('Input path does not exist.\n')
+        parser.print_help()
         sys.exit(errno.EEXIST)
 
     if isdir(output_path):
-        print('Output must be a file, not a directory.')
-        option_usage()
+        print('Output must be a file, not a directory.\n')
+        parser.print_help()
         sys.exit(errno.EISDIR)
 
     if not output_path.endswith('.csv'):
-        print("Output file name must end with '.csv'")
-        syntax()
-        option_usage()
+        print("Output file name must end with '.csv'\n")
+        parser.print_help()
         sys.exit(errno.EINVAL)
 
     if exists(output_path) and not overwrite:
         print('Output file already exists. Select a different file name or use '
-              'the --overwrite option.')
-        option_usage()
+              'the --overwrite option.\n')
+        parser.print_help()
         sys.exit(errno.EEXIST)
 
     if not exists(output_path) or (exists(output_path) and overwrite):
@@ -1130,14 +1112,10 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--version', action='version', version=VERSION,
                         help='Display current version, license notice, and '
                              'copyright notice')
-    VERBOSITY = """Print more or fewer verbose messages while processing ABOUT files
-0 - Do not print any warning or error messages, just a total count (default)
-1 - Print error messages
-2 - Print error and warning messages"""
     parser.add_argument('--verbosity', type=int, choices=[0, 1, 2],
                         help=VERBOSITY)
     parser.add_argument('input_path', help='The input path')
     parser.add_argument('output_path', help='The output path')
     args = parser.parse_args()
 
-    main(args)
+    main(parser, args)
