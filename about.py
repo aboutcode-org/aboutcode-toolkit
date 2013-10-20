@@ -1103,7 +1103,7 @@ def main(parser, args):
         assert False, "Unsupported option(s)."
 
 
-if __name__ == "__main__":
+def get_parser():
     parser = argparse.ArgumentParser(
         description=SYNTAX, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--overwrite', action='store_true',
@@ -1115,6 +1115,11 @@ if __name__ == "__main__":
                         help=VERBOSITY)
     parser.add_argument('input_path', help='The input path')
     parser.add_argument('output_path', help='The output path')
+    return parser
+
+
+if __name__ == "__main__":
+    parser = get_parser()
     args = parser.parse_args()
 
     main(parser, args)

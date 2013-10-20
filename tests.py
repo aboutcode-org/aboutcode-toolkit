@@ -28,13 +28,16 @@ import about
 
 class BasicTest(unittest.TestCase):
     def test_simple_about_command_line_can_run(self):
-        testpath = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
-        tst_fn = testpath.name
-        testpath.close()
-        shutil.rmtree(tst_fn , ignore_errors=True)
-        assert about.main(['about.ABOUT', tst_fn], []) == None
-        self.assertTrue(len(open(tst_fn).read()) > 10)
-        shutil.rmtree(tst_fn, ignore_errors=True)
+        test_path = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
+        test_filename = test_path.name
+        test_path.close()
+        shutil.rmtree(test_filename , ignore_errors=True)
+        parser = about.get_parser()
+        args = parser.parse_args(['about.ABOUT', test_filename])
+
+        assert about.main(parser, args) == None
+        self.assertTrue(len(open(test_filename).read()) > 10)
+        shutil.rmtree(test_filename, ignore_errors=True)
 
     def test_return_path_is_not_abspath_and_contains_subdirs_on_file(self):
         test_input = "testdata/thirdparty/django_snippets_2413.ABOUT"
@@ -43,7 +46,7 @@ class BasicTest(unittest.TestCase):
             os.remove(test_output)
         except OSError:
             pass
-        collector = about.AboutCollector(test_input, test_output, '0')
+        collector = about.AboutCollector(test_input, test_output, 0)
         collector.extract_about_info()
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('testdata/thirdparty/django_snippets_2413.ABOUT'))
         os.remove(test_output)
@@ -55,7 +58,7 @@ class BasicTest(unittest.TestCase):
             os.remove(test_output)
         except OSError:
             pass
-        collector = about.AboutCollector(test_input, test_output, '0')
+        collector = about.AboutCollector(test_input, test_output, 0)
         collector.extract_about_info()
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('testdata/basic'))
         os.remove(test_output)
