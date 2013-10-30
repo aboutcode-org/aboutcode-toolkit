@@ -1,9 +1,14 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
 from setuptools import setup
+
+from about_code_tool import about
+
 
 setup(
     name="about-code-tool",
-    version="0.8.1",
+    version=about.__version__,
     description="Document the origin of third-party software.",
     author="Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez",
     author_email="info@nexb.com",
@@ -13,6 +18,31 @@ setup(
     interesting information about third-party software components that you use
     in your project.""",
     license='Apache License 2.0',
-    py_modules=['about', 'genabout'],
-    zip_safe=False
+    packages=[
+        'about_code_tool',
+        'about_code_tool.tests'
+    ],
+    package_data={
+        'about_code_tool': ['templates/*'],
+    },
+    include_package_data=True,
+    zip_safe=False,
+    test_suite='about_code_tool.tests',
+    platforms='any',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Programming Language :: Python',
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: OS Independent',
+        'Natural Language :: English',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Information Technology',
+        'Intended Audience :: Legal Industry',
+        'Intended Audience :: System Administrators',
+        'Topic :: Software Development',
+        'Topic :: Software Development :: Documentation',
+        'Topic :: Software Development :: Quality Assurance',
+        'Topic :: System :: Software Distribution',
+        'Topic :: Utilities',
+    ],
 )

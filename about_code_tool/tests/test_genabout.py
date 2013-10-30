@@ -14,21 +14,19 @@
 #  limitations under the License.
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import with_statement
 
 import os
-import shutil
-import string
-from StringIO import StringIO
-import tempfile
 import unittest
 
-import genabout
+from about_code_tool import genabout
+
 
 class GenAboutTest(unittest.TestCase):
     def test_read_input(self):
         gen = genabout.GenAbout()
-        test_input = "testdata/test_files_for_genabout/about.csv"
+        test_input = "tests/testdata/test_files_for_genabout/about.csv"
         list = gen.read_input(test_input, False)
         self.assertTrue(list, "List shouldn't be empty.")
 

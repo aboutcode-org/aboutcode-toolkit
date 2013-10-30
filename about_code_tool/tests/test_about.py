@@ -23,7 +23,7 @@ from StringIO import StringIO
 import tempfile
 import unittest
 
-import about
+from about_code_tool import about
 
 
 class BasicTest(unittest.TestCase):

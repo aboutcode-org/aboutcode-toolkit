@@ -42,8 +42,10 @@ SKIPPED_FIELDS = ['warnings', 'errors']
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
 
+self_path = abspath(dirname(__file__))
+
+
 class GenAbout(object):
-    
     def __init__(self):
         self.warnings = []
         self.errors = []
@@ -93,7 +95,6 @@ class GenAbout(object):
             components_list.append(file_list)
         return components_list
 
-
     @staticmethod
     def config_mapping(mapping):
         about_resource = 'about_resource'
@@ -102,7 +103,7 @@ class GenAbout(object):
         version = 'version'
         if mapping:
             try:
-                with open('MAPPING.CONFIG', "rU") as file_in:
+                with open(join(self_path, 'MAPPING.CONFIG'), "rU") as file_in:
                     for line in file_in.readlines():
                         if not line.startswith('#'):
                             if line.partition(':')[0] == 'about_resource':
@@ -128,7 +129,6 @@ class GenAbout(object):
                 sys.exit(errno.EACCES)
         else:
             return about_resource, about_file, name, version
-
 
     def verify_license_files(self, input_list, project_path):
         """
@@ -162,7 +162,6 @@ class GenAbout(object):
                     sys.exit(errno.EINVAL)
         return output_list
 
-
     def copy_license_files(self, gen_location, license_list):
         """
         copy the 'license_text_file' into the gen_location
@@ -177,14 +176,13 @@ class GenAbout(object):
                 makedirs(license_parent_dir)
             shutil.copy2(license_path, output_license_path)
 
-    """ 
+    """
     def extract_licesen_from_url(self):
         # This function needs discussion
         test = urllib2.urlopen("https://enterprise.dejacode.com/license_library/Demo/gpl-1.0/#license-text")
         with open('testdata/test_file.txt', 'wb') as output_file:
             output_file.write(test.read())
     """
-
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
         """
@@ -234,7 +232,6 @@ class GenAbout(object):
                 output_list.append(component_list)
         return output_list
 
-
     def format_output(self, input_list):
         """
         process the input and covert to the specific strings format
@@ -270,7 +267,6 @@ class GenAbout(object):
             components_list.append(component)
         return components_list
 
-
     def write_output(self, output):
         for line in output:
             about_file_location = line[0]
@@ -279,7 +275,6 @@ class GenAbout(object):
                 os.remove(about_file_location)
             with open(about_file_location, 'wb') as output_file:
                 output_file.write(context)
-
 
     def warnings_errors_summary(self, gen_location, show_error_num):
         display_error = False
