@@ -148,7 +148,7 @@ class GenAboutTest(unittest.TestCase):
               'about_resource': '.', 'name': 'ABOUT Tool'}]]
         expected_output = [
             [join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
-            'about_resource: .\nname: ABOUT Tool\nversion: 0.8.1\n\nabout_file: about.py.ABOUT\n']]
+            'about_resource: .\nname: ABOUT Tool\nversion: 0.8.1\n\n']]
         output = gen.format_output(input_list)
         self.assertEqual(expected_output, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")

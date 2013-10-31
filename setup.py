@@ -37,8 +37,6 @@ setup(
         'Natural Language :: English',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
-        'Intended Audience :: Legal Industry',
-        'Intended Audience :: System Administrators',
         'Topic :: Software Development',
         'Topic :: Software Development :: Documentation',
         'Topic :: Software Development :: Quality Assurance',
