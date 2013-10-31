@@ -4,6 +4,9 @@ ABOUT tool
 .. image:: https://travis-ci.org/dejacode/about-code-tool.png?branch=master
    :target: https://travis-ci.org/dejacode/about-code-tool
 
+.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.png
+  :target: https://coveralls.io/r/dejacode/about-code-tool
+
 The ABOUT tool and ABOUT files provide a simple way to document the
 (origin and license) and other important or interesting information about
 third-party software components that you use in your project.
