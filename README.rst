@@ -28,7 +28,7 @@ http://www.dejacode.org/about_spec_v0.8.0.html
 
 REQUIREMENTS
 ------------
-The ABOUT tool has been tested with Python 2.6 or 2.7 on Linux, Mac and Windows.
+The ABOUT tool is tested with Python 2.6 or 2.7 on Linux, Mac and Windows.
 You will need to install a Python interpreter if you do not have one already
 installed.
 
@@ -63,7 +63,7 @@ https://github.com/dejacode/about-code-tool/archive/master.zip
 
 Then open a terminal or command prompt, extract the download if needed and run::
 
-    python tests.py
+    python setup.py test
 
 
 USAGE

@@ -42,8 +42,10 @@ SKIPPED_FIELDS = ['warnings', 'errors']
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
 
+self_path = abspath(dirname(__file__))
+
+
 class GenAbout(object):
-    
     def __init__(self):
         self.warnings = []
         self.errors = []
@@ -93,7 +95,6 @@ class GenAbout(object):
             components_list.append(file_list)
         return components_list
 
-
     @staticmethod
     def config_mapping(mapping):
         about_resource = 'about_resource'
@@ -102,7 +103,7 @@ class GenAbout(object):
         version = 'version'
         if mapping:
             try:
-                with open('MAPPING.CONFIG', "rU") as file_in:
+                with open(join(self_path, 'MAPPING.CONFIG'), "rU") as file_in:
                     for line in file_in.readlines():
                         if not line.startswith('#'):
                             if line.partition(':')[0] == 'about_resource':
@@ -128,7 +129,6 @@ class GenAbout(object):
                 sys.exit(errno.EACCES)
         else:
             return about_resource, about_file, name, version
-
 
     def verify_license_files(self, input_list, project_path):
         """
@@ -162,7 +162,6 @@ class GenAbout(object):
                     sys.exit(errno.EINVAL)
         return output_list
 
-
     def copy_license_files(self, gen_location, license_list):
         """
         copy the 'license_text_file' into the gen_location
@@ -177,14 +176,11 @@ class GenAbout(object):
                 makedirs(license_parent_dir)
             shutil.copy2(license_path, output_license_path)
 
-    """ 
-    def extract_licesen_from_url(self):
-        # This function needs discussion
-        test = urllib2.urlopen("https://enterprise.dejacode.com/license_library/Demo/gpl-1.0/#license-text")
-        with open('testdata/test_file.txt', 'wb') as output_file:
-            output_file.write(test.read())
-    """
-
+    #def extract_license_from_url(self):
+    #    # This function needs discussion
+    #    test = urllib2.urlopen("https://enterprise.dejacode.com/license_library/Demo/gpl-1.0/#license-text")
+    #    with open('testdata/test_file.txt', 'wb') as output_file:
+    #        output_file.write(test.read())
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
         """
@@ -234,28 +230,22 @@ class GenAbout(object):
                 output_list.append(component_list)
         return output_list
 
-
-    def format_output(self, input_list):
+    @staticmethod
+    def format_output(input_list):
         """
-        process the input and covert to the specific strings format
+        Process the input and convert to the specific strings format.
         """
         components_list = []
-        for items in input_list:
+        for entry in input_list:
+            about_file_location = entry[0]
+            about_dict_list = entry[1]
+
             component = []
-            about_file_location = items[0]
-            about_dict_list = items[1]
-            context = ''
-            if about_dict_list['name']:
-                name = about_dict_list['name']
-            else:
-                name = ''
-            if about_dict_list['version']:
-                version = about_dict_list['version']
-            else:
-                version = ''
-            context = 'about_resource: ' + about_dict_list['about_resource'] + '\n' \
-                        + 'name: ' + name + '\n' \
-                        + 'version: ' + version + '\n\n'
+            component_name = about_dict_list.get('name', '')
+            component_version = about_dict_list.get('version', '')
+            context = 'about_resource: %s\nname: %s\nversion: %s\n\n' % (
+                about_dict_list['about_resource'], component_name, component_version)
+
             for item in sorted(about_dict_list.iterkeys()):
                 if item == 'about_file':
                     continue
@@ -265,11 +255,11 @@ class GenAbout(object):
                     value = about_dict_list[item].replace('\n', '\n ')
                     if (value or item in MANDATORY_FIELDS) and not item in SKIPPED_FIELDS:
                         context += item + ': ' + value + '\n'
+
             component.append(about_file_location)
             component.append(context)
             components_list.append(component)
         return components_list
-
 
     def write_output(self, output):
         for line in output:
@@ -279,7 +269,6 @@ class GenAbout(object):
                 os.remove(about_file_location)
             with open(about_file_location, 'wb') as output_file:
                 output_file.write(context)
-
 
     def warnings_errors_summary(self, gen_location, show_error_num):
         display_error = False
