@@ -553,7 +553,7 @@ class AboutFile(object):
             license_text_path = self.file_fields_locations["license_text_file"]
             with open(license_text_path, 'rU') as f:
                 return f.read()
-        except Exception as e: 
+        except Exception as e:
             pass
         #return empty string if the license file does not exist
         return ""
@@ -567,7 +567,7 @@ class AboutFile(object):
             notice_text_path = self.file_fields_locations["notice_file"]
             with open(notice_text_path, 'rU') as f:
                 return f.read()
-        except Exception as e: 
+        except Exception as e:
             pass
         #return empty string if the notice file does not exist
         return ""
@@ -1015,21 +1015,21 @@ class AboutCollector(object):
             return
 
         # We only need the fields names and values to render the template
-        about_validated_fields = [about_object.validated_fields 
-                                  for about_object in self.about_objects 
-                                  if not sublist 
+        about_validated_fields = [about_object.validated_fields
+                                  for about_object in self.about_objects
+                                  if not sublist
                                   or about_object.about_resource_path in sublist]
 
-        about_license_text = [about_object.license_text() 
-                              for about_object in self.about_objects 
-                              if not sublist 
+        about_license_text = [about_object.license_text()
+                              for about_object in self.about_objects
+                              if not sublist
                               or about_object.about_resource_path in sublist]
         about_notice_text = [about_object.notice_text()
                              for about_object in self.about_objects
                              if not sublist
                              or about_object.about_resource_path in sublist]
 
-        return template.render(about_objects = about_validated_fields, 
+        return template.render(about_objects = about_validated_fields,
                                license_texts = about_license_text,
                                notice_texts = about_notice_text)
 
