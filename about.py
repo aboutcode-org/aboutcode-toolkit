@@ -24,7 +24,7 @@ components inventory
 from __future__ import print_function
 from __future__ import with_statement
 
-import argparse
+import optparse
 import codecs
 import csv
 import errno
@@ -1064,11 +1064,11 @@ VERBOSITY = """Print more or fewer verbose messages while processing ABOUT files
 2 - Print error and warning messages"""
 
 
-def main(parser, args):
-    overwrite = args.overwrite
-    verbosity = args.verbosity
-    input_path = args.input_path
-    output_path = args.output_path
+def main(parser, options, args):
+    overwrite = options.overwrite
+    verbosity = options.verbosity
+    input_path = args[0]
+    output_path = args[1]
 
     # TODO: need more path normalization (normpath, expanduser)
     # input_path = abspath(input_path)
@@ -1104,22 +1104,59 @@ def main(parser, args):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(
-        description=SYNTAX, formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('--overwrite', action='store_true',
-                        help='Overwrites the output file if it exists')
-    parser.add_argument('-v', '--version', action='version', version=VERSION,
-                        help='Display current version, license notice, and '
-                             'copyright notice')
-    parser.add_argument('--verbosity', type=int, choices=[0, 1, 2],
-                        help=VERBOSITY)
-    parser.add_argument('input_path', help='The input path')
-    parser.add_argument('output_path', help='The output path')
+    class MyFormatter(optparse.IndentedHelpFormatter):
+        def _format_text(self, text):
+            """
+            Overridden to allow description to be printed without
+            modification
+            """
+            return text
+
+        def format_option(self, option):
+            """
+            Overridden to allow options help text to be printed without
+            modification
+            """
+            result = []
+            opts = self.option_strings[option]
+            opt_width = self.help_position - self.current_indent - 2
+            if len(opts) > opt_width:
+                opts = "%*s%s\n" % (self.current_indent, "", opts)
+                indent_first = self.help_position
+            else:                       # start help on same line as opts
+                opts = "%*s%-*s  " % (self.current_indent, "", opt_width, opts)
+                indent_first = 0
+            result.append(opts)
+            if option.help:
+                help_text = self.expand_default(option)
+                help_lines = help_text.split('\n')
+                #help_lines = textwrap.wrap(help_text, self.help_width)
+                result.append("%*s%s\n" % (indent_first, "", help_lines[0]))
+                result.extend(["%*s%s\n" % (self.help_position, "", line)
+                               for line in help_lines[1:]])
+            elif opts[-1] != "\n":
+                result.append("\n")
+            return "".join(result)
+
+    parser = optparse.OptionParser(
+        usage='%prog [options] input_path output_path',
+        description=SYNTAX,
+        add_help_option=False,
+        formatter=MyFormatter(),
+    )
+    parser.add_option("-h", "--help", action="help", help="Display help")
+    parser.add_option(
+        "--version",
+        action="version",
+        help='Display current version, license notice, and copyright notice')
+    parser.add_option('--overwrite', action='store_true',
+                      help='Overwrites the output file if it exists')
+    parser.add_option('--verbosity', type=int, help=VERBOSITY)
     return parser
 
 
 if __name__ == "__main__":
     parser = get_parser()
-    args = parser.parse_args()
+    (options, args) = parser.parse_args()
 
-    main(parser, args)
+    main(parser, options, args)
