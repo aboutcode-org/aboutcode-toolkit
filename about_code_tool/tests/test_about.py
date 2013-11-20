@@ -37,9 +37,9 @@ class BasicTest(unittest.TestCase):
         test_path.close()
         shutil.rmtree(test_filename , ignore_errors=True)
         parser = about.get_parser()
-        args = parser.parse_args(['about.ABOUT', test_filename])
+        (options, args) = parser.parse_args(['about.ABOUT', test_filename])
 
-        assert about.main(parser, args) == None
+        assert about.main(parser, options, args) == None
         self.assertTrue(len(open(test_filename).read()) > 10)
         shutil.rmtree(test_filename, ignore_errors=True)
 
