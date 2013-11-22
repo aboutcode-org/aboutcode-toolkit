@@ -1,11 +1,12 @@
 ABOUT tool
 ==========
 
-.. image:: https://travis-ci.org/dejacode/about-code-tool.png?branch=master
+.. image:: https://api.travis-ci.org/dejacode/about-code-tool.png?branch=develop
    :target: https://travis-ci.org/dejacode/about-code-tool
 
-.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.png
-  :target: https://coveralls.io/r/dejacode/about-code-tool
+.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.png?branch=develop
+  :target: https://coveralls.io/r/dejacode/about-code-tool?branch=develop
+
 
 The ABOUT tool and ABOUT files provide a simple way to document the
 (origin and license) and other important or interesting information about
