@@ -51,8 +51,8 @@ class BasicTest(unittest.TestCase):
             os.remove(test_output)
         except OSError:
             pass
-        collector = about.AboutCollector(test_input, test_output, 0)
-        collector.extract_about_info()
+        collector = about.AboutCollector(test_input, 0)
+        collector.write_to_csv(test_output)
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'))
         os.remove(test_output)
 
@@ -64,8 +64,8 @@ class BasicTest(unittest.TestCase):
             os.remove(test_output)
         except OSError:
             pass
-        collector = about.AboutCollector(test_input, test_output, 0)
-        collector.extract_about_info()
+        collector = about.AboutCollector(test_input, 0)
+        collector.write_to_csv(test_output)
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/basic'))
         os.remove(test_output)
 
@@ -475,7 +475,7 @@ about_resource: about.py
 
     def test_generate_attribution(self):
         expected = u'version:2.4.3about_resource:httpd-2.4.3.tar.gzname:Apache HTTP Server'
-        about_collector = about.AboutCollector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'), None, 0)
+        about_collector = about.AboutCollector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'), 0)
         result = about_collector.generate_attribution(join(TESTDATA_PATH, 'attrib/test.template'))
         self.assertEqual(result, expected)
 

@@ -31,7 +31,6 @@ import getopt
 import os
 import shutil
 import sys
-import urllib2
 
 __version__ = '0.9.0'
 

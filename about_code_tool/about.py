@@ -893,12 +893,11 @@ class AboutFile(object):
 
 
 class AboutCollector(object):
-    def __init__(self, input_path, output_path, verbosity):
+    def __init__(self, input_path, verbosity):
         # Setup the input and output paths
         self.original_input_path = input_path
         self.input_path = abspath(input_path)
         assert exists(self.input_path)
-        self.output_path = output_path
 
         # Setup the verbosity
         self.display_error = self.display_warning = False
@@ -909,10 +908,12 @@ class AboutCollector(object):
 
         self.about_files = []
         self.about_objects = []
+        self.about_data_list = []
 
         # Running the files collection and objects creation on instantiation
         self.collect_about_files()
         self.create_about_objects_from_files()
+        self.extract_about_data_from_objects()
 
     def collect_about_files(self):
         """
@@ -940,10 +941,13 @@ class AboutCollector(object):
 
         self.about_objects = about_objects
 
-    def extract_about_info(self):
+    def extract_about_data_from_objects(self):
         """
         Builds rows for each stored about objects.
         """
+        if self.about_data_list:  # Process only once.
+            return
+
         about_data_list = []
         warnings_count = errors_count = 0
 
@@ -982,21 +986,24 @@ class AboutCollector(object):
                     if about_object.warnings:
                         print("WARNING: %s\n" % about_object.warnings)
 
-        self.write_to_csv(about_data_list)
+        self.about_data_list = about_data_list
+
         if errors_count:
             print("%d errors detected." % errors_count)
         if warnings_count:
             print("%d warnings detected.\n" % warnings_count)
 
-    def write_to_csv(self, about_data_list):
+    def write_to_csv(self, output_path):
         """
         Write results in CSV file at output_path.
         """
-        with open(self.output_path, 'wb') as output_file:
+        header_row = ['about_file'] + MANDATORY_FIELDS + OPTIONAL_FIELDS + \
+                     ['warnings', 'errors']
+
+        with open(output_path, 'wb') as output_file:
             about_spec_writer = csv.writer(output_file)
-            about_spec_writer.writerow(['about_file'] + MANDATORY_FIELDS +
-                                       OPTIONAL_FIELDS + ['warnings', 'errors'])
-            for row in about_data_list:
+            about_spec_writer.writerow(header_row)
+            for row in self.about_data_list:
                 about_spec_writer.writerow(row)
 
     def generate_attribution(self, template_path='templates/default.html',
@@ -1105,8 +1112,8 @@ def main(parser, options, args):
         sys.exit(errno.EEXIST)
 
     if not exists(output_path) or (exists(output_path) and overwrite):
-        collector = AboutCollector(input_path, output_path, verbosity)
-        collector.extract_about_info()
+        collector = AboutCollector(input_path, verbosity)
+        collector.write_to_csv(output_path)
     else:
         # we should never reach this
         assert False, "Unsupported option(s)."

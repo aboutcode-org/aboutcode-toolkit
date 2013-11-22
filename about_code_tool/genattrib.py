@@ -16,7 +16,7 @@
 
 """
 This is a tool to generate component attribution based on a set of .ABOUT files.
-Optionally, one could pass a subset list of specific components for set of 
+Optionally, one could pass a subset list of specific components for set of
 .ABOUT files to generate attribution.
 """
 
@@ -135,7 +135,7 @@ def main(args, opts):
     input_path = args[0]
     output_path = args[1]
     component_subset_path = None if len(args) < 3 else args[2]
-    
+
     # TODO: need more path normalization (normpath, expanduser)
     # input_path = abspath(input_path)
     output_path = abspath(output_path)
