@@ -1083,6 +1083,12 @@ VERBOSITY = """Print more or fewer verbose messages while processing ABOUT files
 def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
+
+    if not len(args) == 2:
+        print('Input and Output paths are required.\n')
+        parser.print_help()
+        sys.exit(errno.EEXIST)
+
     input_path = args[0]
     output_path = args[1]
 
