@@ -33,7 +33,7 @@ import shutil
 import sys
 
 __version__ = '0.9.0'
-
+# This is a test string.
 
 MANDATORY_FIELDS = ['about_resource', 'name', 'version']
 SKIPPED_FIELDS = ['warnings', 'errors']
