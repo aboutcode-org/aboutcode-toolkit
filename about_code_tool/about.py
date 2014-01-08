@@ -386,6 +386,21 @@ def resource_name(resource_path):
         return ''
 
 
+def check_network_connection():
+    """
+    Returns True if an HTTP connection to the live internet is possible.
+    """
+    http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)
+    try:
+        http_connection.connect()
+    except socket.error:
+        return False
+    else:
+        return True
+
+has_network_connectivity = check_network_connection()
+
+
 class AboutFile(object):
     """
     Represent an ABOUT file and functions to parse and validate a file.
@@ -778,26 +793,12 @@ class AboutFile(object):
             return False
 
         if network_check:
-            # FIXME: we should only check network connection ONCE per run
-            # and cache the results, not do this here
-            if self.check_network_connection():
+            if has_network_connectivity:
                 # FIXME: HEAD request DO NOT WORK for ftp://
                 return self.check_url_reachable(netloc, path)
             else:
                 print('No network connection detected.')
         return url_has_valid_format
-
-    @staticmethod
-    def check_network_connection():
-        """
-        Returns True if an HTTP connection to the live internet is possible.
-        """
-        try:
-            http_connection = httplib.HTTPConnection('dejacode.org')
-            http_connection.connect()
-            return True
-        except socket.error:
-            return False
 
     @staticmethod
     def check_url_reachable(host, path):

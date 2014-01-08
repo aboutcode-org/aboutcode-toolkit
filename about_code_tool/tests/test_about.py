@@ -321,7 +321,7 @@ class UrlCheckTest(unittest.TestCase):
         about_file = about.AboutFile()
         self.assertTrue(about_file.check_url("https://nexb.com", True))
         self.assertTrue(about_file.check_url("http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz", True))
-        if about_file.check_network_connection():
+        if about.check_network_connection():
             self.assertFalse(about_file.check_url("http://nothing_here.com", True))
 
     def FAILING_test_check_url__with_network__not_starting_with_www_and_spaces(self):
@@ -337,7 +337,7 @@ class UrlCheckTest(unittest.TestCase):
 
     def test_check_url__with_network__not_reachable(self):
         about_file = about.AboutFile()
-        if about_file.check_network_connection():
+        if about.check_network_connection():
             self.assertFalse(about_file.check_url("http://www.google", True))
 
     def test_check_url__with_network__empty_URL(self):
