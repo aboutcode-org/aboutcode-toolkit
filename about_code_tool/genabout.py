@@ -27,10 +27,14 @@ from os.path import exists, dirname, join, abspath, isdir
 import about
 import csv
 import errno
+import json
 import getopt
 import os
 import shutil
 import sys
+import urllib
+import urllib2
+
 
 __version__ = '0.9.0'
 
@@ -42,6 +46,33 @@ Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
 
 self_path = abspath(dirname(__file__))
+
+
+def request_license_data(url, username, api_key, license_key):
+    """
+    Send a request to a given API URL to gather license data.
+    Authentication through an Api Key and a username.
+    Returns a python dictionary of results returned by the API.
+    """
+    payload = {
+        'username': username,
+        'api_key': api_key,
+        'format': 'json'
+    }
+
+    full_url = '{0}{1}/?{2}'.format(
+        url if url.endswith('/') else url + '/',
+        license_key, urllib.urlencode(payload))
+
+    request = urllib2.Request(full_url)
+    try:
+        response = urllib2.urlopen(request)
+        response_content = response.read()
+        data = json.loads(response_content)
+    except (urllib2.HTTPError, ValueError):
+        return {}
+    else:
+        return data
 
 
 class GenAbout(object):
@@ -175,11 +206,15 @@ class GenAbout(object):
                 makedirs(license_parent_dir)
             shutil.copy2(license_path, output_license_path)
 
-    #def extract_license_from_url(self):
-    #    # This function needs discussion
-    #    test = urllib2.urlopen("https://enterprise.dejacode.com/license_library/Demo/gpl-1.0/#license-text")
-    #    with open('testdata/test_file.txt', 'wb') as output_file:
-    #        output_file.write(test.read())
+    @staticmethod
+    def get_license_text_from_api(url, username, api_key, license_key):
+        """
+        Returns the license_text of a given license_key using an API request.
+        Returns an empty string if the text is not available.
+        """
+        data = request_license_data(url, username, api_key, license_key)
+        license_text = data.get('full_text', '')
+        return license_text
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
         """
