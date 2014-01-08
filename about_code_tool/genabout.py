@@ -19,7 +19,7 @@ This is a tool to generate ABOUT files based on the input file.
 The input file should be a csv format which contains information about the
 file location, origin and license of the software components etc.
 """
-
+# This is a test string
 from __future__ import print_function
 from collections import namedtuple
 from os import makedirs
