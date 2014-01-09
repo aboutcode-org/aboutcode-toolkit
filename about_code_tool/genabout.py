@@ -393,6 +393,15 @@ Options:
         <path>
             Project path
     --mapping    Activate the MAPPING.CONFIG
+    --extract_license <3 args required>    Extract License text and create <license_key>.LICENSE 
+                                            side-by-side with the .ABOUT from DJE License Library
+        <--api_url='URL'> - URL to the DJE License Library
+        <--api_username='user_api'> - The regular DJE username
+        <--api_key='user_api_key'> - Hash attached to your username which is used 
+                                     to Authenticate yourself in the API. Contact
+                                     us to get the hash key. 
+        Example syntax:
+            genabout.py --extract_license --api_url='https://enterprise.dejacode.com/api/v1/license_text/' --api_username='<user_api>' --api_key='<user_api_key>'
 """)
 
 
@@ -402,6 +411,10 @@ def main(args, opts):
     all_in_one = False
     project_path = ''
     mapping_config = False
+    gen_license = False
+    api_url = ''
+    api_username = ''
+    api_key = ''
 
     for opt, opt_arg in opts:
         invalid_opt = True
@@ -462,9 +475,48 @@ def main(args, opts):
             else:
                 mapping_config = True
 
+        if opt in ('--extract_license'):
+            invalid_opt = False
+            gen_license = True
+
+
+        if opt in ('--api_url'):
+            invalid_opt = False
+            if not opt_arg or not 'http' in opt_arg.lower():
+                print("Invalid option argument.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                api_url = opt_arg
+
+        if opt in ('--api_username'):
+            invalid_opt = False
+            if not opt_arg or '/' in opt_arg or '\\' in opt_arg:
+                print("Invalid option argument.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                api_username = opt_arg
+
+        if opt in ('--api_key'):
+            invalid_opt = False
+            if not opt_arg or '/' in opt_arg or '\\' in opt_arg:
+                print("Invalid option argument.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                api_key = opt_arg
+
         if invalid_opt:
             assert False, 'Unsupported option.'
 
+    # Check do we have all the required arguments: api_url, api_username, api_key
+    if gen_license:
+        if not api_url or not api_username or not api_key:
+            print("Missing argument for --extract_license")
+            option_usage()
+            sys.exit(errno.EINVAL)
+        
     if not len(args) == 2:
         print('Input file and generated location parameters are mandatory.')
         syntax()
@@ -499,7 +551,8 @@ def main(args, opts):
     gen.warnings_errors_summary(gen_location, verb_arg_num)
 
 if __name__ == "__main__":
-    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=', 'mapping']
+    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=', 'mapping', 'extract_license', 'api_url='
+                , 'api_username=', 'api_key=']
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
     except Exception as e:
