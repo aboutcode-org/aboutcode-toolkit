@@ -224,6 +224,9 @@ class GenAbout(object):
                         dje_license_key_list.append(about_parent_dir)
                         dje_license_key_list.append(dje_key)
                         output_list.append(dje_license_key_list)
+                    else:
+                        self.warnings.append(Warn('dje_license_key', '',
+                                         "No 'dje_license_key' for " + line['about_file']))
                 except Exception as e:
                     print(repr(e))
                     print("The input does not have the 'dje_license_key' key which is required.")
@@ -241,8 +244,12 @@ class GenAbout(object):
                 gen_path = gen_path.partition('/')[2]
             gen_license_path = join(project_path, gen_path, license_key) + '.LICENSE'
             context = self.get_license_text_from_api(url, username, key, license_key)
-            with open(gen_license_path, 'wb') as output:
-                output.write(context)
+            if not context:
+                self.errors.append(Error('dje_license_key', license_key,
+                                         "Invalid 'dje_license_key'"))
+            else:
+                with open(gen_license_path, 'wb') as output:
+                    output.write(context)
 
     @staticmethod
     def get_license_text_from_api(url, username, api_key, license_key):
