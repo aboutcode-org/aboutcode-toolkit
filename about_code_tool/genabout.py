@@ -208,33 +208,6 @@ class GenAbout(object):
                 makedirs(license_parent_dir)
             shutil.copy2(license_path, output_license_path)
 
-    def get_dje_license_key(self, input_list):
-        """
-        Get the DJE License Keys
-        """
-        output_list = []
-        for component in input_list:
-            for line in component:
-                try:
-                    if line['dje_license_key']:
-                        dje_license_key_list = []
-                        dje_key = line['dje_license_key']
-                        file_location = line['about_file']
-                        if file_location.endswith('/'):
-                            file_location = file_location.rpartition('/')[0]
-                        about_parent_dir = os.path.dirname(file_location)
-                        dje_license_key_list.append(about_parent_dir)
-                        dje_license_key_list.append(dje_key)
-                        output_list.append(dje_license_key_list)
-                    else:
-                        self.warnings.append(Warn('dje_license_key', '',
-                                         "No 'dje_license_key' for " + line['about_file']))
-                except Exception as e:
-                    print(repr(e))
-                    print("The input does not have the 'dje_license_key' key which is required.")
-                    sys.exit(errno.EINVAL)
-        return output_list
-
     def extract_dje_license(self, project_path, license_list, url, username, key):
         """
         Extract license text from DJE
@@ -268,12 +241,13 @@ class GenAbout(object):
         license_text = data.get('full_text', '')
         return license_text
 
-    def pre_generation(self, gen_location, input_list, action_num, all_in_one):
+    def pre_generation(self, gen_location, input_list, action_num, all_in_one, gen_license):
         """
         check the existence of the output location and handle differently
         according to the action_num.
         """
         output_list = []
+        license_output_list = []
         # The input_list needs to be copied and be used below.
         # Otherwise, the value in the input_list may be changed based on the 
         # action number below
@@ -318,7 +292,28 @@ class GenAbout(object):
                 component_list.append(about_file_location)
                 component_list.append(line)
                 output_list.append(component_list)
-        return output_list
+
+                if gen_license:
+                    try:
+                        if line['dje_license_key']:
+                            dje_license_key_list = []
+                            dje_key = line['dje_license_key']
+                            file_location = line['about_file']
+                            if file_location.endswith('/'):
+                                file_location = file_location.rpartition('/')[0]
+                            about_parent_dir = os.path.dirname(file_location)
+                            dje_license_key_list.append(about_parent_dir)
+                            dje_license_key_list.append(dje_key)
+                            license_output_list.append(dje_license_key_list)
+                        else:
+                            self.warnings.append(Warn('dje_license_key', '',
+                                                      "Missing 'dje_license_key' for " + line['about_file']))
+                    except Exception as e:
+                        print(repr(e))
+                        print("The input does not have the 'dje_license_key' key which is required.")
+                        sys.exit(errno.EINVAL)
+
+        return output_list, license_output_list
 
     @staticmethod
     def format_output(input_list):
@@ -594,19 +589,17 @@ def main(args, opts):
         license_list = gen.verify_license_files(input_list, project_path)
         gen.copy_license_files(gen_location, license_list)
 
-    components_list = gen.pre_generation(gen_location, input_list, opt_arg_num, all_in_one)
-    formatted_output = gen.format_output(components_list)
-    gen.write_output(formatted_output)
-
-    # Check do we have all the required arguments: api_url, api_username, api_key
     if gen_license:
         if not api_url or not api_username or not api_key:
             print("Missing argument for --extract_license")
             option_usage()
             sys.exit(errno.EINVAL)
-        else:
-            dje_license_list = gen.get_dje_license_key(input_list)
-            gen.extract_dje_license(gen_location, dje_license_list, api_url, api_username, api_key)
+
+    components_list, dje_license_list = gen.pre_generation(gen_location, input_list, opt_arg_num, all_in_one, gen_license)
+    formatted_output = gen.format_output(components_list)
+    gen.write_output(formatted_output)
+    if dje_license_list:
+        gen.extract_dje_license(gen_location, dje_license_list, api_url, api_username, api_key)
 
 
     gen.warnings_errors_summary(gen_location, verb_arg_num)
