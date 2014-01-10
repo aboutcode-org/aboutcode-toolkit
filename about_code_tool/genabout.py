@@ -245,17 +245,18 @@ class GenAbout(object):
             if '/' in gen_path:
                 gen_path = gen_path.partition('/')[2]
             gen_license_path = join(project_path, gen_path, license_key) + '.LICENSE'
-            context = self.get_license_text_from_api(url, username, key, license_key)
-            if not context:
-                self.errors.append(Error('dje_license_key', license_key,
-                                         "Invalid 'dje_license_key'"))
-            else:
-                try:
-                    with open(gen_license_path, 'wb') as output:
-                        output.write(context.encode('utf8'))
-                except Exception as e:
-                    self.errors.append(Error('Unknown', gen_license_path,
-                                         "Something is wrong."))
+            if not _exists(gen_license_path):
+                context = self.get_license_text_from_api(url, username, key, license_key)
+                if not context:
+                    self.errors.append(Error('dje_license_key', license_key,
+                                             "Invalid 'dje_license_key'"))
+                else:
+                    try:
+                        with open(gen_license_path, 'wb') as output:
+                            output.write(context.encode('utf8'))
+                    except Exception as e:
+                        self.errors.append(Error('Unknown', gen_license_path,
+                                             "Something is wrong."))
 
     @staticmethod
     def get_license_text_from_api(url, username, api_key, license_key):
