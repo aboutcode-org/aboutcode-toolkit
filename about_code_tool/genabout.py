@@ -94,7 +94,9 @@ class GenAbout(object):
                     line['version'] = line[version]
                 except Exception as e:
                     print(repr(e))
+                    print("The required keys not found.")
                     print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
+                    print("OR, correct the header keys from the input CSV.")
                     sys.exit(errno.EINVAL)
                 if not about_file == 'about_file':
                     del line[about_file]
