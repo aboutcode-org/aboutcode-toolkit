@@ -250,8 +250,12 @@ class GenAbout(object):
                 self.errors.append(Error('dje_license_key', license_key,
                                          "Invalid 'dje_license_key'"))
             else:
-                with open(gen_license_path, 'wb') as output:
-                    output.write(context)
+                try:
+                    with open(gen_license_path, 'wb') as output:
+                        output.write(context.encode('utf8'))
+                except Exception as e:
+                    self.errors.append(Error('Unknown', gen_license_path,
+                                         "Something is wrong."))
 
     @staticmethod
     def get_license_text_from_api(url, username, api_key, license_key):
