@@ -26,11 +26,16 @@ from os import makedirs
 from os.path import exists, dirname, join, abspath, isdir
 import about
 import csv
+import copy
 import errno
+import json
 import getopt
 import os
 import shutil
 import sys
+import urllib
+import urllib2
+
 
 __version__ = '0.9.0'
 
@@ -41,6 +46,33 @@ Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
 
 self_path = abspath(dirname(__file__))
+
+
+def request_license_data(url, username, api_key, license_key):
+    """
+    Send a request to a given API URL to gather license data.
+    Authentication through an Api Key and a username.
+    Returns a python dictionary of results returned by the API.
+    """
+    payload = {
+        'username': username,
+        'api_key': api_key,
+        'format': 'json'
+    }
+
+    full_url = '{0}{1}/?{2}'.format(
+        url if url.endswith('/') else url + '/',
+        license_key, urllib.urlencode(payload))
+
+    request = urllib2.Request(full_url)
+    try:
+        response = urllib2.urlopen(request)
+        response_content = response.read()
+        data = json.loads(response_content)
+    except (urllib2.HTTPError, ValueError):
+        return {}
+    else:
+        return data
 
 
 class GenAbout(object):
@@ -162,7 +194,7 @@ class GenAbout(object):
 
     def copy_license_files(self, gen_location, license_list):
         """
-        copy the 'license_text_file' into the gen_location
+        Copy the 'license_text_file' into the gen_location
         """
         for items in license_list:
             license_path = items[0]
@@ -174,11 +206,60 @@ class GenAbout(object):
                 makedirs(license_parent_dir)
             shutil.copy2(license_path, output_license_path)
 
-    #def extract_license_from_url(self):
-    #    # This function needs discussion
-    #    test = urllib2.urlopen("https://enterprise.dejacode.com/license_library/Demo/gpl-1.0/#license-text")
-    #    with open('testdata/test_file.txt', 'wb') as output_file:
-    #        output_file.write(test.read())
+    def get_dje_license_key(self, input_list):
+        """
+        Get the DJE License Keys
+        """
+        output_list = []
+        for component in input_list:
+            for line in component:
+                try:
+                    if line['dje_license_key']:
+                        dje_license_key_list = []
+                        dje_key = line['dje_license_key']
+                        file_location = line['about_file']
+                        if file_location.endswith('/'):
+                            file_location = file_location.rpartition('/')[0]
+                        about_parent_dir = os.path.dirname(file_location)
+                        dje_license_key_list.append(about_parent_dir)
+                        dje_license_key_list.append(dje_key)
+                        output_list.append(dje_license_key_list)
+                    else:
+                        self.warnings.append(Warn('dje_license_key', '',
+                                         "No 'dje_license_key' for " + line['about_file']))
+                except Exception as e:
+                    print(repr(e))
+                    print("The input does not have the 'dje_license_key' key which is required.")
+                    sys.exit(errno.EINVAL)
+        return output_list
+
+    def extract_dje_license(self, project_path, license_list, url, username, key):
+        """
+        Extract license text from DJE
+        """
+        for items in license_list:
+            gen_path = items[0]
+            license_key = items[1]
+            if '/' in gen_path:
+                gen_path = gen_path.partition('/')[2]
+            gen_license_path = join(project_path, gen_path, license_key) + '.LICENSE'
+            context = self.get_license_text_from_api(url, username, key, license_key)
+            if not context:
+                self.errors.append(Error('dje_license_key', license_key,
+                                         "Invalid 'dje_license_key'"))
+            else:
+                with open(gen_license_path, 'wb') as output:
+                    output.write(context)
+
+    @staticmethod
+    def get_license_text_from_api(url, username, api_key, license_key):
+        """
+        Returns the license_text of a given license_key using an API request.
+        Returns an empty string if the text is not available.
+        """
+        data = request_license_data(url, username, api_key, license_key)
+        license_text = data.get('full_text', '')
+        return license_text
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
         """
@@ -186,7 +267,11 @@ class GenAbout(object):
         according to the action_num.
         """
         output_list = []
-        for component in input_list:
+        # The input_list needs to be copied and be used below.
+        # Otherwise, the value in the input_list may be changed based on the 
+        # action number below
+        copied_list = copy.deepcopy(input_list)
+        for component in copied_list:
             for line in component:
                 component_list = []
                 file_location = line['about_file']
@@ -357,6 +442,15 @@ Options:
         <path>
             Project path
     --mapping    Activate the MAPPING.CONFIG
+    --extract_license <3 args required>    Extract License text and create <license_key>.LICENSE 
+                                            side-by-side with the .ABOUT from DJE License Library
+        <--api_url='URL'> - URL to the DJE License Library
+        <--api_username='user_api'> - The regular DJE username
+        <--api_key='user_api_key'> - Hash attached to your username which is used 
+                                     to Authenticate yourself in the API. Contact
+                                     us to get the hash key. 
+        Example syntax:
+            genabout.py --extract_license --api_url='https://enterprise.dejacode.com/api/v1/license_text/' --api_username='<user_api>' --api_key='<user_api_key>'
 """)
 
 
@@ -366,6 +460,10 @@ def main(args, opts):
     all_in_one = False
     project_path = ''
     mapping_config = False
+    gen_license = False
+    api_url = ''
+    api_username = ''
+    api_key = ''
 
     for opt, opt_arg in opts:
         invalid_opt = True
@@ -426,9 +524,41 @@ def main(args, opts):
             else:
                 mapping_config = True
 
+        if opt in ('--extract_license'):
+            invalid_opt = False
+            gen_license = True
+
+
+        if opt in ('--api_url'):
+            invalid_opt = False
+            if not opt_arg or not 'http' in opt_arg.lower():
+                print("Invalid option argument.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                api_url = opt_arg
+
+        if opt in ('--api_username'):
+            invalid_opt = False
+            if not opt_arg or '/' in opt_arg or '\\' in opt_arg:
+                print("Invalid option argument.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                api_username = opt_arg
+
+        if opt in ('--api_key'):
+            invalid_opt = False
+            if not opt_arg or '/' in opt_arg or '\\' in opt_arg:
+                print("Invalid option argument.")
+                option_usage()
+                sys.exit(errno.EINVAL)
+            else:
+                api_key = opt_arg
+
         if invalid_opt:
             assert False, 'Unsupported option.'
-
+        
     if not len(args) == 2:
         print('Input file and generated location parameters are mandatory.')
         syntax()
@@ -460,10 +590,23 @@ def main(args, opts):
     components_list = gen.pre_generation(gen_location, input_list, opt_arg_num, all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
+
+    # Check do we have all the required arguments: api_url, api_username, api_key
+    if gen_license:
+        if not api_url or not api_username or not api_key:
+            print("Missing argument for --extract_license")
+            option_usage()
+            sys.exit(errno.EINVAL)
+        else:
+            dje_license_list = gen.get_dje_license_key(input_list)
+            gen.extract_dje_license(gen_location, dje_license_list, api_url, api_username, api_key)
+
+
     gen.warnings_errors_summary(gen_location, verb_arg_num)
 
 if __name__ == "__main__":
-    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=', 'mapping']
+    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=', 'mapping', 'extract_license', 'api_url='
+                , 'api_username=', 'api_key=']
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
     except Exception as e:
