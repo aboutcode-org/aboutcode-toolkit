@@ -26,6 +26,7 @@ from os import makedirs
 from os.path import exists, dirname, join, abspath, isdir
 import about
 import csv
+import copy
 import errno
 import json
 import getopt
@@ -267,7 +268,11 @@ class GenAbout(object):
         according to the action_num.
         """
         output_list = []
-        for component in input_list:
+        # The input_list needs to be copied and be used below.
+        # Otherwise, the value in the input_list may be changed based on the 
+        # action number below
+        copied_list = copy.deepcopy(input_list)
+        for component in copied_list:
             for line in component:
                 component_list = []
                 file_location = line['about_file']
