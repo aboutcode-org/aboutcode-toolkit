@@ -64,12 +64,23 @@ def request_license_data(url, username, api_key, license_key):
         url if url.endswith('/') else url + '/',
         license_key, urllib.urlencode(payload))
 
-    request = urllib2.Request(full_url)
+    #request = urllib2.Request(full_url)
     try:
+        request = urllib2.Request(full_url)
         response = urllib2.urlopen(request)
         response_content = response.read()
         data = json.loads(response_content)
-    except (urllib2.HTTPError, ValueError):
+    except urllib2.HTTPError as http_e:
+        # the code 401 represents authorization problem
+        if http_e.code == 401:
+            return 'authorization denied'
+        else:
+            return {}
+    except urllib2.URLError as url_e:
+        if about.check_network_connection():
+            return 'URL not reachable'
+        return 'No network'
+    except ValueError as value_e:
         return {}
     else:
         return data
@@ -220,6 +231,18 @@ class GenAbout(object):
             gen_license_path = join(project_path, gen_path, license_key) + '.LICENSE'
             if not _exists(gen_license_path):
                 context = self.get_license_text_from_api(url, username, key, license_key)
+                if context == 'authorization denied':
+                    print("Authorization denied. Invalid '--api_username' or '--api_key'.")
+                    print("LICENSE generation is skipped.")
+                    sys.exit(errno.EINVAL)
+                if context == 'URL not reachable':
+                    print("URL not reachable. Invalid '--api_url'.")
+                    print("LICENSE generation is skipped.")
+                    sys.exit(errno.EINVAL)
+                if context == 'No network':
+                    print("Network problem. Please check the Internet connection.")
+                    print("LICENSE generation is skipped.")
+                    sys.exit(errno.EINVAL)
                 if not context:
                     self.errors.append(Error('dje_license_key', license_key,
                                              "Invalid 'dje_license_key'"))
@@ -238,6 +261,8 @@ class GenAbout(object):
         Returns an empty string if the text is not available.
         """
         data = request_license_data(url, username, api_key, license_key)
+        if data == 'authorization denied' or data == 'URL not reachable' or data == 'No network':
+            return data
         license_text = data.get('full_text', '')
         return license_text
 
@@ -455,7 +480,7 @@ Options:
         <--api_url='URL'> - URL to the DJE License Library
         <--api_username='user_api'> - The regular DJE username
         <--api_key='user_api_key'> - Hash attached to your username which is used 
-                                     to Authenticate yourself in the API. Contact
+                                     to authenticate yourself in the API. Contact
                                      us to get the hash key. 
         Example syntax:
             genabout.py --extract_license --api_url='https://enterprise.dejacode.com/api/v1/license_text/' --api_username='<user_api>' --api_key='<user_api_key>'
