@@ -46,28 +46,22 @@ class BasicTest(unittest.TestCase):
     def test_return_path_is_not_abspath_and_contains_subdirs_on_file(self):
         # Using a relative path for the purpose of this test
         test_input = "about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT"
-        test_output = join(TESTDATA_PATH, 'output/test_return_path_is_not_abspath_on_file.csv')
-        try:
-            os.remove(test_output)
-        except OSError:
-            pass
+        test_path = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
+        test_output = test_path.name
+        test_path.close()
         collector = about.AboutCollector(test_input, 0)
         collector.write_to_csv(test_output)
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'))
-        os.remove(test_output)
 
     def test_return_path_is_not_abspath_and_contains_subdirs_on_dir(self):
         # Using a relative path for the purpose of this test
         test_input = "about_code_tool/tests/testdata/basic"
-        test_output = join(TESTDATA_PATH, 'output/test_return_path_is_not_abspath_on_dir.csv')
-        try:
-            os.remove(test_output)
-        except OSError:
-            pass
+        test_path = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
+        test_output = test_path.name
+        test_path.close()
         collector = about.AboutCollector(test_input, 0)
         collector.write_to_csv(test_output)
         self.assertTrue(open(test_output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/basic'))
-        os.remove(test_output)
 
     def test_isvalid_about_file(self):
         self.assertTrue(about.isvalid_about_file("test.About"))
