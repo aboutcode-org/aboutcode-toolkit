@@ -1,0 +1,5 @@
+about_file,about_resource,name,version
+test_blank line,/tmp/,blank line,0.8.1
+blank line below,/tmp/1/,,
+,,,
+blank line above,/tmp/2/,,

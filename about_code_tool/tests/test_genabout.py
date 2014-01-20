@@ -35,6 +35,12 @@ class GenAboutTest(unittest.TestCase):
         list = gen.read_input(test_input, False)
         self.assertTrue(list, "List shouldn't be empty.")
 
+    def test_read_input_with_blank_line(self):
+        gen = genabout.GenAbout()
+        test_input = join(TESTDATA_PATH, "test_files_for_genabout/contains_blank_line.csv")
+        list = gen.read_input(test_input, False)
+        self.assertTrue(list, "List shouldn't be empty.")
+
     def test_read_input_missing_about_file(self):
         gen = genabout.GenAbout()
         test_input = join(TESTDATA_PATH, "test_files_for_genabout/missing_about_file.csv")

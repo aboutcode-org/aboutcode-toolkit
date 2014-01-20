@@ -118,8 +118,12 @@ class GenAbout(object):
                 if not version == 'version':
                     del line[version]
                 if not line['about_file']:
-                    missing_about_file = "'about_file' field value is missing. Generation is skipped."
-                    self.errors.append(Error('about_file', None, missing_about_file))
+                    # This code is to handle blank line
+                    for key in line.keys():
+                        if line[key]:
+                            missing_about_file = "'about_file' field value is missing. Generation is skipped."
+                            self.errors.append(Error('about_file', None, missing_about_file))
+                            break
                     continue
             except Exception as e:
                 print(repr(e))
@@ -127,8 +131,12 @@ class GenAbout(object):
                 sys.exit(errno.EINVAL)
             try:
                 if not line['about_resource']:
-                    missing_about_resource = "'about_resource' is missing. Generation is skipped."
-                    self.errors.append(Error('about_resource', line['about_file'], missing_about_resource))
+                    # This code is to handle blank line
+                    for key in line.keys():
+                        if line[key]:
+                            missing_about_resource = "'about_resource' is missing. Generation is skipped."
+                            self.errors.append(Error('about_resource', line['about_file'], missing_about_resource))
+                            break
                     continue
             except Exception as e:
                 print(repr(e))
