@@ -95,6 +95,7 @@ class GenAbout(object):
         about_resource, about_file, name, version = self.config_mapping(mapping)
         csvfile = csv.DictReader(open(input_file, 'rU'))
         components_list = []
+        check_duplication = []
         for line in csvfile:
             file_list = []
             try:
@@ -103,6 +104,13 @@ class GenAbout(object):
                     line['about_resource'] = line[about_resource]
                     line['name'] = line[name]
                     line['version'] = line[version]
+                    component = line['about_file'] + line['about_resource']
+                    if component in check_duplication:
+                        print("The input has duplicated 'about_file' and 'about_resource'.")
+                        print("Duplication is not supported. Please correct the input and rerun the tool.")
+                        print("No ABOUT file is created.")
+                        sys.exit(errno.EINVAL)
+                    check_duplication.append(component)
                 except Exception as e:
                     print(repr(e))
                     print("The required keys not found.")
