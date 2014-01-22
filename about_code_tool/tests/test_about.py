@@ -17,7 +17,6 @@
 from __future__ import print_function
 from __future__ import with_statement
 
-import os
 import shutil
 import string
 from StringIO import StringIO
@@ -43,30 +42,45 @@ class BasicTest(unittest.TestCase):
         self.assertTrue(len(open(test_filename).read()) > 10)
         shutil.rmtree(test_filename, ignore_errors=True)
 
+    def test_is_valid_about_file(self):
+        self.assertTrue(about.is_about_file("test.About"))
+        self.assertTrue(about.is_about_file("test2.aboUT"))
+        self.assertFalse(about.is_about_file("no_about_ext.something"))
+
+
+class AboutCollectorTest(unittest.TestCase):
     def test_return_path_is_not_abspath_and_contains_subdirs_on_file(self):
         # Using a relative path for the purpose of this test
-        test_input = "about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT"
-        test_path = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
-        test_output = test_path.name
-        test_path.close()
-        collector = about.AboutCollector(test_input, 0)
-        collector.write_to_csv(test_output)
-        self.assertTrue(open(test_output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'))
+        input = "about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT"
+        temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
+        output = temp_file.name
+        temp_file.close()
+        collector = about.AboutCollector(input)
+        collector.write_to_csv(output)
+        self.assertTrue(open(output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'))
 
     def test_return_path_is_not_abspath_and_contains_subdirs_on_dir(self):
         # Using a relative path for the purpose of this test
-        test_input = "about_code_tool/tests/testdata/basic"
-        test_path = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
-        test_output = test_path.name
-        test_path.close()
-        collector = about.AboutCollector(test_input, 0)
-        collector.write_to_csv(test_output)
-        self.assertTrue(open(test_output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/basic'))
+        input = "about_code_tool/tests/testdata/basic"
+        temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
+        output = temp_file.name
+        temp_file.close()
+        collector = about.AboutCollector(input)
+        collector.write_to_csv(output)
+        self.assertTrue(open(output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/basic'))
 
-    def test_isvalid_about_file(self):
-        self.assertTrue(about.isvalid_about_file("test.About"))
-        self.assertTrue(about.isvalid_about_file("test2.aboUT"))
-        self.assertFalse(about.isvalid_about_file("no_about_ext.something"))
+    def test_collect_about_files_on_dir(self):
+        input_path = 'about_code_tool/tests/testdata/DateTest'
+        expected = ['about_code_tool/tests/testdata/DateTest/non-supported_date_format.ABOUT',
+                    'about_code_tool/tests/testdata/DateTest/supported_date_format.ABOUT']
+        result = about.AboutCollector._collect_about_files(input_path)
+        self.assertEqual(expected, result)
+
+    def test_collect_about_files_on_file(self):
+        input_path = 'about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'
+        expected = ['about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT']
+        result = about.AboutCollector._collect_about_files(input_path)
+        self.assertEqual(expected, result)
 
 
 class ParserTest(unittest.TestCase):

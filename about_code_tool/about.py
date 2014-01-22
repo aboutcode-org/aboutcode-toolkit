@@ -39,7 +39,8 @@ from collections import namedtuple
 from datetime import datetime
 from email.parser import HeaderParser
 from os import listdir, walk
-from os.path import exists, dirname, join, abspath, isdir, basename, normpath
+from os.path import (exists, dirname, join, abspath, isdir, basename, normpath,
+                     isfile)
 from StringIO import StringIO
 
 
@@ -74,79 +75,99 @@ ASCII = 'ASCII problem'
 SPDX = 'SPDX license problem'
 UNKNOWN = 'Unknown problem'
 
-MANDATORY_FIELDS = ['about_resource', 'name', 'version']
+MANDATORY_FIELDS = (
+    'about_resource',
+    'name',
+    'version',
+)
 
-BASIC_FIELDS = ['spec_version',
-                'date',
-                'description',
-                'description_file',
-                'home_url',
-                'download_url',
-                'readme',
-                'readme_file',
-                'install',
-                'install_file',
-                'changelog',
-                'changelog_file',
-                'news',
-                'news_file',
-                'news_url',
-                'notes',
-                'notes_file']
+BASIC_FIELDS = (
+    'spec_version',
+    'date',
+    'description',
+    'description_file',
+    'home_url',
+    'download_url',
+    'readme',
+    'readme_file',
+    'install',
+    'install_file',
+    'changelog',
+    'changelog_file',
+    'news',
+    'news_file',
+    'news_url',
+    'notes',
+    'notes_file',
+)
 
-OWNERSHIP_FIELDS = ['contact',
-                    'owner',
-                    'author',
-                    'author_file',
-                    'copyright',
-                    'copyright_file']
+OWNERSHIP_FIELDS = (
+    'contact',
+    'owner',
+    'author',
+    'author_file',
+    'copyright',
+    'copyright_file',
+)
 
-LICENSE_FIELDS = ['notice',
-                  'notice_file',
-                  'notice_url',
-                  'license_text',
-                  'license_text_file',
-                  'license_url',
-                  'license_spdx']
+LICENSE_FIELDS = (
+    'notice',
+    'notice_file',
+    'notice_url',
+    'license_text',
+    'license_text_file',
+    'license_url',
+    'license_spdx',
+)
 
-FLAG_FIELDS = ['redistribute',
-               'attribute',
-               'track_changes']
+FLAG_FIELDS = (
+    'redistribute',
+    'attribute',
+    'track_changes',
+)
 
-VCS_FIELDS = ['vcs_tool',
-              'vcs_repository',
-              'vcs_path',
-              'vcs_tag',
-              'vcs_branch',
-              'vcs_revision']
+VCS_FIELDS = (
+    'vcs_tool',
+    'vcs_repository',
+    'vcs_path',
+    'vcs_tag',
+    'vcs_branch',
+    'vcs_revision',
+)
 
-CHECKSUM_FIELDS = ['checksum_sha1',
-                   'checksum_md5',
-                   'checksum_sha256']
+CHECKSUM_FIELDS = (
+    'checksum_sha1',
+    'checksum_md5',
+    'checksum_sha256'
+)
 
-DJE_FIELDS = ['dje_component',
-              'dje_license',
-              'dje_organization']
+DJE_FIELDS = (
+    'dje_component',
+    'dje_license',
+    'dje_organization',
+)
 
-OPTIONAL_FIELDS = BASIC_FIELDS + OWNERSHIP_FIELDS + LICENSE_FIELDS \
-    + FLAG_FIELDS + VCS_FIELDS + CHECKSUM_FIELDS + DJE_FIELDS
+OPTIONAL_FIELDS = BASIC_FIELDS + OWNERSHIP_FIELDS + LICENSE_FIELDS +\
+    FLAG_FIELDS + VCS_FIELDS + CHECKSUM_FIELDS + DJE_FIELDS
 
-FILE_LOCATIONS_FIELDS = ['about_resource_location',
-                         'description_file_location',
-                         'readme_file_location',
-                         'install_file_location',
-                         'changelog_file_location',
-                         'news_file_location',
-                         'notes_file_location',
-                         'author_file_location',
-                         'copyright_file_location',
-                         'notice_file_location',
-                         'license_text_file_location']
+FILE_LOCATIONS_FIELDS = (
+    'about_resource_location',
+    'description_file_location',
+    'readme_file_location',
+    'install_file_location',
+    'changelog_file_location',
+    'news_file_location',
+    'notes_file_location',
+    'author_file_location',
+    'copyright_file_location',
+    'notice_file_location',
+    'license_text_file_location',
+)
 
 #===============================================================================
 # SPDX License List version 1.18, which was released on Apr 10, 2013.
 # These are Identifiers from http://spdx.org/licenses/
-SPDX_LICENSES = [
+SPDX_LICENSES = (
     'AFL-1.1',
     'AFL-1.2',
     'AFL-2.0',
@@ -356,16 +377,17 @@ SPDX_LICENSES = [
     'Zlib',
     'ZPL-1.1',
     'ZPL-2.0',
-    'ZPL-2.1']
+    'ZPL-2.1',
+)
 #===============================================================================
 
-# maps lowercase id to standard ids with official case
-SPDX_LICENSE_IDS = dict((i.lower(), i) for i in SPDX_LICENSES)
+# Maps lowercase id to standard ids with official case
+SPDX_LICENSE_IDS = dict((name.lower(), name) for name in SPDX_LICENSES)
 
 
-def isvalid_about_file(file_name):
+def is_about_file(file_name):
     """
-    Returns True if the file_name is a valid ABOUT file name
+    Returns True if the file_name is a valid ABOUT file name.
     """
     return fnmatch.fnmatch(file_name.lower(), "*.about")
 
@@ -815,20 +837,19 @@ class AboutFile(object):
             # http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
             return conn.getresponse().status
 
-    @staticmethod
-    def get_about_info(update_path, about_object):
+    def get_row_data(self, updated_path):
         """
-        Creates a row of data for an ABOUT object
+        Creates a row of data for an this object.
         """
-        row = [update_path]
+        row = [updated_path]
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
-            if field in about_object.validated_fields.keys():
-                row += [about_object.validated_fields[field]]
+            if field in self.validated_fields.keys():
+                row += [self.validated_fields[field]]
             else:
                 row += ['']
 
-        warnings = [repr(w) for w in about_object.warnings]
-        errors = [repr(e) for e in about_object.errors]
+        warnings = [repr(w) for w in self.warnings]
+        errors = [repr(e) for e in self.errors]
         row += ['\n'.join(warnings), '\n'.join(errors)]
         return row
 
@@ -894,53 +915,44 @@ class AboutFile(object):
 
 
 class AboutCollector(object):
-    def __init__(self, input_path, verbosity):
-        # Setup the input and output paths
+    """
+    Collection of AboutFile objects.
+    """
+    def __init__(self, input_path, verbosity=0):
         self.original_input_path = input_path
         self.input_path = abspath(input_path)
         assert exists(self.input_path)
 
-        # Setup the verbosity
         self.display_error = self.display_warning = False
         if verbosity >= 1:
             self.display_error = True
         elif verbosity >= 2:
             self.display_warning = True
 
-        self.about_files = []
         self.about_objects = []
         self.about_data_list = []
 
         # Running the files collection and objects creation on instantiation
-        self.collect_about_files()
-        self.create_about_objects_from_files()
+        about_file_paths = self._collect_about_files(self.input_path)
+        self.about_objects = [AboutFile(file) for file in about_file_paths]
         self.extract_about_data_from_objects()
 
-    def collect_about_files(self):
-        """
-        Collects all .ABOUT files path given an input_path and stores the
-        results in a about_files list on the collector instance.
-        """
-        files = []
-        if isdir(self.input_path):
-            for root, _, filenames in walk(self.input_path):
-                for filename in filenames:
-                    files += [join(root, filename)]
-        else:
-            files = [self.input_path]
+    def __iter__(self):
+        return iter(self.about_objects)
 
-        self.about_files = files
-
-    def create_about_objects_from_files(self):
+    @staticmethod
+    def _collect_about_files(input_path):
         """
-        Parses each collected files a creates a list of AboutFile objects.
+        Returns a list containing file-paths of valid .ABOUT file given a path.
+        When the input is a file rather than a directory, the returned list may
+        contain only 1 item, if the file name is valid.
         """
-        about_objects = []
-        for about_file in filter(isvalid_about_file, self.about_files):
-            about_object = AboutFile(about_file)
-            about_objects.append(about_object)
+        if isfile(input_path):
+            return filter(is_about_file, [input_path])
 
-        self.about_objects = about_objects
+        return [join(root, name)
+                for root, _, files in walk(input_path)
+                for name in files if is_about_file(name)]
 
     def extract_about_data_from_objects(self):
         """
@@ -952,13 +964,13 @@ class AboutCollector(object):
         about_data_list = []
         warnings_count = errors_count = 0
 
-        for about_object in self.about_objects:
+        for about_object in self:
             warnings_count += len(about_object.warnings)
             errors_count += len(about_object.errors)
 
             #FIXME: why are we doing path sep conversion here?
-            #TODO: THis should be refactored in a separate methods.
-            #TODO: For some reasons, the join(input_path, subpath_ doesn't work
+            #TODO: This should be refactored in a separate methods.
+            #TODO: For some reasons, the join(input_path, subpath) doesn't work
             # if the input_path startswith "../". Therefore, using the
             # "hardcode" to add/append the path. Need to update the code later.
             input_path = self.original_input_path
@@ -969,16 +981,15 @@ class AboutCollector(object):
                     input_path = input_path.rpartition("/")[0]
                 if input_path[-1] == "\\":
                     input_path = input_path.rpartition("\\")[0]
-                update_path = (input_path + subpath).replace("\\", "/")
+                updated_path = (input_path + subpath).replace("\\", "/")
             else:
-                update_path = input_path.replace("\\", "/")
+                updated_path = input_path.replace("\\", "/")
 
-            about_data_list.append(
-                about_object.get_about_info(update_path, about_object))
+            about_data_list.append(about_object.get_row_data(updated_path))
 
             if self.display_error or self.display_warning:
                 if about_object.errors or about_object.warnings:
-                    print("ABOUT File: %s" % update_path)
+                    print("ABOUT File: %s" % updated_path)
 
                 if self.display_error:
                     if about_object.errors:
@@ -998,14 +1009,14 @@ class AboutCollector(object):
         """
         Write results in CSV file at output_path.
         """
-        header_row = ['about_file'] + MANDATORY_FIELDS + OPTIONAL_FIELDS + \
-                     ['warnings', 'errors']
+        header_row = ('about_file', MANDATORY_FIELDS, OPTIONAL_FIELDS,
+                      'warnings', 'errors')
 
         with open(output_path, 'wb') as output_file:
-            about_spec_writer = csv.writer(output_file)
-            about_spec_writer.writerow(header_row)
+            csv_writer = csv.writer(output_file)
+            csv_writer.writerow(header_row)
             for row in self.about_data_list:
-                about_spec_writer.writerow(row)
+                csv_writer.writerow(row)
 
     def generate_attribution(self, template_path='templates/default.html',
                              limit_to=None):
@@ -1031,25 +1042,19 @@ class AboutCollector(object):
 
         try:
             template = env.get_template(template_name)
-        except TemplateNotFound as e:
-            print (e.message)  # TODO: needs to return an error
+        except TemplateNotFound:
+            print("Template: %s not found" % template_name)
             return
 
         # We only need the fields names and values to render the template
-        validated_fields = [about_object.validated_fields
-                            for about_object in self.about_objects
-                            if not limit_to
-                            or about_object.about_resource_path in limit_to]
-
-        license_text = [about_object.license_text()
-                        for about_object in self.about_objects
-                        if not limit_to
-                        or about_object.about_resource_path in limit_to]
-
-        notice_text = [about_object.notice_text()
-                       for about_object in self.about_objects
-                       if not limit_to
-                       or about_object.about_resource_path in limit_to]
+        validated_fields = []
+        license_text = []
+        notice_text = []
+        for about_object in self:
+            if not limit_to or about_object.about_resource_path in limit_to:
+                validated_fields.append(about_object.validated_fields)
+                license_text.append(about_object.license_text())
+                notice_text.append(about_object.notice_text())
 
         return template.render(about_objects=validated_fields,
                                license_texts=license_text,
@@ -1073,12 +1078,14 @@ Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
-under the License.""".format(__version__)
+under the License.
+""".format(__version__)
 
 VERBOSITY = """Print more or fewer verbose messages while processing ABOUT files
 0 - Do not print any warning or error messages, just a total count (default)
 1 - Print error messages
-2 - Print error and warning messages"""
+2 - Print error and warning messages
+"""
 
 
 def main(parser, options, args):
