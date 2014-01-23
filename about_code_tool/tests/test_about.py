@@ -74,7 +74,7 @@ class AboutCollectorTest(unittest.TestCase):
         expected = ['about_code_tool/tests/testdata/DateTest/non-supported_date_format.ABOUT',
                     'about_code_tool/tests/testdata/DateTest/supported_date_format.ABOUT']
         result = about.AboutCollector._collect_about_files(input_path)
-        self.assertEqual(expected, result)
+        self.assertEqual(sorted(expected), sorted(result))
 
     def test_collect_about_files_on_file(self):
         input_path = 'about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'
@@ -483,7 +483,7 @@ about_resource: about.py
 
     def test_generate_attribution(self):
         expected = u'version:2.4.3about_resource:httpd-2.4.3.tar.gzname:Apache HTTP Server'
-        about_collector = about.AboutCollector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'), 0)
+        about_collector = about.AboutCollector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'))
         result = about_collector.generate_attribution(join(TESTDATA_PATH, 'attrib/test.template'))
         self.assertEqual(result, expected)
 
