@@ -919,9 +919,9 @@ class AboutCollector(object):
     Collection of AboutFile objects.
     """
     def __init__(self, input_path, verbosity=0):
-        self.original_input_path = input_path
-        self.input_path = abspath(input_path)
-        assert exists(self.input_path)
+        self.user_provided_path = input_path
+        self.absolute_path = abspath(input_path)
+        assert exists(self.absolute_path)
 
         self.display_error = self.display_warning = False
         if verbosity >= 1:
@@ -933,7 +933,7 @@ class AboutCollector(object):
         self.about_data_list = []
 
         # Running the files collection and objects creation on instantiation
-        about_file_paths = self._collect_about_files(self.input_path)
+        about_file_paths = self._collect_about_files(self.absolute_path)
         self.about_objects = [AboutFile(file) for file in about_file_paths]
         self.extract_about_data_from_objects()
 
@@ -968,28 +968,12 @@ class AboutCollector(object):
             warnings_count += len(about_object.warnings)
             errors_count += len(about_object.errors)
 
-            #FIXME: why are we doing path sep conversion here?
-            #TODO: This should be refactored in a separate methods.
-            #TODO: For some reasons, the join(input_path, subpath) doesn't work
-            # if the input_path startswith "../". Therefore, using the
-            # "hardcode" to add/append the path. Need to update the code later.
-            input_path = self.original_input_path
-            if isdir(self.input_path):
-                subpath = about_object.location.partition(basename(
-                    normpath(input_path)))[2]
-                if input_path[-1] == "/":
-                    input_path = input_path.rpartition("/")[0]
-                if input_path[-1] == "\\":
-                    input_path = input_path.rpartition("\\")[0]
-                updated_path = (input_path + subpath).replace("\\", "/")
-            else:
-                updated_path = input_path.replace("\\", "/")
-
-            about_data_list.append(about_object.get_row_data(updated_path))
+            relative_path = self.get_relative_path(about_object.location)
+            about_data_list.append(about_object.get_row_data(relative_path))
 
             if self.display_error or self.display_warning:
                 if about_object.errors or about_object.warnings:
-                    print("ABOUT File: %s" % updated_path)
+                    print("ABOUT File: %s" % relative_path)
 
                 if self.display_error:
                     if about_object.errors:
@@ -1004,6 +988,25 @@ class AboutCollector(object):
             print("%d errors detected." % errors_count)
         if warnings_count:
             print("%d warnings detected.\n" % warnings_count)
+
+    def get_relative_path(self, about_object_location):
+        """
+        Returns a relative path as provided by the user for an about_object.
+        #TODO: For some reasons, the join(input_path, subpath) doesn't work
+        # if the input_path startswith "../". Therefore, using the
+        # "hardcode" to add/append the path.
+        """
+        user_provided_path = self.user_provided_path
+        if isdir(self.absolute_path):
+            subpath = about_object_location.partition(basename(
+                normpath(user_provided_path)))[2]
+            if user_provided_path[-1] == "/":
+                user_provided_path = user_provided_path.rpartition("/")[0]
+            if user_provided_path[-1] == "\\":
+                user_provided_path = user_provided_path.rpartition("\\")[0]
+            return (user_provided_path + subpath).replace("\\", "/")
+        else:
+            return user_provided_path.replace("\\", "/")
 
     def write_to_csv(self, output_path):
         """
