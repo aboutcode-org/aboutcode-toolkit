@@ -221,7 +221,8 @@ class GenAbout(object):
                     sys.exit(errno.EINVAL)
         return output_list
 
-    def copy_license_files(self, gen_location, license_list):
+    @staticmethod
+    def copy_license_files(gen_location, license_list):
         """
         Copy the 'license_text_file' into the gen_location
         """
