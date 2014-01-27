@@ -183,3 +183,23 @@ class GenAboutTest(unittest.TestCase):
         self.assertTrue(expected_list == output)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_gen_license_list_license_text_file_no_value(self):
+        gen = genabout.GenAbout()
+        input_list = {'about_file': '/tmp/3pp/opensans/', 'name': 'OpenSans Fonts',
+                       'version': '1', 'dje_license_key': 'apache-2.0',
+                       'license_text_file': '', 'about_resource': 'opensans'}
+        expected_list = ['/tmp/3pp', 'apache-2.0']
+        output = gen.gen_license_list(input_list)
+        self.assertTrue(expected_list == output)
+        self.assertTrue(input_list['license_text_file'] == 'apache-2.0.LICENSE')
+
+    def test_gen_license_list_no_license_text_file_key(self):
+        gen = genabout.GenAbout()
+        input_list = {'about_file': '/tmp/3pp/opensans/', 'name': 'OpenSans Fonts',
+                       'version': '1', 'dje_license_key': 'apache-2.0',
+                       'about_resource': 'opensans'}
+        expected_list = ['/tmp/3pp', 'apache-2.0']
+        output = gen.gen_license_list(input_list)
+        self.assertTrue(expected_list == output)
+        self.assertTrue(input_list['license_text_file'] == 'apache-2.0.LICENSE')

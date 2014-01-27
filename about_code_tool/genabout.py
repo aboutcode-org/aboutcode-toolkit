@@ -295,32 +295,48 @@ class GenAbout(object):
         copied_list = copy.deepcopy(input_list)
         for component in copied_list:
             for line in component:
-                if gen_license:
-                    try:
-                        if line['dje_license_key']:
-                            dje_license_key_list = []
-                            dje_key = line['dje_license_key']
-                            file_location = line['about_file']
-                            if file_location.endswith('/'):
-                                file_location = file_location.rpartition('/')[0]
-                            about_parent_dir = os.path.dirname(file_location)
-                            dje_license_key_list.append(about_parent_dir)
-                            dje_license_key_list.append(dje_key)
-                            license_output_list.append(dje_license_key_list)
-                            # Update the Location of License Text is there is none
+                # ToDo: The following code is used to validate the existence
+                # of the 'license_text_file' if there is any.
+                # All the validation calls should be re-factored along with the about.py
+                try:
+                    # We do not need to check for the gen_license option
+                    # as the value of the 'license_text_file' will not be changed
+                    # regardless the gen_license is set or not.
+                    if line['license_text_file']:
+                        file_location = line['about_file']
+                        if file_location.endswith('/'):
+                            file_location = file_location.rpartition('/')[0]
+                        about_parent_dir = os.path.dirname(file_location)
+                        license_file = gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file'])
+                        if not _exists(license_file):
+                            self.errors.append(Error('license_text_file', license_file, 
+                                                     "The 'license_text_file' doesn't exist."))
+                    else:
+                        if gen_license:
                             try:
-                                if not line['Location of License Text']:
-                                    line['Location of License Text'] = dje_key +'.LICENSE'
+                                if line['dje_license_key']:
+                                    license_output_list.append(self.gen_license_list(line))
+                                else:
+                                    self.warnings.append(Warn('dje_license_key', '',
+                                                              "Missing 'dje_license_key' for " + line['about_file']))
                             except Exception as e:
-                                # Force to create the "Location of License Text field"
-                                line['Location of License Text'] = dje_key +'.LICENSE'
-                        else:
-                            self.warnings.append(Warn('dje_license_key', '',
-                                                      "Missing 'dje_license_key' for " + line['about_file']))
-                    except Exception as e:
-                        print(repr(e))
-                        print("The input does not have the 'dje_license_key' key which is required.")
-                        sys.exit(errno.EINVAL)
+                                print(repr(e))
+                                print("The input does not have the 'dje_license_key' key which is required.")
+                                sys.exit(errno.EINVAL)
+                # This except condition will force the tool to create the 
+                # 'license_text_file' key column
+                except Exception as e:
+                    if gen_license:
+                        try:
+                            if line['dje_license_key']:
+                                license_output_list.append(self.gen_license_list(line))
+                            else:
+                                self.warnings.append(Warn('dje_license_key', '',
+                                                          "Missing 'dje_license_key' for " + line['about_file']))
+                        except Exception as e:
+                            print(repr(e))
+                            print("The input does not have the 'dje_license_key' key which is required.")
+                            sys.exit(errno.EINVAL)
 
                 component_list = []
                 file_location = line['about_file']
@@ -361,6 +377,20 @@ class GenAbout(object):
                 component_list.append(line)
                 output_list.append(component_list)
         return output_list, license_output_list
+
+    @staticmethod
+    def gen_license_list(line):
+        dje_license_key_list = []
+        dje_key = line['dje_license_key']
+        file_location = line['about_file']
+        if file_location.endswith('/'):
+            file_location = file_location.rpartition('/')[0]
+        about_parent_dir = os.path.dirname(file_location)
+        dje_license_key_list.append(about_parent_dir)
+        dje_license_key_list.append(dje_key)
+        line['license_text_file'] = dje_key +'.LICENSE'
+        return dje_license_key_list
+
 
     @staticmethod
     def format_output(input_list):
