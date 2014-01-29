@@ -35,6 +35,7 @@ import socket
 import string
 import sys
 import urlparse
+import logging
 from collections import namedtuple
 from datetime import datetime
 from email.parser import HeaderParser
@@ -48,6 +49,13 @@ __version__ = '0.9.0'
 
 # see http://dejacode.org
 __about_spec_version__ = '0.8.0'
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+handler.setLevel(logging.CRITICAL)
+handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+logger.addHandler(handler)
+
 
 Warn = namedtuple('Warn', 'code field_name field_value message',)
 Error = namedtuple('Error', 'code field_name field_value message',)
@@ -918,16 +926,10 @@ class AboutCollector(object):
     """
     Collection of AboutFile objects.
     """
-    def __init__(self, input_path, verbosity=0):
+    def __init__(self, input_path):
         self.user_provided_path = input_path
         self.absolute_path = abspath(input_path)
         assert exists(self.absolute_path)
-
-        self.display_error = self.display_warning = False
-        if verbosity >= 1:
-            self.display_error = True
-        elif verbosity >= 2:
-            self.display_warning = True
 
         self.about_objects = []
         self.about_data_list = []
@@ -971,16 +973,12 @@ class AboutCollector(object):
             relative_path = self.get_relative_path(about_object.location)
             about_data_list.append(about_object.get_row_data(relative_path))
 
-            if self.display_error or self.display_warning:
-                if about_object.errors or about_object.warnings:
-                    print("ABOUT File: %s" % relative_path)
-
-                if self.display_error:
-                    if about_object.errors:
-                        print("ERROR: %s\n" % about_object.errors)
-                if self.display_warning:
-                    if about_object.warnings:
-                        print("WARNING: %s\n" % about_object.warnings)
+            if about_object.errors or about_object.warnings:
+                logger.info("ABOUT File: %s" % relative_path)
+            if about_object.errors:
+                logger.error(about_object.errors)
+            if about_object.warnings:
+                logger.warning(about_object.warnings)
 
         self.about_data_list = about_data_list
 
@@ -1095,6 +1093,11 @@ def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
 
+    if verbosity == 1:
+        handler.setLevel(logging.ERROR)
+    elif verbosity >= 2:
+        handler.setLevel(logging.WARNING)
+
     if not len(args) == 2:
         print('Input and Output paths are required.\n')
         parser.print_help()
@@ -1129,7 +1132,7 @@ def main(parser, options, args):
         sys.exit(errno.EEXIST)
 
     if not exists(output_path) or (exists(output_path) and overwrite):
-        collector = AboutCollector(input_path, verbosity)
+        collector = AboutCollector(input_path)
         collector.write_to_csv(output_path)
     else:
         # we should never reach this
