@@ -82,6 +82,16 @@ class AboutCollectorTest(unittest.TestCase):
         result = about.AboutCollector._collect_about_files(input_path)
         self.assertEqual(expected, result)
 
+    def test_collector_errors_encapsulation(self):
+        input_path = 'about_code_tool/tests/testdata/DateTest'
+        collector = about.AboutCollector(input_path)
+        self.assertEqual(2, len(collector.errors))
+
+    def test_collector_warnings_encapsulation(self):
+        input_path = 'about_code_tool/tests/testdata/allAboutInOneDir'
+        collector = about.AboutCollector(input_path)
+        self.assertEqual(4, len(collector.warnings))
+
 
 class ParserTest(unittest.TestCase):
     def test_valid_chars_in_field_name(self):

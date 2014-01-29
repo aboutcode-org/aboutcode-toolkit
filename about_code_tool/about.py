@@ -924,23 +924,29 @@ class AboutFile(object):
 
 class AboutCollector(object):
     """
-    Collection of AboutFile objects.
+    A collection of AboutFile instances.
     """
     def __init__(self, input_path):
         self.user_provided_path = input_path
         self.absolute_path = abspath(input_path)
         assert exists(self.absolute_path)
 
-        self.about_objects = []
+        self.abouts = []
         self.about_data_list = []
+
+        self._errors = []
+        self._warnings = []
 
         # Running the files collection and objects creation on instantiation
         about_file_paths = self._collect_about_files(self.absolute_path)
-        self.about_objects = [AboutFile(file) for file in about_file_paths]
+        self.abouts = [AboutFile(file) for file in about_file_paths]
         self.extract_about_data_from_objects()
 
     def __iter__(self):
-        return iter(self.about_objects)
+        """
+        Yields the collected about instances.
+        """
+        return iter(self.abouts)
 
     @staticmethod
     def _collect_about_files(input_path):
@@ -956,36 +962,43 @@ class AboutCollector(object):
                 for root, _, files in walk(input_path)
                 for name in files if is_about_file(name)]
 
+    @property
+    def errors(self):
+        """
+        Returns a list of about.errors for every about instance in self.abouts
+        """
+        return self._errors
+
+    @property
+    def warnings(self):
+        """
+        Returns a list of about.warnings for every about instance in self.abouts
+        """
+        return self._warnings
+
     def extract_about_data_from_objects(self):
         """
-        Builds rows for each stored about objects.
+        Builds a row for each about instance and populates self._errors and
+        self._warnings.
         """
         if self.about_data_list:  # Process only once.
             return
 
-        about_data_list = []
-        warnings_count = errors_count = 0
-
         for about_object in self:
-            warnings_count += len(about_object.warnings)
-            errors_count += len(about_object.errors)
-
             relative_path = self.get_relative_path(about_object.location)
-            about_data_list.append(about_object.get_row_data(relative_path))
+            row_data = about_object.get_row_data(relative_path)
+            self.about_data_list.append(row_data)
 
             if about_object.errors or about_object.warnings:
-                logger.info("ABOUT File: %s" % relative_path)
+                logger.error("ABOUT File: %s" % relative_path)
+
             if about_object.errors:
+                self._errors.extend(about_object.errors)
                 logger.error(about_object.errors)
+
             if about_object.warnings:
+                self._warnings.extend(about_object.warnings)
                 logger.warning(about_object.warnings)
-
-        self.about_data_list = about_data_list
-
-        if errors_count:
-            print("%d errors detected." % errors_count)
-        if warnings_count:
-            print("%d warnings detected.\n" % warnings_count)
 
     def get_relative_path(self, about_object_location):
         """
@@ -1134,6 +1147,10 @@ def main(parser, options, args):
     if not exists(output_path) or (exists(output_path) and overwrite):
         collector = AboutCollector(input_path)
         collector.write_to_csv(output_path)
+        if collector.errors:
+            print("%d errors detected." % len(collector.errors))
+        if collector.warnings:
+            print("%d warnings detected." % len(collector.warnings))
     else:
         # we should never reach this
         assert False, "Unsupported option(s)."
