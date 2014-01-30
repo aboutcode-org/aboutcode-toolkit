@@ -193,44 +193,42 @@ class GenAbout(object):
         """
         Verify the existence of the 'license text file'
         """
-        output_list = []
+        license_files_list = []
         for component in input_list:
             for line in component:
                 try:
                     if line['license_text_file']:
-                        license_files_list = []
                         is_dir = False
                         if line['about_file'].endswith('/'):
                             is_dir = True
                         license_file = line['license_text_file']
                         file_location = line['about_file']
-                        if '/' in file_location:
+                        if file_location.startswith('/'):
                             file_location = file_location.partition('/')[2]
+                        if file_location.endswith('/'):
+                            file_location = file_location.rpartition('/')[0]
                         about_parent_dir = os.path.dirname(file_location)
                         project_parent_dir = os.path.dirname(project_path)
-
                         license_file_path = join(project_parent_dir, about_parent_dir, license_file)
                         if _exists(license_file_path):
                             license_files_list.append(license_file_path)
-                            output_list.append(license_files_list)
                         else:
                             self.warnings.append(Warn('license_text_file', license_file_path, "License doesn't exist."))
                 except Exception as e:
                     print(repr(e))
                     print("The input does not have the 'license_text_file' key which is required.")
                     sys.exit(errno.EINVAL)
-        return output_list
+        return license_files_list, project_parent_dir
 
     @staticmethod
-    def copy_license_files(gen_location, license_list):
+    def copy_license_files(gen_location, license_list, project_dir):
         """
         Copy the 'license_text_file' into the gen_location
         """
-        for items in license_list:
-            license_path = items[0]
-            if not gen_location.endswith('/'):
-                gen_location += '/'
-            output_license_path = gen_location + license_path
+        for license_path in license_list:
+            if gen_location.endswith('/'):
+                gen_location = gen_location.rpartition('/')[0]
+            output_license_path = gen_location + license_path.partition(project_dir)[2]
             license_parent_dir = os.path.dirname(output_license_path)
             if not _exists(license_parent_dir):
                 makedirs(license_parent_dir)
@@ -424,7 +422,8 @@ class GenAbout(object):
             components_list.append(component)
         return components_list
 
-    def write_output(self, output):
+    @staticmethod
+    def write_output(output):
         for line in output:
             about_file_location = line[0]
             context = line[1]
@@ -647,6 +646,9 @@ def main(args, opts):
 
     input_file = args[0]
     gen_location = args[1]
+    
+    if not gen_location.endswith('/'):
+        gen_location += '/'
 
     if isdir(input_file):
         print(input_file, ": Input is not a CSV file.")
@@ -664,8 +666,8 @@ def main(args, opts):
 
     input_list = gen.read_input(input_file, mapping_config)
     if project_path:
-        license_list = gen.verify_license_files(input_list, project_path)
-        gen.copy_license_files(gen_location, license_list)
+        license_list, project_dir = gen.verify_license_files(input_list, project_path)
+        gen.copy_license_files(gen_location, license_list, project_dir)
 
     if gen_license:
         if not api_url or not api_username or not api_key:
