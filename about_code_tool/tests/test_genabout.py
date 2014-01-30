@@ -19,6 +19,8 @@ from __future__ import with_statement
 
 import os
 import unittest
+import tempfile
+import shutil
 from os.path import abspath, dirname, join
 
 from about_code_tool import genabout
@@ -166,8 +168,8 @@ class GenAboutTest(unittest.TestCase):
                          'license_text_file': 'apache2.LICENSE.txt',
                           'name': 'ABOUT tool', 'about_resource': '.'}]]
         path = '.'
-        expected_list = [['apache2.LICENSE.txt']]
-        output = gen.verify_license_files(input_list, path)
+        expected_list = ['apache2.LICENSE.txt']
+        output, project_path = gen.verify_license_files(input_list, path)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -179,7 +181,7 @@ class GenAboutTest(unittest.TestCase):
                           'name': 'ABOUT tool', 'about_resource': '.'}]]
         path = '.'
         expected_list = []
-        output = gen.verify_license_files(input_list, path)
+        output, project_path= gen.verify_license_files(input_list, path)
         self.assertTrue(expected_list == output)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -203,3 +205,34 @@ class GenAboutTest(unittest.TestCase):
         output = gen.gen_license_list(input_list)
         self.assertTrue(expected_list == output)
         self.assertTrue(input_list['license_text_file'] == 'apache-2.0.LICENSE')
+
+    def test_config_mapping(self):
+        gen = genabout.GenAbout()
+        about_resource, about_file, name, version = gen.config_mapping(True)
+        self.assertTrue(about_resource == 'file_name')
+        self.assertTrue(about_file == 'Directory/Filename')
+        self.assertTrue(name == 'Component')
+        self.assertTrue(version == 'Confirmed Version')
+
+    def test_copy_license_files_test_path_not_endswith_slash(self):
+        gen = genabout.GenAbout()
+        input_list = ['apache2.LICENSE.txt']
+        project_path = os.path.abspath('.')
+        tmp_path = tempfile.mkdtemp()
+        gen.copy_license_files(tmp_path, input_list, project_path)
+        self.assertTrue(input_list == os.listdir(tmp_path))
+        # According to the doc, the user of mkdtemp() is responsible for 
+        # deleting the temporary directory and its contents when done with it.
+        shutil.rmtree(tmp_path)
+
+    def test_copy_license_files_test_path_endswith_slash(self):
+        gen = genabout.GenAbout()
+        input_list = ['apache2.LICENSE.txt']
+        project_path = os.path.abspath('.')
+        tmp_path = tempfile.mkdtemp() + '/'
+        gen.copy_license_files(tmp_path, input_list, project_path)
+        self.assertTrue(input_list == os.listdir(tmp_path))
+        # According to the doc, the user of mkdtemp() is responsible for 
+        # deleting the temporary directory and its contents when done with it.
+        shutil.rmtree(tmp_path)
+
