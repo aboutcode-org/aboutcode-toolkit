@@ -238,10 +238,11 @@ class GenAbout(object):
         """
         Extract license text from DJE
         """
+        license_context_list = []
         for items in license_list:
             gen_path = items[0]
             license_key = items[1]
-            if '/' in gen_path:
+            if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
             gen_license_path = join(project_path, gen_path, license_key) + '.LICENSE'
             if not _exists(gen_license_path):
@@ -262,12 +263,22 @@ class GenAbout(object):
                     self.errors.append(Error('dje_license_key', license_key,
                                              "Invalid 'dje_license_key'"))
                 else:
-                    try:
-                        with open(gen_license_path, 'wb') as output:
-                            output.write(context.encode('utf8'))
-                    except Exception as e:
-                        self.errors.append(Error('Unknown', gen_license_path,
-                                             "Something is wrong."))
+                    gen_path_context = []
+                    gen_path_context.append(gen_license_path)
+                    gen_path_context.append(context.encode('utf8'))
+                    license_context_list.append(gen_path_context)
+        return license_context_list
+
+    def write_licenses(self, license_context_list):
+        for license in license_context_list:
+            gen_license_path = license[0]
+            license_context = license[1]
+            try:
+                with open(gen_license_path, 'wb') as output:
+                    output.write(license_context)
+            except Exception as e:
+                self.errors.append(Error('Unknown', gen_license_path,
+                                     "Something is wrong."))
 
     @staticmethod
     def get_license_text_from_api(url, username, api_key, license_key):
@@ -680,7 +691,8 @@ def main(args, opts):
     gen.write_output(formatted_output)
 
     if dje_license_list:
-        gen.extract_dje_license(gen_location, dje_license_list, api_url, api_username, api_key)
+        license_list_context = gen.extract_dje_license(gen_location, dje_license_list, api_url, api_username, api_key)
+        gen.write_licenses(license_list_context)
 
     gen.warnings_errors_summary(gen_location, verb_arg_num)
 

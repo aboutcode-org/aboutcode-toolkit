@@ -236,3 +236,15 @@ class GenAboutTest(unittest.TestCase):
         # deleting the temporary directory and its contents when done with it.
         shutil.rmtree(tmp_path)
 
+    def test_write_licenses(self):
+        gen = genabout.GenAbout()
+        tmp_license = tempfile.NamedTemporaryFile(suffix='.LICENSE', delete=True)
+        tmp_license_context = 'This is a test.'
+        input_list = [[tmp_license.name, tmp_license_context]]
+        gen.write_licenses(input_list)
+        self.assertTrue(os.path.exists(tmp_license.name))
+        with open(tmp_license.name, "rU") as file_in:
+            context = ''
+            for line in file_in.readlines():
+                context = line
+        self.assertTrue(context == tmp_license_context)
