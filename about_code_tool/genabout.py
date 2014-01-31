@@ -42,6 +42,9 @@ __version__ = '0.9.0'
 MANDATORY_FIELDS = ['about_resource', 'name', 'version']
 SKIPPED_FIELDS = ['warnings', 'errors']
 
+SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS \
+                    + ('about_file',)
+
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
 
@@ -96,63 +99,73 @@ class GenAbout(object):
         csvfile = csv.DictReader(open(input_file, 'rU'))
         components_list = []
         check_duplication = []
+        ignored_fields_list = self.check_non_supported_fields(input_file)
+        if ignored_fields_list:
+            self.warnings.append(Warn(ignored_fields_list, '' ,\
+                                      'The field(s) "%s"' % ignored_fields_list\
+                                      + ' is/are not supported and will be ignored'))
         for line in csvfile:
-            file_list = []
+            file_list = {}
             try:
-                try:
-                    line['about_file'] = line[about_file]
-                    line['about_resource'] = line[about_resource]
-                    line['name'] = line[name]
-                    line['version'] = line[version]
-                    component = line['about_file'] + line['about_resource']
-                    if component in check_duplication:
-                        print("The input has duplicated 'about_file' and 'about_resource'.")
-                        print("Duplication is not supported. Please correct the input and rerun the tool.")
-                        print("No ABOUT file is created.")
-                        sys.exit(errno.EINVAL)
-                    check_duplication.append(component)
-                except Exception as e:
-                    print(repr(e))
-                    print("The required keys not found.")
-                    print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
-                    print("OR, correct the header keys from the input CSV.")
+                line['about_file'] = line[about_file]
+                line['about_resource'] = line[about_resource]
+                line['name'] = line[name]
+                line['version'] = line[version]
+                component = line['about_file'] + line['about_resource']
+                if component in check_duplication:
+                    print("The input has duplicated 'about_file' and 'about_resource'.")
+                    print("Duplication is not supported. Please correct the input and rerun the tool.")
+                    print("No ABOUT file is created.")
                     sys.exit(errno.EINVAL)
-                if not about_file == 'about_file':
-                    del line[about_file]
-                if not about_resource == 'about_resource':
-                    del line[about_resource]
-                if not name == 'name':
-                    del line[name]
-                if not version == 'version':
-                    del line[version]
-                if not line['about_file']:
-                    # This code is to handle blank line
-                    for key in line.keys():
-                        if line[key]:
-                            missing_about_file = "'about_file' field value is missing. Generation is skipped."
-                            self.errors.append(Error('about_file', None, missing_about_file))
-                            break
-                    continue
+                check_duplication.append(component)
             except Exception as e:
                 print(repr(e))
-                print("The input does not have the 'about_file' key which is required.")
+                print("The required keys not found.")
+                print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
+                print("OR, correct the header keys from the input CSV.")
                 sys.exit(errno.EINVAL)
-            try:
-                if not line['about_resource']:
-                    # This code is to handle blank line
-                    for key in line.keys():
-                        if line[key]:
-                            missing_about_resource = "'about_resource' is missing. Generation is skipped."
-                            self.errors.append(Error('about_resource', line['about_file'], missing_about_resource))
-                            break
-                    continue
-            except Exception as e:
-                print(repr(e))
-                print("The input does not have the 'about_resource' key which is required.")
-                sys.exit(errno.EINVAL)
-            file_list.append(line)
+            if not about_file == 'about_file':
+                del line[about_file]
+            if not about_resource == 'about_resource':
+                del line[about_resource]
+            if not name == 'name':
+                del line[name]
+            if not version == 'version':
+                del line[version]
+            if not line['about_file']:
+                # This code is to handle blank line
+                for key in line.keys():
+                    if line[key]:
+                        missing_about_file = "'about_file' field value is missing. Generation is skipped."
+                        self.errors.append(Error('about_file', None, missing_about_file))
+                        break
+                continue
+            # We don't need to use the try/except here as the existence of 
+            # line['about_resource'] has already been checked above. 
+            if not line['about_resource']:
+                # This code is to handle blank line
+                for key in line.keys():
+                    if line[key]:
+                        missing_about_resource = "'about_resource' is missing. Generation is skipped."
+                        self.errors.append(Error('about_resource', line['about_file'], missing_about_resource))
+                        break
+                continue
+            for key in line.keys():
+                if key in SUPPORTED_FIELDS:
+                    file_list[key] = line[key]
             components_list.append(file_list)
         return components_list
+
+    @staticmethod
+    def check_non_supported_fields(input_file):
+        csvfile = csv.DictReader(open(input_file, 'rU'))
+        non_supported_fields_list = []
+        for line in csvfile:
+            for key in line.keys():
+                if not key in SUPPORTED_FIELDS:
+                    non_supported_fields_list.append(key)
+            break
+        return non_supported_fields_list
 
     @staticmethod
     def config_mapping(mapping):
@@ -303,39 +316,25 @@ class GenAbout(object):
         # Otherwise, the value in the input_list may be changed based on the 
         # action number below
         copied_list = copy.deepcopy(input_list)
-        for component in copied_list:
-            for line in component:
-                # ToDo: The following code is used to validate the existence
-                # of the 'license_text_file' if there is any.
-                # All the validation calls should be re-factored along with the about.py
-                try:
-                    # We do not need to check for the gen_license option
-                    # as the value of the 'license_text_file' will not be changed
-                    # regardless the gen_license is set or not.
-                    if line['license_text_file']:
-                        file_location = line['about_file']
-                        if file_location.endswith('/'):
-                            file_location = file_location.rpartition('/')[0]
-                        about_parent_dir = os.path.dirname(file_location)
-                        license_file = gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file'])
-                        if not _exists(license_file):
-                            self.errors.append(Error('license_text_file', license_file, 
-                                                     "The 'license_text_file' doesn't exist."))
-                    else:
-                        if gen_license:
-                            try:
-                                if line['dje_license_key']:
-                                    license_output_list.append(self.gen_license_list(line))
-                                else:
-                                    self.warnings.append(Warn('dje_license_key', '',
-                                                              "Missing 'dje_license_key' for " + line['about_file']))
-                            except Exception as e:
-                                print(repr(e))
-                                print("The input does not have the 'dje_license_key' key which is required.")
-                                sys.exit(errno.EINVAL)
-                # This except condition will force the tool to create the 
-                # 'license_text_file' key column
-                except Exception as e:
+        #for component in copied_list:
+        for line in copied_list:#component:
+            # ToDo: The following code is used to validate the existence
+            # of the 'license_text_file' if there is any.
+            # All the validation calls should be re-factored along with the about.py
+            try:
+                # We do not need to check for the gen_license option
+                # as the value of the 'license_text_file' will not be changed
+                # regardless the gen_license is set or not.
+                if line['license_text_file']:
+                    file_location = line['about_file']
+                    if file_location.endswith('/'):
+                        file_location = file_location.rpartition('/')[0]
+                    about_parent_dir = os.path.dirname(file_location)
+                    license_file = gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file'])
+                    if not _exists(license_file):
+                        self.errors.append(Error('license_text_file', license_file, 
+                                                 "The 'license_text_file' doesn't exist."))
+                else:
                     if gen_license:
                         try:
                             if line['dje_license_key']:
@@ -347,45 +346,59 @@ class GenAbout(object):
                             print(repr(e))
                             print("The input does not have the 'dje_license_key' key which is required.")
                             sys.exit(errno.EINVAL)
+            # This except condition will force the tool to create the 
+            # 'license_text_file' key column
+            except Exception as e:
+                if gen_license:
+                    try:
+                        if line['dje_license_key']:
+                            license_output_list.append(self.gen_license_list(line))
+                        else:
+                            self.warnings.append(Warn('dje_license_key', '',
+                                                      "Missing 'dje_license_key' for " + line['about_file']))
+                    except Exception as e:
+                        print(repr(e))
+                        print("The input does not have the 'dje_license_key' key which is required.")
+                        sys.exit(errno.EINVAL)
 
-                component_list = []
-                file_location = line['about_file']
-                if file_location.startswith('/'):
-                    file_location = file_location.partition('/')[2]
-                if not file_location.endswith('.ABOUT'):
-                    if file_location.endswith('/'):
-                        file_location = file_location.rpartition('/')[0]
-                    file_location += '.ABOUT'
-                if all_in_one:
-                    # This is to get the filename instead of the file path
-                    file_location = file_location.rpartition('/')[2]
-                about_file_location = join(gen_location, file_location)
-                dir = dirname(about_file_location)
-                if not _exists(dir):
-                    makedirs(dir)
-                if _exists(about_file_location):
-                    if action_num == '0':
-                        about_exist = "ABOUT file already existed. Generation is skipped."
-                        self.warnings.append(Warn('about_file', about_file_location, about_exist))
-                        continue
-                    # Overwrites the current ABOUT field value if existed
-                    elif action_num == '1':
-                        about_object = about.AboutFile(about_file_location)
-                        for field_name, value in about_object.parsed.items():
-                            field_name = field_name.lower()
-                            if not field_name in line.keys() or not line[field_name]:
-                                line[field_name] = value
-                    # Keep the current field value and only add the "new" field and field value
-                    elif action_num == '2':
-                        about_object = about.AboutFile(about_file_location)
-                        for field_name, value in about_object.parsed.items():
-                            field_name = field_name.lower()
+            component_list = []
+            file_location = line['about_file']
+            if file_location.startswith('/'):
+                file_location = file_location.partition('/')[2]
+            if not file_location.endswith('.ABOUT'):
+                if file_location.endswith('/'):
+                    file_location = file_location.rpartition('/')[0]
+                file_location += '.ABOUT'
+            if all_in_one:
+                # This is to get the filename instead of the file path
+                file_location = file_location.rpartition('/')[2]
+            about_file_location = join(gen_location, file_location)
+            dir = dirname(about_file_location)
+            if not _exists(dir):
+                makedirs(dir)
+            if _exists(about_file_location):
+                if action_num == '0':
+                    about_exist = "ABOUT file already existed. Generation is skipped."
+                    self.warnings.append(Warn('about_file', about_file_location, about_exist))
+                    continue
+                # Overwrites the current ABOUT field value if existed
+                elif action_num == '1':
+                    about_object = about.AboutFile(about_file_location)
+                    for field_name, value in about_object.parsed.items():
+                        field_name = field_name.lower()
+                        if not field_name in line.keys() or not line[field_name]:
                             line[field_name] = value
-                    # We don't need to do anything for the action_num = 3 as
-                    # the original ABOUT file will be replaced in the write_output()
-                component_list.append(about_file_location)
-                component_list.append(line)
-                output_list.append(component_list)
+                # Keep the current field value and only add the "new" field and field value
+                elif action_num == '2':
+                    about_object = about.AboutFile(about_file_location)
+                    for field_name, value in about_object.parsed.items():
+                        field_name = field_name.lower()
+                        line[field_name] = value
+                # We don't need to do anything for the action_num = 3 as
+                # the original ABOUT file will be replaced in the write_output()
+            component_list.append(about_file_location)
+            component_list.append(line)
+            output_list.append(component_list)
         return output_list, license_output_list
 
     @staticmethod

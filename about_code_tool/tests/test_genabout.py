@@ -85,8 +85,8 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         action_num = '0'
-        input_list = [[{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
-                        'about_resource': '.', 'name': 'ABOUT tool'}]]
+        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool'}]
         expected_output_list = []
         output_list, lic_output_list = gen.pre_generation(gen_location, input_list, action_num, False, False)
         self.assertTrue(expected_output_list == output_list, "This output_list should be empty.")
@@ -96,8 +96,8 @@ class GenAboutTest(unittest.TestCase):
     def test_pre_generation_about_exists_action_1(self):
         gen = genabout.GenAbout()
         action_num = '1'
-        input_list = [[{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
-                        'about_resource': '.', 'name': ''}]]
+        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
+                        'about_resource': '.', 'name': ''}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
                                  {'about_file': 'about.py.ABOUT', 'version': '0.8.2',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
@@ -109,8 +109,8 @@ class GenAboutTest(unittest.TestCase):
     def test_pre_generation_about_exists_action_2(self):
         gen = genabout.GenAbout()
         action_num = '2'
-        input_list = [[{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
-                        'about_resource': '.', 'name': '', 'test': 'test sample'}]]
+        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
+                        'about_resource': '.', 'name': '', 'test': 'test sample'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
                                   {'test': 'test sample', 'about_file': 'about.py.ABOUT',
                                     'version': '0.8.1', 'about_resource': '.',
@@ -123,8 +123,8 @@ class GenAboutTest(unittest.TestCase):
     def test_pre_generation_about_exists_action_3(self):
         gen = genabout.GenAbout()
         action_num = '3'
-        input_list = [[{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
-                        'about_resource': '.', 'name': '', 'test': 'test sample'}]]
+        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
+                        'about_resource': '.', 'name': '', 'test': 'test sample'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
                                   {'about_file': 'about.py.ABOUT', 'version': '0.8.2',
                                     'about_resource': '.', 'name': '', 'test': 'test sample'}]]
@@ -136,10 +136,10 @@ class GenAboutTest(unittest.TestCase):
     def test_pre_generation_all_in_one(self):
         gen = genabout.GenAbout()
         action_num = '0'
-        input_list = [[{'about_file': 'test_generation/elasticsearch.ABOUT',
+        input_list = [{'about_file': 'test_generation/elasticsearch.ABOUT',
                          'version': '0.19.8',
                          'about_resource': 'elasticsearch-0.19.8.zip',
-                         'name': 'ElasticSearch'}]]
+                         'name': 'ElasticSearch'}]
         expected_output_list = []
         output_list, lic_output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, True, False)
         self.assertFalse(os.path.exists('testdata/test_files_for_genabout/test_generation'),
@@ -248,3 +248,10 @@ class GenAboutTest(unittest.TestCase):
             for line in file_in.readlines():
                 context = line
         self.assertTrue(context == tmp_license_context)
+
+    def test_check_non_supported_fields(self):
+        gen = genabout.GenAbout()
+        input_file = join(TESTDATA_PATH, 'test_files_for_genabout/non_supported_fields.csv')
+        non_supported_list = gen.check_non_supported_fields(input_file)
+        expected_list = ['non_supported field']
+        self.assertTrue(non_supported_list == expected_list)
