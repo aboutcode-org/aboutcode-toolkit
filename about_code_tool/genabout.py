@@ -317,7 +317,7 @@ class GenAbout(object):
         # action number below
         copied_list = copy.deepcopy(input_list)
         #for component in copied_list:
-        for line in copied_list:#component:
+        for line in copied_list:
             # ToDo: The following code is used to validate the existence
             # of the 'license_text_file' if there is any.
             # All the validation calls should be re-factored along with the about.py
