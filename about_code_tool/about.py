@@ -901,11 +901,9 @@ class AboutCollector(object):
         assert exists(self.input_path)
 
         # Setup the verbosity
-        self.display_error = self.display_warning = False
-        if verbosity >= 1:
-            self.display_error = True
-        elif verbosity >= 2:
-            self.display_warning = True
+        self.display_error = True if verbosity == "1" or verbosity == "2" \
+            else False
+        self.display_warning = True if verbosity == "2" else False
 
         self.about_files = []
         self.about_objects = []
