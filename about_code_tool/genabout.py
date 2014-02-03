@@ -67,7 +67,6 @@ def request_license_data(url, username, api_key, license_key):
         url if url.endswith('/') else url + '/',
         license_key, urllib.urlencode(payload))
 
-    #request = urllib2.Request(full_url)
     try:
         request = urllib2.Request(full_url)
         response = urllib2.urlopen(request)
@@ -169,6 +168,9 @@ class GenAbout(object):
 
     @staticmethod
     def config_mapping(mapping):
+        """
+        Read the MAPPING.CONFIG and do the key mapping.
+        """
         about_resource = 'about_resource'
         about_file = 'about_file'
         name = 'name'
@@ -685,8 +687,6 @@ def main(args, opts):
         sys.exit(errno.EIO)
 
     gen = GenAbout()
-
-    #gen.extract_licesen_from_url()
 
     input_list = gen.read_input(input_file, mapping_config)
     if project_path:
