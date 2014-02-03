@@ -43,7 +43,7 @@ MANDATORY_FIELDS = ['about_resource', 'name', 'version']
 SKIPPED_FIELDS = ['warnings', 'errors']
 
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS \
-                    + ('about_file',)
+                    + ('about_file', 'dje_license_key',)
 
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
