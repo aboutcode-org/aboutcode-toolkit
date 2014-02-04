@@ -25,11 +25,12 @@ from collections import namedtuple
 from os import makedirs
 from os.path import exists, dirname, join, abspath, isdir
 import about
-import csv
 import copy
+import csv
 import errno
-import json
 import getopt
+import json
+import logging
 import os
 import shutil
 import sys
@@ -39,8 +40,12 @@ import urllib2
 
 __version__ = '0.9.0'
 
-MANDATORY_FIELDS = ['about_resource', 'name', 'version']
-SKIPPED_FIELDS = ['warnings', 'errors']
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+handler.setLevel(logging.CRITICAL)
+handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+logger.addHandler(handler)
 
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS \
                     + ('about_file', 'dje_license_key',)
@@ -336,6 +341,8 @@ class GenAbout(object):
                     if not _exists(license_file):
                         self.errors.append(Error('license_text_file', license_file, 
                                                  "The 'license_text_file' doesn't exist."))
+                        logger.error(Error('license_text_file', license_file, 
+                                                 "The 'license_text_file' doesn't exist.")
                 else:
                     if gen_license:
                         try:
@@ -436,11 +443,11 @@ class GenAbout(object):
             for item in sorted(about_dict_list.iterkeys()):
                 if item == 'about_file':
                     continue
-                if not item in MANDATORY_FIELDS:
+                if not item in about.MANDATORY_FIELDS:
                     # The purpose of the replace('\n', '\n ') is used to
                     # format the continuation strings
                     value = about_dict_list[item].replace('\n', '\n ')
-                    if (value or item in MANDATORY_FIELDS) and not item in SKIPPED_FIELDS:
+                    if (value or item in about.MANDATORY_FIELDS) and not item in about.ERROR_WARN_FIELDS:
                         context += item + ': ' + value + '\n'
 
             component.append(about_file_location)
@@ -459,13 +466,15 @@ class GenAbout(object):
                 output_file.write(context)
 
     def warnings_errors_summary(self, gen_location, show_error_num):
-        display_error = False
-        display_warning = False
+        #display_error = False
+        #display_warning = False
         if show_error_num == '1':
-            display_error = True
+            handler.setLevel(logging.ERROR)
+            #display_error = True
         if show_error_num == '2':
-            display_error = True
-            display_warning = True
+            handler.setLevel(logging.WARNING)
+            #display_error = True
+            #display_warning = True
         if self.errors or self.warnings:
             error_location = gen_location + 'error.txt' if gen_location.endswith('/') else gen_location + '/error.txt'
             errors_num = len(self.errors)
@@ -599,7 +608,11 @@ def main(args, opts):
                 option_usage()
                 sys.exit(errno.EINVAL)
             else:
-                verb_arg_num = opt_arg
+                #verb_arg_num = opt_arg
+                if opt_arg == 1:
+                    handler.setLevel(logging.ERROR)
+                elif opt_arg == 2:
+                    handler.setLevel(logging.WARNING)
 
         if opt in ('--all-in-one'):
             invalid_opt = False
@@ -707,7 +720,7 @@ def main(args, opts):
         license_list_context = gen.extract_dje_license(gen_location, dje_license_list, api_url, api_username, api_key)
         gen.write_licenses(license_list_context)
 
-    gen.warnings_errors_summary(gen_location, verb_arg_num)
+    #gen.warnings_errors_summary(gen_location, verb_arg_num)
 
 if __name__ == "__main__":
     longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=', 'mapping', 'extract_license', 'api_url='
