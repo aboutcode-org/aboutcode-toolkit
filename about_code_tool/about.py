@@ -172,6 +172,9 @@ FILE_LOCATIONS_FIELDS = (
     'license_text_file_location',
 )
 
+HEADER_ROW_FIELDS = ('about_file',) + MANDATORY_FIELDS + OPTIONAL_FIELDS + \
+                    ('warnings', 'errors')
+
 #===============================================================================
 # SPDX License List version 1.18, which was released on Apr 10, 2013.
 # These are Identifiers from http://spdx.org/licenses/
@@ -949,9 +952,6 @@ class AboutCollector(object):
         """
         return iter(self.abouts)
 
-    def __len__(self):
-        return len(self.abouts)
-
     @staticmethod
     def _collect_about_files(input_path):
         """
@@ -1022,12 +1022,9 @@ class AboutCollector(object):
         Builds a row for each about instance and writes results in CSV file
         located at `output_path`.
         """
-        header_row = ('about_file', MANDATORY_FIELDS, OPTIONAL_FIELDS,
-                      'warnings', 'errors')
-
         with open(output_path, 'wb') as output_file:
             csv_writer = csv.writer(output_file)
-            csv_writer.writerow(header_row)
+            csv_writer.writerow(HEADER_ROW_FIELDS)
 
             for about_object in self:
                 relative_path = self.get_relative_path(about_object.location)

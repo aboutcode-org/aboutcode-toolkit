@@ -57,7 +57,9 @@ class AboutCollectorTest(unittest.TestCase):
         temp_file.close()
         collector = about.AboutCollector(input)
         collector.write_to_csv(output)
-        self.assertTrue(open(output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'))
+        expected = 'about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'
+        with open(output) as f:
+            self.assertTrue(f.read().partition('\n')[2].startswith(expected))
 
     def test_return_path_is_not_abspath_and_contains_subdirs_on_dir(self):
         # Using a relative path for the purpose of this test
@@ -67,7 +69,31 @@ class AboutCollectorTest(unittest.TestCase):
         temp_file.close()
         collector = about.AboutCollector(input)
         collector.write_to_csv(output)
-        self.assertTrue(open(output).read().partition('\n')[2].startswith('about_code_tool/tests/testdata/basic'))
+        expected = 'about_code_tool/tests/testdata/basic'
+        with open(output) as f:
+            self.assertTrue(f.read().partition('\n')[2].startswith(expected))
+
+    def test_header_row_in_csv_output(self):
+        expected_header = 'about_file,about_resource,name,version,' \
+        'spec_version,date,description,description_file,home_url,' \
+        'download_url,readme,readme_file,install,install_file,changelog,' \
+        'changelog_file,news,news_file,news_url,notes,notes_file,contact,' \
+        'owner,author,author_file,copyright,copyright_file,notice,' \
+        'notice_file,notice_url,license_text,license_text_file,license_url,' \
+        'license_spdx,redistribute,attribute,track_changes,vcs_tool,' \
+        'vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,' \
+        'checksum_sha1,checksum_md5,checksum_sha256,dje_component,' \
+        'dje_license,dje_organization,warnings,errors'
+
+        input = "about_code_tool/tests/testdata/basic"
+        temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
+        output = temp_file.name
+        temp_file.close()
+        collector = about.AboutCollector(input)
+        collector.write_to_csv(output)
+        with open(output) as f:
+            header_row = f.readline().replace('\n', '').replace('\r', '')
+            self.assertEqual(expected_header, header_row)
 
     def test_collect_about_files_on_dir(self):
         input_path = 'about_code_tool/tests/testdata/DateTest'
