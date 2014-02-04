@@ -1,28 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-# =============================================================================
-#  Copyright (c) 2013 by nexB, Inc. http://www.nexb.com/ - All rights reserved.
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#      http://www.apache.org/licenses/LICENSE-2.0
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-# =============================================================================
-
 """
 This is a tool to process ABOUT files as specified at http://dejacode.org
 ABOUT files are small text files to document the origin and license of software
-components. This tool read and validates ABOUT files to collect your software
-components inventory
+components.
+This tool read and validates ABOUT files to collect your software components
+inventory.
 """
 
-from __future__ import print_function
-from __future__ import with_statement
+from __future__ import print_function, with_statement
+
+__version__ = '0.9.0'
+
+__about_spec_version__ = '0.8.1'  # See http://dejacode.org
+
+__copyright__ = """
+Copyright (c) 2013-2014 nexB Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 
 import optparse
 import codecs
@@ -44,11 +51,6 @@ from os.path import (exists, dirname, join, abspath, isdir, basename, normpath,
                      isfile)
 from StringIO import StringIO
 
-
-__version__ = '0.9.0'
-
-# see http://dejacode.org
-__about_spec_version__ = '0.8.0'
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -175,7 +177,6 @@ FILE_LOCATIONS_FIELDS = (
 HEADER_ROW_FIELDS = ('about_file',) + MANDATORY_FIELDS + OPTIONAL_FIELDS + \
                     ('warnings', 'errors')
 
-#===============================================================================
 # SPDX License List version 1.18, which was released on Apr 10, 2013.
 # These are Identifiers from http://spdx.org/licenses/
 SPDX_LICENSES = (
@@ -390,7 +391,6 @@ SPDX_LICENSES = (
     'ZPL-2.0',
     'ZPL-2.1',
 )
-#===============================================================================
 
 # Maps lowercase id to standard ids with official case
 SPDX_LICENSE_IDS = dict((name.lower(), name) for name in SPDX_LICENSES)
@@ -1074,27 +1074,13 @@ class AboutCollector(object):
                                notice_texts=notice_text)
 
 
-SYNTAX = """
+USAGE_SYNTAX = """\
     Input can be a file or directory.
     Output must be a file with a .csv extension.
 """
 
-VERSION = """
-ABOUT CODE: Version: {0}
-Copyright (c) 2013 nexB Inc. All rights reserved.
-http://dejacode.org
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and limitations
-under the License.
-""".format(__version__)
-
-VERBOSITY = """Print more or fewer verbose messages while processing ABOUT files
+VERBOSITY_HELP = """\
+Print more or fewer verbose messages while processing ABOUT files
 0 - Do not print any warning or error messages, just a total count (default)
 1 - Print error messages
 2 - Print error and warning messages
@@ -1104,6 +1090,10 @@ VERBOSITY = """Print more or fewer verbose messages while processing ABOUT files
 def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
+
+    if options.version:
+        print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
+        sys.exit(0)
 
     if verbosity == 1:
         handler.setLevel(logging.ERROR)
@@ -1115,11 +1105,7 @@ def main(parser, options, args):
         parser.print_help()
         sys.exit(errno.EEXIST)
 
-    input_path = args[0]
-    output_path = args[1]
-
-    # TODO: need more path normalization (normpath, expanduser)
-    # input_path = abspath(input_path)
+    input_path, output_path = args
     output_path = abspath(output_path)
 
     if not exists(input_path):
@@ -1192,23 +1178,21 @@ def get_parser():
 
     parser = optparse.OptionParser(
         usage='%prog [options] input_path output_path',
-        description=SYNTAX,
+        description=USAGE_SYNTAX,
         add_help_option=False,
         formatter=MyFormatter(),
     )
     parser.add_option("-h", "--help", action="help", help="Display help")
     parser.add_option(
-        "--version",
-        action="version",
+        "--version", action="store_true",
         help='Display current version, license notice, and copyright notice')
     parser.add_option('--overwrite', action='store_true',
                       help='Overwrites the output file if it exists')
-    parser.add_option('--verbosity', type=int, help=VERBOSITY)
+    parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
     return parser
 
 
 if __name__ == "__main__":
     parser = get_parser()
-    (options, args) = parser.parse_args()
-
+    options, args = parser.parse_args()
     main(parser, options, args)
