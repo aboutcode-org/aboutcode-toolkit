@@ -172,6 +172,9 @@ FILE_LOCATIONS_FIELDS = (
     'license_text_file_location',
 )
 
+HEADER_ROW_FIELDS = ('about_file',) + MANDATORY_FIELDS + OPTIONAL_FIELDS + \
+                    ('warnings', 'errors')
+
 #===============================================================================
 # SPDX License List version 1.18, which was released on Apr 10, 2013.
 # These are Identifiers from http://spdx.org/licenses/
@@ -847,7 +850,7 @@ class AboutFile(object):
 
     def get_row_data(self, updated_path):
         """
-        Creates a row of data for an this object.
+        Creates a csv compatible row of data for this object.
         """
         row = [updated_path]
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
@@ -925,22 +928,23 @@ class AboutFile(object):
 class AboutCollector(object):
     """
     A collection of AboutFile instances.
+
+    Collects the About files in the given path on initialization.
+    Creates one AboutFile instance per file.
+    Summarize all the issues from each instance.
     """
     def __init__(self, input_path):
         self.user_provided_path = input_path
         self.absolute_path = abspath(input_path)
         assert exists(self.absolute_path)
 
-        self.abouts = []
-        self.about_data_list = []
-
         self._errors = []
         self._warnings = []
 
-        # Running the files collection and objects creation on instantiation
-        about_file_paths = self._collect_about_files(self.absolute_path)
-        self.abouts = [AboutFile(file) for file in about_file_paths]
-        self.extract_about_data_from_objects()
+        self.abouts = [AboutFile(f)
+                       for f in self._collect_about_files(self.absolute_path)]
+
+        self.summarize_issues()
 
     def __iter__(self):
         """
@@ -952,8 +956,8 @@ class AboutCollector(object):
     def _collect_about_files(input_path):
         """
         Returns a list containing file-paths of valid .ABOUT file given a path.
-        When the input is a file rather than a directory, the returned list may
-        contain only 1 item, if the file name is valid.
+        When the input is a file rather than a directory.
+        The returned list may contain only 1 item, if the file name is valid.
         """
         if isfile(input_path):
             return filter(is_about_file, [input_path])
@@ -976,18 +980,12 @@ class AboutCollector(object):
         """
         return self._warnings
 
-    def extract_about_data_from_objects(self):
+    def summarize_issues(self):
         """
-        Builds a row for each about instance and populates self._errors and
-        self._warnings.
+        Summarize and log, errors and warnings.
         """
-        if self.about_data_list:  # Process only once.
-            return
-
         for about_object in self:
             relative_path = self.get_relative_path(about_object.location)
-            row_data = about_object.get_row_data(relative_path)
-            self.about_data_list.append(row_data)
 
             if about_object.errors or about_object.warnings:
                 logger.error("ABOUT File: %s" % relative_path)
@@ -1021,16 +1019,17 @@ class AboutCollector(object):
 
     def write_to_csv(self, output_path):
         """
-        Write results in CSV file at output_path.
+        Builds a row for each about instance and writes results in CSV file
+        located at `output_path`.
         """
-        header_row = ('about_file', MANDATORY_FIELDS, OPTIONAL_FIELDS,
-                      'warnings', 'errors')
-
         with open(output_path, 'wb') as output_file:
             csv_writer = csv.writer(output_file)
-            csv_writer.writerow(header_row)
-            for row in self.about_data_list:
-                csv_writer.writerow(row)
+            csv_writer.writerow(HEADER_ROW_FIELDS)
+
+            for about_object in self:
+                relative_path = self.get_relative_path(about_object.location)
+                row_data = about_object.get_row_data(relative_path)
+                csv_writer.writerow(row_data)
 
     def generate_attribution(self, template_path='templates/default.html',
                              limit_to=None):
