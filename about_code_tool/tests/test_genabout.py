@@ -251,7 +251,8 @@ class GenAboutTest(unittest.TestCase):
 
     def test_check_non_supported_fields(self):
         gen = genabout.GenAbout()
-        input_file = join(TESTDATA_PATH, 'test_files_for_genabout/non_supported_fields.csv')
-        non_supported_list = gen.check_non_supported_fields(input_file)
+        input = {'about_file': '', 'name': 'OpenSans Fonts', 
+                 'non_supported field': 'TEST', 'version': '1', 'about_resource': 'opensans'}
+        non_supported_list = gen.check_non_supported_fields(input)
         expected_list = ['non_supported field']
         self.assertTrue(non_supported_list == expected_list)
