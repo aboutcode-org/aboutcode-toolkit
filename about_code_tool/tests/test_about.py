@@ -17,7 +17,7 @@
 from __future__ import print_function
 from __future__ import with_statement
 
-import shutil
+import sys
 import string
 from StringIO import StringIO
 import tempfile
@@ -29,23 +29,34 @@ from about_code_tool import about
 TESTDATA_PATH = join(abspath(dirname(__file__)), 'testdata')
 
 
-class BasicTest(unittest.TestCase):
+class CommandLineTest(unittest.TestCase):
     def test_simple_about_command_line_can_run(self):
         test_path = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
         test_filename = test_path.name
         test_path.close()
-        shutil.rmtree(test_filename , ignore_errors=True)
         parser = about.get_parser()
-        (options, args) = parser.parse_args(['about.ABOUT', test_filename])
+        options, args = parser.parse_args(['about.ABOUT', test_filename])
 
-        assert about.main(parser, options, args) == None
-        self.assertTrue(len(open(test_filename).read()) > 10)
-        shutil.rmtree(test_filename, ignore_errors=True)
+        assert not about.main(parser, options, args)
 
-    def test_is_valid_about_file(self):
-        self.assertTrue(about.is_about_file("test.About"))
-        self.assertTrue(about.is_about_file("test2.aboUT"))
-        self.assertFalse(about.is_about_file("no_about_ext.something"))
+        with open(test_filename) as f:
+            self.assertTrue(len(f.read()) > 10)
+
+    def test_command_line_version_option(self):
+        parser = about.get_parser()
+        options, args = parser.parse_args(['--version'])
+
+        sys.stdout = StringIO()
+        try:
+            about.main(parser, options, args)
+        except SystemExit:
+            pass  # This is raise by the sys.exit(0)
+
+        command_output = sys.stdout.getvalue()
+        sys.stdout = sys.__stdout__  # Restore the original stdout
+
+        expected = 'ABOUT tool {0}'.format(about.__version__)
+        self.assertTrue(command_output.startswith(expected))
 
 
 class AboutCollectorTest(unittest.TestCase):
@@ -419,6 +430,11 @@ class UrlCheckTest(unittest.TestCase):
 
 
 class ValidateTest(unittest.TestCase):
+    def test_is_valid_about_file(self):
+        self.assertTrue(about.is_about_file("test.About"))
+        self.assertTrue(about.is_about_file("test2.aboUT"))
+        self.assertFalse(about.is_about_file("no_about_ext.something"))
+
     def test_validate_is_ascii_key(self):
         about_file = about.AboutFile()
         self.assertTrue(about_file.check_is_ascii('abc'))
