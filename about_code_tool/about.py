@@ -172,8 +172,13 @@ FILE_LOCATIONS_FIELDS = (
     'license_text_file_location',
 )
 
+ERROR_WARN_FIELDS = (
+    'warnings',
+    'errors'
+)
+
 HEADER_ROW_FIELDS = ('about_file',) + MANDATORY_FIELDS + OPTIONAL_FIELDS + \
-                    ('warnings', 'errors')
+                    ERROR_WARN_FIELDS
 
 #===============================================================================
 # SPDX License List version 1.18, which was released on Apr 10, 2013.
