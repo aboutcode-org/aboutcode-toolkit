@@ -223,19 +223,16 @@ class GenAbout(object):
             'api_key': api_key,
             'format': 'json'
         }
-    
+
         full_url = '{0}{1}/?{2}'.format(
             url if url.endswith('/') else url + '/',
             license_key, urllib.urlencode(payload))
-    
+
         try:
             request = urllib2.Request(full_url)
             response = urllib2.urlopen(request)
             response_content = response.read()
             data = json.loads(response_content)
-            if not data:
-                self.errors.append(Error('dje_license_key', license_key,
-                                                 "Invalid 'dje_license_key'"))
         except urllib2.HTTPError as http_e:
             # the code 401 represents authorization problem
             if http_e.code == 401:
