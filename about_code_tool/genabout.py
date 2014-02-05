@@ -1,19 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-# =============================================================================
-#  Copyright (c) 2013 by nexB, Inc. http://www.nexb.com/ - All rights reserved.
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#      http://www.apache.org/licenses/LICENSE-2.0
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-# =============================================================================
-
 """
 This is a tool to generate ABOUT files based on the input file.
 The input file should be a csv format which contains information about the
@@ -32,6 +19,7 @@ import getopt
 import json
 import logging
 import os
+import optparse
 import shutil
 import sys
 import urllib
@@ -39,6 +27,22 @@ import urllib2
 
 
 __version__ = '0.9.0'
+
+__copyright__ = """
+Copyright (c) 2013-2014 nexB Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 
 LOG_FILENAME = 'error.log'
 
@@ -240,6 +244,9 @@ class GenAbout(object):
                 print("\n" + error_msg + "\n")
                 extract_dje_license_error = True
                 self.errors.append(Error('username/key', username + '/' + api_key, error_msg))
+            else:
+                self.errors.append(Error('dje_license_key', license_key,
+                                                 "Invalid 'dje_license_key'"))
             return {}
         except urllib2.URLError as url_e:
             if about.check_network_connection():
@@ -484,239 +491,226 @@ def _exists(file_path):
     if file_path:
         return exists(abspath(file_path))
 
+USAGE_SYNTAX = """\
+    Input must be a CSV file.
+    Output must be a directory location where the ABOUT files should be generated.
+"""
 
-def syntax():
-    print("""
-Syntax:
-    genabout.py [Options] [Input File] [Generated Location]
-    Input File         - The input CSV file
-    Generated Location - the output location where the ABOUT files should be generated
-""")
+VERBOSITY_HELP = """\
+Print more or fewer verbose messages while processing ABOUT files
+0 - Do not print any warning or error messages, just a total count (default)
+1 - Print error messages
+2 - Print error and warning messages
+"""
 
+ACTION_HELP = """\
+Handle different behaviors if ABOUT files already existed
+0 - Do nothing if ABOUT file existed (default)
+1 - Overwrites the current ABOUT field value if existed
+2 - Keep the current field value and only add the "new" field and field value
+3 - Replace the ABOUT file with the current generation
+"""
 
-def version():
-    print("""
-ABOUT CODE: Version: %s
-Copyright (c) 2013 nexB Inc. All rights reserved.
-http://dejacode.org
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and limitations
-under the License.""" % __version__)
+ALL_IN_ONE_HELP = """\
+Generate all the ABOUT files in the [output_path] regardless
+of the about_file location
+"""
 
+COPY_LICENSE_HELP = """\
+Copy the 'license_text_file'
+Path - Project Path
+"""
 
-def option_usage():
-    print("""
-Options:
-    -v,--version         Display current version, license notice, and copyright notice
-    -h,--help            Display help
-    --action  <arg>      Handle different behaviors if ABOUT files already existed
-        <arg>
-            0 - Do nothing if ABOUT file existed (default)
-            1 - Overwrites the current ABOUT field value if existed
-            2 - Keep the current field value and only add the "new" field and field value
-            3 - Replace the ABOUT file with the current generation
-    --verbosity  <arg>   Print more or less verbose messages while processing ABOUT files
-        <arg>
-            0 - Do not print any warning or error messages, just a total count (default)
-            1 - Print error messages
-            2 - Print error and warning messages
-    --all-in-one <bool>   Behavior of generating ABOUT files
-        <bool>
-            False - Generate ABOUT files in a project-like structure based on the about_file location (default)
-            True  - Generate all the ABOUT files in the [Generated Location] regardless of the about_file location
-    --copy_license <path>    Copy the 'license_text_file'
-                                This option is for users who want to generate ABOUT files separate
-                                from the original codebase and want to copy the licenses into the
-                                output location.
-        <path>
-            Project path
-    --mapping    Activate the MAPPING.CONFIG
-    --extract_license <3 args required>    Extract License text and create <license_key>.LICENSE 
-                                            side-by-side with the .ABOUT from DJE License Library
-        <--api_url='URL'> - URL to the DJE License Library
-        <--api_username='user_api'> - The regular DJE username
-        <--api_key='user_api_key'> - Hash attached to your username which is used 
-                                     to authenticate yourself in the API. Contact
-                                     us to get the hash key. 
-        Example syntax:
-            genabout.py --extract_license --api_url='https://enterprise.dejacode.com/api/v1/license_text/' --api_username='<user_api>' --api_key='<user_api_key>'
-""")
+MAPPING_HELP = """\
+Activate the MAPPING.CONFIG
+"""
 
+EXTRACT_LICENSE_HELP = """\
+Extract License text and create <license_key>.LICENSE side-by-side 
+    with the .ABOUT from DJE License Library.
+api_url - URL to the DJE License Library
+api_username - The regular DJE username
+api_key - Hash attached to your username which is used to authenticate 
+            yourself in the API. Contact us to get the hash key.
 
-def main(args, opts):
-    opt_arg_num = '0'
-    verb_arg_num = '0'
-    all_in_one = False
+Example syntax:
+genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
+"""
+
+INVALID_OPTION_ARG = """\
+    Invalid option argument.
+"""
+
+def main(parser, options, args):
+    verbosity = options.verbosity
+    action = options.action
+    all_in_one = options.all_in_one
+    copy_license = options.copy_license
+    mapping_config = options.mapping
+    extract_license = options.extract_license
+    
+    action_num = 0
     project_path = ''
-    mapping_config = False
-    gen_license = False
     api_url = ''
     api_username = ''
     api_key = ''
 
-    for opt, opt_arg in opts:
-        invalid_opt = True
-        if opt in ('-h', '--help'):
-            syntax()
-            option_usage()
-            sys.exit(0)
+    if options.version:
+        print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
+        sys.exit(0)
 
-        if opt in ('-v', '--version'):
-            version()
-            sys.exit(0)
+    if verbosity:
+        if verbosity == 0:
+            pass
+        elif verbosity == 1:
+            handler.setLevel(logging.ERROR)
+        elif verbosity == 2:
+            handler.setLevel(logging.WARNING)
+        else:
+            print('--verbosity' + INVALID_OPTION_ARG)
+            sys.exit(errno.EINVAL)
 
-        if opt in ('--action'):
-            invalid_opt = False
-            valid_opt_args = ['0', '1', '2', '3']
-            if not opt_arg or not opt_arg in valid_opt_args:
-                print("Invalid option argument.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-            else:
-                opt_arg_num = opt_arg
+    if action:
+        if not action in [0, 1, 2, 3]:
+            print('--action' + INVALID_OPTION_ARG)
+            sys.exit(errno.EINVAL)
+        else:
+            action_num = action
 
-        if opt in ('--verbosity'):
-            invalid_opt = False
-            valid_opt_args = ['0', '1', '2']
-            if not opt_arg or not opt_arg in valid_opt_args:
-                print("Invalid option argument.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-            else:
-                if opt_arg == '1':
-                    handler.setLevel(logging.ERROR)
-                elif opt_arg == '2':
-                    handler.setLevel(logging.WARNING)
+    if copy_license:
+        if not _exists(copy_license):
+            print("The project path doesn't exist.")
+            sys.exit(errno.EINVAL)
+        else:
+            project_path = copy_license
 
-        if opt in ('--all-in-one'):
-            invalid_opt = False
-            valid_opt_args = ['true', 'false']
-            if not opt_arg or not opt_arg.lower() in valid_opt_args:
-                print("Invalid option argument.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-            else:
-                if opt_arg.lower() == 'true':
-                    all_in_one = True
+    if mapping_config:
+        if not _exists('MAPPING.CONFIG'):
+            print("The file 'MAPPING.CONFIG' doesn't exist.")
+            sys.exit(errno.EINVAL)
 
-        if opt in ('--copy_license'):
-            invalid_opt = False
-            project_path = opt_arg
-            if not _exists(project_path):
-                print("The project path doesn't exist.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-
-        if opt in ('--mapping'):
-            invalid_opt = False
-            if not _exists('MAPPING.CONFIG'):
-                print("The file 'MAPPING.CONFIG' doesn't exist.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-            else:
-                mapping_config = True
-
-        if opt in ('--extract_license'):
-            invalid_opt = False
-            gen_license = True
-
-
-        if opt in ('--api_url'):
-            invalid_opt = False
-            if not opt_arg or not 'http' in opt_arg.lower():
-                print("Invalid option argument.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-            else:
-                api_url = opt_arg
-
-        if opt in ('--api_username'):
-            invalid_opt = False
-            if not opt_arg or '/' in opt_arg or '\\' in opt_arg:
-                print("Invalid option argument.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-            else:
-                api_username = opt_arg
-
-        if opt in ('--api_key'):
-            invalid_opt = False
-            if not opt_arg or '/' in opt_arg or '\\' in opt_arg:
-                print("Invalid option argument.")
-                option_usage()
-                sys.exit(errno.EINVAL)
-            else:
-                api_key = opt_arg
-
-        if invalid_opt:
-            assert False, 'Unsupported option.'
-        
-    if not len(args) == 2:
-        print('Input file and generated location parameters are mandatory.')
-        syntax()
-        option_usage()
-        sys.exit(errno.EINVAL)
-
-    input_file = args[0]
-    gen_location = args[1]
+    if extract_license:
+        api_url = extract_license[0].partition('--api_url=')[2]
+        api_username = extract_license[1].partition('--api_username=')[2]
+        api_key = extract_license[2].partition('--api_key=')[2]
     
-    if not gen_location.endswith('/'):
-        gen_location += '/'
+    if not len(args) == 2:
+        print('Input and Output paths are required.\n')
+        parser.print_help()
+        sys.exit(errno.EEXIST)
 
-    if isdir(input_file):
-        print(input_file, ": Input is not a CSV file.")
-        sys.exit(errno.EIO)
-    if not _exists(input_file):
-        print(input_file, ': Input file does not exist.')
-        sys.exit(errno.EIO)
-    if not _exists(gen_location):
-        print(gen_location, ': Generated location does not exist.')
-        sys.exit(errno.EIO)
+    input_path, output_path = args
+    output_path = abspath(output_path)
+    
+    if not output_path.endswith('/'):
+        output_path += '/'
 
+    if not exists(input_path):
+        print('Input path does not exist.\n')
+        parser.print_help()
+        sys.exit(errno.EEXIST)
+
+    if not exists(output_path):
+        print('Output path does not exist.\n')
+        parser.print_help()
+        sys.exit(errno.EEXIST)
+
+    if not isdir(output_path):
+        print('Output must be a directory, not a file.\n')
+        parser.print_help()
+        sys.exit(errno.EISDIR)
+
+    if not input_path.endswith('.csv'):
+        print("Input file name must be a CSV file ends with '.csv'\n")
+        parser.print_help()
+        sys.exit(errno.EINVAL)
+    
+    
     gen = GenAbout()
 
     # Clear the log file
-    with open(gen_location + LOG_FILENAME, 'w'):
+    with open(output_path + LOG_FILENAME, 'w'):
         pass
-    file_handler = logging.FileHandler(gen_location + LOG_FILENAME)
+    file_handler = logging.FileHandler(output_path + LOG_FILENAME)
     file_logger.addHandler(file_handler)
 
-    input_list = gen.read_input(input_file, mapping_config)
+    input_list = gen.read_input(input_path, mapping_config)
     if project_path:
         license_list, project_dir = gen.verify_license_files(input_list, project_path)
-        gen.copy_license_files(gen_location, license_list, project_dir)
+        gen.copy_license_files(output_path, license_list, project_dir)
 
-    if gen_license:
+    if extract_license:
         if not api_url or not api_username or not api_key:
             print("Missing argument for --extract_license")
-            option_usage()
             sys.exit(errno.EINVAL)
 
-    components_list, dje_license_list = gen.pre_generation(gen_location, input_list, opt_arg_num, all_in_one, gen_license)
+    components_list, dje_license_list = gen.pre_generation(output_path, input_list, action_num, all_in_one, extract_license)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
 
     if dje_license_list:
-        license_list_context = gen.extract_dje_license(gen_location, dje_license_list, api_url, api_username, api_key)
+        license_list_context = gen.extract_dje_license(output_path, dje_license_list, api_url, api_username, api_key)
         gen.write_licenses(license_list_context)
 
-    gen.warnings_errors_summary(gen_location)
+    gen.warnings_errors_summary(output_path)
+
+
+def get_parser():
+    class MyFormatter(optparse.IndentedHelpFormatter):
+        def _format_text(self, text):
+            """
+            Overridden to allow description to be printed without
+            modification
+            """
+            return text
+
+        def format_option(self, option):
+            """
+            Overridden to allow options help text to be printed without
+            modification
+            """
+            result = []
+            opts = self.option_strings[option]
+            opt_width = self.help_position - self.current_indent - 2
+            if len(opts) > opt_width:
+                opts = "%*s%s\n" % (self.current_indent, "", opts)
+                indent_first = self.help_position
+            else:                       # start help on same line as opts
+                opts = "%*s%-*s  " % (self.current_indent, "", opt_width, opts)
+                indent_first = 0
+            result.append(opts)
+            if option.help:
+                help_text = self.expand_default(option)
+                help_lines = help_text.split('\n')
+                #help_lines = textwrap.wrap(help_text, self.help_width)
+                result.append("%*s%s\n" % (indent_first, "", help_lines[0]))
+                result.extend(["%*s%s\n" % (self.help_position, "", line)
+                               for line in help_lines[1:]])
+            elif opts[-1] != "\n":
+                result.append("\n")
+            return "".join(result)
+
+    parser = optparse.OptionParser(
+        usage='%prog [options] input_path output_path',
+        description=USAGE_SYNTAX,
+        add_help_option=False,
+        formatter=MyFormatter(),
+    )
+    parser.add_option('-h', '--help', action='help', help='Display help')
+    parser.add_option(
+        '--version', action='store_true',
+        help='Display current version, license notice, and copyright notice')
+    parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
+    parser.add_option('--action', type=int, help=ACTION_HELP)
+    parser.add_option('--all_in_one', action="store_true", help=ALL_IN_ONE_HELP)
+    parser.add_option('--copy_license', type='string', help=COPY_LICENSE_HELP)
+    parser.add_option('--mapping', action="store_true", help=MAPPING_HELP)
+    parser.add_option(
+        '--extract_license', type="string", nargs=3, help=EXTRACT_LICENSE_HELP)
+    return parser
+
 
 if __name__ == "__main__":
-    longopts = ['help', 'version', 'action=', 'verbosity=', 'all-in-one=', 'copy_license=', 'mapping', 'extract_license', 'api_url='
-                , 'api_username=', 'api_key=']
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hv', longopts)
-    except Exception as e:
-        print(repr(e))
-        syntax()
-        option_usage()
-        sys.exit(errno.EINVAL)
-
-    main(args, opts)
+    parser = get_parser()
+    options, args = parser.parse_args()
+    main(parser, options, args)
