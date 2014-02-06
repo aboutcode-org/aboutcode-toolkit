@@ -221,7 +221,7 @@ class GenAboutTest(unittest.TestCase):
         tmp_path = tempfile.mkdtemp()
         gen.copy_license_files(tmp_path, input_list, project_path)
         self.assertTrue(input_list == os.listdir(tmp_path))
-        # According to the doc, the user of mkdtemp() is responsible for 
+        # According to the doc, the user of mkdtemp() is responsible for
         # deleting the temporary directory and its contents when done with it.
         shutil.rmtree(tmp_path)
 
@@ -232,7 +232,7 @@ class GenAboutTest(unittest.TestCase):
         tmp_path = tempfile.mkdtemp() + '/'
         gen.copy_license_files(tmp_path, input_list, project_path)
         self.assertTrue(input_list == os.listdir(tmp_path))
-        # According to the doc, the user of mkdtemp() is responsible for 
+        # According to the doc, the user of mkdtemp() is responsible for
         # deleting the temporary directory and its contents when done with it.
         shutil.rmtree(tmp_path)
 
@@ -251,8 +251,8 @@ class GenAboutTest(unittest.TestCase):
 
     def test_check_non_supported_fields(self):
         gen = genabout.GenAbout()
-        input = {'about_file': '', 'name': 'OpenSans Fonts', 
+        input = {'about_file': '', 'name': 'OpenSans Fonts',
                  'non_supported field': 'TEST', 'version': '1', 'about_resource': 'opensans'}
-        non_supported_list = gen.check_non_supported_fields(input)
+        non_supported_list = gen.get_non_supported_fields(input)
         expected_list = ['non_supported field']
         self.assertTrue(non_supported_list == expected_list)

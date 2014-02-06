@@ -157,7 +157,7 @@ DJE_FIELDS = (
     'dje_organization',
 )
 
-OPTIONAL_FIELDS = BASIC_FIELDS + OWNERSHIP_FIELDS + LICENSE_FIELDS +\
+OPTIONAL_FIELDS = BASIC_FIELDS + OWNERSHIP_FIELDS + LICENSE_FIELDS + \
     FLAG_FIELDS + VCS_FIELDS + CHECKSUM_FIELDS + DJE_FIELDS
 
 FILE_LOCATIONS_FIELDS = (
@@ -180,7 +180,7 @@ ERROR_WARN_FIELDS = (
 )
 
 HEADER_ROW_FIELDS = ('about_file',) + MANDATORY_FIELDS + OPTIONAL_FIELDS + \
-                    ERROR_WARN_FIELDS
+    ERROR_WARN_FIELDS
 
 # SPDX License List version 1.18, which was released on Apr 10, 2013.
 # These are Identifiers from http://spdx.org/licenses/

@@ -7,24 +7,7 @@ The input file should be a csv format which contains information about the
 file location, origin and license of the software components etc.
 """
 
-from __future__ import print_function
-from collections import namedtuple
-from os import makedirs
-from os.path import exists, dirname, join, abspath, isdir
-import about
-import copy
-import csv
-import errno
-import getopt
-import json
-import logging
-import os
-import optparse
-import shutil
-import sys
-import urllib
-import urllib2
-
+from __future__ import print_function, with_statement
 
 __version__ = '0.9.0'
 
@@ -44,6 +27,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import copy
+import csv
+import errno
+import json
+import logging
+import os
+import optparse
+import shutil
+import sys
+import urllib
+import urllib2
+from collections import namedtuple
+from os import makedirs
+from os.path import exists, dirname, join, abspath, isdir
+
+import about
+
+
 LOG_FILENAME = 'error.log'
 
 logger = logging.getLogger(__name__)
@@ -53,21 +54,18 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__+'_file')
 
-SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS \
-                    + ('about_file', 'dje_license_key',)
+SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + \
+    ('about_file', 'dje_license_key',)
 
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
-
-self_path = abspath(dirname(__file__))
-
-extract_dje_license_error = False
 
 
 class GenAbout(object):
     def __init__(self):
         self.warnings = []
         self.errors = []
+        self.extract_dje_license_error = False
 
     def read_input(self, input_file, mapping):
         about_resource, about_file, name, version = self.config_mapping(mapping)
@@ -78,12 +76,11 @@ class GenAbout(object):
 
         for line in csvfile:
             if not check_non_supported_fields:
-                ignored_fields_list = self.check_non_supported_fields(line)
+                ignored_fields_list = self.get_non_supported_fields(line)
                 check_non_supported_fields = True
                 if ignored_fields_list:
-                    self.warnings.append(Warn(ignored_fields_list, '' ,\
-                                              'The field(s) "%s"' % ignored_fields_list\
-                                              + ' is/are not supported and will be ignored'))
+                    msg = 'The field(s) "%s" is/are not supported and will be ignored' % ignored_fields_list
+                    self.warnings.append(Warn(ignored_fields_list, '', msg))
             file_list = {}
             try:
                 line['about_file'] = line[about_file]
@@ -119,8 +116,8 @@ class GenAbout(object):
                         self.errors.append(Error('about_file', None, missing_about_file))
                         break
                 continue
-            # We don't need to use the try/except here as the existence of 
-            # line['about_resource'] has already been checked above. 
+            # We don't need to use the try/except here as the existence of
+            # line['about_resource'] has already been checked above.
             if not line['about_resource']:
                 # This code is to handle blank line
                 for key in line.keys():
@@ -136,12 +133,11 @@ class GenAbout(object):
         return components_list
 
     @staticmethod
-    def check_non_supported_fields(line):
-        non_supported_fields_list = []
-        for key in line.keys():
-            if not key in SUPPORTED_FIELDS:
-                non_supported_fields_list.append(key)
-        return non_supported_fields_list
+    def get_non_supported_fields(line):
+        """
+        Returns a list of the non-supported fields in a given line.
+        """
+        return [field for field in line.keys() if not field in SUPPORTED_FIELDS]
 
     @staticmethod
     def config_mapping(mapping):
@@ -152,34 +148,35 @@ class GenAbout(object):
         about_file = 'about_file'
         name = 'name'
         version = 'version'
-        if mapping:
-            try:
-                with open(join(self_path, 'MAPPING.CONFIG'), "rU") as file_in:
-                    for line in file_in.readlines():
-                        if not line.startswith('#'):
-                            if line.partition(':')[0] == 'about_resource':
-                                new_value = line.partition(':')[2].strip()
-                                if new_value:
-                                    about_resource = new_value
-                            elif line.partition(':')[0] == 'about_file':
-                                new_value = line.partition(':')[2].strip()
-                                if new_value:
-                                    about_file = new_value
-                            elif line.partition(':')[0] == 'name':
-                                new_value = line.partition(':')[2].strip()
-                                if new_value:
-                                    name = new_value
-                            elif line.partition(':')[0] == 'version':
-                                new_value = line.partition(':')[2].strip()
-                                if new_value:
-                                    version = new_value
-                    return about_resource, about_file, name, version
-            except Exception as e:
-                print(repr(e))
-                print("The 'MAPPING.CONFIG' cannot be opened.")
-                sys.exit(errno.EACCES)
-        else:
+        self_path = abspath(dirname(__file__))
+        if not mapping:
             return about_resource, about_file, name, version
+
+        try:
+            with open(join(self_path, 'MAPPING.CONFIG'), "rU") as file_in:
+                for line in file_in.readlines():
+                    if not line.startswith('#'):
+                        if line.partition(':')[0] == 'about_resource':
+                            new_value = line.partition(':')[2].strip()
+                            if new_value:
+                                about_resource = new_value
+                        elif line.partition(':')[0] == 'about_file':
+                            new_value = line.partition(':')[2].strip()
+                            if new_value:
+                                about_file = new_value
+                        elif line.partition(':')[0] == 'name':
+                            new_value = line.partition(':')[2].strip()
+                            if new_value:
+                                name = new_value
+                        elif line.partition(':')[0] == 'version':
+                            new_value = line.partition(':')[2].strip()
+                            if new_value:
+                                version = new_value
+                return about_resource, about_file, name, version
+        except Exception as e:
+            print(repr(e))
+            print("The 'MAPPING.CONFIG' cannot be opened.")
+            sys.exit(errno.EACCES)
 
     def verify_license_files(self, input_list, project_path):
         """
@@ -190,9 +187,6 @@ class GenAbout(object):
             for line in component:
                 try:
                     if line['license_text_file']:
-                        is_dir = False
-                        if line['about_file'].endswith('/'):
-                            is_dir = True
                         license_file = line['license_text_file']
                         file_location = line['about_file']
                         if file_location.startswith('/'):
@@ -239,27 +233,25 @@ class GenAbout(object):
                 error_msg = "Authorization denied. Invalid '--api_username' or '--api_key'."\
                             + " LICENSE generation is skipped."
                 print("\n" + error_msg + "\n")
-                extract_dje_license_error = True
+                self.extract_dje_license_error = True
                 self.errors.append(Error('username/key', username + '/' + api_key, error_msg))
             else:
-                self.errors.append(Error('dje_license_key', license_key,
-                                                 "Invalid 'dje_license_key'"))
+                self.errors.append(Error('dje_license_key', license_key, "Invalid 'dje_license_key'"))
             return {}
-        except urllib2.URLError as url_e:
+        except urllib2.URLError:
             if about.check_network_connection():
                 error_msg = "URL not reachable. Invalid '--api_url'."\
                                 + " LICENSE generation is skipped."
                 print("\n" + error_msg + "\n")
-                extract_dje_license_error = True
+                self.extract_dje_license_error = True
                 self.errors.append(Error('--api_url', url, error_msg))
             else:
-                error_msg = "Network problem. Please check the Internet connection."\
-                                + " LICENSE generation is skipped."
+                error_msg = "Network problem. Please check the Internet connection. LICENSE generation is skipped."
                 print("\n" + error_msg + "\n")
-                extract_dje_license_error = True
+                self.extract_dje_license_error = True
                 self.errors.append(Error('Network', '', error_msg))
             return {}
-        except ValueError as value_e:
+        except ValueError:
             return {}
         else:
             return data
@@ -289,7 +281,7 @@ class GenAbout(object):
             if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
             gen_license_path = join(project_path, gen_path, license_key) + '.LICENSE'
-            if not _exists(gen_license_path) and not extract_dje_license_error:
+            if not _exists(gen_license_path) and not self.extract_dje_license_error:
                 context = self.get_license_text_from_api(url, username, key, license_key)
                 if context:
                     gen_path_context = []
@@ -305,9 +297,8 @@ class GenAbout(object):
             try:
                 with open(gen_license_path, 'wb') as output:
                     output.write(license_context)
-            except Exception as e:
-                self.errors.append(Error('Unknown', gen_license_path,
-                                     "Something is wrong."))
+            except Exception:
+                self.errors.append(Error('Unknown', gen_license_path, "Something is wrong."))
 
     def get_license_text_from_api(self, url, username, api_key, license_key):
         """
@@ -315,8 +306,6 @@ class GenAbout(object):
         Returns an empty string if the text is not available.
         """
         data = self.request_license_data(url, username, api_key, license_key)
-        #if data == 'authorization denied' or data == 'URL not reachable' or data == 'No network':
-        #    return data
         license_text = data.get('full_text', '')
         return license_text
 
@@ -328,7 +317,7 @@ class GenAbout(object):
         output_list = []
         license_output_list = []
         # The input_list needs to be copied and be used below.
-        # Otherwise, the value in the input_list may be changed based on the 
+        # Otherwise, the value in the input_list may be changed based on the
         # action number below
         copied_list = copy.deepcopy(input_list)
         #for component in copied_list:
@@ -347,8 +336,7 @@ class GenAbout(object):
                     about_parent_dir = os.path.dirname(file_location)
                     license_file = gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file'])
                     if not _exists(license_file):
-                        self.errors.append(Error('license_text_file', license_file, 
-                                                 "The 'license_text_file' doesn't exist."))
+                        self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' doesn't exist."))
                 else:
                     if gen_license:
                         try:
@@ -361,7 +349,7 @@ class GenAbout(object):
                             print(repr(e))
                             print("The input does not have the 'dje_license_key' key which is required.")
                             sys.exit(errno.EINVAL)
-            # This except condition will force the tool to create the 
+            # This except condition will force the tool to create the
             # 'license_text_file' key column
             except Exception as e:
                 if gen_license:
@@ -471,22 +459,22 @@ class GenAbout(object):
             with open(about_file_location, 'wb') as output_file:
                 output_file.write(context)
 
-    def warnings_errors_summary(self, gen_location):
+    def warnings_errors_summary(self):
         if self.errors:
             for error_msg in self.errors:
                 logger.error(error_msg)
                 file_logger.error(error_msg)
+
         if self.warnings:
             for warning_msg in self.warnings:
                 logger.warning(warning_msg)
                 file_logger.warning(warning_msg)
-        print('Warnings: %s' % len(self.warnings))
-        print('Errors: %s' % len(self.errors))
 
 
 def _exists(file_path):
     if file_path:
         return exists(abspath(file_path))
+
 
 USAGE_SYNTAX = """\
     Input must be a CSV file.
@@ -523,11 +511,11 @@ Activate the MAPPING.CONFIG
 """
 
 EXTRACT_LICENSE_HELP = """\
-Extract License text and create <license_key>.LICENSE side-by-side 
+Extract License text and create <license_key>.LICENSE side-by-side
     with the .ABOUT from DJE License Library.
 api_url - URL to the DJE License Library
 api_username - The regular DJE username
-api_key - Hash attached to your username which is used to authenticate 
+api_key - Hash attached to your username which is used to authenticate
             yourself in the API. Contact us to get the hash key.
 
 Example syntax:
@@ -545,7 +533,7 @@ def main(parser, options, args):
     copy_license = options.copy_license
     mapping_config = options.mapping
     extract_license = options.extract_license
-    
+
     action_num = 0
     project_path = ''
     api_url = ''
@@ -556,16 +544,10 @@ def main(parser, options, args):
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
         sys.exit(0)
 
-    if verbosity:
-        if verbosity == 0:
-            pass
-        elif verbosity == 1:
-            handler.setLevel(logging.ERROR)
-        elif verbosity == 2:
-            handler.setLevel(logging.WARNING)
-        else:
-            print('--verbosity' + INVALID_OPTION_ARG)
-            sys.exit(errno.EINVAL)
+    if verbosity == 1:
+        handler.setLevel(logging.ERROR)
+    elif verbosity >= 2:
+        handler.setLevel(logging.WARNING)
 
     if action:
         if not action in [0, 1, 2, 3]:
@@ -590,7 +572,7 @@ def main(parser, options, args):
         api_url = extract_license[0].partition('--api_url=')[2]
         api_username = extract_license[1].partition('--api_username=')[2]
         api_key = extract_license[2].partition('--api_key=')[2]
-    
+
     if not len(args) == 2:
         print('Input and Output paths are required.\n')
         parser.print_help()
@@ -598,7 +580,7 @@ def main(parser, options, args):
 
     input_path, output_path = args
     output_path = abspath(output_path)
-    
+
     if not output_path.endswith('/'):
         output_path += '/'
 
@@ -621,13 +603,13 @@ def main(parser, options, args):
         print("Input file name must be a CSV file ends with '.csv'\n")
         parser.print_help()
         sys.exit(errno.EINVAL)
-    
-    
+
     gen = GenAbout()
 
     # Clear the log file
     with open(output_path + LOG_FILENAME, 'w'):
         pass
+
     file_handler = logging.FileHandler(output_path + LOG_FILENAME)
     file_logger.addHandler(file_handler)
 
@@ -650,6 +632,8 @@ def main(parser, options, args):
         gen.write_licenses(license_list_context)
 
     gen.warnings_errors_summary(output_path)
+    print('Warnings: %s' % len(gen.warnings))
+    print('Errors: %s' % len(gen.errors))
 
 
 def get_parser():
