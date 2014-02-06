@@ -178,33 +178,31 @@ class GenAbout(object):
             print("The 'MAPPING.CONFIG' cannot be opened.")
             sys.exit(errno.EACCES)
 
-    def verify_license_files(self, input_list, project_path):
+    def verify_license_files(self, input_list, project_dir):
         """
         Verify the existence of the 'license text file'
         """
         license_files_list = []
-        for component in input_list:
-            for line in component:
-                try:
-                    if line['license_text_file']:
-                        license_file = line['license_text_file']
-                        file_location = line['about_file']
-                        if file_location.startswith('/'):
-                            file_location = file_location.partition('/')[2]
-                        if file_location.endswith('/'):
-                            file_location = file_location.rpartition('/')[0]
-                        about_parent_dir = os.path.dirname(file_location)
-                        project_parent_dir = os.path.dirname(project_path)
-                        license_file_path = join(project_parent_dir, about_parent_dir, license_file)
-                        if _exists(license_file_path):
-                            license_files_list.append(license_file_path)
-                        else:
-                            self.warnings.append(Warn('license_text_file', license_file_path, "License doesn't exist."))
-                except Exception as e:
-                    print(repr(e))
-                    print("The input does not have the 'license_text_file' key which is required.")
-                    sys.exit(errno.EINVAL)
-        return license_files_list, project_parent_dir
+        for line in input_list:
+            try:
+                if line['license_text_file']:
+                    license_file = line['license_text_file']
+                    file_location = line['about_file']
+                    if file_location.startswith('/'):
+                        file_location = file_location.partition('/')[2]
+                    if file_location.endswith('/'):
+                        file_location = file_location.rpartition('/')[0]
+                    about_parent_dir = dirname(file_location)
+                    license_file_path = join(project_dir, about_parent_dir, license_file)
+                    if _exists(license_file_path):
+                        license_files_list.append(license_file_path)
+                    else:
+                        self.warnings.append(Warn('license_text_file', license_file_path, "License doesn't exist."))
+            except Exception as e:
+                print(repr(e))
+                print("The input does not have the 'license_text_file' key which is required.")
+                sys.exit(errno.EINVAL)
+        return license_files_list
 
     def request_license_data(self, url, username, api_key, license_key):
         """
@@ -265,7 +263,7 @@ class GenAbout(object):
             if gen_location.endswith('/'):
                 gen_location = gen_location.rpartition('/')[0]
             output_license_path = gen_location + license_path.partition(project_dir)[2]
-            license_parent_dir = os.path.dirname(output_license_path)
+            license_parent_dir = dirname(output_license_path)
             if not _exists(license_parent_dir):
                 makedirs(license_parent_dir)
             shutil.copy2(license_path, output_license_path)
@@ -333,7 +331,7 @@ class GenAbout(object):
                     file_location = line['about_file']
                     if file_location.endswith('/'):
                         file_location = file_location.rpartition('/')[0]
-                    about_parent_dir = os.path.dirname(file_location)
+                    about_parent_dir = dirname(file_location)
                     license_file = gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file'])
                     if not _exists(license_file):
                         self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' doesn't exist."))
@@ -411,7 +409,7 @@ class GenAbout(object):
         file_location = line['about_file']
         if file_location.endswith('/'):
             file_location = file_location.rpartition('/')[0]
-        about_parent_dir = os.path.dirname(file_location)
+        about_parent_dir = dirname(file_location)
         dje_license_key_list.append(about_parent_dir)
         dje_license_key_list.append(dje_key)
         line['license_text_file'] = dje_key +'.LICENSE'
@@ -503,7 +501,7 @@ of the about_file location
 
 COPY_LICENSE_HELP = """\
 Copy the 'license_text_file'
-Path - Project Path
+Path - Project path
 """
 
 MAPPING_HELP = """\
@@ -530,12 +528,11 @@ def main(parser, options, args):
     verbosity = options.verbosity
     action = options.action
     all_in_one = options.all_in_one
-    copy_license = options.copy_license
+    copy_license_path = options.copy_license
     mapping_config = options.mapping
     extract_license = options.extract_license
 
     action_num = 0
-    project_path = ''
     api_url = ''
     api_username = ''
     api_key = ''
@@ -556,12 +553,10 @@ def main(parser, options, args):
         else:
             action_num = action
 
-    if copy_license:
-        if not _exists(copy_license):
+    if copy_license_path:
+        if not _exists(copy_license_path):
             print("The project path doesn't exist.")
             sys.exit(errno.EINVAL)
-        else:
-            project_path = copy_license
 
     if mapping_config:
         if not _exists('MAPPING.CONFIG'):
@@ -614,9 +609,17 @@ def main(parser, options, args):
     file_logger.addHandler(file_handler)
 
     input_list = gen.read_input(input_path, mapping_config)
-    if project_path:
-        license_list, project_dir = gen.verify_license_files(input_list, project_path)
-        gen.copy_license_files(output_path, license_list, project_dir)
+
+    if copy_license_path:
+        if not isdir(copy_license_path):
+            print("The '--copy_license' <project_path> must be a directory.")
+            print("'--copy_license' is skipped.")
+        else:
+            if not copy_license_path.endswith('/'):
+                copy_license_path += '/'
+            project_parent_dir = dirname(copy_license_path)
+            license_list = gen.verify_license_files(input_list, project_parent_dir)
+            gen.copy_license_files(output_path, license_list, project_parent_dir)
 
     if extract_license:
         if not api_url or not api_username or not api_key:
@@ -631,7 +634,7 @@ def main(parser, options, args):
         license_list_context = gen.extract_dje_license(output_path, dje_license_list, api_url, api_username, api_key)
         gen.write_licenses(license_list_context)
 
-    gen.warnings_errors_summary(output_path)
+    gen.warnings_errors_summary()
     print('Warnings: %s' % len(gen.warnings))
     print('Errors: %s' % len(gen.errors))
 
@@ -683,11 +686,11 @@ def get_parser():
         help='Display current version, license notice, and copyright notice')
     parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
     parser.add_option('--action', type=int, help=ACTION_HELP)
-    parser.add_option('--all_in_one', action="store_true", help=ALL_IN_ONE_HELP)
+    parser.add_option('--all_in_one', action='store_true', help=ALL_IN_ONE_HELP)
     parser.add_option('--copy_license', type='string', help=COPY_LICENSE_HELP)
-    parser.add_option('--mapping', action="store_true", help=MAPPING_HELP)
+    parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
     parser.add_option(
-        '--extract_license', type="string", nargs=3, help=EXTRACT_LICENSE_HELP)
+        '--extract_license', type='string', nargs=3, help=EXTRACT_LICENSE_HELP)
     return parser
 
 

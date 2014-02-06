@@ -164,24 +164,24 @@ class GenAboutTest(unittest.TestCase):
 
     def test_verify_license_files_exist(self):
         gen = genabout.GenAbout()
-        input_list = [[{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
+        input_list = [{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
                          'license_text_file': 'apache2.LICENSE.txt',
-                          'name': 'ABOUT tool', 'about_resource': '.'}]]
+                          'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
-        expected_list = ['apache2.LICENSE.txt']
-        output, project_path = gen.verify_license_files(input_list, path)
+        expected_list = ['./apache2.LICENSE.txt']
+        output = gen.verify_license_files(input_list, path)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
     def test_verify_license_files_not_exist(self):
         gen = genabout.GenAbout()
-        input_list = [[{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
+        input_list = [{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
                          'license_text_file': 'not_exist.LICENSE.txt',
-                          'name': 'ABOUT tool', 'about_resource': '.'}]]
+                          'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
         expected_list = []
-        output, project_path= gen.verify_license_files(input_list, path)
+        output = gen.verify_license_files(input_list, path)
         self.assertTrue(expected_list == output)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
