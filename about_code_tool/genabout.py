@@ -117,18 +117,18 @@ class GenAbout(object):
         return copied_list
 
     def validate(self, input_list):
-        if not self.validate_value_in_essential_fields(input_list):
-            print("Some of the essential fields value are missing.")
-            print(ESSENTIAL_FIELDS)
-            print("Please check the input CSV.")
-            print("No ABOUT file is created.")
-            sys.exit(errno.EINVAL)
         if not self.validate_mandatory_fields(input_list):
             required_keys = about.MANDATORY_FIELDS + ('about_file',)
             print("The required keys not found.")
             print(required_keys)
             print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
             print("OR, correct the header keys from the input CSV.")
+            sys.exit(errno.EINVAL)
+        if not self.validate_value_in_essential_fields(input_list):
+            print("Some of the essential fields value are missing.")
+            print(ESSENTIAL_FIELDS)
+            print("Please check the input CSV.")
+            print("No ABOUT file is created.")
             sys.exit(errno.EINVAL)
         if self.validate_duplication(input_list):
             print("The input has duplicated 'about_file' and 'about_resource'.")
@@ -269,24 +269,6 @@ class GenAbout(object):
             if not _exists(license_parent_dir):
                 makedirs(license_parent_dir)
             shutil.copy2(license_path, output_license_path)
-
-    def extract_dje_license(self, project_path, license_list, url, username, key):
-        """
-        Extract license text from DJE
-        """
-        license_context_list = []
-        for gen_path, license_key in license_list:
-            if gen_path.startswith('/'):
-                gen_path = gen_path.partition('/')[2]
-            gen_license_path = join(project_path, gen_path, license_key) + '.LICENSE'
-            if not _exists(gen_license_path) and not self.extract_dje_license_error:
-                context = self.get_license_text_from_api(url, username, key, license_key)
-                if context:
-                    gen_path_context = []
-                    gen_path_context.append(gen_license_path)
-                    gen_path_context.append(context.encode('utf8'))
-                    license_context_list.append(gen_path_context)
-        return license_context_list
 
     def write_licenses(self, license_context_list):
         for gen_license_path, license_context in license_context_list:
@@ -610,17 +592,7 @@ def main(parser, options, args):
     if ignored_fields_list:
         input_list = gen.get_only_supported_fields(input_list, ignored_fields_list)
 
-
-
-
-
-
-
-
-
-
-
-    """if copy_license_path:
+    if copy_license_path:
         if not isdir(copy_license_path):
             print("The '--copy_license' <project_path> must be a directory.")
             print("'--copy_license' is skipped.")
@@ -641,12 +613,23 @@ def main(parser, options, args):
     gen.write_output(formatted_output)
 
     if dje_license_list:
-        license_list_context = gen.extract_dje_license(output_path, dje_license_list, api_url, api_username, api_key)
+        license_list_context = []
+        for gen_path, license_key in dje_license_list:
+            if gen_path.startswith('/'):
+                gen_path = gen_path.partition('/')[2]
+            gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
+            if not _exists(gen_license_path) and not gen.extract_dje_license_error:
+                context = gen.get_license_text_from_api(api_url, api_username, api_key, license_key)
+                if context:
+                    gen_path_context = []
+                    gen_path_context.append(gen_license_path)
+                    gen_path_context.append(context.encode('utf8'))
+                    license_list_context.append(gen_path_context)
         gen.write_licenses(license_list_context)
 
     gen.warnings_errors_summary()
     print('Warnings: %s' % len(gen.warnings))
-    print('Errors: %s' % len(gen.errors))"""
+    print('Errors: %s' % len(gen.errors))
 
 
 def get_parser():
