@@ -74,7 +74,7 @@ class GenAbout(object):
         return components_list
 
     @staticmethod
-    def remove_empty_rows(input_list):
+    def get_non_empty_rows_list(input_list):
         copied_list = copy.deepcopy(input_list)
         new_list = []
         for line in copied_list:
@@ -579,8 +579,7 @@ def main(parser, options, args):
     file_logger.addHandler(file_handler)
 
     input_list = gen.get_input_list(input_path)
-
-    input_list = gen.remove_empty_rows(input_list)
+    input_list = gen.get_non_empty_rows_list(input_list)
 
     if mapping_config:
         mapping_list = gen.get_mapping_list()

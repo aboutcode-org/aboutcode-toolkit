@@ -39,7 +39,7 @@ class GenAboutTest(unittest.TestCase):
         list = gen.get_input_list(test_input)
         self.assertTrue(list == expected_list)
 
-    def test_remove_empty_rows(self):
+    def test_get_non_empty_rows_list(self):
         gen = genabout.GenAbout()
         input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'},
@@ -47,7 +47,7 @@ class GenAboutTest(unittest.TestCase):
                        'name': '', 'version': ''}]
         expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
-        output = gen.remove_empty_rows(input_list)
+        output = gen.get_non_empty_rows_list(input_list)
         self.assertTrue(output == expected_list)
 
     
