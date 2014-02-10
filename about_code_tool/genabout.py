@@ -8,6 +8,21 @@ file location, origin and license of the software components etc.
 """
 
 from __future__ import print_function, with_statement
+from collections import namedtuple
+from os import makedirs
+from os.path import exists, dirname, join, abspath, isdir
+import about
+import copy
+import csv
+import errno
+import json
+import logging
+import optparse
+import os
+import shutil
+import sys
+import urllib
+import urllib2
 
 __version__ = '0.9.0'
 
@@ -27,24 +42,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import copy
-import csv
-import errno
-import json
-import logging
-import os
-import optparse
-import shutil
-import sys
-import urllib
-import urllib2
-from collections import namedtuple
-from os import makedirs
-from os.path import exists, dirname, join, abspath, isdir
-
-import about
-
-
 LOG_FILENAME = 'error.log'
 
 logger = logging.getLogger(__name__)
@@ -54,6 +51,7 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__+'_file')
 
+ESSENTIAL_FIELDS = ('about_file', 'about_resource',)
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + \
     ('about_file', 'dje_license_key',)
 
@@ -67,116 +65,120 @@ class GenAbout(object):
         self.errors = []
         self.extract_dje_license_error = False
 
-    def read_input(self, input_file, mapping):
-        about_resource, about_file, name, version = self.config_mapping(mapping)
+    @staticmethod
+    def get_input_list(input_file):
         csvfile = csv.DictReader(open(input_file, 'rU'))
         components_list = []
-        check_duplication = []
-        check_non_supported_fields = False
-
         for line in csvfile:
-            if not check_non_supported_fields:
-                ignored_fields_list = self.get_non_supported_fields(line)
-                check_non_supported_fields = True
-                if ignored_fields_list:
-                    msg = 'The field(s) "%s" is/are not supported and will be ignored' % ignored_fields_list
-                    self.warnings.append(Warn(ignored_fields_list, '', msg))
-            file_list = {}
-            try:
-                line['about_file'] = line[about_file]
-                line['about_resource'] = line[about_resource]
-                line['name'] = line[name]
-                line['version'] = line[version]
-                component = line['about_file'] + line['about_resource']
-                if component in check_duplication:
-                    print("The input has duplicated 'about_file' and 'about_resource'.")
-                    print("Duplication is not supported. Please correct the input and rerun the tool.")
-                    print("No ABOUT file is created.")
-                    sys.exit(errno.EINVAL)
-                check_duplication.append(component)
-            except Exception as e:
-                print(repr(e))
-                print("The required keys not found.")
-                print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
-                print("OR, correct the header keys from the input CSV.")
-                sys.exit(errno.EINVAL)
-            if not about_file == 'about_file':
-                del line[about_file]
-            if not about_resource == 'about_resource':
-                del line[about_resource]
-            if not name == 'name':
-                del line[name]
-            if not version == 'version':
-                del line[version]
-            if not line['about_file']:
-                # This code is to handle blank line
-                for key in line.keys():
-                    if line[key]:
-                        missing_about_file = "'about_file' field value is missing. Generation is skipped."
-                        self.errors.append(Error('about_file', None, missing_about_file))
-                        break
-                continue
-            # We don't need to use the try/except here as the existence of
-            # line['about_resource'] has already been checked above.
-            if not line['about_resource']:
-                # This code is to handle blank line
-                for key in line.keys():
-                    if line[key]:
-                        missing_about_resource = "'about_resource' is missing. Generation is skipped."
-                        self.errors.append(Error('about_resource', line['about_file'], missing_about_resource))
-                        break
-                continue
-            for key in line.keys():
-                if key in SUPPORTED_FIELDS:
-                    file_list[key] = line[key]
-            components_list.append(file_list)
+            components_list.append(line)
         return components_list
 
     @staticmethod
-    def get_non_supported_fields(line):
-        """
-        Returns a list of the non-supported fields in a given line.
-        """
-        return [field for field in line.keys() if not field in SUPPORTED_FIELDS]
+    def remove_empty_rows(input_list):
+        copied_list = copy.deepcopy(input_list)
+        new_list = []
+        for line in copied_list:
+            for key in line.keys():
+                if line[key]:
+                    new_list.append(line)
+                    break
+        return new_list
 
     @staticmethod
-    def config_mapping(mapping):
+    def get_mapping_list():
         """
-        Read the MAPPING.CONFIG and do the key mapping.
+        Read the MAPPING.CONFIG
         """
-        about_resource = 'about_resource'
-        about_file = 'about_file'
-        name = 'name'
-        version = 'version'
         self_path = abspath(dirname(__file__))
-        if not mapping:
-            return about_resource, about_file, name, version
-
+        mapping_list = {}
         try:
             with open(join(self_path, 'MAPPING.CONFIG'), "rU") as file_in:
                 for line in file_in.readlines():
-                    if not line.startswith('#'):
-                        if line.partition(':')[0] == 'about_resource':
-                            new_value = line.partition(':')[2].strip()
-                            if new_value:
-                                about_resource = new_value
-                        elif line.partition(':')[0] == 'about_file':
-                            new_value = line.partition(':')[2].strip()
-                            if new_value:
-                                about_file = new_value
-                        elif line.partition(':')[0] == 'name':
-                            new_value = line.partition(':')[2].strip()
-                            if new_value:
-                                name = new_value
-                        elif line.partition(':')[0] == 'version':
-                            new_value = line.partition(':')[2].strip()
-                            if new_value:
-                                version = new_value
-                return about_resource, about_file, name, version
+                    if not line.startswith('#') and ':' in line:
+                        about_spec_key =line.partition(':')[0]
+                        user_spec_key = line.partition(':')[2].strip()
+                        mapping_list[about_spec_key] = user_spec_key
         except Exception as e:
             print(repr(e))
             print("The 'MAPPING.CONFIG' cannot be opened.")
             sys.exit(errno.EACCES)
+        return mapping_list
+
+    @staticmethod
+    def convert_input_list(input_list, mapping_list):
+        """
+        Perform the key mapping
+        """
+        copied_list = copy.deepcopy(input_list)
+        for copied_dict in copied_list:
+            for about_spec_key in mapping_list:
+                if mapping_list[about_spec_key] in copied_dict.keys():
+                    copied_dict[about_spec_key] = copied_dict.pop(mapping_list[about_spec_key])
+        return copied_list
+
+    def validate(self, input_list):
+        if not self.validate_value_in_essential_fields(input_list):
+            print("Some of the essential fields value are missing.")
+            print(ESSENTIAL_FIELDS)
+            print("Please check the input CSV.")
+            print("No ABOUT file is created.")
+            sys.exit(errno.EINVAL)
+        if not self.validate_mandatory_fields(input_list):
+            required_keys = about.MANDATORY_FIELDS + ('about_file',)
+            print("The required keys not found.")
+            print(required_keys)
+            print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
+            print("OR, correct the header keys from the input CSV.")
+            sys.exit(errno.EINVAL)
+        if self.validate_duplication(input_list):
+            print("The input has duplicated 'about_file' and 'about_resource'.")
+            print("Duplication is not supported. Please correct the input and rerun the tool.")
+            print("No ABOUT file is created.")
+            sys.exit(errno.EINVAL)
+
+    @staticmethod
+    def validate_mandatory_fields(input_list):
+        for line in input_list:
+            for key in about.MANDATORY_FIELDS + ('about_file',):
+                if not key in line.keys():
+                    return False
+        return True
+
+    @staticmethod
+    def validate_value_in_essential_fields(input_list):
+        for line in input_list:
+            for key in ESSENTIAL_FIELDS:
+                if not line[key]:
+                    return False
+        return True
+
+    @staticmethod
+    def validate_duplication(input_list):
+        check_duplication = []
+        for line in input_list:
+            component = line['about_file'] + line['about_resource']
+            if component in check_duplication:
+                return True
+            check_duplication.append(component)
+        return False
+
+    def get_only_supported_fields(self, input_list, ignored_keys_list):
+        copied_list = copy.deepcopy(input_list)
+        for copied_dict in copied_list:
+            for key in copied_dict.keys():
+                if key in ignored_keys_list:
+                    copied_dict.pop(key, None)
+        msg = 'The field(s) "%s" is/are not supported and will be ignored.' % ignored_keys_list
+        self.warnings.append(Warn(ignored_keys_list, '', msg))
+        return copied_list
+
+    @staticmethod
+    def get_non_supported_fields(input_list):
+        """
+        Returns a list of the non-supported fields in a given line.
+        """
+        for line in input_list:
+            return [field for field in line.keys() if not field in SUPPORTED_FIELDS]
 
     def verify_license_files(self, input_list, project_dir):
         """
@@ -273,9 +275,7 @@ class GenAbout(object):
         Extract license text from DJE
         """
         license_context_list = []
-        for items in license_list:
-            gen_path = items[0]
-            license_key = items[1]
+        for gen_path, license_key in license_list:
             if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
             gen_license_path = join(project_path, gen_path, license_key) + '.LICENSE'
@@ -289,9 +289,7 @@ class GenAbout(object):
         return license_context_list
 
     def write_licenses(self, license_context_list):
-        for license in license_context_list:
-            gen_license_path = license[0]
-            license_context = license[1]
+        for gen_license_path, license_context in license_context_list:
             try:
                 with open(gen_license_path, 'wb') as output:
                     output.write(license_context)
@@ -318,7 +316,6 @@ class GenAbout(object):
         # Otherwise, the value in the input_list may be changed based on the
         # action number below
         copied_list = copy.deepcopy(input_list)
-        #for component in copied_list:
         for line in copied_list:
             # ToDo: The following code is used to validate the existence
             # of the 'license_text_file' if there is any.
@@ -404,17 +401,13 @@ class GenAbout(object):
 
     @staticmethod
     def gen_license_list(line):
-        dje_license_key_list = []
         dje_key = line['dje_license_key']
         file_location = line['about_file']
         if file_location.endswith('/'):
             file_location = file_location.rpartition('/')[0]
         about_parent_dir = dirname(file_location)
-        dje_license_key_list.append(about_parent_dir)
-        dje_license_key_list.append(dje_key)
         line['license_text_file'] = dje_key +'.LICENSE'
-        return dje_license_key_list
-
+        return (about_parent_dir, dje_key)
 
     @staticmethod
     def format_output(input_list):
@@ -422,10 +415,7 @@ class GenAbout(object):
         Process the input and convert to the specific strings format.
         """
         components_list = []
-        for entry in input_list:
-            about_file_location = entry[0]
-            about_dict_list = entry[1]
-
+        for about_file_location, about_dict_list in input_list:
             component = []
             component_name = about_dict_list.get('name', '')
             component_version = about_dict_list.get('version', '')
@@ -449,9 +439,7 @@ class GenAbout(object):
 
     @staticmethod
     def write_output(output):
-        for line in output:
-            about_file_location = line[0]
-            context = line[1]
+        for about_file_location, context in output:
             if _exists(about_file_location):
                 os.remove(about_file_location)
             with open(about_file_location, 'wb') as output_file:
@@ -608,9 +596,31 @@ def main(parser, options, args):
     file_handler = logging.FileHandler(output_path + LOG_FILENAME)
     file_logger.addHandler(file_handler)
 
-    input_list = gen.read_input(input_path, mapping_config)
+    input_list = gen.get_input_list(input_path)
 
-    if copy_license_path:
+    input_list = gen.remove_empty_rows(input_list)
+
+    if mapping_config:
+        mapping_list = gen.get_mapping_list()
+        input_list = gen.convert_input_list(input_list, mapping_list)
+
+    gen.validate(input_list)
+
+    ignored_fields_list = gen.get_non_supported_fields(input_list)
+    if ignored_fields_list:
+        input_list = gen.get_only_supported_fields(input_list, ignored_fields_list)
+
+
+
+
+
+
+
+
+
+
+
+    """if copy_license_path:
         if not isdir(copy_license_path):
             print("The '--copy_license' <project_path> must be a directory.")
             print("'--copy_license' is skipped.")
@@ -636,7 +646,7 @@ def main(parser, options, args):
 
     gen.warnings_errors_summary()
     print('Warnings: %s' % len(gen.warnings))
-    print('Errors: %s' % len(gen.errors))
+    print('Errors: %s' % len(gen.errors))"""
 
 
 def get_parser():

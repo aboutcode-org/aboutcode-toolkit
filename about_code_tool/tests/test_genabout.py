@@ -31,55 +31,124 @@ GEN_LOCATION = join(TESTDATA_PATH, 'test_files_for_genabout')
 
 
 class GenAboutTest(unittest.TestCase):
-    def test_read_input(self):
+    def test_get_input_list(self):
         gen = genabout.GenAbout()
         test_input = join(TESTDATA_PATH, "test_files_for_genabout/about.csv")
-        list = gen.read_input(test_input, False)
-        self.assertTrue(list, "List shouldn't be empty.")
+        expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                           'name': 'ABOUT tool', 'version': '0.8.1'}]
+        list = gen.get_input_list(test_input)
+        self.assertTrue(list == expected_list)
 
-    def test_read_input_with_blank_line(self):
+    def test_remove_empty_rows(self):
         gen = genabout.GenAbout()
-        test_input = join(TESTDATA_PATH, "test_files_for_genabout/contains_blank_line.csv")
-        list = gen.read_input(test_input, False)
-        self.assertTrue(list, "List shouldn't be empty.")
+        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'},
+                      {'about_file': '', 'about_resource': '',
+                       'name': '', 'version': ''}]
+        expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'}]
+        output = gen.remove_empty_rows(input_list)
+        self.assertTrue(output == expected_list)
 
-    def test_read_input_missing_about_file(self):
+    
+    def test_get_mapping_list(self):
         gen = genabout.GenAbout()
-        test_input = join(TESTDATA_PATH, "test_files_for_genabout/missing_about_file.csv")
-        list = gen.read_input(test_input, False)
-        self.assertTrue(len(gen.errors) == 1, "This should return only 1 error.")
-        self.assertFalse(gen.warnings, "No warnings should be returned.")
-        self.assertFalse(list, "The list should be empty.")
+        expected_list = {'about_file': 'Directory/Filename',
+                          'version': 'Confirmed Version',
+                           'about_resource': 'file_name', 'name': 'Component'}
+        output = gen.get_mapping_list()
+        self.assertTrue(output == expected_list)
 
-    def test_read_input_missing_about_resource(self):
+    def test_convert_input_list(self):
         gen = genabout.GenAbout()
-        test_input = join(TESTDATA_PATH, "test_files_for_genabout/missing_about_resource.csv")
-        list = gen.read_input(test_input, False)
-        self.assertTrue(len(gen.errors) == 1, "This should return only 1 error.")
-        self.assertFalse(gen.warnings, "No warnings should be returned.")
-        self.assertFalse(list, "The list should be empty.")
+        mapping_list = {'about_file': 'Directory/Filename',
+                          'version': 'Confirmed Version',
+                           'about_resource': 'file_name', 'name': 'Component'}
+        input_list = [{'file_name': 'opensans', 'ignore field': 'i',
+                       'Component': 'OpenSans Fonts', 'Confirmed Version': '1',
+                       'Directory/Filename': '/extension/streamer/opensans/'}]
+        expected_list = [{'about_file': '/extension/streamer/opensans/',
+                          'name': 'OpenSans Fonts', 'ignore field': 'i',
+                          'version': '1', 'about_resource': 'opensans'}]
+        output = gen.convert_input_list(input_list, mapping_list)
+        self.assertTrue(output == expected_list)
 
-    def test_read_input_missing_about_file_and_resource(self):
+    def test_validate_value_in_essential_missing_about_file(self):
         gen = genabout.GenAbout()
-        test_input = join(TESTDATA_PATH, "test_files_for_genabout/missing_about_file_and_resource.csv")
-        list = gen.read_input(test_input, False)
-        self.assertTrue(len(gen.errors) == 1, "This should return only 1 error.")
-        self.assertFalse(gen.warnings, "No warnings should be returned.")
-        self.assertFalse(list, "The list should be empty.")
+        input = [{'about_file': '', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'}]
+        self.assertFalse(gen.validate_value_in_essential_fields(input))
 
-    def test_read_input_valid_and_invalid_rows(self):
+    def test_validate_value_in_essential_missing_about_resource(self):
         gen = genabout.GenAbout()
-        test_input = join(TESTDATA_PATH, "test_files_for_genabout/valid_and_invalid_rows.csv")
-        list = gen.read_input(test_input, False)
-        self.assertTrue(len(gen.errors) == 2, "This should return 2 errors.")
-        self.assertFalse(gen.warnings, "No warnings should be returned.")
-        self.assertTrue(len(list) == 1, "The length of the list should be 1.")
+        input = [{'about_file': 'about.ABOUT', 'about_resource': '',
+                       'name': 'ABOUT tool', 'version': '0.8.1'}]
+        self.assertFalse(gen.validate_value_in_essential_fields(input))
 
-    def test_read_input_with_keys_mapping(self):
+    def test_validate_value_in_essential_missing_all(self):
         gen = genabout.GenAbout()
-        test_input = join(TESTDATA_PATH, "test_files_for_genabout/about-mapping-sample.csv")
-        list = gen.read_input(test_input, True)
-        self.assertTrue(list, "List shouldn't be empty.")
+        input = [{'about_file': '', 'about_resource': '',
+                       'name': 'ABOUT tool', 'version': '0.8.1'}]
+        self.assertFalse(gen.validate_value_in_essential_fields(input))
+
+    def test_validate_value_in_essential_fields_no_missing(self):
+        gen = genabout.GenAbout()
+        input = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'}]
+        self.assertTrue(gen.validate_value_in_essential_fields(input))
+
+    def test_validate_duplication_have_dup(self):
+        gen = genabout.GenAbout()
+        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'},
+                      {'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': ''}]
+        self.assertTrue(gen.validate_duplication(input_list), "The list has duplication.")
+
+    def test_validate_duplication_no_dup(self):
+        gen = genabout.GenAbout()
+        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'},
+                      {'about_file': 'about1.ABOUT', 'about_resource': 'something',
+                       'name': 'ABOUT tool', 'version': ''}]
+        self.assertFalse(gen.validate_duplication(input_list), "The list has no duplication.")
+
+    def test_validate_mandatory_fields_no_missing(self):
+        gen = genabout.GenAbout()
+        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'}]
+        self.assertTrue(gen.validate_mandatory_fields(input_list))
+
+    def test_validate_mandatory_fields_missing_about_file(self):
+        gen = genabout.GenAbout()
+        input_list = [{'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'}]
+        self.assertFalse(gen.validate_mandatory_fields(input_list))
+
+    def test_validate_mandatory_fields_missing_about_resource(self):
+        gen = genabout.GenAbout()
+        input_list = [{'about_file': 'about.ABOUT', 'name': 'ABOUT tool',
+                       'version': '0.8.1'}]
+        self.assertFalse(gen.validate_mandatory_fields(input_list))
+
+    def test_get_non_supported_fields(self):
+        gen = genabout.GenAbout()
+        input = [{'about_file': '', 'name': 'OpenSans Fonts',
+                 'non_supported field': 'TEST', 'version': '1',
+                 'about_resource': 'opensans'}]
+        non_supported_list = gen.get_non_supported_fields(input)
+        expected_list = ['non_supported field']
+        self.assertTrue(non_supported_list == expected_list)
+
+    def test_get_only_supported_fields(self):
+        gen = genabout.GenAbout()
+        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1',
+                       'non_supported': 'test'}]
+        expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                       'name': 'ABOUT tool', 'version': '0.8.1'}]
+        ignore_key_list = ['non_supported']
+        self.assertTrue(expected_list == gen.get_only_supported_fields(input_list, ignore_key_list))
 
     def test_pre_generation_about_exists_action_0(self):
         gen = genabout.GenAbout()
@@ -191,7 +260,7 @@ class GenAboutTest(unittest.TestCase):
         input_list = {'about_file': '/tmp/3pp/opensans/', 'name': 'OpenSans Fonts',
                        'version': '1', 'dje_license_key': 'apache-2.0',
                        'license_text_file': '', 'about_resource': 'opensans'}
-        expected_list = ['/tmp/3pp', 'apache-2.0']
+        expected_list = ('/tmp/3pp', 'apache-2.0')
         output = gen.gen_license_list(input_list)
         self.assertTrue(expected_list == output)
         self.assertTrue(input_list['license_text_file'] == 'apache-2.0.LICENSE')
@@ -201,18 +270,10 @@ class GenAboutTest(unittest.TestCase):
         input_list = {'about_file': '/tmp/3pp/opensans/', 'name': 'OpenSans Fonts',
                        'version': '1', 'dje_license_key': 'apache-2.0',
                        'about_resource': 'opensans'}
-        expected_list = ['/tmp/3pp', 'apache-2.0']
+        expected_list = ('/tmp/3pp', 'apache-2.0')
         output = gen.gen_license_list(input_list)
         self.assertTrue(expected_list == output)
         self.assertTrue(input_list['license_text_file'] == 'apache-2.0.LICENSE')
-
-    def test_config_mapping(self):
-        gen = genabout.GenAbout()
-        about_resource, about_file, name, version = gen.config_mapping(True)
-        self.assertTrue(about_resource == 'file_name')
-        self.assertTrue(about_file == 'Directory/Filename')
-        self.assertTrue(name == 'Component')
-        self.assertTrue(version == 'Confirmed Version')
 
     def test_copy_license_files_test_path_not_endswith_slash(self):
         gen = genabout.GenAbout()
@@ -249,10 +310,3 @@ class GenAboutTest(unittest.TestCase):
                 context = line
         self.assertTrue(context == tmp_license_context)
 
-    def test_check_non_supported_fields(self):
-        gen = genabout.GenAbout()
-        input = {'about_file': '', 'name': 'OpenSans Fonts',
-                 'non_supported field': 'TEST', 'version': '1', 'about_resource': 'opensans'}
-        non_supported_list = gen.get_non_supported_fields(input)
-        expected_list = ['non_supported field']
-        self.assertTrue(non_supported_list == expected_list)
