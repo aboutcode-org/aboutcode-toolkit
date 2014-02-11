@@ -6,12 +6,8 @@ This is a tool to generate ABOUT files based on the input file.
 The input file should be a csv format which contains information about the
 file location, origin and license of the software components etc.
 """
-
 from __future__ import print_function, with_statement
-from collections import namedtuple
-from os import makedirs
-from os.path import exists, dirname, join, abspath, isdir
-import about
+
 import copy
 import csv
 import errno
@@ -23,6 +19,12 @@ import shutil
 import sys
 import urllib
 import urllib2
+
+from collections import namedtuple
+from os import makedirs
+from os.path import exists, dirname, join, abspath, isdir
+
+import about
 
 __version__ = '0.9.0'
 
@@ -70,10 +72,7 @@ class GenAbout(object):
     @staticmethod
     def get_input_list(input_file):
         csvfile = csv.DictReader(open(input_file, 'rU'))
-        components_list = []
-        for line in csvfile:
-            components_list.append(line)
-        return components_list
+        return [line for line in csvfile]
 
     @staticmethod
     def get_non_empty_rows_list(input_list):
@@ -179,8 +178,8 @@ class GenAbout(object):
         """
         Returns a list of the non-supported fields in a given line.
         """
-        for line in input_list:
-            return [field for field in line.keys() if not field in SUPPORTED_FIELDS]
+        first_line = input_list[0]
+        return [field for field in first_line.keys() if not field in SUPPORTED_FIELDS]
 
     def verify_license_files(self, input_list, project_dir):
         """
