@@ -52,6 +52,8 @@ logger.addHandler(handler)
 file_logger = logging.getLogger(__name__+'_file')
 
 ESSENTIAL_FIELDS = ('about_file', 'about_resource',)
+
+# The 'dje_license_key' will be removed and will use the 'dje_license' instead.
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + \
     ('about_file', 'dje_license_key',)
 
@@ -294,18 +296,12 @@ class GenAbout(object):
         """
         output_list = []
         license_output_list = []
-        # The input_list needs to be copied and be used below.
-        # Otherwise, the value in the input_list may be changed based on the
-        # action number below
         copied_list = copy.deepcopy(input_list)
         for line in copied_list:
             # ToDo: The following code is used to validate the existence
             # of the 'license_text_file' if there is any.
             # All the validation calls should be re-factored along with the about.py
             try:
-                # We do not need to check for the gen_license option
-                # as the value of the 'license_text_file' will not be changed
-                # regardless the gen_license is set or not.
                 if line['license_text_file']:
                     file_location = line['about_file']
                     if file_location.endswith('/'):
