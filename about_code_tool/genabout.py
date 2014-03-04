@@ -204,7 +204,7 @@ class GenAbout(object):
             except Exception as e:
                 print(repr(e))
                 print("The input does not have the 'license_text_file' key which is required.")
-                sys.exit(errno.EINVAL)
+                raise Exception(repr(e))
         return license_files_list
 
     def request_license_data(self, url, username, api_key, license_key):
@@ -595,6 +595,8 @@ def main(parser, options, args):
                 copy_license_path += '/'
             project_parent_dir = dirname(copy_license_path)
             license_list = gen.verify_license_files(input_list, project_parent_dir)
+            if not license_list:
+                print("None of the 'license_text_file' is found. '--copy_license' is ignored.")
             gen.copy_license_files(output_path, license_list, project_parent_dir)
 
     if extract_license:

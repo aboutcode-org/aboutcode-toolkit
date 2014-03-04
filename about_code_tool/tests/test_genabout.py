@@ -14,13 +14,13 @@
 #  limitations under the License.
 # =============================================================================
 
-from __future__ import print_function
-from __future__ import with_statement
+from __future__ import print_function, with_statement
 
 import os
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
+
 from os.path import abspath, dirname, join
 
 from about_code_tool import genabout
@@ -254,6 +254,13 @@ class GenAboutTest(unittest.TestCase):
         self.assertTrue(expected_list == output)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_verify_license_files_no_key(self):
+        gen = genabout.GenAbout()
+        input_list = [{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
+                          'name': 'ABOUT tool', 'about_resource': '.'}]
+        path = '.'
+        self.assertRaises(Exception, gen.verify_license_files, input_list, path)
 
     def test_gen_license_list_license_text_file_no_value(self):
         gen = genabout.GenAbout()
