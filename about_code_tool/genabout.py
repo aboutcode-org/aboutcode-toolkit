@@ -445,8 +445,8 @@ Handle different behaviors if ABOUT files already existed
 """
 
 ALL_IN_ONE_HELP = """\
-Generate all the ABOUT files in the [output_path] regardless
-of the about_file location
+Generate all the ABOUT files in the [output_path] without
+any project structure
 """
 
 COPY_LICENSE_HELP = """\
@@ -455,7 +455,7 @@ Path - Project path
 """
 
 MAPPING_HELP = """\
-Activate the MAPPING.CONFIG
+Configure the mapping key from the MAPPING.CONFIG
 """
 
 EXTRACT_LICENSE_HELP = """\
