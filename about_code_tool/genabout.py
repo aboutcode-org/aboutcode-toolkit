@@ -288,18 +288,9 @@ class GenAbout(object):
         license_text = data.get('full_text', '')
         return license_text
 
-    def pre_generation(self, gen_location, input_list, action_num, all_in_one, gen_license):
-        """
-        check the existence of the output location and handle differently
-        according to the action_num.
-        """
-        output_list = []
+    def get_dje_license_list(self, gen_location, input_list, gen_license):
         license_output_list = []
-        copied_list = copy.deepcopy(input_list)
-        for line in copied_list:
-            # ToDo: The following code is used to validate the existence
-            # of the 'license_text_file' if there is any.
-            # All the validation calls should be re-factored along with the about.py
+        for line in input_list:
             try:
                 if line['license_text_file']:
                     file_location = line['about_file']
@@ -311,31 +302,25 @@ class GenAbout(object):
                         self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' doesn't exist."))
                 else:
                     if gen_license:
-                        try:
-                            if line['dje_license_key']:
-                                license_output_list.append(self.gen_license_list(line))
-                            else:
-                                self.warnings.append(Warn('dje_license_key', '',
-                                                          "Missing 'dje_license_key' for " + line['about_file']))
-                        except Exception as e:
-                            print(repr(e))
-                            print("The input does not have the 'dje_license_key' key which is required.")
-                            sys.exit(errno.EINVAL)
-            # This except condition will force the tool to create the
-            # 'license_text_file' key column
-            except Exception as e:
-                if gen_license:
-                    try:
                         if line['dje_license_key']:
                             license_output_list.append(self.gen_license_list(line))
                         else:
                             self.warnings.append(Warn('dje_license_key', '',
                                                       "Missing 'dje_license_key' for " + line['about_file']))
-                    except Exception as e:
-                        print(repr(e))
-                        print("The input does not have the 'dje_license_key' key which is required.")
-                        sys.exit(errno.EINVAL)
+            # This except condition will force the tool to create the
+            # 'license_text_file' key column from the self.gen_license_list(line)
+            except Exception as e:
+                if gen_license:
+                    if line['dje_license_key']:
+                        license_output_list.append(self.gen_license_list(line))
+                    else:
+                        self.warnings.append(Warn('dje_license_key', '',
+                                                  "Missing 'dje_license_key' for " + line['about_file']))
+        return license_output_list
 
+    def pre_generation(self, gen_location, input_list, action_num, all_in_one):
+        output_list = []
+        for line in input_list:
             component_list = []
             file_location = line['about_file']
             if file_location.startswith('/'):
@@ -374,7 +359,7 @@ class GenAbout(object):
             component_list.append(about_file_location)
             component_list.append(line)
             output_list.append(component_list)
-        return output_list, license_output_list
+        return output_list
 
     @staticmethod
     def gen_license_list(line):
@@ -603,8 +588,17 @@ def main(parser, options, args):
         if not api_url or not api_username or not api_key:
             print("Missing argument for --extract_license")
             sys.exit(errno.EINVAL)
+        for line in input_list:
+            try:
+                if line['dje_license_key']:
+                    break
+            except Exception as e:
+                print(repr(e))
+                print("The input does not have the 'dje_license_key' key which is required.")
+                sys.exit(errno.EINVAL)
 
-    components_list, dje_license_list = gen.pre_generation(output_path, input_list, action_num, all_in_one, extract_license)
+    dje_license_list = gen.get_dje_license_list(output_path, input_list, extract_license)
+    components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
 
