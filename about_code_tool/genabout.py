@@ -425,8 +425,8 @@ def _exists(file_path):
 
 
 USAGE_SYNTAX = """\
-    Input must be a CSV file.
-    Output must be a directory location where the ABOUT files should be generated.
+    Input must be a CSV file
+    Output must be a directory location where the ABOUT files should be generated
 """
 
 VERBOSITY_HELP = """\
@@ -450,12 +450,12 @@ any project structure
 """
 
 COPY_LICENSE_HELP = """\
-Copy the 'license_text_file'
+Copy the 'license_text_file' from the project to the generated location
 Project path - Project path
 """
 
 LICENSE_TEXT_LOCATION_HELP = """\
-Copy the provided 'license_text_file' to the generated location
+Copy the 'license_text_file' from the directory to the generated location
 License path - License text files path
 """
 
