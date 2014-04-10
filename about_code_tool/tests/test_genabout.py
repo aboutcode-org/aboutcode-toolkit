@@ -41,11 +41,11 @@ class GenAboutTest(unittest.TestCase):
 
     def test_get_non_empty_rows_list(self):
         gen = genabout.GenAbout()
-        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+        input_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'},
                       {'about_file': '', 'about_resource': '',
                        'name': '', 'version': ''}]
-        expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+        expected_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
         output = gen.get_non_empty_rows_list(input_list)
         self.assertTrue(output == expected_list)
@@ -81,7 +81,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_validate_value_in_essential_missing_about_resource(self):
         gen = genabout.GenAbout()
-        input = [{'about_file': 'about.ABOUT', 'about_resource': '',
+        input = [{'about_file': '/about.ABOUT', 'about_resource': '',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
         self.assertFalse(gen.validate_value_in_essential_fields(input))
 
@@ -93,21 +93,21 @@ class GenAboutTest(unittest.TestCase):
 
     def test_validate_value_in_essential_fields_no_missing(self):
         gen = genabout.GenAbout()
-        input = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+        input = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
         self.assertTrue(gen.validate_value_in_essential_fields(input))
 
     def test_validate_duplication_have_dup(self):
         gen = genabout.GenAbout()
-        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+        input_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'},
-                      {'about_file': 'about.ABOUT', 'about_resource': '.',
+                      {'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': ''}]
         self.assertTrue(gen.validate_duplication(input_list), "The list has duplication.")
 
     def test_validate_duplication_no_dup(self):
         gen = genabout.GenAbout()
-        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+        input_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'},
                       {'about_file': 'about1.ABOUT', 'about_resource': 'something',
                        'name': 'ABOUT tool', 'version': ''}]
@@ -115,7 +115,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_validate_mandatory_fields_no_missing(self):
         gen = genabout.GenAbout()
-        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+        input_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
         self.assertTrue(gen.validate_mandatory_fields(input_list))
 
@@ -127,7 +127,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_validate_mandatory_fields_missing_about_resource(self):
         gen = genabout.GenAbout()
-        input_list = [{'about_file': 'about.ABOUT', 'name': 'ABOUT tool',
+        input_list = [{'about_file': '/about.ABOUT', 'name': 'ABOUT tool',
                        'version': '0.8.1'}]
         self.assertFalse(gen.validate_mandatory_fields(input_list))
 
@@ -142,22 +142,61 @@ class GenAboutTest(unittest.TestCase):
 
     def test_get_only_supported_fields(self):
         gen = genabout.GenAbout()
-        input_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+        input_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1',
                        'non_supported': 'test'}]
-        expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+        expected_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
         ignore_key_list = ['non_supported']
         self.assertTrue(expected_list == gen.get_only_supported_fields(input_list, ignore_key_list))
 
-    def test_get_dje_license_list(self):
+    def test_get_dje_license_list_gen_license_with_key(self):
         gen = genabout.GenAbout()
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
                         'dje_license_key': 'apache-2.0'}]
         expected_output_list = [('', 'apache-2.0')]
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, True)
+        gen_license = True
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_get_dje_license_list_no_gen_license_with_license_text_file_key_not_exist(self):
+        gen = genabout.GenAbout()
+        gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
+        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool'}]
+        expected_output_list = []
+        gen_license = False
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_get_dje_license_list_file_no_gen_license_with_license_text_file_key_exist(self):
+        gen = genabout.GenAbout()
+        gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool',
+                        'license_text_file': '../../../../apache2.LICENSE.txt'}]
+        expected_output_list = []
+        gen_license = False
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_get_dje_license_list_dir_no_gen_license_with_license_text_file_key_exist(self):
+        gen = genabout.GenAbout()
+        gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
+        input_list = [{'about_file': '/ABOUT/', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool',
+                        'license_text_file': '../../../../apache2.LICENSE.txt'}]
+        expected_output_list = []
+        gen_license = False
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -165,7 +204,7 @@ class GenAboutTest(unittest.TestCase):
     def test_pre_generation_about_exists_action_0(self):
         gen = genabout.GenAbout()
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
-        action_num = '0'
+        action_num = 0
         input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool'}]
         expected_output_list = []
@@ -176,7 +215,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_pre_generation_about_exists_action_1(self):
         gen = genabout.GenAbout()
-        action_num = '1'
+        action_num = 1
         input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': ''}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
@@ -189,7 +228,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_pre_generation_about_exists_action_2(self):
         gen = genabout.GenAbout()
-        action_num = '2'
+        action_num = 2
         input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': '', 'test': 'test sample'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
@@ -203,7 +242,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_pre_generation_about_exists_action_3(self):
         gen = genabout.GenAbout()
-        action_num = '3'
+        action_num = 3
         input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': '', 'test': 'test sample'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
@@ -216,7 +255,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_pre_generation_all_in_one(self):
         gen = genabout.GenAbout()
-        action_num = '0'
+        action_num = 0
         input_list = [{'about_file': 'test_generation/elasticsearch.ABOUT',
                          'version': '0.19.8',
                          'about_resource': 'elasticsearch-0.19.8.zip',

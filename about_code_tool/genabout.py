@@ -292,6 +292,8 @@ class GenAbout(object):
         license_output_list = []
         for line in input_list:
             try:
+                # If there is value in 'license_text_file', the tool will not
+                # update/overwrite the 'license_text_file' with 'dje_license_key'
                 if line['license_text_file']:
                     file_location = line['about_file']
                     if file_location.endswith('/'):
@@ -337,19 +339,19 @@ class GenAbout(object):
             if not _exists(dir):
                 makedirs(dir)
             if _exists(about_file_location):
-                if action_num == '0':
+                if action_num == 0:
                     about_exist = "ABOUT file already existed. Generation is skipped."
                     self.warnings.append(Warn('about_file', about_file_location, about_exist))
                     continue
                 # Overwrites the current ABOUT field value if existed
-                elif action_num == '1':
+                elif action_num == 1:
                     about_object = about.AboutFile(about_file_location)
                     for field_name, value in about_object.parsed.items():
                         field_name = field_name.lower()
                         if not field_name in line.keys() or not line[field_name]:
                             line[field_name] = value
                 # Keep the current field value and only add the "new" field and field value
-                elif action_num == '2':
+                elif action_num == 2:
                     about_object = about.AboutFile(about_file_location)
                     for field_name, value in about_object.parsed.items():
                         field_name = field_name.lower()
@@ -492,6 +494,7 @@ def main(parser, options, args):
     api_url = ''
     api_username = ''
     api_key = ''
+    gen_license = False
 
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
@@ -528,6 +531,7 @@ def main(parser, options, args):
         api_url = extract_license[0].partition('--api_url=')[2]
         api_username = extract_license[1].partition('--api_username=')[2]
         api_key = extract_license[2].partition('--api_key=')[2]
+        gen_license = True
 
     if not len(args) == 2:
         print('Input and Output paths are required.\n')
@@ -627,7 +631,7 @@ def main(parser, options, args):
                 print("The input does not have the 'dje_license_key' key which is required.")
                 sys.exit(errno.EINVAL)
 
-    dje_license_list = gen.get_dje_license_list(output_path, input_list, extract_license)
+    dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license)
     components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
