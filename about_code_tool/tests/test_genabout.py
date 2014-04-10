@@ -240,6 +240,19 @@ class GenAboutTest(unittest.TestCase):
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
+    def test_get_dje_license_list_gen_license_with_dje_license_key_no_license_text_file(self):
+        gen = genabout.GenAbout()
+        gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool',
+                        'dje_license_key': 'apache-2.0'}]
+        expected_output_list = [('/', 'apache-2.0')]
+        gen_license = True
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
     def test_pre_generation_about_is_dir_exists_action_0(self):
         gen = genabout.GenAbout()
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
@@ -352,7 +365,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_verify_license_files_exist(self):
         gen = genabout.GenAbout()
-        input_list = [{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
+        input_list = [{'version': '0.8.1', 'about_file': '/TESTCASE/',
                          'license_text_file': 'apache2.LICENSE.txt',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
@@ -362,9 +375,33 @@ class GenAboutTest(unittest.TestCase):
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
+    def test_verify_license_files_exist_license_in_project(self):
+        gen = genabout.GenAbout()
+        input_list = [{'version': '0.8.1', 'about_file': '/TESTCASE/',
+                         'license_text_file': 'apache2.LICENSE.txt',
+                          'name': 'ABOUT tool', 'about_resource': '.'}]
+        path = '.'
+        expected_list = [('./apache2.LICENSE.txt', '')]
+        output = gen.verify_license_files(input_list, path, True)
+        self.assertEqual(expected_list, output)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
     def test_verify_license_files_not_exist(self):
         gen = genabout.GenAbout()
-        input_list = [{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
+        input_list = [{'version': '0.8.1', 'about_file': '/about.py.ABOUT',
+                         'license_text_file': 'not_exist.LICENSE.txt',
+                          'name': 'ABOUT tool', 'about_resource': '.'}]
+        path = '.'
+        expected_list = []
+        output = gen.verify_license_files(input_list, path, False)
+        self.assertTrue(expected_list == output)
+        self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_verify_license_files_not_exist_license_in_project(self):
+        gen = genabout.GenAbout()
+        input_list = [{'version': '0.8.1', 'about_file': '/TESTCASE/',
                          'license_text_file': 'not_exist.LICENSE.txt',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
@@ -376,7 +413,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_verify_license_files_no_key(self):
         gen = genabout.GenAbout()
-        input_list = [{'version': '0.8.1', 'about_file': 'about.py.ABOUT',
+        input_list = [{'version': '0.8.1', 'about_file': '/about.py.ABOUT',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
         self.assertRaises(Exception, gen.verify_license_files, input_list, path)
