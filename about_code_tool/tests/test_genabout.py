@@ -150,14 +150,13 @@ class GenAboutTest(unittest.TestCase):
         ignore_key_list = ['non_supported']
         self.assertTrue(expected_list == gen.get_only_supported_fields(input_list, ignore_key_list))
 
-    def test_get_dje_license_list_gen_license_with_key(self):
+    def test_get_dje_license_list_no_gen_license_with_no_license_text_file_key(self):
         gen = genabout.GenAbout()
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
-        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
-                        'about_resource': '.', 'name': 'ABOUT tool',
-                        'dje_license_key': 'apache-2.0'}]
-        expected_output_list = [('', 'apache-2.0')]
-        gen_license = True
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool'}]
+        expected_output_list = []
+        gen_license = False
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
@@ -166,14 +165,15 @@ class GenAboutTest(unittest.TestCase):
     def test_get_dje_license_list_no_gen_license_with_license_text_file_key_not_exist(self):
         gen = genabout.GenAbout()
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
-        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
-                        'about_resource': '.', 'name': 'ABOUT tool'}]
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool',
+                        'license_text_file': 'not_exist.txt'}]
         expected_output_list = []
         gen_license = False
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
-        self.assertFalse(gen.errors, "No errors should be returned.")
+        self.assertTrue(len(gen.errors) == 1, "Should return 1 error.")
 
     def test_get_dje_license_list_file_no_gen_license_with_license_text_file_key_exist(self):
         gen = genabout.GenAbout()
@@ -201,11 +201,64 @@ class GenAboutTest(unittest.TestCase):
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
+    def test_get_dje_license_list_file_gen_license_with_license_text_file_key_exist(self):
+        gen = genabout.GenAbout()
+        gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool',
+                        'license_text_file': '../../../../apache2.LICENSE.txt'}]
+        expected_output_list = []
+        gen_license = True
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_get_dje_license_list_gen_license_with_dje_license_key_empty_license_text_file(self):
+        gen = genabout.GenAbout()
+        gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool',
+                        'license_text_file': '', 'dje_license_key': 'apache-2.0'}]
+        expected_output_list = [('/', 'apache-2.0')]
+        gen_license = True
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_get_dje_license_list_gen_license_with_empty_dje_license_key_empty_license_text_file(self):
+        gen = genabout.GenAbout()
+        gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool',
+                        'license_text_file': '', 'dje_license_key': ''}]
+        expected_output_list = []
+        gen_license = True
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_pre_generation_about_is_dir_exists_action_0(self):
+        gen = genabout.GenAbout()
+        gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
+        action_num = 0
+        input_list = [{'about_file': '/TESTCASE/', 'version': '0.8.1',
+                        'about_resource': '.', 'name': 'ABOUT tool'}]
+        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/TESTCASE.ABOUT'),
+                                 {'about_file': '/TESTCASE/', 'version': '0.8.1',
+                                  'about_resource': '.', 'name': 'ABOUT tool'}]]
+        output_list = gen.pre_generation(gen_location, input_list, action_num, False)
+        self.assertTrue(expected_output_list == output_list, "This output_list should be empty.")
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
     def test_pre_generation_about_exists_action_0(self):
         gen = genabout.GenAbout()
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         action_num = 0
-        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.1',
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool'}]
         expected_output_list = []
         output_list = gen.pre_generation(gen_location, input_list, action_num, False)
@@ -216,10 +269,10 @@ class GenAboutTest(unittest.TestCase):
     def test_pre_generation_about_exists_action_1(self):
         gen = genabout.GenAbout()
         action_num = 1
-        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': ''}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
-                                 {'about_file': 'about.py.ABOUT', 'version': '0.8.2',
+                                 {'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
@@ -229,7 +282,7 @@ class GenAboutTest(unittest.TestCase):
     def test_pre_generation_about_exists_action_2(self):
         gen = genabout.GenAbout()
         action_num = 2
-        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': '', 'test': 'test sample'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
                                   {'test': 'test sample', 'about_file': 'about.py.ABOUT',
@@ -243,10 +296,10 @@ class GenAboutTest(unittest.TestCase):
     def test_pre_generation_about_exists_action_3(self):
         gen = genabout.GenAbout()
         action_num = 3
-        input_list = [{'about_file': 'about.py.ABOUT', 'version': '0.8.2',
+        input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': '', 'test': 'test sample'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
-                                  {'about_file': 'about.py.ABOUT', 'version': '0.8.2',
+                                  {'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                                     'about_resource': '.', 'name': '', 'test': 'test sample'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
@@ -272,11 +325,26 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         input_list = [
             [join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
-             {'about_file': 'about.py.ABOUT', 'version': '0.8.1',
+             {'about_file': '/about.py.ABOUT', 'version': '0.8.1',
               'about_resource': '.', 'name': 'ABOUT Tool'}]]
         expected_output = [
             [join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
             'about_resource: .\nname: ABOUT Tool\nversion: 0.8.1\n\n']]
+        output = gen.format_output(input_list)
+        self.assertEqual(expected_output, output)
+        self.assertFalse(gen.warnings, "No warnings should be returned.")
+        self.assertFalse(gen.errors, "No errors should be returned.")
+
+    def test_format_output_with_continuation(self):
+        gen = genabout.GenAbout()
+        input_list = [
+            [join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
+             {'about_file': '/about.py.ABOUT', 'version': '0.8.1',
+              'about_resource': '.', 'name': 'ABOUT Tool',
+              'readme': 'This is a readme test with \nline continuation.'}]]
+        expected_output = [
+            [join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
+            'about_resource: .\nname: ABOUT Tool\nversion: 0.8.1\n\nreadme: This is a readme test with \n line continuation.\n']]
         output = gen.format_output(input_list)
         self.assertEqual(expected_output, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
