@@ -596,7 +596,6 @@ def main(parser, options, args):
             project_parent_dir = dirname(copy_license_path)
             licenses_in_project = True
             license_list = gen.verify_license_files(input_list, project_parent_dir, licenses_in_project)
-            print(license_list)
             if not license_list:
                 print("None of the 'license_text_file' is found. '--copy_license' is ignored.")
             else:
@@ -612,7 +611,6 @@ def main(parser, options, args):
             license_dir = dirname(license_text_path)
             licenses_in_project = False
             license_list = gen.verify_license_files(input_list, license_dir, licenses_in_project)
-            print(license_list)
             if not license_list:
                 print("None of the 'license_text_file' is found. '--copy_license' is ignored.")
             else:
