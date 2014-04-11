@@ -949,6 +949,9 @@ class AboutCollector(object):
         self.abouts = [AboutFile(f)
                        for f in self._collect_about_files(self.absolute_path)]
 
+        #self.create_about_objects_from_files()
+        #self.extract_about_data_from_objects()
+
         self.summarize_issues()
 
     def __iter__(self):

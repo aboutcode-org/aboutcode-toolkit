@@ -162,9 +162,9 @@ def main(args, opts):
         sys.exit(errno.EEXIST)
 
     if not exists(output_path) or (exists(output_path) and overwrite):
-        collector = AboutCollector(input_path, output_path, opt_arg_num)
+        collector = AboutCollector(input_path)
         sublist = None if not component_subset_path else component_subset_to_sublist(component_subset_path)
-        attrib_str = collector.generate_attribution( sublist = sublist )
+        attrib_str = collector.generate_attribution( limit_to = sublist )
         with open(output_path, "w") as f:
             f.write(attrib_str)
 
