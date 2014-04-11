@@ -275,7 +275,7 @@ class GenAbout(object):
         for gen_license_path, license_context in license_context_list:
             try:
                 with open(gen_license_path, 'wb') as output:
-                    output.write(license_context)
+                    output.write(license_context.encode('utf8'))
             except Exception:
                 self.errors.append(Error('Unknown', gen_license_path, "Something is wrong."))
 
