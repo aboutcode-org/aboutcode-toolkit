@@ -140,6 +140,11 @@ def main(args, opts):
     # input_path = abspath(input_path)
     output_path = abspath(output_path)
 
+    # Add the following to solve the 
+    # UnicodeEncodeError: 'ascii' codec can't encode character
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
     if not exists(input_path):
         print('Input path does not exist.')
         option_usage()
