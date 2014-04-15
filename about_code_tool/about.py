@@ -929,6 +929,16 @@ class AboutFile(object):
 
         return ""  # Returns empty string if the notice file does not exist
 
+    def dje_license(self):
+        """
+        Return the dje_license value if the dje_license field exists
+        """
+        try:
+            return self.parsed['dje_license']
+        except Exception as e:
+            pass
+
+        return ""  # Returns empty string if the dje_license key does not exist
 
 class AboutCollector(object):
     """
@@ -1071,15 +1081,20 @@ class AboutCollector(object):
         validated_fields = []
         license_text = []
         notice_text = []
+        unique_license = []
         for about_object in self:
             if not limit_to or about_object.about_resource_path in limit_to:
                 validated_fields.append(about_object.validated_fields)
-                license_text.append(about_object.license_text())
                 notice_text.append(about_object.notice_text())
+                if not about_object.dje_license() in unique_license \
+                    and not about_object.dje_license() == None:
+                    unique_license.append(about_object.dje_license())
+                    license_text.append(about_object.license_text())
 
         return template.render(about_objects=validated_fields,
                                license_texts=license_text,
-                               notice_texts=notice_text)
+                               notice_texts=notice_text,
+                               unique_licenses=unique_license)
 
 
 USAGE_SYNTAX = """\

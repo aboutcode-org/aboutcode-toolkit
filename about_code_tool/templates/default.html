@@ -55,7 +55,7 @@
                 {% endif %}
                 {% if about_object.dje_license %} 
                     <p>Full text of
-                        <a class="{{ about_object.dje_license }}" href="#component-license-{{ loop.index0 }}">
+                        <a class="{{ about_object.dje_license }}" href="#component-license-{{ about_object.dje_license }}">
                          {{ about_object.dje_license }}
                          </a>
                             is available at the end of this document.</p>
@@ -65,12 +65,10 @@
         <hr>
 
         <h3>Licenses Used in This Product</h3>
-            {% for index in range(about_objects | count) %}
-                {% if about_objects[index].dje_license %}
-                <h3 id="component-license-{{ index }}">{{ about_objects[index].dje_license }}</h3>
-                <pre>{{ license_texts[index] }}</pre>
-                {% endif %}
-            {% endfor %}
+        {% for index in range(unique_licenses | count) %}
+            <h3 id="component-license-{{ unique_licenses[index] }}">{{ unique_licenses[index] }}</h3>
+            <pre>{{ license_texts[index] }}</pre>
+        {% endfor %}
         <h3><a id="End">End</a></h3>
     </body>
 </html>
