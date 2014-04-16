@@ -940,6 +940,17 @@ class AboutFile(object):
 
         return ""  # Returns empty string if the dje_license key does not exist
 
+    def get_license_text_file_name(self):
+        """
+        Return the license_text_file name if the license_text_file field exists
+        """
+        try:
+            return self.parsed['license_text_file']
+        except Exception as e:
+            pass
+
+        return ""  # Returns empty string if the license_text_file key does not exist
+
 class AboutCollector(object):
     """
     A collection of AboutFile instances.
@@ -1086,10 +1097,16 @@ class AboutCollector(object):
             if not limit_to or about_object.about_resource_path in limit_to:
                 validated_fields.append(about_object.validated_fields)
                 notice_text.append(about_object.notice_text())
-                if not about_object.dje_license() in unique_license \
-                    and not about_object.dje_license() == None:
-                    unique_license.append(about_object.dje_license())
-                    license_text.append(about_object.license_text())
+                if about_object.dje_license():
+                    if not about_object.dje_license() in unique_license \
+                        and not about_object.dje_license() == None:
+                        unique_license.append(about_object.dje_license())
+                        license_text.append(about_object.license_text())
+                elif about_object.get_license_text_file_name():
+                    if not about_object.get_license_text_file_name() in unique_license \
+                        and about_object.license_text():
+                        unique_license.append(about_object.get_license_text_file_name())
+                        license_text.append(about_object.license_text())
 
         return template.render(about_objects=validated_fields,
                                license_texts=license_text,

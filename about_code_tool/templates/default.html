@@ -53,10 +53,16 @@
                 {% elif about_object.notice_file %}
                     <pre class="component-notice">{{ notice_texts[loop.index0] }}</pre>
                 {% endif %}
-                {% if about_object.dje_license %} 
+                {% if about_object.dje_license in unique_licenses %} 
                     <p>Full text of
                         <a class="{{ about_object.dje_license }}" href="#component-license-{{ about_object.dje_license }}">
                          {{ about_object.dje_license }}
+                         </a>
+                            is available at the end of this document.</p>
+                {% elif about_object.license_text_file in unique_licenses %}
+                    <p>Full text of
+                        <a class="{{ about_object.license_text_file }}" href="#component-license-{{ about_object.license_text_file }}">
+                         {{ about_object.license_text_file }}
                          </a>
                             is available at the end of this document.</p>
                 {% endif %}
