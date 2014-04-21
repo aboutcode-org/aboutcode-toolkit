@@ -1109,7 +1109,7 @@ class AboutCollector(object):
                             license_text.append(about_object.license_text())
                         else:
                             msg = 'About resource: %s - license_text does not exist.'\
-                                ' Attribution generation is skipped.'\
+                                ' License generation is skipped.'\
                                 % about_object.about_resource_path
                             self.genattrib_errors.append(Error(GENATTRIB,\
                                                                'dje_license',\
@@ -1121,13 +1121,13 @@ class AboutCollector(object):
                             license_text.append(about_object.license_text())
                         else:
                             msg = 'About resource: %s - license_text does not exist.'\
-                                ' Attribution generation is skipped.'\
+                                ' License generation is skipped.'\
                                 % about_object.about_resource_path
                             self.genattrib_errors.append(Error(GENATTRIB,\
                                                                'license_text',\
                                                                about_object.get_license_text_file_name(), msg))
                 else:
-                    msg = 'No dje_license or license_text is found. Attribution generation is skipped.'
+                    msg = 'No dje_license or license_text is found. License generation is skipped.'
                     self.genattrib_errors.append(Error(GENATTRIB, 'about_resource',\
                                                         about_object.about_resource_path,\
                                                         msg))
