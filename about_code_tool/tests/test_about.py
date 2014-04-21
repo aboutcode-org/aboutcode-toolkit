@@ -578,3 +578,39 @@ this software and releases the component to Public Domain.
         about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/missing_notice_license_files.ABOUT'))
         notice_text = about_file.notice_text()
         self.assertEqual(notice_text, expected)
+
+    def test_get_dje_license_name(self):
+        expected = 'apache-2.0'
+        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_resource_field_present.ABOUT'))
+        output = about_file.get_dje_license_name()
+        self.assertTrue(output == expected)
+
+    def test_get_license_text_file_name(self):
+        expected = 'httpd.LICENSE'
+        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_resource_field_present.ABOUT'))
+        output = about_file.get_license_text_file_name()
+        self.assertTrue(output == expected)
+
+    def test_get_dje_license_name_no_value(self):
+        expected = ''
+        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_empty_value_for_dje_license_license_text_file.ABOUT'))
+        output = about_file.get_dje_license_name()
+        self.assertTrue(output == expected)
+
+    def test_get_license_text_file_name_no_value(self):
+        expected = ''
+        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_empty_value_for_dje_license_license_text_file.ABOUT'))
+        output = about_file.get_license_text_file_name()
+        self.assertTrue(output == expected)
+
+    def test_get_dje_license_name_no_key(self):
+        expected = None
+        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_no_dje_license_no_license_text_file_keys.ABOUT'))
+        output = about_file.get_dje_license_name()
+        self.assertTrue(output == expected)
+
+    def test_get_license_text_file_name_no_key(self):
+        expected = None
+        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_no_dje_license_no_license_text_file_keys.ABOUT'))
+        output = about_file.get_license_text_file_name()
+        self.assertTrue(output == expected)

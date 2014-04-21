@@ -84,6 +84,7 @@ DATE = 'Date problem'
 ASCII = 'ASCII problem'
 SPDX = 'SPDX license problem'
 UNKNOWN = 'Unknown problem'
+GENATTRIB = 'Attribution generation problem'
 
 MANDATORY_FIELDS = (
     'about_resource',
@@ -929,7 +930,7 @@ class AboutFile(object):
 
         return ""  # Returns empty string if the notice file does not exist
 
-    def dje_license(self):
+    def get_dje_license_name(self):
         """
         Return the dje_license value if the dje_license field exists
         """
@@ -938,7 +939,7 @@ class AboutFile(object):
         except Exception as e:
             pass
 
-        return ""  # Returns empty string if the dje_license key does not exist
+        return ""
 
     def get_license_text_file_name(self):
         """
@@ -949,7 +950,7 @@ class AboutFile(object):
         except Exception as e:
             pass
 
-        return ""  # Returns empty string if the license_text_file key does not exist
+        return ""
 
 class AboutCollector(object):
     """
@@ -966,6 +967,8 @@ class AboutCollector(object):
 
         self._errors = []
         self._warnings = []
+
+        self.genattrib_errors = []
 
         self.abouts = [AboutFile(f)
                        for f in self._collect_about_files(self.absolute_path)]
@@ -1097,22 +1100,45 @@ class AboutCollector(object):
             if not limit_to or about_object.about_resource_path in limit_to:
                 validated_fields.append(about_object.validated_fields)
                 notice_text.append(about_object.notice_text())
-                if about_object.dje_license():
-                    if not about_object.dje_license() in unique_license \
-                        and not about_object.dje_license() == None:
-                        unique_license.append(about_object.dje_license())
-                        license_text.append(about_object.license_text())
+                dje_license_name = about_object.get_dje_license_name()
+                if dje_license_name:
+                    if not dje_license_name in unique_license \
+                        and not dje_license_name == None:
+                        if about_object.license_text():
+                            unique_license.append(about_object.get_dje_license_name())
+                            license_text.append(about_object.license_text())
+                        else:
+                            msg = 'About resource: %s - license_text does not exist.'\
+                                ' Attribution generation is skipped.'\
+                                % about_object.about_resource_path
+                            self.genattrib_errors.append(Error(GENATTRIB,\
+                                                               'dje_license',\
+                                                               dje_license_name, msg))
                 elif about_object.get_license_text_file_name():
-                    if not about_object.get_license_text_file_name() in unique_license \
-                        and about_object.license_text():
-                        unique_license.append(about_object.get_license_text_file_name())
-                        license_text.append(about_object.license_text())
+                    if not about_object.get_license_text_file_name() in unique_license:
+                        if about_object.license_text():
+                            unique_license.append(about_object.get_license_text_file_name())
+                            license_text.append(about_object.license_text())
+                        else:
+                            msg = 'About resource: %s - license_text does not exist.'\
+                                ' Attribution generation is skipped.'\
+                                % about_object.about_resource_path
+                            self.genattrib_errors.append(Error(GENATTRIB,\
+                                                               'license_text',\
+                                                               about_object.get_license_text_file_name(), msg))
+                else:
+                    msg = 'No dje_license or license_text is found. Attribution generation is skipped.'
+                    self.genattrib_errors.append(Error(GENATTRIB, 'about_resource',\
+                                                        about_object.about_resource_path,\
+                                                        msg))
 
         return template.render(about_objects=validated_fields,
                                license_texts=license_text,
                                notice_texts=notice_text,
                                unique_licenses=unique_license)
 
+    def get_genattrib_errors(self):
+        return self.genattrib_errors
 
 USAGE_SYNTAX = """\
     Input can be a file or directory.

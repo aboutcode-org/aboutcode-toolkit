@@ -1,19 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-# =============================================================================
-#  Copyright (c) 2013 by nexB, Inc. http://www.nexb.com/ - All rights reserved.
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#      http://www.apache.org/licenses/LICENSE-2.0
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-# =============================================================================
-
 """
 This is a tool to generate component attribution based on a set of .ABOUT files.
 Optionally, one could pass a subset list of specific components for set of
@@ -45,13 +32,14 @@ from os import listdir, walk
 from os.path import exists, dirname, join, abspath, isdir, basename, normpath
 from StringIO import StringIO
 
+LOG_FILENAME = 'error.log'
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
 handler.setLevel(logging.CRITICAL)
 handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
-
+file_logger = logging.getLogger(__name__+'_file')
 
 __version__ = '0.9.0'
 
@@ -125,6 +113,13 @@ def main(parser, options, args):
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
+    # Clear the log file
+    with open(join(dirname(output_path), LOG_FILENAME), 'w'):
+        pass
+
+    file_handler = logging.FileHandler(join(dirname(output_path), LOG_FILENAME))
+    file_logger.addHandler(file_handler)
+
     if not exists(input_path):
         print('Input path does not exist.')
         parser.print_help()
@@ -152,11 +147,13 @@ def main(parser, options, args):
         attrib_str = collector.generate_attribution( limit_to = sublist )
         with open(output_path, "w") as f:
             f.write(attrib_str)
-
+        errors = collector.get_genattrib_errors()
+        for error_msg in errors:
+                logger.error(error_msg)
+                file_logger.error(error_msg)
     else:
         # we should never reach this
         assert False, "Unsupported option(s)."
-
 
 def get_parser():
     class MyFormatter(optparse.IndentedHelpFormatter):

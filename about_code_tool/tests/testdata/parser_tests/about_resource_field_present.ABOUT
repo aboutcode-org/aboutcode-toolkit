@@ -6,3 +6,4 @@ license_text_file: httpd.LICENSE
 copyright: Copyright 2012 The Apache Software Foundation.
 notice_file: httpd.NOTICE
 about_resource: about_resource.c
+dje_license: apache-2.0
