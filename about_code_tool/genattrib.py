@@ -113,13 +113,6 @@ def main(parser, options, args):
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
-    # Clear the log file
-    with open(join(dirname(output_path), LOG_FILENAME), 'w'):
-        pass
-
-    file_handler = logging.FileHandler(join(dirname(output_path), LOG_FILENAME))
-    file_logger.addHandler(file_handler)
-
     if not exists(input_path):
         print('Input path does not exist.')
         parser.print_help()
@@ -148,6 +141,13 @@ def main(parser, options, args):
         with open(output_path, "w") as f:
             f.write(attrib_str)
         errors = collector.get_genattrib_errors()
+
+        # Clear the log file
+        with open(join(dirname(output_path), LOG_FILENAME), 'w'):
+            pass
+    
+        file_handler = logging.FileHandler(join(dirname(output_path), LOG_FILENAME))
+        file_logger.addHandler(file_handler)
         for error_msg in errors:
                 logger.error(error_msg)
                 file_logger.error(error_msg)
