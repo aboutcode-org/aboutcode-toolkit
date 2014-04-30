@@ -1094,6 +1094,8 @@ class AboutCollector(object):
         # We only need the fields names and values to render the template
         validated_fields = []
         notice_text = []
+        license_key = []
+        license_text = []
         license_dict = {}
         for about_object in self:
             if not limit_to or about_object.about_resource_path in limit_to:
@@ -1129,9 +1131,14 @@ class AboutCollector(object):
                                                         about_object.about_resource_path,\
                                                         msg))
 
+        # We want the license generation in alphabetical order
+        for key in sorted(license_dict.keys()):
+            license_key.append(key)
+            license_text.append(license_dict[key])
+
         return template.render(about_objects=validated_fields,
-                               license_keys=list(license_dict.keys()),
-                               license_texts = list(license_dict.values()),
+                               license_keys=license_key,
+                               license_texts = license_text,
                                notice_texts=notice_text)
 
     def get_genattrib_errors(self):
