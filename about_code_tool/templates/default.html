@@ -53,13 +53,13 @@
                 {% elif about_object.notice_file %}
                     <pre class="component-notice">{{ notice_texts[loop.index0] }}</pre>
                 {% endif %}
-                {% if about_object.dje_license in unique_licenses %} 
+                {% if about_object.dje_license in license_keys %} 
                     <p>Full text of
                         <a class="{{ about_object.dje_license }}" href="#component-license-{{ about_object.dje_license }}">
                          {{ about_object.dje_license }}
                          </a>
                             is available at the end of this document.</p>
-                {% elif about_object.license_text_file in unique_licenses %}
+                {% elif about_object.license_text_file in license_keys %}
                     <p>Full text of
                         <a class="{{ about_object.license_text_file }}" href="#component-license-{{ about_object.license_text_file }}">
                          {{ about_object.license_text_file }}
@@ -71,8 +71,8 @@
         <hr>
 
         <h3>Licenses Used in This Product</h3>
-        {% for index in range(unique_licenses | count) %}
-            <h3 id="component-license-{{ unique_licenses[index] }}">{{ unique_licenses[index] }}</h3>
+        {% for index in range(license_keys | count) %}
+            <h3 id="component-license-{{ license_keys[index] }}">{{ license_keys[index] }}</h3>
             <pre>{{ license_texts[index] }}</pre>
         {% endfor %}
         <h3><a id="End">End</a></h3>

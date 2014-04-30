@@ -1093,20 +1093,18 @@ class AboutCollector(object):
 
         # We only need the fields names and values to render the template
         validated_fields = []
-        license_text = []
         notice_text = []
-        unique_license = []
+        license_dict = {}
         for about_object in self:
             if not limit_to or about_object.about_resource_path in limit_to:
                 validated_fields.append(about_object.validated_fields)
                 notice_text.append(about_object.notice_text())
                 dje_license_name = about_object.get_dje_license_name()
                 if dje_license_name:
-                    if not dje_license_name in unique_license \
+                    if not dje_license_name in license_dict \
                         and not dje_license_name == None:
                         if about_object.license_text():
-                            unique_license.append(about_object.get_dje_license_name())
-                            license_text.append(about_object.license_text())
+                            license_dict[about_object.get_dje_license_name()] = about_object.license_text()
                         else:
                             msg = 'About resource: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
@@ -1115,10 +1113,9 @@ class AboutCollector(object):
                                                                'dje_license',\
                                                                dje_license_name, msg))
                 elif about_object.get_license_text_file_name():
-                    if not about_object.get_license_text_file_name() in unique_license:
+                    if not about_object.get_license_text_file_name() in license_dict:
                         if about_object.license_text():
-                            unique_license.append(about_object.get_license_text_file_name())
-                            license_text.append(about_object.license_text())
+                            license_dict[about_object.get_license_text_file_name()] = about_object.license_text()
                         else:
                             msg = 'About resource: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
@@ -1133,9 +1130,9 @@ class AboutCollector(object):
                                                         msg))
 
         return template.render(about_objects=validated_fields,
-                               license_texts=license_text,
-                               notice_texts=notice_text,
-                               unique_licenses=unique_license)
+                               license_keys=list(license_dict.keys()),
+                               license_texts = list(license_dict.values()),
+                               notice_texts=notice_text)
 
     def get_genattrib_errors(self):
         return self.genattrib_errors
