@@ -39,7 +39,7 @@
 
         <div class="oss-table-of-contents">
             {% for about_object in about_objects %}
-                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}</a></p>
+                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}{% if about_object.version %} {{ about_object.version }}{% endif %}</a></p>
             {% endfor %}
         </div>
 
