@@ -47,7 +47,12 @@
 
         {% for about_object in about_objects %}
             <div class="oss-component" id="component_{{ loop.index0 }}">
-                <h3 class="component-name">{{ about_object.name }}{% if about_object.version %} {{ about_object.version }}{% endif %}</h3>
+                <h3 class="component-name">{{ about_object.name }}
+                    {% if about_object.version %}{{ about_object.version }}{% endif %}
+                </h3>
+                {% if about_object.copyright %}
+                    <pre>{{about_object.copyright}}</pre>
+                {% endif %}
                 {% if about_object.notice %}
                     <pre>{{ about_object.notice }}</pre>
                 {% elif about_object.notice_file %}
