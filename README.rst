@@ -26,8 +26,8 @@ In future versions, this tool will be able to generate attribution notices and
 collect redistributable source code used in your project to help you comply
 with open source licenses requirements.
 
-This version of the ABOUT tool follows the ABOUT specification version 0.8.0 at:
-http://www.dejacode.org/about_spec_v0.8.0.html
+This version of the ABOUT tool follows the ABOUT specification version 0.8.1 at:
+http://www.dejacode.org/about_spec_v0.8.1.html
 
 
 REQUIREMENTS
@@ -74,6 +74,8 @@ USAGE
 -----
 The ABOUT tool command syntax is::
 
+⋅⋅* about.py
+
     Usage: about.py [options] input_path output_path
 
     Input can be a file or directory.
@@ -93,6 +95,7 @@ Example::
 
     $ python about.py ./thirdparty_code/ thirdparty_about.csv
 
+..* genabout.py
 
 In this example, the .ABOUT files in the directory /thirdparty_code/ will
 be parsed and validated to collect the data they contain. The collected
