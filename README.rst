@@ -74,24 +74,20 @@ USAGE
 -----
 The ABOUT tool command syntax is::
 
-    $ python about.py [--options] <input> <output>
+    Usage: about.py [options] input_path output_path
 
-    [--options]
-    --overwrite          Overwrites the output file if it exists
-    -v,--version         Display current version, license notice, and copyright notice
-    -h,--help            Display syntax help
-    --verbosity  <arg>   Print more or less verbose messages while processing ABOUT files
-    <arg>
-            0 - Do not print any warning or error messages, just a total count (default)
-            1 - Print error messages
-            2 - Print error and warning messages
+    Input can be a file or directory.
+    Output must be a file with a .csv extension.
 
-    <input> - Path location where the .ABOUT file(s) located.
-              The location can be pointing to a file or directory.
-
-    <output> - Path location where the generated output will be saved.
-               The <output> must be a path with an output filename ending
-               with the ".csv" extension.
+    Options:
+      -h, --help            Display help
+      --version             Display current version, license notice, and copyright notice
+      --overwrite           Overwrites the output file if it exists
+      --verbosity=VERBOSITY
+                            Print more or fewer verbose messages while processing ABOUT files
+                            0 - Do not print any warning or error messages, just a total count (default)
+                            1 - Print error messages
+                            2 - Print error and warning messages
 
 Example::
 
