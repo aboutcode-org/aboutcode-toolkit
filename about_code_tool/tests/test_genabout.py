@@ -180,7 +180,7 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
-                        'license_text_file': '../../../../apache2.LICENSE.txt'}]
+                        'license_text_file': '../../../../apache2.LICENSE'}]
         expected_output_list = []
         gen_license = False
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
@@ -193,7 +193,7 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/ABOUT/', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
-                        'license_text_file': '../../../../apache2.LICENSE.txt'}]
+                        'license_text_file': '../../../../apache2.LICENSE'}]
         expected_output_list = []
         gen_license = False
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
@@ -206,7 +206,7 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
-                        'license_text_file': '../../../../apache2.LICENSE.txt'}]
+                        'license_text_file': '../../../../apache2.LICENSE'}]
         expected_output_list = []
         gen_license = True
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
@@ -366,10 +366,10 @@ class GenAboutTest(unittest.TestCase):
     def test_verify_license_files_exist(self):
         gen = genabout.GenAbout()
         input_list = [{'version': '0.8.1', 'about_file': '/TESTCASE/',
-                         'license_text_file': 'apache2.LICENSE.txt',
+                         'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
-        expected_list = [('./apache2.LICENSE.txt', '')]
+        expected_list = [('./apache2.LICENSE', '')]
         output = gen.verify_license_files(input_list, path, False)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
@@ -378,10 +378,10 @@ class GenAboutTest(unittest.TestCase):
     def test_verify_license_files_exist_license_in_project(self):
         gen = genabout.GenAbout()
         input_list = [{'version': '0.8.1', 'about_file': '/TESTCASE/',
-                         'license_text_file': 'apache2.LICENSE.txt',
+                         'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
-        expected_list = [('./apache2.LICENSE.txt', '')]
+        expected_list = [('./apache2.LICENSE', '')]
         output = gen.verify_license_files(input_list, path, True)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
@@ -440,8 +440,8 @@ class GenAboutTest(unittest.TestCase):
 
     def test_copy_license_files_test_path_not_endswith_slash(self):
         gen = genabout.GenAbout()
-        input_list = [('apache2.LICENSE.txt', '.')]
-        expected_list = ['apache2.LICENSE.txt']
+        input_list = [('apache2.LICENSE', '.')]
+        expected_list = ['apache2.LICENSE']
         project_path = os.path.abspath('.')
         tmp_path = tempfile.mkdtemp()
         gen.copy_license_files(tmp_path, input_list)
@@ -452,8 +452,8 @@ class GenAboutTest(unittest.TestCase):
 
     def test_copy_license_files_test_path_endswith_slash(self):
         gen = genabout.GenAbout()
-        input_list = [('apache2.LICENSE.txt', '.')]
-        expected_list = ['apache2.LICENSE.txt']
+        input_list = [('apache2.LICENSE', '.')]
+        expected_list = ['apache2.LICENSE']
         project_path = os.path.abspath('.')
         tmp_path = tempfile.mkdtemp() + '/'
         gen.copy_license_files(tmp_path, input_list)
