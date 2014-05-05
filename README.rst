@@ -74,8 +74,6 @@ USAGE
 -----
 The ABOUT tool command syntax is::
 
-⋅⋅* about.py
-
     Usage: about.py [options] input_path output_path
 
     Input can be a file or directory.
@@ -94,8 +92,6 @@ The ABOUT tool command syntax is::
 Example::
 
     $ python about.py ./thirdparty_code/ thirdparty_about.csv
-
-..* genabout.py
 
 In this example, the .ABOUT files in the directory /thirdparty_code/ will
 be parsed and validated to collect the data they contain. The collected
