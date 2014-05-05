@@ -74,7 +74,7 @@ USAGE
 -----
 The ABOUT tool command syntax is:
 
-about.py
+**about.py**
 
 ::
 
@@ -101,7 +101,7 @@ In this example, the .ABOUT files in the directory /thirdparty_code/ will
 be parsed and validated to collect the data they contain. The collected
 information will be saved to the CSV file named "thirdparty_about.csv".
 
-genabout.py
+**genabout.py**
 
 ::
 
@@ -149,6 +149,42 @@ genabout.py
     
                             Example syntax:
                             genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
+
+Example::
+
+    $ python genabout.py thirdparty_code.csv /tmp/thirdparty_about/
+
+In this example, the tool will look at the "thirdparty_code.csv" and generate
+the .ABOUT files in the directory /tmp/thirdparty_about/.
+
+**genattrib.py**
+
+::
+
+    Usage: genattrib.py [options] input_path output_path component_list
+    
+        Input can be a file or directory.
+        Output of rendered template must be a file (e.g. .html).
+        Component List must be a .csv file which has at least an "about_resource" column.
+    
+    
+    Options:
+      -h, --help            Display help
+      -v, --version         Display current version, license notice, and copyright notice
+      --overwrite           Overwrites the output file if it exists
+      --verbosity=VERBOSITY
+                            Print more or fewer verbose messages while processing ABOUT files
+                            0 - Do not print any warning or error messages, just a total count (default)
+                            1 - Print error messages
+                            2 - Print error and warning messages
+
+Example::
+
+    $ python genattrib.py /tmp/thirdparty_about/ /tmp/thirdparty_attribution/attribution.html thirdparty_code.csv
+
+In this example, the tool will look at the .ABOUT files listed in the "thirdparty_code.csv" 
+from the /tmp/thirdparty_about/ and then generate the attribution output to
+/tmp/thirdparty_attribution/attribution.html
 
 
 HELP and SUPPORT
