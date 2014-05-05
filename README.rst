@@ -72,7 +72,11 @@ Then open a terminal or command prompt, extract the download if needed and run::
 
 USAGE
 -----
-The ABOUT tool command syntax is::
+The ABOUT tool command syntax is:
+
+about.py
+
+::
 
     Usage: about.py [options] input_path output_path
 
@@ -96,6 +100,55 @@ Example::
 In this example, the .ABOUT files in the directory /thirdparty_code/ will
 be parsed and validated to collect the data they contain. The collected
 information will be saved to the CSV file named "thirdparty_about.csv".
+
+genabout.py
+
+::
+
+    Usage: genabout.py [options] input_path output_path
+    
+        Input must be a CSV file
+        Output must be a directory location where the ABOUT files should be generated
+    
+    
+    Options:
+      -h, --help            Display help
+      --version             Display current version, license notice, and copyright notice
+      --verbosity=VERBOSITY
+                            Print more or fewer verbose messages while processing ABOUT files
+                            0 - Do not print any warning or error messages, just a total count (default)
+                            1 - Print error messages
+                            2 - Print error and warning messages
+    
+      --action=ACTION       Handle different behaviors if ABOUT files already existed
+                            0 - Do nothing if ABOUT file existed (default)
+                            1 - Overwrites the current ABOUT field value if existed
+                            2 - Keep the current field value and only add the "new" field and field value
+                            3 - Replace the ABOUT file with the current generation
+    
+      --all_in_one          Generate all the ABOUT files in the [output_path] without
+                            any project structure
+    
+      --copy_license=COPY_LICENSE
+                            Copy the 'license_text_file' from the project to the generated location
+                            Project path - Project path
+    
+      --license_text_location=LICENSE_TEXT_LOCATION
+                            Copy the 'license_text_file' from the directory to the generated location
+                            License path - License text files path
+    
+      --mapping             Configure the mapping key from the MAPPING.CONFIG
+    
+      --extract_license=EXTRACT_LICENSE
+                            Extract License text and create <license_key>.LICENSE side-by-side
+                                with the .ABOUT from DJE License Library.
+                            api_url - URL to the DJE License Library
+                            api_username - The regular DJE username
+                            api_key - Hash attached to your username which is used to authenticate
+                                        yourself in the API. Contact us to get the hash key.
+    
+                            Example syntax:
+                            genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
 
 
 HELP and SUPPORT
