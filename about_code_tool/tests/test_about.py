@@ -320,7 +320,7 @@ version: 1.2.3
 
     def test_validate_about_ref_testing_the_about_resource_field_is_present(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_resource_field_present.ABOUT'))
-        self.assertEquals(about_file.about_resource_path, 'about_resource.c', 'the about_resource was not detected')
+        self.assertEquals(about_file.about_resource, 'about_resource.c', 'the about_resource was not detected')
 
     def test_validate_about_ref_no_about_ref_key(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/.ABOUT'))

@@ -445,7 +445,7 @@ class AboutFile(object):
     Represent an ABOUT file and functions to parse and validate a file.
     """
     def __init__(self, location=None):
-        self.about_resource_path = None
+        self.about_resource = None
         self.location = location
 
         self.parsed = None
@@ -684,14 +684,14 @@ class AboutFile(object):
         # in validate_mandatory_fields_are_present(self)
         if about_resource in self.validated_fields \
                 and self.validated_fields[about_resource]:
-            self.about_resource_path = self.validated_fields[about_resource]
+            self.about_resource = self.validated_fields[about_resource]
 
-            if not self._exists(self.about_resource_path):
+            if not self._exists(self.about_resource):
                 self.errors.append(Error(FILE, about_resource,
-                                         self.about_resource_path,
+                                         self.about_resource,
                                          'File does not exist.'))
 
-        self._save_location(about_resource, self.about_resource_path)
+        self._save_location(about_resource, self.about_resource)
 
     def validate_file_field_exists(self, field_name, file_path):
         """
@@ -1098,7 +1098,8 @@ class AboutCollector(object):
         license_text = []
         license_dict = {}
         for about_object in self:
-            if not limit_to or about_object.about_resource_path in limit_to:
+            about_relative_path = '/'+ about_object.location.partition(self.user_provided_path)[2]
+            if not limit_to or about_relative_path in limit_to:
                 validated_fields.append(about_object.validated_fields)
                 notice_text.append(about_object.notice_text())
                 dje_license_name = about_object.get_dje_license_name()
@@ -1110,7 +1111,7 @@ class AboutCollector(object):
                         else:
                             msg = 'About resource: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
-                                % about_object.about_resource_path
+                                % about_object.about_resource
                             self.genattrib_errors.append(Error(GENATTRIB,\
                                                                'dje_license',\
                                                                dje_license_name, msg))
@@ -1121,14 +1122,14 @@ class AboutCollector(object):
                         else:
                             msg = 'About resource: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
-                                % about_object.about_resource_path
+                                % about_object.about_resource
                             self.genattrib_errors.append(Error(GENATTRIB,\
                                                                'license_text',\
                                                                about_object.get_license_text_file_name(), msg))
                 else:
                     msg = 'No dje_license or license_text is found. License generation is skipped.'
                     self.genattrib_errors.append(Error(GENATTRIB, 'about_resource',\
-                                                        about_object.about_resource_path,\
+                                                        about_object.about_resource,\
                                                         msg))
 
         # We want the license generation in alphabetical order

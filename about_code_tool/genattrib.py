@@ -10,6 +10,7 @@ Optionally, one could pass a subset list of specific components for set of
 from __future__ import print_function
 from __future__ import with_statement
 from about import AboutCollector
+import genabout
 
 import codecs
 import csv
@@ -61,14 +62,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-def component_subset_to_sublist(input_path):
+def component_subset_to_sublist(input_list):
     sublist = []
-    with open(input_path, "rU") as f:
-        csv_dict = csv.DictReader(f)
-        sublist = [row["about_resource"] for row in csv_dict
-                   if "about_resource" in row.keys()]
-
+    sublist = [row["about_file"] for row in input_list
+                   if "about_file" in row.keys()]
     return sublist
+
+def update_path_to_about(input_list):
+    output_list = []
+    for row in input_list:
+        if row.endswith('/'):
+            row = row.rpartition('/')[0]
+        output_list.append(row + '.ABOUT')
+    return output_list
 
 USAGE_SYNTAX = """\
     Input can be a file or directory.
@@ -83,10 +89,14 @@ Print more or fewer verbose messages while processing ABOUT files
 2 - Print error and warning messages
 """
 
+MAPPING_HELP = """\
+Configure the mapping key from the MAPPING.CONFIG
+"""
 
 def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
+    mapping_config = options.mapping
     
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
@@ -96,6 +106,11 @@ def main(parser, options, args):
         handler.setLevel(logging.ERROR)
     elif verbosity >= 2:
         handler.setLevel(logging.WARNING)
+
+    if mapping_config:
+        if not exists('MAPPING.CONFIG'):
+            print("The file 'MAPPING.CONFIG' doesn't exist.")
+            sys.exit(errno.EINVAL)
 
     if not len(args) == 3:
         print('Path for input, output and component list are required.\n')
@@ -136,8 +151,21 @@ def main(parser, options, args):
 
     if not exists(output_path) or (exists(output_path) and overwrite):
         collector = AboutCollector(input_path)
-        sublist = None if not component_subset_path else component_subset_to_sublist(component_subset_path)
-        attrib_str = collector.generate_attribution( limit_to = sublist )
+        input_list = []
+        if not component_subset_path:
+            sublist = None
+        else:
+            with open(component_subset_path, "rU") as f:
+                input_dict = csv.DictReader(f)
+                for row in input_dict:
+                    input_list.append(row)
+            if mapping_config:
+                mapping_list = genabout.GenAbout().get_mapping_list()
+                input_list = genabout.GenAbout().convert_input_list(input_list, mapping_list)
+            sublist = component_subset_to_sublist(input_list)
+            outlist = update_path_to_about(sublist)
+
+        attrib_str = collector.generate_attribution( limit_to = outlist )
         with open(output_path, "w") as f:
             f.write(attrib_str)
         errors = collector.get_genattrib_errors()
@@ -201,6 +229,7 @@ def get_parser():
     parser.add_option('--overwrite', action='store_true',
                       help='Overwrites the output file if it exists')
     parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
+    parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
     return parser
 
 
