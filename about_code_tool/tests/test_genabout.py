@@ -113,6 +113,18 @@ class GenAboutTest(unittest.TestCase):
                        'name': 'ABOUT tool', 'version': ''}]
         self.assertFalse(gen.validate_duplication(input_list), "The list has no duplication.")
 
+    def test_get_duplicated_keys_have_dup(self):
+        gen = genabout.GenAbout()
+        test_input = join(TESTDATA_PATH, "test_files_for_genabout/dup_keys.csv")
+        expected_list = ['copyright', 'copyright']
+        self.assertTrue(gen.get_duplicated_keys(test_input))
+
+    def test_get_duplicated_keys_have_dup_diff_case(self):
+        gen = genabout.GenAbout()
+        test_input = join(TESTDATA_PATH, "test_files_for_genabout/dup_keys_with_diff_case.csv")
+        expected_list = ['copyright', 'Copyright']
+        self.assertTrue(gen.get_duplicated_keys(test_input))
+
     def test_validate_mandatory_fields_no_missing(self):
         gen = genabout.GenAbout()
         input_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',

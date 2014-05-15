@@ -109,7 +109,7 @@ def main(parser, options, args):
 
     if mapping_config:
         if not exists('MAPPING.CONFIG'):
-            print("The file 'MAPPING.CONFIG' doesn't exist.")
+            print("The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 
     if not len(args) == 3:

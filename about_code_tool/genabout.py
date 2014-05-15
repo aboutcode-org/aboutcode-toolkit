@@ -70,6 +70,13 @@ class GenAbout(object):
         self.extract_dje_license_error = False
 
     @staticmethod
+    def get_duplicated_keys(input_file):
+        csv_context = csv.reader(open(input_file))
+        keys_row = csv_context.next()
+        lower_case_keys_row = [k.lower() for k in keys_row]
+        return ([key for key in keys_row if lower_case_keys_row.count(key.lower()) > 1])
+
+    @staticmethod
     def get_input_list(input_file):
         csvfile = csv.DictReader(open(input_file, 'rU'))
         return [line for line in csvfile]
@@ -203,7 +210,7 @@ class GenAbout(object):
                     if _exists(license_file_path):
                         license_files_list.append((license_file_path, about_parent_dir))
                     else:
-                        self.warnings.append(Warn('license_text_file', license_file_path, "License doesn't exist."))
+                        self.warnings.append(Warn('license_text_file', license_file_path, "License does not exist."))
             except Exception as e:
                 print(repr(e))
                 print("The input does not have the 'license_text_file' key which is required.")
@@ -301,7 +308,7 @@ class GenAbout(object):
                     about_parent_dir = dirname(file_location)
                     license_file = gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file'])
                     if not _exists(license_file):
-                        self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' doesn't exist."))
+                        self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
                         if line['dje_license_key']:
@@ -514,17 +521,17 @@ def main(parser, options, args):
 
     if copy_license_path:
         if not _exists(copy_license_path):
-            print("The project path doesn't exist.")
+            print("The project path does not exist.")
             sys.exit(errno.EINVAL)
 
     if license_text_path:
         if not _exists(license_text_path):
-            print("The license text path doesn't exist.")
+            print("The license text path does not exist.")
             sys.exit(errno.EINVAL)
 
     if mapping_config:
         if not _exists('MAPPING.CONFIG'):
-            print("The file 'MAPPING.CONFIG' doesn't exist.")
+            print("The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 
     if extract_license:
@@ -565,6 +572,13 @@ def main(parser, options, args):
         sys.exit(errno.EINVAL)
 
     gen = GenAbout()
+
+    dup_keys = gen.get_duplicated_keys(input_path)
+    if dup_keys:
+        print('The input file contains duplicated keys. Duplicated keys are not allowed.')
+        print(dup_keys)
+        print('\nPlease fix the input file and re-run the tool.')
+        sys.exit(errno.EINVAL)
 
     # Clear the log file
     with open(output_path + LOG_FILENAME, 'w'):
