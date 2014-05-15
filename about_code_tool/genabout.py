@@ -295,6 +295,16 @@ class GenAbout(object):
         license_text = data.get('full_text', '')
         return license_text
 
+    # This is a temp function. This should be merged with the get_license_text_from_api
+    def get_license_name_from_api(self, url, username, api_key, license_key):
+        """
+        Returns the license_text of a given license_key using an API request.
+        Returns an empty string if the text is not available.
+        """
+        data = self.request_license_data(url, username, api_key, license_key)
+        license_name = data.get('name', '')
+        return license_name
+
     def get_dje_license_list(self, gen_location, input_list, gen_license):
         license_output_list = []
         for line in input_list:
@@ -327,9 +337,14 @@ class GenAbout(object):
                                                   "Missing 'dje_license_key' for " + line['about_file']))
         return license_output_list
 
-    def pre_generation(self, gen_location, input_list, action_num, all_in_one):
+    def pre_generation(self, gen_location, input_list, action_num, all_in_one, api_url, api_username, api_key):
         output_list = []
         for line in input_list:
+            try:
+                if api_url and line['dje_license_key']:
+                    line['dje_license'] = self.get_license_name_from_api(api_url, api_username, api_key, line['dje_license_key'])
+            except Exception as e:
+                pass
             component_list = []
             file_location = line['about_file']
             if file_location.startswith('/'):
@@ -644,7 +659,7 @@ def main(parser, options, args):
                 sys.exit(errno.EINVAL)
 
     dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license)
-    components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one)
+    components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one, api_url, api_username, api_key)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
 

@@ -59,6 +59,9 @@
                     <pre class="component-notice">{{ notice_texts[loop.index0] }}</pre>
                 {% endif %}
                 {% if about_object.dje_license in license_keys %} 
+                    <p>
+                        This component is licensed under {{ about_object.dje_license }}.
+                    </p>
                     <p>Full text of
                         <a class="{{ about_object.dje_license }}" href="#component-license-{{ about_object.dje_license }}">
                          {{ about_object.dje_license }}
