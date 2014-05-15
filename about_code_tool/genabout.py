@@ -57,7 +57,7 @@ ESSENTIAL_FIELDS = ('about_file', 'about_resource',)
 
 # The 'dje_license_key' will be removed and will use the 'dje_license' instead.
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + \
-    ('about_file', 'dje_license_key',)
+    ('about_file',)
 
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
@@ -247,7 +247,7 @@ class GenAbout(object):
                 self.extract_dje_license_error = True
                 self.errors.append(Error('username/key', username + '/' + api_key, error_msg))
             else:
-                self.errors.append(Error('dje_license_key', license_key, "Invalid 'dje_license_key'"))
+                self.errors.append(Error('dje_license', license_key, "Invalid 'dje_license_key'"))
             return {}
         except urllib2.URLError:
             if about.check_network_connection():
@@ -321,28 +321,28 @@ class GenAbout(object):
                         self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
-                        if line['dje_license_key']:
+                        if line['dje_license']:
                             license_output_list.append(self.gen_license_list(line))
                         else:
-                            self.warnings.append(Warn('dje_license_key', '',
-                                                      "Missing 'dje_license_key' for " + line['about_file']))
+                            self.warnings.append(Warn('dje_license', '',
+                                                      "Missing 'dje_license' for " + line['about_file']))
             # This except condition will force the tool to create the
             # 'license_text_file' key column from the self.gen_license_list(line)
             except Exception as e:
                 if gen_license:
-                    if line['dje_license_key']:
+                    if line['dje_license']:
                         license_output_list.append(self.gen_license_list(line))
                     else:
-                        self.warnings.append(Warn('dje_license_key', '',
-                                                  "Missing 'dje_license_key' for " + line['about_file']))
+                        self.warnings.append(Warn('dje_license', '',
+                                                  "Missing 'dje_license' for " + line['about_file']))
         return license_output_list
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one, api_url, api_username, api_key):
         output_list = []
         for line in input_list:
             try:
-                if api_url and line['dje_license_key']:
-                    line['dje_license'] = self.get_license_name_from_api(api_url, api_username, api_key, line['dje_license_key'])
+                if api_url and line['dje_license']:
+                    line['dje_license_name'] = self.get_license_name_from_api(api_url, api_username, api_key, line['dje_license'])
             except Exception as e:
                 pass
             component_list = []
@@ -387,7 +387,7 @@ class GenAbout(object):
 
     @staticmethod
     def gen_license_list(line):
-        dje_key = line['dje_license_key']
+        dje_key = line['dje_license']
         file_location = line['about_file']
         if file_location.endswith('/'):
             file_location = file_location.rpartition('/')[0]
@@ -651,11 +651,11 @@ def main(parser, options, args):
             sys.exit(errno.EINVAL)
         for line in input_list:
             try:
-                if line['dje_license_key']:
+                if line['dje_license']:
                     break
             except Exception as e:
                 print(repr(e))
-                print("The input does not have the 'dje_license_key' key which is required.")
+                print("The input does not have the 'dje_license' key which is required.")
                 sys.exit(errno.EINVAL)
 
     dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license)
