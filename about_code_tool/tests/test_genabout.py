@@ -231,7 +231,7 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
-                        'license_text_file': '', 'dje_license_key': 'apache-2.0'}]
+                        'license_text_file': '', 'dje_license': 'apache-2.0'}]
         expected_output_list = [('/', 'apache-2.0')]
         gen_license = True
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
@@ -244,7 +244,7 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
-                        'license_text_file': '', 'dje_license_key': ''}]
+                        'license_text_file': '', 'dje_license': ''}]
         expected_output_list = []
         gen_license = True
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
@@ -257,7 +257,7 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
-                        'dje_license_key': 'apache-2.0'}]
+                        'dje_license': 'apache-2.0'}]
         expected_output_list = [('/', 'apache-2.0')]
         gen_license = True
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
@@ -433,7 +433,7 @@ class GenAboutTest(unittest.TestCase):
     def test_gen_license_list_license_text_file_no_value(self):
         gen = genabout.GenAbout()
         input_list = {'about_file': '/tmp/3pp/opensans/', 'name': 'OpenSans Fonts',
-                       'version': '1', 'dje_license_key': 'apache-2.0',
+                       'version': '1', 'dje_license': 'apache-2.0',
                        'license_text_file': '', 'about_resource': 'opensans'}
         expected_list = ('/tmp/3pp', 'apache-2.0')
         output = gen.gen_license_list(input_list)
@@ -443,7 +443,7 @@ class GenAboutTest(unittest.TestCase):
     def test_gen_license_list_no_license_text_file_key(self):
         gen = genabout.GenAbout()
         input_list = {'about_file': '/tmp/3pp/opensans/', 'name': 'OpenSans Fonts',
-                       'version': '1', 'dje_license_key': 'apache-2.0',
+                       'version': '1', 'dje_license': 'apache-2.0',
                        'about_resource': 'opensans'}
         expected_list = ('/tmp/3pp', 'apache-2.0')
         output = gen.gen_license_list(input_list)
