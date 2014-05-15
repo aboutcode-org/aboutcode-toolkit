@@ -1097,6 +1097,7 @@ class AboutCollector(object):
         license_key = []
         license_text = []
         license_dict = {}
+        common_license = ['GPL 2.0','OpenSSL/SSLeay License', 'Apache License 2.0', 'BSD-Modified']
         for about_object in self:
             about_relative_path = '/'+ about_object.location.partition(self.user_provided_path)[2]
             if not limit_to or about_relative_path in limit_to:
@@ -1140,7 +1141,9 @@ class AboutCollector(object):
         return template.render(about_objects=validated_fields,
                                license_keys=license_key,
                                license_texts = license_text,
-                               notice_texts=notice_text)
+                               notice_texts=notice_text,
+                               license_dicts=license_dict,
+                               common_licenses=common_license)
 
     def get_genattrib_errors(self):
         return self.genattrib_errors
