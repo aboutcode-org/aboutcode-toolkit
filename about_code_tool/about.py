@@ -1097,7 +1097,7 @@ class AboutCollector(object):
         license_key = []
         license_text = []
         license_dict = {}
-        common_license = ['GPL 2.0','OpenSSL/SSLeay License', 'Apache 2.0', 'BSD-Modified']
+        common_license = ['GPL 2.0','OpenSSL/SSLeay License', 'Apache 2.0', 'BSD-Modified', 'CC-BY-SA-3.0']
         for about_object in self:
             about_relative_path = '/'+ about_object.location.partition(self.user_provided_path)[2]
             if not limit_to or about_relative_path in limit_to:
