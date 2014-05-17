@@ -71,7 +71,7 @@ class GenAbout(object):
 
     @staticmethod
     def get_duplicated_keys(input_file):
-        csv_context = csv.reader(open(input_file))
+        csv_context = csv.reader(open(input_file, 'rU'))
         keys_row = csv_context.next()
         lower_case_keys_row = [k.lower() for k in keys_row]
         return ([key for key in keys_row if lower_case_keys_row.count(key.lower()) > 1])
