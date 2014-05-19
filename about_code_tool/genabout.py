@@ -332,7 +332,7 @@ class GenAbout(object):
                                                   "Missing 'dje_license' for " + line['about_file']))
         return license_output_list
 
-    def pre_process_and_dje_license_list(self, input_list, api_url, api_username, api_key, dje_license_list, output_path):
+    def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
         key_text_dict = {}
         for line in input_list:
             try:
@@ -342,20 +342,22 @@ class GenAbout(object):
             except Exception as e:
                 self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
-        if dje_license_list:
-            license_list_context = []
-            for gen_path, license_key in dje_license_list:
-                if gen_path.startswith('/'):
-                    gen_path = gen_path.partition('/')[2]
-                gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
-                if not _exists(gen_license_path) and not self.extract_dje_license_error:
-                    context = key_text_dict[license_key]
-                    if context:
-                        gen_path_context = []
-                        gen_path_context.append(gen_license_path)
-                        gen_path_context.append(context.encode('utf8'))
-                        license_list_context.append(gen_path_context)
-            return license_list_context
+        return key_text_dict
+
+    def process_dje_licenses(self, dje_license_list, dje_license_dict, output_path):
+        license_list_context = []
+        for gen_path, license_key in dje_license_list:
+            if gen_path.startswith('/'):
+                gen_path = gen_path.partition('/')[2]
+            gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
+            if not _exists(gen_license_path) and not self.extract_dje_license_error:
+                context = dje_license_dict[license_key]
+                if context:
+                    gen_path_context = []
+                    gen_path_context.append(gen_license_path)
+                    gen_path_context.append(context.encode('utf8'))
+                    license_list_context.append(gen_path_context)
+        return license_list_context
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
         output_list = []
@@ -675,13 +677,15 @@ def main(parser, options, args):
 
     dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license)
 
+    # The dje_license_list is an empty list if gen_license is 'False'
     if gen_license:
-        license_list_context = gen.pre_process_and_dje_license_list(input_list,
+        dje_license_dict = gen.pre_process_and_dje_license_dict(input_list,
                                                                     api_url,
                                                                     api_username,
-                                                                    api_key,
-                                                                    dje_license_list,
-                                                                    output_path)
+                                                                    api_key)
+        license_list_context = gen.process_dje_licenses(dje_license_list,
+                                                        dje_license_dict,
+                                                        output_path)
         gen.write_licenses(license_list_context)
 
     components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one)

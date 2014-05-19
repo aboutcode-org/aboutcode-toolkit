@@ -487,3 +487,11 @@ class GenAboutTest(unittest.TestCase):
                 context = line
         self.assertTrue(context == tmp_license_context)
 
+    def test_process_dje_licenses(self):
+        gen = genabout.GenAbout()
+        test_license_list = [('/', 'test')]
+        test_license_dict = {'test': u'This is a test license.'}
+        test_path = '/test'
+        expected_output = [['/test/test.LICENSE', 'This is a test license.']]
+        output = gen.process_dje_licenses(test_license_list, test_license_dict, test_path)
+        self.assertTrue(output == expected_output)
