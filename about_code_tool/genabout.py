@@ -232,6 +232,8 @@ class GenAbout(object):
         full_url = '{0}{1}/?{2}'.format(
             url if url.endswith('/') else url + '/',
             license_key, urllib.urlencode(payload))
+        # The following is to handle special characters in URL such as space etc. 
+        full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
 
         try:
             request = urllib2.Request(full_url)
@@ -336,8 +338,7 @@ class GenAbout(object):
             try:
                 if line['dje_license']:
                     detail = self.get_license_details_from_api(api_url, api_username, api_key, line['dje_license'])
-                    line['dje_license_name'] = detail[0]
-                    key_text_dict[line['dje_license']] = detail[1]
+                    line['dje_license_name'], key_text_dict[line['dje_license']] = detail
             except Exception as e:
                 self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
