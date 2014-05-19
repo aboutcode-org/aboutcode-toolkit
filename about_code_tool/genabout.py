@@ -57,7 +57,7 @@ ESSENTIAL_FIELDS = ('about_file', 'about_resource',)
 
 # The 'dje_license_key' will be removed and will use the 'dje_license' instead.
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + \
-    ('about_file', 'dje_license_key',)
+    ('about_file',)
 
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
@@ -232,6 +232,8 @@ class GenAbout(object):
         full_url = '{0}{1}/?{2}'.format(
             url if url.endswith('/') else url + '/',
             license_key, urllib.urlencode(payload))
+        # The following is to handle special characters in URL such as space etc. 
+        full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
 
         try:
             request = urllib2.Request(full_url)
@@ -247,7 +249,7 @@ class GenAbout(object):
                 self.extract_dje_license_error = True
                 self.errors.append(Error('username/key', username + '/' + api_key, error_msg))
             else:
-                self.errors.append(Error('dje_license_key', license_key, "Invalid 'dje_license_key'"))
+                self.errors.append(Error('dje_license', license_key, "Invalid 'dje_license_key'"))
             return {}
         except urllib2.URLError:
             if about.check_network_connection():
@@ -281,19 +283,22 @@ class GenAbout(object):
     def write_licenses(self, license_context_list):
         for gen_license_path, license_context in license_context_list:
             try:
+                if not _exists(dirname(gen_license_path)):
+                    makedirs(dirname(gen_license_path))
                 with open(gen_license_path, 'wb') as output:
                     output.write(license_context)
             except Exception as e:
                 self.errors.append(Error('Unknown', gen_license_path, "Something is wrong."))
 
-    def get_license_text_from_api(self, url, username, api_key, license_key):
+    def get_license_details_from_api(self, url, username, api_key, license_key):
         """
         Returns the license_text of a given license_key using an API request.
         Returns an empty string if the text is not available.
         """
         data = self.request_license_data(url, username, api_key, license_key)
+        license_name = data.get('name', '')
         license_text = data.get('full_text', '')
-        return license_text
+        return [license_name, license_text]
 
     def get_dje_license_list(self, gen_location, input_list, gen_license):
         license_output_list = []
@@ -311,21 +316,48 @@ class GenAbout(object):
                         self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
-                        if line['dje_license_key']:
+                        if line['dje_license']:
                             license_output_list.append(self.gen_license_list(line))
                         else:
-                            self.warnings.append(Warn('dje_license_key', '',
-                                                      "Missing 'dje_license_key' for " + line['about_file']))
+                            self.warnings.append(Warn('dje_license', '',
+                                                      "Missing 'dje_license' for " + line['about_file']))
             # This except condition will force the tool to create the
             # 'license_text_file' key column from the self.gen_license_list(line)
             except Exception as e:
                 if gen_license:
-                    if line['dje_license_key']:
+                    if line['dje_license']:
                         license_output_list.append(self.gen_license_list(line))
                     else:
-                        self.warnings.append(Warn('dje_license_key', '',
-                                                  "Missing 'dje_license_key' for " + line['about_file']))
+                        self.warnings.append(Warn('dje_license', '',
+                                                  "Missing 'dje_license' for " + line['about_file']))
         return license_output_list
+
+    def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
+        key_text_dict = {}
+        for line in input_list:
+            try:
+                if line['dje_license']:
+                    detail = self.get_license_details_from_api(api_url, api_username, api_key, line['dje_license'])
+                    line['dje_license_name'], key_text_dict[line['dje_license']] = detail
+            except Exception as e:
+                self.warnings.append(Warn('dje_license', '',
+                                                  "Missing 'dje_license' for " + line['about_file']))
+        return key_text_dict
+
+    def process_dje_licenses(self, dje_license_list, dje_license_dict, output_path):
+        license_list_context = []
+        for gen_path, license_key in dje_license_list:
+            if gen_path.startswith('/'):
+                gen_path = gen_path.partition('/')[2]
+            gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
+            if not _exists(gen_license_path) and not self.extract_dje_license_error:
+                context = dje_license_dict[license_key]
+                if context:
+                    gen_path_context = []
+                    gen_path_context.append(gen_license_path)
+                    gen_path_context.append(context.encode('utf8'))
+                    license_list_context.append(gen_path_context)
+        return license_list_context
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
         output_list = []
@@ -372,7 +404,7 @@ class GenAbout(object):
 
     @staticmethod
     def gen_license_list(line):
-        dje_key = line['dje_license_key']
+        dje_key = line['dje_license']
         file_location = line['about_file']
         if file_location.endswith('/'):
             file_location = file_location.rpartition('/')[0]
@@ -636,37 +668,33 @@ def main(parser, options, args):
             sys.exit(errno.EINVAL)
         for line in input_list:
             try:
-                if line['dje_license_key']:
+                if line['dje_license']:
                     break
             except Exception as e:
                 print(repr(e))
-                print("The input does not have the 'dje_license_key' key which is required.")
+                print("The input does not have the 'dje_license' key which is required.")
                 sys.exit(errno.EINVAL)
 
     dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license)
+
+    # The dje_license_list is an empty list if gen_license is 'False'
+    if gen_license:
+        dje_license_dict = gen.pre_process_and_dje_license_dict(input_list,
+                                                                    api_url,
+                                                                    api_username,
+                                                                    api_key)
+        license_list_context = gen.process_dje_licenses(dje_license_list,
+                                                        dje_license_dict,
+                                                        output_path)
+        gen.write_licenses(license_list_context)
+
     components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
 
-    if dje_license_list:
-        license_list_context = []
-        for gen_path, license_key in dje_license_list:
-            if gen_path.startswith('/'):
-                gen_path = gen_path.partition('/')[2]
-            gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
-            if not _exists(gen_license_path) and not gen.extract_dje_license_error:
-                context = gen.get_license_text_from_api(api_url, api_username, api_key, license_key)
-                if context:
-                    gen_path_context = []
-                    gen_path_context.append(gen_license_path)
-                    gen_path_context.append(context.encode('utf8'))
-                    license_list_context.append(gen_path_context)
-        gen.write_licenses(license_list_context)
-
     gen.warnings_errors_summary()
     print('Warnings: %s' % len(gen.warnings))
     print('Errors: %s' % len(gen.errors))
-
 
 def get_parser():
     class MyFormatter(optparse.IndentedHelpFormatter):

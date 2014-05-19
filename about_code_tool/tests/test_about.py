@@ -94,7 +94,7 @@ class AboutCollectorTest(unittest.TestCase):
         'license_spdx,redistribute,attribute,track_changes,vcs_tool,' \
         'vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,' \
         'checksum_sha1,checksum_md5,checksum_sha256,dje_component,' \
-        'dje_license,dje_organization,warnings,errors'
+        'dje_license,dje_organization,dje_license_name,warnings,errors'
 
         input = "about_code_tool/tests/testdata/basic"
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)

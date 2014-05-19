@@ -156,6 +156,7 @@ DJE_FIELDS = (
     'dje_component',
     'dje_license',
     'dje_organization',
+    'dje_license_name'
 )
 
 OPTIONAL_FIELDS = BASIC_FIELDS + OWNERSHIP_FIELDS + LICENSE_FIELDS + \
@@ -1097,7 +1098,8 @@ class AboutCollector(object):
         license_key = []
         license_text = []
         license_dict = {}
-        common_license = ['GPL 2.0','OpenSSL/SSLeay License', 'Apache 2.0', 'BSD-Modified', 'CC-BY-SA-3.0']
+        common_license = ['GNU General Public License 2.0','OpenSSL/SSLeay License', 'Apache License 2.0', 'BSD-Modified']
+
         for about_object in self:
             about_relative_path = '/'+ about_object.location.partition(self.user_provided_path)[2]
             if not limit_to or about_relative_path in limit_to:
