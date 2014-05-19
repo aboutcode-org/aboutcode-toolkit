@@ -936,7 +936,7 @@ class AboutFile(object):
         Return the dje_license value if the dje_license field exists
         """
         try:
-            return self.parsed['dje_license']
+            return self.parsed['dje_license_name']
         except Exception as e:
             pass
 
