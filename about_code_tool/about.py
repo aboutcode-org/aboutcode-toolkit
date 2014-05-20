@@ -399,6 +399,13 @@ SPDX_LICENSES = (
     'ZPL-2.1',
 )
 
+COMMON_LICENSES = (
+    'Apache License 2.0',
+    'BSD-Modified',
+    'GNU General Public License 2.0',
+    'OpenSSL/SSLeay License',
+)
+
 # Maps lowercase id to standard ids with official case
 SPDX_LICENSE_IDS = dict((name.lower(), name) for name in SPDX_LICENSES)
 
@@ -1098,7 +1105,7 @@ class AboutCollector(object):
         license_key = []
         license_text = []
         license_dict = {}
-        common_license = ['GNU General Public License 2.0','OpenSSL/SSLeay License', 'Apache License 2.0', 'BSD-Modified']
+        #common_license = ['GNU General Public License 2.0','OpenSSL/SSLeay License', 'Apache License 2.0', 'BSD-Modified']
 
         for about_object in self:
             about_relative_path = '/'+ about_object.location.partition(self.user_provided_path)[2]
@@ -1145,7 +1152,7 @@ class AboutCollector(object):
                                license_texts = license_text,
                                notice_texts=notice_text,
                                license_dicts=license_dict,
-                               common_licenses=common_license)
+                               common_licenses=COMMON_LICENSES)
 
     def get_genattrib_errors(self):
         return self.genattrib_errors
