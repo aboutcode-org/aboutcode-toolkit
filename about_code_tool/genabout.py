@@ -338,7 +338,7 @@ class GenAbout(object):
             try:
                 if line['dje_license']:
                     detail = self.get_license_details_from_api(api_url, api_username, api_key, line['dje_license'])
-                    line['dje_license_name'], key_text_dict[line['dje_license']] = detail
+                    line['dje_license_name'], key_text_dict[line['dje_license_name']] = detail
             except Exception as e:
                 self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
@@ -404,13 +404,13 @@ class GenAbout(object):
 
     @staticmethod
     def gen_license_list(line):
-        dje_key = line['dje_license']
+        dje_license_name = line['dje_license_name']
         file_location = line['about_file']
         if file_location.endswith('/'):
             file_location = file_location.rpartition('/')[0]
         about_parent_dir = dirname(file_location)
-        line['license_text_file'] = dje_key +'.LICENSE'
-        return (about_parent_dir, dje_key)
+        line['license_text_file'] = dje_license_name +'.LICENSE'
+        return (about_parent_dir, dje_license_name)
 
     @staticmethod
     def format_output(input_list):
@@ -675,22 +675,23 @@ def main(parser, options, args):
                 print("The input does not have the 'dje_license' key which is required.")
                 sys.exit(errno.EINVAL)
 
-    dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license)
-
-    # The dje_license_list is an empty list if gen_license is 'False'
     if gen_license:
         dje_license_dict = gen.pre_process_and_dje_license_dict(input_list,
                                                                     api_url,
                                                                     api_username,
                                                                     api_key)
-        license_list_context = gen.process_dje_licenses(dje_license_list,
-                                                        dje_license_dict,
-                                                        output_path)
-        gen.write_licenses(license_list_context)
+
+    dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license)
 
     components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
+
+    if dje_license_list:
+        license_list_context = gen.process_dje_licenses(dje_license_list,
+                                                        dje_license_dict,
+                                                        output_path)
+        gen.write_licenses(license_list_context)
 
     gen.warnings_errors_summary()
     print('Warnings: %s' % len(gen.warnings))
