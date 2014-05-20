@@ -580,7 +580,7 @@ this software and releases the component to Public Domain.
         self.assertEqual(notice_text, expected)
 
     def test_get_dje_license_name(self):
-        expected = 'apache-2.0'
+        expected = 'Apache License 2.0'
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_resource_field_present.ABOUT'))
         output = about_file.get_dje_license_name()
         self.assertTrue(output == expected)
