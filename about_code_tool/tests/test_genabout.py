@@ -244,6 +244,8 @@ class GenAboutTest(unittest.TestCase):
         gen_license = True
         dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
+        for line in input_list:
+            self.assertTrue(line['license_text_file'] == 'apache-2.0.LICENSE')
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -273,6 +275,8 @@ class GenAboutTest(unittest.TestCase):
         gen_license = True
         dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
+        for line in input_list:
+            self.assertTrue(line['license_text_file'] == 'apache-2.0.LICENSE')
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
