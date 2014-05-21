@@ -79,7 +79,7 @@ class GenAbout(object):
     @staticmethod
     def get_input_list(input_file):
         csvfile = csv.DictReader(open(input_file, 'rU'))
-        return [line for line in csvfile]
+        return [{k.lower(): v for k, v in r.iteritems()} for r in csvfile]
 
     @staticmethod
     def get_non_empty_rows_list(input_list):

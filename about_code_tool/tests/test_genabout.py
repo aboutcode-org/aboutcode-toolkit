@@ -39,6 +39,14 @@ class GenAboutTest(unittest.TestCase):
         list = gen.get_input_list(test_input)
         self.assertTrue(list == expected_list)
 
+    def test_get_input_list_covert_all_keys_to_lower(self):
+        gen = genabout.GenAbout()
+        test_input = join(TESTDATA_PATH, "test_files_for_genabout/about_key_with_upper_case.csv")
+        expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
+                           'name': 'ABOUT tool', 'version': '0.8.1'}]
+        list = gen.get_input_list(test_input)
+        self.assertTrue(list == expected_list)
+
     def test_get_non_empty_rows_list(self):
         gen = genabout.GenAbout()
         input_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
