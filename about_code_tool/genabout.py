@@ -298,9 +298,10 @@ class GenAbout(object):
         data = self.request_license_data(url, username, api_key, license_key)
         license_name = data.get('name', '')
         license_text = data.get('full_text', '')
-        return [license_name, license_text]
+        license_key = data.get('key', '')
+        return [license_name, license_key, license_text]
 
-    def get_dje_license_list(self, gen_location, input_list, gen_license):
+    def get_dje_license_list(self, gen_location, input_list, gen_license, dje_license_dict):
         license_output_list = []
         for line in input_list:
             try:
@@ -318,6 +319,8 @@ class GenAbout(object):
                     if gen_license:
                         if line['dje_license']:
                             license_output_list.append(self.gen_license_list(line))
+                            line['license_text_file'] = dje_license_dict[line['dje_license_name']][0]\
+                                                + '.LICENSE'
                         else:
                             self.warnings.append(Warn('dje_license', '',
                                                       "Missing 'dje_license' for " + line['about_file']))
@@ -327,6 +330,8 @@ class GenAbout(object):
                 if gen_license:
                     if line['dje_license']:
                         license_output_list.append(self.gen_license_list(line))
+                        line['license_text_file'] = dje_license_dict[line['dje_license_name']][0]\
+                                                + '.LICENSE'
                     else:
                         self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
@@ -337,8 +342,14 @@ class GenAbout(object):
         for line in input_list:
             try:
                 if line['dje_license']:
+                    detail_list = []
                     detail = self.get_license_details_from_api(api_url, api_username, api_key, line['dje_license'])
-                    line['dje_license_name'], key_text_dict[line['dje_license_name']] = detail
+                    line['dje_license_name'] = detail[0]
+                    dje_key = detail[1]
+                    license_context = detail [2]
+                    detail_list.append(dje_key)
+                    detail_list.append(license_context)
+                    key_text_dict[line['dje_license_name']] = detail_list
             except Exception as e:
                 self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
@@ -346,12 +357,13 @@ class GenAbout(object):
 
     def process_dje_licenses(self, dje_license_list, dje_license_dict, output_path):
         license_list_context = []
-        for gen_path, license_key in dje_license_list:
+        for gen_path, license_name in dje_license_list:
             if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
+            license_key = dje_license_dict[license_name][0]
             gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
             if not _exists(gen_license_path) and not self.extract_dje_license_error:
-                context = dje_license_dict[license_key]
+                context = dje_license_dict[license_name][1]
                 if context:
                     gen_path_context = []
                     gen_path_context.append(gen_license_path)
@@ -409,7 +421,6 @@ class GenAbout(object):
         if file_location.endswith('/'):
             file_location = file_location.rpartition('/')[0]
         about_parent_dir = dirname(file_location)
-        line['license_text_file'] = dje_license_name +'.LICENSE'
         return (about_parent_dir, dje_license_name)
 
     @staticmethod
@@ -534,6 +545,7 @@ def main(parser, options, args):
     api_username = ''
     api_key = ''
     gen_license = False
+    dje_license_dict = {}
 
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
@@ -681,8 +693,7 @@ def main(parser, options, args):
                                                                     api_username,
                                                                     api_key)
 
-    dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license)
-
+    dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license, dje_license_dict)
     components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)

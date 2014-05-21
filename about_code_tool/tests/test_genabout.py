@@ -169,7 +169,8 @@ class GenAboutTest(unittest.TestCase):
                         'about_resource': '.', 'name': 'ABOUT tool'}]
         expected_output_list = []
         gen_license = False
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        dje_license_dict = {}
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -182,7 +183,8 @@ class GenAboutTest(unittest.TestCase):
                         'license_text_file': 'not_exist.txt'}]
         expected_output_list = []
         gen_license = False
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        dje_license_dict = {}
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertTrue(len(gen.errors) == 1, "Should return 1 error.")
@@ -195,7 +197,8 @@ class GenAboutTest(unittest.TestCase):
                         'license_text_file': '../../../../apache2.LICENSE'}]
         expected_output_list = []
         gen_license = False
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        dje_license_dict = {}
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -208,7 +211,8 @@ class GenAboutTest(unittest.TestCase):
                         'license_text_file': '../../../../apache2.LICENSE'}]
         expected_output_list = []
         gen_license = False
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        dje_license_dict = {}
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -218,10 +222,12 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
+                        'dje_license': 'Apache License 2.0',
                         'license_text_file': '../../../../apache2.LICENSE'}]
         expected_output_list = []
         gen_license = True
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -231,11 +237,13 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
+                        'dje_license': 'apache-2.0',
                         'dje_license_name': 'Apache License 2.0',
-                        'license_text_file': '', 'dje_license': 'apache-2.0'}]
+                        'license_text_file': ''}]
         expected_output_list = [('/', 'Apache License 2.0')]
         gen_license = True
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -248,7 +256,8 @@ class GenAboutTest(unittest.TestCase):
                         'license_text_file': '', 'dje_license': ''}]
         expected_output_list = []
         gen_license = True
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -259,10 +268,11 @@ class GenAboutTest(unittest.TestCase):
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
                         'dje_license_name': 'Apache License 2.0',
-                        'dje_license': 'apache-2.0'}]
+                        'dje_license': 'Apache License 2.0'}]
         expected_output_list = [('/', 'Apache License 2.0')]
         gen_license = True
-        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license)
+        dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
+        lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         self.assertTrue(expected_output_list == lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
@@ -441,7 +451,6 @@ class GenAboutTest(unittest.TestCase):
         expected_list = ('/tmp/3pp', 'Apache License 2.0')
         output = gen.gen_license_list(input_list)
         self.assertTrue(expected_list == output)
-        self.assertTrue(input_list['license_text_file'] == 'Apache License 2.0.LICENSE')
 
     def test_gen_license_list_no_license_text_file_key(self):
         gen = genabout.GenAbout()
@@ -452,7 +461,6 @@ class GenAboutTest(unittest.TestCase):
         expected_list = ('/tmp/3pp', 'Apache License 2.0')
         output = gen.gen_license_list(input_list)
         self.assertTrue(expected_list == output)
-        self.assertTrue(input_list['license_text_file'] == 'Apache License 2.0.LICENSE')
 
     def test_copy_license_files_test_path_not_endswith_slash(self):
         gen = genabout.GenAbout()
@@ -494,8 +502,8 @@ class GenAboutTest(unittest.TestCase):
     def test_process_dje_licenses(self):
         gen = genabout.GenAbout()
         test_license_list = [('/', 'test')]
-        test_license_dict = {'test': u'This is a test license.'}
+        test_license_dict = {'test': [u'test_key', u'This is a test license.']}
         test_path = '/test'
-        expected_output = [['/test/test.LICENSE', 'This is a test license.']]
+        expected_output = [['/test/test_key.LICENSE', 'This is a test license.']]
         output = gen.process_dje_licenses(test_license_list, test_license_dict, test_path)
         self.assertTrue(output == expected_output)
