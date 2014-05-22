@@ -158,6 +158,10 @@ def main(parser, options, args):
             with open(component_subset_path, "rU") as f:
                 input_dict = csv.DictReader(f)
                 for row in input_dict:
+                    # Force the path to start with the '/' to do the mapping
+                    # with the project structure
+                    if not row['about_file'].startswith('/'):
+                        row['about_file'] = '/' + row['about_file']
                     input_list.append(row)
             if mapping_config:
                 mapping_list = genabout.GenAbout().get_mapping_list()

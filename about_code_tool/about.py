@@ -43,6 +43,7 @@ import string
 import sys
 import urlparse
 import logging
+
 from collections import namedtuple
 from datetime import datetime
 from email.parser import HeaderParser
@@ -969,6 +970,8 @@ class AboutCollector(object):
     Summarize all the issues from each instance.
     """
     def __init__(self, input_path):
+        if isdir(input_path) and not input_path.endswith('/'):
+            input_path = input_path + '/'
         self.user_provided_path = input_path
         self.absolute_path = abspath(input_path)
         assert exists(self.absolute_path)
@@ -1105,10 +1108,18 @@ class AboutCollector(object):
         license_key = []
         license_text = []
         license_dict = {}
-        #common_license = ['GNU General Public License 2.0','OpenSSL/SSLeay License', 'Apache License 2.0', 'BSD-Modified']
+        not_exist_components = list(limit_to)
 
         for about_object in self:
             about_relative_path = '/'+ about_object.location.partition(self.user_provided_path)[2]
+            # Check is there any components in the 'limit_to' list that
+            # does not exist in the code base.
+            if limit_to:
+                try:
+                    not_exist_components.remove(about_relative_path)
+                except Exception as e:
+                    continue
+
             if not limit_to or about_relative_path in limit_to:
                 validated_fields.append(about_object.validated_fields)
                 notice_text.append(about_object.notice_text())
@@ -1141,6 +1152,14 @@ class AboutCollector(object):
                     self.genattrib_errors.append(Error(GENATTRIB, 'about_resource',\
                                                         about_object.about_resource,\
                                                         msg))
+
+        if not_exist_components:
+            for component in not_exist_components:
+                msg = 'about file: %s - file does not exist. '\
+                    'No attribution is generated for this component.'\
+                    % (self.user_provided_path + component).replace('//', '/')
+                self.genattrib_errors.append(Error(GENATTRIB, 'about_file',\
+                                                   component, msg))
 
         # We want the license generation in alphabetical order
         for key in sorted(license_dict.keys()):
