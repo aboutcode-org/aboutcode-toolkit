@@ -613,7 +613,7 @@ class AboutFile(object):
         warnings = []
         for field_name, value in self.parsed.items():
             field_name = field_name.lower()
-            if field_name in self.validated_fields.keys():
+            if field_name in self.validated_fields:
                 field_value = self.validated_fields[field_name]
                 msg = 'Duplicate field names found: ignored.'
                 warnings.append(Warn(IGNORED, field_name, field_value, msg))
@@ -733,7 +733,7 @@ class AboutFile(object):
 
     def validate_mandatory_fields_are_present(self):
         for field_name in MANDATORY_FIELDS:
-            if field_name not in self.validated_fields.keys():
+            if field_name not in self.validated_fields:
                 self.errors.append(Error(VALUE, field_name, None,
                                          'Mandatory field missing'))
 
@@ -869,7 +869,7 @@ class AboutFile(object):
         """
         row = [updated_path]
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
-            if field in self.validated_fields.keys():
+            if field in self.validated_fields:
                 row += [self.validated_fields[field]]
             else:
                 row += ['']
