@@ -890,7 +890,12 @@ class AboutFile(object):
             <li> the _ underscore, - dash and . period signs. </li>
         """
         supported = string.digits + string.ascii_letters + '_-.'
-        file_name = resource_name(file_path)
+        # Using the resource_name(file_path) will yield the following error on windows
+        # Field: None, Value: [':', '\\', '\\', '\\', '\\', '\\', '\\'],
+        # Message: The filename contains invalid character.
+        # Perhaps it's better to simply use the os.path.basename(file_path)
+        # file_name = resource_name(file_path)
+        file_name = basename(file_path)
         return [char for char in file_name if char not in supported]
 
     @staticmethod
