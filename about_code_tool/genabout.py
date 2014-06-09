@@ -6,7 +6,7 @@ This is a tool to generate ABOUT files based on the input file.
 The input file should be a csv format which contains information about the
 file location, origin and license of the software components etc.
 """
-from __future__ import print_function, with_statement
+from __future__ import print_function, with_statement # We require Python 2.6 or later
 
 import copy
 import csv
@@ -15,6 +15,7 @@ import json
 import logging
 import optparse
 import os
+import posixpath
 import shutil
 import sys
 import urllib
@@ -79,7 +80,14 @@ class GenAbout(object):
     @staticmethod
     def get_input_list(input_file):
         csvfile = csv.DictReader(open(input_file, 'rU'))
-        return [{k.lower(): v for k, v in r.iteritems()} for r in csvfile]
+        input_list = []
+        for row in csvfile:
+            row_dict = {}
+            for key in row:
+                row_dict[key.lower()] = row[key]
+            input_list.append(row_dict)
+        return input_list
+        #return [{k.lower(): v for k, v in r.iteritems()} for r in csvfile]
 
     @staticmethod
     def get_non_empty_rows_list(input_list):

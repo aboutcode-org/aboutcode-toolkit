@@ -14,8 +14,7 @@
 #  limitations under the License.
 # =============================================================================
 
-from __future__ import print_function
-from __future__ import with_statement
+from __future__ import print_function, with_statement # We require Python 2.6 or later
 
 import sys
 import string

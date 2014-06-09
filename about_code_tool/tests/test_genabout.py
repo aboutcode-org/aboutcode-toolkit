@@ -14,7 +14,7 @@
 #  limitations under the License.
 # =============================================================================
 
-from __future__ import print_function, with_statement
+from __future__ import print_function, with_statement # We require Python 2.6 or later
 
 import os
 import shutil
@@ -125,13 +125,13 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         test_input = join(TESTDATA_PATH, "test_files_for_genabout/dup_keys.csv")
         expected_list = ['copyright', 'copyright']
-        self.assertTrue(gen.get_duplicated_keys(test_input))
+        self.assertTrue(gen.get_duplicated_keys(test_input) == expected_list)
 
     def test_get_duplicated_keys_have_dup_diff_case(self):
         gen = genabout.GenAbout()
         test_input = join(TESTDATA_PATH, "test_files_for_genabout/dup_keys_with_diff_case.csv")
         expected_list = ['copyright', 'Copyright']
-        self.assertTrue(gen.get_duplicated_keys(test_input))
+        self.assertTrue(gen.get_duplicated_keys(test_input) == expected_list)
 
     def test_validate_mandatory_fields_no_missing(self):
         gen = genabout.GenAbout()

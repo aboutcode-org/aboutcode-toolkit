@@ -9,7 +9,7 @@ This tool read and validates ABOUT files to collect your software components
 inventory.
 """
 
-from __future__ import print_function, with_statement
+from __future__ import print_function, with_statement # We require Python 2.6 or later
 
 __version__ = '0.9.0'
 
