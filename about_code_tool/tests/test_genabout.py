@@ -320,11 +320,11 @@ class GenAboutTest(unittest.TestCase):
         action_num = 1
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': ''}]
-        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
+        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout', 'about.py.ABOUT'),
                                  {'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
-        self.assertTrue(expected_output_list == output_list)
+        self.assertTrue(expected_output_list == expected_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -333,7 +333,7 @@ class GenAboutTest(unittest.TestCase):
         action_num = 2
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': '', 'test': 'test sample'}]
-        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
+        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout', 'about.py.ABOUT'),
                                   {'test': 'test sample', 'about_file': 'about.py.ABOUT',
                                     'version': '0.8.1', 'about_resource': '.',
                                      'name': 'ABOUT tool'}]]
@@ -347,7 +347,7 @@ class GenAboutTest(unittest.TestCase):
         action_num = 3
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': '', 'test': 'test sample'}]
-        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/about.py.ABOUT'),
+        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout', 'about.py.ABOUT'),
                                   {'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                                     'about_resource': '.', 'name': '', 'test': 'test sample'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
@@ -405,7 +405,7 @@ class GenAboutTest(unittest.TestCase):
                          'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
-        expected_list = [('./apache2.LICENSE', '')]
+        expected_list = [(join('.', 'apache2.LICENSE'), '')]
         output = gen.verify_license_files(input_list, path, False)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
@@ -417,7 +417,7 @@ class GenAboutTest(unittest.TestCase):
                          'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
-        expected_list = [('./apache2.LICENSE', '')]
+        expected_list = [(join('.', 'apache2.LICENSE'), '')]
         output = gen.verify_license_files(input_list, path, True)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
@@ -516,6 +516,6 @@ class GenAboutTest(unittest.TestCase):
         test_license_list = [('/', 'test')]
         test_license_dict = {'test': [u'test_key', u'This is a test license.']}
         test_path = '/test'
-        expected_output = [['/test/test_key.LICENSE', 'This is a test license.']]
+        expected_output = [[join(u'/test', 'test_key.LICENSE'), 'This is a test license.']]
         output = gen.process_dje_licenses(test_license_list, test_license_dict, test_path)
         self.assertTrue(output == expected_output)

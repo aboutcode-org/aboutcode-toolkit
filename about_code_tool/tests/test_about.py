@@ -107,8 +107,8 @@ class AboutCollectorTest(unittest.TestCase):
 
     def test_collect_about_files_on_dir(self):
         input_path = 'about_code_tool/tests/testdata/DateTest'
-        expected = ['about_code_tool/tests/testdata/DateTest/non-supported_date_format.ABOUT',
-                    'about_code_tool/tests/testdata/DateTest/supported_date_format.ABOUT']
+        expected = [join('about_code_tool/tests/testdata/DateTest', 'non-supported_date_format.ABOUT'),
+                    join('about_code_tool/tests/testdata/DateTest', 'supported_date_format.ABOUT')]
         result = about.AboutCollector._collect_about_files(input_path)
         self.assertEqual(sorted(expected), sorted(result))
 
@@ -157,8 +157,7 @@ class ParserTest(unittest.TestCase):
 
     def test_invalid_chars_in_file_name_path(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_about_file_name('%6571351()275612$/_$asafg:/\\')
-        print(invalid)
+        invalid = about_obj.invalid_chars_in_about_file_name('%6571351()275612$/_$asafg:/')
         self.assertEqual([], invalid)
 
     def test_invalid_chars_in_file_name_path2(self):
