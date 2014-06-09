@@ -152,18 +152,19 @@ class ParserTest(unittest.TestCase):
 
     def test_invalid_chars_in_file_name(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_about_file_name('_$as/afg\\:')
-        self.assertEqual(['\\', ':'], invalid)
+        invalid = about_obj.invalid_chars_in_about_file_name('_$as/afg:')
+        self.assertEqual([':'], invalid)
 
     def test_invalid_chars_in_file_name_path(self):
         about_obj = about.AboutFile()
         invalid = about_obj.invalid_chars_in_about_file_name('%6571351()275612$/_$asafg:/\\')
-        self.assertEqual(['\\', ], invalid)
+        print(invalid)
+        self.assertEqual([], invalid)
 
     def test_invalid_chars_in_file_name_path2(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_about_file_name('%6571351()275612$_$asafg:\\')
-        self.assertEqual(['%', '(', ')', '$', '$', ':', '\\', ], invalid)
+        invalid = about_obj.invalid_chars_in_about_file_name('%6571351()275612$_$asafg:')
+        self.assertEqual(['%', '(', ')', '$', '$', ':', ], invalid)
 
     def test_invalid_space_in_file_name(self):
         about_obj = about.AboutFile()
