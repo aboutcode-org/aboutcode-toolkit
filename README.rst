@@ -187,6 +187,8 @@ from the /tmp/thirdparty_about/ and then generate the attribution output to
 /tmp/thirdparty_attribution/attribution.html
 
 
+(See USAGE for a details explaining of each scripts and options.)
+
 HELP and SUPPORT
 ----------------
 If you have a question or find a bug, enter a ticket at:

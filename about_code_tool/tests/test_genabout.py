@@ -61,9 +61,9 @@ class GenAboutTest(unittest.TestCase):
     
     def test_get_mapping_list(self):
         gen = genabout.GenAbout()
-        expected_list = {'about_file': 'Directory/Filename',
-                          'version': 'Confirmed Version',
-                           'about_resource': 'file_name', 'name': 'Component'}
+        expected_list = {'about_file': 'directory/filename',
+                          'version': 'confirmed version',
+                           'about_resource': 'file_name', 'name': 'component'}
         output = gen.get_mapping_list()
         self.assertTrue(output == expected_list)
 
