@@ -113,7 +113,7 @@ class GenAbout(object):
                     if not line.startswith('#') and ':' in line:
                         about_spec_key =line.partition(':')[0]
                         user_spec_key = line.partition(':')[2].strip()
-                        mapping_list[about_spec_key] = user_spec_key
+                        mapping_list[about_spec_key.lower()] = user_spec_key.lower()
         except Exception as e:
             print(repr(e))
             print("The 'MAPPING.CONFIG' cannot be opened.")
