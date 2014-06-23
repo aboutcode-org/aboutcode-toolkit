@@ -1086,7 +1086,7 @@ class AboutCollector(object):
                 row_data = about_object.get_row_data(relative_path)
                 csv_writer.writerow(row_data)
 
-    def generate_attribution(self, template_path='templates/default.html',
+    def generate_attribution(self, template_path=None,
                              limit_to=None):
         """
         Generates an attribution file from the current list of ABOUT objects.
@@ -1095,6 +1095,9 @@ class AboutCollector(object):
         """
         if not limit_to:
             limit_to = []
+
+        if not template_path:
+            template_path = 'templates/default.html'
 
         try:
             from jinja2 import Environment, FileSystemLoader, TemplateNotFound

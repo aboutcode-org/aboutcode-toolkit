@@ -177,6 +177,11 @@ the .ABOUT files in the directory /tmp/thirdparty_about/.
                             0 - Do not print any warning or error messages, just a total count (default)
                             1 - Print error messages
                             2 - Print error and warning messages
+    
+      --template_location=TEMPLATE_LOCATION
+                            Use the custom template for the Attribution Generation
+    
+      --mapping             Configure the mapping key from the MAPPING.CONFIG
 
 Example::
 

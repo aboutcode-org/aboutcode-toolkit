@@ -89,6 +89,10 @@ Print more or fewer verbose messages while processing ABOUT files
 2 - Print error and warning messages
 """
 
+TEMPLATE_LOCATION_HELP = """\
+Use the custom template for the Attribution Generation
+"""
+
 MAPPING_HELP = """\
 Configure the mapping key from the MAPPING.CONFIG
 """
@@ -97,7 +101,8 @@ def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
     mapping_config = options.mapping
-    
+    template_location = options.template_location
+
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
         sys.exit(0)
@@ -169,7 +174,7 @@ def main(parser, options, args):
             sublist = component_subset_to_sublist(input_list)
             outlist = update_path_to_about(sublist)
 
-        attrib_str = collector.generate_attribution( limit_to = outlist )
+        attrib_str = collector.generate_attribution(template_path=template_location, limit_to=outlist)
         with open(output_path, "w") as f:
             f.write(attrib_str)
         errors = collector.get_genattrib_errors()
@@ -233,6 +238,7 @@ def get_parser():
     parser.add_option('--overwrite', action='store_true',
                       help='Overwrites the output file if it exists')
     parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
+    parser.add_option('--template_location', type='string', help=TEMPLATE_LOCATION_HELP)
     parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
     return parser
 

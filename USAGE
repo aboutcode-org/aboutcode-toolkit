@@ -192,12 +192,12 @@ Syntax
 ------
 
     Usage: genattrib.py [options] input_path output_path component_list
-
+    
         Input can be a file or directory.
         Output of rendered template must be a file (e.g. .html).
         Component List must be a .csv file which has at least an "about_resource" column.
-
-
+    
+    
     Options:
       -h, --help            Display help
       -v, --version         Display current version, license notice, and copyright notice
@@ -207,6 +207,11 @@ Syntax
                             0 - Do not print any warning or error messages, just a total count (default)
                             1 - Print error messages
                             2 - Print error and warning messages
+
+      --template_location=TEMPLATE_LOCATION
+                            Use the custom template for the Attribution Generation
+
+      --mapping             Configure the mapping key from the MAPPING.CONFIG
 
 -------
 Purpose
@@ -226,3 +231,17 @@ Purpose
     '/home/project/component_list.csv' is the component list that user want to be generated
 
         $ python genattrib.py /home/about_files/ /home/attribution/attribution.html /home/project/component_list.csv
+
+-------
+Options
+-------
+
+    --template_loaction
+
+        This option allows user to use its own template for Attribution Generation.
+        For instance, if the custom template the user want to use is located at:
+        /home/custom_template/template.html
+
+            $ python genattrib.py --template_location=/home/custom_template/template.html input_path output_path component_list
+
+
