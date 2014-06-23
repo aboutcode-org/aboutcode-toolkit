@@ -400,11 +400,18 @@ SPDX_LICENSES = (
     'ZPL-2.1',
 )
 
+# Use DJE License Name
 COMMON_LICENSES = (
     'Apache License 2.0',
     'BSD-Modified',
+    'BSD-Original',
+    'BSD-Original-UC',
     'GNU General Public License 2.0',
+    'GNU General Public License 3.0',
+    'GNU Lesser General Public License 2.1',
+    'Net SNMP License',
     'OpenSSL/SSLeay License',
+    'ZLIB License',
 )
 
 # Maps lowercase id to standard ids with official case
