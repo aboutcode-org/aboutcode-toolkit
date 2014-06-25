@@ -71,15 +71,38 @@ def component_subset_to_sublist(input_list):
 def update_path_to_about(input_list):
     output_list = []
     for row in input_list:
-        if row.endswith('/'):
-            row = row.rpartition('/')[0]
-        output_list.append(row + '.ABOUT')
+        if not row.endswith('.ABOUT'):
+            if row.endswith('/'):
+                row = row.rpartition('/')[0]
+            output_list.append(row + '.ABOUT')
+        else:
+            output_list.append(row)
     return output_list
+
+def convert_dict_key_to_lower_case(input_list):
+    output_list = []
+    for line in input_list:
+        dict = {}
+        for key in line:
+            dict[key.lower()] = line[key]
+        output_list.append(dict)
+    return output_list
+
+def check_about_file_existance_and_format(input_list):
+    try:
+        for row in input_list:
+            # Force the path to start with the '/' to do the mapping
+            # with the project structure
+            if not row['about_file'].startswith('/'):
+                row['about_file'] = '/' + row['about_file']
+        return input_list
+    except Exception as e:
+        return []
 
 USAGE_SYNTAX = """\
     Input can be a file or directory.
     Output of rendered template must be a file (e.g. .html).
-    Component List must be a .csv file which has at least an "about_resource" column.
+    Component List must be a .csv file which has at least an "about_file" column.
 """
 
 VERBOSITY_HELP = """\
@@ -156,22 +179,25 @@ def main(parser, options, args):
 
     if not exists(output_path) or (exists(output_path) and overwrite):
         collector = AboutCollector(input_path)
-        input_list = []
         if not component_subset_path:
             sublist = None
         else:
+            input_list = []
             with open(component_subset_path, "rU") as f:
                 input_dict = csv.DictReader(f)
                 for row in input_dict:
-                    # Force the path to start with the '/' to do the mapping
-                    # with the project structure
-                    if not row['about_file'].startswith('/'):
-                        row['about_file'] = '/' + row['about_file']
                     input_list.append(row)
+            updated_list = convert_dict_key_to_lower_case(input_list)
             if mapping_config:
                 mapping_list = genabout.GenAbout().get_mapping_list()
-                input_list = genabout.GenAbout().convert_input_list(input_list, mapping_list)
-            sublist = component_subset_to_sublist(input_list)
+                updated_list = genabout.GenAbout().convert_input_list(updated_list, mapping_list)
+            if not check_about_file_existance_and_format(updated_list):
+                print("The required key, 'about_file, not found.")
+                print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
+                print("OR, correct the header keys from the component list.")
+                parser.print_help()
+                sys.exit(errno.EISDIR)
+            sublist = component_subset_to_sublist(updated_list)
             outlist = update_path_to_about(sublist)
 
         attrib_str = collector.generate_attribution(template_path=template_location, limit_to=outlist)

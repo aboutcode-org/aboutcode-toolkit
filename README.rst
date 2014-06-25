@@ -165,7 +165,7 @@ the .ABOUT files in the directory /tmp/thirdparty_about/.
     
         Input can be a file or directory.
         Output of rendered template must be a file (e.g. .html).
-        Component List must be a .csv file which has at least an "about_resource" column.
+        Component List must be a .csv file which has at least an "about_file" column.
     
     
     Options:
