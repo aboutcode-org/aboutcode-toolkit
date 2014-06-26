@@ -91,8 +91,7 @@ def convert_dict_key_to_lower_case(input_list):
 def check_about_file_existance_and_format(input_list):
     try:
         for row in input_list:
-            # Force the path to start with the '/' to do the mapping
-            # with the project structure
+            # Force the path to start with the '/' to map with the project structure
             if not row['about_file'].startswith('/'):
                 row['about_file'] = '/' + row['about_file']
         return input_list
@@ -208,12 +207,15 @@ def main(parser, options, args):
         # Clear the log file
         with open(join(dirname(output_path), LOG_FILENAME), 'w'):
             pass
-    
+
         file_handler = logging.FileHandler(join(dirname(output_path), LOG_FILENAME))
         file_logger.addHandler(file_handler)
         for error_msg in errors:
-                logger.error(error_msg)
-                file_logger.error(error_msg)
+            logger.error(error_msg)
+            file_logger.error(error_msg)
+        if errors:
+            print("%d errors detected." % len(errors))
+
     else:
         # we should never reach this
         assert False, "Unsupported option(s)."
