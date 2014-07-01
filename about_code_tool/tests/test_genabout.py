@@ -63,7 +63,9 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         expected_list = {'about_file': 'directory/filename',
                           'version': 'confirmed version',
-                           'about_resource': 'file_name', 'name': 'component'}
+                           'about_resource': 'file_name',
+                           'name': 'component',
+                           'copyright': 'confirmed copyright'}
         output = gen.get_mapping_list()
         self.assertTrue(output == expected_list)
 
@@ -295,11 +297,11 @@ class GenAboutTest(unittest.TestCase):
         action_num = 0
         input_list = [{'about_file': '/TESTCASE/', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool'}]
-        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/TESTCASE.ABOUT'),
+        expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/TESTCASE', 'TESTCASE.ABOUT'),
                                  {'about_file': '/TESTCASE/', 'version': '0.8.1',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
         output_list = gen.pre_generation(gen_location, input_list, action_num, False)
-        self.assertTrue(expected_output_list == output_list, "This output_list should be empty.")
+        self.assertTrue(expected_output_list == output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 

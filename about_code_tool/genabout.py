@@ -388,7 +388,11 @@ class GenAbout(object):
                 file_location = file_location.partition('/')[2]
             if not file_location.endswith('.ABOUT'):
                 if file_location.endswith('/'):
-                    file_location = file_location.rpartition('/')[0]
+                    file_location = dirname(file_location)
+                    file_location = join(file_location, os.path.basename(file_location))
+                    # Since this is referencing everything in the current directory,
+                    # we will use a '.' period to reference it.
+                    line['about_resource'] = '.'
                 file_location += '.ABOUT'
             if all_in_one:
                 # This is to get the filename instead of the file path
