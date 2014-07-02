@@ -208,8 +208,8 @@ class GenAbout(object):
                     file_location = line['about_file']
                     if file_location.startswith('/'):
                         file_location = file_location.partition('/')[2]
-                    if file_location.endswith('/'):
-                        file_location = file_location.rpartition('/')[0]
+                    #if file_location.endswith('/'):
+                    #    file_location = file_location.rpartition('/')[0]
                     about_parent_dir = dirname(file_location)
                     if license_in_project:
                         license_file_path = join(project_dir, about_parent_dir, license_file)
@@ -661,8 +661,8 @@ def main(parser, options, args):
             print("The '--copy_license' <project_path> must be a directory.")
             print("'--copy_license' is skipped.")
         else:
-            if not copy_license_path.endswith('/'):
-                copy_license_path += '/'
+            #if not copy_license_path.endswith('/'):
+            #   copy_license_path += '/'
             project_parent_dir = dirname(copy_license_path)
             licenses_in_project = True
             license_list = gen.verify_license_files(input_list, project_parent_dir, licenses_in_project)
@@ -676,8 +676,8 @@ def main(parser, options, args):
             print("The '--license_text_location' <license_path> must be a directory.")
             print("'--license_text_location' is skipped.")
         else:
-            if not license_text_path.endswith('/'):
-                license_text_path += '/'
+            #if not license_text_path.endswith('/'):
+            #    license_text_path += '/'
             license_dir = dirname(license_text_path)
             licenses_in_project = False
             license_list = gen.verify_license_files(input_list, license_dir, licenses_in_project)

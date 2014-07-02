@@ -407,7 +407,7 @@ class GenAboutTest(unittest.TestCase):
                          'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
-        expected_list = [(join('.', 'apache2.LICENSE'), '')]
+        expected_list = [(join('.', 'apache2.LICENSE'), 'TESTCASE')]
         output = gen.verify_license_files(input_list, path, False)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
@@ -415,7 +415,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_verify_license_files_exist_license_in_project(self):
         gen = genabout.GenAbout()
-        input_list = [{'version': '0.8.1', 'about_file': '/TESTCASE/',
+        input_list = [{'version': '0.8.1', 'about_file': '.',
                          'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
