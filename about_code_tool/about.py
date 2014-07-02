@@ -1086,8 +1086,7 @@ class AboutCollector(object):
                 row_data = about_object.get_row_data(relative_path)
                 csv_writer.writerow(row_data)
 
-    def generate_attribution(self, template_path=None,
-                             limit_to=None):
+    def generate_attribution(self, template_path=None, limit_to=None):
         """
         Generates an attribution file from the current list of ABOUT objects.
         The optional `limit_to` parameter allows to restrict the generated

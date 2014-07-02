@@ -55,7 +55,7 @@ class GenAttribTest(unittest.TestCase):
 
     def test_update_path_to_about(self):
         input_list = ['/test/test1.ABOUT', '/test/test2/', 'test/test3.c']
-        expected_list = ['/test/test1.ABOUT', '/test/test2.ABOUT', 'test/test3.c.ABOUT']
+        expected_list = ['/test/test1.ABOUT', '/test/test2/test2.ABOUT', 'test/test3.c.ABOUT']
         output = genattrib.update_path_to_about(input_list)
         self.assertTrue(expected_list == output)
 

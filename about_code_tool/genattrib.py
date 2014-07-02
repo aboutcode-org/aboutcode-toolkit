@@ -73,7 +73,7 @@ def update_path_to_about(input_list):
     for row in input_list:
         if not row.endswith('.ABOUT'):
             if row.endswith('/'):
-                row = row.rpartition('/')[0]
+                row += basename(dirname(row))
             output_list.append(row + '.ABOUT')
         else:
             output_list.append(row)
