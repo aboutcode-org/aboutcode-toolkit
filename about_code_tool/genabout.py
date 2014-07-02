@@ -23,7 +23,7 @@ import urllib2
 
 from collections import namedtuple
 from os import makedirs
-from os.path import exists, dirname, join, abspath, isdir
+from os.path import exists, dirname, join, abspath, isdir, normpath
 
 import about
 
@@ -317,10 +317,10 @@ class GenAbout(object):
                 # update/overwrite the 'license_text_file' with 'dje_license_key'
                 if line['license_text_file']:
                     file_location = line['about_file']
-                    if file_location.endswith('/'):
-                        file_location = file_location.rpartition('/')[0]
+                    #if file_location.endswith('/'):
+                    #    file_location = file_location.rpartition('/')[0]
                     about_parent_dir = dirname(file_location)
-                    license_file = gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file'])
+                    license_file = normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file']))
                     if not _exists(license_file):
                         self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:

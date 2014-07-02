@@ -218,7 +218,7 @@ class GenAboutTest(unittest.TestCase):
         gen_location = join(TESTDATA_PATH, "test_files_for_genabout/")
         input_list = [{'about_file': '/ABOUT/', 'version': '0.8.1',
                         'about_resource': '.', 'name': 'ABOUT tool',
-                        'license_text_file': '../../../../apache2.LICENSE'}]
+                        'license_text_file': '../../../../../apache2.LICENSE'}]
         expected_output_list = []
         gen_license = False
         dje_license_dict = {}
