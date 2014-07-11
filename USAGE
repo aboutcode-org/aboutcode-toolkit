@@ -70,8 +70,8 @@ Syntax
       --all_in_one          Generate all the ABOUT files in the [output_path] without
                             any project structure
 
-      --copy_license=COPY_LICENSE
-                            Copy the 'license_text_file' from the project to the generated location
+      --copy_files=COPY_FILES
+                            Copy the '*_file' from the project to the generated location
                             Project path - Project path
 
       --license_text_location=LICENSE_TEXT_LOCATION
@@ -114,19 +114,20 @@ Options
 
             $ python genabout.py --all_in_one <input path> <output path>
 
-    --copy_license
+    --copy_files
 
-        Copy the license files to the generated location based on the 
-        'license_text_file' value in the input from the project
+        Copy the files to the generated location based on the 
+        *_file value in the input from the project
 
         Purpose of this option is for users who want to generate ABOUT files
         in a different location other than the project side by side with the code.
 
         For instance, the project is located at /home/project/, and users want to
-        generate ABOUT files to /home/about/ and also want to copy the licenses from
+        generate ABOUT files to /home/about/ and also want to copy the
+        'license_text_file' and 'notice_text_file' from
         /home/project/ to /home/about/
 
-            $ python genabout.py --copy_license=/home/project/ <input path> /home/about/
+            $ python genabout.py --copy_files=/home/project/ <input path> /home/about/
 
     --license_text_location
 

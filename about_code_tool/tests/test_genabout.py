@@ -401,60 +401,60 @@ class GenAboutTest(unittest.TestCase):
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
-    def test_verify_license_files_exist(self):
+    def test_verify_files_existance_exist(self):
         gen = genabout.GenAbout()
         input_list = [{'version': '0.8.1', 'about_file': '/TESTCASE/',
                          'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
         expected_list = [(join('.', 'apache2.LICENSE'), 'TESTCASE')]
-        output = gen.verify_license_files(input_list, path, False)
+        output = gen.verify_files_existance(input_list, path, False)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
-    def test_verify_license_files_exist_license_in_project(self):
+    def test_verify_files_existance_exist_license_in_project(self):
         gen = genabout.GenAbout()
         input_list = [{'version': '0.8.1', 'about_file': '.',
                          'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
         expected_list = [(join('.', 'apache2.LICENSE'), '')]
-        output = gen.verify_license_files(input_list, path, True)
+        output = gen.verify_files_existance(input_list, path, True)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
-    def test_verify_license_files_not_exist(self):
+    def test_verify_files_existance_not_exist(self):
         gen = genabout.GenAbout()
         input_list = [{'version': '0.8.1', 'about_file': '/about.py.ABOUT',
                          'license_text_file': 'not_exist.LICENSE.txt',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
         expected_list = []
-        output = gen.verify_license_files(input_list, path, False)
+        output = gen.verify_files_existance(input_list, path, False)
         self.assertTrue(expected_list == output)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
-    def test_verify_license_files_not_exist_license_in_project(self):
+    def test_verify_files_existance_not_exist_license_in_project(self):
         gen = genabout.GenAbout()
         input_list = [{'version': '0.8.1', 'about_file': '/TESTCASE/',
                          'license_text_file': 'not_exist.LICENSE.txt',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
         expected_list = []
-        output = gen.verify_license_files(input_list, path, False)
+        output = gen.verify_files_existance(input_list, path, False)
         self.assertTrue(expected_list == output)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
-    def test_verify_license_files_no_key(self):
+    def test_verify_files_existance_no_key(self):
         gen = genabout.GenAbout()
         input_list = [{'version': '0.8.1', 'about_file': '/about.py.ABOUT',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
-        self.assertRaises(Exception, gen.verify_license_files, input_list, path)
+        self.assertRaises(Exception, gen.verify_files_existance, input_list, path)
 
     def test_gen_license_list_license_text_file_no_value(self):
         gen = genabout.GenAbout()
@@ -476,25 +476,25 @@ class GenAboutTest(unittest.TestCase):
         output = gen.gen_license_list(input_list)
         self.assertTrue(expected_list == output)
 
-    def test_copy_license_files_test_path_not_endswith_slash(self):
+    def test_copy_files_test_path_not_endswith_slash(self):
         gen = genabout.GenAbout()
         input_list = [('apache2.LICENSE', '.')]
         expected_list = ['apache2.LICENSE']
         project_path = os.path.abspath('.')
         tmp_path = tempfile.mkdtemp()
-        gen.copy_license_files(tmp_path, input_list)
+        gen.copy_files(tmp_path, input_list)
         self.assertTrue(expected_list == os.listdir(tmp_path))
         # According to the doc, the user of mkdtemp() is responsible for
         # deleting the temporary directory and its contents when done with it.
         shutil.rmtree(tmp_path)
 
-    def test_copy_license_files_test_path_endswith_slash(self):
+    def test_copy_files_test_path_endswith_slash(self):
         gen = genabout.GenAbout()
         input_list = [('apache2.LICENSE', '.')]
         expected_list = ['apache2.LICENSE']
         project_path = os.path.abspath('.')
         tmp_path = tempfile.mkdtemp() + '/'
-        gen.copy_license_files(tmp_path, input_list)
+        gen.copy_files(tmp_path, input_list)
         self.assertTrue(expected_list == os.listdir(tmp_path))
         # According to the doc, the user of mkdtemp() is responsible for
         # deleting the temporary directory and its contents when done with it.

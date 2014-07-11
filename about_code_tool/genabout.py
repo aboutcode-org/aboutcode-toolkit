@@ -196,34 +196,50 @@ class GenAbout(object):
         first_line = input_list[0]
         return [field for field in first_line.keys() if not field in SUPPORTED_FIELDS]
 
-    def verify_license_files(self, input_list, project_dir, license_in_project):
+    def verify_files_existance(self, input_list, project_dir, file_in_project):
         """
         Verify the existence of the 'license text file'
         """
-        license_files_list = []
+        files_list = []
+        # Get all the dictionary keys
+        column_keys = input_list[0].keys()
+
+        # Get all the keys that ending with _file except for the 'about_file
+        file_keys = []
+        for key in column_keys:
+            if '_file' in key and key != 'about_file':
+                file_keys.append(key)
+
         for line in input_list:
-            try:
-                if line['license_text_file']:
-                    license_file = line['license_text_file']
+            for file_key in file_keys:
+                if line[file_key]:
+                    file_path_list = []
+                    file_value = []
                     file_location = line['about_file']
                     if file_location.startswith('/'):
                         file_location = file_location.partition('/')[2]
-                    #if file_location.endswith('/'):
-                    #    file_location = file_location.rpartition('/')[0]
                     about_parent_dir = dirname(file_location)
-                    if license_in_project:
-                        license_file_path = join(project_dir, about_parent_dir, license_file)
+                    if file_in_project:
+                        if '\n' in line[file_key]:
+                            file_value = line[file_key].split('\n')
+                        else:
+                            file_value.append(line[file_key])
+                        for value in file_value:
+                            file_path_list.append(join(project_dir, about_parent_dir, value))
                     else:
-                        license_file_path = join(project_dir, license_file)
-                    if _exists(license_file_path):
-                        license_files_list.append((license_file_path, about_parent_dir))
-                    else:
-                        self.warnings.append(Warn('license_text_file', license_file_path, "License does not exist."))
-            except Exception as e:
-                print(repr(e))
-                print("The input does not have the 'license_text_file' key which is required.")
-                raise Exception(repr(e))
-        return license_files_list
+                        if '\n' in line[file_key]:
+                            file_value = line[file_key].split('\n')
+                        else:
+                            file_value.append(line[file_key])
+                        for value in file_value:
+                            file_path_list.append(join(project_dir, value))
+
+                    for path in file_path_list:
+                        if _exists(path):
+                            files_list.append((path, about_parent_dir))
+                        else:
+                            self.warnings.append(Warn(file_key, path, "File does not exist."))
+        return files_list
 
     def request_license_data(self, url, username, api_key, license_key):
         """
@@ -278,15 +294,15 @@ class GenAbout(object):
             return data
 
     @staticmethod
-    def copy_license_files(gen_location, license_list):
+    def copy_files(gen_location, files_list):
         """
-        Copy the 'license_text_file' into the gen_location
+        Copy the files into the gen_location
         """
-        for license_path, component_path in license_list:
-            output_license_path = join(gen_location, component_path)
-            if not _exists(output_license_path):
-                makedirs(output_license_path)
-            shutil.copy2(license_path, output_license_path)
+        for file_path, component_path in files_list:
+            output_file_path = join(gen_location, component_path)
+            if not _exists(output_file_path):
+                makedirs(output_file_path)
+            shutil.copy2(file_path, output_file_path)
 
     def write_licenses(self, license_context_list):
         for gen_license_path, license_context in license_context_list:
@@ -513,8 +529,8 @@ Generate all the ABOUT files in the [output_path] without
 any project structure
 """
 
-COPY_LICENSE_HELP = """\
-Copy the 'license_text_file' from the project to the generated location
+COPY_FILES_HELP = """\
+Copy the '*_file' from the project to the generated location
 Project path - Project path
 """
 
@@ -547,7 +563,7 @@ def main(parser, options, args):
     verbosity = options.verbosity
     action = options.action
     all_in_one = options.all_in_one
-    copy_license_path = options.copy_license
+    copy_files_path = options.copy_files
     license_text_path = options.license_text_location
     mapping_config = options.mapping
     extract_license = options.extract_license
@@ -575,8 +591,8 @@ def main(parser, options, args):
         else:
             action_num = action
 
-    if copy_license_path:
-        if not _exists(copy_license_path):
+    if copy_files_path:
+        if not _exists(copy_files_path):
             print("The project path does not exist.")
             sys.exit(errno.EINVAL)
 
@@ -656,20 +672,20 @@ def main(parser, options, args):
     if ignored_fields_list:
         input_list = gen.get_only_supported_fields(input_list, ignored_fields_list)
 
-    if copy_license_path:
-        if not isdir(copy_license_path):
-            print("The '--copy_license' <project_path> must be a directory.")
-            print("'--copy_license' is skipped.")
+    if copy_files_path:
+        if not isdir(copy_files_path):
+            print("The '--copy_files' <project_path> must be a directory.")
+            print("'--copy_files' is skipped.")
         else:
-            #if not copy_license_path.endswith('/'):
-            #   copy_license_path += '/'
-            project_parent_dir = dirname(copy_license_path)
+            #if not copy_files_path.endswith('/'):
+            #   copy_files_path += '/'
+            project_parent_dir = dirname(copy_files_path)
             licenses_in_project = True
-            license_list = gen.verify_license_files(input_list, project_parent_dir, licenses_in_project)
+            license_list = gen.verify_files_existance(input_list, project_parent_dir, licenses_in_project)
             if not license_list:
-                print("None of the 'license_text_file' is found. '--copy_license' is ignored.")
+                print("None of the file is found. '--copy_files' is ignored.")
             else:
-                gen.copy_license_files(output_path, license_list)
+                gen.copy_files(output_path, license_list)
 
     if license_text_path:
         if not isdir(license_text_path):
@@ -680,11 +696,11 @@ def main(parser, options, args):
             #    license_text_path += '/'
             license_dir = dirname(license_text_path)
             licenses_in_project = False
-            license_list = gen.verify_license_files(input_list, license_dir, licenses_in_project)
+            license_list = gen.verify_files_existance(input_list, license_dir, licenses_in_project)
             if not license_list:
-                print("None of the 'license_text_file' is found. '--copy_license' is ignored.")
+                print("None of the file is found. '--copy_files' is ignored.")
             else:
-                gen.copy_license_files(output_path, license_list)
+                gen.copy_files(output_path, license_list)
 
     if extract_license:
         if not api_url or not api_username or not api_key:
@@ -768,7 +784,7 @@ def get_parser():
     parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
     parser.add_option('--action', type=int, help=ACTION_HELP)
     parser.add_option('--all_in_one', action='store_true', help=ALL_IN_ONE_HELP)
-    parser.add_option('--copy_license', type='string', help=COPY_LICENSE_HELP)
+    parser.add_option('--copy_files', type='string', help=COPY_FILES_HELP)
     parser.add_option('--license_text_location', type='string', help=LICENSE_TEXT_LOCATION_HELP)
     parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
     parser.add_option(

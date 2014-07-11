@@ -128,11 +128,11 @@ information will be saved to the CSV file named "thirdparty_about.csv".
     
       --all_in_one          Generate all the ABOUT files in the [output_path] without
                             any project structure
-    
-      --copy_license=COPY_LICENSE
-                            Copy the 'license_text_file' from the project to the generated location
+
+      --copy_files=COPY_FILES
+                            Copy the '*_file' from the project to the generated location
                             Project path - Project path
-    
+
       --license_text_location=LICENSE_TEXT_LOCATION
                             Copy the 'license_text_file' from the directory to the generated location
                             License path - License text files path
