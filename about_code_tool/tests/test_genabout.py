@@ -462,7 +462,7 @@ class GenAboutTest(unittest.TestCase):
                        'version': '1', 'dje_license': 'apache-2.0',
                        'dje_license_name': 'Apache License 2.0',
                        'license_text_file': '', 'about_resource': 'opensans'}
-        expected_list = ('/tmp/3pp', 'Apache License 2.0')
+        expected_list = ('/tmp/3pp/opensans', 'Apache License 2.0')
         output = gen.gen_license_list(input_list)
         self.assertTrue(expected_list == output)
 
@@ -472,7 +472,7 @@ class GenAboutTest(unittest.TestCase):
                        'version': '1', 'dje_license': 'apache-2.0',
                        'dje_license_name': 'Apache License 2.0',
                        'about_resource': 'opensans'}
-        expected_list = ('/tmp/3pp', 'Apache License 2.0')
+        expected_list = ('/tmp/3pp/opensans', 'Apache License 2.0')
         output = gen.gen_license_list(input_list)
         self.assertTrue(expected_list == output)
 

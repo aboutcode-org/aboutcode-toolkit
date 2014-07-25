@@ -446,8 +446,8 @@ class GenAbout(object):
     def gen_license_list(line):
         dje_license_name = line['dje_license_name']
         file_location = line['about_file']
-        if file_location.endswith('/'):
-            file_location = file_location.rpartition('/')[0]
+        """if file_location.endswith('/'):
+            file_location = file_location.rpartition('/')[0]"""
         about_parent_dir = dirname(file_location)
         return (about_parent_dir, dje_license_name)
 
