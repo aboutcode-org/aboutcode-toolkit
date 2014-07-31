@@ -1142,7 +1142,7 @@ class AboutCollector(object):
                     if not dje_license_name in license_dict \
                         and not dje_license_name == None:
                         if about_object.license_text():
-                            license_dict[about_object.get_dje_license_name()] = about_object.license_text()
+                            license_dict[about_object.get_dje_license_name()] = unicode(about_object.license_text(), errors='replace')
                         else:
                             msg = 'About resource: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
@@ -1153,7 +1153,7 @@ class AboutCollector(object):
                 elif about_object.get_license_text_file_name():
                     if not about_object.get_license_text_file_name() in license_dict:
                         if about_object.license_text():
-                            license_dict[about_object.get_license_text_file_name()] = about_object.license_text()
+                            license_dict[about_object.get_license_text_file_name()] = unicode(about_object.license_text(), errors='replace')
                         else:
                             msg = 'About resource: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
