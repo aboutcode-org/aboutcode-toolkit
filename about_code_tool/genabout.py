@@ -333,13 +333,20 @@ class GenAbout(object):
                 # If there is value in 'license_text_file', the tool will not
                 # update/overwrite the 'license_text_file' with 'dje_license_key'
                 if line['license_text_file']:
+                    file_value = []
+                    license_file_list = []
                     file_location = line['about_file']
-                    #if file_location.endswith('/'):
-                    #    file_location = file_location.rpartition('/')[0]
                     about_parent_dir = dirname(file_location)
-                    license_file = normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, line['license_text_file']))
-                    if not _exists(license_file):
-                        self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
+                    if '\n' in line['license_text_file']:
+                        file_value = line['license_text_file'].split('\n')
+                    else:
+                        file_value = [line['license_text_file']]
+                    for license_text_file in file_value:
+                        license_file_list.append(normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file)))
+                    print(license_file_list)
+                    for license_file in license_file_list:
+                        if not _exists(license_file):
+                            self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
                         if line['dje_license']:
