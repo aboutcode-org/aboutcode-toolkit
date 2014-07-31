@@ -419,7 +419,7 @@ class GenAboutTest(unittest.TestCase):
                          'license_text_file': 'apache2.LICENSE',
                           'name': 'ABOUT tool', 'about_resource': '.'}]
         path = '.'
-        expected_list = [(join('.', 'apache2.LICENSE'), '')]
+        expected_list = [(join('.', 'apache2.LICENSE'), '.')]
         output = gen.verify_files_existance(input_list, path, True)
         self.assertEqual(expected_list, output)
         self.assertFalse(gen.warnings, "No warnings should be returned.")

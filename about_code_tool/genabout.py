@@ -225,7 +225,8 @@ class GenAbout(object):
                         else:
                             file_value.append(line[file_key])
                         for value in file_value:
-                            file_path_list.append(join(project_dir, about_parent_dir, value))
+                            about_parent_dir = normpath(dirname(join(file_location, value)))
+                            file_path_list.append(join(project_dir, dirname(file_location), value))
                     else:
                         if '\n' in line[file_key]:
                             file_value = line[file_key].split('\n')
