@@ -225,7 +225,8 @@ class GenAbout(object):
                         else:
                             file_value.append(line[file_key])
                         for value in file_value:
-                            about_parent_dir = normpath(dirname(join(file_location, value)))
+                            if file_location.endswith('/'):
+                                about_parent_dir = normpath(dirname(join(file_location, value)))
                             file_path_list.append(join(project_dir, dirname(file_location), value))
                     else:
                         if '\n' in line[file_key]:
@@ -343,7 +344,6 @@ class GenAbout(object):
                         file_value = [line['license_text_file']]
                     for license_text_file in file_value:
                         license_file_list.append(normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file)))
-                    print(license_file_list)
                     for license_file in license_file_list:
                         if not _exists(license_file):
                             self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
