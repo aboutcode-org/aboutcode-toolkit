@@ -371,17 +371,22 @@ class GenAbout(object):
 
     def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
         key_text_dict = {}
+        license_dict = {}
         for line in input_list:
             try:
                 if line['dje_license']:
-                    detail_list = []
-                    detail = self.get_license_details_from_api(api_url, api_username, api_key, line['dje_license'])
-                    line['dje_license_name'] = detail[0]
-                    dje_key = detail[1]
-                    license_context = detail [2]
-                    detail_list.append(dje_key)
-                    detail_list.append(license_context)
-                    key_text_dict[line['dje_license_name']] = detail_list
+                    if not line['dje_license'] in license_dict:
+                        detail_list = []
+                        detail = self.get_license_details_from_api(api_url, api_username, api_key, line['dje_license'])
+                        license_dict[line['dje_license']] = detail[0]
+                        line['dje_license_name'] = detail[0]
+                        dje_key = detail[1]
+                        license_context = detail [2]
+                        detail_list.append(dje_key)
+                        detail_list.append(license_context)
+                        key_text_dict[line['dje_license_name']] = detail_list
+                    else:
+                        line['dje_license_name'] = license_dict[line['dje_license']]
             except Exception as e:
                 self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
