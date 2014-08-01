@@ -517,7 +517,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_process_dje_licenses(self):
         gen = genabout.GenAbout()
-        test_license_list = [('/', 'test')]
+        test_license_list = [('/', [u'test'])]
         test_license_dict = {'test': [u'test_key', u'This is a test license.']}
         test_path = '/test'
         expected_output = [[join(u'/test', 'test_key.LICENSE'), 'This is a test license.']]

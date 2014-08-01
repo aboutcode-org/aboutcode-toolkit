@@ -351,8 +351,20 @@ class GenAbout(object):
                     if gen_license:
                         if line['dje_license']:
                             license_output_list.append(self.gen_license_list(line))
-                            line['license_text_file'] = dje_license_dict[line['dje_license_name']][0]\
-                                                + '.LICENSE'
+                            license_name_list = []
+                            if '\n' in line['dje_license_name']:
+                                license_name_list = line['dje_license_name'].split('\n ')
+                            else:
+                                license_name_list = [line['dje_license_name']]
+                            for lic_name in license_name_list:
+                                try:
+                                    if line['license_text_file']:
+                                        line['license_text_file'] += '\n '
+                                    line['license_text_file'] += dje_license_dict[lic_name][0]\
+                                                                + '.LICENSE'
+                                except:
+                                    line['license_text_file'] = dje_license_dict[lic_name][0]\
+                                                                + '.LICENSE'
                         else:
                             self.warnings.append(Warn('dje_license', '',
                                                       "Missing 'dje_license' for " + line['about_file']))
@@ -362,8 +374,20 @@ class GenAbout(object):
                 if gen_license:
                     if line['dje_license']:
                         license_output_list.append(self.gen_license_list(line))
-                        line['license_text_file'] = dje_license_dict[line['dje_license_name']][0]\
-                                                + '.LICENSE'
+                        license_name_list = []
+                        if '\n' in line['dje_license_name']:
+                            license_name_list = line['dje_license_name'].split('\n ')
+                        else:
+                            license_name_list = [line['dje_license_name']]
+                        for lic_name in license_name_list:
+                            try:
+                                if line['license_text_file']:
+                                    line['license_text_file'] += '\n '
+                                line['license_text_file'] += dje_license_dict[lic_name][0]\
+                                                            + '.LICENSE'
+                            except:
+                                line['license_text_file'] = dje_license_dict[lic_name][0]\
+                                                            + '.LICENSE'
                     else:
                         self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
@@ -375,18 +399,28 @@ class GenAbout(object):
         for line in input_list:
             try:
                 if line['dje_license']:
-                    if not line['dje_license'] in license_dict:
-                        detail_list = []
-                        detail = self.get_license_details_from_api(api_url, api_username, api_key, line['dje_license'])
-                        license_dict[line['dje_license']] = detail[0]
-                        line['dje_license_name'] = detail[0]
-                        dje_key = detail[1]
-                        license_context = detail [2]
-                        detail_list.append(dje_key)
-                        detail_list.append(license_context)
-                        key_text_dict[line['dje_license_name']] = detail_list
+                    license_list = []
+                    if '\n' in line['dje_license']:
+                        license_list = line['dje_license'].split('\n')
                     else:
-                        line['dje_license_name'] = license_dict[line['dje_license']]
+                        license_list = [line['dje_license']]
+                    for lic in license_list:
+                        if not lic in license_dict:
+                            detail_list = []
+                            detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
+                            license_dict[lic] = detail[0]
+                            try:
+                                if line['dje_license_name']:
+                                    line['dje_license_name'] += "\n " + detail[0]
+                            except:
+                                line['dje_license_name'] = detail[0]
+                            dje_key = detail[1]
+                            license_context = detail [2]
+                            detail_list.append(dje_key)
+                            detail_list.append(license_context)
+                            key_text_dict[detail[0]] = detail_list
+                        else:
+                            line['dje_license_name'] = license_dict[lic]
             except Exception as e:
                 self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
@@ -395,17 +429,23 @@ class GenAbout(object):
     def process_dje_licenses(self, dje_license_list, dje_license_dict, output_path):
         license_list_context = []
         for gen_path, license_name in dje_license_list:
+            license_list = []
+            if '\n' in license_name:
+                license_list = license_name.split('\n ')
+            else:
+                license_list = license_name
             if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
-            license_key = dje_license_dict[license_name][0]
-            gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
-            if not _exists(gen_license_path) and not self.extract_dje_license_error:
-                context = dje_license_dict[license_name][1]
-                if context:
-                    gen_path_context = []
-                    gen_path_context.append(gen_license_path)
-                    gen_path_context.append(context.encode('utf8'))
-                    license_list_context.append(gen_path_context)
+            for license in license_list:
+                license_key = dje_license_dict[license][0]
+                gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
+                if not _exists(gen_license_path) and not self.extract_dje_license_error:
+                    context = dje_license_dict[license][1]
+                    if context:
+                        gen_path_context = []
+                        gen_path_context.append(gen_license_path)
+                        gen_path_context.append(context.encode('utf8'))
+                        license_list_context.append(gen_path_context)
         return license_list_context
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
