@@ -959,7 +959,6 @@ class AboutFile(object):
             return self.parsed['dje_license_name']
         except Exception as e:
             pass
-
         return ""
 
     def get_license_text_file_name(self):
@@ -970,7 +969,16 @@ class AboutFile(object):
             return self.parsed['license_text_file']
         except Exception as e:
             pass
+        return ""
 
+    def get_about_name(self):
+        """
+        Return the about object's name
+        """
+        try:
+            return self.parsed['name']
+        except Exception as e:
+            pass
         return ""
 
 class AboutCollector(object):
@@ -1144,9 +1152,9 @@ class AboutCollector(object):
                         if about_object.license_text():
                             license_dict[about_object.get_dje_license_name()] = unicode(about_object.license_text(), errors='replace')
                         else:
-                            msg = 'About resource: %s - license_text does not exist.'\
+                            msg = 'Name: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
-                                % about_object.about_resource
+                                % about_object.get_about_name()
                             self.genattrib_errors.append(Error(GENATTRIB,\
                                                                'dje_license',\
                                                                dje_license_name, msg))
@@ -1155,16 +1163,16 @@ class AboutCollector(object):
                         if about_object.license_text():
                             license_dict[about_object.get_license_text_file_name()] = unicode(about_object.license_text(), errors='replace')
                         else:
-                            msg = 'About resource: %s - license_text does not exist.'\
+                            msg = 'Name: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
-                                % about_object.about_resource
+                                % about_object.get_about_name()
                             self.genattrib_errors.append(Error(GENATTRIB,\
                                                                'license_text',\
                                                                about_object.get_license_text_file_name(), msg))
                 else:
                     msg = 'No dje_license or license_text is found. License generation is skipped.'
-                    self.genattrib_errors.append(Error(GENATTRIB, 'about_resource',\
-                                                        about_object.about_resource,\
+                    self.genattrib_errors.append(Error(GENATTRIB, 'name',\
+                                                        about_object.get_about_name(),\
                                                         msg))
 
         if not_exist_components:
