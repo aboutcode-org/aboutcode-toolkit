@@ -433,7 +433,7 @@ class GenAbout(object):
             if '\n' in license_name:
                 license_list = license_name.split('\n ')
             else:
-                license_list = license_name
+                license_list = [license_name]
             if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
             for license in license_list:
