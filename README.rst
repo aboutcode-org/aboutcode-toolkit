@@ -43,11 +43,8 @@ version may be pre-installed, open a terminal and type::
     python2.6 --version
     python2.7 --version
 
-On Windows or Mac, you can download Python 2.6 here:
-    http://www.python.org/download/releases/2.6.6/
-
-or Python 2.7 here:
-    http://www.python.org/download/releases/2.7.5/
+On Windows or Mac, you can download the latest Python 2.7.x here:
+    https://www.python.org/downloads/
 
 Download the .msi installer for Windows or the .dmg archive for Mac.
 Open and run the installer using all the default options.
