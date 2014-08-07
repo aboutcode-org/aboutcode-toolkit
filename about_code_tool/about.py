@@ -402,16 +402,16 @@ SPDX_LICENSES = (
 
 # Use DJE License Name
 COMMON_LICENSES = (
-    'Apache License 2.0',
-    'BSD-Modified',
-    'BSD-Original',
-    'BSD-Original-UC',
-    'GNU General Public License 2.0',
-    'GNU General Public License 3.0',
-    'GNU Lesser General Public License 2.1',
-    'Net SNMP License',
-    'OpenSSL/SSLeay License',
-    'ZLIB License',
+    'apache-2.0.LICENSE',
+    'bsd-new.LICENSE',
+    'bsd-original.LICENSE',
+    'bsd-original-uc.LICENSE',
+    'gpl-2.0.LICENSE',
+    'gpl-3.0.LICENSE',
+    'lgpl-2.1.LICENSE',
+    'net-snmp.LICENSE',
+    'openssl-ssleay.LICENSE',
+    'zlib.LICENSE',
 )
 
 # Maps lowercase id to standard ids with official case
@@ -1130,6 +1130,8 @@ class AboutCollector(object):
         license_key = []
         license_text = []
         license_dict = {}
+        license_text_file_name = []
+        license_text_file_content = []
         not_exist_components = list(limit_to)
 
         for about_object in self:
@@ -1146,31 +1148,79 @@ class AboutCollector(object):
                 validated_fields.append(about_object.validated_fields)
                 notice_text.append(about_object.notice_text())
                 dje_license_name = about_object.get_dje_license_name()
-                if dje_license_name:
-                    if not dje_license_name in license_dict \
-                        and not dje_license_name == None:
-                        if about_object.license_text():
-                            license_dict[about_object.get_dje_license_name()] = unicode(about_object.license_text(), errors='replace')
-                        else:
-                            msg = 'Name: %s - license_text does not exist.'\
+                license_text_file = about_object.get_license_text_file_name()
+                if license_text_file:
+                    # Check if the 'license_text_file' was generated from the
+                    # extract_license option. If the 'license_text_file' is
+                    # not extracted from DJE and is in the original codebase,
+                    # then, the dict key's name should me 'name' + 'license_text_file'
+                    # We can check if the 'license_text_file' was generated from
+                    # extract_license option by checking if it ends with '.LICENSE'
+
+                    # UPDATE: There may be cases that components have the same
+                    # about name and 'license_text_file' name but different 
+                    # content in the 'license_text_file'.
+                    # As a result, we need to raise error if this is the case
+                    if license_text_file in license_dict:
+                        # Check if the content are the same
+                        if license_dict[license_text_file] == unicode(about_object.license_text(), errors='replace'):
+                            msg = 'License Name: %s - Same license name with different content.'\
+                                ' License generation is skipped.'\
+                                % license_text_file
+                            self.genattrib_errors.append(Error(GENATTRIB,\
+                                   'license_text',\
+                                   license_text_file, msg))
+                            break
+
+                    if license_text_file.endswith('.LICENSE'):
+                        license_dict[license_text_file] = unicode(about_object.license_text(), errors='replace')
+                    else:
+                        license_name = about_object.get_about_name() + '_' + license_text_file
+                        license_dict[license_name] = unicode(about_object.license_text(), errors='replace')
+                    
+                    """
+                    if about_object.license_text():
+                        license_text_file_name.append(license_text_file)
+                        license_text_file_content.append(unicode(about_object.license_text(), errors='replace'))
+                    else:
+                        msg = 'Name: %s - license_text does not exist.'\
                                 ' License generation is skipped.'\
                                 % about_object.get_about_name()
-                            self.genattrib_errors.append(Error(GENATTRIB,\
-                                                               'dje_license',\
-                                                               dje_license_name, msg))
-                elif about_object.get_license_text_file_name():
-                    if not about_object.get_license_text_file_name() in license_dict:
-                        if about_object.license_text():
-                            license_dict[about_object.get_license_text_file_name()] = unicode(about_object.license_text(), errors='replace')
-                        else:
-                            msg = 'Name: %s - license_text does not exist.'\
-                                ' License generation is skipped.'\
-                                % about_object.get_about_name()
-                            self.genattrib_errors.append(Error(GENATTRIB,\
-                                                               'license_text',\
-                                                               about_object.get_license_text_file_name(), msg))
+                        self.genattrib_errors.append(Error(GENATTRIB,\
+                               'license_text',\
+                               license_text_file, msg))
+                    """
+                # Following code are useless as the 'license_text_file' is needed
+                # to grab the license for attribution generation.
+                # If there is no 'license_text_file' key or value, the tool
+                # should throw an error
+                    """
+                    if dje_license_name:
+                        if not dje_license_name in license_dict \
+                            and not dje_license_name == None:
+                            if about_object.license_text():
+                                license_dict[about_object.get_dje_license_name()] = unicode(about_object.license_text(), errors='replace')
+                            else:
+                                msg = 'Name: %s - license_text does not exist.'\
+                                    ' License generation is skipped.'\
+                                    % about_object.get_about_name()
+                                self.genattrib_errors.append(Error(GENATTRIB,\
+                                                                   'dje_license',\
+                                                                   dje_license_name, msg))
+                    elif about_object.get_license_text_file_name():
+                        if not about_object.get_license_text_file_name() in license_dict:
+                            if about_object.license_text():
+                                license_dict[about_object.get_license_text_file_name()] = unicode(about_object.license_text(), errors='replace')
+                            else:
+                                msg = 'Name: %s - license_text does not exist.'\
+                                    ' License generation is skipped.'\
+                                    % about_object.get_about_name()
+                                self.genattrib_errors.append(Error(GENATTRIB,\
+                                                                   'license_text',\
+                                                                   about_object.get_license_text_file_name(), msg))
+                    """
                 else:
-                    msg = 'No dje_license or license_text is found. License generation is skipped.'
+                    msg = 'No license_text is found. License generation is skipped.'
                     self.genattrib_errors.append(Error(GENATTRIB, 'name',\
                                                         about_object.get_about_name(),\
                                                         msg))
@@ -1191,6 +1241,8 @@ class AboutCollector(object):
         return template.render(about_objects=validated_fields,
                                license_keys=license_key,
                                license_texts = license_text,
+                               #license_keys=license_text_file_name,
+                               #license_texts = license_text_file_content,
                                notice_texts=notice_text,
                                license_dicts=license_dict,
                                common_licenses=COMMON_LICENSES)
