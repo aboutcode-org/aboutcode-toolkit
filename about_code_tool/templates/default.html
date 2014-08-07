@@ -84,6 +84,8 @@
                             <pre>{{ license_dicts[about_object.license_text_file]|e }}</pre>
                         {% endif %}
                     {% endif %}
+                {% elif about_object.license_text %}
+                    <p>{{about_object.license_text | e}}</p>
                 {% endif %}
             </div>
         {% endfor %}
