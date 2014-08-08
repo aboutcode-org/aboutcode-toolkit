@@ -951,16 +951,6 @@ class AboutFile(object):
 
         return ""  # Returns empty string if the notice file does not exist
 
-    def get_dje_license_name(self):
-        """
-        Return the dje_license value if the dje_license field exists
-        """
-        try:
-            return self.parsed['dje_license_name']
-        except Exception as e:
-            pass
-        return ""
-
     def get_license_text_file_name(self):
         """
         Return the license_text_file name if the license_text_file field exists
@@ -987,6 +977,16 @@ class AboutFile(object):
         """
         try:
             return self.parsed['name']
+        except Exception as e:
+            pass
+        return ""
+
+    def get_about_resource_path(self):
+        """
+        Return the about object's name
+        """
+        try:
+            return self.parsed['about_resource_path']
         except Exception as e:
             pass
         return ""
@@ -1140,6 +1140,7 @@ class AboutCollector(object):
         license_key = []
         license_text_list = []
         license_dict = {}
+        common_license_dict = {}
         not_exist_components = list(limit_to)
 
         for about_object in self:
@@ -1155,16 +1156,24 @@ class AboutCollector(object):
             if not limit_to or about_relative_path in limit_to:
                 validated_fields.append(about_object.validated_fields)
                 notice_text.append(about_object.notice_text())
-                dje_license_name = about_object.get_dje_license_name()
                 license_text_file = about_object.get_license_text_file_name()
-                license_text = about_object.get_license_text()
+                about_resource_path = about_object.get_about_resource_path()
+                if not about_resource_path:
+                    msg = 'About File: %s - The required field, about_resource_path, not found'\
+                        ' License generation is skipped.'\
+                        % about_object.location
+                    self.genattrib_errors.append(Error(GENATTRIB,\
+                                   'about_resource',\
+                                   about_object.location, msg))
                 if license_text_file:
-                    # Check if the license key, license_text_file, already
-                    # exist in the license dictionary
-                    if license_text_file in license_dict:
+                    # Use the about_file_path as the key
+                    # Check if the key already existed in the dictionary
+                    # This shouldn't be reached as the 'about_resource_path'
+                    # should be unique.
+                    if about_resource_path in license_dict:
                         # Raise error if key name are the same but the content
                         # are different
-                        license_text_check = license_dict[license_text_file]
+                        license_text_check = license_dict[about_resource_path]
                         if not unicode(license_text_check) == unicode(about_object.license_text()):
                             msg = 'License Name: %s - Same license name with different content.'\
                                 ' License generation is skipped.'\
@@ -1173,18 +1182,12 @@ class AboutCollector(object):
                                    'license_text',\
                                    license_text_file, msg))
                     else:
-                        if license_text_file.endswith('.LICENSE'):
-                            license_dict[license_text_file] = unicode(about_object.license_text(), errors='replace')
-                        else:
-                            # If the 'license_text_file' doesn't end with '.LICENSE',
-                            # such as COPYING, COPYRIGHT, we will use the name
-                            # of the About file combine with the 'license_text_file'
-                            # as the key of the license dictionary.
-                            license_name = about_object.get_about_name() + '_' + license_text_file
-                            license_dict[license_name] = unicode(about_object.license_text(), errors='replace')
-                elif license_text:
+                        license_dict[about_resource_path] = unicode(about_object.license_text(), errors='replace')
+                        if license_text_file in COMMON_LICENSES:
+                            common_license_dict[license_text_file] = unicode(about_object.license_text(), errors='replace')
+                elif about_object.get_license_text():
                     # We don't need to do anything here as the license_text
-                    # will be capture directly in the about object.
+                    # will be captured directly in the about object.
                     pass
                 else:
                     msg = 'No license_text is found. License generation is skipped.'
@@ -1200,16 +1203,14 @@ class AboutCollector(object):
                 self.genattrib_errors.append(Error(GENATTRIB, 'about_file',\
                                                    component, msg))
 
-        # We want the license generation in alphabetical order
-        for key in sorted(license_dict.keys()):
+        # We want to display common_licenses in alphabetical order
+        for key in sorted(common_license_dict.keys()):
             license_key.append(key)
-            license_text_list.append(license_dict[key])
+            license_text_list.append(common_license_dict[key])
 
         return template.render(about_objects=validated_fields,
                                license_keys=license_key,
                                license_texts = license_text_list,
-                               #license_keys=license_text_file_name,
-                               #license_texts = license_text_file_content,
                                notice_texts=notice_text,
                                license_dicts=license_dict,
                                common_licenses=COMMON_LICENSES)

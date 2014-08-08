@@ -467,6 +467,9 @@ class GenAbout(object):
                 # This is to get the filename instead of the file path
                 file_location = file_location.rpartition('/')[2]
             about_file_location = join(gen_location, file_location)
+            if not file_location.startswith('/'):
+                line['about_resource_path'] = '/'
+            line['about_resource_path'] += file_location
             dir = dirname(about_file_location)
             if not _exists(dir):
                 makedirs(dir)

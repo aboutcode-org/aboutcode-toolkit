@@ -56,7 +56,7 @@
                 <h3 class="component-name">{{ about_object.name }}
                     {% if about_object.version %}{{ about_object.version }}{% endif %}
                 </h3>
-                {% if about_object.license_text_file in license_dicts.keys() %}
+                {% if about_object.about_resource_path in license_dicts.keys() %}
                     {% if about_object.dje_license_name %}
                         <p>This component is licensed under {{about_object.dje_license_name }}.
                     {% endif %}
@@ -70,10 +70,12 @@
                     <pre class="component-notice">{{ notice_texts[loop.index0] }}</pre>
                 {% endif %}
                 {% if about_object.license_text_file %}
+                    <!-- 'license_text_file' is not a common license if it 
+                        doesn't end with '.LICENSE'
+                    -->
                     {% if not about_object.license_text_file.endswith('.LICENSE') %}
-                        <pre>{{ license_dicts[about_object.name + '_' + about_object.license_text_file]|e }}</pre>
-                    {% endif %}
-                    {% if about_object.license_text_file in license_dicts.keys() %}
+                        <pre>{{ license_dicts[about_object.about_resource_path]|e }}</pre>
+                    {% elif about_object.about_resource_path in license_dicts.keys() %}
                         {% if about_object.license_text_file in common_licenses %}
                             <p>Full text of
                                 <a class="{{ about_object.license_text_file }}" href="#component-license-{{ about_object.license_text_file }}">
@@ -81,7 +83,7 @@
                                  </a>
                                     is available at the end of this document.</p>
                         {% else %}
-                            <pre>{{ license_dicts[about_object.license_text_file]|e }}</pre>
+                            <pre>{{ license_dicts[about_object.about_resource_path]|e }}</pre>
                         {% endif %}
                     {% endif %}
                 {% elif about_object.license_text %}

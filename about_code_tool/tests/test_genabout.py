@@ -299,6 +299,7 @@ class GenAboutTest(unittest.TestCase):
                         'about_resource': '.', 'name': 'ABOUT tool'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/TESTCASE', 'TESTCASE.ABOUT'),
                                  {'about_file': '/TESTCASE/', 'version': '0.8.1',
+                                  'about_resource_path' : '/TESTCASE/TESTCASE.ABOUT',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
         output_list = gen.pre_generation(gen_location, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
@@ -336,9 +337,9 @@ class GenAboutTest(unittest.TestCase):
         input_list = [{'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                         'about_resource': '.', 'name': '', 'test': 'test sample'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout', 'about.py.ABOUT'),
-                                  {'test': 'test sample', 'about_file': 'about.py.ABOUT',
-                                    'version': '0.8.1', 'about_resource': '.',
-                                     'name': 'ABOUT tool'}]]
+                                 {'about_file': 'about.py.ABOUT', 'name': 'ABOUT tool',
+                                      'about_resource_path': '/about.py.ABOUT',
+                                      'version': '0.8.1', 'test': 'test sample', 'about_resource': '.'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
@@ -351,7 +352,8 @@ class GenAboutTest(unittest.TestCase):
                         'about_resource': '.', 'name': '', 'test': 'test sample'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout', 'about.py.ABOUT'),
                                   {'about_file': '/about.py.ABOUT', 'version': '0.8.2',
-                                    'about_resource': '.', 'name': '', 'test': 'test sample'}]]
+                                   'about_resource_path': '/about.py.ABOUT',
+                                   'about_resource': '.', 'name': '', 'test': 'test sample'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
