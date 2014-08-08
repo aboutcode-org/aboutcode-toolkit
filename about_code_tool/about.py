@@ -400,7 +400,7 @@ SPDX_LICENSES = (
     'ZPL-2.1',
 )
 
-# Use DJE License Name
+# Use DJE License key with extension
 COMMON_LICENSES = (
     'apache-2.0.LICENSE',
     'bsd-new.LICENSE',
