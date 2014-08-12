@@ -23,7 +23,7 @@ import urllib2
 
 from collections import namedtuple
 from os import makedirs
-from os.path import exists, dirname, join, abspath, isdir, normpath
+from os.path import exists, dirname, join, abspath, isdir, normpath, basename
 
 import about
 
@@ -54,7 +54,7 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__+'_file')
 
-ESSENTIAL_FIELDS = ('about_file', 'about_resource',)
+ESSENTIAL_FIELDS = ('about_file',)
 
 # The 'dje_license_key' will be removed and will use the 'dje_license' instead.
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + \
@@ -172,7 +172,7 @@ class GenAbout(object):
     def validate_duplication(input_list):
         check_duplication = []
         for line in input_list:
-            component = line['about_file'] + line['about_resource']
+            component = line['about_file']
             if component in check_duplication:
                 return True
             check_duplication.append(component)
@@ -453,23 +453,38 @@ class GenAbout(object):
         for line in input_list:
             component_list = []
             file_location = line['about_file']
+            # TODO: The following few line of code seems to change the value
+            # without checking the action num which is incorrect.
+            # Get the filename from the file_location and put it as the
+            # value for 'about_resource'
+            
             if file_location.startswith('/'):
                 file_location = file_location.partition('/')[2]
             if not file_location.endswith('.ABOUT'):
                 if file_location.endswith('/'):
                     file_location = dirname(file_location)
-                    file_location = join(file_location, os.path.basename(file_location))
+                    file_location = join(file_location, basename(file_location))
+                file_location += '.ABOUT'
+
+            """line['about_resource'] = basename(file_location)
+            if not file_location.startswith('/'):
+                line['about_resource_path'] = '/' + file_location
+            else:
+                line['about_resource_path'] = file_location
+                # Strip the first '/' for the later 'join'
+                file_location = file_location.partition('/')[2]
+            if not file_location.endswith('.ABOUT'):
+                if file_location.endswith('/'):
+                    file_location = dirname(file_location)
+                    file_location = join(file_location, basename(file_location))
                     # Since this is referencing everything in the current directory,
                     # we will use a '.' period to reference it.
                     line['about_resource'] = '.'
-                file_location += '.ABOUT'
+                file_location += '.ABOUT'"""
             if all_in_one:
                 # This is to get the filename instead of the file path
                 file_location = file_location.rpartition('/')[2]
             about_file_location = join(gen_location, file_location)
-            if not file_location.startswith('/'):
-                line['about_resource_path'] = '/'
-            line['about_resource_path'] += file_location
             dir = dirname(about_file_location)
             if not _exists(dir):
                 makedirs(dir)
@@ -491,12 +506,46 @@ class GenAbout(object):
                     for field_name, value in about_object.parsed.items():
                         field_name = field_name.lower()
                         line[field_name] = value
-                # We don't need to do anything for the action_num = 3 as
-                # the original ABOUT file will be replaced in the write_output()
+                # We do not need to do anything if action_num is 3 as the 
+                # original ABOUT file will be replaced in the write_output()
+                elif action_num == 3:
+                    pass
+            # The following is to ensure the 'about_resource' and 
+            # 'about_resource_path' present. If those are existed already,
+            # the code will not touch it.
+            self.update_about_resource(line)
+            self.update_about_resource_path(line)
+
             component_list.append(about_file_location)
             component_list.append(line)
             output_list.append(component_list)
         return output_list
+
+    def update_about_resource(self, line):
+        # Check is 'about_resource' exist
+        try:
+            if line['about_resource']:
+                # Do nothing
+                pass
+        except:
+            # Add the 'about_resource' field
+            about_resource = line['about_file']
+            if about_resource.endswith('/'):
+                line['about_resource'] = '.'
+            else:
+                line['about_resource'] = basename(about_resource)
+
+    def update_about_resource_path(self, line):
+        # Check is 'about_resource_path' exist
+        try:
+            if line['about_resoure_path']:
+                pass
+        except:
+            file_path = line['about_file']
+            if not file_path.startswith('/'):
+                line['about_resource_path'] = '/' + file_path
+            else:
+                line['about_resource_path'] = file_path
 
     @staticmethod
     def gen_license_list(line):
@@ -527,7 +576,8 @@ class GenAbout(object):
                     # The purpose of the replace('\n', '\n ') is used to
                     # format the continuation strings
                     value = about_dict_list[item].replace('\n', '\n ')
-                    if (value or item in about.MANDATORY_FIELDS) and not item in about.ERROR_WARN_FIELDS:
+                    if (value or item in about.MANDATORY_FIELDS) and not item\
+                        in about.ERROR_WARN_FIELDS and not item == 'about_resource':
                         context += item + ': ' + value + '\n'
 
             component.append(about_file_location)

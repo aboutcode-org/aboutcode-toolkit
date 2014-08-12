@@ -88,12 +88,15 @@ UNKNOWN = 'Unknown problem'
 GENATTRIB = 'Attribution generation problem'
 
 MANDATORY_FIELDS = (
-    'about_resource',
+    #'about_resource',
+    #'about_file',
     'name',
     'version',
 )
 
 BASIC_FIELDS = (
+    'about_resource',
+    'about_resource_path', # Need to update spec
     'spec_version',
     'date',
     'description',

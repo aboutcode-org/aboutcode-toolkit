@@ -63,7 +63,6 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         expected_list = {'about_file': 'directory/filename',
                           'version': 'confirmed version',
-                           'about_resource': 'file_name',
                            'name': 'component',
                            'copyright': 'confirmed copyright'}
         output = gen.get_mapping_list()
@@ -93,7 +92,9 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         input = [{'about_file': '/about.ABOUT', 'about_resource': '',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
-        self.assertFalse(gen.validate_value_in_essential_fields(input))
+        #self.assertFalse(gen.validate_value_in_essential_fields(input))
+        # This is now true as it doesn't depends on about_resource now
+        self.assertTrue(gen.validate_value_in_essential_fields(input))
 
     def test_validate_value_in_essential_missing_all(self):
         gen = genabout.GenAbout()
@@ -151,7 +152,9 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         input_list = [{'about_file': '/about.ABOUT', 'name': 'ABOUT tool',
                        'version': '0.8.1'}]
-        self.assertFalse(gen.validate_mandatory_fields(input_list))
+        #self.assertFalse(gen.validate_mandatory_fields(input_list))
+        # This is now True as it doesn't need about_resource
+        self.assertTrue(gen.validate_mandatory_fields(input_list))
 
     def test_get_non_supported_fields(self):
         gen = genabout.GenAbout()
@@ -299,7 +302,7 @@ class GenAboutTest(unittest.TestCase):
                         'about_resource': '.', 'name': 'ABOUT tool'}]
         expected_output_list = [[join(TESTDATA_PATH, 'test_files_for_genabout/TESTCASE', 'TESTCASE.ABOUT'),
                                  {'about_file': '/TESTCASE/', 'version': '0.8.1',
-                                  'about_resource_path' : '/TESTCASE/TESTCASE.ABOUT',
+                                  'about_resource_path' : '/TESTCASE/',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
         output_list = gen.pre_generation(gen_location, input_list, action_num, False)
         self.assertTrue(expected_output_list == output_list)
@@ -525,3 +528,43 @@ class GenAboutTest(unittest.TestCase):
         expected_output = [[join(u'/test', 'test_key.LICENSE'), 'This is a test license.']]
         output = gen.process_dje_licenses(test_license_list, test_license_dict, test_path)
         self.assertTrue(output == expected_output)
+
+    def test_update_about_resource_exist(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_resource': 'test.c', 'about_file': '/tmp/test.c'}
+        gen.update_about_resource(input_dict)
+        self.assertTrue(input_dict == input_dict, "The dict should not be changed.")
+
+    def test_update_about_resource_not_exist_isFile(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_file': '/tmp/test.c'}
+        expected_output = {'about_file': '/tmp/test.c', 'about_resource': 'test.c'}
+        gen.update_about_resource(input_dict)
+        self.assertTrue(input_dict == expected_output)
+
+    def test_update_about_resource_not_exist_isdir(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_file': '/tmp/test/'}
+        expected_output = {'about_file': '/tmp/test/', 'about_resource': '.'}
+        gen.update_about_resource(input_dict)
+        self.assertTrue(input_dict == expected_output)
+
+    def test_update_about_resource_path_exist(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_resource_path': '/tmp/test.c', 'about_file': '/tmp/test.c'}
+        gen.update_about_resource_path(input_dict)
+        self.assertTrue(input_dict == input_dict, "The dict should not be changed.")
+
+    def test_update_about_resource_path_not_exist_isFile(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_file': '/tmp/test.c'}
+        expected_output = {'about_file': '/tmp/test.c', 'about_resource_path': '/tmp/test.c'}
+        gen.update_about_resource_path(input_dict)
+        self.assertTrue(input_dict == expected_output)
+
+    def test_update_about_resource_path_not_exist_isDir(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_file': '/tmp/test/'}
+        expected_output = {'about_file': '/tmp/test/', 'about_resource_path': '/tmp/test/'}
+        gen.update_about_resource_path(input_dict)
+        self.assertTrue(input_dict == expected_output)
