@@ -488,7 +488,9 @@ class GenAbout(object):
             dir = dirname(about_file_location)
             if not _exists(dir):
                 makedirs(dir)
+            about_file_exist = False
             if _exists(about_file_location):
+                about_file_exist = True
                 if action_num == 0:
                     about_exist = "ABOUT file already existed. Generation is skipped."
                     self.warnings.append(Warn('about_file', about_file_location, about_exist))
@@ -513,20 +515,22 @@ class GenAbout(object):
             # The following is to ensure the 'about_resource' and 
             # 'about_resource_path' present. If those are existed already,
             # the code will not touch it.
-            self.update_about_resource(line)
-            self.update_about_resource_path(line)
+            self.update_about_resource(line, about_file_exist)
+            self.update_about_resource_path(line, about_file_exist)
 
             component_list.append(about_file_location)
             component_list.append(line)
             output_list.append(component_list)
         return output_list
 
-    def update_about_resource(self, line):
+    def update_about_resource(self, line, about_file_exist):
         # Check is 'about_resource' exist
         try:
             if line['about_resource']:
-                # Do nothing
-                pass
+                if not about_file_exist:
+                    about_resource = line['about_file']
+                    if about_resource.endswith('/'):
+                        line['about_resource'] = '.'
         except:
             # Add the 'about_resource' field
             about_resource = line['about_file']
@@ -535,11 +539,16 @@ class GenAbout(object):
             else:
                 line['about_resource'] = basename(about_resource)
 
-    def update_about_resource_path(self, line):
+    def update_about_resource_path(self, line, about_file_exist):
         # Check is 'about_resource_path' exist
         try:
             if line['about_resoure_path']:
-                pass
+                if not about_file_exist:
+                    file_path = line['about_file']
+                    if not file_path.startswith('/'):
+                        line['about_resource_path'] = '/' + file_path
+                    else:
+                        line['about_resource_path'] = file_path
         except:
             file_path = line['about_file']
             if not file_path.startswith('/'):

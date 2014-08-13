@@ -529,42 +529,96 @@ class GenAboutTest(unittest.TestCase):
         output = gen.process_dje_licenses(test_license_list, test_license_dict, test_path)
         self.assertTrue(output == expected_output)
 
-    def test_update_about_resource_exist(self):
+    def test_update_about_resource_about_file_and_field_exist(self):
         gen = genabout.GenAbout()
         input_dict = {'about_resource': 'test.c', 'about_file': '/tmp/test.c'}
-        gen.update_about_resource(input_dict)
+        about_file_exist = True
+        gen.update_about_resource(input_dict, about_file_exist)
         self.assertTrue(input_dict == input_dict, "The dict should not be changed.")
 
-    def test_update_about_resource_not_exist_isFile(self):
+    def test_update_about_resource_about_file_and_field_not_exist_isFile(self):
         gen = genabout.GenAbout()
         input_dict = {'about_file': '/tmp/test.c'}
         expected_output = {'about_file': '/tmp/test.c', 'about_resource': 'test.c'}
-        gen.update_about_resource(input_dict)
+        about_file_exist = True
+        gen.update_about_resource(input_dict, about_file_exist)
         self.assertTrue(input_dict == expected_output)
 
-    def test_update_about_resource_not_exist_isdir(self):
+    def test_update_about_resource_about_file_and_field_not_exist_isdir(self):
         gen = genabout.GenAbout()
         input_dict = {'about_file': '/tmp/test/'}
         expected_output = {'about_file': '/tmp/test/', 'about_resource': '.'}
-        gen.update_about_resource(input_dict)
+        about_file_exist = True
+        gen.update_about_resource(input_dict, about_file_exist)
         self.assertTrue(input_dict == expected_output)
 
-    def test_update_about_resource_path_exist(self):
+    def test_update_about_resource_no_about_file_field_exist(self):
         gen = genabout.GenAbout()
-        input_dict = {'about_resource_path': '/tmp/test.c', 'about_file': '/tmp/test.c'}
-        gen.update_about_resource_path(input_dict)
+        input_dict = {'about_resource': 'test.c', 'about_file': '/tmp/test.c'}
+        about_file_exist = False
+        gen.update_about_resource(input_dict, about_file_exist)
         self.assertTrue(input_dict == input_dict, "The dict should not be changed.")
 
-    def test_update_about_resource_path_not_exist_isFile(self):
+    def test_update_about_resource_no_about_file_no_field_isFile(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_file': '/tmp/test.c'}
+        expected_output = {'about_file': '/tmp/test.c', 'about_resource': 'test.c'}
+        about_file_exist = False
+        gen.update_about_resource(input_dict, about_file_exist)
+        self.assertTrue(input_dict == expected_output)
+
+    def test_update_about_resource_no_about_file_no_field_isdir(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_file': '/tmp/test/'}
+        expected_output = {'about_file': '/tmp/test/', 'about_resource': '.'}
+        about_file_exist = False
+        gen.update_about_resource(input_dict, about_file_exist)
+        self.assertTrue(input_dict == expected_output)
+
+    def test_update_about_resource_path_about_file_field_exist(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_resource_path': '/tmp/test.c', 'about_file': '/tmp/test.c'}
+        about_file_exist = True
+        gen.update_about_resource_path(input_dict, about_file_exist)
+        self.assertTrue(input_dict == input_dict, "The dict should not be changed.")
+
+    def test_update_about_resource_path_about_file_field_not_exist_isFile(self):
         gen = genabout.GenAbout()
         input_dict = {'about_file': '/tmp/test.c'}
         expected_output = {'about_file': '/tmp/test.c', 'about_resource_path': '/tmp/test.c'}
-        gen.update_about_resource_path(input_dict)
+        about_file_exist = True
+        gen.update_about_resource_path(input_dict, about_file_exist)
         self.assertTrue(input_dict == expected_output)
 
-    def test_update_about_resource_path_not_exist_isDir(self):
+    def test_update_about_resource_path_about_file_field_not_exist_isDir(self):
         gen = genabout.GenAbout()
         input_dict = {'about_file': '/tmp/test/'}
         expected_output = {'about_file': '/tmp/test/', 'about_resource_path': '/tmp/test/'}
-        gen.update_about_resource_path(input_dict)
+        about_file_exist = True
+        gen.update_about_resource_path(input_dict, about_file_exist)
         self.assertTrue(input_dict == expected_output)
+
+    def test_update_about_resource_path_no_about_file_field_exist(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_resource_path': '/tmp/test.c', 'about_file': '/tmp/test.c'}
+        about_file_exist = False
+        gen.update_about_resource_path(input_dict, about_file_exist)
+        self.assertTrue(input_dict == input_dict, "The dict should not be changed.")
+
+    def test_update_about_resource_path_no_about_file_field_not_exist_isFile(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_file': '/tmp/test.c'}
+        expected_output = {'about_file': '/tmp/test.c', 'about_resource_path': '/tmp/test.c'}
+        about_file_exist = False
+        gen.update_about_resource_path(input_dict, about_file_exist)
+        self.assertTrue(input_dict == expected_output)
+
+    def test_update_about_resource_path_no_about_file_field_not_exist_isDir(self):
+        gen = genabout.GenAbout()
+        input_dict = {'about_file': '/tmp/test/'}
+        expected_output = {'about_file': '/tmp/test/', 'about_resource_path': '/tmp/test/'}
+        about_file_exist = False
+        gen.update_about_resource_path(input_dict, about_file_exist)
+        self.assertTrue(input_dict == expected_output)
+
+
