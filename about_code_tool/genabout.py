@@ -189,12 +189,12 @@ class GenAbout(object):
         return copied_list
 
     @staticmethod
-    def get_non_supported_fields(input_list):
+    def get_non_supported_fields(input_list, mapping_keys):
         """
         Returns a list of the non-supported fields in a given line.
         """
         first_line = input_list[0]
-        return [field for field in first_line.keys() if not field in SUPPORTED_FIELDS]
+        return [field for field in first_line.keys() if not field in SUPPORTED_FIELDS and not field in mapping_keys]
 
     def verify_files_existance(self, input_list, project_dir, file_in_project):
         """
@@ -689,6 +689,7 @@ def main(parser, options, args):
     api_key = ''
     gen_license = False
     dje_license_dict = {}
+    mapping_keys = []
 
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
@@ -780,10 +781,11 @@ def main(parser, options, args):
     if mapping_config:
         mapping_list = gen.get_mapping_list()
         input_list = gen.convert_input_list(input_list, mapping_list)
+        mapping_keys = mapping_list.keys()
 
     gen.validate(input_list)
 
-    ignored_fields_list = gen.get_non_supported_fields(input_list)
+    ignored_fields_list = gen.get_non_supported_fields(input_list, mapping_keys)
     if ignored_fields_list:
         input_list = gen.get_only_supported_fields(input_list, ignored_fields_list)
 
