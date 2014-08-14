@@ -37,7 +37,7 @@ class GenAboutTest(unittest.TestCase):
         expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
                            'name': 'ABOUT tool', 'version': '0.8.1'}]
         list = gen.get_input_list(test_input)
-        self.assertTrue(list == expected_list)
+        self.assertEquals(list, expected_list)
 
     def test_get_input_list_covert_all_keys_to_lower(self):
         gen = genabout.GenAbout()
@@ -45,7 +45,7 @@ class GenAboutTest(unittest.TestCase):
         expected_list = [{'about_file': 'about.ABOUT', 'about_resource': '.',
                            'name': 'ABOUT tool', 'version': '0.8.1'}]
         list = gen.get_input_list(test_input)
-        self.assertTrue(list == expected_list)
+        self.assertEquals(list, expected_list)
 
     def test_get_non_empty_rows_list(self):
         gen = genabout.GenAbout()
@@ -56,7 +56,7 @@ class GenAboutTest(unittest.TestCase):
         expected_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
         output = gen.get_non_empty_rows_list(input_list)
-        self.assertTrue(output == expected_list)
+        self.assertEquals(output, expected_list)
 
     
     def test_get_mapping_list(self):
@@ -66,7 +66,7 @@ class GenAboutTest(unittest.TestCase):
                            'name': 'component',
                            'copyright': 'confirmed copyright'}
         output = gen.get_mapping_list()
-        self.assertTrue(output == expected_list)
+        self.assertEquals(output, expected_list)
 
     def test_convert_input_list(self):
         gen = genabout.GenAbout()
@@ -80,7 +80,7 @@ class GenAboutTest(unittest.TestCase):
                           'name': 'OpenSans Fonts', 'ignore field': 'i',
                           'version': '1', 'about_resource': 'opensans'}]
         output = gen.convert_input_list(input_list, mapping_list)
-        self.assertTrue(output == expected_list)
+        self.assertEquals(output, expected_list)
 
     def test_validate_value_in_essential_missing_about_file(self):
         gen = genabout.GenAbout()
@@ -128,13 +128,13 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         test_input = join(TESTDATA_PATH, "test_files_for_genabout/dup_keys.csv")
         expected_list = ['copyright', 'copyright']
-        self.assertTrue(gen.get_duplicated_keys(test_input) == expected_list)
+        self.assertEquals(gen.get_duplicated_keys(test_input), expected_list)
 
     def test_get_duplicated_keys_have_dup_diff_case(self):
         gen = genabout.GenAbout()
         test_input = join(TESTDATA_PATH, "test_files_for_genabout/dup_keys_with_diff_case.csv")
         expected_list = ['copyright', 'Copyright']
-        self.assertTrue(gen.get_duplicated_keys(test_input) == expected_list)
+        self.assertEquals(gen.get_duplicated_keys(test_input), expected_list)
 
     def test_validate_mandatory_fields_no_missing(self):
         gen = genabout.GenAbout()
@@ -163,7 +163,7 @@ class GenAboutTest(unittest.TestCase):
                  'about_resource': 'opensans'}]
         non_supported_list = gen.get_non_supported_fields(input)
         expected_list = ['non_supported field']
-        self.assertTrue(non_supported_list == expected_list)
+        self.assertEquals(non_supported_list, expected_list)
 
     def test_get_only_supported_fields(self):
         gen = genabout.GenAbout()
@@ -173,7 +173,7 @@ class GenAboutTest(unittest.TestCase):
         expected_list = [{'about_file': '/about.ABOUT', 'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'}]
         ignore_key_list = ['non_supported']
-        self.assertTrue(expected_list == gen.get_only_supported_fields(input_list, ignore_key_list))
+        self.assertEquals(expected_list, gen.get_only_supported_fields(input_list, ignore_key_list))
 
     def test_get_dje_license_list_no_gen_license_with_no_license_text_file_key(self):
         gen = genabout.GenAbout()
@@ -184,7 +184,7 @@ class GenAboutTest(unittest.TestCase):
         gen_license = False
         dje_license_dict = {}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
-        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertEquals(expected_output_list, lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -198,7 +198,7 @@ class GenAboutTest(unittest.TestCase):
         gen_license = False
         dje_license_dict = {}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
-        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertEquals(expected_output_list, lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertTrue(len(gen.errors) == 1, "Should return 1 error.")
 
@@ -212,7 +212,7 @@ class GenAboutTest(unittest.TestCase):
         gen_license = False
         dje_license_dict = {}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
-        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertEquals(expected_output_list, lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -226,7 +226,7 @@ class GenAboutTest(unittest.TestCase):
         gen_license = False
         dje_license_dict = {}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
-        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertEquals(expected_output_list, lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -241,7 +241,7 @@ class GenAboutTest(unittest.TestCase):
         gen_license = True
         dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
-        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertEquals(expected_output_list, lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -258,8 +258,8 @@ class GenAboutTest(unittest.TestCase):
         dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         for line in input_list:
-            self.assertTrue(line['license_text_file'] == 'apache-2.0.LICENSE')
-        self.assertTrue(expected_output_list == lic_output_list)
+            self.assertEquals(line['license_text_file'], 'apache-2.0.LICENSE')
+        self.assertEquals(expected_output_list, lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -273,7 +273,7 @@ class GenAboutTest(unittest.TestCase):
         gen_license = True
         dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
-        self.assertTrue(expected_output_list == lic_output_list)
+        self.assertEquals(expected_output_list, lic_output_list)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -289,8 +289,8 @@ class GenAboutTest(unittest.TestCase):
         dje_license_dict = {'Apache License 2.0': [u'apache-2.0', 'test context']}
         lic_output_list = gen.get_dje_license_list(gen_location, input_list, gen_license, dje_license_dict)
         for line in input_list:
-            self.assertTrue(line['license_text_file'] == 'apache-2.0.LICENSE')
-        self.assertTrue(expected_output_list == lic_output_list)
+            self.assertEquals(line['license_text_file'], 'apache-2.0.LICENSE')
+        self.assertEquals(expected_output_list, lic_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -305,7 +305,7 @@ class GenAboutTest(unittest.TestCase):
                                   'about_resource_path' : '/TESTCASE/',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
         output_list = gen.pre_generation(gen_location, input_list, action_num, False)
-        self.assertTrue(expected_output_list == output_list)
+        self.assertEquals(expected_output_list, output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -317,7 +317,7 @@ class GenAboutTest(unittest.TestCase):
                         'about_resource': '.', 'name': 'ABOUT tool'}]
         expected_output_list = []
         output_list = gen.pre_generation(gen_location, input_list, action_num, False)
-        self.assertTrue(expected_output_list == output_list, "This output_list should be empty.")
+        self.assertEquals(expected_output_list, output_list)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warnings.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -330,7 +330,7 @@ class GenAboutTest(unittest.TestCase):
                                  {'about_file': '/about.py.ABOUT', 'version': '0.8.2',
                                   'about_resource': '.', 'name': 'ABOUT tool'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
-        self.assertTrue(expected_output_list == expected_output_list)
+        self.assertEquals(expected_output_list, expected_output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -344,7 +344,7 @@ class GenAboutTest(unittest.TestCase):
                                       'about_resource_path': '/about.py.ABOUT',
                                       'version': '0.8.1', 'test': 'test sample', 'about_resource': '.'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
-        self.assertTrue(expected_output_list == output_list)
+        self.assertEquals(expected_output_list, output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -358,7 +358,7 @@ class GenAboutTest(unittest.TestCase):
                                    'about_resource_path': '/about.py.ABOUT',
                                    'about_resource': '.', 'name': '', 'test': 'test sample'}]]
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, False)
-        self.assertTrue(expected_output_list == output_list)
+        self.assertEquals(expected_output_list, output_list)
         self.assertFalse(gen.warnings, "No warnings should be returned.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -373,7 +373,7 @@ class GenAboutTest(unittest.TestCase):
         output_list = gen.pre_generation(GEN_LOCATION, input_list, action_num, True)
         self.assertFalse(os.path.exists('testdata/test_files_for_genabout/test_generation'),
                           "This directory shouldn't be generaetd as the all_in_one is set to True.")
-        self.assertTrue(expected_output_list == output_list, "This output_list should be empty.")
+        self.assertEquals(expected_output_list, output_list)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -438,7 +438,7 @@ class GenAboutTest(unittest.TestCase):
         path = '.'
         expected_list = []
         output = gen.verify_files_existance(input_list, path, False)
-        self.assertTrue(expected_list == output)
+        self.assertEquals(expected_list, output)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -450,7 +450,7 @@ class GenAboutTest(unittest.TestCase):
         path = '.'
         expected_list = []
         output = gen.verify_files_existance(input_list, path, False)
-        self.assertTrue(expected_list == output)
+        self.assertEquals(expected_list, output)
         self.assertTrue(len(gen.warnings) == 1, "Should return 1 warning.")
         self.assertFalse(gen.errors, "No errors should be returned.")
 
@@ -469,7 +469,7 @@ class GenAboutTest(unittest.TestCase):
                        'license_text_file': '', 'about_resource': 'opensans'}
         expected_list = ('/tmp/3pp/opensans', 'Apache License 2.0')
         output = gen.gen_license_list(input_list)
-        self.assertTrue(expected_list == output)
+        self.assertEquals(expected_list, output)
 
     def test_gen_license_list_no_license_text_file_key(self):
         gen = genabout.GenAbout()
@@ -479,7 +479,7 @@ class GenAboutTest(unittest.TestCase):
                        'about_resource': 'opensans'}
         expected_list = ('/tmp/3pp/opensans', 'Apache License 2.0')
         output = gen.gen_license_list(input_list)
-        self.assertTrue(expected_list == output)
+        self.assertEquals(expected_list, output)
 
     def test_copy_files_test_path_not_endswith_slash(self):
         gen = genabout.GenAbout()
@@ -488,7 +488,7 @@ class GenAboutTest(unittest.TestCase):
         project_path = os.path.abspath('.')
         tmp_path = tempfile.mkdtemp()
         gen.copy_files(tmp_path, input_list)
-        self.assertTrue(expected_list == os.listdir(tmp_path))
+        self.assertEquals(expected_list, os.listdir(tmp_path))
         # According to the doc, the user of mkdtemp() is responsible for
         # deleting the temporary directory and its contents when done with it.
         shutil.rmtree(tmp_path)
@@ -500,7 +500,7 @@ class GenAboutTest(unittest.TestCase):
         project_path = os.path.abspath('.')
         tmp_path = tempfile.mkdtemp() + '/'
         gen.copy_files(tmp_path, input_list)
-        self.assertTrue(expected_list == os.listdir(tmp_path))
+        self.assertEquals(expected_list, os.listdir(tmp_path))
         # According to the doc, the user of mkdtemp() is responsible for
         # deleting the temporary directory and its contents when done with it.
         shutil.rmtree(tmp_path)
@@ -516,7 +516,7 @@ class GenAboutTest(unittest.TestCase):
             context = ''
             for line in file_in.readlines():
                 context = line
-        self.assertTrue(context == tmp_license_context)
+        self.assertEquals(context, tmp_license_context)
         os.close(fh)
         os.remove(tmp_license_name)
 
@@ -527,7 +527,7 @@ class GenAboutTest(unittest.TestCase):
         test_path = '/test'
         expected_output = [[join(u'/test', 'test_key.LICENSE'), 'This is a test license.']]
         output = gen.process_dje_licenses(test_license_list, test_license_dict, test_path)
-        self.assertTrue(output == expected_output)
+        self.assertEquals(output, expected_output)
 
     def test_update_about_resource_about_file_and_field_exist(self):
         gen = genabout.GenAbout()
@@ -542,7 +542,7 @@ class GenAboutTest(unittest.TestCase):
         expected_output = {'about_file': '/tmp/test.c', 'about_resource': 'test.c'}
         about_file_exist = True
         gen.update_about_resource(input_dict, about_file_exist)
-        self.assertTrue(input_dict == expected_output)
+        self.assertEquals(input_dict, expected_output)
 
     def test_update_about_resource_about_file_and_field_not_exist_isdir(self):
         gen = genabout.GenAbout()
@@ -550,7 +550,7 @@ class GenAboutTest(unittest.TestCase):
         expected_output = {'about_file': '/tmp/test/', 'about_resource': '.'}
         about_file_exist = True
         gen.update_about_resource(input_dict, about_file_exist)
-        self.assertTrue(input_dict == expected_output)
+        self.assertEquals(input_dict, expected_output)
 
     def test_update_about_resource_no_about_file_field_exist(self):
         gen = genabout.GenAbout()
@@ -565,7 +565,7 @@ class GenAboutTest(unittest.TestCase):
         expected_output = {'about_file': '/tmp/test.c', 'about_resource': 'test.c'}
         about_file_exist = False
         gen.update_about_resource(input_dict, about_file_exist)
-        self.assertTrue(input_dict == expected_output)
+        self.assertEquals(input_dict, expected_output)
 
     def test_update_about_resource_no_about_file_no_field_isdir(self):
         gen = genabout.GenAbout()
@@ -573,7 +573,7 @@ class GenAboutTest(unittest.TestCase):
         expected_output = {'about_file': '/tmp/test/', 'about_resource': '.'}
         about_file_exist = False
         gen.update_about_resource(input_dict, about_file_exist)
-        self.assertTrue(input_dict == expected_output)
+        self.assertEquals(input_dict, expected_output)
 
     def test_update_about_resource_path_about_file_field_exist(self):
         gen = genabout.GenAbout()
@@ -588,7 +588,7 @@ class GenAboutTest(unittest.TestCase):
         expected_output = {'about_file': '/tmp/test.c', 'about_resource_path': '/tmp/test.c'}
         about_file_exist = True
         gen.update_about_resource_path(input_dict, about_file_exist)
-        self.assertTrue(input_dict == expected_output)
+        self.assertEquals(input_dict, expected_output)
 
     def test_update_about_resource_path_about_file_field_not_exist_isDir(self):
         gen = genabout.GenAbout()
@@ -596,7 +596,7 @@ class GenAboutTest(unittest.TestCase):
         expected_output = {'about_file': '/tmp/test/', 'about_resource_path': '/tmp/test/'}
         about_file_exist = True
         gen.update_about_resource_path(input_dict, about_file_exist)
-        self.assertTrue(input_dict == expected_output)
+        self.assertEquals(input_dict, expected_output)
 
     def test_update_about_resource_path_no_about_file_field_exist(self):
         gen = genabout.GenAbout()
@@ -611,7 +611,7 @@ class GenAboutTest(unittest.TestCase):
         expected_output = {'about_file': '/tmp/test.c', 'about_resource_path': '/tmp/test.c'}
         about_file_exist = False
         gen.update_about_resource_path(input_dict, about_file_exist)
-        self.assertTrue(input_dict == expected_output)
+        self.assertEquals(input_dict, expected_output)
 
     def test_update_about_resource_path_no_about_file_field_not_exist_isDir(self):
         gen = genabout.GenAbout()
@@ -619,6 +619,6 @@ class GenAboutTest(unittest.TestCase):
         expected_output = {'about_file': '/tmp/test/', 'about_resource_path': '/tmp/test/'}
         about_file_exist = False
         gen.update_about_resource_path(input_dict, about_file_exist)
-        self.assertTrue(input_dict == expected_output)
+        self.assertEquals(input_dict, expected_output)
 
 
