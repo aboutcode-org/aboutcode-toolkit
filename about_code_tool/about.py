@@ -1002,32 +1002,11 @@ class AboutFile(object):
                 pass
         return ''
 
-
-    def get_license_text_file_name(self):
-        """
-        Return the license_text_file name if the license_text_file field
-        exists
-        """
-        return self.parsed.get('license_text_file', '')
-
-    def get_license_text(self):
-        """
-        Return the license_text if the license_text field exists.
-        """
-        return self.parsed.get('license_text', '')
-
     def get_about_name(self):
         """
         Return the about object's name.
         """
         return self.parsed.get('name', '')
-
-    def get_about_resource_path(self):
-        """
-        Return the about object's name
-        """
-        return self.parsed.get('about_resource_path', '')
-
 
 class AboutCollector(object):
     """
@@ -1174,13 +1153,8 @@ class AboutCollector(object):
             print('Template: %(template_name)s not found' % locals())
             return
 
-        # We only need the fields names and values to render the template
-        validated_fields = []
-        notice_text = []
-        license_key = []
-        license_text_list = []
-        license_dict = {}
-        common_license_dict = {}
+        about_object_fields = []
+        about_content_dict = {}
         not_exist_components = list(limit_to)
 
         # FIXME: this loop and conditional is too complex.
@@ -1198,58 +1172,22 @@ class AboutCollector(object):
                     continue
 
             if not limit_to or about_relative_path in limit_to:
-                validated_fields.append(about_object.validated_fields)
-                notice_text.append(about_object.notice_text())
-                license_text_file = about_object.get_license_text_file_name()
-                about_resource_path = about_object.get_about_resource_path()
-
-                if not about_resource_path:
-                    msg = ('About File: %s - The required field '
-                           'about_resource_path was not found. '
-                           'License generation is skipped.'
-                           % about_object.location)
-                    err = Error(GENATTRIB, 'about_resource',
-                                about_object.location, msg)
-                    self.genattrib_errors.append(err)
-
-                if license_text_file:
-                    # Use the about_file_path as the key
-                    # Check if the key already existed in the dictionary
-                    # This shouldn't be reached as the 'about_resource_path'
-                    # should be unique.
-                    if about_resource_path in license_dict:
-                        # Raise error if key name are the same but the content
-                        # are different
-                        license_text_check = license_dict[about_resource_path]
-
-                        if (unicode(license_text_check)
-                            != unicode(about_object.license_text())):
-                            msg = ('License Name: %s - Same license name '
-                                   'with different content. License '
-                                   'generation is skipped.'
-                                   % license_text_file)
-                            err = Error(GENATTRIB, 'license_text',
-                                        license_text_file, msg)
-                            self.genattrib_errors.append(err)
-                    else:
-                        lft = unicode(about_object.license_text(),
+                about_content_dict = about_object.validated_fields
+                # Add information in the dictionary where it does not
+                # present in the ABOUT file
+                about_content_dict['license_text_content'] = unicode(about_object.license_text(),
                                       errors='replace')
-                        license_dict[about_resource_path] = lft
+                about_content_dict['notice_text_content'] = about_object.notice_text()
 
-                        if license_text_file in COMMON_LICENSES:
-                            ltf = unicode(about_object.license_text(),
-                                          errors='replace')
-                            common_license_dict[license_text_file] = ltf
-                elif about_object.get_license_text():
-                    # We do not need to do anything here as the license_text
-                    # will be captured directly in the about object.
-                    pass
-                else:
+                # Raise error if no license_text is found
+                if not about_content_dict['license_text_content']:
                     msg = ('No license_text is found. '
                            'License generation is skipped.')
                     err = Error(GENATTRIB, 'name',
                                 about_object.get_about_name(), msg)
                     self.genattrib_errors.append(err)
+
+            about_object_fields.append(about_content_dict)
 
         if not_exist_components:
             for component in not_exist_components:
@@ -1260,17 +1198,13 @@ class AboutCollector(object):
                 err = Error(GENATTRIB, 'about_file', component, msg)
                 self.genattrib_errors.append(err)
 
-        # We want to display common_licenses in alphabetical order
+        # TODO: Handle the grouping and ordering later
+        """# We want to display common_licenses in alphabetical order
         for key in sorted(common_license_dict.keys()):
             license_key.append(key)
-            license_text_list.append(common_license_dict[key])
+            license_text_list.append(common_license_dict[key])"""
 
-        return template.render(about_objects=validated_fields,
-                               license_keys=license_key,
-                               license_texts=license_text_list,
-                               notice_texts=notice_text,
-                               license_dicts=license_dict,
-                               common_licenses=COMMON_LICENSES)
+        return template.render(about_objects=about_object_fields)
 
     def get_genattrib_errors(self):
         return self.genattrib_errors

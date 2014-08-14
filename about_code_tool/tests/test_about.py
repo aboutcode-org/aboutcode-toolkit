@@ -532,7 +532,8 @@ about_resource: about.py
             self.assertEqual(expected_warnings[i][1], w.field_value)
 
     def test_generate_attribution(self):
-        expected = u'version:2.4.3about_resource:httpd-2.4.3.tar.gzname:Apache HTTP Server'
+        expected = u'notice_text_content:version:2.4.3about_resource:httpd-2.4.3.tar.gz'\
+                    'name:Apache HTTP Serverlicense_text_content:'
         about_collector = about.AboutCollector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'))
         result = about_collector.generate_attribution(join(TESTDATA_PATH, 'attrib/test.template'))
         self.assertEqual(result, expected)
@@ -577,20 +578,4 @@ this software and releases the component to Public Domain.
         notice_text = about_file.notice_text()
         self.assertEqual(notice_text, expected)
 
-    def test_get_license_text_file_name(self):
-        expected = 'httpd.LICENSE'
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_resource_field_present.ABOUT'))
-        output = about_file.get_license_text_file_name()
-        self.assertEquals(expected, output)
 
-    def test_get_license_text_file_name_no_value(self):
-        expected = ''
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_empty_value_for_dje_license_license_text_file.ABOUT'))
-        output = about_file.get_license_text_file_name()
-        self.assertEquals(expected, output)
-
-    def test_get_license_text_file_name_no_key(self):
-        expected = ''
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_no_dje_license_no_license_text_file_keys.ABOUT'))
-        output = about_file.get_license_text_file_name()
-        self.assertEquals(expected, output)

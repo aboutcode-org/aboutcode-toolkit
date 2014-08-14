@@ -56,10 +56,8 @@
                 <h3 class="component-name">{{ about_object.name }}
                     {% if about_object.version %}{{ about_object.version }}{% endif %}
                 </h3>
-                {% if about_object.about_resource_path in license_dicts.keys() %}
-                    {% if about_object.dje_license_name %}
-                        <p>This component is licensed under {{about_object.dje_license_name }}.
-                    {% endif %}
+                {% if about_object.dje_license_name %}
+                    <p>This component is licensed under {{about_object.dje_license_name }}.
                 {% endif %}
                 {% if about_object.copyright %}
                     <pre>{{about_object.copyright}}</pre>
@@ -67,39 +65,15 @@
                 {% if about_object.notice %}
                     <pre>{{ about_object.notice }}</pre>
                 {% elif about_object.notice_file %}
-                    <pre class="component-notice">{{ notice_texts[loop.index0] }}</pre>
+                    <pre class="component-notice">{{ about_object.notice_text_content }}</pre>
                 {% endif %}
-                {% if about_object.license_text_file %}
-                    <!-- 'license_text_file' is not a common license if it 
-                        doesn't end with '.LICENSE'
-                    -->
-                    {% if not about_object.license_text_file.endswith('.LICENSE') %}
-                        <pre>{{ license_dicts[about_object.about_resource_path]|e }}</pre>
-                    {% elif about_object.about_resource_path in license_dicts.keys() %}
-                        {% if about_object.license_text_file in common_licenses %}
-                            <p>Full text of
-                                <a class="{{ about_object.license_text_file }}" href="#component-license-{{ about_object.license_text_file }}">
-                                 {{ about_object.license_text_file }}
-                                 </a>
-                                    is available at the end of this document.</p>
-                        {% else %}
-                            <pre>{{ license_dicts[about_object.about_resource_path]|e }}</pre>
-                        {% endif %}
-                    {% endif %}
-                {% elif about_object.license_text %}
-                    <p>{{about_object.license_text | e}}</p>
+                {% if about_object.license_text_content %}
+                    <pre>{{about_object.license_text_content | e}}</pre>
                 {% endif %}
             </div>
         {% endfor %}
         <hr>
 
-        <h3>Common Licenses Used in This Product</h3>
-        {% for index in range(license_keys | count) %}
-            {% if license_keys[index] in common_licenses %}
-                <h3 id="component-license-{{ license_keys[index] }}">{{ license_keys[index] }}</h3>
-                <pre>{{ license_texts[index]|e }}</pre>
-            {% endif %}
-        {% endfor %}
         <h3><a id="End">End</a></h3>
     </body>
 </html>
