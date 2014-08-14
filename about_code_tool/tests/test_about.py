@@ -84,15 +84,15 @@ class AboutCollectorTest(unittest.TestCase):
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))
 
     def test_header_row_in_csv_output(self):
-        expected_header = 'about_file,about_resource,name,version,' \
-        'spec_version,date,description,description_file,home_url,' \
-        'download_url,readme,readme_file,install,install_file,changelog,' \
-        'changelog_file,news,news_file,news_url,notes,notes_file,contact,' \
-        'owner,author,author_file,copyright,copyright_file,notice,' \
-        'notice_file,notice_url,license_text,license_text_file,license_url,' \
-        'license_spdx,redistribute,attribute,track_changes,vcs_tool,' \
-        'vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,' \
-        'checksum_sha1,checksum_md5,checksum_sha256,dje_component,' \
+        expected_header = 'about_file,name,version,about_resource,'\
+        'about_resource_path,spec_version,date,description,description_file,'\
+        'home_url,download_url,readme,readme_file,install,install_file,changelog,'\
+        'changelog_file,news,news_file,news_url,notes,notes_file,contact,'\
+        'owner,author,author_file,copyright,copyright_file,notice,'\
+        'notice_file,notice_url,license_text,license_text_file,license_url,'\
+        'license_spdx,redistribute,attribute,track_changes,vcs_tool,'\
+        'vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,'\
+        'checksum_sha1,checksum_md5,checksum_sha256,dje_component,'\
         'dje_license,dje_organization,dje_license_name,warnings,errors'
 
         input = "about_code_tool/tests/testdata/basic"
@@ -323,11 +323,12 @@ version: 1.2.3
 
     def test_validate_about_ref_no_about_ref_key(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/.ABOUT'))
-        expected_errors = [about.VALUE, 'about_resource']
-        self.assertTrue(len(about_file.errors) == 1, "This should throw 1 error")
-        for w in about_file.errors:
+        # We do not need 'about_resource' now, so no error should be thrown.
+        # expected_errors = [about.VALUE, 'about_resource']
+        self.assertTrue(len(about_file.errors) == 0, "No error should be thrown.")
+        """for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
-            self.assertEqual(expected_errors[1], w.field_name)
+            self.assertEqual(expected_errors[1], w.field_name)"""
 
     def test_validate_about_resource_error_thrown_when_file_referenced_by_about_file_does_not_exist(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_about_ref.ABOUT'))
@@ -339,19 +340,17 @@ version: 1.2.3
 
     def test_validate_mand_fields_name_and_version_and_about_resource_present(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_mand.ABOUT'))
-        expected_errors = [(about.VALUE, 'about_resource'),
-                           (about.VALUE, 'name'),
+        expected_errors = [(about.VALUE, 'name'),
                            (about.VALUE, 'version'), ]
-        self.assertTrue(len(about_file.errors) == 3, "This should throw 3 errors")
+        self.assertTrue(len(about_file.errors) == 2, "This should throw 2 errors.")
         for i, w in enumerate(about_file.errors):
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
 
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_mand_values.ABOUT'))
         expected_errors = [(about.VALUE, 'name'),
-                             (about.VALUE, 'version'),
-                             (about.VALUE, 'about_resource')]
-        self.assertTrue(len(about_file.errors) == 3, "This should throw 3 errors")
+                             (about.VALUE, 'version')]
+        self.assertTrue(len(about_file.errors) == 2, "This should throw 2 errors.")
         for i, w in enumerate(about_file.errors):
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
