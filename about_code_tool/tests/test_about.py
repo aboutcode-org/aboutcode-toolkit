@@ -532,8 +532,8 @@ about_resource: about.py
             self.assertEqual(expected_warnings[i][1], w.field_value)
 
     def test_generate_attribution(self):
-        expected = u'notice_text_content:version:2.4.3about_resource:httpd-2.4.3.tar.gz'\
-                    'name:Apache HTTP Serverlicense_text_content:'
+        expected = u'notice_text:version:2.4.3about_resource:httpd-2.4.3.tar.gz'\
+                    'name:Apache HTTP Serverlicense_text:'
         about_collector = about.AboutCollector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'))
         result = about_collector.generate_attribution(join(TESTDATA_PATH, 'attrib/test.template'))
         self.assertEqual(result, expected)

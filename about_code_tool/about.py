@@ -20,6 +20,7 @@ from collections import namedtuple
 import csv
 from datetime import datetime
 from email.parser import HeaderParser
+from os.path import dirname, join
 import errno
 import httplib
 import logging
@@ -749,7 +750,6 @@ class AboutFile(object):
                 self.errors.append(Error(FILE, about_resource,
                                          self.about_resource,
                                          'File does not exist.'))
-
         self._save_location(about_resource, self.about_resource)
 
     def validate_file_field_exists(self, field_name, file_path):
@@ -974,6 +974,20 @@ class AboutFile(object):
                 names.append(name)
         return names
 
+    def tmp_get_license_text(self):
+        # TODO: This is a temp fix for handling multiple 'license_text_file'
+        # The code should get the license text from the def license_text(self),
+        # not this function.
+        license_text = ""
+        licenses = self.parsed.get('license_text_file', '')
+        license_list = licenses.split('\n ')
+        for lic in license_list:
+            location = join(dirname(self.location), lic)
+            with open(location, 'rU') as f:
+                license_text += f.read()
+                license_text += '\n\n\n\n\n\n'
+        return license_text
+
     def license_text(self):
         """
         Return the license text if the license_text_file field exists and the
@@ -1175,12 +1189,19 @@ class AboutCollector(object):
                 about_content_dict = about_object.validated_fields
                 # Add information in the dictionary where it does not
                 # present in the ABOUT file
-                about_content_dict['license_text_content'] = unicode(about_object.license_text(),
+                about_content_dict['license_text'] = unicode(about_object.license_text(),
                                       errors='replace')
-                about_content_dict['notice_text_content'] = about_object.notice_text()
+                about_content_dict['notice_text'] = about_object.notice_text()
+
+                # FIXME: The following is a tmp code to handle multiple 
+                # 'license_text_file' in the input
+                for k in about_content_dict:
+                    if '\n' in about_content_dict[k] and k == 'license_text_file':
+                        about_content_dict['license_text'] = unicode(about_object.tmp_get_license_text(),
+                                      errors='replace')
 
                 # Raise error if no license_text is found
-                if not about_content_dict['license_text_content']:
+                if not about_content_dict['license_text']:
                     msg = ('No license_text is found. '
                            'License generation is skipped.')
                     err = Error(GENATTRIB, 'name',

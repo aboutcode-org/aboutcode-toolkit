@@ -65,10 +65,10 @@
                 {% if about_object.notice %}
                     <pre>{{ about_object.notice }}</pre>
                 {% elif about_object.notice_file %}
-                    <pre class="component-notice">{{ about_object.notice_text_content }}</pre>
+                    <pre class="component-notice">{{ about_object.notice_text }}</pre>
                 {% endif %}
-                {% if about_object.license_text_content %}
-                    <pre>{{about_object.license_text_content | e}}</pre>
+                {% if about_object.license_text %}
+                    <pre>{{about_object.license_text | e}}</pre>
                 {% endif %}
             </div>
         {% endfor %}
