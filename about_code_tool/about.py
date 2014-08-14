@@ -68,9 +68,13 @@ def repr_problem(obj):
     Return a formatted representation of a given Warn or Error object
     suitable for reporting.
     """
+    field_name = obj.field_name
+    field_value = obj.field_value
+    message = obj.message
     return ('Field: %(field_name)s, '
             'Value: %(field_value)s, '
-            'Message: %(message)s' % obj)
+            'Message: %(message)s' % locals())
+
 
 Warn = namedtuple('Warn', 'code field_name field_value message',)
 Warn.__repr__ = repr_problem
@@ -93,8 +97,8 @@ GENATTRIB = 'Attribution generation problem'
 
 
 MANDATORY_FIELDS = (
-    #'about_resource',
-    #'about_file',
+    # 'about_resource',
+    # 'about_file',
     'name',
     'version',
 )
@@ -102,7 +106,7 @@ MANDATORY_FIELDS = (
 
 BASIC_FIELDS = (
     'about_resource',
-    'about_resource_path', # Need to update spec
+    'about_resource_path',  # Need to update spec
     'spec_version',
     'date',
     'description',
