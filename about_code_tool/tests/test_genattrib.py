@@ -34,7 +34,7 @@ class GenAttribTest(unittest.TestCase):
         input_list = [{'Directory': '/test/', 'file_name': 'test.c'}]
         expected_list = [{'directory': '/test/', 'file_name': 'test.c'}]
         output = genattrib.convert_dict_key_to_lower_case(input_list)
-        self.assertTrue(output == expected_list)
+        self.assertEquals(output, expected_list)
 
     def test_check_no_about_file_existance(self):
         input_list = [{'Directory': '/test/', 'file_name': '/test.c'}]
