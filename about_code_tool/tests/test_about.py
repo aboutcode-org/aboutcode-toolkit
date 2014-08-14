@@ -14,7 +14,7 @@
 #  limitations under the License.
 # =============================================================================
 
-from __future__ import print_function, with_statement # We require Python 2.6 or later
+from __future__ import print_function, with_statement  # We require Python 2.6 or later
 
 import sys
 import string
@@ -538,7 +538,7 @@ about_resource: about.py
         self.assertEqual(result, expected)
 
     def test_license_text_extracted_from_license_text_file(self):
-        expected ='''Tester holds the copyright for test component. Tester relinquishes copyright of
+        expected = '''Tester holds the copyright for test component. Tester relinquishes copyright of
 this software and releases the component to Public Domain.
 
 * Email Test@tester.com for any questions'''
@@ -548,7 +548,7 @@ this software and releases the component to Public Domain.
         self.assertEqual(license_text, expected)
 
     def test_notice_text_extacted_from_notice_text_file(self):
-        expected ='''Test component is released to Public Domain.'''
+        expected = '''Test component is released to Public Domain.'''
         about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/license_text.ABOUT'))
         notice_text = about_file.notice_text()
         self.assertEqual(notice_text, expected)
@@ -581,16 +581,16 @@ this software and releases the component to Public Domain.
         expected = 'httpd.LICENSE'
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_resource_field_present.ABOUT'))
         output = about_file.get_license_text_file_name()
-        self.assertTrue(output == expected)
+        self.assertEquals(expected, output)
 
     def test_get_license_text_file_name_no_value(self):
         expected = ''
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_empty_value_for_dje_license_license_text_file.ABOUT'))
         output = about_file.get_license_text_file_name()
-        self.assertTrue(output == expected)
+        self.assertEquals(expected, output)
 
     def test_get_license_text_file_name_no_key(self):
-        expected = None
+        expected = ''
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_no_dje_license_no_license_text_file_keys.ABOUT'))
         output = about_file.get_license_text_file_name()
-        self.assertTrue(output == expected)
+        self.assertEquals(expected, output)
