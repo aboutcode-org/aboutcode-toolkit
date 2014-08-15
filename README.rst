@@ -52,18 +52,18 @@ Open and run the installer using all the default options.
 
 INSTALLATION
 ------------
-Download and save the about.py file from:
-https://raw.github.com/dejacode/about-code-tool/master/about.py
+Checkout or download and extract the AboutCode tool from:
+    https://github.com/dejacode/about-code-tool/
+
+To install all the needed dependencies in a virtualenv, run (on posix)::
+    source configure 
+or on windows::
+    configure
 
 
 TESTS
 -----
-Optionally, to verify that everything works fine you can run the test suite,
-download the whole repository at:
-https://github.com/dejacode/about-code-tool/archive/master.zip
-
-Then open a terminal or command prompt, extract the download if needed and run::
-
+To verify that everything works fine you can run the test suite with::
     python setup.py test
 
 
@@ -147,12 +147,14 @@ information will be saved to the CSV file named "thirdparty_about.csv".
                             Example syntax:
                             genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
 
+
 Example::
 
     $ python genabout.py thirdparty_code.csv /tmp/thirdparty_about/
 
 In this example, the tool will look at the "thirdparty_code.csv" and generate
 the .ABOUT files in the directory /tmp/thirdparty_about/.
+
 
 **genattrib.py**
 
@@ -204,17 +206,17 @@ For issues, you can use:
 
 SOURCE CODE
 -----------
-The ABOUT tool is available through GitHub. For the latest version visit:
-
+AboutCode is available through GitHub. For the latest version visit:
     https://github.com/dejacode/about-code-tool
 
 
 HACKING
 -------
 We accept pull requests provided under the same license as this tool.
+You agree to the http://developercertificate.org/ 
 
 
 LICENSE
 -------
-The ABOUT tool is released under the Apache 2.0 license.
+AboutCode is released under the Apache 2.0 license.
 See (of course) the about.ABOUT file for details.

@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-# =============================================================================
-#  Copyright (c) 2014 by nexB, Inc. http://www.nexb.com/ - All rights reserved.
-#  Licensed under the Apache License, Version 2.0 (the "License");
+# ============================================================================
+#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Licensed under the Apache License, Version 2.0 (the 'License');
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
 #      http://www.apache.org/licenses/LICENSE-2.0
 #  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
+#  distributed under the License is distributed on an 'AS IS' BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-# =============================================================================
+# ============================================================================
 
-from __future__ import print_function, with_statement  # We require Python 2.6 or later
+# We require Python 2.6 or later
+from __future__ import print_function
 
 import sys
 import string
@@ -61,23 +62,25 @@ class CommandLineTest(unittest.TestCase):
 class AboutCollectorTest(unittest.TestCase):
     def test_return_path_is_not_abspath_and_contains_subdirs_on_file(self):
         # Using a relative path for the purpose of this test
-        input = "about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT"
+        test_file = ('about_code_tool/tests/testdata/thirdparty'
+                    '/django_snippets_2413.ABOUT')
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
         output = temp_file.name
         temp_file.close()
-        collector = about.AboutCollector(input)
+        collector = about.AboutCollector(test_file)
         collector.write_to_csv(output)
-        expected = 'about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'
+        expected = ('about_code_tool/tests/testdata/thirdparty'
+                    '/django_snippets_2413.ABOUT')
         with open(output) as f:
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))
 
     def test_return_path_is_not_abspath_and_contains_subdirs_on_dir(self):
         # Using a relative path for the purpose of this test
-        input = "about_code_tool/tests/testdata/basic"
+        test_file = 'about_code_tool/tests/testdata/basic'
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
         output = temp_file.name
         temp_file.close()
-        collector = about.AboutCollector(input)
+        collector = about.AboutCollector(test_file)
         collector.write_to_csv(output)
         expected = 'about_code_tool/tests/testdata/basic'
         with open(output) as f:
@@ -95,59 +98,75 @@ class AboutCollectorTest(unittest.TestCase):
         'checksum_sha1,checksum_md5,checksum_sha256,dje_component,'\
         'dje_license,dje_organization,dje_license_name,warnings,errors'
 
-        input = "about_code_tool/tests/testdata/basic"
+        test_file = 'about_code_tool/tests/testdata/basic'
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
         output = temp_file.name
         temp_file.close()
-        collector = about.AboutCollector(input)
+        collector = about.AboutCollector(test_file)
         collector.write_to_csv(output)
         with open(output) as f:
             header_row = f.readline().replace('\n', '').replace('\r', '')
             self.assertEqual(expected_header, header_row)
 
     def test_collect_about_files_on_dir(self):
-        input_path = 'about_code_tool/tests/testdata/DateTest'
-        expected = [join('about_code_tool/tests/testdata/DateTest', 'non-supported_date_format.ABOUT'),
-                    join('about_code_tool/tests/testdata/DateTest', 'supported_date_format.ABOUT')]
-        result = about.AboutCollector._collect_about_files(input_path)
+        test_dir = 'about_code_tool/tests/testdata/DateTest'
+        
+        expected = [('about_code_tool/tests/testdata/DateTest'
+                     '/non-supported_date_format.ABOUT'),
+                    ('about_code_tool/tests/testdata/DateTest'
+                     '/supported_date_format.ABOUT')]
+        result = about.AboutCollector._collect_about_files(test_dir)
+
         self.assertEqual(sorted(expected), sorted(result))
 
     def test_collect_about_files_on_file(self):
-        input_path = 'about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'
-        expected = ['about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT']
-        result = about.AboutCollector._collect_about_files(input_path)
+        test_file = ('about_code_tool/tests/testdata/thirdparty'
+                      '/django_snippets_2413.ABOUT')
+        expected = ['about_code_tool/tests/testdata/thirdparty'
+                    '/django_snippets_2413.ABOUT']
+        result = about.AboutCollector._collect_about_files(test_file)
         self.assertEqual(expected, result)
 
     def test_collector_errors_encapsulation(self):
-        input_path = 'about_code_tool/tests/testdata/DateTest'
-        collector = about.AboutCollector(input_path)
+        test_file = 'about_code_tool/tests/testdata/DateTest'
+        collector = about.AboutCollector(test_file)
         self.assertEqual(2, len(collector.errors))
 
     def test_collector_warnings_encapsulation(self):
-        input_path = 'about_code_tool/tests/testdata/allAboutInOneDir'
-        collector = about.AboutCollector(input_path)
+        test_file = 'about_code_tool/tests/testdata/allAboutInOneDir'
+        collector = about.AboutCollector(test_file)
         self.assertEqual(4, len(collector.warnings))
 
 
 class ParserTest(unittest.TestCase):
     def test_valid_chars_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid, warnings = about_obj.check_invalid_chars_in_field_name(string.digits + string.ascii_letters + '_', string.digits + string.ascii_letters + '_')
+        name = string.digits + string.ascii_letters + '_'
+        line = string.digits + string.ascii_letters + '_'
+        invalid, _warn = about_obj.check_invalid_chars_in_field_name(name,
+                                                                     line)
         self.assertEqual([], invalid)
 
     def test_invalid_chars_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid, warnings = about_obj.check_invalid_chars_in_field_name('_$asafg:', '_$asafg: test')
+        name = '_$asafg:'
+        line = '_$asafg: test'
+        invalid, _warn = about_obj.check_invalid_chars_in_field_name(name,
+                                                                     line)
         self.assertEqual(['$', ':'], invalid)
 
     def test_invalid_space_in_field_name(self):
         about_obj = about.AboutFile()
-        invalid, warnings = about_obj.check_invalid_chars_in_field_name('_ Hello', '_ Hello')
+        name = '_ Hello'
+        line = '_ Hello'
+        invalid, _warn = about_obj.check_invalid_chars_in_field_name(name,
+                                                                     line)
         self.assertEqual([' '], invalid)
 
     def test_valid_chars_in_file_name(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_about_file_name(string.digits + string.ascii_letters + '_-.')
+        name = string.digits + string.ascii_letters + '_-.'
+        invalid = about_obj.invalid_chars_in_about_file_name(name)
         self.assertEqual([], invalid)
 
     def test_invalid_chars_in_file_name(self):
@@ -157,12 +176,14 @@ class ParserTest(unittest.TestCase):
 
     def test_invalid_chars_in_file_name_path(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_about_file_name('%6571351()275612$/_$asafg:/')
+        name = '%6571351()275612$/_$asafg:/'
+        invalid = about_obj.invalid_chars_in_about_file_name(name)
         self.assertEqual([], invalid)
 
     def test_invalid_chars_in_file_name_path2(self):
         about_obj = about.AboutFile()
-        invalid = about_obj.invalid_chars_in_about_file_name('%6571351()275612$_$asafg:')
+        name = '%6571351()275612$_$asafg:'
+        invalid = about_obj.invalid_chars_in_about_file_name(name)
         self.assertEqual(['%', '(', ')', '$', '$', ':', ], invalid)
 
     def test_invalid_space_in_file_name(self):
@@ -280,25 +301,26 @@ name: jQuery
 version: 1.2.3
 '''
         about_obj = about.AboutFile()
-        result, warn = about.AboutFile.pre_process(about_obj, StringIO(text_input))
+        result, _warn = about.AboutFile.pre_process(about_obj,
+                                                    StringIO(text_input))
         self.assertEqual(expected, result.read())
 
     def test_handles_last_line_is_a_continuation_line(self):
         warnings = []
-        warn = about.AboutFile.check_line_continuation(" Last line is a continuation line.", True)
+        warn = about.AboutFile.check_line_continuation(' Last line is a continuation line.', True)
         warnings.append(warn)
-        self.assertTrue(warnings == [""], "This should not throw any warning.")
+        self.assertTrue(warnings == [''], 'This should not throw any warning.')
 
     def test_handles_last_line_is_not_a_continuation_line(self):
         warnings = []
-        warn = about.AboutFile.check_line_continuation(" Last line is NOT a continuation line.", False)
+        warn = about.AboutFile.check_line_continuation(' Last line is NOT a continuation line.', False)
         warnings.append(warn)
-        self.assertTrue(len(warnings) == 1, "This should throw ONLY 1 warning.")
+        self.assertTrue(len(warnings) == 1, 'This should throw ONLY 1 warning.')
 
     def test_normalize_dupe_field_names(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/dupe_field_name.ABOUT'))
         expected_warnings = [about.IGNORED, 'Apache HTTP Server']
-        self.assertTrue(len(about_file.warnings) == 1, "This should throw one warning")
+        self.assertTrue(len(about_file.warnings) == 1, 'This should throw one warning')
         for w in about_file.warnings:
             self.assertEqual(expected_warnings[0], w.code)
             self.assertEqual(expected_warnings[1], w.field_value)
@@ -325,15 +347,15 @@ version: 1.2.3
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/.ABOUT'))
         # We do not need 'about_resource' now, so no error should be thrown.
         # expected_errors = [about.VALUE, 'about_resource']
-        self.assertTrue(len(about_file.errors) == 0, "No error should be thrown.")
-        """for w in about_file.errors:
+        self.assertTrue(len(about_file.errors) == 0, 'No error should be thrown.')
+        '''for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
-            self.assertEqual(expected_errors[1], w.field_name)"""
+            self.assertEqual(expected_errors[1], w.field_name)'''
 
     def test_validate_about_resource_error_thrown_when_file_referenced_by_about_file_does_not_exist(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_about_ref.ABOUT'))
         expected_errors = [about.FILE, 'about_resource']
-        self.assertTrue(len(about_file.errors) == 1, "This should throw 1 error")
+        self.assertTrue(len(about_file.errors) == 1, 'This should throw 1 error')
         for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
             self.assertEqual(expected_errors[1], w.field_name)
@@ -342,7 +364,7 @@ version: 1.2.3
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_mand.ABOUT'))
         expected_errors = [(about.VALUE, 'name'),
                            (about.VALUE, 'version'), ]
-        self.assertTrue(len(about_file.errors) == 2, "This should throw 2 errors.")
+        self.assertTrue(len(about_file.errors) == 2, 'This should throw 2 errors.')
         for i, w in enumerate(about_file.errors):
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
@@ -350,7 +372,7 @@ version: 1.2.3
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_mand_values.ABOUT'))
         expected_errors = [(about.VALUE, 'name'),
                              (about.VALUE, 'version')]
-        self.assertTrue(len(about_file.errors) == 2, "This should throw 2 errors.")
+        self.assertTrue(len(about_file.errors) == 2, 'This should throw 2 errors.')
         for i, w in enumerate(about_file.errors):
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
@@ -358,7 +380,7 @@ version: 1.2.3
     def test_validate_optional_file_field_value(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_ref.c.ABOUT'))
         expected_warnings = [about.VALUE, 'notice_file']
-        self.assertTrue(len(about_file.warnings) == 1, "This should throw one warning")
+        self.assertTrue(len(about_file.warnings) == 1, 'This should throw one warning')
         for w in about_file.warnings:
             self.assertEqual(expected_warnings[0], w.code)
             self.assertEqual(expected_warnings[1], w.field_name)
@@ -367,71 +389,71 @@ version: 1.2.3
 class UrlCheckTest(unittest.TestCase):
     def test_check_url__with_network(self):
         about_file = about.AboutFile()
-        self.assertTrue(about_file.check_url("http://www.google.com", True))
-        self.assertTrue(about_file.check_url("http://www.google.co.uk/", True))
+        self.assertTrue(about_file.check_url('http://www.google.com', True))
+        self.assertTrue(about_file.check_url('http://www.google.co.uk/', True))
 
     def test_check_url__with_network__not_starting_with_www(self):
         about_file = about.AboutFile()
-        self.assertTrue(about_file.check_url("https://nexb.com", True))
-        self.assertTrue(about_file.check_url("http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz", True))
+        self.assertTrue(about_file.check_url('https://nexb.com', True))
+        self.assertTrue(about_file.check_url('http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz', True))
         if about.check_network_connection():
-            self.assertFalse(about_file.check_url("http://nothing_here.com", True))
+            self.assertFalse(about_file.check_url('http://nothing_here.com', True))
 
     def FAILING_test_check_url__with_network__not_starting_with_www_and_spaces(self):
         # TODO: this does work yet as we do not have a solution for now (URL with spaces)
         about_file = about.AboutFile()
-        self.assertTrue(about_file.check_url(u"http://de.wikipedia.org/wiki/Elf (Begriffsklärung)", True))
+        self.assertTrue(about_file.check_url(u'http://de.wikipedia.org/wiki/Elf (Begriffsklärung)', True))
 
     def test_check_url__with_network__no_schemes(self):
         about_file = about.AboutFile()
-        self.assertFalse(about_file.check_url("google.com", True))
-        self.assertFalse(about_file.check_url("www.google.com", True))
-        self.assertFalse(about_file.check_url("", True))
+        self.assertFalse(about_file.check_url('google.com', True))
+        self.assertFalse(about_file.check_url('www.google.com', True))
+        self.assertFalse(about_file.check_url('', True))
 
     def test_check_url__with_network__not_reachable(self):
         about_file = about.AboutFile()
         if about.check_network_connection():
-            self.assertFalse(about_file.check_url("http://www.google", True))
+            self.assertFalse(about_file.check_url('http://www.google', True))
 
     def test_check_url__with_network__empty_URL(self):
         about_file = about.AboutFile()
-        self.assertFalse(about_file.check_url("http:", True))
+        self.assertFalse(about_file.check_url('http:', True))
 
     def test_check_url__without_network(self):
         about_file = about.AboutFile()
-        self.assertTrue(about_file.check_url("http://www.google.com", False))
+        self.assertTrue(about_file.check_url('http://www.google.com', False))
 
     def test_check_url__without_network__not_starting_with_www(self):
         about_file = about.AboutFile()
-        self.assertTrue(about_file.check_url("https://nexb.com", False))
-        self.assertTrue(about_file.check_url("http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz", False))
-        self.assertTrue(about_file.check_url("http://de.wikipedia.org/wiki/Elf (Begriffsklärung)", False))
-        self.assertTrue(about_file.check_url("http://nothing_here.com", False))
+        self.assertTrue(about_file.check_url('https://nexb.com', False))
+        self.assertTrue(about_file.check_url('http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz', False))
+        self.assertTrue(about_file.check_url('http://de.wikipedia.org/wiki/Elf (Begriffsklärung)', False))
+        self.assertTrue(about_file.check_url('http://nothing_here.com', False))
 
     def test_check_url__without_network__no_schemes(self):
         about_file = about.AboutFile()
-        self.assertFalse(about_file.check_url("google.com", False))
-        self.assertFalse(about_file.check_url("www.google.com", False))
-        self.assertFalse(about_file.check_url("", False))
+        self.assertFalse(about_file.check_url('google.com', False))
+        self.assertFalse(about_file.check_url('www.google.com', False))
+        self.assertFalse(about_file.check_url('', False))
 
     def test_check_url__without_network__not_ends_with_com(self):
         about_file = about.AboutFile()
-        self.assertTrue(about_file.check_url("http://www.google", False))
+        self.assertTrue(about_file.check_url('http://www.google', False))
 
     def test_check_url__without_network__ends_with_slash(self):
         about_file = about.AboutFile()
-        self.assertTrue(about_file.check_url("http://www.google.co.uk/", False))
+        self.assertTrue(about_file.check_url('http://www.google.co.uk/', False))
 
     def test_check_url__without_network__empty_URL(self):
         about_file = about.AboutFile()
-        self.assertFalse(about_file.check_url("http:", False))
+        self.assertFalse(about_file.check_url('http:', False))
 
 
 class ValidateTest(unittest.TestCase):
     def test_is_valid_about_file(self):
-        self.assertTrue(about.is_about_file("test.About"))
-        self.assertTrue(about.is_about_file("test2.aboUT"))
-        self.assertFalse(about.is_about_file("no_about_ext.something"))
+        self.assertTrue(about.is_about_file('test.About'))
+        self.assertTrue(about.is_about_file('test2.aboUT'))
+        self.assertFalse(about.is_about_file('no_about_ext.something'))
 
     def test_validate_is_ascii_key(self):
         about_file = about.AboutFile()
@@ -443,20 +465,20 @@ class ValidateTest(unittest.TestCase):
     def test_validate_is_ascii_value(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'filesfields/non_ascii_field.about'))
         expected_errors = [about.ASCII]
-        self.assertTrue(len(about_file.errors) == 1, "This should throw 1 error")
+        self.assertTrue(len(about_file.errors) == 1, 'This should throw 1 error')
         self.assertEqual(about_file.errors[0].code, expected_errors[0])
 
     def test_validate_spdx_licenses(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'spdx_licenses/incorrect_spdx.about'))
         expected_errors = [about.SPDX]
-        self.assertTrue(len(about_file.errors) == 1, "This should throw 1 error")
+        self.assertTrue(len(about_file.errors) == 1, 'This should throw 1 error')
         for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
 
     def test_validate_spdx_licenses1(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'spdx_licenses/invalid_multi_format_spdx.ABOUT'))
         expected_errors = [about.SPDX]
-        self.assertTrue(len(about_file.errors) == 1, "This should throw 1 error")
+        self.assertTrue(len(about_file.errors) == 1, 'This should throw 1 error')
         for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
 
@@ -465,27 +487,27 @@ class ValidateTest(unittest.TestCase):
         expected_errors = [about.SPDX]
         # The test case is: license_spdx: Something and SomeOtherThings
         # Thus, it should throw 2 errors: 'Something', 'SomeOtherThings'
-        self.assertTrue(len(about_file.errors) == 2, "This should throw 2 errors")
+        self.assertTrue(len(about_file.errors) == 2, 'This should throw 2 errors')
         for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
 
     def test_validate_spdx_licenses3(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'spdx_licenses/lower_case_spdx.ABOUT'))
         expected_warnings = [about.SPDX]
-        self.assertTrue(len(about_file.warnings) == 1, "This should throw one warning")
+        self.assertTrue(len(about_file.warnings) == 1, 'This should throw one warning')
         for w in about_file.warnings:
             self.assertEqual(expected_warnings[0], w.code)
 
     def test_validate_not_supported_date_format(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'DateTest/non-supported_date_format.ABOUT'))
         expected_warnings = [about.DATE]
-        self.assertTrue(len(about_file.warnings) == 1, "This should throw one warning")
+        self.assertTrue(len(about_file.warnings) == 1, 'This should throw one warning')
         for w in about_file.warnings:
             self.assertEqual(expected_warnings[0], w.code)
 
     def test_validate_supported_date_format(self):
         about_file = about.AboutFile(join(TESTDATA_PATH, 'DateTest/supported_date_format.ABOUT'))
-        self.assertTrue(len(about_file.warnings) == 0, "This should not throw warning.")
+        self.assertTrue(len(about_file.warnings) == 0, 'This should not throw warning.')
 
     def test_remove_blank_lines_and_field_spaces(self):
         text_input = '''
@@ -577,5 +599,3 @@ this software and releases the component to Public Domain.
         about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/missing_notice_license_files.ABOUT'))
         notice_text = about_file.notice_text()
         self.assertEqual(notice_text, expected)
-
-

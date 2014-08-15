@@ -1,37 +1,25 @@
-about_resource: about-code-tool/about.py
+about_resource: .
 
-name: ABOUT tool
-version: 0.8.1
+name: AboutCode
+version: 0.9.0
 
 owner: nexB Inc.
 author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
 
-
 home_url: http://dejacode.org
-readme_file: README.rst
-changelog_file: CHANGELOG.txt
 
 vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 
-description: This is a tool to process ABOUT files. An ABOUT file provides a
- simple way to document the provenance (origin and license) 'about' a software
- component. An ABOUT file is a small text file stored in the codebase
- side-by-side with the software component that it documents.
+description: AboutCode is a tool to process ABOUT files. An ABOUT file
+ provides a simple way to document the provenance (origin and license)
+ 'about' a software component. This is a small text file stored in the
+ codebase side-by-side with the documented software component.
 
 
-license_text_file: apache2.LICENSE.txt
+dej_license: apache-2.0
+license_text_file: apache-2.0.LICENSE
 license_spdx: Apache-2.0
-copyright: Copyright (c) 2013 nexB, Inc.
+copyright: Copyright (c) 2013-2014 nexB Inc.
 
-notice:
- Copyright (c) 2013 nexB, Inc. http://www.nexb.com/ - All rights reserved.
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-     http://www.apache.org/licenses/LICENSE-2.0
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+notice_file: NOTICE

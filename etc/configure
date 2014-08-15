@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#
+
+set -e
+
+ETC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$( dirname "$ETC_DIR" )"
+
+if [ "$1" == "--clean" ]; then
+    echo "* Cleaning ..."
+    cd $ROOT_DIR && rm -rf build bin lib include django_background_task.log
+    cd $ROOT_DIR && rm -rf develop-eggs eggs parts .installed.cfg
+    exit 0
+fi
+
+
+CONFIGURED_PYTHON=$ROOT_DIR/bin/python
+
+# Install and activate a virtualenv without any download
+if [ ! -f "$CONFIGURED_PYTHON" ]; then
+    echo ""
+    echo "* Configuring Python ..."
+    python2.7 $ROOT_DIR/thirdparty/virtualenv.py --never-download --extra-search-dir=$ROOT_DIR/thirdparty/ $ROOT_DIR
+fi
+
+source $ROOT_DIR/bin/activate
+
+
+# Install components from selected requirements
+echo ""
+echo "* Installing components ..."
+for req in $($CONFIGURED_PYTHON $ETC_DIR/getconf.py --requirements $@)
+    do pip install --upgrade --no-allow-external --use-wheel --no-index --find-links=$ROOT_DIR/thirdparty/ -r $ROOT_DIR/$req
+done
+
+# Run selected configuration python scripts
+echo ""
+echo "* Configuring ..."
+for script in $($CONFIGURED_PYTHON $ETC_DIR/getconf.py --python $@)
+    do python $ROOT_DIR/$script
+done
+
+# Run selected configuration command line scripts
+for script in $($CONFIGURED_PYTHON $ETC_DIR/getconf.py --shell $@)
+    do source $ROOT_DIR/$script
+done
+
+# Set exec permission on all files in bin
+chmod -R ogu+x $ROOT_DIR/bin

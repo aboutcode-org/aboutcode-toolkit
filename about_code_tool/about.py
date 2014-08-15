@@ -2,17 +2,17 @@
 # -*- coding: utf8 -*-
 
 """
-This is a tool to process ABOUT files as specified at http://dejacode.org.
+AboutCode is a tool to process ABOUT files. ABOUT files are small text files
+that document the provenance (aka. the origin and license) of software
+components as well as the essential obligation such as attribution/credits and
+source code redistribution. See the ABOUT spec at http://dejacode.org.
 
-ABOUT files are small text files that document the origin and license of
-software components.
-
-This tool read and validates ABOUT files to collect your software components
-inventory.
+AbouCode reads and validates ABOUT files and collect software components
+inventories.
 """
 
 # We require Python 2.6 or later
-from __future__ import print_function, with_statement
+from __future__ import print_function
 
 from StringIO import StringIO
 import codecs
@@ -31,6 +31,7 @@ import socket
 import string
 import sys
 import urlparse
+import ntpath
 
 
 __version__ = '0.9.0'
@@ -55,13 +56,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
 handler.setLevel(logging.CRITICAL)
 handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
-
 
 
 def repr_problem(obj):
@@ -450,6 +449,24 @@ COMMON_LICENSES = (
     'openssl-ssleay.LICENSE',
     'zlib.LICENSE',
 )
+
+def posix_path(path):
+    """
+    Return a path using the posixpath separator given a path that may
+    contain posix or windows separators, converting \ to /.
+    """
+    return path.replace(ntpath.sep, posixpath.sep)
+
+
+def native_path(path):
+    """
+    Return a path using the current OS path separator given a path that may
+    contain posix or windows separators, converting / to \ on windows and \ to
+    / on posix OSes.
+    """
+    path = path.replace(ntpath.sep, os.path.sep)
+    path = path.replace(posixpath.sep, os.path.sep)
+    return path
 
 
 def is_about_file(path):
@@ -1057,18 +1074,24 @@ class AboutCollector(object):
         return iter(self.abouts)
 
     @staticmethod
-    def _collect_about_files(input_path):
+    def _collect_about_files(location):
         """
-        Return a list containing file-paths of valid .ABOUT file given a path.
-        When the input is a file rather than a directory. The returned list
-        may contain only one item if the file name is valid.
+        Given the location of a file or directory, return a list of 
+        locations of valid .ABOUT files.
         """
-        if os.path.isfile(input_path):
-            return filter(is_about_file, [input_path])
+        paths = []
+        if location:
+            if os.path.isfile(location) and is_about_file(location):
+                paths = [location]
+            else:
+                for root, _, files in os.walk(location):
+                    for name in files:
+                        if is_about_file(name):
+                            paths.append(os.path.join(root, name))
+        # normalize the paths to use os path seps
+        paths = [posix_path(p)for p in paths]
+        return paths
 
-        return [os.path.join(root, name)
-                for root, _, files in os.walk(input_path)
-                for name in files if is_about_file(name)]
 
     @property
     def errors(self):
@@ -1193,7 +1216,7 @@ class AboutCollector(object):
                                       errors='replace')
                 about_content_dict['notice_text'] = about_object.notice_text()
 
-                # FIXME: The following is a tmp code to handle multiple 
+                # FIXME: The following is a tmp code to handle multiple
                 # 'license_text_file' in the input
                 for k in about_content_dict:
                     if '\n' in about_content_dict[k] and k == 'license_text_file':
