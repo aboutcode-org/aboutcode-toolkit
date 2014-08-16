@@ -1,15 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
+# ============================================================================
+#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#      http://www.apache.org/licenses/LICENSE-2.0
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# ============================================================================
+
 """
-This is a tool to generate component attribution based on a set of .ABOUT files.
-Optionally, one could pass a subset list of specific components for set of
-.ABOUT files to generate attribution.
+This tool is used to generate component attribution based on a set of .ABOUT
+files. Optionally, one could pass a subset list of specific components for set
+of .ABOUT files to generate attribution.
 """
 
 from __future__ import print_function
 from __future__ import with_statement
-from about import AboutCollector
+from about import Collector
 import genabout
 
 import codecs
@@ -40,7 +53,7 @@ handler = logging.StreamHandler()
 handler.setLevel(logging.CRITICAL)
 handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
-file_logger = logging.getLogger(__name__+'_file')
+file_logger = logging.getLogger(__name__ + '_file')
 
 __version__ = '0.9.0'
 
@@ -150,8 +163,9 @@ def main(parser, options, args):
     # input_path = abspath(input_path)
     output_path = abspath(output_path)
 
-    # Add the following to solve the 
+    # Add the following to solve the
     # UnicodeEncodeError: 'ascii' codec can't encode character
+    # FIXME: these two lines do not make sense
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
@@ -166,8 +180,8 @@ def main(parser, options, args):
         sys.exit(errno.EISDIR)
 
     if exists(output_path) and not overwrite:
-        print('Output file already exists. Select a different file name or use '
-              'the --overwrite option.')
+        print('Output file already exists. Select a different file name '
+              'or use the --overwrite option.')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -177,7 +191,7 @@ def main(parser, options, args):
         sys.exit(errno.EEXIST)
 
     if not exists(output_path) or (exists(output_path) and overwrite):
-        collector = AboutCollector(input_path)
+        collector = Collector(input_path)
         if not component_subset_path:
             sublist = None
         else:
@@ -191,9 +205,10 @@ def main(parser, options, args):
                 mapping_list = genabout.GenAbout().get_mapping_list()
                 updated_list = genabout.GenAbout().convert_input_list(updated_list, mapping_list)
             if not check_about_file_existance_and_format(updated_list):
-                print("The required key, 'about_file, not found.")
-                print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
-                print("OR, correct the header keys from the component list.")
+                print('The required key "about_file" was not found.')
+                print('Please use the "--mapping" option to map the input '
+                      'keys and verify the mapping information are correct.')
+                print('OR, correct the header keys from the component list.')
                 parser.print_help()
                 sys.exit(errno.EISDIR)
             sublist = component_subset_to_sublist(updated_list)
@@ -240,7 +255,7 @@ def get_parser():
             if len(opts) > opt_width:
                 opts = "%*s%s\n" % (self.current_indent, "", opts)
                 indent_first = self.help_position
-            else:                       # start help on same line as opts
+            else:  # start help on same line as opts
                 opts = "%*s%-*s  " % (self.current_indent, "", opt_width, opts)
                 indent_first = 0
             result.append(opts)
