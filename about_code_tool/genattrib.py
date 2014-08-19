@@ -25,26 +25,13 @@ from __future__ import with_statement
 from about import Collector
 import genabout
 
-import codecs
 import csv
 import errno
-import fnmatch
-import getopt
-import httplib
 import logging
 import optparse
-import posixpath
-import socket
-import string
 import sys
-import urlparse
 
-from collections import namedtuple
-from datetime import datetime
-from email.parser import HeaderParser
-from os import listdir, walk
-from os.path import exists, dirname, join, abspath, isdir, basename, normpath
-from StringIO import StringIO
+from os.path import exists, dirname, join, abspath, isdir, basename
 
 LOG_FILENAME = 'error.log'
 
@@ -75,11 +62,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+
 def component_subset_to_sublist(input_list):
-    sublist = []
     sublist = [row["about_file"] for row in input_list
                    if "about_file" in row.keys()]
     return sublist
+
 
 def update_path_to_about(input_list):
     output_list = []
@@ -92,30 +80,35 @@ def update_path_to_about(input_list):
             output_list.append(row)
     return output_list
 
+
 def convert_dict_key_to_lower_case(input_list):
     output_list = []
     for line in input_list:
-        dict = {}
+        lower_dict = {}
         for key in line:
-            dict[key.lower()] = line[key]
-        output_list.append(dict)
+            lower_dict[key.lower()] = line[key]
+        output_list.append(lower_dict)
     return output_list
+
 
 def check_about_file_existance_and_format(input_list):
     try:
         for row in input_list:
-            # Force the path to start with the '/' to map with the project structure
+            # Force the path to start with the '/' to map with the project
+            # structure
             if not row['about_file'].startswith('/'):
                 row['about_file'] = '/' + row['about_file']
         return input_list
-    except Exception as e:
+    except Exception:
         return []
+
 
 USAGE_SYNTAX = """\
     Input can be a file or directory.
     Output of rendered template must be a file (e.g. .html).
     Component List must be a .csv file which has at least an "about_file" column.
 """
+
 
 VERBOSITY_HELP = """\
 Print more or fewer verbose messages while processing ABOUT files
@@ -124,13 +117,16 @@ Print more or fewer verbose messages while processing ABOUT files
 2 - Print error and warning messages
 """
 
+
 TEMPLATE_LOCATION_HELP = """\
 Use the custom template for the Attribution Generation
 """
 
+
 MAPPING_HELP = """\
 Configure the mapping key from the MAPPING.CONFIG
 """
+
 
 def main(parser, options, args):
     overwrite = options.overwrite
@@ -167,7 +163,7 @@ def main(parser, options, args):
     # UnicodeEncodeError: 'ascii' codec can't encode character
     # FIXME: these two lines do not make sense
     reload(sys)
-    sys.setdefaultencoding('utf-8')
+    sys.setdefaultencoding('utf-8')  # @UndefinedVariable
 
     if not exists(input_path):
         print('Input path does not exist.')
@@ -235,6 +231,7 @@ def main(parser, options, args):
         # we should never reach this
         assert False, "Unsupported option(s)."
 
+
 def get_parser():
     class MyFormatter(optparse.IndentedHelpFormatter):
         def _format_text(self, text):
@@ -280,9 +277,12 @@ def get_parser():
         help='Display current version, license notice, and copyright notice')
     parser.add_option('--overwrite', action='store_true',
                       help='Overwrites the output file if it exists')
-    parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
-    parser.add_option('--template_location', type='string', help=TEMPLATE_LOCATION_HELP)
-    parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
+    parser.add_option('--verbosity', type=int,
+                      help=VERBOSITY_HELP)
+    parser.add_option('--template_location', type='string',
+                      help=TEMPLATE_LOCATION_HELP)
+    parser.add_option('--mapping', action='store_true',
+                      help=MAPPING_HELP)
     return parser
 
 
