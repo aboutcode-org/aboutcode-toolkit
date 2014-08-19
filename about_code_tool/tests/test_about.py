@@ -384,6 +384,7 @@ version: 1.2.3
 
 
 class UrlCheckTest(unittest.TestCase):
+    # FIXME: we should use a mock HTTP server AND NEVER do live HTTP requests
     def test_check_url__with_network(self):
         about_file = about.AboutFile()
         self.assertTrue(about_file.check_url('http://www.google.com', True))
@@ -554,11 +555,7 @@ about_resource: about.py
         expected = (u'notice_text:version:2.4.3about_resource:httpd-2.4.3.tar.gz'
                     'name:Apache HTTP Serverlicense_text:')
         collector = about.Collector(join(TESTDATA_DIR, 'attrib/attrib.ABOUT'))
-        print()
-        print(collector.abouts[0])
-        print()
         result = collector.generate_attribution(join(TESTDATA_DIR, 'attrib/test.template'))
-        print('result:', result)
         self.assertEqual(expected, result)
 
     def test_license_text_extracted_from_license_text_file(self):
