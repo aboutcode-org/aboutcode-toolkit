@@ -553,8 +553,12 @@ about_resource: about.py
     def test_generate_attribution(self):
         expected = (u'notice_text:version:2.4.3about_resource:httpd-2.4.3.tar.gz'
                     'name:Apache HTTP Serverlicense_text:')
-        about_collector = about.Collector(join(TESTDATA_DIR, 'attrib/attrib.ABOUT'))
-        result = about_collector.generate_attribution(join(TESTDATA_DIR, 'attrib/test.template'))
+        collector = about.Collector(join(TESTDATA_DIR, 'attrib/attrib.ABOUT'))
+        print()
+        print(collector.abouts[0])
+        print()
+        result = collector.generate_attribution(join(TESTDATA_DIR, 'attrib/test.template'))
+        print('result:', result)
         self.assertEqual(expected, result)
 
     def test_license_text_extracted_from_license_text_file(self):

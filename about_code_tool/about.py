@@ -1026,8 +1026,8 @@ class AboutFile(object):
         Return the license text if the license_text_file field exists and the
         field value (file) exists.
         """
-        location = self.file_fields_locations.get('license_text_file', '')
-        if location:
+        location = self.file_fields_locations.get('license_text_file',)
+        if location and os.path.exists(location):
             try:
                 with open(location, 'rU') as f:
                     return f.read()
@@ -1194,7 +1194,8 @@ class Collector(object):
                 row_data = about_object.get_row_data(relative_path)
                 csv_writer.writerow(row_data)
 
-    def generate_attribution(self, template_path='templates/default.html',
+    def generate_attribution(self,
+                             template_path='templates/default.html',
                              limit_to=None):
         """
         Generate an attribution file from the current list of ABOUT objects.
@@ -1204,26 +1205,27 @@ class Collector(object):
 
         try:
             import jinja2 as j2
-        except ImportError, e:
+        except ImportError:
             print('The Jinja2 templating library is required to generate '
                   'attribution texts. You can install it by running:'
-                  'configure')
+                  '"configure"')
             return
 
         # FIXME: the template dir should be outside the code tree
         template_dir = os.path.dirname(template_path)
         template_file_name = os.path.basename(template_path)
-
-        jinja_env = j2.Environment(loader=j2.FileSystemLoader(template_dir))
+        loader = j2.FileSystemLoader(template_dir)
+        jinja_env = j2.Environment(loader=loader)
 
         try:
             template = jinja_env.get_template(template_file_name)
-        except j2.TemplateNotFound, e:
+        except j2.TemplateNotFound:
             print('Template: %(template_file_name)s not found' % locals())
             return
 
         limit_to = limit_to or []
         limit_to = set(limit_to)
+        print('limit_to:', limit_to)
 
         about_object_fields = []
         about_content_dict = {}
@@ -1232,48 +1234,55 @@ class Collector(object):
             # FIXME: what is the meaning of this partition?
             # PO created the var some_path to provide some clarity
             # but what does the second element means?
-            some_path = about_object.location.partition(self.location)[2]
-            about_relative_path = '/' + some_path
-            print('some_path:', some_path)
+            file_name = about_object.location.partition(self.location)[2]
+            # FIXME: a path starting with / is NOT relative
+            about_relative_path = '/' + file_name
+            print('file_name:', file_name)
 
             if limit_to and about_relative_path in limit_to:
                 continue
 
-            about_content_dict = about_object.validated_fields
-            print('about_content_dict:', about_content_dict)
-            # Add information in the dictionary where it does not
-            # present in the ABOUT file
+            about_content = about_object.validated_fields
+            print('about_content 1:', about_content)
+            # Add information in the dictionary if not in the ABOUT file
             lic_text = unicode(about_object.license_text(),
                                errors='replace')
-            about_content_dict['license_text'] = lic_text
+            
+            print('lic_text:', lic_text)
+            about_content['license_text'] = lic_text
             notice_text = about_object.notice_text()
-            about_content_dict['notice_text'] = notice_text
+            about_content['notice_text'] = notice_text
+            print('about_content 2:', about_content)
 
             # FIXME: The following is a tmp code to handle multiple
             # 'license_text_file' in the input
-            print('about_content_dict:', about_content_dict)
-            for k in about_content_dict:
-                if ('\n' in about_content_dict[k]
+            for k in about_content:
+                if ('\n' in about_content[k]
                     and k == 'license_text_file'):
                     lic_text = unicode(about_object.tmp_get_license_text(),
                                        errors='replace')
-                    about_content_dict['license_text'] = lic_text
+                    about_content['license_text'] = lic_text
+            print('about_content 3:', about_content)
 
             # Raise error if no license_text is found
-            if 'license_text' not in about_content_dict:
+            if not about_content.get('license_text'):
                 msg = ('No license_text found. '
-                       'skipping License generation.')
+                       'Skipping License generation.')
+                print()
+                print(msg)
+                print()
                 err = Error(GENATTRIB, 'name',
                             about_object.get_about_name(), msg)
                 self.genattrib_errors.append(err)
 
-            about_object_fields.append(about_content_dict)
+            about_object_fields.append(about_content)
+            print('about_object_fields:', about_object_fields)
 
         # find paths requested in the limit_to paths arg that do not point to
         # a corresponding ABOUT file
         for path in limit_to:
             path = posix_path(path)
-            
+
             afp = join(self.location, path)
             msg = ('The requested ABOUT file: %(afp)r does not exist. '
                    'No attribution generated for this file.' % locals())
@@ -1287,6 +1296,9 @@ class Collector(object):
             license_text_list.append(common_license_dict[key])"""
 
         rendered = template.render(about_objects=about_object_fields)
+        print('genattrib_errors:', self.genattrib_errors)
+        print('rendered:', rendered)
+        print()
         return rendered
 
     def check_paths(self, paths):
