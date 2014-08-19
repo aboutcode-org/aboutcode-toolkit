@@ -14,7 +14,6 @@
 #  limitations under the License.
 # ============================================================================
 
-# We require Python 2.6 or later
 from __future__ import print_function
 
 import sys
@@ -26,7 +25,7 @@ from os.path import abspath, dirname, join
 
 from about_code_tool import about
 
-TESTDATA_PATH = join(abspath(dirname(__file__)), 'testdata')
+TESTDATA_DIR = join(abspath(dirname(__file__)), 'testdata')
 
 
 class CommandLineTest(unittest.TestCase):
@@ -316,7 +315,7 @@ version: 1.2.3
         self.assertTrue(len(warnings) == 1, 'This should throw ONLY 1 warning.')
 
     def test_normalize_dupe_field_names(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/dupe_field_name.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'parser_tests/dupe_field_name.ABOUT'))
         expected_warnings = [about.IGNORED, 'Apache HTTP Server']
         self.assertTrue(len(about_file.warnings) == 1, 'This should throw one warning')
         for w in about_file.warnings:
@@ -324,7 +323,7 @@ version: 1.2.3
             self.assertEqual(expected_warnings[1], w.field_value)
 
     def test_normalize_lowercase(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/upper_field_names.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'parser_tests/upper_field_names.ABOUT'))
         expected = {'name': 'Apache HTTP Server\nthis is a continuation',
                     'home_url': 'http://httpd.apache.org',
                     'download_url': 'http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz',
@@ -338,11 +337,11 @@ version: 1.2.3
         self.assertTrue(all(item in about_file.validated_fields.items() for item in expected.items()))
 
     def test_validate_about_ref_testing_the_about_resource_field_is_present(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_resource_field_present.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'parser_tests/about_resource_field_present.ABOUT'))
         self.assertEquals(about_file.about_resource, 'about_resource.c', 'the about_resource was not detected')
 
     def test_validate_about_ref_no_about_ref_key(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'parser_tests/.ABOUT'))
         # We do not need 'about_resource' now, so no error should be thrown.
         # expected_errors = [about.VALUE, 'about_resource']
         self.assertTrue(len(about_file.errors) == 0, 'No error should be thrown.')
@@ -351,7 +350,7 @@ version: 1.2.3
             self.assertEqual(expected_errors[1], w.field_name)'''
 
     def test_validate_about_resource_error_thrown_when_file_referenced_by_about_file_does_not_exist(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_about_ref.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'parser_tests/missing_about_ref.ABOUT'))
         expected_errors = [about.FILE, 'about_resource']
         self.assertTrue(len(about_file.errors) == 1, 'This should throw 1 error')
         for w in about_file.errors:
@@ -359,7 +358,7 @@ version: 1.2.3
             self.assertEqual(expected_errors[1], w.field_name)
 
     def test_validate_mand_fields_name_and_version_and_about_resource_present(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_mand.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'parser_tests/missing_mand.ABOUT'))
         expected_errors = [(about.VALUE, 'name'),
                            (about.VALUE, 'version'), ]
         self.assertTrue(len(about_file.errors) == 2, 'This should throw 2 errors.')
@@ -367,7 +366,7 @@ version: 1.2.3
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
 
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/missing_mand_values.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'parser_tests/missing_mand_values.ABOUT'))
         expected_errors = [(about.VALUE, 'name'),
                              (about.VALUE, 'version')]
         self.assertTrue(len(about_file.errors) == 2, 'This should throw 2 errors.')
@@ -376,7 +375,7 @@ version: 1.2.3
             self.assertEqual(expected_errors[i][1], w.field_name)
 
     def test_validate_optional_file_field_value(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'parser_tests/about_file_ref.c.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'parser_tests/about_file_ref.c.ABOUT'))
         expected_warnings = [about.VALUE, 'notice_file']
         self.assertTrue(len(about_file.warnings) == 1, 'This should throw one warning')
         for w in about_file.warnings:
@@ -461,27 +460,27 @@ class ValidateTest(unittest.TestCase):
         self.assertFalse(about_file.check_is_ascii(u'測試'))
 
     def test_validate_is_ascii_value(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'filesfields/non_ascii_field.about'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'filesfields/non_ascii_field.about'))
         expected_errors = [about.ASCII]
         self.assertTrue(len(about_file.errors) == 1, 'This should throw 1 error')
         self.assertEqual(about_file.errors[0].code, expected_errors[0])
 
     def test_validate_spdx_licenses(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'spdx_licenses/incorrect_spdx.about'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'spdx_licenses/incorrect_spdx.about'))
         expected_errors = [about.SPDX]
         self.assertTrue(len(about_file.errors) == 1, 'This should throw 1 error')
         for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
 
     def test_validate_spdx_licenses1(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'spdx_licenses/invalid_multi_format_spdx.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'spdx_licenses/invalid_multi_format_spdx.ABOUT'))
         expected_errors = [about.SPDX]
         self.assertTrue(len(about_file.errors) == 1, 'This should throw 1 error')
         for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
 
     def test_validate_spdx_licenses2(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'spdx_licenses/invalid_multi_name.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'spdx_licenses/invalid_multi_name.ABOUT'))
         expected_errors = [about.SPDX]
         # The test case is: license_spdx: Something and SomeOtherThings
         # Thus, it should throw 2 errors: 'Something', 'SomeOtherThings'
@@ -490,21 +489,21 @@ class ValidateTest(unittest.TestCase):
             self.assertEqual(expected_errors[0], w.code)
 
     def test_validate_spdx_licenses3(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'spdx_licenses/lower_case_spdx.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'spdx_licenses/lower_case_spdx.ABOUT'))
         expected_warnings = [about.SPDX]
         self.assertTrue(len(about_file.warnings) == 1, 'This should throw one warning')
         for w in about_file.warnings:
             self.assertEqual(expected_warnings[0], w.code)
 
     def test_validate_not_supported_date_format(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'DateTest/non-supported_date_format.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'DateTest/non-supported_date_format.ABOUT'))
         expected_warnings = [about.DATE]
         self.assertTrue(len(about_file.warnings) == 1, 'This should throw one warning')
         for w in about_file.warnings:
             self.assertEqual(expected_warnings[0], w.code)
 
     def test_validate_supported_date_format(self):
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'DateTest/supported_date_format.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'DateTest/supported_date_format.ABOUT'))
         self.assertTrue(len(about_file.warnings) == 0, 'This should not throw warning.')
 
     def test_remove_blank_lines_and_field_spaces(self):
@@ -554,8 +553,8 @@ about_resource: about.py
     def test_generate_attribution(self):
         expected = (u'notice_text:version:2.4.3about_resource:httpd-2.4.3.tar.gz'
                     'name:Apache HTTP Serverlicense_text:')
-        about_collector = about.Collector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'))
-        result = about_collector.generate_attribution(join(TESTDATA_PATH, 'attrib/test.template'))
+        about_collector = about.Collector(join(TESTDATA_DIR, 'attrib/attrib.ABOUT'))
+        result = about_collector.generate_attribution(join(TESTDATA_DIR, 'attrib/test.template'))
         self.assertEqual(expected, result)
 
     def test_license_text_extracted_from_license_text_file(self):
@@ -564,36 +563,36 @@ this software and releases the component to Public Domain.
 
 * Email Test@tester.com for any questions'''
 
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/license_text.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'attrib/license_text.ABOUT'))
         license_text = about_file.license_text()
         self.assertEqual(license_text, expected)
 
     def test_notice_text_extacted_from_notice_text_file(self):
         expected = '''Test component is released to Public Domain.'''
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/license_text.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'attrib/license_text.ABOUT'))
         notice_text = about_file.notice_text()
         self.assertEqual(notice_text, expected)
 
     def test_license_text_returns_empty_string_when_no_field_present(self):
         expected = ''
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/no_text_file_field.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'attrib/no_text_file_field.ABOUT'))
         license_text = about_file.license_text()
         self.assertEqual(license_text, expected)
 
     def test_notice_text_returns_empty_string_when_no_field_present(self):
         expected = ''
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/no_text_file_field.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'attrib/no_text_file_field.ABOUT'))
         notice_text = about_file.notice_text()
         self.assertEqual(notice_text, expected)
 
     def test_license_text_returns_empty_string_when_ref_file_doesnt_exist(self):
         expected = ''
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/missing_notice_license_files.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'attrib/missing_notice_license_files.ABOUT'))
         license_text = about_file.license_text()
         self.assertEqual(license_text, expected)
 
     def test_notice_text_returns_empty_string_when_ref_file_doesnt_exist(self):
         expected = ''
-        about_file = about.AboutFile(join(TESTDATA_PATH, 'attrib/missing_notice_license_files.ABOUT'))
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'attrib/missing_notice_license_files.ABOUT'))
         notice_text = about_file.notice_text()
         self.assertEqual(notice_text, expected)

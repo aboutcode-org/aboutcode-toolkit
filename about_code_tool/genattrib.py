@@ -21,9 +21,7 @@ of .ABOUT files to generate attribution.
 """
 
 from __future__ import print_function
-from __future__ import with_statement
-from about import Collector
-import genabout
+
 
 import csv
 import errno
@@ -32,6 +30,9 @@ import optparse
 import sys
 
 from os.path import exists, dirname, join, abspath, isdir, basename
+
+from about import Collector
+import genabout
 
 LOG_FILENAME = 'error.log'
 
@@ -91,7 +92,7 @@ def convert_dict_key_to_lower_case(input_list):
     return output_list
 
 
-def check_about_file_existance_and_format(input_list):
+def check_about_file_existence_and_format(input_list):
     try:
         for row in input_list:
             # Force the path to start with the '/' to map with the project
@@ -200,7 +201,7 @@ def main(parser, options, args):
             if mapping_config:
                 mapping_list = genabout.GenAbout().get_mapping_list()
                 updated_list = genabout.GenAbout().convert_input_list(updated_list, mapping_list)
-            if not check_about_file_existance_and_format(updated_list):
+            if not check_about_file_existence_and_format(updated_list):
                 print('The required key "about_file" was not found.')
                 print('Please use the "--mapping" option to map the input '
                       'keys and verify the mapping information are correct.')

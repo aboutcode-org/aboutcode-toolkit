@@ -19,7 +19,8 @@ This is a tool to generate ABOUT files based on the input file.
 The input file should be a csv format which contains information about the
 file location, origin and license of the software components etc.
 """
-from __future__ import print_function, with_statement # We require Python 2.6 or later
+
+from __future__ import print_function
 
 import copy
 import csv
@@ -28,7 +29,6 @@ import json
 import logging
 import optparse
 import os
-import posixpath
 import shutil
 import sys
 import urllib
@@ -65,16 +65,22 @@ handler = logging.StreamHandler()
 handler.setLevel(logging.CRITICAL)
 handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
-file_logger = logging.getLogger(__name__+'_file')
+file_logger = logging.getLogger(__name__ + '_file')
 
 ESSENTIAL_FIELDS = ('about_file',)
 
 # The 'dje_license_key' will be removed and will use the 'dje_license' instead.
-SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + \
-    ('about_file',)
+SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + ('about_file',)
 
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
+
+# Handle different behaviors if ABOUT files already existed
+ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST = 0
+ACTION_OVERWRITES_THE_CURRENT_ABOUT_FIELD_VALUE_IF_EXIST = 1
+ACTION_KEEP_CURRENT_FIELDS_UNCHANGED_AND_ONLY_ADD_NEW_FIELDS = 2
+ACTION_REPLACE_THE_ABOUT_FILE_WITH_THE_CURRENT_GENERATED_FILE = 3
+
 
 
 class GenAbout(object):
@@ -100,7 +106,7 @@ class GenAbout(object):
                 row_dict[key.lower()] = row[key]
             input_list.append(row_dict)
         return input_list
-        #return [{k.lower(): v for k, v in r.iteritems()} for r in csvfile]
+        # return [{k.lower(): v for k, v in r.iteritems()} for r in csvfile]
 
     @staticmethod
     def get_non_empty_rows_list(input_list):
@@ -121,15 +127,15 @@ class GenAbout(object):
         self_path = abspath(dirname(__file__))
         mapping_list = {}
         try:
-            with open(join(self_path, 'MAPPING.CONFIG'), "rU") as file_in:
+            with open(join(self_path, 'MAPPING.CONFIG'), 'rU') as file_in:
                 for line in file_in.readlines():
                     if not line.startswith('#') and ':' in line:
-                        about_spec_key =line.partition(':')[0]
+                        about_spec_key = line.partition(':')[0]
                         user_spec_key = line.partition(':')[2].strip()
                         mapping_list[about_spec_key.lower()] = user_spec_key.lower()
         except Exception as e:
             print(repr(e))
-            print("The 'MAPPING.CONFIG' cannot be opened.")
+            print('The "MAPPING.CONFIG" file cannot be opened.')
             sys.exit(errno.EACCES)
         return mapping_list
 
@@ -209,7 +215,7 @@ class GenAbout(object):
         first_line = input_list[0]
         return [field for field in first_line.keys() if not field in SUPPORTED_FIELDS]
 
-    def verify_files_existance(self, input_list, project_dir, file_in_project):
+    def verify_files_existence(self, input_list, project_dir, file_in_project):
         """
         Verify the existence of the 'license text file'
         """
@@ -271,7 +277,7 @@ class GenAbout(object):
         full_url = '{0}{1}/?{2}'.format(
             url if url.endswith('/') else url + '/',
             license_key, urllib.urlencode(payload))
-        # The following is to handle special characters in URL such as space etc. 
+        # The following is to handle special characters in URL such as space etc.
         full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
 
         try:
@@ -282,18 +288,19 @@ class GenAbout(object):
         except urllib2.HTTPError as http_e:
             # the code 401 represents authorization problem
             if http_e.code == 401:
-                error_msg = "Authorization denied. Invalid '--api_username' or '--api_key'."\
-                            + " LICENSE generation is skipped."
+                error_msg = ("Authorization denied. Invalid '--api_username' or '--api_key'."
+                            " LICENSE generation is skipped.")
                 print("\n" + error_msg + "\n")
                 self.extract_dje_license_error = True
                 self.errors.append(Error('username/key', username + '/' + api_key, error_msg))
             else:
-                self.errors.append(Error('dje_license', license_key, "Invalid 'dje_license_key'"))
+                self.errors.append(Error('dje_license', license_key,
+                                         "Invalid 'dje_license_key'"))
             return {}
         except urllib2.URLError:
             if about.check_network_connection():
-                error_msg = "URL not reachable. Invalid '--api_url'."\
-                                + " LICENSE generation is skipped."
+                error_msg = ("URL not reachable. Invalid '--api_url'."
+                             " LICENSE generation is skipped.")
                 print("\n" + error_msg + "\n")
                 self.extract_dje_license_error = True
                 self.errors.append(Error('--api_url', url, error_msg))
@@ -326,8 +333,10 @@ class GenAbout(object):
                     makedirs(dirname(gen_license_path))
                 with open(gen_license_path, 'wb') as output:
                     output.write(license_context)
-            except Exception as e:
-                self.errors.append(Error('Unknown', gen_license_path, "Something is wrong."))
+            except Exception:
+                err = Error('Unknown', gen_license_path,
+                            'Something is wrong.')
+                self.errors.append(err)
 
     def get_license_details_from_api(self, url, username, api_key, license_key):
         """
@@ -341,6 +350,7 @@ class GenAbout(object):
         return [license_name, license_key, license_text]
 
     def get_dje_license_list(self, gen_location, input_list, gen_license, dje_license_dict):
+        # FIXME : this is too complex
         license_output_list = []
         for line in input_list:
             try:
@@ -364,43 +374,40 @@ class GenAbout(object):
                     if gen_license:
                         if line['dje_license']:
                             license_output_list.append(self.gen_license_list(line))
-                            license_name_list = []
+                            license_names = []
                             if '\n' in line['dje_license_name']:
-                                license_name_list = line['dje_license_name'].split('\n ')
+                                license_names = line['dje_license_name'].split('\n ')
                             else:
-                                license_name_list = [line['dje_license_name']]
-                            for lic_name in license_name_list:
+                                license_names = [line['dje_license_name']]
+                            for lic_name in license_names:
                                 try:
                                     if line['license_text_file']:
                                         line['license_text_file'] += '\n '
-                                    line['license_text_file'] += dje_license_dict[lic_name][0]\
-                                                                + '.LICENSE'
+                                    line['license_text_file'] += dje_license_dict[lic_name][0] + '.LICENSE'
                                 except:
-                                    line['license_text_file'] = dje_license_dict[lic_name][0]\
-                                                                + '.LICENSE'
+                                    line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                         else:
                             self.warnings.append(Warn('dje_license', '',
                                                       "Missing 'dje_license' for " + line['about_file']))
             # This except condition will force the tool to create the
             # 'license_text_file' key column from the self.gen_license_list(line)
-            except Exception as e:
+            except Exception:
+                # FIXME: this is too complex
                 if gen_license:
                     if line['dje_license']:
                         license_output_list.append(self.gen_license_list(line))
-                        license_name_list = []
+                        license_names = []
                         if '\n' in line['dje_license_name']:
-                            license_name_list = line['dje_license_name'].split('\n ')
+                            license_names = line['dje_license_name'].split('\n ')
                         else:
-                            license_name_list = [line['dje_license_name']]
-                        for lic_name in license_name_list:
-                            try:
-                                if line['license_text_file']:
-                                    line['license_text_file'] += '\n '
-                                line['license_text_file'] += dje_license_dict[lic_name][0]\
-                                                            + '.LICENSE'
-                            except:
-                                line['license_text_file'] = dje_license_dict[lic_name][0]\
-                                                            + '.LICENSE'
+                            license_names = [line['dje_license_name']]
+
+                        for lic_name in license_names:
+                            if 'license_text_file' in line:
+                                line['license_text_file'] += '\n '
+                            license_name = dje_license_dict[lic_name][0]
+                            license_text_file = license_name + '.LICENSE'
+                            line['license_text_file'] = license_text_file
                     else:
                         self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
@@ -434,26 +441,27 @@ class GenAbout(object):
                             key_text_dict[detail[0]] = detail_list
                         else:
                             line['dje_license_name'] = license_dict[lic]
-            except Exception as e:
-                self.warnings.append(Warn('dje_license', '',
-                                                  "Missing 'dje_license' for " + line['about_file']))
+            except Exception:
+                err = Warn('dje_license', '',
+                           'Missing "dje_license" for ' + line['about_file'])
+                self.warnings.append(err)
         return key_text_dict
 
     def process_dje_licenses(self, dje_license_list, dje_license_dict, output_path):
         license_list_context = []
         for gen_path, license_name in dje_license_list:
-            license_list = []
+            licenses = []
             if '\n' in license_name:
-                license_list = license_name.split('\n ')
+                licenses = license_name.split('\n ')
             else:
-                license_list = [license_name]
+                licenses = [license_name]
             if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
-            for license in license_list:
-                license_key = dje_license_dict[license][0]
+            for lic in licenses:
+                license_key = dje_license_dict[lic][0]
                 gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
                 if not _exists(gen_license_path) and not self.extract_dje_license_error:
-                    context = dje_license_dict[license][1]
+                    context = dje_license_dict[lic][1]
                     if context:
                         gen_path_context = []
                         gen_path_context.append(gen_license_path)
@@ -462,6 +470,10 @@ class GenAbout(object):
         return license_list_context
 
     def pre_generation(self, gen_location, input_list, action_num, all_in_one):
+        """
+        Perfom some pre-generation.
+        TODO: document me
+        """
         output_list = []
         for line in input_list:
             component_list = []
@@ -470,7 +482,7 @@ class GenAbout(object):
             # without checking the action num which is incorrect.
             # Get the filename from the file_location and put it as the
             # value for 'about_resource'
-            
+
             if file_location.startswith('/'):
                 file_location = file_location.partition('/')[2]
             if not file_location.endswith('.ABOUT'):
@@ -498,36 +510,38 @@ class GenAbout(object):
                 # This is to get the filename instead of the file path
                 file_location = file_location.rpartition('/')[2]
             about_file_location = join(gen_location, file_location)
-            dir = dirname(about_file_location)
-            if not _exists(dir):
-                makedirs(dir)
-            about_file_exist = False
-            if _exists(about_file_location):
-                about_file_exist = True
-                if action_num == 0:
-                    about_exist = "ABOUT file already existed. Generation is skipped."
-                    self.warnings.append(Warn('about_file', about_file_location, about_exist))
+            about_file_dir = dirname(about_file_location)
+            if not os.path.exists(about_file_dir):
+                makedirs(about_file_dir)
+            about_file_exist = _exists(about_file_location)
+            if about_file_exist:
+                if action_num == ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST:
+                    msg = 'ABOUT file already existed. Generation is skipped.'
+                    self.warnings.append(Warn('about_file',
+                                              about_file_location, msg))
                     continue
-                # Overwrites the current ABOUT field value if existed
-                elif action_num == 1:
+                # Overwrites the current ABOUT field value if it existed
+                elif action_num == ACTION_OVERWRITES_THE_CURRENT_ABOUT_FIELD_VALUE_IF_EXIST:
                     about_object = about.AboutFile(about_file_location)
                     for field_name, value in about_object.parsed.items():
                         field_name = field_name.lower()
                         if not field_name in line.keys() or not line[field_name]:
                             line[field_name] = value
-                # Keep the current field value and only add the "new" field and field value
-                elif action_num == 2:
+                # Keep the current field value and only add the "new" field
+                # and field value
+                elif action_num == ACTION_KEEP_CURRENT_FIELDS_UNCHANGED_AND_ONLY_ADD_NEW_FIELDS:
                     about_object = about.AboutFile(about_file_location)
                     for field_name, value in about_object.parsed.items():
                         field_name = field_name.lower()
                         line[field_name] = value
-                # We do not need to do anything if action_num is 3 as the 
+                # We do not need to do anything if action_num is 3 as the
                 # original ABOUT file will be replaced in the write_output()
-                elif action_num == 3:
+                elif action_num == ACTION_REPLACE_THE_ABOUT_FILE_WITH_THE_CURRENT_GENERATED_FILE:
                     pass
-            # The following is to ensure the 'about_resource' and 
-            # 'about_resource_path' present. If those are existed already,
-            # the code will not touch it.
+
+            # The following is to ensure about_resource and
+            # about_resource_path fields are present. If they exist already,
+            # the code will not changes these.
             self.update_about_resource(line, about_file_exist)
             self.update_about_resource_path(line, about_file_exist)
 
@@ -627,9 +641,9 @@ class GenAbout(object):
                 file_logger.warning(warning_msg)
 
 
-def _exists(file_path):
-    if file_path:
-        return exists(abspath(file_path))
+def _exists(location):
+    # FIXME: duplicated code with about.py
+    return location and  exists(abspath(location))
 
 
 USAGE_SYNTAX = """\
@@ -805,11 +819,11 @@ def main(parser, options, args):
             print("The '--copy_files' <project_path> must be a directory.")
             print("'--copy_files' is skipped.")
         else:
-            #if not copy_files_path.endswith('/'):
+            # if not copy_files_path.endswith('/'):
             #   copy_files_path += '/'
             project_parent_dir = dirname(copy_files_path)
             licenses_in_project = True
-            license_list = gen.verify_files_existance(input_list, project_parent_dir, licenses_in_project)
+            license_list = gen.verify_files_existence(input_list, project_parent_dir, licenses_in_project)
             if not license_list:
                 print("None of the file is found. '--copy_files' is ignored.")
             else:
@@ -820,11 +834,11 @@ def main(parser, options, args):
             print("The '--license_text_location' <license_path> must be a directory.")
             print("'--license_text_location' is skipped.")
         else:
-            #if not license_text_path.endswith('/'):
+            # if not license_text_path.endswith('/'):
             #    license_text_path += '/'
             license_dir = dirname(license_text_path)
             licenses_in_project = False
-            license_list = gen.verify_files_existance(input_list, license_dir, licenses_in_project)
+            license_list = gen.verify_files_existence(input_list, license_dir, licenses_in_project)
             if not license_list:
                 print("None of the file is found. '--copy_files' is ignored.")
             else:
@@ -884,14 +898,14 @@ def get_parser():
             if len(opts) > opt_width:
                 opts = "%*s%s\n" % (self.current_indent, "", opts)
                 indent_first = self.help_position
-            else:                       # start help on same line as opts
+            else:  # start help on same line as opts
                 opts = "%*s%-*s  " % (self.current_indent, "", opt_width, opts)
                 indent_first = 0
             result.append(opts)
             if option.help:
                 help_text = self.expand_default(option)
                 help_lines = help_text.split('\n')
-                #help_lines = textwrap.wrap(help_text, self.help_width)
+                # help_lines = textwrap.wrap(help_text, self.help_width)
                 result.append("%*s%s\n" % (indent_first, "", help_lines[0]))
                 result.extend(["%*s%s\n" % (self.help_position, "", line)
                                for line in help_lines[1:]])

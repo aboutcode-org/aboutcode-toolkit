@@ -24,7 +24,6 @@ AbouCode reads and validates ABOUT files and collect software components
 inventories.
 """
 
-# We require Python 2.6 or later
 from __future__ import print_function
 
 from StringIO import StringIO
