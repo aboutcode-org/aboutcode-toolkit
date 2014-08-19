@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from __future__ import print_function
+
 from setuptools import setup
 
 from about_code_tool import about
@@ -9,17 +11,19 @@ from about_code_tool import about
 setup(
     name='about-code-tool',
     version=about.__version__,
-    description='Document the provenance (origin and license) of third-party software. '
-                'Collect inventories, generate attribution docs.',
-    author='Jillian Daguil, Thomas Druez, Chin-Yeung Li, Philippe Ombredanne and others.',
+    description=('Document the provenance (origin and license) of '
+                'third-party software. Collect inventories, generate '
+                'attribution docs.'),
+    author=('Jillian Daguil, Thomas Druez, Chin-Yeung Li, '
+            'Philippe Ombredanne and others.'),
     author_email='info@nexb.com',
     url='http://dejacode.org',
 
-    long_description='''AboutCode provides a simple way to document the
-    provenance (i.e. origin and license) and other important or interesting
-    information about third-party software components that you use in your
-    project. This documentation is stored in *.ABOUT files, side-by-side with
-    the code they document.''',
+    long_description=('AboutCode provides a simple way to document the'
+        'provenance (i.e. origin and license) and other important or'
+        'interesting information about third-party software components that'
+        'you use in your project. This documentation is stored in *.ABOUT'
+        'files, side-by-side with the code they document.'),
 
     license='Apache License 2.0',
     packages=[

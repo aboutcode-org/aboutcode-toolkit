@@ -3,12 +3,12 @@
 
 # ============================================================================
 #  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
-#  Licensed under the Apache License, Version 2.0 (the 'License');
+#  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
 #      http://www.apache.org/licenses/LICENSE-2.0
 #  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an 'AS IS' BASIS,
+#  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
@@ -59,7 +59,7 @@ class CommandLineTest(unittest.TestCase):
         self.assertTrue(command_output.startswith(expected))
 
 
-class AboutCollectorTest(unittest.TestCase):
+class CollectorTest(unittest.TestCase):
     def test_return_path_is_not_abspath_and_contains_subdirs_on_file(self):
         # Using a relative path for the purpose of this test
         test_file = ('about_code_tool/tests/testdata/thirdparty'
@@ -67,7 +67,7 @@ class AboutCollectorTest(unittest.TestCase):
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
         output = temp_file.name
         temp_file.close()
-        collector = about.AboutCollector(test_file)
+        collector = about.Collector(test_file)
         collector.write_to_csv(output)
         expected = ('about_code_tool/tests/testdata/thirdparty'
                     '/django_snippets_2413.ABOUT')
@@ -80,7 +80,7 @@ class AboutCollectorTest(unittest.TestCase):
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
         output = temp_file.name
         temp_file.close()
-        collector = about.AboutCollector(test_file)
+        collector = about.Collector(test_file)
         collector.write_to_csv(output)
         expected = 'about_code_tool/tests/testdata/basic'
         with open(output) as f:
@@ -102,39 +102,37 @@ class AboutCollectorTest(unittest.TestCase):
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
         output = temp_file.name
         temp_file.close()
-        collector = about.AboutCollector(test_file)
+        collector = about.Collector(test_file)
         collector.write_to_csv(output)
         with open(output) as f:
             header_row = f.readline().replace('\n', '').replace('\r', '')
             self.assertEqual(expected_header, header_row)
 
-    def test_collect_about_files_on_dir(self):
+    def test_collect_can_collect_a_directory_tree(self):
         test_dir = 'about_code_tool/tests/testdata/DateTest'
-        
         expected = [('about_code_tool/tests/testdata/DateTest'
                      '/non-supported_date_format.ABOUT'),
                     ('about_code_tool/tests/testdata/DateTest'
                      '/supported_date_format.ABOUT')]
-        result = about.AboutCollector._collect_about_files(test_dir)
-
+        result = about.Collector.collect(test_dir)
         self.assertEqual(sorted(expected), sorted(result))
 
-    def test_collect_about_files_on_file(self):
+    def test_collect_can_collect_a_single_file(self):
         test_file = ('about_code_tool/tests/testdata/thirdparty'
                       '/django_snippets_2413.ABOUT')
         expected = ['about_code_tool/tests/testdata/thirdparty'
                     '/django_snippets_2413.ABOUT']
-        result = about.AboutCollector._collect_about_files(test_file)
+        result = about.Collector.collect(test_file)
         self.assertEqual(expected, result)
 
     def test_collector_errors_encapsulation(self):
         test_file = 'about_code_tool/tests/testdata/DateTest'
-        collector = about.AboutCollector(test_file)
+        collector = about.Collector(test_file)
         self.assertEqual(2, len(collector.errors))
 
     def test_collector_warnings_encapsulation(self):
         test_file = 'about_code_tool/tests/testdata/allAboutInOneDir'
-        collector = about.AboutCollector(test_file)
+        collector = about.Collector(test_file)
         self.assertEqual(4, len(collector.warnings))
 
 
@@ -556,7 +554,7 @@ about_resource: about.py
     def test_generate_attribution(self):
         expected = (u'notice_text:version:2.4.3about_resource:httpd-2.4.3.tar.gz'
                     'name:Apache HTTP Serverlicense_text:')
-        about_collector = about.AboutCollector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'))
+        about_collector = about.Collector(join(TESTDATA_PATH, 'attrib/attrib.ABOUT'))
         result = about_collector.generate_attribution(join(TESTDATA_PATH, 'attrib/test.template'))
         self.assertEqual(expected, result)
 

@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
+# ============================================================================
+#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#      http://www.apache.org/licenses/LICENSE-2.0
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# ============================================================================
+
 """
 AboutCode is a tool to process ABOUT files. ABOUT files are small text files
 that document the provenance (aka. the origin and license) of software
@@ -503,6 +516,7 @@ def check_network_connection():
     else:
         return True
 
+
 has_network_connectivity = check_network_connection()
 
 
@@ -527,6 +541,9 @@ class AboutFile(object):
 
         if self.location:
             self.parse()
+
+    def __repr__(self):
+        return repr((self.parsed, self.parsed_fields, self.validated_fields,))
 
     def parse(self):
         """
@@ -1039,56 +1056,55 @@ class AboutFile(object):
         """
         return self.parsed.get('name', '')
 
-class AboutCollector(object):
-    """
-    A collection of AboutFile instances.
 
-    Collects the About files in the given path on initialization.
-    Creates one AboutFile instance per file.
-    Summarize all the issues from each instance.
+class Collector(object):
     """
-    def __init__(self, input_path):
-        if os.path.isdir(input_path) and not input_path.endswith('/'):
-            input_path = input_path + '/'
-        self.user_provided_path = input_path
-        self.absolute_path = os.path.abspath(input_path)
-        assert os.path.exists(self.absolute_path)
+    Collect ABOUT files.
+    """
+    def __init__(self, location):
+        """
+        Collect ABOUT files at location and create one AboutFile instance per
+        file.
+        """
+        assert location
+        self.location = location
+        normed_loc = os.path.expanduser(location)
+        normed_loc = os.path.normpath(normed_loc)
+        normed_loc = os.path.abspath(normed_loc)
+        normed_loc = posix_path(normed_loc)
+        assert os.path.exists(normed_loc)
+        self.normalized_location = normed_loc
+        self.abouts = [AboutFile(f) for f in self.collect(normed_loc)]
 
         self._errors = []
         self._warnings = []
-
         self.genattrib_errors = []
-
-        self.abouts = [AboutFile(f) for f
-                       in self._collect_about_files(self.absolute_path)]
-
-        # self.create_about_objects_from_files()
-        # self.extract_about_data_from_objects()
-
         self.summarize_issues()
 
     def __iter__(self):
         """
-        Yield the collected about instances.
+        Iterate collected AboutFile.
         """
         return iter(self.abouts)
 
     @staticmethod
-    def _collect_about_files(location):
+    def collect(location):
         """
-        Given the location of a file or directory, return a list of 
-        locations of valid .ABOUT files.
+        Return a list of locations of *.ABOUT files given the location of an
+        ABOUT file or a directory tree containing ABOUT files.
+        Locations are normalized using posix path separators.
         """
+        # FIXME: we should not accept both a file and dir location as input
         paths = []
         if location:
             if os.path.isfile(location) and is_about_file(location):
-                paths = [location]
+                paths.append(location)
             else:
                 for root, _, files in os.walk(location):
                     for name in files:
                         if is_about_file(name):
                             paths.append(os.path.join(root, name))
-        # normalize the paths to use os path seps
+        # normalize the paths to use posix path separators
         paths = [posix_path(p)for p in paths]
         return paths
 
@@ -1098,6 +1114,7 @@ class AboutCollector(object):
         """
         Return a list of about.errors for every about instances.
         """
+        # FIXME: this function is not needed.
         return self._errors
 
     @property
@@ -1105,11 +1122,12 @@ class AboutCollector(object):
         """
         Return a list of about.warnings for every about instances.
         """
+        # FIXME: this function is not needed.
         return self._warnings
 
     def summarize_issues(self):
         """
-        Summarize and log, errors and warnings.
+        Summarize and log errors and warnings.
         """
         for about_object in self:
             relative_path = self.get_relative_path(about_object.location)
@@ -1125,7 +1143,23 @@ class AboutCollector(object):
                 self._warnings.extend(about_object.warnings)
                 logger.warning(about_object.warnings)
 
-    def get_relative_path(self, about_object_location):
+    def get_relative_path(self, location):
+        """
+        Return a path for a given ABOUT file location relative to and based on
+        the provided collector normalized location.
+        """
+        user_loc = self.location
+        if os.path.isdir(self.normalized_location):
+            subpath = location.partition(os.path.basename(os.path.normpath(user_loc)))[2]
+            if user_loc[-1] == '/':
+                user_loc = user_loc.rpartition('/')[0]
+            if user_loc[-1] == '\\':
+                user_loc = user_loc.rpartition('\\')[0]
+            return (user_loc + subpath).replace('\\', '/')
+        else:
+            return user_loc.replace('\\', '/')
+
+    def get_relative_path2(self, about_object_location):
         """
         Return a relative path as provided by the user for an about_object.
 
@@ -1134,7 +1168,8 @@ class AboutCollector(object):
         "hardcode" to add/append the path.
         """
         # FIXME: we should use correct path manipulation, not our own cooking
-        user_provided_path = self.user_provided_path
+        # this is too complex
+        user_provided_path = self.location
         if os.path.isdir(self.absolute_path):
             subpath = about_object_location.partition(
                 os.path.basename(os.path.normpath(user_provided_path)))[2]
@@ -1160,87 +1195,91 @@ class AboutCollector(object):
                 row_data = about_object.get_row_data(relative_path)
                 csv_writer.writerow(row_data)
 
-    def generate_attribution(self, template_path=None, limit_to=None):
+    def generate_attribution(self, template_path='templates/default.html',
+                             limit_to=None):
         """
         Generate an attribution file from the current list of ABOUT objects.
         The optional `limit_to` parameter allows to restrict the generated
         attribution to a specific list of component names.
         """
-        if not limit_to:
-            limit_to = []
-
-        if not template_path:
-            template_path = 'templates/default.html'
 
         try:
-            import jinja2
+            import jinja2 as j2
         except ImportError, e:
             print('The Jinja2 templating library is required to generate '
-                  'attribution texts. You can install it with using:'
-                  'pip install -r requirements.txt')
+                  'attribution texts. You can install it by running:'
+                  'configure')
             return
 
+        # FIXME: the template dir should be outside the code tree
         template_dir = os.path.dirname(template_path)
-        template_name = os.path.basename(template_path)
-        env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir))
+        template_file_name = os.path.basename(template_path)
+
+        jinja_env = j2.Environment(loader=j2.FileSystemLoader(template_dir))
 
         try:
-            template = env.get_template(template_name)
-        except jinja2.TemplateNotFound:
-            print('Template: %(template_name)s not found' % locals())
+            template = jinja_env.get_template(template_file_name)
+        except j2.TemplateNotFound, e:
+            print('Template: %(template_file_name)s not found' % locals())
             return
+
+        limit_to = limit_to or []
+        limit_to = set(limit_to)
 
         about_object_fields = []
         about_content_dict = {}
-        not_exist_components = list(limit_to)
 
-        # FIXME: this loop and conditional is too complex.
         for about_object in self:
-            about_relative_path = ('/' +
-                                   about_object.location.partition(
-                                               self.user_provided_path)[2])
+            # FIXME: what is the meaning of this partition?
+            # PO created the var some_path to provide some clarity
+            # but what does the second element means?
+            some_path = about_object.location.partition(self.location)[2]
+            about_relative_path = '/' + some_path
+            print('some_path:', some_path)
 
-            # Check is there any components in the 'limit_to' list that
-            # does not exist in the code base.
-            if limit_to:
-                try:
-                    not_exist_components.remove(about_relative_path)
-                except Exception as e:
-                    continue
+            if limit_to and about_relative_path in limit_to:
+                continue
 
-            if not limit_to or about_relative_path in limit_to:
-                about_content_dict = about_object.validated_fields
-                # Add information in the dictionary where it does not
-                # present in the ABOUT file
-                about_content_dict['license_text'] = unicode(about_object.license_text(),
-                                      errors='replace')
-                about_content_dict['notice_text'] = about_object.notice_text()
+            about_content_dict = about_object.validated_fields
+            print('about_content_dict:', about_content_dict)
+            # Add information in the dictionary where it does not
+            # present in the ABOUT file
+            lic_text = unicode(about_object.license_text(),
+                               errors='replace')
+            about_content_dict['license_text'] = lic_text
+            notice_text = about_object.notice_text()
+            about_content_dict['notice_text'] = notice_text
 
-                # FIXME: The following is a tmp code to handle multiple
-                # 'license_text_file' in the input
-                for k in about_content_dict:
-                    if '\n' in about_content_dict[k] and k == 'license_text_file':
-                        about_content_dict['license_text'] = unicode(about_object.tmp_get_license_text(),
-                                      errors='replace')
+            # FIXME: The following is a tmp code to handle multiple
+            # 'license_text_file' in the input
+            print('about_content_dict:', about_content_dict)
+            for k in about_content_dict:
+                if ('\n' in about_content_dict[k]
+                    and k == 'license_text_file'):
+                    lic_text = unicode(about_object.tmp_get_license_text(),
+                                       errors='replace')
+                    about_content_dict['license_text'] = lic_text
 
-                # Raise error if no license_text is found
-                if not about_content_dict['license_text']:
-                    msg = ('No license_text is found. '
-                           'License generation is skipped.')
-                    err = Error(GENATTRIB, 'name',
-                                about_object.get_about_name(), msg)
-                    self.genattrib_errors.append(err)
+            # Raise error if no license_text is found
+            if 'license_text' not in about_content_dict:
+                msg = ('No license_text found. '
+                       'skipping License generation.')
+                err = Error(GENATTRIB, 'name',
+                            about_object.get_about_name(), msg)
+                self.genattrib_errors.append(err)
 
             about_object_fields.append(about_content_dict)
 
-        if not_exist_components:
-            for component in not_exist_components:
-                afp = self.user_provided_path + component.replace('//', '/')
-                msg = ('about file: %s - file does not exist. '
-                       'No attribution is generated for this component.'
-                       % afp)
-                err = Error(GENATTRIB, 'about_file', component, msg)
-                self.genattrib_errors.append(err)
+        # find paths requested in the limit_to paths arg that do not point to
+        # a corresponding ABOUT file
+        for path in limit_to:
+            path = posix_path(path)
+            
+            afp = join(self.location, path)
+            msg = ('The requested ABOUT file: %(afp)r does not exist. '
+                   'No attribution generated for this file.' % locals())
+            err = Error(GENATTRIB, 'about_file', path, msg)
+            self.genattrib_errors.append(err)
 
         # TODO: Handle the grouping and ordering later
         """# We want to display common_licenses in alphabetical order
@@ -1248,7 +1287,21 @@ class AboutCollector(object):
             license_key.append(key)
             license_text_list.append(common_license_dict[key])"""
 
-        return template.render(about_objects=about_object_fields)
+        rendered = template.render(about_objects=about_object_fields)
+        return rendered
+
+    def check_paths(self, paths):
+        """
+        Check if each path in a list of ABOUT file paths exist in the
+        collected ABOUT files. Add errors if it does not.
+        """
+        for path in paths:
+            path = posix_path(path)
+            afp = join(self.location, path)
+            msg = ('The requested ABOUT file: %(afp)r does not exist. '
+                   'No attribution generated for this file.' % locals())
+            err = Error(GENATTRIB, 'about_file', path, msg)
+            self.genattrib_errors.append(err)
 
     def get_genattrib_errors(self):
         return self.genattrib_errors
@@ -1320,7 +1373,7 @@ def main(parser, options, args):
 
     if (not os.path.exists(output_path)
         or (os.path.exists(output_path) and overwrite)):
-        collector = AboutCollector(input_path)
+        collector = Collector(input_path)
         collector.write_to_csv(output_path)
         if collector.errors:
             print('%d errors detected.' % len(collector.errors))
