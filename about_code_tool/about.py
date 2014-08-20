@@ -223,8 +223,7 @@ ERROR_WARN_FIELDS = (
 
 HEADER_ROW_FIELDS = (('about_file',)
                      + MANDATORY_FIELDS
-                     + OPTIONAL_FIELDS
-                     + ERROR_WARN_FIELDS)
+                     + OPTIONAL_FIELDS)
 
 
 # SPDX License Identifiers from http://spdx.org/licenses/
@@ -720,10 +719,9 @@ class AboutFile(object):
 
         for field_name, value in self.validated_fields.items():
             self.check_is_ascii(self.validated_fields.get(field_name))
-            self.validate_known_optional_fields(field_name)
+            #self.validate_known_optional_fields(field_name)
             self.validate_file_field_exists(field_name, value)
             self.validate_url_field(field_name, network_check=False)
-
             self.validate_spdx_license(field_name, value)
             self.check_date_format(field_name)
 
@@ -953,15 +951,30 @@ class AboutFile(object):
             # http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
             return conn.getresponse().status
 
-    def get_row_data(self, updated_path):
+    def get_custom_field_keys(self):
+        custom_key = []
+        for key in self.validated_fields:
+            if key not in MANDATORY_FIELDS + OPTIONAL_FIELDS:
+                custom_key.append(key)
+        return custom_key
+
+    def get_row_data(self, updated_path, custom_keys):
         """
         Create a csv compatible row of data for this object.
         """
         row = [updated_path]
+        custom_field = []
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
             if field in self.validated_fields:
                 row += [self.validated_fields[field]]
             else:
+                row += ['']
+
+        # Add custom field value
+        for key in custom_keys:
+            try:
+                row += [self.validated_fields[key]]
+            except:
                 row += ['']
 
         warnings = [repr(w) for w in self.warnings]
@@ -1180,18 +1193,33 @@ class Collector(object):
         else:
             return user_provided_path.replace('\\', '/')
 
+    def custom_keys(self):
+        custom_keys = []
+        for about_object in self:
+            keys = about_object.get_custom_field_keys()
+            for key in keys:
+                if key not in custom_keys:
+                    custom_keys.append(key)
+        return custom_keys
+
     def write_to_csv(self, output_path):
         """
         Build a row for each about instance and write results in CSV file
         located at `output_path`.
         """
+        custom_keys = self.custom_keys()
         with open(output_path, 'wb') as output_file:
             csv_writer = csv.writer(output_file)
-            csv_writer.writerow(HEADER_ROW_FIELDS)
+            header_row = HEADER_ROW_FIELDS
+            # Add the non-supported fields if exist
+            for key in custom_keys:
+                header_row += (key, )
+            header_row += ERROR_WARN_FIELDS
+            csv_writer.writerow(header_row)
 
             for about_object in self:
                 relative_path = self.get_relative_path(about_object.location)
-                row_data = about_object.get_row_data(relative_path)
+                row_data = about_object.get_row_data(relative_path, custom_keys)
                 csv_writer.writerow(row_data)
 
     def generate_attribution(self,

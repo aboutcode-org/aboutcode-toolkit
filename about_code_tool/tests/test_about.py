@@ -95,7 +95,9 @@ class CollectorTest(unittest.TestCase):
         'license_spdx,redistribute,attribute,track_changes,vcs_tool,'\
         'vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,'\
         'checksum_sha1,checksum_md5,checksum_sha256,dje_component,'\
-        'dje_license,dje_organization,dje_license_name,warnings,errors'
+        'dje_license,dje_organization,dje_license_name,scm_branch,'\
+        'scm_repository,signature_gpg_file,redistribute_sources,about_format,'\
+        'usage,scm_tool,scm_path,scm_tag,scm_rev,organization,warnings,errors'
 
         test_file = 'about_code_tool/tests/testdata/basic'
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
@@ -132,8 +134,9 @@ class CollectorTest(unittest.TestCase):
     def test_collector_warnings_encapsulation(self):
         test_file = 'about_code_tool/tests/testdata/allAboutInOneDir'
         collector = about.Collector(test_file)
-        self.assertEqual(4, len(collector.warnings))
-
+        #self.assertEqual(4, len(collector.warnings))
+        # No warning is thrown as all fields from ABOUT files are accepted.
+        self.assertEqual(0, len(collector.warnings))
 
 class ParserTest(unittest.TestCase):
     def test_valid_chars_in_field_name(self):
@@ -597,3 +600,16 @@ this software and releases the component to Public Domain.
         about_file = about.AboutFile(join(TESTDATA_DIR, 'attrib/missing_notice_license_files.ABOUT'))
         notice_text = about_file.notice_text()
         self.assertEqual(notice_text, expected)
+
+
+class OtherTest(unittest.TestCase):
+    def test_get_custom_field_keys(self):
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'basic/basic.about'))
+        custom_keys = about_file.get_custom_field_keys()
+        expected_keys = ['scm_branch', 'scm_repository', 'signature_gpg_file',
+                         'redistribute_sources', 'about_format', 'usage',
+                         'scm_tool', 'scm_path', 'scm_tag', 'scm_rev',
+                         'organization']
+        self.assertEqual(custom_keys, expected_keys)
+
+

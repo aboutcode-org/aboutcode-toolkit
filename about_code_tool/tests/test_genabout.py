@@ -58,13 +58,13 @@ class GenAboutTest(unittest.TestCase):
         output = gen.get_non_empty_rows_list(input_list)
         self.assertEquals(output, expected_list)
 
-
     def test_get_mapping_list(self):
         gen = genabout.GenAbout()
         expected_list = {'about_file': 'directory/filename',
                           'version': 'confirmed version',
-                           'name': 'component',
-                           'copyright': 'confirmed copyright'}
+                          'name': 'component',
+                          'copyright': 'confirmed copyright',
+                          'confirmed_license': 'confirmed license'}
         output = gen.get_mapping_list()
         self.assertEquals(output, expected_list)
 
@@ -156,16 +156,27 @@ class GenAboutTest(unittest.TestCase):
         result = gen.validate_mandatory_fields(input_list)
         self.assertTrue(result)
 
-    def test_get_non_supported_fields(self):
+    def test_get_non_supported_fields_no_mapping(self):
         gen = genabout.GenAbout()
         test_fields = [{'about_file': '',
                         'name': 'OpenSans Fonts',
                         'non_supported field': 'TEST',
                         'version': '1',
                         'about_resource': 'opensans'}]
-        result = gen.get_non_supported_fields(test_fields)
+        mapping_keys = []
+        result = gen.get_non_supported_fields(test_fields, mapping_keys)
         expected = ['non_supported field']
         self.assertEquals(expected, result)
+
+    def test_get_non_supported_fields_with_mapping(self):
+            gen = genabout.GenAbout()
+            input = [{'about_file': '', 'name': 'OpenSans Fonts',
+                     'non_supported field': 'TEST', 'version': '1',
+                     'about_resource': 'opensans'}]
+            mapping_keys = ['non_supported field']
+            non_supported_list = gen.get_non_supported_fields(input, mapping_keys)
+            expected_list = []
+            self.assertEquals(non_supported_list, expected_list)
 
     def test_get_only_supported_fields(self):
         gen = genabout.GenAbout()
