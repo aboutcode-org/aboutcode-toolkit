@@ -93,7 +93,9 @@ class AboutCollectorTest(unittest.TestCase):
         'license_spdx,redistribute,attribute,track_changes,vcs_tool,'\
         'vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,'\
         'checksum_sha1,checksum_md5,checksum_sha256,dje_component,'\
-        'dje_license,dje_organization,dje_license_name,warnings,errors'
+        'dje_license,dje_organization,dje_license_name,scm_branch,'\
+        'scm_repository,signature_gpg_file,redistribute_sources,about_format,'\
+        'usage,scm_tool,scm_path,scm_tag,scm_rev,organization,warnings,errors'
 
         input = "about_code_tool/tests/testdata/basic"
         temp_file = tempfile.NamedTemporaryFile(suffix='.csv', delete=True)
@@ -126,10 +128,9 @@ class AboutCollectorTest(unittest.TestCase):
     def test_collector_warnings_encapsulation(self):
         input_path = 'about_code_tool/tests/testdata/allAboutInOneDir'
         collector = about.AboutCollector(input_path)
-        print("#####################################################")
-        print(collector.warnings)
-        print(collector.errors)
-        self.assertEqual(4, len(collector.warnings))
+        #self.assertEqual(4, len(collector.warnings))
+        # No warning is throw as all fields from ABOUT files are accepted.
+        self.assertEqual(0, len(collector.warnings))
 
 
 class ParserTest(unittest.TestCase):
