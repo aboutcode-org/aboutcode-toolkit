@@ -58,7 +58,6 @@ class GenAboutTest(unittest.TestCase):
         output = gen.get_non_empty_rows_list(input_list)
         self.assertEquals(output, expected_list)
 
-    
     def test_get_mapping_list(self):
         gen = genabout.GenAbout()
         expected_list = {'about_file': 'directory/filename',

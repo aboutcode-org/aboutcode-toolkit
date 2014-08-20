@@ -111,8 +111,12 @@ class GenAbout(object):
             with open(join(self_path, 'MAPPING.CONFIG'), "rU") as file_in:
                 for line in file_in.readlines():
                     if not line.startswith('#') and ':' in line:
-                        about_spec_key =line.partition(':')[0]
+                        about_spec_key = line.partition(':')[0]
                         user_spec_key = line.partition(':')[2].strip()
+                        # Handle cases which keys contain spaces
+                        if about_spec_key.endswith(' '):
+                            about_spec_key = about_spec_key.strip()
+                        about_spec_key = about_spec_key.replace(' ', '_')
                         mapping_list[about_spec_key.lower()] = user_spec_key.lower()
         except Exception as e:
             print(repr(e))
