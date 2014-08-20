@@ -126,6 +126,9 @@ class AboutCollectorTest(unittest.TestCase):
     def test_collector_warnings_encapsulation(self):
         input_path = 'about_code_tool/tests/testdata/allAboutInOneDir'
         collector = about.AboutCollector(input_path)
+        print("#####################################################")
+        print(collector.warnings)
+        print(collector.errors)
         self.assertEqual(4, len(collector.warnings))
 
 
