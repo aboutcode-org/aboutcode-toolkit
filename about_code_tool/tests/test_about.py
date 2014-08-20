@@ -583,3 +583,14 @@ this software and releases the component to Public Domain.
         self.assertEqual(notice_text, expected)
 
 
+class OtherTest(unittest.TestCase):
+    def test_get_custom_field_keys(self):
+        about_file = about.AboutFile(join(TESTDATA_PATH, 'basic/basic.about'))
+        custom_keys = about_file.get_custom_field_keys()
+        expected_keys = ['scm_branch', 'scm_repository', 'signature_gpg_file',
+                         'redistribute_sources', 'about_format', 'usage',
+                         'scm_tool', 'scm_path', 'scm_tag', 'scm_rev',
+                         'organization']
+        self.assertEqual(custom_keys, expected_keys)
+
+
