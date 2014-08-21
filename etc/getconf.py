@@ -37,6 +37,9 @@ The execution order is:
  - python scripts execution
  - shell scripts execution
 
+On posix, posix Python and shell scripts are executed before mac or linux 
+scripts.
+
 For example a tree could be looking like this::
     etc/conf
         base.txt : base pip requirements for all platforms
@@ -70,7 +73,7 @@ elif 'darwin' in sys_platform:
 elif 'cygwin' in sys_platform:
     platform_names = ('posix', 'cygwin',)
 else:
-    # raise Exception('Unsupported OS/platform')
+    print('Unsupported OS/platform')
     platform_names = tuple()
 
 
@@ -128,9 +131,14 @@ def get_conf_files(config_dir_paths, file_names=requirements):
                            os.path.join(base_loc, path),)
 
             path, loc = current
-            collected += [os.path.join(path, f)
-                          for f in os.listdir(loc) if f in file_names
-                          and os.path.join(path, f) not in collected]
+            # we iterate on filenames to ensure the precedence of posix over
+            # mac, linux, etc is repsected
+            for n in file_names:
+                for f in os.listdir(loc):
+                    if f == n:
+                        f_loc = os.path.join(path, f)
+                        if f_loc not in collected:
+                            collected.append(f_loc)
 
     return collected
 
