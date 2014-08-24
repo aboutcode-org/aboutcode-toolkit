@@ -58,6 +58,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+
 LOG_FILENAME = 'error.log'
 
 logger = logging.getLogger(__name__)
@@ -72,15 +73,16 @@ ESSENTIAL_FIELDS = ('about_file',)
 # The 'dje_license_key' will be removed and will use the 'dje_license' instead.
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + ('about_file',)
 
+
 Warn = namedtuple('Warn', 'field_name field_value message',)
 Error = namedtuple('Error', 'field_name field_value message',)
 
-# Handle different behaviors if ABOUT files already existed
+
+# Handle different behaviors if ABOUT file already exists
 ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST = 0
 ACTION_OVERWRITES_THE_CURRENT_ABOUT_FIELD_VALUE_IF_EXIST = 1
 ACTION_KEEP_CURRENT_FIELDS_UNCHANGED_AND_ONLY_ADD_NEW_FIELDS = 2
 ACTION_REPLACE_THE_ABOUT_FILE_WITH_THE_CURRENT_GENERATED_FILE = 3
-
 
 
 class GenAbout(object):
@@ -90,6 +92,7 @@ class GenAbout(object):
         self.extract_dje_license_error = False
 
     @staticmethod
+        # FIXME: why use a static and not a regular function?
     def get_duplicated_keys(input_file):
         csv_context = csv.reader(open(input_file, 'rU'))
         keys_row = csv_context.next()
@@ -98,6 +101,7 @@ class GenAbout(object):
 
     @staticmethod
     def get_input_list(input_file):
+        # FIXME: why use a static and not a regular function?
         csvfile = csv.DictReader(open(input_file, 'rU'))
         input_list = []
         for row in csvfile:
@@ -106,10 +110,10 @@ class GenAbout(object):
                 row_dict[key.lower()] = row[key]
             input_list.append(row_dict)
         return input_list
-        # return [{k.lower(): v for k, v in r.iteritems()} for r in csvfile]
 
     @staticmethod
     def get_non_empty_rows_list(input_list):
+        # FIXME: why use a static and not a regular function?
         copied_list = copy.deepcopy(input_list)
         new_list = []
         for line in copied_list:
@@ -124,6 +128,7 @@ class GenAbout(object):
         """
         Read the MAPPING.CONFIG
         """
+        # FIXME: why use a static and not a regular function?
         self_path = abspath(dirname(__file__))
         mapping_list = {}
         try:
@@ -148,6 +153,7 @@ class GenAbout(object):
         """
         Perform the key mapping
         """
+        # FIXME: why use a static and not a regular function?
         copied_list = copy.deepcopy(input_list)
         for copied_dict in copied_list:
             for about_spec_key in mapping_list:
@@ -158,10 +164,10 @@ class GenAbout(object):
     def validate(self, input_list):
         if not self.validate_mandatory_fields(input_list):
             required_keys = about.MANDATORY_FIELDS + ('about_file',)
-            print("The required keys not found.")
+            print("Required keys not found.")
             print(required_keys)
-            print("Please use the '--mapping' option to map the input keys and verify the mapping information are correct.")
-            print("OR, correct the header keys from the input CSV.")
+            print("Use the '--mapping' option to map the input keys and verify the mapping information are correct.")
+            print("OR correct the header keys from the input CSV.")
             sys.exit(errno.EINVAL)
         if not self.validate_value_in_essential_fields(input_list):
             print("Some of the essential fields value are missing.")
@@ -177,6 +183,7 @@ class GenAbout(object):
 
     @staticmethod
     def validate_mandatory_fields(input_list):
+        # FIXME: why use a static and not a regular function?
         for line in input_list:
             for key in about.MANDATORY_FIELDS + ('about_file',):
                 if not key in line.keys():
@@ -185,6 +192,7 @@ class GenAbout(object):
 
     @staticmethod
     def validate_value_in_essential_fields(input_list):
+        # FIXME: why use a static and not a regular function?
         for line in input_list:
             for key in ESSENTIAL_FIELDS:
                 if not line[key]:
@@ -193,6 +201,7 @@ class GenAbout(object):
 
     @staticmethod
     def validate_duplication(input_list):
+        # FIXME: why use a static and not a regular function?
         check_duplication = []
         for line in input_list:
             component = line['about_file']
@@ -216,6 +225,7 @@ class GenAbout(object):
         """
         Returns a list of the non-supported fields in a given line.
         """
+        # FIXME: why use a static and not a regular function?
         first_line = input_list[0]
         return [field for field in first_line.keys() if not field in SUPPORTED_FIELDS and not field in mapping_keys]
 
@@ -227,12 +237,13 @@ class GenAbout(object):
         # Get all the dictionary keys
         column_keys = input_list[0].keys()
 
-        # Get all the keys that ending with _file except for the 'about_file
+        # Get all the keys that ends with _file except for the 'about_file
         file_keys = []
         for key in column_keys:
-            if '_file' in key and key != 'about_file':
+            if key.endswith('_file') and key != 'about_file':
                 file_keys.append(key)
 
+        # FIXME: this loop is too complex
         for line in input_list:
             for file_key in file_keys:
                 if line[file_key]:
@@ -268,9 +279,9 @@ class GenAbout(object):
 
     def request_license_data(self, url, username, api_key, license_key):
         """
-        Send a request to a given API URL to gather license data.
-        Authentication through an Api Key and a username.
-        Returns a python dictionary of results returned by the API.
+        Send a request to a given API URL to gather license data for
+        license_key, authenticating through an api_key and username. Return a
+        python dictionary of results returned by the API.
         """
         payload = {
             'username': username,
@@ -278,29 +289,32 @@ class GenAbout(object):
             'format': 'json'
         }
 
-        full_url = '{0}{1}/?{2}'.format(
-            url if url.endswith('/') else url + '/',
-            license_key, urllib.urlencode(payload))
-        # The following is to handle special characters in URL such as space etc.
+        url = url.rstrip('/')
+        encoded_payload = urllib.urlencode(payload)
+        full_url = '%(url)s/%(license_key)s/?encoded_payload'.format(locals())
+        # handle special characters in URL such as space etc.
         full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
-
+        license_data = {}
         try:
             request = urllib2.Request(full_url)
             response = urllib2.urlopen(request)
             response_content = response.read()
-            data = json.loads(response_content)
+            license_data = json.loads(response_content)
         except urllib2.HTTPError as http_e:
-            # the code 401 represents authorization problem
+            # some auth problem
             if http_e.code == 401:
                 error_msg = ("Authorization denied. Invalid '--api_username' or '--api_key'."
-                            " LICENSE generation is skipped.")
-                print("\n" + error_msg + "\n")
+                            " License data collection skipped.")
+                print()
+                print(error_msg)
+                print()
                 self.extract_dje_license_error = True
-                self.errors.append(Error('username/key', username + '/' + api_key, error_msg))
+                self.errors.append(Error('username/api_key',
+                                         username + '/' + api_key, error_msg))
             else:
+                # FIXME: would this be only with a 404?
                 self.errors.append(Error('dje_license', license_key,
                                          "Invalid 'dje_license_key'"))
-            return {}
         except urllib2.URLError:
             if about.check_network_connection():
                 error_msg = ("URL not reachable. Invalid '--api_url'."
@@ -313,17 +327,18 @@ class GenAbout(object):
                 print("\n" + error_msg + "\n")
                 self.extract_dje_license_error = True
                 self.errors.append(Error('Network', '', error_msg))
-            return {}
         except ValueError:
-            return {}
-        else:
-            return data
+            # FIXME: when does this happen?
+            pass
+        finally:
+            return license_data
 
     @staticmethod
     def copy_files(gen_location, files_list):
         """
         Copy the files into the gen_location
         """
+        # FIXME : why use a static and not a regular function?
         for file_path, component_path in files_list:
             output_file_path = join(gen_location, component_path)
             if not _exists(output_file_path):
@@ -347,10 +362,11 @@ class GenAbout(object):
         Returns the license_text of a given license_key using an API request.
         Returns an empty string if the text is not available.
         """
-        data = self.request_license_data(url, username, api_key, license_key)
-        license_name = data.get('name', '')
-        license_text = data.get('full_text', '')
-        license_key = data.get('key', '')
+        license_data = self.request_license_data(url, username,
+                                                 api_key, license_key)
+        license_name = license_data.get('name', '')
+        license_text = license_data.get('full_text', '')
+        license_key = license_data.get('key', '')
         return [license_name, license_key, license_text]
 
     def get_dje_license_list(self, gen_location, input_list, gen_license, dje_license_dict):
@@ -359,7 +375,8 @@ class GenAbout(object):
         for line in input_list:
             try:
                 # If there is value in 'license_text_file', the tool will not
-                # update/overwrite the 'license_text_file' with 'dje_license_key'
+                # update/overwrite the 'license_text_file' with
+                # 'dje_license_key'
                 if line['license_text_file']:
                     file_value = []
                     license_file_list = []
@@ -555,7 +572,7 @@ class GenAbout(object):
         return output_list
 
     def update_about_resource(self, line, about_file_exist):
-        # Check is 'about_resource' exist
+        # Check if 'about_resource' exist
         try:
             if line['about_resource']:
                 if not about_file_exist:
@@ -571,7 +588,7 @@ class GenAbout(object):
                 line['about_resource'] = basename(about_resource)
 
     def update_about_resource_path(self, line, about_file_exist):
-        # Check is 'about_resource_path' exist
+        # Check if 'about_resource_path' exist
         try:
             if line['about_resoure_path']:
                 if not about_file_exist:
@@ -701,9 +718,6 @@ Example syntax:
 genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
 """
 
-INVALID_OPTION_ARG = """\
-    Invalid option argument.
-"""
 
 def main(parser, options, args):
     verbosity = options.verbosity
@@ -723,7 +737,8 @@ def main(parser, options, args):
     mapping_keys = []
 
     if options.version:
-        print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
+        msg = 'AboutCode %(__version__)s\n%(__copyright__)s'.format(globals())
+        print(msg)
         sys.exit(0)
 
     if verbosity == 1:
@@ -731,25 +746,22 @@ def main(parser, options, args):
     elif verbosity >= 2:
         handler.setLevel(logging.WARNING)
 
-    if action:
-        if not action in [0, 1, 2, 3]:
-            print('--action' + INVALID_OPTION_ARG)
-            sys.exit(errno.EINVAL)
-        else:
-            action_num = action
+    valid_actions = 0, 1, 2, 3
+    if action and action in valid_actions:
+        action_num = action
+    else:
+        print('Invalid action: should be 0,1,2 or 3')
+        sys.exit(errno.EINVAL)
 
-    if copy_files_path:
-        if not _exists(copy_files_path):
+    if copy_files_path and not _exists(copy_files_path):
             print("The project path does not exist.")
             sys.exit(errno.EINVAL)
 
-    if license_text_path:
-        if not _exists(license_text_path):
+    if license_text_path and not _exists(license_text_path):
             print("The license text path does not exist.")
             sys.exit(errno.EINVAL)
 
-    if mapping_config:
-        if not _exists('MAPPING.CONFIG'):
+    if mapping_config and not _exists('MAPPING.CONFIG'):
             print("The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 
@@ -760,7 +772,8 @@ def main(parser, options, args):
         gen_license = True
 
     if not len(args) == 2:
-        print('Input and Output paths are required.\n')
+        print('Input and Output paths are required.')
+        print()
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -771,22 +784,26 @@ def main(parser, options, args):
         output_path += '/'
 
     if not exists(input_path):
-        print('Input path does not exist.\n')
+        print('Input path does not exist.')
+        print()
         parser.print_help()
         sys.exit(errno.EEXIST)
 
     if not exists(output_path):
-        print('Output path does not exist.\n')
+        print('Output path does not exist.')
+        print()
         parser.print_help()
         sys.exit(errno.EEXIST)
 
     if not isdir(output_path):
-        print('Output must be a directory, not a file.\n')
+        print('Output must be a directory, not a file.')
+        print()
         parser.print_help()
         sys.exit(errno.EISDIR)
 
     if not input_path.endswith('.csv'):
-        print("Input file name must be a CSV file ends with '.csv'\n")
+        print("Input file name must be a CSV file ends with '.csv'")
+        print()
         parser.print_help()
         sys.exit(errno.EINVAL)
 
@@ -794,12 +811,16 @@ def main(parser, options, args):
 
     dup_keys = gen.get_duplicated_keys(input_path)
     if dup_keys:
-        print('The input file contains duplicated keys. Duplicated keys are not allowed.')
+        print('The input file contains duplicated keys. '
+              'Duplicated keys are not allowed.')
         print(dup_keys)
-        print('\nPlease fix the input file and re-run the tool.')
+        print()
+        print('Please fix the input file and re-run the tool.')
         sys.exit(errno.EINVAL)
 
     # Clear the log file
+    # FIXME: we should just delete the file, not override it
+    # or we should append to it...
     with open(output_path + LOG_FILENAME, 'w'):
         pass
 
@@ -816,9 +837,11 @@ def main(parser, options, args):
 
     gen.validate(input_list)
 
-    ignored_fields_list = gen.get_non_supported_fields(input_list, mapping_keys)
+    ignored_fields_list = gen.get_non_supported_fields(input_list,
+                                                       mapping_keys)
     if ignored_fields_list:
-        input_list = gen.get_only_supported_fields(input_list, ignored_fields_list)
+        input_list = gen.get_only_supported_fields(input_list,
+                                                   ignored_fields_list)
 
     if copy_files_path:
         if not isdir(copy_files_path):
@@ -829,7 +852,9 @@ def main(parser, options, args):
             #   copy_files_path += '/'
             project_parent_dir = dirname(copy_files_path)
             licenses_in_project = True
-            license_list = gen.verify_files_existence(input_list, project_parent_dir, licenses_in_project)
+            license_list = gen.verify_files_existence(input_list,
+                                                      project_parent_dir,
+                                                      licenses_in_project)
             if not license_list:
                 print("None of the file is found. '--copy_files' is ignored.")
             else:
@@ -837,14 +862,17 @@ def main(parser, options, args):
 
     if license_text_path:
         if not isdir(license_text_path):
-            print("The '--license_text_location' <license_path> must be a directory.")
+            print("The '--license_text_location' <license_path> "
+                  "must be a directory.")
             print("'--license_text_location' is skipped.")
         else:
             # if not license_text_path.endswith('/'):
             #    license_text_path += '/'
             license_dir = dirname(license_text_path)
             licenses_in_project = False
-            license_list = gen.verify_files_existence(input_list, license_dir, licenses_in_project)
+            license_list = gen.verify_files_existence(input_list,
+                                                      license_dir,
+                                                      licenses_in_project)
             if not license_list:
                 print("None of the file is found. '--copy_files' is ignored.")
             else:
@@ -860,17 +888,24 @@ def main(parser, options, args):
                     break
             except Exception as e:
                 print(repr(e))
-                print("The input does not have the 'dje_license' key which is required.")
+                print("The input does not have the 'dje_license' "
+                      "key which is required.")
                 sys.exit(errno.EINVAL)
 
     if gen_license:
         dje_license_dict = gen.pre_process_and_dje_license_dict(input_list,
-                                                                    api_url,
-                                                                    api_username,
-                                                                    api_key)
+                                                                api_url,
+                                                                api_username,
+                                                                api_key)
 
-    dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license, dje_license_dict)
-    components_list = gen.pre_generation(output_path, input_list, action_num, all_in_one)
+    dje_license_list = gen.get_dje_license_list(output_path,
+                                                input_list,
+                                                gen_license,
+                                                dje_license_dict)
+    components_list = gen.pre_generation(output_path,
+                                         input_list,
+                                         action_num,
+                                         all_in_one)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
 
@@ -884,7 +919,9 @@ def main(parser, options, args):
     print('Warnings: %s' % len(gen.warnings))
     print('Errors: %s' % len(gen.errors))
 
+
 def get_parser():
+
     class MyFormatter(optparse.IndentedHelpFormatter):
         def _format_text(self, text):
             """
@@ -902,22 +939,22 @@ def get_parser():
             opts = self.option_strings[option]
             opt_width = self.help_position - self.current_indent - 2
             if len(opts) > opt_width:
-                opts = "%*s%s\n" % (self.current_indent, "", opts)
+                opts = '%*s%s\n' % (self.current_indent, '', opts)
                 indent_first = self.help_position
             else:  # start help on same line as opts
-                opts = "%*s%-*s  " % (self.current_indent, "", opt_width, opts)
+                opts = '%*s%-*s  ' % (self.current_indent, '', opt_width, opts)
                 indent_first = 0
             result.append(opts)
             if option.help:
                 help_text = self.expand_default(option)
                 help_lines = help_text.split('\n')
                 # help_lines = textwrap.wrap(help_text, self.help_width)
-                result.append("%*s%s\n" % (indent_first, "", help_lines[0]))
-                result.extend(["%*s%s\n" % (self.help_position, "", line)
+                result.append('%*s%s\n' % (indent_first, '', help_lines[0]))
+                result.extend(['%*s%s\n' % (self.help_position, '', line)
                                for line in help_lines[1:]])
-            elif opts[-1] != "\n":
-                result.append("\n")
-            return "".join(result)
+            elif opts[-1] != '\n':
+                result.append('\n')
+            return ''.join(result)
 
     parser = optparse.OptionParser(
         usage='%prog [options] input_path output_path',
@@ -926,21 +963,26 @@ def get_parser():
         formatter=MyFormatter(),
     )
     parser.add_option('-h', '--help', action='help', help='Display help')
-    parser.add_option(
-        '--version', action='store_true',
-        help='Display current version, license notice, and copyright notice')
-    parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
-    parser.add_option('--action', type=int, help=ACTION_HELP)
-    parser.add_option('--all_in_one', action='store_true', help=ALL_IN_ONE_HELP)
-    parser.add_option('--copy_files', type='string', help=COPY_FILES_HELP)
-    parser.add_option('--license_text_location', type='string', help=LICENSE_TEXT_LOCATION_HELP)
-    parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
-    parser.add_option(
-        '--extract_license', type='string', nargs=3, help=EXTRACT_LICENSE_HELP)
+    parser.add_option('--version', action='store_true',
+                      help='Display version, license and copyright notice')
+    parser.add_option('--verbosity', type=int,
+                      help=VERBOSITY_HELP)
+    parser.add_option('--action', type=int,
+                      help=ACTION_HELP)
+    parser.add_option('--all_in_one', action='store_true',
+                      help=ALL_IN_ONE_HELP)
+    parser.add_option('--copy_files', type='string',
+                      help=COPY_FILES_HELP)
+    parser.add_option('--license_text_location', type='string',
+                      help=LICENSE_TEXT_LOCATION_HELP)
+    parser.add_option('--mapping', action='store_true',
+                      help=MAPPING_HELP)
+    parser.add_option('--extract_license', type='string', nargs=3,
+                      help=EXTRACT_LICENSE_HELP)
     return parser
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = get_parser()
     options, args = parser.parse_args()
     main(parser, options, args)

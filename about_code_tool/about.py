@@ -621,7 +621,7 @@ class AboutFile(object):
 
             # invalid field characters
             _invalid_chars, warn = (
-                    self.check_invalid_chars_in_field_name(field_name, line))
+                    check_invalid_chars(field_name, line))
             if warn:
                 warnings.append(warn)
                 last_line_is_field_or_continuation = False
@@ -661,26 +661,6 @@ class AboutFile(object):
             warnings = Warn(IGNORED, field_name, line, msg)
         return warnings
 
-    @staticmethod
-    def check_invalid_chars_in_field_name(field_name, line):
-        """
-        Return a sequence of invalid characters in a field name.
-        From spec 0.8.0:
-            A field name can contain only these US-ASCII characters:
-            <li> digits from 0 to 9 </li>
-            <li> uppercase and lowercase letters from A to Z</li>
-            <li> the _ underscore sign. </li>
-        """
-        supported = string.digits + string.ascii_letters + '_'
-        warnings = ''
-        invalid_chars = [char for char in field_name
-                         if char not in supported]
-        if invalid_chars:
-            msg = ('Field name contains invalid characters: %r: line ignored.'
-                   % (''.join(invalid_chars)))
-
-            warnings = Warn(IGNORED, field_name, line, msg)
-        return invalid_chars, warnings
 
     def normalize(self):
         """
@@ -719,7 +699,7 @@ class AboutFile(object):
 
         for field_name, value in self.validated_fields.items():
             self.check_is_ascii(self.validated_fields.get(field_name))
-            #self.validate_known_optional_fields(field_name)
+            # self.validate_known_optional_fields(field_name)
             self.validate_file_field_exists(field_name, value)
             self.validate_url_field(field_name, network_check=False)
             self.validate_spdx_license(field_name, value)
@@ -963,6 +943,7 @@ class AboutFile(object):
         Create a csv compatible row of data for this object.
         """
         row = [updated_path]
+        # FIXME: this list is not used? what was the intent?
         custom_field = []
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
             if field in self.validated_fields:
@@ -1013,7 +994,7 @@ class AboutFile(object):
             files stored in the same directory have the same lowercase file
             name.
         """
-        # TODO: Add a test
+        # TODO: Add a test, only for a case sensitive FS, such as on Linux
         names = []
         for name in os.listdir(os.path.dirname(file_location)):
             if name.lower() in names:
@@ -1067,6 +1048,27 @@ class AboutFile(object):
         Return the about object's name.
         """
         return self.parsed.get('name', '')
+
+
+def check_invalid_chars(field_name, line):
+    """
+    Return a sequence of invalid characters in a field name.
+    From spec 0.8.0:
+        A field name can contain only these US-ASCII characters:
+        <li> digits from 0 to 9 </li>
+        <li> uppercase and lowercase letters from A to Z</li>
+        <li> the _ underscore sign. </li>
+    """
+    supported = string.digits + string.ascii_letters + '_'
+    warnings = ''
+    invalid_chars = [char for char in field_name
+                     if char not in supported]
+    if invalid_chars:
+        msg = ('Field name contains invalid characters: %r: line ignored.'
+               % (''.join(invalid_chars)))
+
+        warnings = Warn(IGNORED, field_name, line, msg)
+    return invalid_chars, warnings
 
 
 class Collector(object):
@@ -1213,7 +1215,7 @@ class Collector(object):
             header_row = HEADER_ROW_FIELDS
             # Add the non-supported fields if exist
             for key in custom_keys:
-                header_row += (key, )
+                header_row += (key,)
             header_row += ERROR_WARN_FIELDS
             csv_writer.writerow(header_row)
 
@@ -1349,13 +1351,16 @@ Print more or fewer verbose messages while processing ABOUT files:
 """
 )
 
+
+ERROR = 0
+OK = 1
 def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
 
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
-        sys.exit(0)
+        return ERROR
 
     if verbosity == 1:
         handler.setLevel(logging.ERROR)
@@ -1366,7 +1371,7 @@ def main(parser, options, args):
         print('Input and Output paths are required.')
         print()
         parser.print_help()
-        sys.exit(errno.EEXIST)
+        return errno.EEXIST
 
     input_path, output_path = args
     output_path = os.path.abspath(output_path)
@@ -1375,26 +1380,26 @@ def main(parser, options, args):
         print('Input path does not exist.')
         print()
         parser.print_help()
-        sys.exit(errno.EEXIST)
+        return errno.EEXIST
 
     if os.path.isdir(output_path):
         print('Output must be a file, not a directory.')
         print()
         parser.print_help()
-        sys.exit(errno.EISDIR)
+        return errno.EISDIR
 
     if not output_path.endswith('.csv'):
         print('Output file name must end with ".csv".')
         print()
         parser.print_help()
-        sys.exit(errno.EINVAL)
+        return errno.EINVAL
 
     if os.path.exists(output_path) and not overwrite:
         print('Output file already exists. Select a different file name '
               'or use the --overwrite option.')
         print()
         parser.print_help()
-        sys.exit(errno.EEXIST)
+        return errno.EEXIST
 
     if (not os.path.exists(output_path)
         or (os.path.exists(output_path) and overwrite)):
@@ -1404,6 +1409,7 @@ def main(parser, options, args):
             print('%d errors detected.' % len(collector.errors))
         if collector.warnings:
             print('%d warnings detected.' % len(collector.warnings))
+        return OK
     else:
         # we should never reach this
         assert False, 'Unsupported option(s).'
@@ -1464,4 +1470,4 @@ def get_parser():
 if __name__ == '__main__':
     parser = get_parser()
     options, args = parser.parse_args()
-    main(parser, options, args)
+    sys.exit(main(parser, options, args))
