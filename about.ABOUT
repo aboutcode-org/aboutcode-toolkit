@@ -17,7 +17,7 @@ description: AboutCode is a tool to process ABOUT files. An ABOUT file
  codebase side-by-side with the documented software component.
 
 
-dej_license: apache-2.0
+dje_license: apache-2.0
 license_text_file: apache-2.0.LICENSE
 license_spdx: Apache-2.0
 copyright: Copyright (c) 2013-2014 nexB Inc.
