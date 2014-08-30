@@ -661,7 +661,6 @@ class AboutFile(object):
             warnings = Warn(IGNORED, field_name, line, msg)
         return warnings
 
-
     def normalize(self):
         """
         Convert field names to lower case. If a field name occurs multiple
