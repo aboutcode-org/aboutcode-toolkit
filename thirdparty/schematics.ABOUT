@@ -1,0 +1,12 @@
+about_resource: schematics-0.9_5-py2-none-any.whl
+name: schematics
+version: 0.9-5
+
+download_url: https://pypi.python.org/packages/source/s/schematics/schematics-0.9-5.tar.gz#md5=82ba0d67aa2600421877edcd9e7500f7
+
+home_url: https://github.com/schematics/schematics
+owner: J2 Labs LLC.
+copyright: Copyright (c) 2013, J2 Labs LLC.
+
+dje_license: bsd-new
+license_text_file: schematics.LICENSE

@@ -7,12 +7,16 @@ set PYTHON="c:\Python27\python.exe"
 
 @rem ROOT_DIR must have been set by the calling script
 
+cd %ROOT_DIR%
+
 set CONFIGURED_PYTHON=%ROOT_DIR%\Scripts\python.exe
 
 if "%1"=="--clean" goto clean
 
-@rem create bin dir
-if not exist %ROOT_DIR%\bin mkdir %ROOT_DIR%\bin
+@rem create Scripts dir
+if not exist %ROOT_DIR%\Scripts mkdir %ROOT_DIR%\Scripts
+@rem Link bin dir as Junction (aka Symbolic link)
+if not exist %ROOT_DIR%\bin mklink /J %ROOT_DIR%\bin %ROOT_DIR%\Scripts
 
 set CMD_LINE_ARGS= 
 @rem Collect all command line arguments in a variable
@@ -68,8 +72,8 @@ goto EOS
 :clean
 echo * Cleaning ...
 if exist %ROOT_DIR%\Scripts\deactivate.bat call %ROOT_DIR%\Scripts\deactivate
-cd %ROOT_DIR%
-rmdir /S /Q bin build Scripts Lib Include 2>NUL
+rmdir /S /Q %ROOT_DIR%\bin %ROOT_DIR%\build %ROOT_DIR%\Scripts %ROOT_DIR%\Lib %ROOT_DIR%\Include 2>NUL
+rmdir /S /Q %ROOT_DIR%\eggs %ROOT_DIR%\parts %ROOT_DIR%\develop-eggs %ROOT_DIR%\.installed.cfg 2>NUL
 goto EOS
 
 
