@@ -61,7 +61,7 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 
 
-Error = namedtuple('Error', ['severity', 'message'], verbose=True)
+Error = namedtuple('Error', ['severity', 'message'])
 
 def error_repr(self):
     sev = severities[self.severity]
@@ -69,6 +69,7 @@ def error_repr(self):
     return 'Error(%(sev)s, %(msg)r)' % locals()
 
 Error.__repr__ = error_repr
+
 
 # modeled after the logging levels
 CRITICAL = 50
@@ -101,17 +102,15 @@ class Field(object):
         self.present = present
         self.errors = []
 
-    def validate(self, **kwargs):
+    def validate(self, *args, **kwargs):
         """
         Validate and normalize thyself. Return a list of errors.
         """
         name = self.name
         errors = []
-        if name == 'about_resource':
-            print('validate: name/value:', repr(self.name), repr(self.value))
-            print(' ', repr(self))
         if self.present:
             if not self.has_content:
+                self.value = None
                 # check empties
                 if self.required:
                     msg = u'Field %(name)s is required and empty'
@@ -121,7 +120,7 @@ class Field(object):
                     msg = u'Field %(name)s is present but empty'
                 errors.append(Error(severity, msg % locals()))
             else:
-                validation_errors = self._validate(kwargs)
+                validation_errors = self._validate(*args, ** kwargs)
                 errors.extend(validation_errors)
 
         else:
@@ -149,16 +148,9 @@ class Field(object):
         """
         return self._serialize()
 
-    def _serialize(self):
-        """
-        Return a unicode serialization of self in the ABOUT format.
-        Subclasses must implement this for custom validation. 
-        """
-        return u'%(name)s: %(value)s' % self.__dict__
-
     @property
     def has_content(self):
-        return self.value
+        return True if self.value else False
 
     def __repr__(self):
         name = self.name
@@ -167,7 +159,7 @@ class Field(object):
         has_content = self.has_content
         present = self.present
         r = ('Field(name=%(name)r, value=%(value)r, required=%(required)r, '
-             'present=%(present)r, has_content=%(has_content)r')
+             'present=%(present)r)')
         return r % locals()
 
 
@@ -176,10 +168,7 @@ class StringField(Field):
     A field containing a string value possibly on multiple lines.
     """
     def _validate(self, *args, **kwargs):
-        errors = super(StringField, self)._validate(args, kwargs)
-        # single string value: a multi-line string
-        if self.value:
-            self.value = u'\n'.join(self.value)
+        errors = super(StringField, self)._validate(*args, ** kwargs)
         return errors
 
     def _serialize(self):
@@ -187,15 +176,14 @@ class StringField(Field):
         # prefix each line with one space for continuations
         if not self.has_content:
             value = ''
-        else:
-            value = self.value.splitlines(True)
-            value = u' '.join(value)
         return u'%(name)s: %(value)s' % locals()
 
     @property
     def has_content(self):
-        if self.value:
-            return u''.join(self.value).strip()
+        if self.value and u''.join(self.value).strip():
+            return True
+        else:
+            return False
 
 
 class SingleLineField(StringField):
@@ -203,33 +191,41 @@ class SingleLineField(StringField):
     A field containing a string value on a single line.
     """
     def _validate(self, *args, **kwargs):
-        errors = super(SingleLineField, self)._validate(args, kwargs)
+        errors = super(SingleLineField, self)._validate(*args, ** kwargs)
         if self.value and '\n' in self.value:
             name = self.name
             value = self.value
             msg = (u'Field %(name)s: Cannot span multiple lines: %(value)s'
                    % locals())
             errors.append(Error(ERROR, msg))
-
         return errors
 
 
-class ListField(Field):
+class ListField(StringField):
     """
     A field containing a list of string values, one per line
     """
+    def _validate(self, *args, **kwargs):
+        print('ListField:', self.value)
+        errors = super(ListField, self)._validate(*args, ** kwargs)
+        if self.value:
+            self.value = [v.strip() for v in self.value.splitlines()]
+        else:
+            self.value = []
+        return errors
+
     def _serialize(self):
         name = self.name
-        # add newline
-        value = [val.rstrip() + u'\n' for val in self.value]
-        # prefix lines with one space for continuations and
+        # add newline only if multiple values
+        if len(self.value) > 1:
+            value = [val + u'\n' for val in self.value]
+        # prefix lines with one space for continuation
         value = u' '.join(value)
         return u'%(name)s: %(value)s' % locals()
 
     @property
     def has_content(self):
-        if self.value:
-            return u''.join(self.value).strip()
+        return True if self.value else False
 
 
 class PathField(ListField):
@@ -242,28 +238,41 @@ class PathField(ListField):
         paths. Return a list of errors. base_dir is the directory used to
         resolve a file location from a path.
         """
-        errors = super(PathField, self)._validate(args, kwargs)
-
+        errors = super(PathField, self)._validate(*args, ** kwargs)
         self.base_dir = kwargs.get('base_dir')
+        if self.base_dir:
+            self.base_dir = to_posix(self.base_dir)
 
         name = self.name
         # mapping of normalized paths to a location or None
         paths = OrderedDict()
-
         for path in self.value:
             path = path.strip()
             path = to_posix(path)
-            path = path.lstrip(posixpath.sep)
+
+            # normalize eventual / to .
+            if path == posixpath.sep:
+                path = '.'
+
+            if path.strip() and not path.strip(posixpath.sep):
+                # a succession of ////
+                path = '.'
+
+            # removing leading and trailing path separator
+            # path are always relative
+            path = path.strip(posixpath.sep)
 
             if self.base_dir:
-                location = posixpath.join(self.base_dir,
-                                          posixpath.normpath(path))
-                if os.path.exists(location):
-                    continue
+                location = posixpath.join(self.base_dir,path)
+                location = to_native(location)
+                location = os.path.abspath(os.path.normpath(location))
+                location = to_posix(location)
 
-                msg = (u'Field %(name)s: Path %(path)s not found '
-                       u'at: %(location)s' % locals())
-                errors.append(Error(CRITICAL, msg))
+                if not os.path.exists(location):
+                    msg = (u'Field %(name)s: Path %(path)s not found'
+                           % locals())
+                    errors.append(Error(CRITICAL, msg))
+                    location = None
             else:
                 location = None
                 msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
@@ -277,8 +286,10 @@ class PathField(ListField):
 
     @property
     def has_content(self):
-        if self.value:
-            return u''.join(self.value).strip()
+        if self.value and u''.join(self.value).strip():
+            return True
+        else:
+            return False
 
 
 class TextField(PathField):
@@ -291,18 +302,16 @@ class TextField(PathField):
         of errors. base_dir is the directory used to resolve a file location
         from a path.
         """
-        errors = super(TextField, self)._validate(args, kwargs)
+        errors = super(TextField, self)._validate(*args, ** kwargs)
         # a TextField is a PathField
         # self.value is a paths to location ordered mapping
         # we will replace the location with the text content
         name = self.name
         for path, location in self.value.items():
             if not location:
-                msg = (u'Field %(name)s: No location available. '
-                       u'Unable to load text at: '
-                       u'%(path)s' % locals())
-                errors.append(Error(ERROR, msg))
                 # do not try to load if no location
+                # errors about non existing locations are PathField errors
+                # alreday collected.
                 continue
 
             try:
@@ -312,18 +321,20 @@ class TextField(PathField):
                 # only keep the first 100 char of the exception
                 emsg = repr(e)[:100]
                 msg = (u'Field %(name)s: Failed to load text at path: '
-                       u'%(path)s from location: %(location)s '
+                       u'%(path)s '
                        u'with error: %(emsg)s' % locals())
                 errors.append(Error(ERROR, msg))
         return errors
 
     @property
     def has_content(self):
-        if self.value:
-            return u''.join(self.value).strip()
+        if self.value and u''.join(self.value).strip():
+            return True
+        else:
+            return False
 
 
-class BooleanField(StringField):
+class BooleanField(SingleLineField):
     """
     An flag field with a boolean value.
     """
@@ -345,7 +356,8 @@ class BooleanField(StringField):
         Check that flag are valid. Convert flags to booleans. Return a list of
         errors.
         """
-        errors = super(BooleanField, self)._validate(args, kwargs)
+        print('BooleanField _validate name:', self.name)
+        errors = super(BooleanField, self)._validate(*args, ** kwargs)
         if self.value:
             val = self.value.lower()
             flag = self.flags.get(val, None)
@@ -365,6 +377,8 @@ class BooleanField(StringField):
         # FIXME: does not work for flags
         if self.value != None:
             return True
+        else:
+            return False
 
     def _serialize(self):
         # default normalized values for serialization
@@ -383,7 +397,9 @@ class UrlField(ListField):
         """
         Check that URLs are valid. Return a list of errors.
         """
-        errors = super(UrlField, self)._validate(args, kwargs)
+        print('UrlField _validate name:', self.name)
+
+        errors = super(UrlField, self)._validate(*args, ** kwargs)
         for url in self.value:
             if not is_valid_url(url):
                 name = self.name
@@ -407,7 +423,7 @@ def validate_fields(fields, base_dir):
     Validation may update the Field objects as needed as a side effect.
     """
     errors = []
-    for field in fields.values():
+    for field in fields:
         errors.extend(field.validate(base_dir=base_dir))
     return errors
 
@@ -425,9 +441,9 @@ class About(object):
         """
         self.fields = OrderedDict(
             about_resource=PathField(required=True),
-            name=StringField(required=True),
+            name=SingleLineField(required=True),
 
-            version=StringField(),
+            version=SingleLineField(),
             download_url=UrlField(),
             description=StringField(),
             home_url=UrlField(),
@@ -453,15 +469,15 @@ class About(object):
             contact=ListField(),
             author=ListField(),
 
-            vcs_tool=StringField(),
-            vcs_repository=StringField(),
-            vcs_path=StringField(),
-            vcs_tag=StringField(),
-            vcs_branch=Field(),
-            vcs_revision=StringField(),
+            vcs_tool=SingleLineField(),
+            vcs_repository=SingleLineField(),
+            vcs_path=SingleLineField(),
+            vcs_tag=SingleLineField(),
+            vcs_branch=SingleLineField(),
+            vcs_revision=SingleLineField(),
 
             checksum=ListField(),
-            spec_version=StringField(),
+            spec_version=SingleLineField(),
         )
 
         for name, field in self.fields.items():
@@ -512,19 +528,27 @@ class About(object):
 
     def hydrate(self, fields):
         """
-        Process an iterable of field tuples (name, [value]). Update or create
+        Process an iterable of field (name, value) tuples. Update or create
         Fields attributes and the fields and custom fields dictionaries.
         Return a list of errors.
         """
         errors = []
         seen_fields = OrderedDict()
         for name, value in fields:
+            # normalize to lower case
+            orig_name = name
             name = name.lower()
-            overridden = seen_fields.get(name)
-            if overridden:
-                msg = ('Field %(name)s: duplicated. Value: %(overridden)r '
-                       'overridden with: %(value)r')
-                errors.append(Error(WARNING, msg % locals()))
+            previous_value = seen_fields.get(name)
+            if previous_value:
+                if value != previous_value:
+                    msg = (u'Field %(orig_name)s is a duplicate. '
+                           u'Original value: "%(previous_value)s" '
+                           u'replaced with: "%(value)s"')
+                    errors.append(Error(WARNING, msg % locals()))
+                else:
+                    msg = (u'Field %(orig_name)s is a duplicate '
+                           u'with the same value as before.')
+                    errors.append(Error(INFO, msg % locals()))
             else:
                 seen_fields[name] = value
 
@@ -533,20 +557,19 @@ class About(object):
                 standard_field.value = value
                 standard_field.present = True
             else:
-                val = u'\n'.join(value)
-                msg = (u'Field %(name)s is a custom field')
+                msg = (u'Field %(orig_name)s is a custom field')
                 errors.append(Error(INFO, msg % locals()))
-
                 custom_field = self.custom_fields.get(name)
-
                 if custom_field:
                     custom_field.value = value
                     custom_field.present = True
                 else:
                     if name in dir(self):
-                        msg = (u'Field %(name)s is an illegal reserved name')
+                        msg = (u'Field %(orig_name)s has an '
+                               u'illegal reserved name')
                         errors.append(Error(ERROR, msg % locals()))
                     else:
+                        # custom fields are always handled as StringFields
                         custom_field = StringField(name=name,
                                                    value=value,
                                                    present=True)
@@ -576,12 +599,11 @@ class About(object):
         Read, parse, hydrate and validate the ABOUT file lines list of location.
         """
         parse_errors, fields = parse(loc_or_list)
-        fields = lower_names(fields)
         self.errors.extend(parse_errors)
         hydratation_errors = self.hydrate(fields)
         self.errors.extend(hydratation_errors)
         # we validate all fields, not only these hydrated
-        validation_errors = validate_fields(self.fields, self.base_dir)
+        validation_errors = validate_fields(self.all_fields(), self.base_dir)
         self.errors.extend(validation_errors)
 
     def dumps(self):
@@ -604,7 +626,7 @@ def parse(location_or_lines):
     """
     Parse the ABOUT file at location (or a list of unicode lines). Return a
     list of errors found during parsing and a list of tuples of (name,
-    [value]) where the value is a list of strings, one per line.
+    value) strings.
     """
     # NB: we could define the re as globals but re caching does not
     # require this: having them here makes this clearer
@@ -686,21 +708,37 @@ def parse(location_or_lines):
     if name:
         fields.append((name, value,))
 
+    # rejoin eventual multi-line string values
+    fields = [(name, u'\n'.join(value)) for name, value in fields]
+
     return errors, fields
 
 
-def lower_names(field_tuples):
-    """
-    Return a list of fields name/value tuples where the name is lowercased
-    """
-    return [(n.lower(), v,) for n, v in field_tuples]
+
+valid_file_chars = string.digits + string.ascii_letters + '_-.'
 
 
-def check_duplicate_file_names(paths):
+def invalid_chars(path):
     """
-    Given an iterable of ABOUT file paths, check for case-insensitive
-    duplicate file names. Return a list of errors.
+    Return a list of invalid characters in the file name of path
+    """
+    path = to_posix(path)
+    rname = resource_name(path)
+    name = rname.lower()
+    return [c for c in name if c not in valid_file_chars]
 
+
+def check_file_names(paths):
+    """
+    Given a sequence of file paths, check that file names are valid and that
+    there are no case-insensitive duplicates in any given directories. 
+    Return a list of errors.
+
+    From spec :
+        A file name can contain only these US-ASCII characters:
+        - digits from 0 to 9
+        - uppercase and lowercase letters from A to Z
+        - the _ underscore, - dash and . period signs.
     From spec:
      The case of a file name is not significant. On case-sensitive file
      systems (such as Linux), a tool must raise an error if two ABOUT files
@@ -709,6 +747,14 @@ def check_duplicate_file_names(paths):
     seen = {}
     errors = []
     for orig_path in paths:
+        path = orig_path
+        invalid = invalid_chars(path)
+        if invalid:
+            invalid = ''.join(invalid)
+            msg = ('Invalid characters %(invalid)r in file name at: '
+                   '%(path)r' % locals())
+            errors.append(Error(CRITICAL, msg))
+
         path = to_posix(orig_path)
         name = resource_name(path).lower()
         parent = posixpath.dirname(path)
@@ -717,38 +763,11 @@ def check_duplicate_file_names(paths):
         path = posixpath.abspath(path)
         existing = seen.get(path)
         if existing:
-            msg = ('Duplicate ABOUT files: %(orig_path)r and %(existing)r '
-                   'have the same case-insensitive file name' % locals)
+            msg = ('Duplicate files: %(orig_path)r and %(existing)r '
+                   'have the same case-insensitive file name' % locals())
             errors.append(Error(CRITICAL, msg))
         else:
             seen[path] = orig_path
-    return errors
-
-
-valid_file_chars = string.digits + string.ascii_letters + '_-.'
-
-
-def check_file_names(paths):
-    """
-    Given a sequence of ABOUT file paths, check that file names are valid.
-    Return a list of errors.
-
-    From spec :
-        A file name can contain only these US-ASCII characters:
-        - digits from 0 to 9
-        - uppercase and lowercase letters from A to Z
-        - the _ underscore, - dash and . period signs.
-    """
-    errors = []
-    for orig_path in paths:
-        path = to_posix(orig_path)
-        rname = resource_name(path)
-        name = rname.lower()
-        valid = all(c in valid_file_chars for c in name)
-        if not valid:
-            msg = ('Invalid characters in ABOUT file name: '
-                   '%(name)r at %(orig_path)r' % locals)
-            errors.append(Error(CRITICAL, msg))
     return errors
 
 
@@ -759,10 +778,12 @@ def inventory(location):
     """
     errors = []
     locations = list(get_locations(location))
-    duplicate_errors = check_duplicate_file_names(locations)
+    duplicate_errors = check_file_names(locations)
     errors.extend(duplicate_errors)
+
     name_errors = check_file_names(locations)
     errors.extend(name_errors)
+
     abouts = [About(loc) for loc in locations]
     for about in abouts:
         errors.extend(about.errors)
@@ -771,28 +792,38 @@ def inventory(location):
 
 def get_locations(location):
     """
-    Return a list of locations of *.ABOUT files given the location of an
-    ABOUT file or a directory tree containing ABOUT files.
-    Locations are normalized using posix path separators.
+    Return a list of locations of files given the location of a
+    a file or a directory tree containing ABOUT files.
+    File locations are normalized using posix path separators.
     """
     location = os.path.expanduser(location)
+    location = os.path.expandvars(location)
     location = os.path.normpath(location)
     location = os.path.abspath(location)
     location = to_posix(location)
     assert os.path.exists(location)
 
-    if os.path.isfile(location) and is_about_file(location):
+    if os.path.isfile(location):
         yield location
     else:
         for base_dir, _, files in os.walk(location):
             for name in files:
-                if not is_about_file(name):
-                    continue
                 bd = to_posix(base_dir)
                 yield posixpath.join(bd, name)
 
 
-def log_errors(errors, level=NOTSET):
+def get_about_locations(location):
+    """
+    Return a list of locations of ABOUT files given the location of a
+    a file or a directory tree containing ABOUT files.
+    File locations are normalized using posix path separators.
+    """
+    for loc in get_locations(location):
+        if is_about_file(loc):
+            yield loc
+
+
+def log_errors(errors, logger=logger, level=NOTSET):
     """
     Iterate of sequence of Error objects and log errors with a severity
     superior or equal to level.
