@@ -237,10 +237,10 @@ Purpose
 Options
 -------
 
-    --template_loaction
+    --template_location
 
-        This option allows user to use its own template for Attribution Generation.
-        For instance, if the custom template the user want to use is located at:
+        This option allows you to use your own template for Attribution Generation.
+        For instance, if the custom template you want to use is located at:
         /home/custom_template/template.html
 
             $ python genattrib.py --template_location=/home/custom_template/template.html input_path output_path component_list
