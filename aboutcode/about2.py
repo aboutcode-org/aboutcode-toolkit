@@ -37,7 +37,7 @@ import ntpath
 from collections import namedtuple, OrderedDict
 
 
-__version__ = '0.10.0'
+__version__ = '0.11.0'
 
 __about_spec_version__ = 'simplification'
 
