@@ -1,0 +1,228 @@
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
+
+# ============================================================================
+#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#      http://www.apache.org/licenses/LICENSE-2.0
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# ============================================================================
+
+from __future__ import print_function
+
+import unittest
+import string
+
+from aboutcode.tests import get_test_loc
+from aboutcode.tests import on_posix
+from aboutcode.tests import on_windows
+
+from aboutcode import Error
+from aboutcode import CRITICAL
+
+from aboutcode import util
+
+class UtilsTest(unittest.TestCase):
+
+    def test_resource_name(self):
+        expected = 'first'
+        result = util.resource_name('some/things/first')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_with_extension(self):
+        expected = 'first.ABOUT'
+        result = util.resource_name('/some/things/first.ABOUT')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_for_dir(self):
+        expected = 'first'
+        result = util.resource_name('some/things/first/')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_windows(self):
+        expected = r'first.'
+        result = util.resource_name(r'c:\some\things\first.')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_mixed_windows_posix(self):
+        expected = r'first'
+        result = util.resource_name(r'c:\some/things\first')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_double_slash(self):
+        expected = 'first'
+        result = util.resource_name(r'some\thi ngs//first')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_punctuation(self):
+        expected = '_$asafg:'
+        result = util.resource_name('%6571351()2/75612$/_$asafg:')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_simple_slash(self):
+        expected = ''
+        result = util.resource_name('/')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_spaces(self):
+        expected = ''
+        result = util.resource_name('/  /  ')
+        self.assertEqual(expected, result)
+
+    def test_resource_name_does_not_recurse_infinitely(self):
+        expected = ''
+        result = util.resource_name(' / ')
+        self.assertEqual(expected, result)
+
+    def test_to_posix_from_win(self):
+        test = r'c:\this\that'
+        expected = 'c:/this/that'
+        result = util.to_posix(test)
+        self.assertEqual(expected, result)
+
+    def test_to_posix_from_posix(self):
+        test = r'/this/that'
+        expected = '/this/that'
+        result = util.to_posix(test)
+        self.assertEqual(expected, result)
+
+    def test_to_posix_from_mixed(self):
+        test = r'/this/that\this'
+        expected = '/this/that/this'
+        result = util.to_posix(test)
+        self.assertEqual(expected, result)
+
+    def test_to_native_from_win(self):
+        test = r'c:\this\that'
+        if on_posix:
+            expected = 'c:/this/that'
+        else:
+            expected = test
+        result = util.to_native(test)
+        self.assertEqual(expected, result)
+
+    def test_to_native_from_posix(self):
+        test = r'/this/that'
+        if on_windows:
+            expected = r'\this\that'
+        else:
+            expected = test
+        result = util.to_native(test)
+        self.assertEqual(expected, result)
+
+    def test_to_native_from_mixed(self):
+        test = r'/this/that\this'
+        if on_windows:
+            expected = r'\this\that\this'
+        else:
+            expected = r'/this/that/this'
+        result = util.to_native(test)
+        self.assertEqual(expected, result)
+
+    def test_get_locations(self):
+        test_dir = get_test_loc('locations')
+        expected = sorted([
+                    'locations/file with_spaces',
+                    'locations/file1',
+                    'locations/file2',
+                    'locations/dir1/file2',
+                    'locations/dir1/dir2/file1',
+                    'locations/dir2/file1'])
+
+        result = sorted(util.get_locations(test_dir))
+        for i, res in enumerate(result):
+            expect = expected[i]
+            self.assertTrue(res.endswith(expect),
+                            '%(res)r does not ends with: %(expect)r'
+                            % locals())
+
+    def test_get_about_locations_with_no_ABOUT_files(self):
+        test_dir = get_test_loc('locations')
+        expected = []
+        result = list(util.get_about_locations(test_dir))
+        self.assertEqual(expected, result)
+
+    def test_get_about_locations_with_ABOUT_files(self):
+        test_dir = get_test_loc('about_locations')
+        expected = sorted([
+                    'locations/file with_spaces.ABOUT',
+                    'locations/dir1/file2.aBout',
+                    'locations/dir1/dir2/file1.about',
+                    ])
+
+        result = sorted(util.get_about_locations(test_dir))
+        for i, res in enumerate(result):
+            expect = expected[i]
+            self.assertTrue(res.endswith(expect),
+                            '%(res)r does not ends with: %(expect)r'
+                            % locals())
+
+    def test_invalid_chars_with_valid_chars(self):
+        name = string.digits + string.ascii_letters + '_-.'
+        result = util.invalid_chars(name)
+        expected = []
+        self.assertEqual(expected, result)
+
+    def test_invalid_chars_with_invalid_in_name_and_dir(self):
+        result = util.invalid_chars('_$as/afg:')
+        expected = [':']
+        self.assertEqual(expected, result)
+
+    def test_invalid_chars_in_file_name(self):
+        name = '%657!1351()275612$_$asafg:'
+        result = util.invalid_chars(name)
+        expected = ['%', '!', '(', ')', '$', '$', ':']
+        self.assertEqual(expected, result)
+
+    def test_invalid_chars_with_space(self):
+        result = util.invalid_chars('_ Hello')
+        expected = [' ']
+        self.assertEqual(expected, result)
+
+    def test_check_file_names_with_dupes_return_errors(self):
+        paths = ['some/path',
+                 'some/PAth']
+        result = util.check_file_names(paths)
+        expected = [Error(CRITICAL, "Duplicate files: 'some/PAth' and 'some/path' have the same case-insensitive file name")]
+        self.assertEqual(expected, result)
+
+    def test_check_file_names_without_dupes_return_no_error(self):
+        paths = ['some/path',
+                 'some/otherpath']
+        result = util.check_file_names(paths)
+        expected = []
+        self.assertEqual(expected, result)
+
+    def test_check_file_names_with_no_invalid_char_return_no_error(self):
+        paths = ['locations/file',
+                 'locations/file1',
+                 'locations/file2',
+                 'locations/dir1/file2',
+                 'locations/dir1/dir2/file1',
+                 'locations/dir2/file1']
+
+        expected = []
+        result = util.check_file_names(paths)
+        self.assertEqual(expected, result)
+
+    def test_check_file_names_with_invalid_chars_return_errors(self):
+        paths = ['locations/file',
+                 'locations/file with space',
+                 'locations/dir1/dir2/file1',
+                 'locations/dir2/file1']
+
+        expected = [Error(CRITICAL, "Invalid characters '  ' in file name at: 'locations/file with space'")]
+        result = util.check_file_names(paths)
+        self.assertEqual(expected, result)
+
+
+    def test_is_about_file(self):
+        self.assertTrue(util.is_about_file('test.About'))
+        self.assertTrue(util.is_about_file('test2.aboUT'))
+        self.assertFalse(util.is_about_file('no_about_ext.something'))

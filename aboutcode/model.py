@@ -30,63 +30,17 @@ import codecs
 import os
 import re
 import urlparse
-import string
-import logging
 import posixpath
-import ntpath
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 
 
-__version__ = '0.11.0'
+from aboutcode import Error
+from aboutcode import CRITICAL
+from aboutcode import WARNING
+from aboutcode import ERROR
+from aboutcode import INFO
 
-__about_spec_version__ = 'simplification'
-
-__copyright__ = """
-Copyright (c) 2013-2014 nexB Inc. All rights reserved. http://dejacode.org
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-handler.setLevel(logging.CRITICAL)
-handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-logger.addHandler(handler)
-
-
-Error = namedtuple('Error', ['severity', 'message'])
-
-def error_repr(self):
-    sev = severities[self.severity]
-    msg = self.message
-    return 'Error(%(sev)s, %(msg)r)' % locals()
-
-Error.__repr__ = error_repr
-
-
-# modeled after the logging levels
-CRITICAL = 50
-ERROR = 40
-WARNING = 30
-INFO = 20
-DEBUG = 10
-NOTSET = 0
-
-severities = {
-    CRITICAL : u'CRITICAL',
-    ERROR : u'ERROR',
-    WARNING : u'WARNING',
-    INFO : u'INFO',
-    DEBUG : u'DEBUG',
-    NOTSET : u'NOTSET'
-    }
+from aboutcode import util
 
 
 class Field(object):
@@ -241,14 +195,14 @@ class PathField(ListField):
         errors = super(PathField, self)._validate(*args, ** kwargs)
         self.base_dir = kwargs.get('base_dir')
         if self.base_dir:
-            self.base_dir = to_posix(self.base_dir)
+            self.base_dir = util.to_posix(self.base_dir)
 
         name = self.name
         # mapping of normalized paths to a location or None
         paths = OrderedDict()
         for path in self.value:
             path = path.strip()
-            path = to_posix(path)
+            path = util.to_posix(path)
 
             # normalize eventual / to .
             if path == posixpath.sep:
@@ -263,10 +217,10 @@ class PathField(ListField):
             path = path.strip(posixpath.sep)
 
             if self.base_dir:
-                location = posixpath.join(self.base_dir,path)
-                location = to_native(location)
+                location = posixpath.join(self.base_dir, path)
+                location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
-                location = to_posix(location)
+                location = util.to_posix(location)
 
                 if not os.path.exists(location):
                     msg = (u'Field %(name)s: Path %(path)s not found'
@@ -401,20 +355,21 @@ class UrlField(ListField):
 
         errors = super(UrlField, self)._validate(*args, ** kwargs)
         for url in self.value:
-            if not is_valid_url(url):
+            if not self.is_valid_url(url):
                 name = self.name
                 msg = (u'Field %(name)s: Invalid URL: %(val)s' % locals())
                 errors.append(Error(WARNING, msg))
         return errors
 
+    @staticmethod
+    def is_valid_url(url):
+        """
+        Return True if a URL is valid.
+        """
+        scheme, netloc, _path, _p, _q, _frg = urlparse.urlparse(url)
+        valid = scheme in ('http', 'https', 'ftp') and netloc
+        return valid
 
-def is_valid_url(url):
-    """
-    Return True if a URL is valid.
-    """
-    scheme, netloc, _path, _p, _q, _frg = urlparse.urlparse(url)
-    valid = scheme in ('http', 'https', 'ftp') and netloc
-    return valid
 
 
 def validate_fields(fields, base_dir):
@@ -582,7 +537,7 @@ class About(object):
         """
         Read, parse, hydrate and validate the ABOUT file at location.
         """
-        self.base_dir = posixpath.dirname(to_posix(self.location))
+        self.base_dir = posixpath.dirname(util.to_posix(self.location))
         self._load(location)
 
     def loads(self, s, base_dir):
@@ -714,74 +669,17 @@ def parse(location_or_lines):
     return errors, fields
 
 
-
-valid_file_chars = string.digits + string.ascii_letters + '_-.'
-
-
-def invalid_chars(path):
-    """
-    Return a list of invalid characters in the file name of path
-    """
-    path = to_posix(path)
-    rname = resource_name(path)
-    name = rname.lower()
-    return [c for c in name if c not in valid_file_chars]
-
-
-def check_file_names(paths):
-    """
-    Given a sequence of file paths, check that file names are valid and that
-    there are no case-insensitive duplicates in any given directories. 
-    Return a list of errors.
-
-    From spec :
-        A file name can contain only these US-ASCII characters:
-        - digits from 0 to 9
-        - uppercase and lowercase letters from A to Z
-        - the _ underscore, - dash and . period signs.
-    From spec:
-     The case of a file name is not significant. On case-sensitive file
-     systems (such as Linux), a tool must raise an error if two ABOUT files
-     stored in the same directory have the same lowercase file name.
-    """
-    seen = {}
-    errors = []
-    for orig_path in paths:
-        path = orig_path
-        invalid = invalid_chars(path)
-        if invalid:
-            invalid = ''.join(invalid)
-            msg = ('Invalid characters %(invalid)r in file name at: '
-                   '%(path)r' % locals())
-            errors.append(Error(CRITICAL, msg))
-
-        path = to_posix(orig_path)
-        name = resource_name(path).lower()
-        parent = posixpath.dirname(path)
-        path = posixpath.join(parent, name)
-        path = posixpath.normpath(path)
-        path = posixpath.abspath(path)
-        existing = seen.get(path)
-        if existing:
-            msg = ('Duplicate files: %(orig_path)r and %(existing)r '
-                   'have the same case-insensitive file name' % locals())
-            errors.append(Error(CRITICAL, msg))
-        else:
-            seen[path] = orig_path
-    return errors
-
-
 def inventory(location):
     """
     Collect ABOUT files at location and return a list of errors and a list of
     About objects.
     """
     errors = []
-    locations = list(get_locations(location))
-    duplicate_errors = check_file_names(locations)
+    locations = list(util.get_locations(location))
+    duplicate_errors = util.check_file_names(locations)
     errors.extend(duplicate_errors)
 
-    name_errors = check_file_names(locations)
+    name_errors = util.check_file_names(locations)
     errors.extend(name_errors)
 
     abouts = [About(loc) for loc in locations]
@@ -789,98 +687,3 @@ def inventory(location):
         errors.extend(about.errors)
     return errors, abouts
 
-
-def get_locations(location):
-    """
-    Return a list of locations of files given the location of a
-    a file or a directory tree containing ABOUT files.
-    File locations are normalized using posix path separators.
-    """
-    location = os.path.expanduser(location)
-    location = os.path.expandvars(location)
-    location = os.path.normpath(location)
-    location = os.path.abspath(location)
-    location = to_posix(location)
-    assert os.path.exists(location)
-
-    if os.path.isfile(location):
-        yield location
-    else:
-        for base_dir, _, files in os.walk(location):
-            for name in files:
-                bd = to_posix(base_dir)
-                yield posixpath.join(bd, name)
-
-
-def get_about_locations(location):
-    """
-    Return a list of locations of ABOUT files given the location of a
-    a file or a directory tree containing ABOUT files.
-    File locations are normalized using posix path separators.
-    """
-    for loc in get_locations(location):
-        if is_about_file(loc):
-            yield loc
-
-
-def log_errors(errors, logger=logger, level=NOTSET):
-    """
-    Iterate of sequence of Error objects and log errors with a severity
-    superior or equal to level.
-    """
-    for severity, message in errors:
-        if severity >= level:
-            logger.log(severity, message)
-
-
-def get_relative_path(base_loc, full_loc):
-    """
-    Return a posix path for a given full location relative to a base location.
-    The last segment of the base_loc will become the first segment of the
-    returned path.
-    """
-    base = to_posix(base_loc).rstrip(posixpath.sep)
-    base_name = resource_name(base)
-    path = to_posix(full_loc).lstrip(posixpath.sep)
-    assert path.starts(base)
-    relative = path[len(base):]
-    return posixpath.join(base_name, relative)
-
-
-def to_posix(path):
-    """
-    Return a path using the posix path separator given a path that may contain
-    posix or windows separators, converting \ to /. NB: this path will still
-    be valid in the windows explorer (except if UNC or share name). It will be
-    a valid path everywhere in Python. It will not be valid for windows
-    command line operations.
-    """
-    return path.replace(ntpath.sep, posixpath.sep)
-
-def to_native(path):
-    """
-    Return a path using the current OS path separator given a path that may
-    contain posix or windows separators, converting / to \ on windows and \ to
-    / on posix OSes.
-    """
-    path = path.replace(ntpath.sep, os.path.sep)
-    path = path.replace(posixpath.sep, os.path.sep)
-    return path
-
-
-def is_about_file(path):
-    """
-    Return True if the path represents a valid ABOUT file name.
-    """
-    return path and path.lower().endswith('.about')
-
-
-def resource_name(path):
-    """
-    Return the file or directory name from a path.
-    """
-    path = path.strip()
-    path = to_posix(path)
-    path = path.rstrip(posixpath.sep)
-    _left, right = posixpath.split(path)
-    return right.strip()
