@@ -26,9 +26,9 @@ import posixpath
 import sys
 import string
 
-from about_code_tool import about2
-from about_code_tool.about2 import Error
-from about_code_tool.about2 import (CRITICAL, ERROR, INFO,
+from aboutcode import about2
+from aboutcode.about2 import Error
+from aboutcode.about2 import (CRITICAL, ERROR, INFO,
                                     WARNING, DEBUG, NOTSET)
 
 

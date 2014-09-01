@@ -8,6 +8,6 @@ install:
     # extra reqs for testings on Travis
     - pip install coverage coveralls
 script:
-    - coverage run --source=about_code_tool setup.py test
+    - coverage run --source=aboutcode setup.py test
 after_success:
     - coveralls
