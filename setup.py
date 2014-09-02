@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from aboutcode import about
 
@@ -25,10 +25,7 @@ setup(
         'files, side-by-side with the documented code.'),
 
     license='Apache License 2.0',
-    packages=[
-        'aboutcode',
-        'aboutcode.tests'
-    ],
+    packages=find_packages(),
     package_data={
         'aboutcode': ['templates/*'],
         'aboutcode': ['tests/testdata/*'],
@@ -36,6 +33,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
 
+    entry_points='''
+        [console_scripts]
+        about-code=aboutcode.cmd:cli
+    ''',
 #     install_requires=[
 #         'Jinja2',
 #         'MarkuSafe',
@@ -62,8 +63,6 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Natural Language :: English',

@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#
+
+# cd to the root directory
+ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$ROOT_DIR"
+
+CONFIGURED_PYTHON=$ROOT_DIR/bin/python
+
+if [ ! -f "$CONFIGURED_PYTHON" ]; then
+    echo "* Configuring AboutCode ..."
+    source $ROOT_DIR/configure
+fi
+
+source $ROOT_DIR/bin/activate
+
+$ROOT_DIR/bin/about-code "$@"

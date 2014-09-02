@@ -23,5 +23,4 @@ if "%CFG_CMD_LINE_ARGS%"==" " (
 call %ROOT_DIR%\etc\configure %CFG_CMD_LINE_ARGS%
 goto EOS
 
-
 :EOS

@@ -16,7 +16,9 @@ if "%1"=="--clean" goto clean
 @rem create Scripts dir
 if not exist %ROOT_DIR%\Scripts mkdir %ROOT_DIR%\Scripts
 @rem Link bin dir as Junction (aka Symbolic link)
-if not exist %ROOT_DIR%\bin mklink /J %ROOT_DIR%\bin %ROOT_DIR%\Scripts
+if not exist %ROOT_DIR%\bin (
+    mklink /J %ROOT_DIR%\bin %ROOT_DIR%\Scripts
+)
 
 set CMD_LINE_ARGS= 
 @rem Collect all command line arguments in a variable
@@ -67,13 +69,18 @@ for /F %%i in (tmpscrfile) do (
 )
 del tmpscrfile > NUL
 
+@rem  enable local usage of entry points scripts
+cd %ROOT_DIR%
+pip install --upgrade --no-index --no-allow-external --editable .
+
+
 goto EOS
 
 :clean
 echo * Cleaning ...
 if exist %ROOT_DIR%\Scripts\deactivate.bat call %ROOT_DIR%\Scripts\deactivate
 rmdir /S /Q %ROOT_DIR%\bin %ROOT_DIR%\build %ROOT_DIR%\Scripts %ROOT_DIR%\Lib %ROOT_DIR%\Include 2>NUL
-rmdir /S /Q %ROOT_DIR%\eggs %ROOT_DIR%\parts %ROOT_DIR%\develop-eggs %ROOT_DIR%\.installed.cfg 2>NUL
+rmdir /S /Q %ROOT_DIR%\AboutCode.egg-info %ROOT_DIR%\eggs %ROOT_DIR%\parts %ROOT_DIR%\develop-eggs %ROOT_DIR%\.installed.cfg 2>NUL
 goto EOS
 
 
