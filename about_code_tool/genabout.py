@@ -747,11 +747,12 @@ def main(parser, options, args):
         handler.setLevel(logging.WARNING)
 
     valid_actions = 0, 1, 2, 3
-    if action and action in valid_actions:
-        action_num = action
-    else:
-        print('Invalid action: should be 0,1,2 or 3')
-        sys.exit(errno.EINVAL)
+    if action: 
+        if action in valid_actions:
+            action_num = action
+        else:
+            print('Invalid action: should be 0, 1, 2 or 3')
+            sys.exit(errno.EINVAL)
 
     if copy_files_path and not _exists(copy_files_path):
             print("The project path does not exist.")
