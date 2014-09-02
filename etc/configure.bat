@@ -71,7 +71,7 @@ del tmpscrfile > NUL
 
 @rem  enable local usage of entry points scripts
 cd %ROOT_DIR%
-pip install --upgrade --no-index --no-allow-external --editable .
+pip install --upgrade --no-index --no-allow-external --find-links=%ROOT_DIR%\thirdparty\ --editable .
 
 
 goto EOS

@@ -51,4 +51,4 @@ chmod -R ogu+x $ROOT_DIR/bin
 
 # enable local usage of entry points scripts
 cd "$ROOT_DIR"
-pip install --upgrade --no-allow-external --editable --no-index .
+pip install --upgrade --no-allow-external --use-wheel --no-index --find-links=$ROOT_DIR/thirdparty/ --editable .
