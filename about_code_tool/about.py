@@ -1224,13 +1224,12 @@ class Collector(object):
                 row_data = about_object.get_row_data(relative_path, custom_keys)
                 csv_writer.writerow(row_data)
 
-    def generate_attribution(self, template_path, limit_to=None):
+    def generate_attribution(self, template_path=None, limit_to=None):
         """
         Generate an attribution file from the current list of ABOUT objects.
         The optional `limit_to` parameter allows to restrict the generated
         attribution to a specific list of component names.
         """
-
         try:
             import jinja2 as j2
         except ImportError:
@@ -1238,6 +1237,11 @@ class Collector(object):
                   'attribution texts. You can install it by running:'
                   '"configure"')
             return
+
+        # For some reasons, if I set the template_path = "templates/default.html"
+        # in the parameter, the tempalte_path will become 'None' and cause error
+        if not template_path:
+            template_path = "templates/default.html"
 
         # FIXME: the template dir should be outside the code tree
         template_dir = os.path.dirname(template_path)
@@ -1249,7 +1253,6 @@ class Collector(object):
             template = jinja_env.get_template(template_file_name)
         except j2.TemplateNotFound:
             return
-
         limit_to = limit_to or []
         limit_to = set(limit_to)
 

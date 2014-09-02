@@ -605,7 +605,7 @@ about_resource: about.py
             self.assertEqual(expected_warnings[i][0], w.code)
             self.assertEqual(expected_warnings[i][1], w.field_value)
 
-    def test_generate_attribution(self):
+    def test_generate_attribution_with_custom_template(self):
         expected = (u'notice_text:'
                     'version:2.4.3'
                     'about_resource:httpd-2.4.3.tar.gz'
