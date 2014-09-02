@@ -27,6 +27,9 @@ from aboutcode import Error
 from aboutcode import CRITICAL, INFO, WARNING
 from aboutcode import model
 from aboutcode import util
+from aboutcode import ERROR
+from collections import OrderedDict
+import aboutcode
 
 
 class FieldTest(unittest.TestCase):
@@ -103,6 +106,89 @@ class FieldTest(unittest.TestCase):
 
     def test_UrlField_is_valid_url_empty_URL(self):
         self.assertFalse(model.UrlField.is_valid_url('http:'))
+
+    def check_validate(self, field_class, value, expected, expected_errors):
+        """
+        Check field values after validation
+        """
+        field = field_class(name='s', value=value, present=True)
+        errors = field.validate()
+        self.assertEqual(expected_errors, errors)
+        self.assertEqual(expected, field.value)
+
+    def test_StringField_strings_trailing_spaces_are_removed(self):
+        field_class = model.StringField
+        value = 'trailin spaces  '
+        expected = 'trailin spaces'
+        self.check_validate(field_class, value, expected, expected_errors=[])
+
+    def test_ListField_contains_list_after_validate(self):
+        value = 'string'
+        field_class = model.ListField
+        expected = [value]
+        self.check_validate(field_class, value, expected, expected_errors=[])
+
+    def test_ListField_contains_stripped_strings_after_validate(self):
+        value = '''first line    
+                   second line  '''
+        field_class = model.ListField
+        expected = ['first line', 'second line']
+        self.check_validate(field_class, value, expected, expected_errors=[])
+
+    def test_PathField_contains_stripped_strings_after_validate(self):
+        value = '''first line    
+                   second line  '''
+        field_class = model.ListField
+        expected = ['first line', 'second line']
+        self.check_validate(field_class, value, expected, expected_errors=[])
+
+    def test_PathField_contains_dict_after_validate(self):
+        value = 'string'
+        field_class = model.PathField
+        expected = OrderedDict([('string', None)])
+        expected_errors = [
+            Error(ERROR, u'Field s: Unable to verify path: string: No base directory provided')
+                          ]
+        self.check_validate(field_class, value, expected, expected_errors)
+
+    def test_UrlField_contains_list_after_validate(self):
+        value = 'http://some.com/url'
+        field_class = model.UrlField
+        expected = [value]
+        self.check_validate(field_class, value, expected, expected_errors=[])
+
+    def test_SingleLineField_has_errors_if_multiline(self):
+        value = '''line1
+        line2'''
+        field_class = model.SingleLineField
+        expected = value
+        expected_errors = [Error(ERROR, u'Field s: Cannot span multiple lines: line1\n        line2')]
+        self.check_validate(field_class, value, expected, expected_errors)
+
+    def test_AboutResourceField_can_resolve_single_value(self):
+        about_file_path = 'some/dir/me.ABOUT'
+        field = model.AboutResourceField(name='s', value='.', present=True)
+        field.validate()
+        expected = ['some/dir']
+        field.resolve(about_file_path)
+        result = field.resolved_paths
+        self.assertEqual(expected, result)
+
+    def test_AboutResourceField_can_resolve_paths_list(self):
+        about_file_path = 'some/dir/me.ABOUT'
+        value = '''.
+                   ../path1
+                   path2/path3/
+                   /path2/path3/
+                   '''
+        field = model.AboutResourceField(name='s', value=value, present=True)
+        field.validate()
+        expected = ['some/dir', 
+                    'some/path1', 
+                    'some/dir/path2/path3']
+        field.resolve(about_file_path)
+        result = field.resolved_paths
+        self.assertEqual(expected, result)
 
 
 class ParseTest(unittest.TestCase):
@@ -285,7 +371,6 @@ class AboutTest(unittest.TestCase):
         self.assertEqual([], a.errors)
         result = a.about_resource.value['about_resource.c']
         # this means we have a location
-        print(result)
         self.assertNotEqual([], result)
 
     def test_About_has_errors_when_about_resource_is_missing(self):
@@ -397,10 +482,144 @@ this software and releases the component to Public Domain.
         self.assertEqual(None, result)
 
     def test_About_rejects_non_ascii_names_and_accepts_unicode_values(self):
-        a = model.About(get_test_loc('parse/non_ascii_field_name_value.about'))
+        test_file = get_test_loc('parse/non_ascii_field_name_value.about')
+        a = model.About(test_file)
         result = a.errors
         expected = [
-                    Error(CRITICAL, "Invalid line: 3: u'Mat\\xedas: unicode field name\\n'")
+            Error(CRITICAL, "Invalid line: 3: u'Mat\\xedas: unicode field name\\n'")
                     ]
         self.assertEqual(expected, result)
 
+    def test_About_dumps(self):
+        self.maxDiff = None
+        test_file = get_test_loc('parse/complete/about.ABOUT')
+        a = model.About(test_file)
+        self.assertEqual([], a.errors)
+
+        expected = u'''about_resource: .
+name: AboutCode
+version: 0.11.0
+description: AboutCode is a tool
+ to process ABOUT files.
+ An ABOUT file is a file.
+home_url: http://dejacode.org
+license: apache-2.0
+license_file: apache-2.0.LICENSE
+copyright: Copyright (c) 2013-2014 nexB Inc.
+notice_file: NOTICE
+owner: nexB Inc.
+author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
+vcs_tool: git
+vcs_repository: https://github.com/dejacode/about-code-tool.git'''.splitlines()
+        result = a.dumps().splitlines()
+        self.assertEqual(expected, result)
+
+    def test_About_contains_about_file_path(self):
+        test_file = get_test_loc('parse/complete/about.ABOUT')
+        a = model.About(test_file, about_file_path='complete/about.ABOUT')
+        self.assertEqual([], a.errors)
+        expected = 'complete/about.ABOUT'
+        result = a.about_file_path
+        self.assertEqual(expected, result)
+
+    def test_About_as_dict_contains_about_file_path(self):
+        test_file = get_test_loc('parse/complete/about.ABOUT')
+        a = model.About(test_file, about_file_path='complete/about.ABOUT')
+        self.assertEqual([], a.errors)
+        expected = 'complete/about.ABOUT'
+        result = a.as_dict()[model.About.about_file_path_attr]
+        self.assertEqual(expected, result)
+
+class CollectorTest(unittest.TestCase):
+
+    def test_collect_inventory_in_directory_with_correct_about_file_path(self):
+        test_loc = get_test_loc('collect-inventory-errors')
+        _errors, abouts = model.collect_inventory(test_loc)
+        self.assertEqual(2, len(abouts))
+
+        expected = ['collect-inventory-errors/non-supported_date_format.ABOUT', 
+                    'collect-inventory-errors/supported_date_format.ABOUT']
+        result = [a.about_file_path for a in abouts]
+        self.assertEqual(expected, result)
+
+    def test_collect_inventory_return_errors(self):
+        test_loc = get_test_loc('collect-inventory-errors')
+        errors, _abouts = model.collect_inventory(test_loc)
+        expected_errors = [
+            Error(INFO, u'Field date is a custom field'),
+            Error(CRITICAL, u'Field about_resource: Path distribute_setup.py not found'),
+            Error(INFO, u'Field date is a custom field'),
+            Error(CRITICAL, u'Field about_resource: Path date_test.py not found')]
+        self.assertEqual(expected_errors, errors)
+
+    def test_collect_inventory_can_collect_a_single_file(self):
+        test_loc = get_test_loc('thirdparty/django_snippets_2413.ABOUT')
+        _errors, abouts = model.collect_inventory(test_loc)
+        self.assertEqual(1, len(abouts))
+        expected = ['thirdparty/django_snippets_2413.ABOUT']
+        result = [a.about_file_path for a in abouts]
+        self.assertEqual(expected, result)
+
+    def test_collect_inventory_return_no_warnings(self):
+        test_loc = get_test_loc('allAboutInOneDir')
+        errors, _abouts = model.collect_inventory(test_loc)
+        expected_errors = []
+        result = [(level,e) for level,e in errors if level > aboutcode.INFO]
+        self.assertEqual(expected_errors, result)
+
+    def test_collect_inventory_populate_about_file_path(self):
+        test_loc = get_test_loc('parse/complete')
+        errors, abouts = model.collect_inventory(test_loc)
+        self.assertEqual([], errors)
+        expected = 'complete/about.ABOUT'
+        result = abouts[0].about_file_path
+        self.assertEqual(expected, result)
+
+    def test_field_names(self):
+        a = model.About()
+        a.custom_fields['f'] = model.StringField(name='f', value='1',
+                                                 present=True)
+        b = model.About()
+        b.custom_fields['g'] = model.StringField(name='g', value='1',
+                                                 present=True)
+        abouts = [a, b]
+        # ensure that custom fields and about file path are collected
+        # and that all fields are in the correct order
+        expected = [
+            model.About.about_file_path_attr,
+            model.About.about_resource_path_attr,
+            'about_resource',
+            'name',
+            'version',
+            'download_url',
+            'description',
+            'home_url',
+            'notes',
+            'license',
+            'license_name',
+            'license_file',
+            'license_url',
+            'copyright',
+            'notice_file',
+            'notice_url',
+            'redistribute',
+            'attribute',
+            'track_change',
+            'modified',
+            'changelog_file',
+            'owner',
+            'owner_url',
+            'contact',
+            'author',
+            'vcs_tool',
+            'vcs_repository',
+            'vcs_path',
+            'vcs_tag',
+            'vcs_branch',
+            'vcs_revision',
+            'checksum',
+            'spec_version',
+            'f',
+            'g']
+        result = model.field_names(abouts)
+        self.assertEqual(expected, result)

@@ -132,12 +132,37 @@ def get_relative_path(base_loc, full_loc):
     The last segment of the base_loc will become the first segment of the
     returned path.
     """
-    base = to_posix(base_loc).rstrip(posixpath.sep)
+    def norm(p):
+        p = to_posix(p)
+        p = p.strip(posixpath.sep)
+        p = posixpath.normpath(p)
+        return p
+
+    base = norm(base_loc)
+    path = norm(full_loc)
+
+
+    assert path.startswith(base), ('Cannot compute relative path: '
+                                   '%(path)r does not start with %(base)r'
+                                   % locals())
     base_name = resource_name(base)
-    path = to_posix(full_loc).lstrip(posixpath.sep)
-    assert path.starts(base)
-    relative = path[len(base):]
-    return posixpath.join(base_name, relative)
+    no_dir = base == base_name
+    same_loc = base == path
+    if same_loc:
+        # this is the case of a single file or single dir
+        if no_dir:
+            # we have no dir: the full path is the same as the resource name
+            relative = base_name
+        else:
+            # we have at least one dir
+            parent_dir = posixpath.dirname(base)
+            parent_dir = resource_name(parent_dir)
+            relative = posixpath.join(parent_dir, base_name)
+    else:
+        relative = path[len(base) + 1:]
+        relative = posixpath.join(base_name, relative)
+
+    return relative
 
 
 def to_posix(path):

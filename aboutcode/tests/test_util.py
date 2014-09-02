@@ -221,8 +221,40 @@ class UtilsTest(unittest.TestCase):
         result = util.check_file_names(paths)
         self.assertEqual(expected, result)
 
+    def test_get_about_locations(self):
+        location = get_test_loc('parse/complete')
+        result = list(util.get_about_locations(location))
+        expected = 'testdata/parse/complete/about.ABOUT'
+        self.assertTrue(result[0].endswith(expected))
 
     def test_is_about_file(self):
         self.assertTrue(util.is_about_file('test.About'))
         self.assertTrue(util.is_about_file('test2.aboUT'))
         self.assertFalse(util.is_about_file('no_about_ext.something'))
+
+    def test_get_relative_path(self):
+        test = [('/some/path','/some/path/file','path/file'),
+                ('path','/path/file','path/file'),
+                ('/path','/path/file','path/file'),
+                ('/path/','/path/file/','path/file'),
+                ('/path/','path/','path'),
+                ('/p1/p2/p3','/p1/p2//p3/file','p3/file'),
+                (r'c:\some/path','c:/some/path/file','path/file'),
+                (r'c:\\some\\path\\','c:/some/path/file','path/file'),
+                ]
+        for base_loc, full_loc, expected in test:
+            result = util.get_relative_path(base_loc, full_loc)
+            self.assertEqual(expected, result)
+
+    def test_get_relative_path_with_same_path_twice(self):
+        test = [('/some/path/file','path/file'),
+                ('/path/file','path/file'),
+                ('/path/file/','path/file'),
+                ('path/','path'),
+                ('/p1/p2//p3/file','p3/file'),
+                ('c:/some/path/file','path/file'),
+                (r'c:\\some\\path\\file','path/file'),
+                ]
+        for loc, expected in test:
+            result = util.get_relative_path(loc, loc)
+            self.assertEqual(expected, result)
