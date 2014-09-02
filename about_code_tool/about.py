@@ -1256,6 +1256,8 @@ class Collector(object):
         about_object_fields = []
         about_content_dict = {}
 
+        not_process_components = list(limit_to)
+
         for about_object in self:
             # FIXME: what is the meaning of this partition?
             # PO created the var some_path to provide some clarity
@@ -1264,8 +1266,14 @@ class Collector(object):
             # FIXME: a path starting with / is NOT relative
             about_relative_path = '/' + file_name
 
-            if limit_to and about_relative_path in limit_to:
-                continue
+            if limit_to:
+                try:
+                    not_process_components.remove(about_relative_path)
+                except Exception as e:
+                    continue
+
+            #if limit_to and about_relative_path in limit_to:
+            #    continue
 
             about_content = about_object.validated_fields
             # Add information in the dictionary if not in the ABOUT file
@@ -1298,7 +1306,7 @@ class Collector(object):
 
         # find paths requested in the limit_to paths arg that do not point to
         # a corresponding ABOUT file
-        for path in limit_to:
+        for path in not_process_components:
             path = posix_path(path)
             afp = join(self.location, path)
             msg = ('The requested ABOUT file: %(afp)r does not exist. '
