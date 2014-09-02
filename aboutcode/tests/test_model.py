@@ -183,8 +183,8 @@ class FieldTest(unittest.TestCase):
                    '''
         field = model.AboutResourceField(name='s', value=value, present=True)
         field.validate()
-        expected = ['some/dir', 
-                    'some/path1', 
+        expected = ['some/dir',
+                    'some/path1',
                     'some/dir/path2/path3']
         field.resolve(about_file_path)
         result = field.resolved_paths
@@ -533,14 +533,15 @@ vcs_repository: https://github.com/dejacode/about-code-tool.git'''.splitlines()
 class CollectorTest(unittest.TestCase):
 
     def test_collect_inventory_in_directory_with_correct_about_file_path(self):
+        self.maxDiff = None
         test_loc = get_test_loc('collect-inventory-errors')
         _errors, abouts = model.collect_inventory(test_loc)
         self.assertEqual(2, len(abouts))
 
-        expected = ['collect-inventory-errors/non-supported_date_format.ABOUT', 
+        expected = ['collect-inventory-errors/non-supported_date_format.ABOUT',
                     'collect-inventory-errors/supported_date_format.ABOUT']
         result = [a.about_file_path for a in abouts]
-        self.assertEqual(expected, result)
+        self.assertEqual(sorted(expected), sorted(result))
 
     def test_collect_inventory_return_errors(self):
         test_loc = get_test_loc('collect-inventory-errors')
@@ -550,7 +551,7 @@ class CollectorTest(unittest.TestCase):
             Error(CRITICAL, u'Field about_resource: Path distribute_setup.py not found'),
             Error(INFO, u'Field date is a custom field'),
             Error(CRITICAL, u'Field about_resource: Path date_test.py not found')]
-        self.assertEqual(expected_errors, errors)
+        self.assertEqual(sorted(expected_errors), sorted(errors))
 
     def test_collect_inventory_can_collect_a_single_file(self):
         test_loc = get_test_loc('thirdparty/django_snippets_2413.ABOUT')
@@ -564,7 +565,7 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('allAboutInOneDir')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = []
-        result = [(level,e) for level,e in errors if level > aboutcode.INFO]
+        result = [(level, e) for level, e in errors if level > aboutcode.INFO]
         self.assertEqual(expected_errors, result)
 
     def test_collect_inventory_populate_about_file_path(self):

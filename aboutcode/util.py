@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
 # ============================================================================
 #  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,22 +13,15 @@
 #  limitations under the License.
 # ============================================================================
 
-"""
-AboutCode is a tool to process ABOUT files. ABOUT files are small text files
-that document the provenance (aka. the origin and license) of software
-components as well as the essential obligation such as attribution/credits and
-source code redistribution. See the ABOUT spec at http://dejacode.org.
-
-AbouCode reads and validates ABOUT files and collect software components
-inventories.
-"""
-
 from __future__ import print_function
 
 import os
 import string
 import posixpath
 import ntpath
+import codecs
+import unicodecsv
+from collections import OrderedDict
 
 
 from aboutcode import Error
@@ -204,3 +196,26 @@ def resource_name(path):
     _left, right = posixpath.split(path)
     return right.strip()
 
+
+class OrderedDictReader(unicodecsv.DictReader):
+    """
+    A DictReader that return OrderedDicts
+    """
+    def next(self):
+        row_dict = unicodecsv.DictReader.next(self)
+        result = OrderedDict()
+        # reorder based on fieldnames order
+        for name in self.fieldnames:
+            result[name] = row_dict[name]
+        return result
+
+
+def load_csv(location):
+    """
+    Read CSV at location, yield a list of ordered mappings, one for each row.
+    """
+    results = []
+    with codecs.open(location, mode='rb', encoding='utf-8') as csvfile:
+        for row in OrderedDictReader(csvfile):
+            results.append(row)
+    return results

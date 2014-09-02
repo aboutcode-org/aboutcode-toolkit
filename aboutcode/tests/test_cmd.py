@@ -17,41 +17,13 @@
 from __future__ import print_function
 
 import unittest
-import codecs
-
-import unicodecsv
 
 from aboutcode.tests import get_test_loc
 from aboutcode.tests import get_temp_file
 
 from aboutcode import cmd
 from aboutcode import model
-from collections import OrderedDict
-
-
-class OrderedDictReader(unicodecsv.DictReader):
-    """
-    A DictReader that return OrderedDicts
-    """
-    def next(self):
-        row_dict = unicodecsv.DictReader.next(self)
-        result = OrderedDict()
-        # reorder based on fieldnames order
-        for name in self.fieldnames:
-            result[name] = row_dict[name]
-        return result
-
-
-def load_csv(location):
-    """
-    Read CSV at location, yield a list of ordered mappings, one for each row.
-    """
-    results = []
-    with codecs.open(location, mode='rb', encoding='utf-8') as csvfile:
-        for row in OrderedDictReader(csvfile):
-            results.append(row)
-    return results
-
+from aboutcode import util
 
 
 class CmdTest(unittest.TestCase):
@@ -62,7 +34,7 @@ class CmdTest(unittest.TestCase):
         """
         self.maxDiff = None
         def as_items(csvfile):
-            return [i.items() for i in load_csv(csvfile)]
+            return [i.items() for i in util.load_csv(csvfile)]
 
         expected = as_items(expected)
         result = as_items(result)
