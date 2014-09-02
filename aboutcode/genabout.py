@@ -291,7 +291,7 @@ class GenAbout(object):
 
         url = url.rstrip('/')
         encoded_payload = urllib.urlencode(payload)
-        full_url = '%(url)s/%(license_key)s/?encoded_payload'.format(locals())
+        full_url = '%(url)s/%(license_key)s/?%(encoded_payload)s' % locals()
         # handle special characters in URL such as space etc.
         full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
         license_data = {}
