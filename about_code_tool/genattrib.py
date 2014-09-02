@@ -133,7 +133,8 @@ def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
     mapping_config = options.mapping
-    template_location = options.template_location
+    template_location = options.template_location \
+        if options.template_location else "templates/default.html"
 
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
