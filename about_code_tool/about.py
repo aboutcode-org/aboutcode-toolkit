@@ -32,7 +32,7 @@ from collections import namedtuple
 import csv
 from datetime import datetime
 from email.parser import HeaderParser
-from os.path import basename, dirname, join, realpath
+from os.path import basename, dirname, join, normpath, realpath
 import errno
 import httplib
 import logging
@@ -948,6 +948,14 @@ class AboutFile(object):
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
             if field in self.validated_fields:
                 row += [self.validated_fields[field]]
+            elif field == 'about_resource_path':
+                about = self.validated_fields['about_resource']
+                if about.endswith('.'):
+                    about_resource_path = dirname(updated_path) + '/'
+                else:
+                    about_resource_path = normpath(join(dirname(updated_path),
+                                                        about))
+                row += [about_resource_path]
             else:
                 row += ['']
 

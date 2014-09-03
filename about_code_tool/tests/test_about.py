@@ -115,7 +115,7 @@ class CollectorTest(unittest.TestCase):
         'checksum_sha1,checksum_md5,checksum_sha256,dje_component,'
         'dje_license,dje_organization,dje_license_name,scm_branch,'
         'scm_repository,signature_gpg_file,redistribute_sources,about_format,'
-        'usage,scm_tool,scm_path,scm_tag,scm_rev,organization,'
+        'usage,scm_path,scm_tool,scm_rev,scm_tag,organization,'
         'warnings,errors')
 
         test_file = 'about_code_tool/tests/testdata/basic'
@@ -678,9 +678,10 @@ class OtherTest(unittest.TestCase):
         about_file = about.AboutFile(join(TESTDATA_DIR, 'basic/basic.about'))
         result = about_file.get_custom_field_keys()
         expected = ['scm_branch', 'scm_repository', 'signature_gpg_file',
-                         'redistribute_sources', 'about_format', 'usage',
-                         'scm_tool', 'scm_path', 'scm_tag', 'scm_rev',
-                         'organization']
+                    'redistribute_sources', 'about_format', 'usage',
+                    'scm_path', 'scm_tool', 'scm_rev', 'scm_tag',
+                    'organization']
+        print(result)
         self.assertEqual(result, expected)
 
 

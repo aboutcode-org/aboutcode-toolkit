@@ -441,7 +441,6 @@ class GenAboutTest(unittest.TestCase):
                           'TESTCASE.ABOUT'),
                      {'about_file': '/TESTCASE/',
                       'version': '0.8.1',
-                      'about_resource_path' : '/TESTCASE/',
                       'about_resource': '.',
                       'name': 'ABOUT tool'}]]
 
@@ -479,7 +478,6 @@ class GenAboutTest(unittest.TestCase):
         expected = [[join(TESTDATA_DIR, 'test_files_for_genabout',
                           'about.py.ABOUT'),
                      {'about_file': '/about.py.ABOUT',
-                      'about_resource_path': '/about.py.ABOUT',
                       'version': '0.8.2',
                       'about_resource': '.',
                       'name': 'ABOUT tool'}]]
@@ -503,7 +501,6 @@ class GenAboutTest(unittest.TestCase):
                           'about.py.ABOUT'),
                      {'about_file': 'about.py.ABOUT',
                       'name': 'ABOUT tool',
-                      'about_resource_path': '/about.py.ABOUT',
                       'version': '0.8.1',
                       'test': 'test sample',
                       'about_resource': '.'}]]
@@ -527,7 +524,6 @@ class GenAboutTest(unittest.TestCase):
                           'about.py.ABOUT'),
                      {'about_file': '/about.py.ABOUT',
                       'version': '0.8.2',
-                      'about_resource_path': '/about.py.ABOUT',
                       'about_resource': '.',
                       'name': '',
                       'test': 'test sample'}]]
@@ -786,58 +782,4 @@ class GenAboutTest(unittest.TestCase):
         expected = {'about_file': '/tmp/test/', 'about_resource': '.'}
         about_file_exist = False
         gen.update_about_resource(test_fields, about_file_exist)
-        self.assertEqual(test_fields, expected)
-
-    def test_update_about_resource_path_about_file_field_exist(self):
-        gen = genabout.GenAbout()
-        test_fields = {'about_resource_path': '/tmp/test.c',
-                       'about_file': '/tmp/test.c'}
-        about_file_exist = True
-        gen.update_about_resource_path(test_fields, about_file_exist)
-        # FIXME: this will always be true: the test is incorrect
-        self.assertTrue(test_fields == test_fields, 'The dict should not be changed.')
-
-    def test_update_about_resource_path_about_file_field_not_exist_isFile(self):
-        gen = genabout.GenAbout()
-        test_fields = {'about_file': '/tmp/test.c'}
-        expected = {'about_file': '/tmp/test.c',
-                    'about_resource_path': '/tmp/test.c'}
-        about_file_exist = True
-        gen.update_about_resource_path(test_fields, about_file_exist)
-        self.assertEqual(test_fields, expected)
-
-    def test_update_about_resource_path_about_file_field_not_exist_isDir(self):
-        gen = genabout.GenAbout()
-        test_fields = {'about_file': '/tmp/test/'}
-        expected = {'about_file': '/tmp/test/',
-                    'about_resource_path': '/tmp/test/'}
-        about_file_exist = True
-        gen.update_about_resource_path(test_fields, about_file_exist)
-        self.assertEqual(test_fields, expected)
-
-    def test_update_about_resource_path_no_about_file_field_exist(self):
-        gen = genabout.GenAbout()
-        test_fields = {'about_resource_path': '/tmp/test.c',
-                       'about_file': '/tmp/test.c'}
-        about_file_exist = False
-        gen.update_about_resource_path(test_fields, about_file_exist)
-        # FIXME: this will always be true: the test is incorrect
-        self.assertTrue(test_fields == test_fields, 'The dict should not be changed.')
-
-    def test_update_about_resource_path_no_about_file_field_not_exist_isFile(self):
-        gen = genabout.GenAbout()
-        test_fields = {'about_file': '/tmp/test.c'}
-        expected = {'about_file': '/tmp/test.c',
-                    'about_resource_path': '/tmp/test.c'}
-        about_file_exist = False
-        gen.update_about_resource_path(test_fields, about_file_exist)
-        self.assertEqual(test_fields, expected)
-
-    def test_update_about_resource_path_no_about_file_field_not_exist_isDir(self):
-        gen = genabout.GenAbout()
-        test_fields = {'about_file': '/tmp/test/'}
-        expected = {'about_file': '/tmp/test/',
-                    'about_resource_path': '/tmp/test/'}
-        about_file_exist = False
-        gen.update_about_resource_path(test_fields, about_file_exist)
         self.assertEqual(test_fields, expected)

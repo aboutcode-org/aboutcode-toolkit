@@ -512,21 +512,6 @@ class GenAbout(object):
                     file_location = join(file_location, basename(file_location))
                 file_location += '.ABOUT'
 
-            """line['about_resource'] = basename(file_location)
-            if not file_location.startswith('/'):
-                line['about_resource_path'] = '/' + file_location
-            else:
-                line['about_resource_path'] = file_location
-                # Strip the first '/' for the later 'join'
-                file_location = file_location.partition('/')[2]
-            if not file_location.endswith('.ABOUT'):
-                if file_location.endswith('/'):
-                    file_location = dirname(file_location)
-                    file_location = join(file_location, basename(file_location))
-                    # Since this is referencing everything in the current directory,
-                    # we will use a '.' period to reference it.
-                    line['about_resource'] = '.'
-                file_location += '.ABOUT'"""
             if all_in_one:
                 # This is to get the filename instead of the file path
                 file_location = file_location.rpartition('/')[2]
@@ -560,11 +545,9 @@ class GenAbout(object):
                 elif action_num == ACTION_REPLACE_THE_ABOUT_FILE_WITH_THE_CURRENT_GENERATED_FILE:
                     pass
 
-            # The following is to ensure about_resource and
-            # about_resource_path fields are present. If they exist already,
-            # the code will not changes these.
+            # The following is to ensure about_resource is present.
+            # If they exist already, the code will not changes these.
             self.update_about_resource(line, about_file_exist)
-            self.update_about_resource_path(line, about_file_exist)
 
             component_list.append(about_file_location)
             component_list.append(line)
@@ -586,23 +569,6 @@ class GenAbout(object):
                 line['about_resource'] = '.'
             else:
                 line['about_resource'] = basename(about_resource)
-
-    def update_about_resource_path(self, line, about_file_exist):
-        # Check if 'about_resource_path' exist
-        try:
-            if line['about_resoure_path']:
-                if not about_file_exist:
-                    file_path = line['about_file']
-                    if not file_path.startswith('/'):
-                        line['about_resource_path'] = '/' + file_path
-                    else:
-                        line['about_resource_path'] = file_path
-        except:
-            file_path = line['about_file']
-            if not file_path.startswith('/'):
-                line['about_resource_path'] = '/' + file_path
-            else:
-                line['about_resource_path'] = file_path
 
     @staticmethod
     def gen_license_list(line):
