@@ -616,6 +616,14 @@ about_resource: about.py
         result = collector.generate_attribution(template)
         self.assertEqual(expected, result)
 
+    def test_generate_attribution_with_default_template(self):
+        f = open(join(TESTDATA_DIR, 'attrib/attrib.html'))
+        expected = f.read()
+        test_file = join(TESTDATA_DIR, 'attrib/attrib.ABOUT')
+        collector = about.Collector(test_file)
+        result = collector.generate_attribution()
+        self.assertEqual(expected, result)
+
     def test_license_text_extracted_from_license_text_file(self):
         expected = '''Tester holds the copyright for test component. Tester relinquishes copyright of
 this software and releases the component to Public Domain.

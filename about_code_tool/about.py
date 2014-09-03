@@ -32,7 +32,7 @@ from collections import namedtuple
 import csv
 from datetime import datetime
 from email.parser import HeaderParser
-from os.path import dirname, join
+from os.path import basename, dirname, join, realpath
 import errno
 import httplib
 import logging
@@ -1241,11 +1241,12 @@ class Collector(object):
         # For some reasons, if I set the template_path = "templates/default.html"
         # in the parameter, the tempalte_path will become 'None' and cause error
         if not template_path:
-            template_path = "templates/default.html"
+            template_path = join(dirname(realpath(__file__)),
+                                 "templates/default.html")
 
         # FIXME: the template dir should be outside the code tree
-        template_dir = os.path.dirname(template_path)
-        template_file_name = os.path.basename(template_path)
+        template_dir = dirname(template_path)
+        template_file_name = basename(template_path)
         loader = j2.FileSystemLoader(template_dir)
         jinja_env = j2.Environment(loader=loader)
 
