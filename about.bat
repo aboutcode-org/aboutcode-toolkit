@@ -4,11 +4,11 @@
 
 
 @rem  cd to the dpl directory
-set ROOT_DIR=%~dp0
-cd %ROOT_DIR%
+set ABOUT_ROOT_DIR=%~dp0
+cd %ABOUT_ROOT_DIR%
 
 set CMD_LINE_ARGS= 
-set CONFIGURED_PYTHON=%ROOT_DIR%\Scripts\python.exe
+set CONFIGURED_PYTHON=%ABOUT_ROOT_DIR%\Scripts\python.exe
 
 @rem Collect all command line arguments in a variable
 :collectarg
@@ -25,10 +25,10 @@ goto about
 
 :configure
  echo * Configuring AboutCode ...
- call %ROOT_DIR%\configure
+ call %ABOUT_ROOT_DIR%\configure
 
 :about
-call %ROOT_DIR%\Scripts\activate
-%ROOT_DIR%\bin\about-code %DPL_CMD_LINE_ARGS%
+call %ABOUT_ROOT_DIR%\Scripts\activate
+%ABOUT_ROOT_DIR%\bin\about-code %DPL_CMD_LINE_ARGS%
 
 :EOS

@@ -4,16 +4,16 @@
 #
 
 # cd to the root directory
-ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$ROOT_DIR"
+ABOUT_ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$ABOUT_ROOT_DIR"
 
-CONFIGURED_PYTHON=$ROOT_DIR/bin/python
+CONFIGURED_PYTHON=$ABOUT_ROOT_DIR/bin/python
 
 if [ ! -f "$CONFIGURED_PYTHON" ]; then
     echo "* Configuring AboutCode ..."
-    source $ROOT_DIR/configure
+    source $ABOUT_ROOT_DIR/configure
 fi
 
-source $ROOT_DIR/bin/activate
+source $ABOUT_ROOT_DIR/bin/activate
 
-$ROOT_DIR/bin/about-code "$@"
+$ABOUT_ROOT_DIR/bin/about-code "$@"

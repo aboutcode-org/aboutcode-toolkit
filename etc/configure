@@ -5,50 +5,50 @@
 set -e
 
 ETC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT_DIR="$( dirname "$ETC_DIR" )"
+ABOUT_ROOT_DIR="$( dirname "$ETC_DIR" )"
 
 if [ "$1" == "--clean" ]; then
     echo "* Cleaning ..."
-    cd $ROOT_DIR && rm -rf build bin lib include AboutCode.egg-info
-    cd $ROOT_DIR && rm -rf develop-eggs eggs parts .installed.cfg
+    cd $ABOUT_ROOT_DIR && rm -rf build bin lib include AboutCode.egg-info
+    cd $ABOUT_ROOT_DIR && rm -rf develop-eggs eggs parts .installed.cfg
     exit 0
 fi
 
 
-CONFIGURED_PYTHON=$ROOT_DIR/bin/python
+CONFIGURED_PYTHON=$ABOUT_ROOT_DIR/bin/python
 
 # Install and activate a virtualenv without any download
 if [ ! -f "$CONFIGURED_PYTHON" ]; then
     echo ""
     echo "* Configuring Python ..."
-    python2.7 $ROOT_DIR/thirdparty/virtualenv.py --never-download --extra-search-dir=$ROOT_DIR/thirdparty/ $ROOT_DIR
+    python2.7 $ABOUT_ROOT_DIR/thirdparty/virtualenv.py --never-download --extra-search-dir=$ABOUT_ROOT_DIR/thirdparty/ $ABOUT_ROOT_DIR
 fi
 
-source $ROOT_DIR/bin/activate
+source $ABOUT_ROOT_DIR/bin/activate
 
 
 # Install components from selected requirements
 echo ""
 echo "* Installing components ..."
 for req in $($CONFIGURED_PYTHON $ETC_DIR/getconf.py --requirements $@)
-    do pip install --upgrade --no-allow-external --use-wheel --no-index --find-links=$ROOT_DIR/thirdparty/ -r $ROOT_DIR/$req
+    do pip install --upgrade --no-allow-external --use-wheel --no-index --find-links=$ABOUT_ROOT_DIR/thirdparty/ -r $ABOUT_ROOT_DIR/$req
 done
 
 # Run selected configuration python scripts
 echo ""
 echo "* Configuring ..."
 for script in $($CONFIGURED_PYTHON $ETC_DIR/getconf.py --python $@)
-    do python $ROOT_DIR/$script
+    do python $ABOUT_ROOT_DIR/$script
 done
 
 # Run selected configuration command line scripts
 for script in $($CONFIGURED_PYTHON $ETC_DIR/getconf.py --shell $@)
-    do source $ROOT_DIR/$script
+    do source $ABOUT_ROOT_DIR/$script
 done
 
 # Set exec permission on all files in bin
-chmod -R ogu+x $ROOT_DIR/bin
+chmod -R ogu+x $ABOUT_ROOT_DIR/bin
 
 # enable local usage of entry points scripts
-cd "$ROOT_DIR"
-pip install --upgrade --no-allow-external --use-wheel --no-index --find-links=$ROOT_DIR/thirdparty/ --editable .
+cd "$ABOUT_ROOT_DIR"
+pip install --upgrade --no-allow-external --use-wheel --no-index --find-links=$ABOUT_ROOT_DIR/thirdparty/ --editable .
