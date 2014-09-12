@@ -212,7 +212,7 @@ class OrderedDictReader(unicodecsv.DictReader):
 
 def load_csv(location):
     """
-    Read CSV at location, yield a list of ordered mappings, one for each row.
+    Read CSV at location, return a list of ordered mappings, one for each row.
     """
     results = []
     with codecs.open(location, mode='rb', encoding='utf-8') as csvfile:
