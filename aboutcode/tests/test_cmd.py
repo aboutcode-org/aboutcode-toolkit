@@ -21,9 +21,16 @@ import unittest
 from aboutcode.tests import get_test_loc
 from aboutcode.tests import get_temp_file
 
-from aboutcode import cmd
 from aboutcode import model
 from aboutcode import util
+from aboutcode import INFO
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import ERROR
+from aboutcode import WARNING
+from aboutcode import DEBUG
+from aboutcode import NOTSET
+from aboutcode import cmd
 
 
 class CmdTest(unittest.TestCase):
@@ -40,15 +47,51 @@ class CmdTest(unittest.TestCase):
         result = as_items(result)
         self.assertEqual(expected, result)
 
-    def test_to_cmd_basic_from_directory(self):
-        location = get_test_loc('cmd-inventory/basic/about')
+    def test_collect_inventory_basic_from_directory(self):
+        location = get_test_loc('inventory/basic/about')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        cmd.to_csv(abouts, result)
+        model.to_csv(abouts, result)
 
         expected_errors = []
         self.assertEqual(expected_errors, errors)
 
-        expected = get_test_loc('cmd-inventory/basic/expected.csv')
+        expected = get_test_loc('inventory/basic/expected.csv')
         self.check_csv(expected, result)
+
+
+    def test_collect_inventory_complex_from_directory(self):
+        self.maxDiff=None
+        location = get_test_loc('inventory/complex/about')
+        result = get_temp_file()
+        errors, abouts = model.collect_inventory(location)
+
+        model.to_csv(abouts, result)
+
+        self.assertTrue(all(e.severity==INFO for e in errors))
+
+        expected = get_test_loc('inventory/complex/expected.csv')
+        self.check_csv(expected, result)
+
+
+# NB: this test depends on py.test stdout/err capture capabilities
+def test_log_errors(capsys):
+    errors = [Error(CRITICAL, 'msg1'),
+              Error(ERROR, 'msg2'),
+              Error(INFO, 'msg3'),
+              Error(WARNING, 'msg4'),
+              Error(DEBUG, 'msg4'),
+              Error(NOTSET, 'msg4'),
+              ]
+    cmd.log_errors(errors,level=NOTSET)
+    out, err = capsys.readouterr()
+    expected_out = '''CRITICAL: msg1
+ERROR: msg2
+INFO: msg3
+WARNING: msg4
+DEBUG: msg4
+NOTSET: msg4
+'''
+    assert '' == err
+    assert expected_out ==out

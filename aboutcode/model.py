@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
 # ============================================================================
 #  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,13 +32,13 @@ import urlparse
 import posixpath
 from collections import OrderedDict
 
+import unicodecsv
 
 from aboutcode import Error
 from aboutcode import CRITICAL
 from aboutcode import WARNING
 from aboutcode import ERROR
 from aboutcode import INFO
-
 from aboutcode import util
 
 
@@ -52,7 +51,12 @@ class Field(object):
     def __init__(self, name=None, value=None, required=False, present=False):
         # normalized names are lowercased per specification
         self.name = name
-        self.value = value  # list or OrderedDict()
+        # save this and do not mutate it afterwards
+        self.original_value = value
+
+        # can become a string, list or OrderedDict() after validation
+        self.value = value
+
         self.required = required
         # True if the field is present in an About object
         self.present = present
@@ -62,69 +66,74 @@ class Field(object):
         """
         Validate and normalize thyself. Return a list of errors.
         """
+        errors = []
         name = self.name
         if not self.present:
             # required fields must be present
             if self.required:
                 msg = u'Field %(name)s is required'
-                return [Error(CRITICAL, msg % locals())]
+                errors.append(Error(CRITICAL, msg % locals()))
             else:
                 # no error for not present non required fields
                 # FIXME: should we add an info?
-                return []
-
-        # present fields should have content ...
-        if not self.has_content:
-            self.value = None
-            # ... especially if required
-            if self.required:
-                msg = u'Field %(name)s is required and empty'
-                severity = CRITICAL
+                pass
+        else:
+            # present fields should have content ...
+            if not self.has_content:
+                self.value = None
+                # ... especially if required
+                if self.required:
+                    msg = u'Field %(name)s is required and empty'
+                    severity = CRITICAL
+                else:
+                    severity = WARNING
+                    msg = u'Field %(name)s is present but empty'
+                errors.append(Error(severity, msg % locals()))
             else:
-                severity = WARNING
-                msg = u'Field %(name)s is present but empty'
-            return [Error(severity, msg % locals())]
-
-        # present fields with content go through validation...
-        # first trim any trailing spaces on each line
-        value = '\n'.join(s.rstrip() for s in self.value.splitlines())
-        self.value = value
-        # then validate proper
-        return self._validate(*args, ** kwargs)
+                # present fields with content go through validation...
+                # first trim any trailing spaces on each line
+                value = '\n'.join(s.rstrip() for s
+                                  in self.original_value.splitlines(False))
+                # then strip leading and trailing spaces
+                self.value = value.strip()
+                validation_errors = self._validate(*args, **kwargs)
+                errors.extend(validation_errors)
+        # set or reset self
+        self.errors = errors
+        return errors
 
     def _validate(self, *args, **kwargs):
         """
-        Subclasses must implement this function for custom validation and
-        return a list of errors.
-         """
+        Validate and normalize thyself. Return a list of errors.
+        Subclasses should override as needed.
+        """
         return []
-
-    def get_errors(self, level):
-        """
-        Return a list of Errors of severity superior or equal to level
-        """
 
     def serialize(self):
         """
         Return a unicode serialization of self in the ABOUT format.
         """
         name = self.name
-        value = self.serialized_value()
-        # add space prefix for continuations
-        value = value.splitlines(True)
-        value = u' '.join(value)
-        return u'%(name)s: %(value)s' % locals()
+        value = self.serialized_value() or u''
+        if self.has_content:
+            # add space prefix for continuations
+            value = value.splitlines(True)
+            value = u' '.join(value)
+            serialized = u'%(name)s: %(value)s' % locals()
+        else:
+            serialized = u'%(name)s:' % locals()
+        return serialized
 
     def serialized_value(self):
         """
         Return a unicode serialization of self in the ABOUT format.
         Does not include a white space for continuations.
         """
-        return self._serialized_value()
+        return self._serialized_value() or u''
 
     @property
     def has_content(self):
-        return True if self.value else False
+        return self.original_value and self.original_value.strip()
 
     def __repr__(self):
         name = self.name
@@ -157,9 +166,9 @@ class SingleLineField(StringField):
     """
     def _validate(self, *args, **kwargs):
         errors = super(SingleLineField, self)._validate(*args, ** kwargs)
-        if self.value and '\n' in self.value:
+        if '\n' in self.value:
             name = self.name
-            value = self.value
+            value = self.original_value
             msg = (u'Field %(name)s: Cannot span multiple lines: %(value)s'
                    % locals())
             errors.append(Error(ERROR, msg))
@@ -173,10 +182,25 @@ class ListField(StringField):
     """
     def _validate(self, *args, **kwargs):
         errors = super(ListField, self)._validate(*args, ** kwargs)
-        if self.value:
-            self.value = [v.strip() for v in self.value.splitlines(False)]
-        else:
-            self.value = []
+
+        # reset
+        self.value = []
+        for val in self.original_value.splitlines(False):
+            val = val.strip()
+            if not val:
+                name = self.name
+                msg = (u'Field %(name)s: ignored empty list value'
+                       % locals())
+                errors.append(Error(INFO, msg))
+                continue
+            # keep only unique and report error for duplicates
+            if val not in self.value:
+                self.value.append(val)
+            else:
+                name = self.name
+                msg = (u'Field %(name)s: ignored duplicated list value: '
+                       '%(val)s' % locals())
+                errors.append(Error(WARNING, msg))
         return errors
 
     def _serialized_value(self):
@@ -213,6 +237,7 @@ class PathField(ListField):
     """
     A field pointing to one or more paths relative to the ABOUT file location.
     The validated value is an ordered mapping of path->location or None.
+    The paths can also be resolved
     """
 
     def _validate(self, *args, **kwargs):
@@ -236,11 +261,8 @@ class PathField(ListField):
             path = util.to_posix(path)
 
             # normalize eventual / to .
-            if path == posixpath.sep:
-                path = '.'
-
+            # and a succession of one or more ////// to . too
             if path.strip() and not path.strip(posixpath.sep):
-                # a succession of ////
                 path = '.'
 
             # removing leading and trailing path separator
@@ -272,18 +294,24 @@ class PathField(ListField):
 
 class AboutResourceField(PathField):
     """
-    Special field for about_resource.
+    Special field for about_resource. self.resolved_paths contains a list of
+    the paths resolved relative to the about file path.
     """
     def __init__(self, *args, ** kwargs):
         super(AboutResourceField, self).__init__(*args, ** kwargs)
         self.resolved_paths = []
 
+    def _validate(self, *args, **kwargs):
+        errors = super(AboutResourceField, self)._validate(*args, ** kwargs)
+        return errors
+
     def resolve(self, about_file_path):
         """
-        Resolve paths based relative to an ABOUT file path.
+        Resolve resource paths relative to an ABOUT file path.
         Set a list attribute on self called resolved_paths 
         """
         if not about_file_path:
+            # FIXME: should we return an info or warning?
             return
         # clear
         self.resolved_paths = []
@@ -297,10 +325,8 @@ class AboutResourceField(PathField):
 class TextField(PathField):
     """
     A path field pointing to one or more text files such as license files.
-
     The validated value is an ordered mapping of path->Text or None if no
     location or text could not be loaded.
-    
     """
     def _validate(self, *args, **kwargs):
         """
@@ -317,9 +343,10 @@ class TextField(PathField):
             if not location:
                 # do not try to load if no location
                 # errors about non existing locations are PathField errors
-                # alreday collected.
+                # already collected.
                 continue
             try:
+                # TODO: we have lots the location by replacing it with a text
                 text = codecs.open(location, encoding='utf-8').read()
                 self.value[path] = text
             except Exception, e:
@@ -329,6 +356,8 @@ class TextField(PathField):
                        u'%(path)s '
                        u'with error: %(emsg)s' % locals())
                 errors.append(Error(ERROR, msg))
+        # set or reset self
+        self.errors = errors
         return errors
 
 
@@ -336,16 +365,7 @@ class BooleanField(SingleLineField):
     """
     An flag field with a boolean value. Validated value is False, True or None.
     """
-    flags = {
-        'yes': True,
-        'true': True,
-        'y': True,
-        't': True,
-        'no': False,
-        'false': False,
-        'n': False,
-        'f': False,
-        }
+    flags = {'yes': True, 'y': True, 'no': False, 'n': False, }
 
     flag_values = ', '.join(flags)
 
@@ -355,39 +375,64 @@ class BooleanField(SingleLineField):
         False. Return a list of errors.
         """
         errors = super(BooleanField, self)._validate(*args, ** kwargs)
-        if self.value:
-            flag = self.flags.get(self.value.lower(), None)
-            if flag != None:
-                self.value = flag
-            else:
-                name = self.name
-                val = self.value
-                flag_values = self.flag_values
-                msg = (u'Field %(name)s: Invalid flag value: %(val)r is not '
-                       u'one of: %(flag_values)s' % locals())
-                errors.append(Error(ERROR, msg))
-        else:
+
+        flag = self.get_flag(self.original_value)
+        if flag is False:
+            name = self.name
+            val = self.original_value
+            flag_values = self.flag_values
+            msg = (u'Field %(name)s: Invalid flag value: %(val)r is not '
+                   u'one of: %(flag_values)s' % locals())
+            errors.append(Error(ERROR, msg))
+            self.value = None
+        elif flag is None:
             name = self.name
             msg = (u'Field %(name)s: field is empty. '
-                   u'Defaulting flag to no/false.' % locals())
+                   u'Defaulting flag to no.' % locals())
             errors.append(Error(INFO, msg))
             self.value = None
-
+        else:
+            self.value = self.flag_values.get(flag)
         return errors
+
+    def get_flag(self, value):
+        """
+        Return a normalized existing flag value if found in the list of
+        possible values or None if empty or False if not found.
+        """
+        if not value:
+            return None
+
+        value = value.strip()
+        if not value:
+            return None
+
+        value = value.lower()
+        if value in self.flag_values:
+            # of of yes, no, true, etc.
+            return value
+        else:
+            return False
 
     @property
     def has_content(self):
         # Special for flags: None means False AND content not defined
-        if self.value != None:
+        flag = self.get_flag(self.original_value)
+        if flag:
             return True
         else:
-            return False
+            return flag
 
     def _serialized_value(self):
         # default normalized values for serialization
-        TRUE = u'yes'
-        FALSE = u'no'
-        return TRUE if self.value else FALSE
+        if self.value is True:
+            return u'yes'
+        elif self.value is False:
+            return u'no'
+        else:
+            # self.value is None
+            # TODO: should we serialize to No for None???
+            return u''
 
 
 def validate_fields(fields, base_dir):
@@ -412,7 +457,7 @@ class About(object):
     about_file_path_attr = 'about_file_path'
 
     # name of the attribute containing the resolved relative Resources paths
-    about_resource_path_attr = 'Resource_path'
+    about_resource_path_attr = 'about_resource_path'
 
     def create_fields(self):
         """
@@ -489,18 +534,6 @@ class About(object):
     def __repr__(self):
         return repr(self.all_fields())
 
-    def as_dict(self):
-        """
-        Return all the standard fields and customer-defined fields of this
-        About object in an ordered mapping.
-        """
-        dct = OrderedDict()
-        dct[self.about_file_path_attr] = self.about_file_path
-        dct[self.about_resource_path_attr] = self.resolved_resources_paths()
-        for field in self.all_fields():
-            dct[field.name] = field.serialized_value()
-        return dct
-
     def resolved_resources_paths(self):
         """
         Return a serialized string of resolved resource paths, one per line.
@@ -509,11 +542,47 @@ class About(object):
         abrf.resolve(self.about_file_path)
         return u'\n'.join(abrf.resolved_paths)
 
-    def all_fields(self):
+    def all_fields(self, with_absent=True, with_empty=True):
         """
-        Return a list of all Field objects
+        Return the list of all Field objects.
+        If with_absent, include absent (not present) fields.
+        If with_empty, include empty fields.
         """
-        return self.fields.values() + self.custom_fields.values()
+        all_fields = []
+        for field in self.fields.values() + self.custom_fields.values():
+            if field.required:
+                all_fields.append(field)
+            else:
+                if field.present:
+                    if not field.has_content:
+                        if with_empty:
+                            all_fields.append(field)
+                    else:
+                        all_fields.append(field)
+                else:
+                    if with_absent:
+                        all_fields.append(field)
+        return all_fields
+
+    def as_dict(self, with_paths=False, with_absent=True, with_empty=True):
+        """
+        Return all the standard fields and customer-defined fields of this
+        About object in an ordered mapping.
+        If with_paths, include special paths attributes.
+        If with_absent, include absent (not present) fields.
+        If with_empty, include empty fields.
+        """
+        as_dict = OrderedDict()
+        if with_paths:
+            afpa = self.about_file_path_attr
+            arpa = self.about_resource_path_attr
+            as_dict[afpa] = self.about_file_path
+            as_dict[arpa] = self.resolved_resources_paths()
+
+        for field in self.all_fields(with_absent=with_absent,
+                                     with_empty=with_empty):
+            as_dict[field.name] = field.serialized_value()
+        return as_dict
 
     def hydrate(self, fields):
         """
@@ -543,13 +612,24 @@ class About(object):
 
             standard_field = self.fields.get(name)
             if standard_field:
+                standard_field.original_value = value
                 standard_field.value = value
                 standard_field.present = True
             else:
+                # this is a special attribute
+                if name == self.about_file_path_attr:
+                    setattr(self, self.about_file_path_attr, value)
+                    continue
+
+                # this is a special attribute, skip entirely
+                if name == self.about_resource_path_attr:
+                    continue
+
                 msg = (u'Field %(orig_name)s is a custom field')
                 errors.append(Error(INFO, msg % locals()))
                 custom_field = self.custom_fields.get(name)
                 if custom_field:
+                    custom_field.original_value = value
                     custom_field.value = value
                     custom_field.present = True
                 else:
@@ -566,91 +646,132 @@ class About(object):
                         setattr(self, name, custom_field)
         return errors
 
-    def load(self, location):
+    def process(self, fields, base_dir=None):
         """
-        Read, parse, hydrate and validate the ABOUT file at location.
-        """
-        self.base_dir = posixpath.dirname(util.to_posix(self.location))
-        self._load(location)
-
-    def loads(self, s, base_dir):
-        """
-        Read, parse, hydrate and validate the ABOUT file content string s.
-        Mostly for testing.
+        Hydrate and validate a sequence of field name/value tuples from an
+        ABOUT file. Return a list of errors.
         """
         self.base_dir = base_dir
-        lines = s.splitlines(True)
-        self._load(lines)
-
-    def _load(self, loc_or_list, base_dir=None):
-        """
-        Read, parse, hydrate and validate the ABOUT file lines list of location.
-        """
-        parse_errors, fields = parse(loc_or_list)
-        self.errors.extend(parse_errors)
+        errors = []
         hydratation_errors = self.hydrate(fields)
-        self.errors.extend(hydratation_errors)
+        errors.extend(hydratation_errors)
+
         # we validate all fields, not only these hydrated
         validation_errors = validate_fields(self.all_fields(), self.base_dir)
+        errors.extend(validation_errors)
 
         # do not forget to resolve about resource paths
         self.about_resource.resolve(self.about_file_path)
+        return errors
 
-        self.errors.extend(validation_errors)
+    def load(self, location):
+        """
+        Read, parse, hydrate and validate the ABOUT file at location.
+        Return a list of errors and update self with errors.
+        """
+        self.location = location
+        loc = util.to_posix(location)
+        base_dir = posixpath.dirname(loc)
+        # TODO: do we want to catch errors?
+        lines = codecs.open(loc, encoding='utf-8').readlines()
+        errors = self.load_lines(lines, base_dir)
+        self.errors = errors
+        return errors
 
-    def dumps(self):
+    def loads(self, string, base_dir):
+        """
+        Load the ABOUT file from string. Return a list of errors.
+        """
+        lines = string.splitlines(True)
+        errors = self.load_lines(lines, base_dir)
+        self.errors = errors
+        return errors
+
+    def load_lines(self, lines, base_dir):
+        """
+        Load the ABOUT file from a lines list. Return a list of errors.
+        """
+        errors = []
+        parse_errors, fields = parse(lines)
+        errors.extend(parse_errors)
+        process_errors = self.process(fields, base_dir)
+        errors.extend(process_errors)
+        self.errors = errors
+        return errors
+
+    def load_dict(self, fields_dict, base_dir, with_empty=True):
+        """
+        Load the ABOUT file from a fields name/value mapping. 
+        If with_empty, create fields with no value for empty fields.
+        Return a list of
+        errors.
+        """
+        fields = fields_dict.items()
+        if not with_empty:
+            fields = [(n,v) for n,v in fields_dict.items() if v]
+        errors = self.process(fields, base_dir)
+        self.errors = errors
+        return errors
+
+    def dumps(self, with_absent=False, with_empty=True):
         """
         Return self as a formatted ABOUT string.
+        If with_absent, include absent (not present) fields.
+        If with_empty, include empty fields.
         """
-        serialized = [field.serialize() for field in self.all_fields()
-                      if field.present]
-        return u'\n'.join(serialized)
+        serialized = []
+        for field  in self.all_fields(with_absent, with_empty):
+            serialized.append(field.serialize())
+        # always end with a new line
+        return u'\n'.join(serialized) + u'\n'
 
-    def dump(self, location):
+    def dump(self, location, with_absent=False, with_empty=True):
         """
         Write formatted ABOUT representation of self to location.
+        If with_absent, include absent (not present) fields.
+        If with_empty, include empty fields.
         """
+        loc = util.to_posix(location)
+        parent = posixpath.dirname(loc)
+        if not os.path.exists(parent):
+            os.makedirs(parent)
         with codecs.open(location, mode='wb', encoding='utf-8') as dumped:
-            dumped.write(self.dumps())
+            dumped.write(self.dumps(with_absent, with_empty))
 
 
-def parse(location_or_lines):
+# valid field name
+field_name = r'(?P<name>[a-z][0-9a-z_]*)'
+
+valid_field_name = re.compile(field_name, re.UNICODE | re.IGNORECASE).match
+
+# line in the form of "name: value"
+field_declaration = re.compile(
+    r'^'
+    + field_name +
+    r'\s*:\s*'
+    r'(?P<value>.*)'
+    r'\s*$'
+    , re.UNICODE | re.IGNORECASE
+    ).match
+
+
+# continuation line in the form of " value"
+continuation = re.compile(
+    r'^'
+    r' '
+    r'(?P<value>.*)'
+    r'\s*$'
+    , re.UNICODE | re.IGNORECASE
+    ).match
+
+
+def parse(lines):
     """
-    Parse the ABOUT file at location (or a list of unicode lines). Return a
+    Parse a list of unicode lines from an ABOUT file. Return a
     list of errors found during parsing and a list of tuples of (name,
     value) strings.
     """
-    # NB: we could define the re as globals but re caching does not
-    # require this: having them here makes this clearer
-
-    # line in the form of "name: value"
-    field_declaration = re.compile(
-        r'^'
-        r'(?P<name>[a-z][0-9a-z_]*)'
-        r'\s*:\s*'
-        r'(?P<value>.*)'
-        r'\s*$'
-        , re.UNICODE | re.IGNORECASE
-        ).match
-
-    # continuation line in the form of " value"
-    continuation = re.compile(
-        r'^'
-        r' '
-        r'(?P<value>.*)'
-        r'\s*$'
-        , re.UNICODE | re.IGNORECASE
-        ).match
-
-    # accept a location string or a lines list as input
-    if isinstance(location_or_lines, list):
-        lines = location_or_lines
-    else:
-        # TODO: do we want to catch errors?
-        lines = codecs.open(location_or_lines, encoding='utf-8').readlines()
-
     errors = []
-    # list of parsed name/value tuples to return
     fields = []
 
     # track current name and value to accumulate possible continuations
@@ -727,21 +848,59 @@ def collect_inventory(location):
     return errors, abouts
 
 
-def field_names(abouts):
+def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
     """
     Given a list of About objects, return a list of any field names that exist
     in any object, including custom fields.
     """
     fields = []
-    fields.append(About.about_file_path_attr)
-    fields.append(About.about_resource_path_attr)
-    standard_fields = About().fields.keys()
-    fields.extend(standard_fields)
-    custom_fields = []
+    if with_paths:
+        fields.append(About.about_file_path_attr)
+        fields.append(About.about_resource_path_attr)
+
+    if with_absent:
+        standard_fields = About().fields.keys()
+        fields.extend(standard_fields)
+    else:
+        for a in abouts:
+            for name, field in a.fields.items():
+                if field.required:
+                    if name not in fields:
+                        fields.append(name)
+                else:
+                    if field.present:
+                        if name not in fields:
+                            fields.append(name)
     for a in abouts:
         for name, field in a.custom_fields.items():
-            if field not in custom_fields:
-                custom_fields.append(name)
-    fields.extend(custom_fields)
+            if field.has_content:
+                if name not in fields:
+                    fields.append(name)
+            else:
+                if with_empty:
+                    if name not in fields:
+                        fields.append(name)
+            
     return fields
 
+
+def to_csv(abouts, location, with_absent=False, with_empty=True):
+    """
+    Write a CSV file at location given a list of About objects.
+    """
+    fieldnames = field_names(abouts)
+    with codecs.open(location, mode='wb', encoding='utf-8') as csvfile:
+        writer = unicodecsv.DictWriter(csvfile, fieldnames)
+        writer.writeheader()
+        for a in abouts:
+            ad = a.as_dict(with_paths=True,
+                           with_absent=with_absent,
+                           with_empty=with_empty)
+            writer.writerow(ad)
+
+
+def from_csv(location, base_dir):
+    """
+    Load a CSV file at location and return a list of About objects.
+    """
+    #TODO: use this instead of load inventory

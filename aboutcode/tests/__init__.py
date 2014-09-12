@@ -69,9 +69,18 @@ def get_test_loc(path):
     Return the location of a test file or directory given a path relative to
     the testdata directory.
     """
+    base = to_posix(TESTDATA_DIR)
     path = to_posix(path)
-    path = to_native(path)
-    return os.path.join(TESTDATA_DIR, path)
+    path = posixpath.join(base, path)
+    #path = to_native(path)
+    return path
+
+def get_unicode_content(location):
+    """
+    Read file at location and return a unicode.
+    """
+    with codecs.open(location, 'rb', encoding='utf-8') as doc:
+        return doc.read()
 
 
 def get_test_lines(path):
@@ -79,8 +88,7 @@ def get_test_lines(path):
     Return a list of text lines loaded from the location of a test file or
     directory given a path relative to the testdata directory.
     """
-    with codecs.open(get_test_loc(path), 'rb', encoding='utf-8') as doc:
-        return doc.readlines(True)
+    return get_unicode_content(get_test_loc(path)).splitlines(True)
 
 
 def create_dir(location):

@@ -1,0 +1,11 @@
+about_resource: setuptools-5.6-py2.py3-none-any.whl
+name: setuptools
+version: 5.6
+
+download_url: https://pypi.python.org/packages/3.4/s/setuptools/setuptools-5.6-py2.py3-none-any.whl#md5=4503e42d67edc51e293ba9be4af799a5
+
+home_url: https://pypi.python.org/pypi/setuptools
+owner: Python Packaging Authority
+
+dje_license: psf
+license_text_file: PSF.LICENSE

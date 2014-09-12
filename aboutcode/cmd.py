@@ -23,10 +23,9 @@ import codecs
 import click
 import unicodecsv
 
-import aboutcode
-from aboutcode import model
-
-logger = logging.getLogger(__name__)
+import aboutcode.gen
+import aboutcode.model
+from aboutcode import NOTSET
 
 
 __version__ = '0.11.0'
@@ -89,41 +88,92 @@ def inventory(location, output):
     """
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
-    errors, abouts = model.collect_inventory(location)
-    aboutcode.log_errors(errors, logger)
-    to_csv(abouts, output)
+
+    errors, abouts = aboutcode.model.collect_inventory(location)
+    log_errors(errors)
+    aboutcode.model.to_csv(abouts, output)
+
+
+gen_help = '''
+LOCATION: Path to a CSV inventory file
+OUTPUT: Path to the directory to write ABOUT files to
+'''
+@cli.command(help=gen_help,
+             short_help='LOCATION: csv file, OUTPUT: directory')
+@click.argument('location', nargs=1, required=True,
+                type=click.Path(exists=True, file_okay=True,
+                                dir_okay=False, writable=False,
+                                readable=True, resolve_path=True))
+@click.argument('output', nargs=1, required=True,
+                type=click.Path(exists=True, file_okay=False, writable=True,
+                                dir_okay=True, resolve_path=True))
+def gen(location, output):
+    """
+    Given a CVS inventory of ABOUT files at location, generate ABOUT files in
+    base directory.
+    """
+    click.echo('Generating ABOUT files in: %(output)s'
+               ' from the CSV inventory at: %(location)s' % locals())
+    errors, abouts = aboutcode.gen.generate(location, output)
+    lea = len(abouts)
+    lee = len(errors)
+    click.echo('Generated %(lea)d ABOUT files with %(lee)d errors or warning' % locals())
+    log_errors(errors)
 
 
 @cli.command()
 def export():
-    click.echo('Export a zip archive ABOUT files and related files in a directory tree')
+    click.echo('Export a zip archive ABOUT files and related files in a directory tree.')
 
-
-@cli.command()
-def gen():
-    click.echo('Generate ABOUT files from an inventory')
 
 
 @cli.command()
-def attrib():
+def fetch(location, ):
+    """
+    Given a directory of ABOUT files at location, calls the DejaCode API and
+    update or create license data fields and license texts.
+    """
+    click.echo('Update ABOUT files with license text and data from DejaCode.')
+
+
+@cli.command()
+def attrib(input_dir, output, template = None, inventory_location=None, ):
+    """
+    Generate attribution document at output location using:
+     - the input_dir of ABOUT files,
+     - the template file (or a default)
+     - an inventory_location CSV file containing a list of ABOUT files to
+     generate attribution for.
+     Only include components code when attribute=yes
+     Return a list of errors.
+    """
     click.echo('Generate attribution documentation')
 
 
 @cli.command()
-def redist():
+def redist(input_dir, output, inventory_location=None, ):
+    """
+    Collect redistributable code at output location using:
+     - the input_dir of code and ABOUT files,
+     - an inventory_location CSV file containing a list of ABOUT files to
+     generate redistribution for.
+     Only collect code when redistribute=yes
+     Return a list of errors.
+    """
     click.echo('Collect redistributable files')
 
 
-def to_csv(abouts, location):
+def log_errors(errors, level=NOTSET):
     """
-    Given a list of About objects, write a CSV file at location.
+    Iterate of sequence of Error objects and print errors with a severity
+    superior or equal to level.
     """
-    fieldnames = model.field_names(abouts)
-    with codecs.open(location, mode='wb', encoding='utf-8') as csvfile:
-        writer = unicodecsv.DictWriter(csvfile, fieldnames)
-        writer.writeheader()
-        for a in abouts:
-            writer.writerow(a.as_dict())
+    msg_format = '%(sever)s: %(message)s'
+
+    for severity, message in errors:
+        sever = aboutcode.severities[severity]
+        print(msg_format % locals())
+
 
 
 if __name__ == '__main__':

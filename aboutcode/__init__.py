@@ -37,13 +37,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-handler.setLevel(logging.CRITICAL)
-handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-logger.addHandler(handler)
-
-
 Error = namedtuple('Error', ['severity', 'message'])
 
 def error_repr(self):
@@ -71,14 +64,4 @@ severities = {
     DEBUG : u'DEBUG',
     NOTSET : u'NOTSET'
     }
-
-
-def log_errors(errors, logger=logger, level=NOTSET):
-    """
-    Iterate of sequence of Error objects and log errors with a severity
-    superior or equal to level.
-    """
-    for severity, message in errors:
-        if severity >= level:
-            logger.log(severity, message)
 

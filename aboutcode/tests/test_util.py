@@ -27,6 +27,7 @@ from aboutcode import Error
 from aboutcode import CRITICAL
 
 from aboutcode import util
+from collections import OrderedDict
 
 class UtilsTest(unittest.TestCase):
 
@@ -233,28 +234,50 @@ class UtilsTest(unittest.TestCase):
         self.assertFalse(util.is_about_file('no_about_ext.something'))
 
     def test_get_relative_path(self):
-        test = [('/some/path','/some/path/file','path/file'),
-                ('path','/path/file','path/file'),
-                ('/path','/path/file','path/file'),
-                ('/path/','/path/file/','path/file'),
-                ('/path/','path/','path'),
-                ('/p1/p2/p3','/p1/p2//p3/file','p3/file'),
-                (r'c:\some/path','c:/some/path/file','path/file'),
-                (r'c:\\some\\path\\','c:/some/path/file','path/file'),
+        test = [('/some/path', '/some/path/file', 'path/file'),
+                ('path', '/path/file', 'path/file'),
+                ('/path', '/path/file', 'path/file'),
+                ('/path/', '/path/file/', 'path/file'),
+                ('/path/', 'path/', 'path'),
+                ('/p1/p2/p3', '/p1/p2//p3/file', 'p3/file'),
+                (r'c:\some/path', 'c:/some/path/file', 'path/file'),
+                (r'c:\\some\\path\\', 'c:/some/path/file', 'path/file'),
                 ]
         for base_loc, full_loc, expected in test:
             result = util.get_relative_path(base_loc, full_loc)
             self.assertEqual(expected, result)
 
     def test_get_relative_path_with_same_path_twice(self):
-        test = [('/some/path/file','path/file'),
-                ('/path/file','path/file'),
-                ('/path/file/','path/file'),
-                ('path/','path'),
-                ('/p1/p2//p3/file','p3/file'),
-                ('c:/some/path/file','path/file'),
-                (r'c:\\some\\path\\file','path/file'),
+        test = [('/some/path/file', 'path/file'),
+                ('/path/file', 'path/file'),
+                ('/path/file/', 'path/file'),
+                ('path/', 'path'),
+                ('/p1/p2//p3/file', 'p3/file'),
+                ('c:/some/path/file', 'path/file'),
+                (r'c:\\some\\path\\file', 'path/file'),
                 ]
         for loc, expected in test:
             result = util.get_relative_path(loc, loc)
             self.assertEqual(expected, result)
+
+    def test_load_csv(self):
+        test_file = get_test_loc('util/about.csv')
+        expected = [OrderedDict(
+                    [('about_file', 'about.ABOUT'),
+                     ('about_resource', '.'),
+                     ('name', 'ABOUT tool'),
+                     ('version', '0.8.1')])
+                    ]
+        result = util.load_csv(test_file)
+        self.assertEqual(expected, result)
+
+    def test_load_csv_does_not_convert_column_names_to_lowercase(self):
+        test_file = get_test_loc('util/about_key_with_upper_case.csv')
+        expected = [OrderedDict(
+                    [('about_file', 'about.ABOUT'),
+                     ('about_resource', '.'),
+                     ('nAme', 'ABOUT tool'),
+                     ('Version', '0.8.1')])
+                    ]
+        result = util.load_csv(test_file)
+        self.assertEqual(expected, result)
