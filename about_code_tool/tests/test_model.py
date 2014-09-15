@@ -907,8 +907,8 @@ class CollectorTest(unittest.TestCase):
         expected = [
             'about_resource',
             'name',
-            'f',
             'cf',
+            'f',
             'g',
             ]
         result = model.field_names(abouts, with_paths=False, 

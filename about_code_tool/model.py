@@ -708,7 +708,7 @@ class About(object):
         """
         fields = fields_dict.items()
         if not with_empty:
-            fields = [(n,v) for n,v in fields_dict.items() if v]
+            fields = [(n, v) for n, v in fields_dict.items() if v]
         errors = self.process(fields, base_dir)
         self.errors = errors
         return errors
@@ -858,29 +858,42 @@ def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
         fields.append(About.about_file_path_attr)
         fields.append(About.about_resource_path_attr)
 
+    standard_fields = About().fields.keys()
     if with_absent:
-        standard_fields = About().fields.keys()
         fields.extend(standard_fields)
     else:
+        standards = []
         for a in abouts:
             for name, field in a.fields.items():
                 if field.required:
-                    if name not in fields:
-                        fields.append(name)
+                    if name not in standards:
+                        standards.append(name)
                 else:
                     if field.present:
-                        if name not in fields:
-                            fields.append(name)
+                        if name not in standards:
+                            standards.append(name)
+        # resort standard fields in standard order
+        # which is a tad complex as this is a predefined order
+        sorted_std = []
+        for fn in standard_fields:
+            if fn in standards:
+                sorted_std.append(fn)
+        fields.extend(sorted_std)
+
+    customs = []
     for a in abouts:
         for name, field in a.custom_fields.items():
             if field.has_content:
-                if name not in fields:
-                    fields.append(name)
+                if name not in customs:
+                    customs.append(name)
             else:
                 if with_empty:
-                    if name not in fields:
-                        fields.append(name)
-            
+                    if name not in customs:
+                        customs.append(name)
+    # always sort custom fields list by name
+    customs.sort()
+    fields.extend(customs)
+
     return fields
 
 
@@ -903,4 +916,4 @@ def from_csv(location, base_dir):
     """
     Load a CSV file at location and return a list of About objects.
     """
-    #TODO: use this instead of load inventory
+    # TODO: use this instead of load inventory
