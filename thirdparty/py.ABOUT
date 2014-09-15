@@ -4,11 +4,11 @@ download_url: https://pypi.python.org/packages/source/p/py/py-1.4.23.tar.gz#md5=
 
 name: py
 description: library with cross-python path, ini-parsing, io, code, log facilities
-home_url: http://pylib.readthedocs.org/
+homepage: http://pylib.readthedocs.org/
 owner: holger krekel, Ronny Pfannschmidt, Benjamin Peterson and others
-contatct: pytest-dev@python.org
-dje_license: mit
-license_text_file: py.LICENSE
+contact: pytest-dev@python.org
+license: mit
+license_file: py.LICENSE
 copyright: Holger Krekel and others, 2004-2014
 
 
