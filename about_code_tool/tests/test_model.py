@@ -19,20 +19,20 @@ from __future__ import print_function
 import posixpath
 import unittest
 
-from aboutcode.tests import get_test_loc
-from aboutcode.tests import get_test_lines
+from about_code_tool.tests import get_test_loc
+from about_code_tool.tests import get_test_lines
 
 
-from aboutcode import Error
-from aboutcode import CRITICAL, INFO, WARNING
-from aboutcode import model
-from aboutcode import util
-from aboutcode import ERROR
+from about_code_tool import Error
+from about_code_tool import CRITICAL, INFO, WARNING
+from about_code_tool import model
+from about_code_tool import util
+from about_code_tool import ERROR
 from collections import OrderedDict
-import aboutcode
-from aboutcode.tests import get_temp_file
-from aboutcode.tests import get_unicode_content
-from aboutcode.util import load_csv
+import about_code_tool
+from about_code_tool.tests import get_temp_file
+from about_code_tool.tests import get_unicode_content
+from about_code_tool.util import load_csv
 
 
 class FieldTest(unittest.TestCase):
@@ -830,7 +830,7 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('allAboutInOneDir')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = []
-        result = [(level, e) for level, e in errors if level > aboutcode.INFO]
+        result = [(level, e) for level, e in errors if level > about_code_tool.INFO]
         self.assertEqual(expected_errors, result)
 
     def test_collect_inventory_populate_about_file_path(self):

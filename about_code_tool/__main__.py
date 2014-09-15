@@ -16,5 +16,5 @@
 
 
 if __name__ == '__main__':
-    from aboutcode import cmd
+    from about_code_tool import cmd
     cmd.cli()

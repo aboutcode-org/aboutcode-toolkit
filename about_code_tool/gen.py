@@ -30,13 +30,13 @@ import posixpath
 import os
 
 
-from aboutcode import Error
-from aboutcode import ERROR
+from about_code_tool import Error
+from about_code_tool import ERROR
 
-from aboutcode import util
-from aboutcode import model
+from about_code_tool import util
+from about_code_tool import model
 from collections import OrderedDict
-from aboutcode.util import to_posix
+from about_code_tool.util import to_posix
 
 
 LOG_FILENAME = 'error.log'

@@ -23,9 +23,9 @@ import codecs
 import click
 import unicodecsv
 
-import aboutcode.gen
-import aboutcode.model
-from aboutcode import NOTSET
+import about_code_tool.gen
+import about_code_tool.model
+from about_code_tool import NOTSET
 
 
 __version__ = '0.11.0'
@@ -89,9 +89,9 @@ def inventory(location, output):
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
 
-    errors, abouts = aboutcode.model.collect_inventory(location)
+    errors, abouts = about_code_tool.model.collect_inventory(location)
     log_errors(errors)
-    aboutcode.model.to_csv(abouts, output)
+    about_code_tool.model.to_csv(abouts, output)
 
 
 gen_help = '''
@@ -114,7 +114,7 @@ def gen(location, output):
     """
     click.echo('Generating ABOUT files in: %(output)s'
                ' from the CSV inventory at: %(location)s' % locals())
-    errors, abouts = aboutcode.gen.generate(location, output)
+    errors, abouts = about_code_tool.gen.generate(location, output)
     lea = len(abouts)
     lee = len(errors)
     click.echo('Generated %(lea)d ABOUT files with %(lee)d errors or warning' % locals())
@@ -171,7 +171,7 @@ def log_errors(errors, level=NOTSET):
     msg_format = '%(sever)s: %(message)s'
 
     for severity, message in errors:
-        sever = aboutcode.severities[severity]
+        sever = about_code_tool.severities[severity]
         print(msg_format % locals())
 
 

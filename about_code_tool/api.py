@@ -23,8 +23,8 @@ import json
 from collections import namedtuple
 
 
-from aboutcode import Error
-from aboutcode import ERROR
+from about_code_tool import Error
+from about_code_tool import ERROR
 
 """
 API call helpers

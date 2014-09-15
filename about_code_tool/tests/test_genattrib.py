@@ -19,7 +19,7 @@ from __future__ import print_function
 import os
 import unittest
 
-from aboutcode import genattrib
+from about_code_tool import genattrib
 
 
 TESTS_DIR = os.path.abspath(os.path.dirname(__file__))

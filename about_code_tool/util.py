@@ -24,8 +24,8 @@ import unicodecsv
 from collections import OrderedDict
 
 
-from aboutcode import Error
-from aboutcode import CRITICAL
+from about_code_tool import Error
+from about_code_tool import CRITICAL
 
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.'

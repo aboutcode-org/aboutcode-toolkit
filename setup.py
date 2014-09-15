@@ -5,12 +5,12 @@ from __future__ import print_function
 
 from setuptools import setup, find_packages
 
-from aboutcode import about
+import about_code_tool
 
 
 setup(
     name='AboutCode',
-    version=about.__version__,
+    version=about_code_tool.__version__,
     description=('Document the provenance (origin and license) of '
                 'third-party software using small text files. '
                 'Collect inventories, generate attribution documentation.'),
@@ -27,15 +27,15 @@ setup(
     license='Apache License 2.0',
     packages=find_packages(),
     package_data={
-        'aboutcode': ['templates/*'],
-        'aboutcode': ['tests/testdata/*'],
+        'about_code_tool': ['templates/*'],
+        'about_code_tool': ['tests/testdata/*'],
     },
     include_package_data=True,
     zip_safe=False,
 
     entry_points='''
         [console_scripts]
-        about-code=aboutcode.cmd:cli
+        about-code=about_code_tool.cmd:cli
     ''',
 #     install_requires=[
 #         'Jinja2',
@@ -50,7 +50,7 @@ setup(
 #         'py==1.4.23'
 #     ],
 
-     test_suite='aboutcode.tests',
+     test_suite='about_code_tool.tests',
 #     tests_require=[
 #         'pytest',
 #         'py',

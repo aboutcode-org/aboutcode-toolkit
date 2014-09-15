@@ -22,7 +22,7 @@ import unittest
 from os.path import abspath, dirname, join
 
 import test_about
-from aboutcode import genabout
+from about_code_tool import genabout
 
 
 TESTDATA_DIR = join(abspath(dirname(__file__)), 'testdata')

@@ -19,17 +19,17 @@ from __future__ import print_function
 import unittest
 import posixpath
 
-from aboutcode import Error
-from aboutcode import ERROR
-from aboutcode import INFO
-from aboutcode import CRITICAL
+from about_code_tool import Error
+from about_code_tool import ERROR
+from about_code_tool import INFO
+from about_code_tool import CRITICAL
 
-from aboutcode import gen
-from aboutcode import model
+from about_code_tool import gen
+from about_code_tool import model
 
-from aboutcode.tests import to_posix
-from aboutcode.tests import get_test_loc
-from aboutcode.tests import get_temp_dir
+from about_code_tool.tests import to_posix
+from about_code_tool.tests import get_test_loc
+from about_code_tool.tests import get_temp_dir
 
 
 class GenTest(unittest.TestCase):

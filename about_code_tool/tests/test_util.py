@@ -19,14 +19,14 @@ from __future__ import print_function
 import unittest
 import string
 
-from aboutcode.tests import get_test_loc
-from aboutcode.tests import on_posix
-from aboutcode.tests import on_windows
+from about_code_tool.tests import get_test_loc
+from about_code_tool.tests import on_posix
+from about_code_tool.tests import on_windows
 
-from aboutcode import Error
-from aboutcode import CRITICAL
+from about_code_tool import Error
+from about_code_tool import CRITICAL
 
-from aboutcode import util
+from about_code_tool import util
 from collections import OrderedDict
 
 class UtilsTest(unittest.TestCase):

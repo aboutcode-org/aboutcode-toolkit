@@ -25,7 +25,7 @@ import os
 import stat
 from os.path import abspath, dirname, join
 
-from aboutcode import about
+from about_code_tool import about
 
 
 TESTDATA_DIR = join(abspath(dirname(__file__)), 'testdata')
@@ -81,12 +81,12 @@ def get_temp_dir(sub_dir_path=None):
 class CollectorTest(unittest.TestCase):
     def test_return_path_is_not_abspath_and_contains_subdirs_on_file(self):
         # Using a relative path for the purpose of this test
-        test_file = ('aboutcode/tests/testdata/thirdparty'
+        test_file = ('about_code_tool/tests/testdata/thirdparty'
                     '/django_snippets_2413.ABOUT')
         output = get_temp_file()
         collector = about.Collector(test_file)
         collector.write_to_csv(output)
-        expected = ('aboutcode/tests/testdata/thirdparty'
+        expected = ('about_code_tool/tests/testdata/thirdparty'
                     '/django_snippets_2413.ABOUT')
         # FIXME: why [2]? what this test means?
         with open(output) as f:
@@ -94,11 +94,11 @@ class CollectorTest(unittest.TestCase):
 
     def test_return_path_is_not_abspath_and_contains_subdirs_on_dir(self):
         # Using a relative path for the purpose of this test
-        test_file = 'aboutcode/tests/testdata/basic'
+        test_file = 'about_code_tool/tests/testdata/basic'
         output = get_temp_file()
         collector = about.Collector(test_file)
         collector.write_to_csv(output)
-        expected = 'aboutcode/tests/testdata/basic'
+        expected = 'about_code_tool/tests/testdata/basic'
         # FIXME: why [2]? what this test means?
         with open(output) as f:
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))
@@ -118,7 +118,7 @@ class CollectorTest(unittest.TestCase):
         'usage,scm_tool,scm_path,scm_tag,scm_rev,organization,'
         'warnings,errors')
 
-        test_file = 'aboutcode/tests/testdata/basic'
+        test_file = 'about_code_tool/tests/testdata/basic'
         output = get_temp_file()
         collector = about.Collector(test_file)
         collector.write_to_csv(output)
@@ -127,29 +127,29 @@ class CollectorTest(unittest.TestCase):
             self.assertEqual(expected_header, header_row)
 
     def test_collect_can_collect_a_directory_tree(self):
-        test_dir = 'aboutcode/tests/testdata/DateTest'
-        expected = [('aboutcode/tests/testdata/DateTest'
+        test_dir = 'about_code_tool/tests/testdata/DateTest'
+        expected = [('about_code_tool/tests/testdata/DateTest'
                      '/non-supported_date_format.ABOUT'),
-                    ('aboutcode/tests/testdata/DateTest'
+                    ('about_code_tool/tests/testdata/DateTest'
                      '/supported_date_format.ABOUT')]
         result = about.Collector.collect(test_dir)
         self.assertEqual(sorted(expected), sorted(result))
 
     def test_collect_can_collect_a_single_file(self):
-        test_file = ('aboutcode/tests/testdata/thirdparty'
+        test_file = ('about_code_tool/tests/testdata/thirdparty'
                       '/django_snippets_2413.ABOUT')
-        expected = ['aboutcode/tests/testdata/thirdparty'
+        expected = ['about_code_tool/tests/testdata/thirdparty'
                     '/django_snippets_2413.ABOUT']
         result = about.Collector.collect(test_file)
         self.assertEqual(expected, result)
 
     def test_collector_errors_encapsulation(self):
-        test_file = 'aboutcode/tests/testdata/DateTest'
+        test_file = 'about_code_tool/tests/testdata/DateTest'
         collector = about.Collector(test_file)
         self.assertEqual(2, len(collector.errors))
 
     def test_collector_warnings_encapsulation(self):
-        test_file = 'aboutcode/tests/testdata/allAboutInOneDir'
+        test_file = 'about_code_tool/tests/testdata/allAboutInOneDir'
         collector = about.Collector(test_file)
         # self.assertEqual(4, len(collector.warnings))
         # No warning is thrown as all fields from ABOUT files are accepted.
