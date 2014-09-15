@@ -376,7 +376,7 @@ class AboutTest(unittest.TestCase):
             self.check_About_hydrate(a, fields, errors)
 
     def test_About_with_existing_about_resource_has_no_error(self):
-        test_file = get_test_loc('parser_tests/about_resource_field_present.ABOUT')
+        test_file = get_test_loc('parser_tests/about_resource_field.ABOUT')
         a = model.About(test_file)
         self.assertEqual([], a.errors)
         result = a.about_resource.value['about_resource.c']
