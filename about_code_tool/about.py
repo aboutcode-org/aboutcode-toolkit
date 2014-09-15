@@ -32,7 +32,7 @@ from collections import namedtuple
 import csv
 from datetime import datetime
 from email.parser import HeaderParser
-from os.path import dirname, join
+from os.path import basename, dirname, join, normpath, realpath
 import errno
 import httplib
 import logging
@@ -661,6 +661,7 @@ class AboutFile(object):
             warnings = Warn(IGNORED, field_name, line, msg)
         return warnings
 
+
     def normalize(self):
         """
         Convert field names to lower case. If a field name occurs multiple
@@ -947,6 +948,14 @@ class AboutFile(object):
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
             if field in self.validated_fields:
                 row += [self.validated_fields[field]]
+            elif field == 'about_resource_path':
+                about = self.validated_fields['about_resource']
+                if about.endswith('.'):
+                    about_resource_path = dirname(updated_path) + '/'
+                else:
+                    about_resource_path = normpath(join(dirname(updated_path),
+                                                        about))
+                row += [about_resource_path]
             else:
                 row += ['']
 
@@ -1223,15 +1232,12 @@ class Collector(object):
                 row_data = about_object.get_row_data(relative_path, custom_keys)
                 csv_writer.writerow(row_data)
 
-    def generate_attribution(self,
-                             template_path='templates/default.html',
-                             limit_to=None):
+    def generate_attribution(self, template_path=None, limit_to=None):
         """
         Generate an attribution file from the current list of ABOUT objects.
         The optional `limit_to` parameter allows to restrict the generated
         attribution to a specific list of component names.
         """
-
         try:
             import jinja2 as j2
         except ImportError:
@@ -1240,9 +1246,15 @@ class Collector(object):
                   '"configure"')
             return
 
+        # For some reasons, if I set the template_path = "templates/default.html"
+        # in the parameter, the tempalte_path will become 'None' and cause error
+        if not template_path:
+            template_path = join(dirname(realpath(__file__)),
+                                 "templates/default.html")
+
         # FIXME: the template dir should be outside the code tree
-        template_dir = os.path.dirname(template_path)
-        template_file_name = os.path.basename(template_path)
+        template_dir = dirname(template_path)
+        template_file_name = basename(template_path)
         loader = j2.FileSystemLoader(template_dir)
         jinja_env = j2.Environment(loader=loader)
 
@@ -1250,12 +1262,13 @@ class Collector(object):
             template = jinja_env.get_template(template_file_name)
         except j2.TemplateNotFound:
             return
-
         limit_to = limit_to or []
         limit_to = set(limit_to)
 
         about_object_fields = []
         about_content_dict = {}
+
+        not_process_components = list(limit_to)
 
         for about_object in self:
             # FIXME: what is the meaning of this partition?
@@ -1265,8 +1278,14 @@ class Collector(object):
             # FIXME: a path starting with / is NOT relative
             about_relative_path = '/' + file_name
 
-            if limit_to and about_relative_path in limit_to:
-                continue
+            if limit_to:
+                try:
+                    not_process_components.remove(about_relative_path)
+                except Exception as e:
+                    continue
+
+            #if limit_to and about_relative_path in limit_to:
+            #    continue
 
             about_content = about_object.validated_fields
             # Add information in the dictionary if not in the ABOUT file
@@ -1299,7 +1318,7 @@ class Collector(object):
 
         # find paths requested in the limit_to paths arg that do not point to
         # a corresponding ABOUT file
-        for path in limit_to:
+        for path in not_process_components:
             path = posix_path(path)
             afp = join(self.location, path)
             msg = ('The requested ABOUT file: %(afp)r does not exist. '
