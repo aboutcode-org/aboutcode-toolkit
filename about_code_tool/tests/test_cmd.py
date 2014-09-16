@@ -41,7 +41,7 @@ class CmdTest(unittest.TestCase):
         """
         self.maxDiff = None
         def as_items(csvfile):
-            return [i.items() for i in util.load_csv(csvfile)]
+            return sorted([i.items() for i in util.load_csv(csvfile)])
 
         expected = as_items(expected)
         result = as_items(result)
