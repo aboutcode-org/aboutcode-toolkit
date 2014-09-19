@@ -27,6 +27,7 @@ import sys
 import string
 import ntpath
 
+from about_code_tool.util import to_posix, to_native
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -37,31 +38,9 @@ logger.addHandler(handler)
 TESTDATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                             'testdata')
 
-
-on_windows = 'win' in sys.platform
+on_windows = 'win32' in sys.platform
 on_posix = not on_windows
 
-
-def to_posix(path):
-    """
-    Return a path using the posix path separator given a path that may contain
-    posix or windows separators, converting \ to /. NB: this path will still
-    be valid in the windows explorer (except if UNC or share name). It will be
-    a valid path everywhere in Python. It will not be valid for windows
-    command line operations.
-    """
-    return path.replace(ntpath.sep, posixpath.sep)
-
-
-def to_native(path):
-    """
-    Return a path using the current OS path separator given a path that may
-    contain posix or windows separators, converting / to \ on windows and \ to
-    / on posix OSes.
-    """
-    path = path.replace(ntpath.sep, os.path.sep)
-    path = path.replace(posixpath.sep, os.path.sep)
-    return path
 
 
 def get_test_loc(path):

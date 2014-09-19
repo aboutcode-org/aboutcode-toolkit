@@ -84,7 +84,6 @@ def check_file_names(paths):
     return errors
 
 
-
 def get_locations(location):
     """
     Return a list of locations of files given the location of a
