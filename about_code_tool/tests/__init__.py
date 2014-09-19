@@ -42,7 +42,6 @@ on_windows = 'win32' in sys.platform
 on_posix = not on_windows
 
 
-
 def get_test_loc(path):
     """
     Return the location of a test file or directory given a path relative to
