@@ -1,0 +1,11 @@
+about_resource: pytest-2.6.1-py2.py3-none-any.whl
+name: pytest
+version: 2.6.1
+download_url: https://pypi.python.org/packages/source/p/pytest/pytest-2.6.1.tar.gz#md5=bb353f6cf6d9ff83ff7f2dfbeaca47a3
+description: pytest: simple powerful testing with Python
+license: mit
+license_file: pytest.LICENSE
+copyright: Copyright Holger Krekel and others, 2004-2014
+owner: Holger Krekel, Benjamin Peterson, Ronny Pfannschmidt, Floris Bruynooghe and others
+contact: holger at merlinux.eu
+homepage: http://pytest.org

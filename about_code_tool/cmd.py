@@ -25,6 +25,8 @@ import unicodecsv
 
 import about_code_tool.gen
 import about_code_tool.model
+import about_code_tool.attrib
+
 from about_code_tool import NOTSET
 
 
@@ -58,13 +60,12 @@ ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
 
 @click.group()
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
-@click.option('-v', '--verbose', count=True, 
+@click.option('-v', '--verbose', count=True,
               help='Increase verbosity. Repeat to print more output.')
 @click.option('-q', '--quiet', count=True, help='Do not print any output.')
 def cli(verbose, quiet):
     pass
     # click.echo('Verbosity: %s' % verbose)
-
 
 
 inventory_help = '''
@@ -128,7 +129,7 @@ def export():
 
 
 @cli.command()
-def fetch(location, ):
+def fetch(location):
     """
     Given a directory of ABOUT files at location, calls the DejaCode API and
     update or create license data fields and license texts.
@@ -137,21 +138,28 @@ def fetch(location, ):
 
 
 @cli.command()
-def attrib(input_dir, output, template = None, inventory_location=None, ):
+@click.argument('location', nargs=1, required=True,
+                type=click.Path(exists=True, file_okay=True,
+                                dir_okay=True, writable=False,
+                                readable=True, resolve_path=True))
+@click.argument('output', nargs=1, required=True,
+                type=click.Path(exists=False, file_okay=True, writable=True,
+                                dir_okay=False, resolve_path=True))
+def attrib(location, output, template=None, inventory_location=None,):
     """
-    Generate attribution document at output location using:
-     - the input_dir of ABOUT files,
-     - the template file (or a default)
-     - an inventory_location CSV file containing a list of ABOUT files to
-     generate attribution for.
-     Only include components code when attribute=yes
-     Return a list of errors.
+    Generate attribution document at output location using the directory of
+    ABOUT files at location, the template file (or a default), an inventory_location CSV
+    file containing a list of ABOUT files to generate attribution for. Only
+    include components code when attribute=yes
     """
     click.echo('Generate attribution documentation')
+    errors, abouts = about_code_tool.model.collect_inventory(location)
+    about_code_tool.attrib.generate_and_save(abouts, output, template, inventory_location)
+    log_errors(errors)
 
 
 @cli.command()
-def redist(input_dir, output, inventory_location=None, ):
+def redist(input_dir, output, inventory_location=None,):
     """
     Collect redistributable code at output location using:
      - the input_dir of code and ABOUT files,
@@ -173,7 +181,6 @@ def log_errors(errors, level=NOTSET):
     for severity, message in errors:
         sever = about_code_tool.severities[severity]
         print(msg_format % locals())
-
 
 
 if __name__ == '__main__':

@@ -1,0 +1,14 @@
+about_resource: virtualenv-1.11.6-py2.py3-none-any.whl
+name: virtualenv
+version: 1.11.6
+download_url: https://raw.githubusercontent.com/pypa/virtualenv/1.11.6/virtualenv.py
+license: mit
+license_file: virtualenv.LICENSE
+license_url: https://raw.github.com/pypa/virtualenv/develop/LICENSE.txt
+copyright: Copyright (c) 2007 Ian Bicking and Contributors
+ Copyright (c) 2009 Ian Bicking, The Open Planning Project
+ Copyright (c) 2011-2014 The virtualenv developers
+owner: The virtualenv developers
+vcs_tool: git
+vcs_repository: https://github.com/pypa/virtualenv.git
+homepage: http://virtualenv.org/

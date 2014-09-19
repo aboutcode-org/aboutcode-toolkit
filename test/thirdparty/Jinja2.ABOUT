@@ -1,0 +1,11 @@
+about_resource: Jinja2-2.7.3-py2-none-any.whl
+name: Jinja2
+version: 2.7.3
+download_url: https://pypi.python.org/packages/source/J/Jinja2/Jinja2-2.7.3.tar.gz#md5=b9dffd2f3b43d673802fe857c8445b1a
+license: bsd-new
+license_file: Jinja2.LICENSE
+copyright: Copyright (c) 2009 by the Jinja Team
+owner: Armin Ronacher
+vcs_tool: git
+vcs_repository: https://github.com/mitsuhiko/jinja2.git
+homepage: http://jinja.pocoo.org/
