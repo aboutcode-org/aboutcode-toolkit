@@ -461,7 +461,11 @@ class GenAbout(object):
                             detail_list.append(license_context)
                             key_text_dict[detail[0]] = detail_list
                         else:
-                            line['dje_license_name'] = license_dict[lic]
+                            try:
+                                if line['dje_license_name']:
+                                    line['dje_license_name'] += "\n " + license_dict[lic]
+                            except:
+                                line['dje_license_name'] = license_dict[lic]
             except Exception:
                 err = Warn('dje_license', '',
                            'Missing "dje_license" for ' + line['about_file'])
