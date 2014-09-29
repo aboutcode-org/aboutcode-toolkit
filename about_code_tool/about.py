@@ -1263,71 +1263,60 @@ class Collector(object):
         except j2.TemplateNotFound:
             return
         limit_to = limit_to or []
-        # ToDo: The set(limit_to) break the order of the original limit_to list
-        #limit_to = set(limit_to)
+        limit_to = set(limit_to)
 
         about_object_fields = []
         about_content_dict = {}
 
         not_process_components = list(limit_to)
-        
-        component_exist = False
 
-        # ToDo: temp fix to have correct order in the attribution generation based on
-        # the input
-        for component in not_process_components:
-            for about_object in self:
-                # FIXME: what is the meaning of this partition?
-                # PO created the var some_path to provide some clarity
-                # but what does the second element means?
-                file_name = about_object.location.partition(self.location)[2]
-                # FIXME: a path starting with / is NOT relative
-                about_relative_path = '/' + file_name
-                """if limit_to:
-                    try:
-                        not_process_components.remove(about_relative_path)
-                    except Exception as e:
-                        continue"""
-    
-                #if limit_to and about_relative_path in limit_to:
-                #    continue
-                if component == about_relative_path:
-                    component_exist = True
-                    about_content = about_object.validated_fields
-                    # Add information in the dictionary if not in the ABOUT file
-                    lic_text = unicode(about_object.license_text(),
+        for about_object in self:
+            # FIXME: what is the meaning of this partition?
+            # PO created the var some_path to provide some clarity
+            # but what does the second element means?
+            file_name = about_object.location.partition(self.location)[2]
+            # FIXME: a path starting with / is NOT relative
+            about_relative_path = '/' + file_name
+
+            if limit_to:
+                try:
+                    not_process_components.remove(about_relative_path)
+                except Exception as e:
+                    continue
+
+            #if limit_to and about_relative_path in limit_to:
+            #    continue
+
+            about_content = about_object.validated_fields
+            # Add information in the dictionary if not in the ABOUT file
+            lic_text = unicode(about_object.license_text(),
+                               errors='replace')
+
+            about_content['license_text'] = lic_text
+            notice_text = about_object.notice_text()
+            about_content['notice_text'] = notice_text
+
+            # FIXME: The following is temporary code to handle multiple
+            # license_text_file paths in the field value, one per lne
+            for k in about_content:
+                if ('\n' in about_content[k]
+                    and k == 'license_text_file'):
+                    # FIXME: we should report decoding errors
+                    lic_text = unicode(about_object.tmp_get_license_text(),
                                        errors='replace')
-        
                     about_content['license_text'] = lic_text
-                    notice_text = about_object.notice_text()
-                    about_content['notice_text'] = notice_text
-        
-                    # FIXME: The following is temporary code to handle multiple
-                    # license_text_file paths in the field value, one per lne
-                    for k in about_content:
-                        if ('\n' in about_content[k]
-                            and k == 'license_text_file'):
-                            # FIXME: we should report decoding errors
-                            lic_text = unicode(about_object.tmp_get_license_text(),
-                                               errors='replace')
-                            about_content['license_text'] = lic_text
-        
-                    # report error if no license_text is found
-                    if not about_content.get('license_text'):
-                        msg = ('No license_text found. '
-                               'Skipping License generation.')
-                        err = Error(GENATTRIB, 'name',
-                                    about_object.get_about_name(), msg)
-                        self.genattrib_errors.append(err)
-                    about_object_fields.append(about_content)
-                    break
-            if not component_exist:
-                msg = ('The requested ABOUT file: %r does not exist. '
-                       'No attribution generated for this file.' % component)
-                err = Error(GENATTRIB, 'about_file', component, msg)
+
+            # report error if no license_text is found
+            if not about_content.get('license_text'):
+                msg = ('No license_text found. '
+                       'Skipping License generation.')
+                err = Error(GENATTRIB, 'name',
+                            about_object.get_about_name(), msg)
                 self.genattrib_errors.append(err)
 
-        """# find paths requested in the limit_to paths arg that do not point to
+            about_object_fields.append(about_content)
+
+        # find paths requested in the limit_to paths arg that do not point to
         # a corresponding ABOUT file
         for path in not_process_components:
             path = posix_path(path)
@@ -1335,7 +1324,7 @@ class Collector(object):
             msg = ('The requested ABOUT file: %(afp)r does not exist. '
                    'No attribution generated for this file.' % locals())
             err = Error(GENATTRIB, 'about_file', path, msg)
-            self.genattrib_errors.append(err)"""
+            self.genattrib_errors.append(err)
 
         # TODO: Handle the grouping and ordering later
         """# We want to display common_licenses in alphabetical order
