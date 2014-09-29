@@ -145,6 +145,15 @@ class Field(object):
              'present=%(present)r)')
         return r % locals()
 
+    def __eq__(self, other):
+        """
+        Equality based on string content value, ignoring spaces
+        """
+
+        return (isinstance(other, self.__class__)
+                and self.name == other.name
+                and self.value == other.value)
+
 
 class StringField(Field):
     """
@@ -157,6 +166,32 @@ class StringField(Field):
 
     def _serialized_value(self):
         return self.value if self.has_content else u''
+
+    def __eq__(self, other):
+        """
+        Equality based on string content value, ignoring spaces
+        """
+
+        if not (isinstance(other, self.__class__)
+                and self.name == other.name):
+            return False
+
+        if self.value == other.value:
+            return True
+
+        # compare values stripped from spaces. Empty and None are equal
+        if self.value:
+            sval = u''.join(self.value.split())
+        if not sval:
+            sval = None
+
+        if other.value:
+            oval = u''.join(other.value.split())
+        if not oval:
+            oval = None
+
+        if sval == oval:
+            return True
 
 
 class SingleLineField(StringField):
@@ -205,6 +240,30 @@ class ListField(StringField):
 
     def _serialized_value(self):
         return u'\n'.join(self.value) if self.has_content else u''
+
+    def __eq__(self, other):
+        """
+        Equality based on sort-insensitive values
+        """
+
+        if not (isinstance(other, self.__class__)
+                and self.name == other.name):
+            return False
+
+        if self.value == other.value:
+            return True
+
+        # compare values stripped from spaces.
+        sval = []
+        if self.value and isinstance(self.value, list):
+            sval = sorted(self.value)
+
+        oval = []
+        if other.value and isinstance(other.value, list):
+            oval = sorted(other.value)
+
+        if sval == oval:
+            return True
 
 
 class UrlField(ListField):
@@ -392,7 +451,7 @@ class BooleanField(SingleLineField):
             errors.append(Error(INFO, msg))
             self.value = None
         else:
-            self.value = self.flag_values.get(flag)
+            self.value = self.flags.get(flag)
         return errors
 
     def get_flag(self, value):
@@ -433,6 +492,14 @@ class BooleanField(SingleLineField):
             # self.value is None
             # TODO: should we serialize to No for None???
             return u''
+
+    def __eq__(self, other):
+        """
+        Boolean equality
+        """
+        return (isinstance(other, self.__class__)
+                and self.name == other.name
+                and self.value == other.value)
 
 
 def validate_fields(fields, base_dir):
@@ -533,6 +600,14 @@ class About(object):
 
     def __repr__(self):
         return repr(self.all_fields())
+
+    def __eq__(self, other):
+        """
+        Equality based on fields and custom_fields., i.e. content.
+        """
+        return (isinstance(other, self.__class__)
+                and self.fields == other.fields
+                and self.custom_fields == other.custom_fields)
 
     def resolved_resources_paths(self):
         """
