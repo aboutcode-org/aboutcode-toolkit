@@ -182,6 +182,12 @@ def main(parser, options, args):
         parser.print_help()
         sys.exit(errno.EEXIST)
 
+    if template_location:
+        if not exists(template_location):
+            print('The defined template location does not exist.')
+            parser.print_help()
+            sys.exit(errno.EINVAL)
+
     if component_subset_path and not exists(component_subset_path):
         print('Component Subset path does not exist.')
         parser.print_help()
