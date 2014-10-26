@@ -446,19 +446,65 @@ SPDX_LICENSES = (
 SPDX_LICENSE_IDS = dict((name.lower(), name) for name in SPDX_LICENSES)
 
 
-
-# Use DJE License key with extension
+# Use DJE License Name
 COMMON_LICENSES = (
-    'apache-2.0.LICENSE',
-    'bsd-new.LICENSE',
-    'bsd-original.LICENSE',
-    'bsd-original-uc.LICENSE',
-    'gpl-2.0.LICENSE',
-    'gpl-3.0.LICENSE',
-    'lgpl-2.1.LICENSE',
-    'net-snmp.LICENSE',
-    'openssl-ssleay.LICENSE',
-    'zlib.LICENSE',
+    'AES-128 v3.0 License',
+    'Apache License 1.1',
+    'Apache License 2.0',
+    'Apple Attribution License 1997',
+    'Apple Example Code License',
+    'Apple Public Source License 2.0',
+    'Arphic Public License',
+    'Artistic License (Perl) 1.0',
+    'Artistic License 2.0',
+    'Bitstream Vera Font License',
+    'Boost Software License 1.0',
+    'Broadcom CFE License',
+    'BSD-Modified',
+    'BSD-Original',
+    'BSD-Original-UC',
+    'BSD-Simplified',
+    'CMU Computing Services License',
+    'Common Development and Distribution License 1.0',
+    'Common Development and Distribution License 1.1',
+    'Common Public License 1.0',
+    'Creative Commons Attribution License 2.5',
+    'Creative Commons Attribution Share Alike License 3.0',
+    'Curl License',
+    'FreeType Project License',
+    'GNU General Public License 2.0',
+    'GNU General Public License 2.0 with Bison exception',
+    'GNU General Public License 2.0 with GLIBC  exception',
+    'GNU General Public License 3.0',
+    'GNU Lesser General Public License 2.1',
+    'GNU Library General Public License 2.0',
+    'GPL 2.0 or later with Linking exception',
+    'GPL 2.0 with Broadcom Linking exception',
+    'Independent JPEG Group License',
+    'ISC License (ISCL)',
+    'Larabie Fonts EULA',
+    'Libpng License',
+    'Microsoft Limited Public License',
+    'Microsoft Public License',
+    'Microsoft Reciprocal License',
+    'Microsoft TrueType Fonts EULA',
+    'MIT License',
+    'Mozilla Public License 1.1',
+    'Net SNMP License',
+    'Netscape Public License 1.1',
+    'NTP License',
+    'OpenSSL/SSLeay License',
+    'Original SSLeay License with Windows exception',
+    'RSA Data Security MD4',
+    'RSA Data Security MD5',
+    'SFL License Agreement',
+    'SGI Free Software License B v2.0',
+    'Sun RPC License',
+    'TCL/TK License',
+    'Tidy License',
+    'University of Illinois/NCSA Open Source License',
+    'X11 License',
+    'ZLIB License',
 )
 
 def posix_path(path):
@@ -1057,6 +1103,11 @@ class AboutFile(object):
         """
         return self.parsed.get('name', '')
 
+    def get_dje_license_name(self):
+        """
+        Return the about object's dje_license_name.
+        """
+        return self.parsed.get('dje_license_name', '')
 
 def check_invalid_chars(field_name, line):
     """
@@ -1245,8 +1296,7 @@ class Collector(object):
                   'attribution texts. You can install it by running:'
                   '"configure"')
             return
-        # For some reasons, if I set the template_path = "templates/default.html"
-        # in the parameter, the tempalte_path will become 'None' and cause error
+
         if not template_path:
             template_path = join(dirname(realpath(__file__)),
                                  "templates/default.html")
@@ -1266,68 +1316,21 @@ class Collector(object):
 
         about_object_fields = []
         about_content_dict = {}
+        license_dict = {}
 
         not_process_components = list(limit_to)
         component_exist = False
 
+        """
         # ToDo: temp fix to have correct order in the attribution generation based on
         # the input
-        # In addition, if user doesn't provide the component list a.k.a the
-        # limit_to, this code will never work.
-        # ToDo: This code need to be refactor. Too many duplicated code.
-        if not_process_components:
-            for component in not_process_components:
-                for about_object in self:
-                    # FIXME: what is the meaning of this partition?
-                    # PO created the var some_path to provide some clarity
-                    # but what does the second element means?
-                    file_name = about_object.location.partition(self.location)[2]
-                    # FIXME: a path starting with / is NOT relative
-                    about_relative_path = '/' + file_name
-                    """if limit_to:
-                        try:
-                            not_process_components.remove(about_relative_path)
-                        except Exception as e:
-                            continue"""
-
-                    #if limit_to and about_relative_path in limit_to:
-                    #    continue
-                    if component == about_relative_path:
-                        component_exist = True
-                        about_content = about_object.validated_fields
-                        # Add information in the dictionary if not in the ABOUT file
-                        lic_text = unicode(about_object.license_text(),
-                                           errors='replace')
-
-                        about_content['license_text'] = lic_text
-                        notice_text = about_object.notice_text()
-                        about_content['notice_text'] = notice_text
-
-                        # FIXME: The following is temporary code to handle multiple
-                        # license_text_file paths in the field value, one per lne
-                        for k in about_content:
-                            if ('\n' in about_content[k]
-                                and k == 'license_text_file'):
-                                # FIXME: we should report decoding errors
-                                lic_text = unicode(about_object.tmp_get_license_text(),
-                                                   errors='replace')
-                                about_content['license_text'] = lic_text
-
-                        # report error if no license_text is found
-                        if not about_content.get('license_text'):
-                            msg = ('No license_text found. '
-                                   'Skipping License generation.')
-                            err = Error(GENATTRIB, 'name',
-                                        about_object.get_about_name(), msg)
-                            self.genattrib_errors.append(err)
-                        about_object_fields.append(about_content)
-                        break
-                if not component_exist:
-                    msg = ('The requested ABOUT file: %r does not exist. '
-                           'No attribution generated for this file.' % component)
-                    err = Error(GENATTRIB, 'about_file', component, msg)
-                    self.genattrib_errors.append(err)
-        else:
+        # Many of the following code were written as the criteria to have user
+        # generate ALL the attribution output without providing the component list.
+        # However, the component_list is requried at this stage in the genattrib.py.
+        # Therefore, these code are commented out for later use.
+        """
+        #if not_process_components:
+        for component in not_process_components:
             for about_object in self:
                 # FIXME: what is the meaning of this partition?
                 # PO created the var some_path to provide some clarity
@@ -1341,34 +1344,108 @@ class Collector(object):
                     except Exception as e:
                         continue"""
 
-                about_content = about_object.validated_fields
-                # Add information in the dictionary if not in the ABOUT file
-                lic_text = unicode(about_object.license_text(),
-                                   errors='replace')
-
-                about_content['license_text'] = lic_text
-                notice_text = about_object.notice_text()
-                about_content['notice_text'] = notice_text
-
-                # FIXME: The following is temporary code to handle multiple
-                # license_text_file paths in the field value, one per lne
-                for k in about_content:
-                    if ('\n' in about_content[k]
-                        and k == 'license_text_file'):
-                        # FIXME: we should report decoding errors
+                #if limit_to and about_relative_path in limit_to:
+                #    continue
+                if component == about_relative_path:
+                    component_exist = True
+                    about_content = about_object.validated_fields
+                    licenses = about_object.get_dje_license_name()
+                    if '\n' in licenses:
                         lic_text = unicode(about_object.tmp_get_license_text(),
                                            errors='replace')
-                        about_content['license_text'] = lic_text
+                    else:
+                        # Add information in the dictionary if not in the ABOUT file
+                        lic_text = unicode(about_object.license_text(),
+                                           errors='replace')
+                        """
+                        # FIXME: The following is temporary code to handle multiple
+                        # license_text_file paths in the field value, one per line
+                        for k in about_content:
+                            if ('\n' in about_content[k]
+                                and k == 'license_text_file'):
+                                # FIXME: we should report decoding errors
+                                lic_text = unicode(about_object.tmp_get_license_text(),
+                                                   errors='replace')
+                        """
+                    notice_text = unicode(about_object.notice_text(),
+                                   errors='replace')
+                    about_content['license_text'] = lic_text
+                    about_content['notice_text'] = notice_text
+
+                    license_dict[about_object.get_dje_license_name()] = about_content['license_text']
+
+                    # report error if no license_text is found
+                    if not about_content.get('license_text') and not about_content.get('notice_text'):
+                        msg = ('No license_text found. '
+                               'Skipping License generation.')
+                        err = Error(GENATTRIB, 'name',
+                                    about_object.get_about_name(), msg)
+                        self.genattrib_errors.append(err)
+                    about_object_fields.append(about_content)
+                    break
+            if not component_exist:
+                msg = ('The requested ABOUT file: %r does not exist. '
+                       'No attribution generated for this file.' % component)
+                err = Error(GENATTRIB, 'about_file', component, msg)
+                self.genattrib_errors.append(err)
+
+        # This code can be removed.
+        # This following code was written to support user to generate the 
+        # attribution for ALL of the about files if user does not provide
+        # the component_list. However, this feature should be developed in 
+        # this next release, not the current release.
+        """
+        else:
+            for about_object in self:
+                # FIXME: what is the meaning of this partition?
+                # PO created the var some_path to provide some clarity
+                # but what does the second element means?
+                file_name = about_object.location.partition(self.location)[2]
+                # FIXME: a path starting with / is NOT relative
+                about_relative_path = '/' + file_name
+                
+                
+                if limit_to:
+                    try:
+                        not_process_components.remove(about_relative_path)
+                    except Exception as e:
+                        continue
+
+                about_content = about_object.validated_fields
+                licenses = about_object.get_dje_license_name()
+                if '\n' in licenses:
+                    lic_text = unicode(about_object.tmp_get_license_text(),
+                                       errors='replace')
+                else:
+                    # Add information in the dictionary if not in the ABOUT file
+                    lic_text = unicode(about_object.license_text(),
+                                       errors='replace')
+                    
+                    # FIXME: The following is temporary code to handle multiple
+                    # license_text_file paths in the field value, one per line
+                    for k in about_content:
+                        if ('\n' in about_content[k]
+                            and k == 'license_text_file'):
+                            # FIXME: we should report decoding errors
+                            lic_text = unicode(about_object.tmp_get_license_text(),
+                                               errors='replace')
+                    
+                notice_text = unicode(about_object.notice_text(),
+                               errors='replace')
+                about_content['license_text'] = lic_text
+                about_content['notice_text'] = notice_text
+
+                license_dict[about_object.get_dje_license_name()] = about_content['license_text']
 
                 # report error if no license_text is found
-                if not about_content.get('license_text'):
+                if not about_content.get('license_text') and not about_content.get('notice_text'):
                     msg = ('No license_text found. '
                            'Skipping License generation.')
                     err = Error(GENATTRIB, 'name',
                                 about_object.get_about_name(), msg)
                     self.genattrib_errors.append(err)
                 about_object_fields.append(about_content)
-                break
+                break"""
 
         """# find paths requested in the limit_to paths arg that do not point to
         # a corresponding ABOUT file
@@ -1380,13 +1457,19 @@ class Collector(object):
             err = Error(GENATTRIB, 'about_file', path, msg)
             self.genattrib_errors.append(err)"""
 
-        # TODO: Handle the grouping and ordering later
-        """# We want to display common_licenses in alphabetical order
-        for key in sorted(common_license_dict.keys()):
+        # We want to display common_licenses in alphabetical order
+        license_key = []
+        license_text_list = []
+        for key in sorted(license_dict):
             license_key.append(key)
-            license_text_list.append(common_license_dict[key])"""
+            license_text_list.append(license_dict[key])
 
-        rendered = template.render(about_objects=about_object_fields)
+        # We should only pass the about_objects to the template.
+        # However, this is a temp fix for the license summarization feature.
+        rendered = template.render(about_objects=about_object_fields,
+                                   license_keys=license_key,
+                                   license_texts = license_text_list,
+                                   common_licenses=COMMON_LICENSES)
         return rendered
 
     def check_paths(self, paths):
