@@ -224,8 +224,9 @@ def main(parser, options, args):
             try:
                 with open(output_path, "w") as f:
                     f.write(attrib_str)
-            except:
-                print("Problem occurs. Attribution is not generated.")
+            except Exception as e:
+                print("Problem occurs. Attribution was not generated.")
+                print(e)
 
         # Clear the log file
         with open(join(dirname(output_path), LOG_FILENAME), 'w'):
