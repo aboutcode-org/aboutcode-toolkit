@@ -218,9 +218,14 @@ def main(parser, options, args):
             outlist = update_path_to_about(sublist)
 
         attrib_str = collector.generate_attribution(template_path=template_location, limit_to=outlist)
-        with open(output_path, "w") as f:
-            f.write(attrib_str)
         errors = collector.get_genattrib_errors()
+
+        if attrib_str:
+            try:
+                with open(output_path, "w") as f:
+                    f.write(attrib_str)
+            except:
+                print("Problem occurs. Attribution is not generated.")
 
         # Clear the log file
         with open(join(dirname(output_path), LOG_FILENAME), 'w'):
