@@ -289,6 +289,19 @@ class GenAbout(object):
             'format': 'json'
         }
 
+        # Check is the provided api_url valid or not.
+        try:
+            request = urllib2.Request(url)
+            response = urllib2.urlopen(request)
+            response_content = response.read()
+        except urllib2.HTTPError as http_e:
+            if http_e.code == 404:
+                error_msg = ("URL not reachable. Invalid '--api_url'."
+                                 " LICENSE generation is skipped.")
+                print("\n" + error_msg + "\n")
+                self.extract_dje_license_error = True
+                self.errors.append(Error('--api_url', url, error_msg))
+
         url = url.rstrip('/')
         encoded_payload = urllib.urlencode(payload)
         full_url = '%(url)s/%(license_key)s/?%(encoded_payload)s' % locals()
