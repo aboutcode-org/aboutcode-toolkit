@@ -1288,8 +1288,6 @@ class Collector(object):
         except j2.TemplateNotFound:
             return
         limit_to = limit_to or []
-        # ToDo: The set(limit_to) break the order of the original limit_to list
-        #limit_to = set(limit_to)
 
         about_object_fields = []
         about_content_dict = {}
