@@ -1055,7 +1055,7 @@ class AboutFile(object):
                 names.append(name)
         return names
 
-    def tmp_get_license_text(self):
+    """def tmp_get_license_text(self):
         # TODO: This is a temp fix for handling multiple 'license_text_file'
         # The code should get the license text from the def license_text(self),
         # not this function.
@@ -1067,7 +1067,7 @@ class AboutFile(object):
             with open(location, 'rU') as f:
                 license_text += f.read()
                 license_text += '\n\n\n\n\n\n'
-        return license_text
+        return license_text"""
 
     def license_text(self):
         """
@@ -1181,7 +1181,6 @@ class Collector(object):
         paths = [posix_path(p)for p in paths]
         return paths
 
-
     @property
     def errors(self):
         """
@@ -1231,28 +1230,6 @@ class Collector(object):
             return (user_loc + subpath).replace('\\', '/')
         else:
             return user_loc.replace('\\', '/')
-
-    def get_relative_path2(self, about_object_location):
-        """
-        Return a relative path as provided by the user for an about_object.
-
-        TODO: For some reasons, the join(input_path, subpath) does not work if
-        the input_path startswith "../". Therefore, using the
-        "hardcode" to add/append the path.
-        """
-        # FIXME: we should use correct path manipulation, not our own cooking
-        # this is too complex
-        user_provided_path = self.location
-        if os.path.isdir(self.absolute_path):
-            subpath = about_object_location.partition(
-                os.path.basename(os.path.normpath(user_provided_path)))[2]
-            if user_provided_path[-1] == '/':
-                user_provided_path = user_provided_path.rpartition('/')[0]
-            if user_provided_path[-1] == '\\':
-                user_provided_path = user_provided_path.rpartition('\\')[0]
-            return (user_provided_path + subpath).replace('\\', '/')
-        else:
-            return user_provided_path.replace('\\', '/')
 
     def custom_keys(self):
         custom_keys = []
@@ -1321,15 +1298,6 @@ class Collector(object):
         not_process_components = list(limit_to)
         component_exist = False
 
-        """
-        # ToDo: temp fix to have correct order in the attribution generation based on
-        # the input
-        # Many of the following code were written as the criteria to have user
-        # generate ALL the attribution output without providing the component list.
-        # However, the component_list is requried at this stage in the genattrib.py.
-        # Therefore, these code are commented out for later use.
-        """
-        #if not_process_components:
         for component in not_process_components:
             for about_object in self:
                 # The about_object.location is the absolute path of the ABOUT
@@ -1338,44 +1306,29 @@ class Collector(object):
                 about_relative_path = about_object.location.partition(
                                                 normpath(self.location))[2]
 
-                """if limit_to:
-                    try:
-                        not_process_components.remove(about_relative_path)
-                    except Exception as e:
-                        continue"""
-
-                #if limit_to and about_relative_path in limit_to:
-                #    continue
                 if component == about_relative_path:
                     component_exist = True
                     about_content = about_object.validated_fields
-                    licenses = about_object.get_dje_license_name()
-                    if '\n' in licenses:
-                        lic_text = unicode(about_object.tmp_get_license_text(),
-                                           errors='replace')
-                    else:
-                        # Add information in the dictionary if not in the ABOUT file
-                        lic_text = unicode(about_object.license_text(),
-                                           errors='replace')
-                        """
-                        # FIXME: The following is temporary code to handle multiple
-                        # license_text_file paths in the field value, one per line
-                        for k in about_content:
-                            if ('\n' in about_content[k]
-                                and k == 'license_text_file'):
-                                # FIXME: we should report decoding errors
-                                lic_text = unicode(about_object.tmp_get_license_text(),
-                                                   errors='replace')
-                        """
+                    if '\n' in about_object.get_dje_license_name():
+                        msg = ('Multiple licenses is not supported. '
+                               'Skipping License generation.')
+                        err = Error(GENATTRIB, 'dje_license',
+                                    about_object.get_dje_license_name(), msg)
+                        self.genattrib_errors.append(err)
+
+                    lic_text = unicode(about_object.license_text(),
+                                       errors='replace')
                     notice_text = unicode(about_object.notice_text(),
-                                   errors='replace')
+                                          errors='replace')
                     about_content['license_text'] = lic_text
                     about_content['notice_text'] = notice_text
 
                     license_dict[about_object.get_dje_license_name()] = about_content['license_text']
 
                     # report error if no license_text is found
-                    if not about_content.get('license_text') and not about_content.get('notice_text'):
+                    if not about_content.get('license_text')\
+                        and not about_content.get('notice_text')\
+                        and not '\n' in about_object.get_dje_license_name():
                         msg = ('No license_text found. '
                                'Skipping License generation.')
                         err = Error(GENATTRIB, 'name',
@@ -1388,74 +1341,6 @@ class Collector(object):
                        'No attribution generated for this file.' % component)
                 err = Error(GENATTRIB, 'about_file', component, msg)
                 self.genattrib_errors.append(err)
-
-        # This code can be removed.
-        # This following code was written to support user to generate the 
-        # attribution for ALL of the about files if user does not provide
-        # the component_list. However, this feature should be developed in 
-        # this next release, not the current release.
-        """
-        else:
-            for about_object in self:
-                # FIXME: what is the meaning of this partition?
-                # PO created the var some_path to provide some clarity
-                # but what does the second element means?
-                file_name = about_object.location.partition(self.location)[2]
-                # FIXME: a path starting with / is NOT relative
-                about_relative_path = '/' + file_name
-                
-                
-                if limit_to:
-                    try:
-                        not_process_components.remove(about_relative_path)
-                    except Exception as e:
-                        continue
-
-                about_content = about_object.validated_fields
-                licenses = about_object.get_dje_license_name()
-                if '\n' in licenses:
-                    lic_text = unicode(about_object.tmp_get_license_text(),
-                                       errors='replace')
-                else:
-                    # Add information in the dictionary if not in the ABOUT file
-                    lic_text = unicode(about_object.license_text(),
-                                       errors='replace')
-                    
-                    # FIXME: The following is temporary code to handle multiple
-                    # license_text_file paths in the field value, one per line
-                    for k in about_content:
-                        if ('\n' in about_content[k]
-                            and k == 'license_text_file'):
-                            # FIXME: we should report decoding errors
-                            lic_text = unicode(about_object.tmp_get_license_text(),
-                                               errors='replace')
-                    
-                notice_text = unicode(about_object.notice_text(),
-                               errors='replace')
-                about_content['license_text'] = lic_text
-                about_content['notice_text'] = notice_text
-
-                license_dict[about_object.get_dje_license_name()] = about_content['license_text']
-
-                # report error if no license_text is found
-                if not about_content.get('license_text') and not about_content.get('notice_text'):
-                    msg = ('No license_text found. '
-                           'Skipping License generation.')
-                    err = Error(GENATTRIB, 'name',
-                                about_object.get_about_name(), msg)
-                    self.genattrib_errors.append(err)
-                about_object_fields.append(about_content)
-                break"""
-
-        """# find paths requested in the limit_to paths arg that do not point to
-        # a corresponding ABOUT file
-        for path in not_process_components:
-            path = posix_path(path)
-            afp = join(self.location, path)
-            msg = ('The requested ABOUT file: %(afp)r does not exist. '
-                   'No attribution generated for this file.' % locals())
-            err = Error(GENATTRIB, 'about_file', path, msg)
-            self.genattrib_errors.append(err)"""
 
         # We want to display common_licenses in alphabetical order
         license_key = []
