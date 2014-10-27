@@ -606,7 +606,7 @@ about_resource: about.py
             self.assertEqual(expected_warnings[i][0], w.code)
             self.assertEqual(expected_warnings[i][1], w.field_value)
 
-    # FIXME: This is feeling because there is no component list provided
+    # FIXME: This is failing because there is no component list provided
     def FAILING_test_generate_attribution_with_custom_template(self):
         expected = (u'notice_text:'
                     'version:2.4.3'
@@ -618,7 +618,7 @@ about_resource: about.py
         result = collector.generate_attribution(template)
         self.assertEqual(expected, result)
 
-    # FIXME: This is feeling because there is no component list provided
+    # FIXME: This is failing because there is no component list provided
     def FAILING_test_generate_attribution_with_default_template(self):
         f = open(join(TESTDATA_DIR, 'attrib/attrib.html'))
         expected = f.read()
@@ -685,7 +685,5 @@ class OtherTest(unittest.TestCase):
                     'redistribute_sources', 'about_format', 'usage',
                     'scm_path', 'scm_tool', 'scm_rev', 'scm_tag',
                     'organization']
-        print(result)
         self.assertEqual(result, expected)
-
 

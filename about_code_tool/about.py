@@ -1332,12 +1332,12 @@ class Collector(object):
         #if not_process_components:
         for component in not_process_components:
             for about_object in self:
-                # FIXME: what is the meaning of this partition?
-                # PO created the var some_path to provide some clarity
-                # but what does the second element means?
-                file_name = about_object.location.partition(self.location)[2]
-                # FIXME: a path starting with / is NOT relative
-                about_relative_path = '/' + file_name
+                # The about_object.location is the absolute path of the ABOUT
+                # file. The purpose of the following partition is to match
+                # the about_file's location with the input list.
+                about_relative_path = about_object.location.partition(
+                                                normpath(self.location))[2]
+
                 """if limit_to:
                     try:
                         not_process_components.remove(about_relative_path)
