@@ -395,31 +395,16 @@ class GenAbout(object):
                     license_file_list = []
                     file_location = line['about_file']
                     about_parent_dir = dirname(file_location)
-                    if '\n' in line['license_text_file']:
-                        file_value = line['license_text_file'].split('\n')
-                    else:
-                        file_value = [line['license_text_file']]
-                    for license_text_file in file_value:
-                        license_file_list.append(normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file)))
-                    for license_file in license_file_list:
-                        if not _exists(license_file):
-                            self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
+                    license_text_file = line['license_text_file']
+                    license_file = normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file))
+                    if not _exists(license_file):
+                        self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
                         if line['dje_license']:
                             license_output_list.append(self.gen_license_list(line))
-                            license_names = []
-                            if '\n' in line['dje_license_name']:
-                                license_names = line['dje_license_name'].split('\n ')
-                            else:
-                                license_names = [line['dje_license_name']]
-                            for lic_name in license_names:
-                                try:
-                                    if line['license_text_file']:
-                                        line['license_text_file'] += '\n '
-                                    line['license_text_file'] += dje_license_dict[lic_name][0] + '.LICENSE'
-                                except:
-                                    line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
+                            lic_name = line['dje_license_name']
+                            line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                         else:
                             self.warnings.append(Warn('dje_license', '',
                                                       "Missing 'dje_license' for " + line['about_file']))
@@ -430,18 +415,9 @@ class GenAbout(object):
                 if gen_license:
                     if line['dje_license']:
                         license_output_list.append(self.gen_license_list(line))
-                        license_names = []
-                        if '\n' in line['dje_license_name']:
-                            license_names = line['dje_license_name'].split('\n ')
-                        else:
-                            license_names = [line['dje_license_name']]
-
-                        for lic_name in license_names:
-                            if 'license_text_file' in line:
-                                line['license_text_file'] += '\n '
-                            license_name = dje_license_dict[lic_name][0]
-                            license_text_file = license_name + '.LICENSE'
-                            line['license_text_file'] = license_text_file
+                        lic_name = line['dje_license_name']
+                        print(lic_name)
+                        line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                     else:
                         self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
@@ -453,32 +429,25 @@ class GenAbout(object):
         for line in input_list:
             try:
                 if line['dje_license']:
-                    license_list = []
                     if '\n' in line['dje_license']:
-                        license_list = line['dje_license'].split('\n')
+                        line['dje_license_name'] = ""
+                        self.errors.append(Error('dje_license',
+                                                 line['dje_license'],
+                                                 "No multiple licenses or newline character are accepted."))
+                        continue
+                    lic = line['dje_license']
+                    if not lic in license_dict:
+                        detail_list = []
+                        detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
+                        license_dict[lic] = detail[0]
+                        line['dje_license_name'] = detail[0]
+                        dje_key = detail[1]
+                        license_context = detail [2]
+                        detail_list.append(dje_key)
+                        detail_list.append(license_context)
+                        key_text_dict[detail[0]] = detail_list
                     else:
-                        license_list = [line['dje_license']]
-                    for lic in license_list:
-                        if not lic in license_dict:
-                            detail_list = []
-                            detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
-                            license_dict[lic] = detail[0]
-                            try:
-                                if line['dje_license_name']:
-                                    line['dje_license_name'] += "\n " + detail[0]
-                            except:
-                                line['dje_license_name'] = detail[0]
-                            dje_key = detail[1]
-                            license_context = detail [2]
-                            detail_list.append(dje_key)
-                            detail_list.append(license_context)
-                            key_text_dict[detail[0]] = detail_list
-                        else:
-                            try:
-                                if line['dje_license_name']:
-                                    line['dje_license_name'] += "\n " + license_dict[lic]
-                            except:
-                                line['dje_license_name'] = license_dict[lic]
+                        line['dje_license_name'] = license_dict[lic]
             except Exception:
                 err = Warn('dje_license', '',
                            'Missing "dje_license" for ' + line['about_file'])
@@ -488,14 +457,10 @@ class GenAbout(object):
     def process_dje_licenses(self, dje_license_list, dje_license_dict, output_path):
         license_list_context = []
         for gen_path, license_name in dje_license_list:
-            licenses = []
-            if '\n' in license_name:
-                licenses = license_name.split('\n ')
-            else:
-                licenses = [license_name]
+            lic = license_name
             if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
-            for lic in licenses:
+            if lic:
                 license_key = dje_license_dict[lic][0]
                 gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
                 if not _exists(gen_license_path) and not self.extract_dje_license_error:
