@@ -237,7 +237,7 @@ class GenAbout(object):
         # Get all the dictionary keys
         column_keys = input_list[0].keys()
 
-        # Get all the keys that ends with _file except for the 'about_file
+        # Get all the keys that ends with _file except for the 'about_file'
         file_keys = []
         for key in column_keys:
             if key.endswith('_file') and key != 'about_file':
@@ -416,8 +416,8 @@ class GenAbout(object):
                     if line['dje_license']:
                         license_output_list.append(self.gen_license_list(line))
                         lic_name = line['dje_license_name']
-                        print(lic_name)
-                        line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
+                        if lic_name:
+                            line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                     else:
                         self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
