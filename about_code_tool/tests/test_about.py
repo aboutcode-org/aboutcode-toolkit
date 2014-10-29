@@ -687,3 +687,12 @@ class OtherTest(unittest.TestCase):
                     'organization']
         self.assertEqual(result, expected)
 
+    def test_get_about_name(self):
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'basic/simple.about'))
+        result = about_file.get_about_name()
+        self.assertEqual(result, 'simple')
+
+    def test_get_dje_license_name(self):
+        about_file = about.AboutFile(join(TESTDATA_DIR, 'basic/simple.about'))
+        result = about_file.get_dje_license_name()
+        self.assertEqual(result, 'Apache License 2.0')

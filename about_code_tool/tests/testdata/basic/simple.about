@@ -1,0 +1,6 @@
+about_resource: .
+name: simple
+version: 2.2
+
+dje_license: apache-2.0
+dje_license_name: Apache License 2.0
