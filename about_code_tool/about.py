@@ -515,17 +515,6 @@ def posix_path(path):
     return path.replace(ntpath.sep, posixpath.sep)
 
 
-def native_path(path):
-    """
-    Return a path using the current OS path separator given a path that may
-    contain posix or windows separators, converting / to \ on windows and \ to
-    / on posix OSes.
-    """
-    path = path.replace(ntpath.sep, os.path.sep)
-    path = path.replace(posixpath.sep, os.path.sep)
-    return path
-
-
 def is_about_file(path):
     """
     Return True if the path represents a valid ABOUT file name.
