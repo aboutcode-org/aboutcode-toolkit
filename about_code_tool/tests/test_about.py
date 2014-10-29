@@ -106,7 +106,7 @@ class CollectorTest(unittest.TestCase):
 
     def test_header_row_in_csv_output(self):
         expected_header = ('about_file,name,version,about_resource,'
-        'about_resource_path,spec_version,date,description,description_file,'
+        'spec_version,date,description,description_file,'
         'home_url,download_url,readme,readme_file,install,install_file,'
         'changelog,changelog_file,news,news_file,news_url,notes,notes_file,'
         'contact,owner,author,author_file,copyright,copyright_file,'
@@ -533,8 +533,7 @@ class ValidateTest(unittest.TestCase):
         about_file = about.AboutFile(test_file)
         expected_errors = [about.SPDX]
         # The test case is: license_spdx: Something and SomeOtherThings
-        # Thus, it should throw 2 errors: 'Something', 'SomeOtherThings'
-        self.assertEqual(2, len(about_file.errors))
+        self.assertEqual(1, len(about_file.errors))
         for w in about_file.errors:
             self.assertEqual(expected_errors[0], w.code)
 

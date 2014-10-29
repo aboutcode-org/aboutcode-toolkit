@@ -97,7 +97,7 @@ Error.__repr__ = repr_problem
 
 
 IGNORED = 'field or line ignored problem'
-VALUE = 'missing or empty value problem'
+VALUE = 'missing or empty or multiple value problem'
 FILE = 'file problem'
 URL = 'URL problem'
 VCS = 'Version control problem'
@@ -109,8 +109,6 @@ GENATTRIB = 'Attribution generation problem'
 
 
 MANDATORY_FIELDS = (
-    # 'about_resource',
-    # 'about_file',
     'name',
     'version',
 )
@@ -118,7 +116,6 @@ MANDATORY_FIELDS = (
 
 BASIC_FIELDS = (
     'about_resource',
-    'about_resource_path',  # Need to update spec
     'spec_version',
     'date',
     'description',
@@ -734,7 +731,6 @@ class AboutFile(object):
 
         for field_name, value in self.validated_fields.items():
             self.check_is_ascii(self.validated_fields.get(field_name))
-            # self.validate_known_optional_fields(field_name)
             self.validate_file_field_exists(field_name, value)
             self.validate_url_field(field_name, network_check=False)
             self.validate_spdx_license(field_name, value)
@@ -854,28 +850,28 @@ class AboutFile(object):
         if not field_name == 'license_spdx':
             return
         # FIXME: do we support more than one ID?
-        spdx_ids = field_value.split()
-        for spdx_id in spdx_ids:
-            # valid id, matching the case
-            if spdx_id in SPDX_LICENSE_IDS.values():
-                continue
+        # Not support multiple IDs
+        spdx_id = field_value
+        # valid id, matching the case
+        if spdx_id in SPDX_LICENSE_IDS.values():
+            return
 
-            spdx_id_lower = spdx_id.lower()
+        spdx_id_lower = spdx_id.lower()
 
-            # conjunctions
-            if spdx_id_lower in ['or', 'and']:
-                continue
+        # conjunctions
+        if spdx_id_lower in ['or', 'and']:
+            return
 
-            # lowercase check
-            try:
-                standard_id = SPDX_LICENSE_IDS[spdx_id_lower]
-            except KeyError:
-                self.errors.append(Error(SPDX, field_name, spdx_id,
-                                         'Invalid SPDX license id.'))
-            else:
-                msg = ('Non standard SPDX license id case. Should be %r.'
-                       % (standard_id))
-                self.warnings.append(Warn(SPDX, field_name, id, msg))
+        # lowercase check
+        try:
+            standard_id = SPDX_LICENSE_IDS[spdx_id_lower]
+        except KeyError:
+            self.errors.append(Error(SPDX, field_name, spdx_id,
+                                     'Invalid SPDX license id.'))
+        else:
+            msg = ('Non standard SPDX license id case. Should be %r.'
+                   % (standard_id))
+            self.warnings.append(Warn(SPDX, field_name, id, msg))
 
     def validate_url_field(self, field_name, network_check=False):
         """
@@ -974,23 +970,31 @@ class AboutFile(object):
         return custom_key
 
     def get_row_data(self, updated_path, custom_keys):
+        print(updated_path)
+        print(custom_keys)
         """
         Create a csv compatible row of data for this object.
         """
         row = [updated_path]
-        # FIXME: this list is not used? what was the intent?
-        custom_field = []
+        no_multi_license_fields = ('license_text_file',
+                                    'license_spdx',
+                                    'dje_license',
+                                    'dje_license_name')
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
             if field in self.validated_fields:
                 row += [self.validated_fields[field]]
-            elif field == 'about_resource_path':
-                about = self.validated_fields['about_resource']
-                if about.endswith('.'):
-                    about_resource_path = dirname(updated_path) + '/'
-                else:
-                    about_resource_path = normpath(join(dirname(updated_path),
-                                                        about))
-                row += [about_resource_path]
+                # The following code is to catch is the input contians any
+                # multiple licenses
+                if field in no_multi_license_fields:
+                    for lic_field in no_multi_license_fields:
+                        try:
+                            if '\n' in self.validated_fields[lic_field]:
+                                self.errors.append(Error(VALUE,
+                                                         lic_field,
+                                                         self.validated_fields[field],
+                                                         "Multiple Licenses are not supported."))
+                        except:
+                            pass
             else:
                 row += ['']
 
@@ -1043,20 +1047,6 @@ class AboutFile(object):
             if name.lower() in names:
                 names.append(name)
         return names
-
-    """def tmp_get_license_text(self):
-        # TODO: This is a temp fix for handling multiple 'license_text_file'
-        # The code should get the license text from the def license_text(self),
-        # not this function.
-        license_text = ""
-        licenses = self.parsed.get('license_text_file', '')
-        license_list = licenses.split('\n ')
-        for lic in license_list:
-            location = join(dirname(self.location), lic)
-            with open(location, 'rU') as f:
-                license_text += f.read()
-                license_text += '\n\n\n\n\n\n'
-        return license_text"""
 
     def license_text(self):
         """
