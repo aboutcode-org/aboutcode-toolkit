@@ -49,7 +49,7 @@ import ntpath
 __version__ = '0.9.0'
 
 # See http://dejacode.org
-__about_spec_version__ = '0.8.1'
+__about_spec_version__ = '1.0'
 
 
 __copyright__ = """
@@ -146,10 +146,8 @@ OWNERSHIP_FIELDS = (
 
 
 LICENSE_FIELDS = (
-    'notice',
     'notice_file',
     'notice_url',
-    'license_text',
     'license_text_file',
     'license_url',
     'license_spdx',
