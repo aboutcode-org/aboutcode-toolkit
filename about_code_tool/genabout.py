@@ -793,13 +793,12 @@ def main(parser, options, args):
                                                    ignored_fields_list)
 
     if copy_files_path:
-        if not isdir(copy_files_path):
+        copy_files_location = os.path.abspath(copy_files_path)
+        if not isdir(copy_files_location):
             print("The '--copy_files' <project_path> must be a directory.")
             print("'--copy_files' is skipped.")
         else:
-            # if not copy_files_path.endswith('/'):
-            #   copy_files_path += '/'
-            project_parent_dir = dirname(copy_files_path)
+            project_parent_dir = dirname(copy_files_location)
             licenses_in_project = True
             license_list = gen.verify_files_existence(input_list,
                                                       project_parent_dir,
@@ -810,14 +809,13 @@ def main(parser, options, args):
                 gen.copy_files(output_path, license_list)
 
     if license_text_path:
-        if not isdir(license_text_path):
+        license_text_location = os.path.abspath(license_text_path)
+        if not isdir(license_text_location):
             print("The '--license_text_location' <license_path> "
                   "must be a directory.")
             print("'--license_text_location' is skipped.")
         else:
-            # if not license_text_path.endswith('/'):
-            #    license_text_path += '/'
-            license_dir = dirname(license_text_path)
+            license_dir = dirname(license_text_location)
             licenses_in_project = False
             license_list = gen.verify_files_existence(input_list,
                                                       license_dir,
