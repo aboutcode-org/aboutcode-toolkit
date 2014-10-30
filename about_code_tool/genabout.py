@@ -36,7 +36,7 @@ import urllib2
 
 from collections import namedtuple
 from os import makedirs
-from os.path import exists, dirname, join, abspath, isdir, normpath, basename
+from os.path import exists, dirname, join, abspath, isdir, normpath, basename, expanduser
 
 import about
 
@@ -702,11 +702,17 @@ def main(parser, options, args):
             print('Invalid action: should be 0, 1, 2 or 3')
             sys.exit(errno.EINVAL)
 
-    if copy_files_path and not _exists(copy_files_path):
+    if copy_files_path:
+        # code to handle tidle character
+        copy_files_path = os.path.abspath(expanduser(copy_files_path))
+        if not _exists(copy_files_path):
             print("The project path does not exist.")
             sys.exit(errno.EINVAL)
 
-    if license_text_path and not _exists(license_text_path):
+    if license_text_path:
+        # code to handle tidle character
+        license_text_path = os.path.abspath(expanduser(license_text_path))
+        if not _exists(license_text_path):
             print("The license text path does not exist.")
             sys.exit(errno.EINVAL)
 
@@ -793,15 +799,13 @@ def main(parser, options, args):
                                                    ignored_fields_list)
 
     if copy_files_path:
-        copy_files_location = os.path.abspath(copy_files_path)
-        if not isdir(copy_files_location):
+        if not isdir(copy_files_path):
             print("The '--copy_files' <project_path> must be a directory.")
             print("'--copy_files' is skipped.")
         else:
-            project_parent_dir = dirname(copy_files_location)
             licenses_in_project = True
             license_list = gen.verify_files_existence(input_list,
-                                                      project_parent_dir,
+                                                      copy_files_path,
                                                       licenses_in_project)
             if not license_list:
                 print("None of the file is found. '--copy_files' is ignored.")
@@ -809,16 +813,15 @@ def main(parser, options, args):
                 gen.copy_files(output_path, license_list)
 
     if license_text_path:
-        license_text_location = os.path.abspath(license_text_path)
-        if not isdir(license_text_location):
+        print(normpath(license_text_path))
+        if not isdir(license_text_path):
             print("The '--license_text_location' <license_path> "
                   "must be a directory.")
             print("'--license_text_location' is skipped.")
         else:
-            license_dir = dirname(license_text_location)
             licenses_in_project = False
             license_list = gen.verify_files_existence(input_list,
-                                                      license_dir,
+                                                      license_text_path,
                                                       licenses_in_project)
             if not license_list:
                 print("None of the file is found. '--copy_files' is ignored.")
