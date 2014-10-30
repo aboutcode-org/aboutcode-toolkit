@@ -29,7 +29,7 @@ import logging
 import optparse
 import sys
 
-from os.path import exists, dirname, join, abspath, isdir, basename
+from os.path import exists, dirname, join, abspath, isdir, basename, expanduser
 
 from about import Collector
 import genabout
@@ -183,7 +183,8 @@ def main(parser, options, args):
         sys.exit(errno.EEXIST)
 
     if template_location:
-        if not exists(template_location):
+        template_location = abspath(expanduser(template_location))
+        if not exists(expanduser(template_location)):
             print('The defined template location does not exist.')
             parser.print_help()
             sys.exit(errno.EINVAL)
