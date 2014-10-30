@@ -110,13 +110,14 @@ class CollectorTest(unittest.TestCase):
         'home_url,download_url,readme,readme_file,install,install_file,'
         'changelog,changelog_file,news,news_file,news_url,notes,notes_file,'
         'contact,owner,author,author_file,copyright,copyright_file,'
-        'notice,notice_file,notice_url,license_text,license_text_file,'
-        'license_url,license_spdx,redistribute,attribute,track_changes,'
-        'vcs_tool,vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,'
-        'checksum_sha1,checksum_md5,checksum_sha256,dje_component,'
-        'dje_license,dje_organization,dje_license_name,scm_branch,'
-        'scm_repository,signature_gpg_file,redistribute_sources,about_format,'
-        'usage,scm_path,scm_tool,scm_rev,scm_tag,organization,'
+        'notice_file,notice_url,license_text_file,license_url,license_spdx,'
+        'redistribute,attribute,track_changes,vcs_tool,vcs_repository,'
+        'vcs_path,vcs_tag,vcs_branch,vcs_revision,checksum_sha1,checksum_md5,'
+        'checksum_sha256,dje_component,dje_license,dje_organization,'
+        'dje_license_name,scm_branch,scm_repository,signature_gpg_file,'
+        'redistribute_sources,about_format,usage,'
+        'license_text,notice,' # These two are not supported and thus treat as custom keys
+        'scm_path,scm_tool,scm_rev,scm_tag,organization,'
         'warnings,errors')
 
         test_file = 'about_code_tool/tests/testdata/basic'
@@ -682,6 +683,9 @@ class OtherTest(unittest.TestCase):
         result = about_file.get_custom_field_keys()
         expected = ['scm_branch', 'scm_repository', 'signature_gpg_file',
                     'redistribute_sources', 'about_format', 'usage',
+                    # These two keys are removed from the spec and therefore
+                    # become a custom keys
+                    'license_text', 'notice',
                     'scm_path', 'scm_tool', 'scm_rev', 'scm_tag',
                     'organization']
         self.assertEqual(result, expected)
