@@ -22,14 +22,14 @@ of .ABOUT files to generate attribution.
 
 from __future__ import print_function
 
-
 import csv
 import errno
 import logging
 import optparse
+import os
 import sys
 
-from os.path import exists, dirname, join, abspath, isdir, basename, expanduser
+from os.path import exists, dirname, join, abspath, isdir, basename, expanduser, normpath
 
 from about import Collector
 import genabout
@@ -157,8 +157,8 @@ def main(parser, options, args):
     input_path, output_path, component_subset_path = args
 
     # TODO: need more path normalization (normpath, expanduser)
-    # input_path = abspath(input_path)
-    output_path = abspath(output_path)
+    input_path = expanduser(normpath(input_path))
+    output_path = expanduser(normpath(output_path))
 
     # Add the following to solve the
     # UnicodeEncodeError: 'ascii' codec can't encode character
@@ -229,11 +229,12 @@ def main(parser, options, args):
                 print("Problem occurs. Attribution was not generated.")
                 print(e)
 
-        # Clear the log file
-        with open(join(dirname(output_path), LOG_FILENAME), 'w'):
-            pass
+        # Remove the previous log file if exist
+        log_path = join(dirname(output_path), LOG_FILENAME)
+        if exists(log_path):
+            os.remove(log_path)
 
-        file_handler = logging.FileHandler(join(dirname(output_path), LOG_FILENAME))
+        file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
         for error_msg in errors:
             logger.error(error_msg)

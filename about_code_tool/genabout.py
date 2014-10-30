@@ -703,14 +703,14 @@ def main(parser, options, args):
             sys.exit(errno.EINVAL)
 
     if copy_files_path:
-        # code to handle tidle character
+        # code to handle tilde character
         copy_files_path = os.path.abspath(expanduser(copy_files_path))
         if not _exists(copy_files_path):
             print("The project path does not exist.")
             sys.exit(errno.EINVAL)
 
     if license_text_path:
-        # code to handle tidle character
+        # code to handle tilde character
         license_text_path = os.path.abspath(expanduser(license_text_path))
         if not _exists(license_text_path):
             print("The license text path does not exist.")
@@ -773,13 +773,12 @@ def main(parser, options, args):
         print('Please fix the input file and re-run the tool.')
         sys.exit(errno.EINVAL)
 
-    # Clear the log file
-    # FIXME: we should just delete the file, not override it
-    # or we should append to it...
-    with open(output_path + LOG_FILENAME, 'w'):
-        pass
+    # Remove the previous log file if exist
+    log_path = join(output_path, LOG_FILENAME)
+    if exists(log_path):
+        os.remove(log_path)
 
-    file_handler = logging.FileHandler(output_path + LOG_FILENAME)
+    file_handler = logging.FileHandler(log_path)
     file_logger.addHandler(file_handler)
 
     input_list = gen.get_input_list(input_path)
