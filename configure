@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#
+
+set -e
+CFG_CMD_LINE_ARGS="$@"
+
+if [ "$1" == "" ]; then
+    # default configuration if not argument is provided
+    CFG_CMD_LINE_ARGS="etc/conf"
+fi
+
+source etc/configure $CFG_CMD_LINE_ARGS

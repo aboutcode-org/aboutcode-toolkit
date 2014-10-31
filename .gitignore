@@ -1,22 +1,14 @@
 *.py[cod]
 
-# C extensions
-*.so
-
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
+/build
+/bin
+/var
+/lib
 lib64
+/Include
+/Lib
+/Scripts
+/include
 
 # Installer logs
 pip-log.txt
@@ -37,3 +29,4 @@ nosetests.xml
 
 # PyCharm project
 .idea/
+/about_code_tool.egg_info

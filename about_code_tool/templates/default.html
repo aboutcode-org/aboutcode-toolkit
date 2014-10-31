@@ -52,7 +52,7 @@
                 <h3 class="component-name">{{ about_object.name }}
                     {% if about_object.version %}{{ about_object.version }}{% endif %}
                 </h3>
-                {% if about_object.dje_license_name in license_dicts.keys() %} 
+                {% if about_object.dje_license_name %}
                     <p>This component is licensed under {{about_object.dje_license_name }}.
                 {% endif %}
                 {% if about_object.copyright %}
@@ -61,30 +61,17 @@
                 {% if about_object.notice %}
                     <pre>{{ about_object.notice }}</pre>
                 {% elif about_object.notice_file %}
-                    <pre class="component-notice">{{ notice_texts[loop.index0] }}</pre>
+                    <pre class="component-notice">{{ about_object.notice_text }}</pre>
                 {% endif %}
-                {% if about_object.dje_license_name in license_dicts.keys() %}
-                    {% if about_object.dje_license_name in common_licenses %}
-                        <p>Full text of
-                            <a class="{{ about_object.dje_license_name }}" href="#component-license-{{ about_object.dje_license_name }}">
-                             {{ about_object.dje_license_name }}
-                             </a>
-                                is available at the end of this document.</p>
-                    {% else %}
-                        <pre>{{ license_dicts[about_object.dje_license_name]|e }}</pre>
-                    {% endif %}
-                {% elif about_object.license_text_file in license_dicts.keys() %}
-                    {% if about_object.dje_license_name in common_licenses %}
-                        <p>
-                            This component is licensed under {{ about_object.dje_license_name }}.
-                        </p>
-                        <p>Full text of
-                            <a class="{{ about_object.license_text_file }}" href="#component-license-{{ about_object.license_text_file }}">
-                             {{ about_object.license_text_file }}
-                             </a>
-                                is available at the end of this document.</p>
-                    {% else %}
-                        <pre>{{ license_dicts[about_object.license_text_file]|e }}</pre>
+                {% if about_object.dje_license_name in common_licenses %}
+                    <p>Full text of
+                        <a class="{{ about_object.dje_license_name }}" href="#component-license-{{ about_object.dje_license_name }}">
+                         {{ about_object.dje_license_name }}
+                         </a>
+                            is available at the end of this document.</p>
+                {% else %}
+                    {% if about_object.license_text %}
+                        <pre>{{about_object.license_text | e}}</pre>
                     {% endif %}
                 {% endif %}
             </div>
@@ -98,6 +85,7 @@
                 <pre>{{ license_texts[index]|e }}</pre>
             {% endif %}
         {% endfor %}
+
         <h3><a id="End">End</a></h3>
     </body>
 </html>

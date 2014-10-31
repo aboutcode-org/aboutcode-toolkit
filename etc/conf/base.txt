@@ -1,0 +1,9 @@
+# Base
+certifi==14.05.14
+setuptools==5.6
+wheel==0.24.0
+pip==1.5.6
+
+# used for templating
+jinja2==2.7.3
+MarkupSafe==0.23
