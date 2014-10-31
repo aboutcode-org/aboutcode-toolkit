@@ -62,3 +62,10 @@ class GenAttribTest(unittest.TestCase):
                     'test/test3.c.ABOUT']
         result = genattrib.update_path_to_about(test)
         self.assertEqual(expected, result)
+
+    def test_component_subset_to_sublist(self):
+        test = [{'about_file': '/tmp/', 'notes': 'test'},
+                {'about_file': '/tmp/t1/', 'dje_license': 'bsd-new'}]
+        expected = ['/tmp/', '/tmp/t1/']
+        result = genattrib.component_subset_to_sublist(test)
+        self.assertEqual(expected, result)
