@@ -544,6 +544,12 @@ class GenAbout(object):
                     about_resource = line['about_file']
                     if about_resource.endswith('/'):
                         line['about_resource'] = '.'
+            else: # 'about_resource' key present with no value
+                about_resource = line['about_file']
+                if about_resource.endswith('/'):
+                    line['about_resource'] = '.'
+                else:
+                    line['about_resource'] = basename(about_resource)
         except:
             # Add the 'about_resource' field
             about_resource = line['about_file']
