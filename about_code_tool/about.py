@@ -49,7 +49,7 @@ import ntpath
 __version__ = '0.9.0'
 
 # See http://dejacode.org
-__about_spec_version__ = '0.8.1'
+__about_spec_version__ = '1.0'
 
 
 __copyright__ = """
@@ -97,7 +97,7 @@ Error.__repr__ = repr_problem
 
 
 IGNORED = 'field or line ignored problem'
-VALUE = 'missing or empty value problem'
+VALUE = 'missing or empty or multiple value problem'
 FILE = 'file problem'
 URL = 'URL problem'
 VCS = 'Version control problem'
@@ -109,8 +109,6 @@ GENATTRIB = 'Attribution generation problem'
 
 
 MANDATORY_FIELDS = (
-    # 'about_resource',
-    # 'about_file',
     'name',
     'version',
 )
@@ -118,7 +116,6 @@ MANDATORY_FIELDS = (
 
 BASIC_FIELDS = (
     'about_resource',
-    'about_resource_path',  # Need to update spec
     'spec_version',
     'date',
     'description',
@@ -149,10 +146,8 @@ OWNERSHIP_FIELDS = (
 
 
 LICENSE_FIELDS = (
-    'notice',
     'notice_file',
     'notice_url',
-    'license_text',
     'license_text_file',
     'license_url',
     'license_spdx',
@@ -446,19 +441,65 @@ SPDX_LICENSES = (
 SPDX_LICENSE_IDS = dict((name.lower(), name) for name in SPDX_LICENSES)
 
 
-
-# Use DJE License key with extension
+# Use DJE License Name
 COMMON_LICENSES = (
-    'apache-2.0.LICENSE',
-    'bsd-new.LICENSE',
-    'bsd-original.LICENSE',
-    'bsd-original-uc.LICENSE',
-    'gpl-2.0.LICENSE',
-    'gpl-3.0.LICENSE',
-    'lgpl-2.1.LICENSE',
-    'net-snmp.LICENSE',
-    'openssl-ssleay.LICENSE',
-    'zlib.LICENSE',
+    'AES-128 v3.0 License',
+    'Apache License 1.1',
+    'Apache License 2.0',
+    'Apple Attribution License 1997',
+    'Apple Example Code License',
+    'Apple Public Source License 2.0',
+    'Arphic Public License',
+    'Artistic License (Perl) 1.0',
+    'Artistic License 2.0',
+    'Bitstream Vera Font License',
+    'Boost Software License 1.0',
+    'Broadcom CFE License',
+    'BSD-Modified',
+    'BSD-Original',
+    'BSD-Original-UC',
+    'BSD-Simplified',
+    'CMU Computing Services License',
+    'Common Development and Distribution License 1.0',
+    'Common Development and Distribution License 1.1',
+    'Common Public License 1.0',
+    'Creative Commons Attribution License 2.5',
+    'Creative Commons Attribution Share Alike License 3.0',
+    'Curl License',
+    'FreeType Project License',
+    'GNU General Public License 2.0',
+    'GNU General Public License 2.0 with Bison exception',
+    'GNU General Public License 2.0 with GLIBC  exception',
+    'GNU General Public License 3.0',
+    'GNU Lesser General Public License 2.1',
+    'GNU Library General Public License 2.0',
+    'GPL 2.0 or later with Linking exception',
+    'GPL 2.0 with Broadcom Linking exception',
+    'Independent JPEG Group License',
+    'ISC License (ISCL)',
+    'Larabie Fonts EULA',
+    'Libpng License',
+    'Microsoft Limited Public License',
+    'Microsoft Public License',
+    'Microsoft Reciprocal License',
+    'Microsoft TrueType Fonts EULA',
+    'MIT License',
+    'Mozilla Public License 1.1',
+    'Net SNMP License',
+    'Netscape Public License 1.1',
+    'NTP License',
+    'OpenSSL/SSLeay License',
+    'Original SSLeay License with Windows exception',
+    'RSA Data Security MD4',
+    'RSA Data Security MD5',
+    'SFL License Agreement',
+    'SGI Free Software License B v2.0',
+    'Sun RPC License',
+    'TCL/TK License',
+    'Tidy License',
+    'University of Illinois/NCSA Open Source License',
+    'X11 License',
+    'ZLIB License',
 )
 
 def posix_path(path):
@@ -467,17 +508,6 @@ def posix_path(path):
     contain posix or windows separators, converting \ to /.
     """
     return path.replace(ntpath.sep, posixpath.sep)
-
-
-def native_path(path):
-    """
-    Return a path using the current OS path separator given a path that may
-    contain posix or windows separators, converting / to \ on windows and \ to
-    / on posix OSes.
-    """
-    path = path.replace(ntpath.sep, os.path.sep)
-    path = path.replace(posixpath.sep, os.path.sep)
-    return path
 
 
 def is_about_file(path):
@@ -699,7 +729,6 @@ class AboutFile(object):
 
         for field_name, value in self.validated_fields.items():
             self.check_is_ascii(self.validated_fields.get(field_name))
-            # self.validate_known_optional_fields(field_name)
             self.validate_file_field_exists(field_name, value)
             self.validate_url_field(field_name, network_check=False)
             self.validate_spdx_license(field_name, value)
@@ -819,28 +848,28 @@ class AboutFile(object):
         if not field_name == 'license_spdx':
             return
         # FIXME: do we support more than one ID?
-        spdx_ids = field_value.split()
-        for spdx_id in spdx_ids:
-            # valid id, matching the case
-            if spdx_id in SPDX_LICENSE_IDS.values():
-                continue
+        # Not support multiple IDs
+        spdx_id = field_value
+        # valid id, matching the case
+        if spdx_id in SPDX_LICENSE_IDS.values():
+            return
 
-            spdx_id_lower = spdx_id.lower()
+        spdx_id_lower = spdx_id.lower()
 
-            # conjunctions
-            if spdx_id_lower in ['or', 'and']:
-                continue
+        # conjunctions
+        if spdx_id_lower in ['or', 'and']:
+            return
 
-            # lowercase check
-            try:
-                standard_id = SPDX_LICENSE_IDS[spdx_id_lower]
-            except KeyError:
-                self.errors.append(Error(SPDX, field_name, spdx_id,
-                                         'Invalid SPDX license id.'))
-            else:
-                msg = ('Non standard SPDX license id case. Should be %r.'
-                       % (standard_id))
-                self.warnings.append(Warn(SPDX, field_name, id, msg))
+        # lowercase check
+        try:
+            standard_id = SPDX_LICENSE_IDS[spdx_id_lower]
+        except KeyError:
+            self.errors.append(Error(SPDX, field_name, spdx_id,
+                                     'Invalid SPDX license id.'))
+        else:
+            msg = ('Non standard SPDX license id case. Should be %r.'
+                   % (standard_id))
+            self.warnings.append(Warn(SPDX, field_name, id, msg))
 
     def validate_url_field(self, field_name, network_check=False):
         """
@@ -939,23 +968,31 @@ class AboutFile(object):
         return custom_key
 
     def get_row_data(self, updated_path, custom_keys):
+        print(updated_path)
+        print(custom_keys)
         """
         Create a csv compatible row of data for this object.
         """
         row = [updated_path]
-        # FIXME: this list is not used? what was the intent?
-        custom_field = []
+        no_multi_license_fields = ('license_text_file',
+                                    'license_spdx',
+                                    'dje_license',
+                                    'dje_license_name')
         for field in MANDATORY_FIELDS + OPTIONAL_FIELDS:
             if field in self.validated_fields:
                 row += [self.validated_fields[field]]
-            elif field == 'about_resource_path':
-                about = self.validated_fields['about_resource']
-                if about.endswith('.'):
-                    about_resource_path = dirname(updated_path) + '/'
-                else:
-                    about_resource_path = normpath(join(dirname(updated_path),
-                                                        about))
-                row += [about_resource_path]
+                # The following code is to catch is the input contians any
+                # multiple licenses
+                if field in no_multi_license_fields:
+                    for lic_field in no_multi_license_fields:
+                        try:
+                            if '\n' in self.validated_fields[lic_field]:
+                                self.errors.append(Error(VALUE,
+                                                         lic_field,
+                                                         self.validated_fields[field],
+                                                         "Multiple Licenses are not supported."))
+                        except:
+                            pass
             else:
                 row += ['']
 
@@ -1009,20 +1046,6 @@ class AboutFile(object):
                 names.append(name)
         return names
 
-    def tmp_get_license_text(self):
-        # TODO: This is a temp fix for handling multiple 'license_text_file'
-        # The code should get the license text from the def license_text(self),
-        # not this function.
-        license_text = ""
-        licenses = self.parsed.get('license_text_file', '')
-        license_list = licenses.split('\n ')
-        for lic in license_list:
-            location = join(dirname(self.location), lic)
-            with open(location, 'rU') as f:
-                license_text += f.read()
-                license_text += '\n\n\n\n\n\n'
-        return license_text
-
     def license_text(self):
         """
         Return the license text if the license_text_file field exists and the
@@ -1057,6 +1080,11 @@ class AboutFile(object):
         """
         return self.parsed.get('name', '')
 
+    def get_dje_license_name(self):
+        """
+        Return the about object's dje_license_name.
+        """
+        return self.parsed.get('dje_license_name', '')
 
 def check_invalid_chars(field_name, line):
     """
@@ -1130,7 +1158,6 @@ class Collector(object):
         paths = [posix_path(p)for p in paths]
         return paths
 
-
     @property
     def errors(self):
         """
@@ -1181,28 +1208,6 @@ class Collector(object):
         else:
             return user_loc.replace('\\', '/')
 
-    def get_relative_path2(self, about_object_location):
-        """
-        Return a relative path as provided by the user for an about_object.
-
-        TODO: For some reasons, the join(input_path, subpath) does not work if
-        the input_path startswith "../". Therefore, using the
-        "hardcode" to add/append the path.
-        """
-        # FIXME: we should use correct path manipulation, not our own cooking
-        # this is too complex
-        user_provided_path = self.location
-        if os.path.isdir(self.absolute_path):
-            subpath = about_object_location.partition(
-                os.path.basename(os.path.normpath(user_provided_path)))[2]
-            if user_provided_path[-1] == '/':
-                user_provided_path = user_provided_path.rpartition('/')[0]
-            if user_provided_path[-1] == '\\':
-                user_provided_path = user_provided_path.rpartition('\\')[0]
-            return (user_provided_path + subpath).replace('\\', '/')
-        else:
-            return user_provided_path.replace('\\', '/')
-
     def custom_keys(self):
         custom_keys = []
         for about_object in self:
@@ -1246,8 +1251,6 @@ class Collector(object):
                   '"configure"')
             return
 
-        # For some reasons, if I set the template_path = "templates/default.html"
-        # in the parameter, the tempalte_path will become 'None' and cause error
         if not template_path:
             template_path = join(dirname(realpath(__file__)),
                                  "templates/default.html")
@@ -1257,19 +1260,27 @@ class Collector(object):
         template_file_name = basename(template_path)
         loader = j2.FileSystemLoader(template_dir)
         jinja_env = j2.Environment(loader=loader)
-
         try:
             template = jinja_env.get_template(template_file_name)
         except j2.TemplateNotFound:
             return
         limit_to = limit_to or []
+<<<<<<< HEAD
         limit_to = set(limit_to)
+=======
+>>>>>>> refs/remotes/origin/develop
 
         about_object_fields = []
         about_content_dict = {}
+        license_dict = {}
 
         not_process_components = list(limit_to)
+<<<<<<< HEAD
+=======
+        component_exist = False
+>>>>>>> refs/remotes/origin/develop
 
+<<<<<<< HEAD
         for about_object in self:
             # FIXME: what is the meaning of this partition?
             # PO created the var some_path to provide some clarity
@@ -1303,8 +1314,35 @@ class Collector(object):
                     and k == 'license_text_file'):
                     # FIXME: we should report decoding errors
                     lic_text = unicode(about_object.tmp_get_license_text(),
+=======
+        for component in not_process_components:
+            for about_object in self:
+                # The about_object.location is the absolute path of the ABOUT
+                # file. The purpose of the following partition is to match
+                # the about_file's location with the input list.
+                about_relative_path = about_object.location.partition(
+                                                normpath(self.location))[2]
+
+                if component == about_relative_path:
+                    component_exist = True
+                    about_content = about_object.validated_fields
+                    if '\n' in about_object.get_dje_license_name():
+                        msg = ('Multiple licenses is not supported. '
+                               'Skipping License generation.')
+                        err = Error(GENATTRIB, 'dje_license',
+                                    about_object.get_dje_license_name(), msg)
+                        self.genattrib_errors.append(err)
+
+                    lic_text = unicode(about_object.license_text(),
+>>>>>>> refs/remotes/origin/develop
                                        errors='replace')
+<<<<<<< HEAD
+=======
+                    notice_text = unicode(about_object.notice_text(),
+                                          errors='replace')
+>>>>>>> refs/remotes/origin/develop
                     about_content['license_text'] = lic_text
+<<<<<<< HEAD
 
             # report error if no license_text is found
             if not about_content.get('license_text'):
@@ -1312,8 +1350,30 @@ class Collector(object):
                        'Skipping License generation.')
                 err = Error(GENATTRIB, 'name',
                             about_object.get_about_name(), msg)
+=======
+                    about_content['notice_text'] = notice_text
+
+                    license_dict[about_object.get_dje_license_name()] = about_content['license_text']
+
+                    # report error if no license_text is found
+                    if not about_content.get('license_text')\
+                        and not about_content.get('notice_text')\
+                        and not '\n' in about_object.get_dje_license_name():
+                        msg = ('No license_text found. '
+                               'Skipping License generation.')
+                        err = Error(GENATTRIB, 'name',
+                                    about_object.get_about_name(), msg)
+                        self.genattrib_errors.append(err)
+                    about_object_fields.append(about_content)
+                    break
+            if not component_exist:
+                msg = ('The requested ABOUT file: %r does not exist. '
+                       'No attribution generated for this file.' % component)
+                err = Error(GENATTRIB, 'about_file', component, msg)
+>>>>>>> refs/remotes/origin/develop
                 self.genattrib_errors.append(err)
 
+<<<<<<< HEAD
             about_object_fields.append(about_content)
 
         # find paths requested in the limit_to paths arg that do not point to
@@ -1329,10 +1389,21 @@ class Collector(object):
         # TODO: Handle the grouping and ordering later
         """# We want to display common_licenses in alphabetical order
         for key in sorted(common_license_dict.keys()):
+=======
+        # We want to display common_licenses in alphabetical order
+        license_key = []
+        license_text_list = []
+        for key in sorted(license_dict):
+>>>>>>> refs/remotes/origin/develop
             license_key.append(key)
-            license_text_list.append(common_license_dict[key])"""
+            license_text_list.append(license_dict[key])
 
-        rendered = template.render(about_objects=about_object_fields)
+        # We should only pass the about_objects to the template.
+        # However, this is a temp fix for the license summarization feature.
+        rendered = template.render(about_objects=about_object_fields,
+                                   license_keys=license_key,
+                                   license_texts = license_text_list,
+                                   common_licenses=COMMON_LICENSES)
         return rendered
 
     def check_paths(self, paths):

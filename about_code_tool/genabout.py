@@ -36,7 +36,7 @@ import urllib2
 
 from collections import namedtuple
 from os import makedirs
-from os.path import exists, dirname, join, abspath, isdir, normpath, basename
+from os.path import exists, dirname, join, abspath, isdir, normpath, basename, expanduser
 
 import about
 
@@ -237,7 +237,7 @@ class GenAbout(object):
         # Get all the dictionary keys
         column_keys = input_list[0].keys()
 
-        # Get all the keys that ends with _file except for the 'about_file
+        # Get all the keys that ends with _file except for the 'about_file'
         file_keys = []
         for key in column_keys:
             if key.endswith('_file') and key != 'about_file':
@@ -288,6 +288,19 @@ class GenAbout(object):
             'api_key': api_key,
             'format': 'json'
         }
+
+        # Check is the provided api_url valid or not.
+        try:
+            request = urllib2.Request(url)
+            response = urllib2.urlopen(request)
+            response_content = response.read()
+        except urllib2.HTTPError as http_e:
+            if http_e.code == 404:
+                error_msg = ("URL not reachable. Invalid '--api_url'."
+                                 " LICENSE generation is skipped.")
+                print("\n" + error_msg + "\n")
+                self.extract_dje_license_error = True
+                self.errors.append(Error('--api_url', url, error_msg))
 
         url = url.rstrip('/')
         encoded_payload = urllib.urlencode(payload)
@@ -382,31 +395,16 @@ class GenAbout(object):
                     license_file_list = []
                     file_location = line['about_file']
                     about_parent_dir = dirname(file_location)
-                    if '\n' in line['license_text_file']:
-                        file_value = line['license_text_file'].split('\n')
-                    else:
-                        file_value = [line['license_text_file']]
-                    for license_text_file in file_value:
-                        license_file_list.append(normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file)))
-                    for license_file in license_file_list:
-                        if not _exists(license_file):
-                            self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
+                    license_text_file = line['license_text_file']
+                    license_file = normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file))
+                    if not _exists(license_file):
+                        self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
                         if line['dje_license']:
                             license_output_list.append(self.gen_license_list(line))
-                            license_names = []
-                            if '\n' in line['dje_license_name']:
-                                license_names = line['dje_license_name'].split('\n ')
-                            else:
-                                license_names = [line['dje_license_name']]
-                            for lic_name in license_names:
-                                try:
-                                    if line['license_text_file']:
-                                        line['license_text_file'] += '\n '
-                                    line['license_text_file'] += dje_license_dict[lic_name][0] + '.LICENSE'
-                                except:
-                                    line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
+                            lic_name = line['dje_license_name']
+                            line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                         else:
                             self.warnings.append(Warn('dje_license', '',
                                                       "Missing 'dje_license' for " + line['about_file']))
@@ -417,18 +415,9 @@ class GenAbout(object):
                 if gen_license:
                     if line['dje_license']:
                         license_output_list.append(self.gen_license_list(line))
-                        license_names = []
-                        if '\n' in line['dje_license_name']:
-                            license_names = line['dje_license_name'].split('\n ')
-                        else:
-                            license_names = [line['dje_license_name']]
-
-                        for lic_name in license_names:
-                            if 'license_text_file' in line:
-                                line['license_text_file'] += '\n '
-                            license_name = dje_license_dict[lic_name][0]
-                            license_text_file = license_name + '.LICENSE'
-                            line['license_text_file'] = license_text_file
+                        lic_name = line['dje_license_name']
+                        if lic_name:
+                            line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                     else:
                         self.warnings.append(Warn('dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
@@ -440,32 +429,25 @@ class GenAbout(object):
         for line in input_list:
             try:
                 if line['dje_license']:
-                    license_list = []
                     if '\n' in line['dje_license']:
-                        license_list = line['dje_license'].split('\n')
+                        line['dje_license_name'] = ""
+                        self.errors.append(Error('dje_license',
+                                                 line['dje_license'],
+                                                 "No multiple licenses or newline character are accepted."))
+                        continue
+                    lic = line['dje_license']
+                    if not lic in license_dict:
+                        detail_list = []
+                        detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
+                        license_dict[lic] = detail[0]
+                        line['dje_license_name'] = detail[0]
+                        dje_key = detail[1]
+                        license_context = detail [2]
+                        detail_list.append(dje_key)
+                        detail_list.append(license_context)
+                        key_text_dict[detail[0]] = detail_list
                     else:
-                        license_list = [line['dje_license']]
-                    for lic in license_list:
-                        if not lic in license_dict:
-                            detail_list = []
-                            detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
-                            license_dict[lic] = detail[0]
-                            try:
-                                if line['dje_license_name']:
-                                    line['dje_license_name'] += "\n " + detail[0]
-                            except:
-                                line['dje_license_name'] = detail[0]
-                            dje_key = detail[1]
-                            license_context = detail [2]
-                            detail_list.append(dje_key)
-                            detail_list.append(license_context)
-                            key_text_dict[detail[0]] = detail_list
-                        else:
-                            try:
-                                if line['dje_license_name']:
-                                    line['dje_license_name'] += "\n " + license_dict[lic]
-                            except:
-                                line['dje_license_name'] = license_dict[lic]
+                        line['dje_license_name'] = license_dict[lic]
             except Exception:
                 err = Warn('dje_license', '',
                            'Missing "dje_license" for ' + line['about_file'])
@@ -475,14 +457,10 @@ class GenAbout(object):
     def process_dje_licenses(self, dje_license_list, dje_license_dict, output_path):
         license_list_context = []
         for gen_path, license_name in dje_license_list:
-            licenses = []
-            if '\n' in license_name:
-                licenses = license_name.split('\n ')
-            else:
-                licenses = [license_name]
+            lic = license_name
             if gen_path.startswith('/'):
                 gen_path = gen_path.partition('/')[2]
-            for lic in licenses:
+            if lic:
                 license_key = dje_license_dict[lic][0]
                 gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
                 if not _exists(gen_license_path) and not self.extract_dje_license_error:
@@ -566,6 +544,12 @@ class GenAbout(object):
                     about_resource = line['about_file']
                     if about_resource.endswith('/'):
                         line['about_resource'] = '.'
+            else: # 'about_resource' key present with no value
+                about_resource = line['about_file']
+                if about_resource.endswith('/'):
+                    line['about_resource'] = '.'
+                else:
+                    line['about_resource'] = basename(about_resource)
         except:
             # Add the 'about_resource' field
             about_resource = line['about_file']
@@ -724,11 +708,17 @@ def main(parser, options, args):
             print('Invalid action: should be 0, 1, 2 or 3')
             sys.exit(errno.EINVAL)
 
-    if copy_files_path and not _exists(copy_files_path):
+    if copy_files_path:
+        # code to handle tilde character
+        copy_files_path = os.path.abspath(expanduser(copy_files_path))
+        if not _exists(copy_files_path):
             print("The project path does not exist.")
             sys.exit(errno.EINVAL)
 
-    if license_text_path and not _exists(license_text_path):
+    if license_text_path:
+        # code to handle tilde character
+        license_text_path = os.path.abspath(expanduser(license_text_path))
+        if not _exists(license_text_path):
             print("The license text path does not exist.")
             sys.exit(errno.EINVAL)
 
@@ -789,13 +779,12 @@ def main(parser, options, args):
         print('Please fix the input file and re-run the tool.')
         sys.exit(errno.EINVAL)
 
-    # Clear the log file
-    # FIXME: we should just delete the file, not override it
-    # or we should append to it...
-    with open(output_path + LOG_FILENAME, 'w'):
-        pass
+    # Remove the previous log file if exist
+    log_path = join(output_path, LOG_FILENAME)
+    if exists(log_path):
+        os.remove(log_path)
 
-    file_handler = logging.FileHandler(output_path + LOG_FILENAME)
+    file_handler = logging.FileHandler(log_path)
     file_logger.addHandler(file_handler)
 
     input_list = gen.get_input_list(input_path)
@@ -819,12 +808,9 @@ def main(parser, options, args):
             print("The '--copy_files' <project_path> must be a directory.")
             print("'--copy_files' is skipped.")
         else:
-            # if not copy_files_path.endswith('/'):
-            #   copy_files_path += '/'
-            project_parent_dir = dirname(copy_files_path)
             licenses_in_project = True
             license_list = gen.verify_files_existence(input_list,
-                                                      project_parent_dir,
+                                                      copy_files_path,
                                                       licenses_in_project)
             if not license_list:
                 print("None of the file is found. '--copy_files' is ignored.")
@@ -832,17 +818,15 @@ def main(parser, options, args):
                 gen.copy_files(output_path, license_list)
 
     if license_text_path:
+        print(normpath(license_text_path))
         if not isdir(license_text_path):
             print("The '--license_text_location' <license_path> "
                   "must be a directory.")
             print("'--license_text_location' is skipped.")
         else:
-            # if not license_text_path.endswith('/'):
-            #    license_text_path += '/'
-            license_dir = dirname(license_text_path)
             licenses_in_project = False
             license_list = gen.verify_files_existence(input_list,
-                                                      license_dir,
+                                                      license_text_path,
                                                       licenses_in_project)
             if not license_list:
                 print("None of the file is found. '--copy_files' is ignored.")

@@ -22,14 +22,14 @@ of .ABOUT files to generate attribution.
 
 from __future__ import print_function
 
-
 import csv
 import errno
 import logging
 import optparse
+import os
 import sys
 
-from os.path import exists, dirname, join, abspath, isdir, basename
+from os.path import exists, dirname, join, abspath, isdir, basename, expanduser, normpath
 
 from about import Collector
 import genabout
@@ -157,8 +157,8 @@ def main(parser, options, args):
     input_path, output_path, component_subset_path = args
 
     # TODO: need more path normalization (normpath, expanduser)
-    # input_path = abspath(input_path)
-    output_path = abspath(output_path)
+    input_path = expanduser(normpath(input_path))
+    output_path = expanduser(normpath(output_path))
 
     # Add the following to solve the
     # UnicodeEncodeError: 'ascii' codec can't encode character
@@ -181,6 +181,13 @@ def main(parser, options, args):
               'or use the --overwrite option.')
         parser.print_help()
         sys.exit(errno.EEXIST)
+
+    if template_location:
+        template_location = abspath(expanduser(template_location))
+        if not exists(expanduser(template_location)):
+            print('The defined template location does not exist.')
+            parser.print_help()
+            sys.exit(errno.EINVAL)
 
     if component_subset_path and not exists(component_subset_path):
         print('Component Subset path does not exist.')
@@ -212,15 +219,22 @@ def main(parser, options, args):
             outlist = update_path_to_about(sublist)
 
         attrib_str = collector.generate_attribution(template_path=template_location, limit_to=outlist)
-        with open(output_path, "w") as f:
-            f.write(attrib_str)
         errors = collector.get_genattrib_errors()
 
-        # Clear the log file
-        with open(join(dirname(output_path), LOG_FILENAME), 'w'):
-            pass
+        if attrib_str:
+            try:
+                with open(output_path, "w") as f:
+                    f.write(attrib_str)
+            except Exception as e:
+                print("Problem occurs. Attribution was not generated.")
+                print(e)
 
-        file_handler = logging.FileHandler(join(dirname(output_path), LOG_FILENAME))
+        # Remove the previous log file if exist
+        log_path = join(dirname(output_path), LOG_FILENAME)
+        if exists(log_path):
+            os.remove(log_path)
+
+        file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
         for error_msg in errors:
             logger.error(error_msg)

@@ -41,11 +41,7 @@
 
         <div class="oss-table-of-contents">
             {% for about_object in about_objects %}
-                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}
-                    {% if about_object.version %} 
-                        {{ about_object.version }}
-                    {% endif %}
-                </a></p>
+                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}{% if about_object.version %} {{ about_object.version }}{% endif %}</a></p>
             {% endfor %}
         </div>
 
@@ -67,12 +63,28 @@
                 {% elif about_object.notice_file %}
                     <pre class="component-notice">{{ about_object.notice_text }}</pre>
                 {% endif %}
-                {% if about_object.license_text %}
-                    <pre>{{about_object.license_text | e}}</pre>
+                {% if about_object.dje_license_name in common_licenses %}
+                    <p>Full text of
+                        <a class="{{ about_object.dje_license_name }}" href="#component-license-{{ about_object.dje_license_name }}">
+                         {{ about_object.dje_license_name }}
+                         </a>
+                            is available at the end of this document.</p>
+                {% else %}
+                    {% if about_object.license_text %}
+                        <pre>{{about_object.license_text | e}}</pre>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endfor %}
         <hr>
+
+        <h3>Common Licenses Used in This Product</h3>
+        {% for index in range(license_keys | count) %}
+            {% if license_keys[index] in common_licenses %}
+                <h3 id="component-license-{{ license_keys[index] }}">{{ license_keys[index] }}</h3>
+                <pre>{{ license_texts[index]|e }}</pre>
+            {% endif %}
+        {% endfor %}
 
         <h3><a id="End">End</a></h3>
     </body>
