@@ -16,49 +16,39 @@
 
 from __future__ import print_function
 
-import os
 import unittest
 
-from about_code_tool import genattrib
+from about_code_tool.tests import get_test_loc
+
+from about_code_tool import attrib, model
 
 
-TESTS_DIR = os.path.abspath(os.path.dirname(__file__))
-TESTDATA_DIR = os.path.join(TESTS_DIR, 'testdata')
-GEN_LOCATION = os.path.join(TESTDATA_DIR, 'test_files_for_genabout')
+class AttribTest(unittest.TestCase):
 
+    def test_check_template(self):
+        assert attrib.check_template('template_string') == None
+        assert attrib.check_template('{{template_string') == (1,
+          "unexpected end of template, expected 'end of print statement'.",)
+        template = open(get_test_loc('attrib_gen/test.template')).read()
+        assert attrib.check_template(template) == None
 
-class GenAttribTest(unittest.TestCase):
-    def test_convert_dict_key_to_lower_case(self):
-        test = [{'Directory': '/test/', 'file_name': 'test.c'}]
-        expected = [{'directory': '/test/', 'file_name': 'test.c'}]
-        result = genattrib.convert_dict_key_to_lower_case(test)
+    def test_check_template_default_is_valid(self):
+        template = open(attrib.default_template).read()
+        assert attrib.check_template(template) == None
+
+    def test_generate(self):
+        expected = (u'Apache HTTP Server: 2.4.3\n'
+                    u'resource: httpd-2.4.3.tar.gz\n')
+        test_file = get_test_loc('attrib_gen/attrib.ABOUT')
+        template = open(get_test_loc('attrib_gen/test.template')).read()
+        _errors, abouts = model.collect_inventory(test_file)
+        result = attrib.generate(abouts, template)
         self.assertEqual(expected, result)
 
-    def test_check_no_about_file_existence(self):
-        test = [{'Directory': '/test/', 'file_name': '/test.c'}]
-        result = genattrib.check_about_file_existence_and_format(test)
-        self.assertFalse(result)
-
-    def test_check_have_about_file_existence(self):
-        test = [{'Directory': '/test/', 'about_file': '/test.ABOUT'}]
-        result = genattrib.check_about_file_existence_and_format(test)
-        self.assertEqual(test, result)
-
-    def test_check_no_about_file_not_start_with_slash(self):
-        test = [{'Directory': '/test/', 'file_name': 'test.c'}]
-        result = genattrib.check_about_file_existence_and_format(test)
-        self.assertFalse(result)
-
-    def test_check_have_about_file_not_start_with_slash(self):
-        test = [{'Directory': '/test/', 'about_file': 'test.ABOUT'}]
-        expected = [{'Directory': '/test/', 'about_file': '/test.ABOUT'}]
-        result = genattrib.check_about_file_existence_and_format(test)
-        self.assertEqual(expected, result)
-
-    def test_update_path_to_about(self):
-        test = ['/test/test1.ABOUT', '/test/test2/', 'test/test3.c']
-        expected = ['/test/test1.ABOUT',
-                    '/test/test2/test2.ABOUT',
-                    'test/test3.c.ABOUT']
-        result = genattrib.update_path_to_about(test)
-        self.assertEqual(expected, result)
+    def test_generate_from_file_with_default_template(self):
+        test_file = get_test_loc('attrib_gen/attrib.ABOUT')
+        _errors, abouts = model.collect_inventory(test_file)
+        result = attrib.generate_from_file(abouts)
+        expected = open(get_test_loc('attrib_gen/expected_default_attrib.html')).read()
+        self.assertEqual([x.rstrip() for x in expected.splitlines()],
+                         [x.rstrip() for x in  result.splitlines()])

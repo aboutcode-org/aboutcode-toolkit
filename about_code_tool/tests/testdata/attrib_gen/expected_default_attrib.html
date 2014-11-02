@@ -40,34 +40,23 @@
     </div>
 
     <div class="oss-table-of-contents">
-    {% for about in abouts %}
-      <p>name: {{ about.name.value }} version: {{ about.version.value }}</p>
-      <p><a href="#component_{{ loop.index0 }}">{{ about.name.value }} {{ about.version.value }}</a></p>
-    {% endfor %}
-    </div>
-    <hr/>
-    {% for about in abouts %}
-    <div class="oss-component" id="component_{{ loop.index0 }}">
-      <h3 class="component-name">{{ about.name.value }} {{ about.version.value }}</h3>
-      {% if about.license_name.value %}
-      <p>This component is licensed under {{about.license_name.value }}.
-      {% endif -%}
-      {% if about.copyright.value %}
-      <pre>{{about.copyright.value}}</pre>
-      {% endif %}
-      {% for pth, text in about.notice_file.value %}
-      <pre class="component-notice">{{ text }}</pre>
-      {% endfor %}
-      {% if about.license_name in [] %}
-      <p>Full text of <a class="{{ about.license_name.value }}" href="#component-license-{{ about.license_name.value }}"> {{ about.license_name.value }} </a> is available at the end of this document.</p>
-      {% else %}
-        {% for pth, text in about.license_file.value %}
-        <pre class="component-license">{{ text | e}}</pre>
-        {% endfor %}
-      {% endif %}
+    
+      <p>name: Apache HTTP Server version: 2.4.3</p>
+      <p><a href="#component_0">Apache HTTP Server 2.4.3</a></p>
 
     </div>
-    {% endfor %}
+    <hr/>
+
+    <div class="oss-component" id="component_0">
+      <h3 class="component-name">Apache HTTP Server 2.4.3</h3>
+
+
+
+
+
+
+    </div>
+
     <hr/>
 
     <h3>Common Licenses Used in This Product</h3>

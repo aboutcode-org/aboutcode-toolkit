@@ -49,6 +49,10 @@ class FieldTest(unittest.TestCase):
         field = model.Field()
         self.assertFalse(field.has_content)
 
+    def test_empty_Field_has_default_value(self):
+        field = model.Field()
+        self.assertEqual('', field.value)
+
     def test_PathField_check_location(self):
         test_file = 'license.LICENSE'
         field = model.PathField(name='f', value=test_file, present=True)
@@ -435,7 +439,7 @@ class AboutTest(unittest.TestCase):
         expected = [
             (u'single_line', u'README STUFF'),
             (u'multi_line', u'line1\nline2'),
-            (u'empty', None)]
+            (u'empty', '')]
         self.assertEqual(expected, result)
 
     def test_About_has_errors_for_illegal_custom_field_name(self):
@@ -486,10 +490,10 @@ this software and releases the component to Public Domain.
         self.assertEqual(expected_errors, a.errors)
 
         result = a.license_file.value
-        self.assertEqual(None, result)
+        self.assertEqual({}, result)
 
         result = a.notice_file.value
-        self.assertEqual(None, result)
+        self.assertEqual({}, result)
 
     def test_About_rejects_non_ascii_names_and_accepts_unicode_values(self):
         test_file = get_test_loc('parse/non_ascii_field_name_value.about')

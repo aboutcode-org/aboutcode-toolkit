@@ -148,13 +148,14 @@ def fetch(location):
 def attrib(location, output, template=None, inventory_location=None,):
     """
     Generate attribution document at output location using the directory of
-    ABOUT files at location, the template file (or a default), an inventory_location CSV
-    file containing a list of ABOUT files to generate attribution for. Only
-    include components code when attribute=yes
+    ABOUT files at location, the template file (or a default), an
+    inventory_location CSV file containing a list of ABOUT files to generate
+    attribution for. Only include components code when attribute=yes
     """
     click.echo('Generate attribution documentation')
     errors, abouts = about_code_tool.model.collect_inventory(location)
-    about_code_tool.attrib.generate_and_save(abouts, output, template, inventory_location)
+    about_code_tool.attrib.generate_and_save(abouts, output, template, 
+                                             inventory_location)
     log_errors(errors)
 
 
@@ -185,4 +186,3 @@ def log_errors(errors, level=NOTSET):
 
 if __name__ == '__main__':
     cli()
-

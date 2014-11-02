@@ -1,5 +1,6 @@
-{% for about_object in about_objects -%}
-    {% for key, value in about_object.iteritems() -%}
-        {{ key }}:{{ value }}
-    {%- endfor %}
-{%- endfor %}
+{% for about in abouts -%}
+{{ about.name.value }}: {{ about.version.value }}
+{% for res in about.about_resource.value -%}
+resource: {{ res }}
+{% endfor -%}
+{% endfor -%}

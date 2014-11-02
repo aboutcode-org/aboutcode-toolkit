@@ -55,12 +55,15 @@ class Field(object):
         self.original_value = value
 
         # can become a string, list or OrderedDict() after validation
-        self.value = value
+        self.value = value or self.default_value()
 
         self.required = required
         # True if the field is present in an About object
         self.present = present
         self.errors = []
+
+    def default_value(self):
+        return ''
 
     def validate(self, *args, **kwargs):
         """
@@ -68,6 +71,7 @@ class Field(object):
         """
         errors = []
         name = self.name
+        self.value = self.default_value()
         if not self.present:
             # required fields must be present
             if self.required:
@@ -80,7 +84,6 @@ class Field(object):
         else:
             # present fields should have content ...
             if not self.has_content:
-                self.value = None
                 # ... especially if required
                 if self.required:
                     msg = u'Field %(name)s is required and empty'
@@ -149,7 +152,6 @@ class Field(object):
         """
         Equality based on string content value, ignoring spaces
         """
-
         return (isinstance(other, self.__class__)
                 and self.name == other.name
                 and self.value == other.value)
@@ -160,6 +162,7 @@ class StringField(Field):
     A field containing a string value possibly on multiple lines.
     The validated value is a string.
     """
+
     def _validate(self, *args, **kwargs):
         errors = super(StringField, self)._validate(*args, ** kwargs)
         return errors
@@ -215,6 +218,9 @@ class ListField(StringField):
     A field containing a list of string values, one per line. The validated
     value is a list.
     """
+    def default_value(self):
+        return []
+
     def _validate(self, *args, **kwargs):
         errors = super(ListField, self)._validate(*args, ** kwargs)
 
@@ -298,6 +304,8 @@ class PathField(ListField):
     The validated value is an ordered mapping of path->location or None.
     The paths can also be resolved
     """
+    def default_value(self):
+        return {}
 
     def _validate(self, *args, **kwargs):
         """
@@ -424,6 +432,9 @@ class BooleanField(SingleLineField):
     """
     An flag field with a boolean value. Validated value is False, True or None.
     """
+    def default_value(self):
+        return None
+
     flags = {'yes': True, 'y': True, 'no': False, 'n': False, }
 
     flag_values = ', '.join(flags)
