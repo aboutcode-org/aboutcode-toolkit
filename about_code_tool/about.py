@@ -1265,56 +1265,14 @@ class Collector(object):
         except j2.TemplateNotFound:
             return
         limit_to = limit_to or []
-<<<<<<< HEAD
-        limit_to = set(limit_to)
-=======
->>>>>>> refs/remotes/origin/develop
 
         about_object_fields = []
         about_content_dict = {}
         license_dict = {}
 
         not_process_components = list(limit_to)
-<<<<<<< HEAD
-=======
         component_exist = False
->>>>>>> refs/remotes/origin/develop
 
-<<<<<<< HEAD
-        for about_object in self:
-            # FIXME: what is the meaning of this partition?
-            # PO created the var some_path to provide some clarity
-            # but what does the second element means?
-            file_name = about_object.location.partition(self.location)[2]
-            # FIXME: a path starting with / is NOT relative
-            about_relative_path = '/' + file_name
-
-            if limit_to:
-                try:
-                    not_process_components.remove(about_relative_path)
-                except Exception as e:
-                    continue
-
-            #if limit_to and about_relative_path in limit_to:
-            #    continue
-
-            about_content = about_object.validated_fields
-            # Add information in the dictionary if not in the ABOUT file
-            lic_text = unicode(about_object.license_text(),
-                               errors='replace')
-
-            about_content['license_text'] = lic_text
-            notice_text = about_object.notice_text()
-            about_content['notice_text'] = notice_text
-
-            # FIXME: The following is temporary code to handle multiple
-            # license_text_file paths in the field value, one per lne
-            for k in about_content:
-                if ('\n' in about_content[k]
-                    and k == 'license_text_file'):
-                    # FIXME: we should report decoding errors
-                    lic_text = unicode(about_object.tmp_get_license_text(),
-=======
         for component in not_process_components:
             for about_object in self:
                 # The about_object.location is the absolute path of the ABOUT
@@ -1334,23 +1292,10 @@ class Collector(object):
                         self.genattrib_errors.append(err)
 
                     lic_text = unicode(about_object.license_text(),
->>>>>>> refs/remotes/origin/develop
                                        errors='replace')
-<<<<<<< HEAD
-=======
                     notice_text = unicode(about_object.notice_text(),
                                           errors='replace')
->>>>>>> refs/remotes/origin/develop
                     about_content['license_text'] = lic_text
-<<<<<<< HEAD
-
-            # report error if no license_text is found
-            if not about_content.get('license_text'):
-                msg = ('No license_text found. '
-                       'Skipping License generation.')
-                err = Error(GENATTRIB, 'name',
-                            about_object.get_about_name(), msg)
-=======
                     about_content['notice_text'] = notice_text
 
                     license_dict[about_object.get_dje_license_name()] = about_content['license_text']
@@ -1370,31 +1315,12 @@ class Collector(object):
                 msg = ('The requested ABOUT file: %r does not exist. '
                        'No attribution generated for this file.' % component)
                 err = Error(GENATTRIB, 'about_file', component, msg)
->>>>>>> refs/remotes/origin/develop
                 self.genattrib_errors.append(err)
 
-<<<<<<< HEAD
-            about_object_fields.append(about_content)
-
-        # find paths requested in the limit_to paths arg that do not point to
-        # a corresponding ABOUT file
-        for path in not_process_components:
-            path = posix_path(path)
-            afp = join(self.location, path)
-            msg = ('The requested ABOUT file: %(afp)r does not exist. '
-                   'No attribution generated for this file.' % locals())
-            err = Error(GENATTRIB, 'about_file', path, msg)
-            self.genattrib_errors.append(err)
-
-        # TODO: Handle the grouping and ordering later
-        """# We want to display common_licenses in alphabetical order
-        for key in sorted(common_license_dict.keys()):
-=======
         # We want to display common_licenses in alphabetical order
         license_key = []
         license_text_list = []
         for key in sorted(license_dict):
->>>>>>> refs/remotes/origin/develop
             license_key.append(key)
             license_text_list.append(license_dict[key])
 
