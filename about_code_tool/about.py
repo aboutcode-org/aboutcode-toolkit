@@ -1267,7 +1267,6 @@ class Collector(object):
         limit_to = limit_to or []
 
         about_object_fields = []
-        about_content_dict = {}
         license_dict = {}
 
         not_process_components = list(limit_to)

@@ -606,8 +606,7 @@ about_resource: about.py
             self.assertEqual(expected_warnings[i][0], w.code)
             self.assertEqual(expected_warnings[i][1], w.field_value)
 
-    # FIXME: This is failing because there is no component list provided
-    def FAILING_test_generate_attribution_with_custom_template(self):
+    def test_generate_attribution_with_custom_template(self):
         expected = (u'notice_text:'
                     'version:2.4.3'
                     'about_resource:httpd-2.4.3.tar.gz'
@@ -615,16 +614,15 @@ about_resource: about.py
         test_file = join(TESTDATA_DIR, 'attrib/attrib.ABOUT')
         collector = about.Collector(test_file)
         template = join(TESTDATA_DIR, 'attrib/test.template')
-        result = collector.generate_attribution(template)
+        result = collector.generate_attribution(template,limit_to=[''])
         self.assertEqual(expected, result)
 
-    # FIXME: This is failing because there is no component list provided
-    def FAILING_test_generate_attribution_with_default_template(self):
+    def test_generate_attribution_with_default_template(self):
         f = open(join(TESTDATA_DIR, 'attrib/attrib.html'))
         expected = f.read()
         test_file = join(TESTDATA_DIR, 'attrib/attrib.ABOUT')
         collector = about.Collector(test_file)
-        result = collector.generate_attribution()
+        result = collector.generate_attribution(limit_to=[''])
         # Strip all the white spaces 
         self.assertEqual(re.sub(r'\s+', '', expected), re.sub(r'\s+', '', result))
 
