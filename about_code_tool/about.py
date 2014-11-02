@@ -968,8 +968,6 @@ class AboutFile(object):
         return custom_key
 
     def get_row_data(self, updated_path, custom_keys):
-        print(updated_path)
-        print(custom_keys)
         """
         Create a csv compatible row of data for this object.
         """
