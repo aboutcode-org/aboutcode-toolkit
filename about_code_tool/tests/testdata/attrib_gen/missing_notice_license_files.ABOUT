@@ -1,0 +1,8 @@
+about_resource:license_text_test
+name: license extraction
+version: beta
+notes: this is a test file to see if the license_test() correctly returns an 
+ of empty string when the license_text_file and notice_file have file values
+ that do not exist
+license_text_file: test.LICENSE
+notice_file: test.NOTICE 
