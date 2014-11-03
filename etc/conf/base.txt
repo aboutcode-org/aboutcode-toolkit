@@ -8,7 +8,7 @@ pip==1.5.6
 jinja2==2.7.3
 MarkupSafe==0.23
 
-schematics==0.9-5
+#schematics==0.9-5
 
 unicodecsv==0.9.4
 
