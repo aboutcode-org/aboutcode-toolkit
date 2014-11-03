@@ -525,6 +525,31 @@ this software and releases the component to Public Domain.
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
         self.assertEqual(a, b)
 
+    def test_About_same_attribution(self):
+        base_dir = 'some_dir'
+        a = model.About()
+        a.load_dict({'name': u'apache', 'version': u'1.1' }, base_dir)
+        b = model.About()
+        b.load_dict({'name': u'apache', 'version': u'1.1' }, base_dir)
+        self.assertTrue(a.same_attribution(b))
+
+    def test_About_same_attribution_with_different_resource(self):
+        base_dir = 'some_dir'
+        a = model.About()
+        a.load_dict({'about_resource': u'resource', 'name': u'apache', 'version': u'1.1' }, base_dir)
+        b = model.About()
+        b.load_dict({'about_resource': u'other', 'name': u'apache', 'version': u'1.1' }, base_dir)
+        self.assertTrue(a.same_attribution(b))
+
+    def test_About_same_attribution_different_data(self):
+        base_dir = 'some_dir'
+        a = model.About()
+        a.load_dict({'about_resource': u'resource', 'name': u'apache', 'version': u'1.1' }, base_dir)
+        b = model.About()
+        b.load_dict({'about_resource': u'other', 'name': u'apache', 'version': u'1.2' }, base_dir)
+        self.assertFalse(a.same_attribution(b))
+        self.assertFalse(b.same_attribution(a))
+
     def test_field_names(self):
         a = model.About()
         a.custom_fields['f'] = model.StringField(name='f', value='1',
@@ -960,3 +985,69 @@ class CollectorTest(unittest.TestCase):
         model.collect_inventory('.')
         model.collect_inventory('')
         model.collect_inventory('./etc')
+
+
+class GroupingsTest(unittest.TestCase):
+
+    def test_unique(self):
+        base_dir = 'some_dir'
+        test = {'about_resource': u'.',
+                 'author': u'',
+                 'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
+                u'custom1': u'some custom',
+                u'custom_empty': u'',
+                 'description': u'AboutCode is a tool\nfor files.',
+                 'license': u'apache-2.0',
+                 'name': u'AboutCode',
+                 'owner': u'nexB Inc.'}
+
+        a = model.About()
+        a.load_dict(test, base_dir)
+
+        b = model.About()
+        b.load_dict(test, base_dir)
+        abouts = [a, b]
+        results = model.unique(abouts)
+        self.assertEqual([a], results)
+
+    def test_by_license(self):
+        base_dir = 'some_dir'
+        a = model.About()
+        a.load_dict({'license': u'apache-2.0\n cddl-1.0', }, base_dir)
+        b = model.About()
+        b.load_dict({'license': u'apache-2.0', }, base_dir)
+        c = model.About()
+        c.load_dict({}, base_dir)
+        d = model.About()
+        d.load_dict({'license': u'bsd', }, base_dir)
+
+        abouts = [a, b, c, d]
+        results = model.by_license(abouts)
+        expected = OrderedDict([
+                                ('', [c]),
+                                ('apache-2.0', [a,b]),
+                                ('bsd', [d]),
+                                ('cddl-1.0', [a]),
+                                ])
+        self.assertEqual(expected, results)
+
+    def test_by_name(self):
+        base_dir = 'some_dir'
+        a = model.About()
+        a.load_dict({'name': u'apache', 'version': u'1.1' }, base_dir)
+        b = model.About()
+        b.load_dict({'name': u'apache', 'version': u'1.2' }, base_dir)
+        c = model.About()
+        c.load_dict({}, base_dir)
+        d = model.About()
+        d.load_dict({'name': u'eclipse', 'version': u'1.1' }, base_dir)
+
+        abouts = [a, b, c, d]
+        results = model.by_name(abouts)
+        expected = OrderedDict([
+                                ('', [c]),
+                                ('apache', [a,b]),
+                                ('eclipse', [d]),
+                                ])
+        self.assertEqual(expected, results)
+

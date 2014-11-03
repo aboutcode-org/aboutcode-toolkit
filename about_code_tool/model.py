@@ -174,7 +174,6 @@ class StringField(Field):
         """
         Equality based on string content value, ignoring spaces
         """
-
         if not (isinstance(other, self.__class__)
                 and self.name == other.name):
             return False
@@ -620,6 +619,38 @@ class About(object):
                 and self.fields == other.fields
                 and self.custom_fields == other.custom_fields)
 
+    def attribution_fields(self, fields):
+        """
+        Return attrib-only fields
+        """
+        attrib_fields = ['name',
+                         'version',
+                         'license',
+                         'license_name',
+                         'license_file',
+                         'license_url',
+                         'copyright',
+                         'notice_file',
+                         'notice_url',
+                         'redistribute',
+                         'attribute',
+                         'track_change',
+                         'modified',
+                         'changelog_file',
+                         'owner',
+                         'author']
+
+        return OrderedDict([(n,o,) for n,o in fields.items() 
+                                if n in attrib_fields])
+
+    def same_attribution(self, other):
+        """
+        Equality based on attribution-related fields.
+        """
+        return (isinstance(other, self.__class__)
+                and self.attribution_fields(self.fields)
+                    == self.attribution_fields(other.fields))
+
     def resolved_resources_paths(self):
         """
         Return a serialized string of resolved resource paths, one per line.
@@ -1010,3 +1041,82 @@ def from_csv(location, base_dir):
     Load a CSV file at location and return a list of About objects.
     """
     # TODO: use this instead of load inventory
+
+
+def by_license(abouts):
+    """
+    Return an ordered dict sorted by key of About objects grouped by license
+    """
+    grouped = {}
+    grouped[''] = []
+    no_license = grouped['']
+    for about in abouts:
+        if about.license.value:
+            for lic in about.license.value:
+                if lic in grouped:
+                    grouped[lic].append(about)
+                else:
+                    grouped[lic] = [about]
+        else:
+            no_license.append(about)
+    return OrderedDict(sorted(grouped.items()))
+
+
+def by_name(abouts):
+    """
+    Return an ordered dict sorted by key of About objects grouped by component
+    name.
+    """
+    grouped = {}
+    grouped[''] = []
+    no_name = grouped['']
+    for about in abouts:
+        name = about.name.value
+        if name:
+            if name in grouped:
+                grouped[name].append(about)
+            else:
+                grouped[name] = [about]
+        else:
+            no_name.append(about)
+    return OrderedDict(sorted(grouped.items()))
+
+
+def unique(abouts):
+    """
+    Return a list of unique About objects.
+    """
+    uniques = []
+    for about in abouts:
+        if any(about == x for x in uniques):
+            continue
+        uniques.append(about)
+    return uniques
+
+
+def by_license_content(abouts):
+    """
+    Return an ordered dict sorted by key of About objects grouped by license
+    content.
+    """
+    grouped = {}
+    grouped[''] = []
+    no_license = grouped['']
+    for about in abouts:
+        if about.license.value:
+            for lic in about.license.value:
+                if lic in grouped:
+                    grouped[lic].append(about)
+                else:
+                    grouped[lic] = [about]
+        else:
+            no_license.append(about)
+    return OrderedDict(sorted(grouped.items()))
+
+
+def common_licenses(abouts):
+    """
+    Return a ordered dictionary of repeated licenses sorted by key and update
+    the list of about objects with license references for repeated licenses.
+    """
+    pass

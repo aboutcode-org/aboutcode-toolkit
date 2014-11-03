@@ -22,35 +22,6 @@ import codecs
 import jinja2
 
 
-def by_license(abouts):
-    """
-    Return an ordered dict sorted by key of About objects grouped by license
-    """
-    pass
-
-
-def by_component_name(abouts):
-    """
-    Return an ordered dict sorted by key of About objects grouped by component
-    name.
-    """
-    pass
-
-
-def unique(abouts):
-    """
-    Return a list of unique About objects.
-    """
-    pass
-
-
-def prepare_licenses(abouts):
-    """
-    Return a ordered dictionary of repeated licenses sorted by key and update
-    a list of new about objects with updated license references for repeated
-    licenses.
-    """
-    pass
 
 
 def generate(abouts, template_string=None):
