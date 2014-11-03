@@ -20,7 +20,7 @@ from __future__ import print_function
 import logging
 from collections import namedtuple
 
-__version__ = '0.11.0'
+__version__ = '2.0.0dev2'
 
 __about_spec_version__ = 'simplification'
 
