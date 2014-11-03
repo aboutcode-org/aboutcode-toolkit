@@ -43,9 +43,9 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
-__version__ = '0.9.0'
+__version__ = '1.0.1'
 
-__about_spec_version__ = '0.8.0'  # See http://dejacode.org
+__about_spec_version__ = '1.0.0'  # See http://dejacode.org
 
 __copyright__ = """
 Copyright (c) 2013-2014 nexB Inc. All rights reserved.

@@ -46,7 +46,7 @@ import urlparse
 import ntpath
 
 
-__version__ = '0.9.0'
+__version__ = '1.0.1'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'
@@ -1325,7 +1325,7 @@ class Collector(object):
         # However, this is a temp fix for the license summarization feature.
         rendered = template.render(about_objects=about_object_fields,
                                    license_keys=license_key,
-                                   license_texts = license_text_list,
+                                   license_texts=license_text_list,
                                    common_licenses=COMMON_LICENSES)
         return rendered
 

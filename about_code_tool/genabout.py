@@ -40,7 +40,7 @@ from os.path import exists, dirname, join, abspath, isdir, normpath, basename, e
 
 import about
 
-__version__ = '0.9.0'
+__version__ = '1.0.1'
 
 __copyright__ = """
 Copyright (c) 2013-2014 nexB Inc. All rights reserved.
@@ -391,8 +391,6 @@ class GenAbout(object):
                 # update/overwrite the 'license_text_file' with
                 # 'dje_license_key'
                 if line['license_text_file']:
-                    file_value = []
-                    license_file_list = []
                     file_location = line['about_file']
                     about_parent_dir = dirname(file_location)
                     license_text_file = line['license_text_file']
@@ -544,7 +542,7 @@ class GenAbout(object):
                     about_resource = line['about_file']
                     if about_resource.endswith('/'):
                         line['about_resource'] = '.'
-            else: # 'about_resource' key present with no value
+            else:  # 'about_resource' key present with no value
                 about_resource = line['about_file']
                 if about_resource.endswith('/'):
                     line['about_resource'] = '.'
@@ -701,7 +699,7 @@ def main(parser, options, args):
         handler.setLevel(logging.WARNING)
 
     valid_actions = 0, 1, 2, 3
-    if action: 
+    if action:
         if action in valid_actions:
             action_num = action
         else:
