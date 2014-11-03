@@ -116,7 +116,7 @@ class CollectorTest(unittest.TestCase):
         'checksum_sha256,dje_component,dje_license,dje_organization,'
         'dje_license_name,scm_branch,scm_repository,signature_gpg_file,'
         'redistribute_sources,about_format,usage,'
-        'license_text,notice,' # These two are not supported and thus treat as custom keys
+        'license_text,notice,'  # These two are not supported and thus treat as custom keys
         'scm_path,scm_tool,scm_rev,scm_tag,organization,'
         'warnings,errors')
 
@@ -614,7 +614,7 @@ about_resource: about.py
         test_file = join(TESTDATA_DIR, 'attrib/attrib.ABOUT')
         collector = about.Collector(test_file)
         template = join(TESTDATA_DIR, 'attrib/test.template')
-        result = collector.generate_attribution(template,limit_to=[''])
+        result = collector.generate_attribution(template, limit_to=[''])
         self.assertEqual(expected, result)
 
     def test_generate_attribution_with_default_template(self):
@@ -623,7 +623,7 @@ about_resource: about.py
         test_file = join(TESTDATA_DIR, 'attrib/attrib.ABOUT')
         collector = about.Collector(test_file)
         result = collector.generate_attribution(limit_to=[''])
-        # Strip all the white spaces 
+        # Strip all the white spaces
         self.assertEqual(re.sub(r'\s+', '', expected), re.sub(r'\s+', '', result))
 
     def test_license_text_extracted_from_license_text_file(self):
