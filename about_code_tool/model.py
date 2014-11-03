@@ -924,6 +924,7 @@ def collect_inventory(location):
     About objects.
     """
     errors = []
+    location = util.get_absolute(location)
     locations = list(util.get_about_locations(location))
     duplicate_errors = util.check_file_names(locations)
     errors.extend(duplicate_errors)

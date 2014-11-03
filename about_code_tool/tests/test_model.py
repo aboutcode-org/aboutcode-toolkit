@@ -525,6 +525,81 @@ this software and releases the component to Public Domain.
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
         self.assertEqual(a, b)
 
+    def test_field_names(self):
+        a = model.About()
+        a.custom_fields['f'] = model.StringField(name='f', value='1',
+                                                 present=True)
+        b = model.About()
+        b.custom_fields['g'] = model.StringField(name='g', value='1',
+                                                 present=True)
+        abouts = [a, b]
+        # ensure that custom fields and about file path are collected
+        # and that all fields are in the correct order
+        expected = [
+            model.About.about_file_path_attr,
+            model.About.about_resource_path_attr,
+            'about_resource',
+            'name',
+            'version',
+            'download_url',
+            'description',
+            'home_url',
+            'notes',
+            'license',
+            'license_name',
+            'license_file',
+            'license_url',
+            'copyright',
+            'notice_file',
+            'notice_url',
+            'redistribute',
+            'attribute',
+            'track_change',
+            'modified',
+            'changelog_file',
+            'owner',
+            'owner_url',
+            'contact',
+            'author',
+            'vcs_tool',
+            'vcs_repository',
+            'vcs_path',
+            'vcs_tag',
+            'vcs_branch',
+            'vcs_revision',
+            'checksum',
+            'spec_version',
+            'f',
+            'g']
+        result = model.field_names(abouts)
+        self.assertEqual(expected, result)
+
+    def test_field_names_does_not_return_duplicates_custom_fields(self):
+        a = model.About()
+        a.custom_fields['f'] = model.StringField(name='f', value='1',
+                                                 present=True)
+        a.custom_fields['cf'] = model.StringField(name='cf', value='1',
+                                                 present=True)
+        b = model.About()
+        b.custom_fields['g'] = model.StringField(name='g', value='1',
+                                                 present=True)
+        b.custom_fields['cf'] = model.StringField(name='cf', value='2',
+                                                 present=True)
+        abouts = [a, b]
+        # ensure that custom fields and about file path are collected
+        # and that all fields are in the correct order
+        expected = [
+            'about_resource',
+            'name',
+            'cf',
+            'f',
+            'g',
+            ]
+        result = model.field_names(abouts, with_paths=False,
+                                   with_absent=False,
+                                   with_empty=False)
+        self.assertEqual(expected, result)
+
 
 class SerializationTest(unittest.TestCase):
     def test_About_dumps(self):
@@ -881,77 +956,7 @@ class CollectorTest(unittest.TestCase):
         result = abouts[0].about_file_path
         self.assertEqual(expected, result)
 
-    def test_field_names(self):
-        a = model.About()
-        a.custom_fields['f'] = model.StringField(name='f', value='1',
-                                                 present=True)
-        b = model.About()
-        b.custom_fields['g'] = model.StringField(name='g', value='1',
-                                                 present=True)
-        abouts = [a, b]
-        # ensure that custom fields and about file path are collected
-        # and that all fields are in the correct order
-        expected = [
-            model.About.about_file_path_attr,
-            model.About.about_resource_path_attr,
-            'about_resource',
-            'name',
-            'version',
-            'download_url',
-            'description',
-            'home_url',
-            'notes',
-            'license',
-            'license_name',
-            'license_file',
-            'license_url',
-            'copyright',
-            'notice_file',
-            'notice_url',
-            'redistribute',
-            'attribute',
-            'track_change',
-            'modified',
-            'changelog_file',
-            'owner',
-            'owner_url',
-            'contact',
-            'author',
-            'vcs_tool',
-            'vcs_repository',
-            'vcs_path',
-            'vcs_tag',
-            'vcs_branch',
-            'vcs_revision',
-            'checksum',
-            'spec_version',
-            'f',
-            'g']
-        result = model.field_names(abouts)
-        self.assertEqual(expected, result)
-
-    def test_field_names_does_not_return_duplicates_custom_fields(self):
-        a = model.About()
-        a.custom_fields['f'] = model.StringField(name='f', value='1',
-                                                 present=True)
-        a.custom_fields['cf'] = model.StringField(name='cf', value='1',
-                                                 present=True)
-        b = model.About()
-        b.custom_fields['g'] = model.StringField(name='g', value='1',
-                                                 present=True)
-        b.custom_fields['cf'] = model.StringField(name='cf', value='2',
-                                                 present=True)
-        abouts = [a, b]
-        # ensure that custom fields and about file path are collected
-        # and that all fields are in the correct order
-        expected = [
-            'about_resource',
-            'name',
-            'cf',
-            'f',
-            'g',
-            ]
-        result = model.field_names(abouts, with_paths=False,
-                                   with_absent=False,
-                                   with_empty=False)
-        self.assertEqual(expected, result)
+    def test_collect_inventory_works_with_relative_paths(self):
+        model.collect_inventory('.')
+        model.collect_inventory('')
+        model.collect_inventory('./etc')

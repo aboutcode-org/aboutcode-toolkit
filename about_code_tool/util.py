@@ -84,17 +84,24 @@ def check_file_names(paths):
     return errors
 
 
+def get_absolute(location):
+    """
+    Return an absolute normalized location.
+    """
+    location = os.path.expanduser(location)
+    location = os.path.expandvars(location)
+    location = os.path.normpath(location)
+    location = os.path.abspath(location)
+    return location
+
+
 def get_locations(location):
     """
     Return a list of locations of files given the location of a
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
-    location = os.path.expanduser(location)
-    location = os.path.expandvars(location)
-    location = os.path.normpath(location)
-    location = os.path.abspath(location)
-    location = to_posix(location)
+    location = get_absolute(location)
     assert os.path.exists(location)
 
     if os.path.isfile(location):
@@ -131,7 +138,6 @@ def get_relative_path(base_loc, full_loc):
 
     base = norm(base_loc)
     path = norm(full_loc)
-
 
     assert path.startswith(base), ('Cannot compute relative path: '
                                    '%(path)r does not start with %(base)r'
