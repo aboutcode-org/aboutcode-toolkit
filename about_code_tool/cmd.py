@@ -30,10 +30,10 @@ import about_code_tool.attrib
 from about_code_tool import NOTSET
 
 
-__version__ = '0.11.0'
+__version__ = '2.0.0dev'
 
 
-__about_spec_version__ = '0.9.0'
+__about_spec_version__ = '2.0.0dev'
 
 
 __copyright__ = """
@@ -145,17 +145,24 @@ def fetch(location):
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
+@click.argument('template', nargs=1, required=False,
+                type=click.Path(exists=False, file_okay=True, writable=True,
+                                dir_okay=False, resolve_path=True))
+@click.argument('inventory_location', nargs=1, required=False,
+                type=click.Path(exists=False, file_okay=True, writable=True,
+                                dir_okay=False, resolve_path=True))
 def attrib(location, output, template=None, inventory_location=None,):
     """
-    Generate attribution document at output location using the directory of
-    ABOUT files at location, the template file (or a default), an
-    inventory_location CSV file containing a list of ABOUT files to generate
-    attribution for. Only include components code when attribute=yes
+    Generate attribution document at output using the directory of
+    ABOUT files at location, the template file (or a default) and an
+    inventory_location CSV file containing a list of ABOUT files path to
+    generate attribution for.
     """
     click.echo('Generate attribution documentation')
     errors, abouts = about_code_tool.model.collect_inventory(location)
-    about_code_tool.attrib.generate_and_save(abouts, output, template, 
-                                             inventory_location)
+    about_code_tool.attrib.generate_and_save(abouts, output, 
+                                             template_loc=template, 
+                                             inventory_location=inventory_location)
     log_errors(errors)
 
 

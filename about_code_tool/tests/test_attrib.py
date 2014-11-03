@@ -46,9 +46,10 @@ class AttribTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_generate_from_file_with_default_template(self):
+        self.maxDiff = None
         test_file = get_test_loc('attrib_gen/attrib.ABOUT')
         _errors, abouts = model.collect_inventory(test_file)
         result = attrib.generate_from_file(abouts)
-        expected = open(get_test_loc('attrib_gen/expected_default_attrib.html')).read()
+        expected = unicode(open(get_test_loc('attrib_gen/expected_default_attrib.html')).read())
         self.assertEqual([x.rstrip() for x in expected.splitlines()],
                          [x.rstrip() for x in  result.splitlines()])

@@ -63,7 +63,6 @@ def generate(abouts, template_string=None):
     if syntax_error:
         return 'Template validation error at line: %r: %r' % (syntax_error)
     template = jinja2.Template(template_string)
-    return template.render(abouts=abouts)
 
     try:
         rendered = template.render(abouts=abouts)
@@ -111,7 +110,6 @@ def generate_and_save(abouts, output_location, template_loc=None,
     Filter the list of about object based on the inventory CSV at 
     inventory_location.
     """
-
     # TODO: Filter abouts based on CSV at inventory_location.
     if inventory_location:
         pass
