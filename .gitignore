@@ -31,3 +31,4 @@ nosetests.xml
 .idea/
 /aboutcode.egg_info
 AboutCode.egg-info
+/dist

@@ -1,6 +1,6 @@
-about_resource: click-3.2-py2.py3-none-any.whl
-version: 3.2
-download_url: https://pypi.python.org/packages/2.7/c/click/click-3.2-py2.py3-none-any.whl#md5=7d0bf0ca4e8ce6056e35cc8135d21abd
+about_resource: click-3.3-py2.py3-none-any.whl
+version: 3.3
+download_url: https://pypi.python.org/packages/2.7/c/click/click-3.3-py2.py3-none-any.whl
 name: click
 owner: Armin Ronacher
 contact: armin.ronacher@active-4.com

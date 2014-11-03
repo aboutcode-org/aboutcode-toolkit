@@ -80,7 +80,7 @@ goto EOS
 echo * Cleaning ...
 cd %ABOUT_ROOT_DIR%
 if exist %ABOUT_ROOT_DIR%\Scripts\deactivate.bat call %ABOUT_ROOT_DIR%\Scripts\deactivate
-rmdir /S /Q %ABOUT_ROOT_DIR%\bin %ABOUT_ROOT_DIR%\build %ABOUT_ROOT_DIR%\Scripts %ABOUT_ROOT_DIR%\Lib %ABOUT_ROOT_DIR%\Include 2>NUL
+rmdir /S /Q %ABOUT_ROOT_DIR%\bin %ABOUT_ROOT_DIR%\build %ABOUT_ROOT_DIR%\Scripts %ABOUT_ROOT_DIR%\Lib %ABOUT_ROOT_DIR%\Include %ABOUT_ROOT_DIR%\build %ABOUT_ROOT_DIR%\dist 2>NUL
 rmdir /S /Q %ABOUT_ROOT_DIR%\AboutCode.egg-info %ABOUT_ROOT_DIR%\eggs %ABOUT_ROOT_DIR%\parts %ABOUT_ROOT_DIR%\develop-eggs %ABOUT_ROOT_DIR%\.installed.cfg 2>NUL
 goto EOS
 

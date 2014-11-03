@@ -8,7 +8,6 @@ pip==1.5.6
 jinja2==2.7.3
 MarkupSafe==0.23
 
-#schematics==0.9-5
 
 unicodecsv==0.9.4
 
@@ -16,4 +15,7 @@ pytest==2.6.1
 colorama==0.3.1
 py==1.4.23
 
-click==3.2
+click==3.3
+
+schematics==1.0-0
+pyyaml==3.11

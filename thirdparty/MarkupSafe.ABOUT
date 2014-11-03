@@ -8,7 +8,7 @@ homepage: https://github.com/mitsuhiko/markupsafe
 license: bsd-new
 
 vcs_tool: git
-vcs_repository: https://github.com/mitsuhiko/jinja2.git
+vcs_repository: https://github.com/mitsuhiko/markupsafe
 license_file:MarkupSafe.LICENSE
 
 copyright: Copyright (c) 2010 by Armin Ronacher and contributors.
