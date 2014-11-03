@@ -113,8 +113,7 @@ def gen(location, output):
     Given a CVS inventory of ABOUT files at location, generate ABOUT files in
     base directory.
     """
-    click.echo('Generating ABOUT files in: %(output)s'
-               ' from the CSV inventory at: %(location)s' % locals())
+    click.echo('Generating ABOUT files...')
     errors, abouts = about_code_tool.gen.generate(location, output)
     lea = len(abouts)
     lee = len(errors)
@@ -124,7 +123,7 @@ def gen(location, output):
 
 @cli.command()
 def export():
-    click.echo('Export a zip archive ABOUT files and related files in a directory tree.')
+    click.echo('Exporting zip archive...')
 
 
 
@@ -134,7 +133,7 @@ def fetch(location):
     Given a directory of ABOUT files at location, calls the DejaCode API and
     update or create license data fields and license texts.
     """
-    click.echo('Update ABOUT files with license text and data from DejaCode.')
+    click.echo('Updating ABOUT files...')
 
 
 @cli.command()
@@ -158,7 +157,7 @@ def attrib(location, output, template=None, inventory_location=None,):
     inventory_location CSV file containing a list of ABOUT files path to
     generate attribution for.
     """
-    click.echo('Generate attribution documentation')
+    click.echo('Generating attribution...')
     errors, abouts = about_code_tool.model.collect_inventory(location)
     about_code_tool.attrib.generate_and_save(abouts, output, 
                                              template_loc=template, 
@@ -176,7 +175,7 @@ def redist(input_dir, output, inventory_location=None,):
      Only collect code when redistribute=yes
      Return a list of errors.
     """
-    click.echo('Collect redistributable files')
+    click.echo('Collecting redistributable files...')
 
 
 def log_errors(errors, level=NOTSET):
