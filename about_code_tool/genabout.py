@@ -689,8 +689,7 @@ def main(parser, options, args):
     mapping_keys = []
 
     if options.version:
-        msg = 'AboutCode %(__version__)s\n%(__copyright__)s'.format(globals())
-        print(msg)
+        print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
         sys.exit(0)
 
     if verbosity == 1:
