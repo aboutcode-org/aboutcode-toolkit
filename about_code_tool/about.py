@@ -46,7 +46,7 @@ import urlparse
 import ntpath
 
 
-__version__ = '0.9.0'
+__version__ = '1.0.1'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'
@@ -968,8 +968,6 @@ class AboutFile(object):
         return custom_key
 
     def get_row_data(self, updated_path, custom_keys):
-        print(updated_path)
-        print(custom_keys)
         """
         Create a csv compatible row of data for this object.
         """
@@ -1267,7 +1265,6 @@ class Collector(object):
         limit_to = limit_to or []
 
         about_object_fields = []
-        about_content_dict = {}
         license_dict = {}
 
         not_process_components = list(limit_to)
@@ -1328,7 +1325,7 @@ class Collector(object):
         # However, this is a temp fix for the license summarization feature.
         rendered = template.render(about_objects=about_object_fields,
                                    license_keys=license_key,
-                                   license_texts = license_text_list,
+                                   license_texts=license_text_list,
                                    common_licenses=COMMON_LICENSES)
         return rendered
 
