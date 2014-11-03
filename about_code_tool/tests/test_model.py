@@ -770,6 +770,29 @@ custom1: multi
         result = get_unicode_content(dumped_file).splitlines()
         self.assertEqual(expected, result)
 
+    def test_load_can_load_unicode(self):
+        test_file = get_test_loc('unicode/nose-selecttests.ABOUT')
+        a = model.About()
+        a.load(test_file)
+        errors = [
+            Error(INFO, u'Field dje_license is a custom field'),
+            Error(INFO, u'Field license_text_file is a custom field'),
+            Error(INFO, u'Field scm_tool is a custom field'),
+            Error(INFO, u'Field scm_repository is a custom field'),
+            Error(INFO, u'Field test is a custom field'),
+            Error(CRITICAL, u'Field about_resource: Path nose-selecttests-0.3.zip not found')]
+        self.assertEqual(errors, a.errors)
+        self.assertEqual(u'Copyright (c) 2012, Domen Kožar', a.copyright.value)
+
+    def test_load_has_errors_for_non_unicode(self):
+        test_file = get_test_loc('unicode/not-unicode.ABOUT')
+        a = model.About()
+        a.load(test_file)
+        err = a.errors[0]
+        self.assertEqual(CRITICAL, err.severity)
+        self.assertTrue('Cannot load invalid ABOUT file' in err.message)
+        self.assertTrue('UnicodeDecodeError' in err.message)
+
     def test_as_dict_load_dict_is_idempotent(self):
         test = {'about_resource': u'.',
                  'author': u'',
@@ -928,7 +951,7 @@ class CollectorTest(unittest.TestCase):
             'f',
             'g',
             ]
-        result = model.field_names(abouts, with_paths=False, 
-                                   with_absent=False, 
+        result = model.field_names(abouts, with_paths=False,
+                                   with_absent=False,
                                    with_empty=False)
         self.assertEqual(expected, result)

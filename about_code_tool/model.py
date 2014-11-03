@@ -758,9 +758,15 @@ class About(object):
         self.location = location
         loc = util.to_posix(location)
         base_dir = posixpath.dirname(loc)
-        # TODO: do we want to catch errors?
-        lines = codecs.open(loc, encoding='utf-8').readlines()
-        errors = self.load_lines(lines, base_dir)
+        errors = []
+        try:
+            lines = codecs.open(loc, encoding='utf-8').readlines()
+            errs = self.load_lines(lines, base_dir)
+            errors.extend(errs)
+        except Exception, e:
+            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'
+            errors.append(Error(CRITICAL, msg % locals()))
+
         self.errors = errors
         return errors
 
