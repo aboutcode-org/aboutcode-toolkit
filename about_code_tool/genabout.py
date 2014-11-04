@@ -176,7 +176,7 @@ class GenAbout(object):
             print("No ABOUT file is created.")
             sys.exit(errno.EINVAL)
         if self.validate_duplication(input_list):
-            print("The input has duplicated 'about_file' and 'about_resource'.")
+            print("The input has duplicated 'about_file'.")
             print("Duplication is not supported. Please correct the input and rerun the tool.")
             print("No ABOUT file is created.")
             sys.exit(errno.EINVAL)
