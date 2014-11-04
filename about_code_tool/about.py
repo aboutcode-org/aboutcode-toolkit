@@ -1280,7 +1280,6 @@ class Collector(object):
                     # the about_file's location with the input list.
                     about_relative_path = about_object.location.partition(
                                                     normpath(self.location))[2]
-
                     if component == about_relative_path:
                         component_exist = True
                         about_content = about_object.validated_fields
@@ -1312,9 +1311,10 @@ class Collector(object):
                         about_object_fields.append(about_content)
                         break
                 if not component_exist:
+                    loc = self.location + component
                     msg = ('The requested ABOUT file: %r does not exist. '
-                           'No attribution generated for this file.' % component)
-                    err = Error(GENATTRIB, 'about_file', component, msg)
+                           'No attribution generated for this file.' % loc)
+                    err = Error(GENATTRIB, 'about_file', loc, msg)
                     self.genattrib_errors.append(err)
         else:
             for about_object in self:
