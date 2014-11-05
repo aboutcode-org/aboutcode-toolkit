@@ -43,7 +43,7 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 __about_spec_version__ = '1.0.0'  # See http://dejacode.org
 
@@ -149,12 +149,17 @@ def main(parser, options, args):
             print("The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 
-    if not len(args) == 3:
-        print('Path for input, output and component list are required.\n')
+    if not len(args) >= 2 and not len(args) < 4:
+        print('Path for input and output are required.\n')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
-    input_path, output_path, component_subset_path = args
+    input_path = args[0]
+    output_path = args[1]
+    if len(args) == 3:
+        component_subset_path = args[2]
+    else:
+        component_subset_path = ""
 
     # TODO: need more path normalization (normpath, expanduser)
     input_path = expanduser(normpath(input_path))
@@ -172,9 +177,15 @@ def main(parser, options, args):
         sys.exit(errno.EEXIST)
 
     if isdir(output_path):
-        print('Output must be a file, not a directory.')
+        print('Output must be a HTML file.')
         parser.print_help()
         sys.exit(errno.EISDIR)
+
+    # We only support HTML currently
+    if not output_path.endswith('.html'):
+        print('Output must be a HTML file.')
+        parser.print_help()
+        sys.exit(errno.EINVAL)
 
     if exists(output_path) and not overwrite:
         print('Output file already exists. Select a different file name '
@@ -196,6 +207,7 @@ def main(parser, options, args):
 
     if not exists(output_path) or (exists(output_path) and overwrite):
         collector = Collector(input_path)
+        outlist = None
         if not component_subset_path:
             sublist = None
         else:

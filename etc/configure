@@ -3,15 +3,12 @@
 # Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #
 
-set -e
-
 ETC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$( dirname "$ETC_DIR" )"
 
 if [ "$1" == "--clean" ]; then
     echo "* Cleaning ..."
-    cd $ROOT_DIR && rm -rf build bin lib include django_background_task.log
-    cd $ROOT_DIR && rm -rf develop-eggs eggs parts .installed.cfg
+    cd $ROOT_DIR && rm -rf build bin lib include dist about_code_tool.egg-info
     exit 0
 fi
 
