@@ -40,6 +40,8 @@ The execution order is:
 On posix, posix Python and shell scripts are executed before mac or linux 
 scripts.
 
+The base scripts or packages are always installed first before platform-specific ones. 
+
 For example a tree could be looking like this::
     etc/conf
         base.txt : base pip requirements for all platforms
@@ -81,10 +83,10 @@ else:
 base = ('base',)
 
 # known full file names with txt extension for requirements
-requirements = tuple(p + '.txt' for p in base + platform_names)
+requirements = tuple(p + '.txt' for p in platform_names + base)
 
 # known full file names with py extensions for scripts
-python_scripts = tuple(p + '.py' for p in base + platform_names)
+python_scripts = tuple(p + '.py' for p in platform_names + base)
 
 # known full file names of shell scripts
 shell_scripts = tuple(p + '.sh' for p in platform_names)

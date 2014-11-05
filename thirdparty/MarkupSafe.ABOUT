@@ -9,7 +9,7 @@ dje_license: bsd-new
 
 vcs_tool: git
 vcs_repository: https://github.com/mitsuhiko/jinja2.git
-license_text_file:MarkupSafe.LICENSE
+license_text_file: MarkupSafe.LICENSE
 
 copyright: Copyright (c) 2010 by Armin Ronacher and contributors.
 owner: Armin Ronacher
