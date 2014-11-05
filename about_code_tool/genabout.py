@@ -40,7 +40,7 @@ from os.path import exists, dirname, join, abspath, isdir, normpath, basename, e
 
 import about
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 __copyright__ = """
 Copyright (c) 2013-2014 nexB Inc. All rights reserved.
@@ -176,7 +176,7 @@ class GenAbout(object):
             print("No ABOUT file is created.")
             sys.exit(errno.EINVAL)
         if self.validate_duplication(input_list):
-            print("The input has duplicated 'about_file' and 'about_resource'.")
+            print("The input has duplicated 'about_file'.")
             print("Duplication is not supported. Please correct the input and rerun the tool.")
             print("No ABOUT file is created.")
             sys.exit(errno.EINVAL)
@@ -689,8 +689,7 @@ def main(parser, options, args):
     mapping_keys = []
 
     if options.version:
-        msg = 'AboutCode %(__version__)s\n%(__copyright__)s'.format(globals())
-        print(msg)
+        print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
         sys.exit(0)
 
     if verbosity == 1:

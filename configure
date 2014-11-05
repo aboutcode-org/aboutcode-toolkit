@@ -3,7 +3,6 @@
 # Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #
 
-set -e
 CFG_CMD_LINE_ARGS="$@"
 
 if [ "$1" == "" ]; then

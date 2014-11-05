@@ -1,6 +1,6 @@
 # Base
 certifi==14.05.14
-setuptools==5.6
+setuptools==7.0
 wheel==0.24.0
 pip==1.5.6
 

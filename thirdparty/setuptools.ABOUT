@@ -1,8 +1,8 @@
-about_resource: setuptools-5.6-py2.py3-none-any.whl
+about_resource: setuptools-7.0-py2.py3-none-any.whl
 name: setuptools
-version: 5.6
+version: 7.0
 
-download_url: https://pypi.python.org/packages/3.4/s/setuptools/setuptools-5.6-py2.py3-none-any.whl#md5=4503e42d67edc51e293ba9be4af799a5
+download_url: https://pypi.python.org/packages/3.4/s/setuptools/setuptools-7.0-py2.py3-none-any.whl#md5=918e7e5ea108507e1ffbbdfccc3496b1
 
 homepage: https://pypi.python.org/pypi/setuptools
 owner: Python Packaging Authority

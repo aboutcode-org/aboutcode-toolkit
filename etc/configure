@@ -2,15 +2,13 @@
 #
 # Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #
-set -e
 
 ETC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ABOUT_ROOT_DIR="$( dirname "$ETC_DIR" )"
 
 if [ "$1" == "--clean" ]; then
     echo "* Cleaning ..."
-    cd $ABOUT_ROOT_DIR && rm -rf build bin lib include AboutCode.egg-info build dist
-    cd $ABOUT_ROOT_DIR && rm -rf develop-eggs eggs parts .installed.cfg
+    cd $ABOUT_ROOT_DIR && rm -rf build bin lib include about_code_tool.egg-info AboutCode.egg-info build dist
     exit 0
 fi
 
