@@ -46,7 +46,7 @@ import urlparse
 import ntpath
 
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'
@@ -1514,4 +1514,4 @@ def get_parser():
 if __name__ == '__main__':
     parser = get_parser()
     options, args = parser.parse_args()
-    sys.exit(main(parser, options, args))
+    main(parser, options, args)

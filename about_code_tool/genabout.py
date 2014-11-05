@@ -40,7 +40,7 @@ from os.path import exists, dirname, join, abspath, isdir, normpath, basename, e
 
 import about
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 __copyright__ = """
 Copyright (c) 2013-2014 nexB Inc. All rights reserved.

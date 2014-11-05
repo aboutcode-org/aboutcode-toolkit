@@ -43,7 +43,7 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 __about_spec_version__ = '1.0.0'  # See http://dejacode.org
 
