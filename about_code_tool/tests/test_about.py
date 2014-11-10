@@ -99,7 +99,7 @@ class CollectorTest(unittest.TestCase):
         output = get_temp_file()
         collector = about.Collector(test_file)
         collector.write_to_csv(output)
-        expected = 'about_code_tool/tests/testdata/basic'
+        expected = '/basic'
         # FIXME: why [2]? what this test means?
         with open(output) as f:
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))

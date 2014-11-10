@@ -1153,7 +1153,7 @@ class Collector(object):
                         if is_about_file(name):
                             paths.append(os.path.join(root, name))
         # normalize the paths to use posix path separators
-        paths = [posix_path(p)for p in paths]
+        paths = [posix_path(p) for p in paths]
         return paths
 
     @property
@@ -1195,14 +1195,15 @@ class Collector(object):
         Return a path for a given ABOUT file location relative to and based on
         the provided collector normalized location.
         """
-        user_loc = self.location
+        user_loc = normpath(self.location)
         if os.path.isdir(self.normalized_location):
-            subpath = location.partition(os.path.basename(os.path.normpath(user_loc)))[2]
+            parent_name = basename(user_loc)
+            subpath = '/' + parent_name + location.partition(user_loc)[2]
             if user_loc[-1] == '/':
                 user_loc = user_loc.rpartition('/')[0]
             if user_loc[-1] == '\\':
                 user_loc = user_loc.rpartition('\\')[0]
-            return (user_loc + subpath).replace('\\', '/')
+            return subpath.replace('\\', '/')
         else:
             return user_loc.replace('\\', '/')
 
