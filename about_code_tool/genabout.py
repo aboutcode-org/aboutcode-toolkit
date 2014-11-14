@@ -70,13 +70,40 @@ file_logger = logging.getLogger(__name__ + '_file')
 
 ESSENTIAL_FIELDS = ('about_file',)
 
-# The 'dje_license_key' will be removed and will use the 'dje_license' instead.
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + ('about_file',)
 
 
-Warn = namedtuple('Warn', 'field_name field_value message',)
-Error = namedtuple('Error', 'field_name field_value message',)
+def repr_problem(obj):
+    """
+    Return a formatted representation of a given Warn or Error object
+    suitable for reporting.
+    """
+    field_name = obj.field_name
+    field_value = obj.field_value
+    message = obj.message
+    return ('Field: %(field_name)s, '
+            'Value: %(field_value)s, '
+            'Message: %(message)s' % locals())
 
+
+Warn = namedtuple('Warn', 'code field_name field_value message',)
+Warn.__repr__ = repr_problem
+
+
+Error = namedtuple('Error', 'code field_name field_value message',)
+Error.__repr__ = repr_problem
+
+IGNORED = 'field or line ignored problem'
+VALUE = 'missing or empty or multiple value problem'
+FILE = 'file problem'
+URL = 'URL problem'
+VCS = 'Version control problem'
+DATE = 'Date problem'
+ASCII = 'ASCII problem'
+SPDX = 'SPDX license problem'
+UNKNOWN = 'Unknown problem'
+GENATTRIB = 'Attribution generation problem'
+NETWORK = 'Network problem'
 
 # Handle different behaviors if ABOUT file already exists
 ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST = 0
@@ -217,7 +244,7 @@ class GenAbout(object):
                 if key in ignored_keys_list:
                     copied_dict.pop(key, None)
         msg = 'The field(s) "%s" is/are not supported and will be ignored.' % ignored_keys_list
-        self.warnings.append(Warn(ignored_keys_list, '', msg))
+        self.warnings.append(Warn(IGNORED, ignored_keys_list, '', msg))
         return copied_list
 
     @staticmethod
@@ -274,7 +301,7 @@ class GenAbout(object):
                         if _exists(path):
                             files_list.append((path, about_parent_dir))
                         else:
-                            self.warnings.append(Warn(file_key, path, "File does not exist."))
+                            self.warnings.append(Warn(FILE, file_key, path, "File does not exist."))
         return files_list
 
     def request_license_data(self, url, username, api_key, license_key):
@@ -309,11 +336,11 @@ class GenAbout(object):
                 print(error_msg)
                 print()
                 self.extract_dje_license_error = True
-                self.errors.append(Error('username/api_key',
+                self.errors.append(Error(VALUE, 'username/api_key',
                                          username + '/' + api_key, error_msg))
             else:
                 # FIXME: would this be only with a 404?
-                self.errors.append(Error('dje_license', license_key,
+                self.errors.append(Error(VALUE, 'dje_license', license_key,
                                          "Invalid 'dje_license_key'"))
         except urllib2.URLError:
             if about.check_network_connection():
@@ -321,12 +348,12 @@ class GenAbout(object):
                              " LICENSE generation is skipped.")
                 print("\n" + error_msg + "\n")
                 self.extract_dje_license_error = True
-                self.errors.append(Error('--api_url', url, error_msg))
+                self.errors.append(Error(VALUE, '--api_url', url, error_msg))
             else:
                 error_msg = "Network problem. Please check the Internet connection. LICENSE generation is skipped."
                 print("\n" + error_msg + "\n")
                 self.extract_dje_license_error = True
-                self.errors.append(Error('Network', '', error_msg))
+                self.errors.append(Error(NETWORK, 'Network', '', error_msg))
         except ValueError:
             # FIXME: when does this happen?
             pass
@@ -353,7 +380,7 @@ class GenAbout(object):
                 with open(gen_license_path, 'wb') as output:
                     output.write(license_context)
             except Exception:
-                err = Error('Unknown', gen_license_path,
+                err = Error(UNKNOWN, 'Unknown', gen_license_path,
                             'Something is wrong.')
                 self.errors.append(err)
 
@@ -383,7 +410,7 @@ class GenAbout(object):
                     license_text_file = line['license_text_file']
                     license_file = normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file))
                     if not _exists(license_file):
-                        self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
+                        self.errors.append(Error(FILE, 'license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
                         if line['dje_license']:
@@ -391,7 +418,7 @@ class GenAbout(object):
                             lic_name = line['dje_license_name']
                             line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                         else:
-                            self.warnings.append(Warn('dje_license', '',
+                            self.warnings.append(Warn(VALUE, 'dje_license', '',
                                                       "Missing 'dje_license' for " + line['about_file']))
             # This except condition will force the tool to create the
             # 'license_text_file' key column from the self.gen_license_list(line)
@@ -404,7 +431,7 @@ class GenAbout(object):
                         if lic_name:
                             line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                     else:
-                        self.warnings.append(Warn('dje_license', '',
+                        self.warnings.append(Warn(VALUE, 'dje_license', '',
                                                   "Missing 'dje_license' for " + line['about_file']))
         return license_output_list
 
@@ -416,7 +443,7 @@ class GenAbout(object):
                 if line['dje_license']:
                     if '\n' in line['dje_license']:
                         line['dje_license_name'] = ""
-                        self.errors.append(Error('dje_license',
+                        self.errors.append(Error(VALUE, 'dje_license',
                                                  line['dje_license'],
                                                  "No multiple licenses or newline character are accepted."))
                         continue
@@ -434,7 +461,7 @@ class GenAbout(object):
                     else:
                         line['dje_license_name'] = license_dict[lic]
             except Exception:
-                err = Warn('dje_license', '',
+                err = Warn(VALUE, 'dje_license', '',
                            'Missing "dje_license" for ' + line['about_file'])
                 self.warnings.append(err)
         return key_text_dict
@@ -496,7 +523,7 @@ class GenAbout(object):
             if about_file_exist:
                 if action_num == ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST:
                     msg = 'ABOUT file already existed. Generation is skipped.'
-                    self.warnings.append(Warn('about_file',
+                    self.warnings.append(Warn(IGNORED, 'about_file',
                                               about_file_location, msg))
                     continue
                 # Overwrites the current ABOUT field value if it existed
