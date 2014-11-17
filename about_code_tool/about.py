@@ -1288,7 +1288,7 @@ class Collector(object):
                             msg = ('Multiple licenses is not supported. '
                                    'Skipping License generation.')
                             err = Error(GENATTRIB, 'dje_license',
-                                        about_object.get_dje_license_name(), msg)
+                                        about_object.location, msg)
                             self.genattrib_errors.append(err)
 
                         lic_text = unicode(about_object.license_text(),
@@ -1306,8 +1306,8 @@ class Collector(object):
                             and not '\n' in about_object.get_dje_license_name():
                             msg = ('No license_text found. '
                                    'Skipping License generation.')
-                            err = Error(GENATTRIB, 'name',
-                                        about_object.get_about_name(), msg)
+                            err = Error(GENATTRIB, 'license_text_file',
+                                        about_object.location, msg)
                             self.genattrib_errors.append(err)
                         about_object_fields.append(about_content)
                         break
@@ -1324,7 +1324,7 @@ class Collector(object):
                     msg = ('Multiple licenses is not supported. '
                            'Skipping License generation.')
                     err = Error(GENATTRIB, 'dje_license',
-                                about_object.get_dje_license_name(), msg)
+                                about_object.location, msg)
                     self.genattrib_errors.append(err)
 
                 lic_text = unicode(about_object.license_text(),
@@ -1342,8 +1342,8 @@ class Collector(object):
                     and not '\n' in about_object.get_dje_license_name():
                     msg = ('No license_text found. '
                            'Skipping License generation.')
-                    err = Error(GENATTRIB, 'name',
-                                about_object.get_about_name(), msg)
+                    err = Error(GENATTRIB, 'license_text_file',
+                                about_object.location, msg)
                     self.genattrib_errors.append(err)
                 about_object_fields.append(about_content)
 
