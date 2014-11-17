@@ -626,6 +626,16 @@ about_resource: about.py
         # Strip all the white spaces
         self.assertEqual(re.sub(r'\s+', '', expected), re.sub(r'\s+', '', result))
 
+    def test_generate_attribution_verification(self):
+        expected = (u'name,version,copyright,dje_license_name\n'
+                    'Apache HTTP Server,2.4.3,,') 
+        test_file = join(TESTDATA_DIR, 'attrib/attrib.ABOUT')
+        collector = about.Collector(test_file)
+        test_path = get_temp_file('test.csv')
+        result = collector.generate_attribution(limit_to=[''], verification=test_path)
+        with open(test_path, 'rU') as f:
+            self.assertEqual(f.read().rstrip(), expected)
+
     def test_license_text_extracted_from_license_text_file(self):
         expected = '''Tester holds the copyright for test component. Tester relinquishes copyright of
 this software and releases the component to Public Domain.

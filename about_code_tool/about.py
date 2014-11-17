@@ -1236,7 +1236,7 @@ class Collector(object):
                 row_data = about_object.get_row_data(relative_path, custom_keys)
                 csv_writer.writerow(row_data)
 
-    def generate_attribution(self, template_path=None, limit_to=None):
+    def generate_attribution(self, template_path=None, limit_to=None, verification=None):
         """
         Generate an attribution file from the current list of ABOUT objects.
         The optional `limit_to` parameter allows to restrict the generated
@@ -1353,6 +1353,22 @@ class Collector(object):
         for key in sorted(license_dict):
             license_key.append(key)
             license_text_list.append(license_dict[key])
+
+        # Create the verification CSV output
+        if verification:
+            # Define what will be shown in the verification output
+            header_row = ('name', 'version', 'copyright', 'dje_license_name')
+            with open(verification, 'wb') as verification_file:
+                csv_writer = csv.writer(verification_file)
+                csv_writer.writerow(header_row)
+                for component in about_object_fields:
+                    row_data = []
+                    for key in header_row:
+                        try:
+                            row_data.append(component[key])
+                        except:
+                            row_data.append('')
+                    csv_writer.writerow(row_data)
 
         # We should only pass the about_objects to the template.
         # However, this is a temp fix for the license summarization feature.
