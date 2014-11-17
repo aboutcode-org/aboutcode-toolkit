@@ -107,6 +107,8 @@ def check_about_file_existence_and_format(input_list):
 USAGE_SYNTAX = """\
     Input can be a file or directory.
     Output of rendered template must be a file (e.g. .html).
+
+    Optional:
     Component List must be a .csv file which has at least an "about_file" column.
 """
 
@@ -171,8 +173,8 @@ def main(parser, options, args):
             parser.print_help()
             sys.exit(errno.EINVAL)
 
-    if not len(args) >= 2 and len(args) < 4:
-        print('Path for input and output are required.\n')
+    if not len(args) >= 2 or not len(args) < 4:
+        print('The number of arguments is incorrect.\n')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -309,7 +311,7 @@ def get_parser():
             return "".join(result)
 
     parser = optparse.OptionParser(
-        usage='%prog [options] input_path output_path component_list',
+        usage='%prog [options] input_path output_path [component_list]',
         description=USAGE_SYNTAX,
         add_help_option=False,
         formatter=MyFormatter(),
