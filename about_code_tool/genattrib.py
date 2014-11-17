@@ -139,11 +139,6 @@ def main(parser, options, args):
     template_location = options.template_location
     verification_location = options.verification_location
 
-    if not len(args) >= 2 and len(args) < 4:
-        print('Path for input and output are required.\n')
-        parser.print_help()
-        sys.exit(errno.EEXIST)
-
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
         sys.exit(0)
@@ -175,6 +170,11 @@ def main(parser, options, args):
             print('The verification output directory does not exist.')
             parser.print_help()
             sys.exit(errno.EINVAL)
+
+    if not len(args) >= 2 and len(args) < 4:
+        print('Path for input and output are required.\n')
+        parser.print_help()
+        sys.exit(errno.EEXIST)
 
     input_path = args[0]
     output_path = args[1]
