@@ -446,8 +446,7 @@ class GenAboutTest(unittest.TestCase):
 
         result = gen.pre_generation(gen_location,
                                          test_fields,
-                                         action_num=0,
-                                         all_in_one=False)
+                                         action_num=0)
         self.assertEqual(expected, result)
         self.assertFalse(gen.warnings, 'No warnings should be returned.')
         self.assertFalse(gen.errors, 'No errors should be returned.')
@@ -462,8 +461,7 @@ class GenAboutTest(unittest.TestCase):
         expected = []
         result = gen.pre_generation(gen_location,
                                          test_fields,
-                                         action_num=0,
-                                         all_in_one=False)
+                                         action_num=0)
         self.assertEqual(expected, result)
         self.assertTrue(len(gen.warnings) == 1, 'Should return 1 warnings.')
         self.assertFalse(gen.errors, 'No errors should be returned.')
@@ -483,8 +481,7 @@ class GenAboutTest(unittest.TestCase):
                       'name': 'ABOUT tool'}]]
 
         result = gen.pre_generation(GEN_LOCATION, test_fields,
-                                    action_num=1,
-                                    all_in_one=False)
+                                    action_num=1)
         self.assertEqual(expected, result)
         self.assertFalse(gen.warnings, 'No warnings should be returned.')
         self.assertFalse(gen.errors, 'No errors should be returned.')
@@ -507,8 +504,7 @@ class GenAboutTest(unittest.TestCase):
 
         result = gen.pre_generation(GEN_LOCATION,
                                     test_input,
-                                    action_num=2,
-                                    all_in_one=False)
+                                    action_num=2)
         self.assertEqual(expected, result)
         self.assertFalse(gen.warnings, 'No warnings should be returned.')
         self.assertFalse(gen.errors, 'No errors should be returned.')
@@ -530,30 +526,10 @@ class GenAboutTest(unittest.TestCase):
 
         result = gen.pre_generation(GEN_LOCATION,
                                     test_fields,
-                                    action_num=3,
-                                    all_in_one=False)
+                                    action_num=3)
 
         self.assertEqual(expected, result)
         self.assertFalse(gen.warnings, 'No warnings should be returned.')
-        self.assertFalse(gen.errors, 'No errors should be returned.')
-
-    def test_pre_generation_all_in_one(self):
-        gen = genabout.GenAbout()
-        test_fields = [{'about_file': 'test_generation/elasticsearch.ABOUT',
-                       'version': '0.19.8',
-                       'about_resource': 'elasticsearch-0.19.8.zip',
-                       'name': 'ElasticSearch'}]
-        expected = []
-        result = gen.pre_generation(GEN_LOCATION,
-                                    test_fields,
-                                    action_num=0,
-                                    all_in_one=True)
-
-        self.assertFalse(os.path.exists('testdata/test_files_for_genabout/test_generation'),
-                         'This directory should not be generted as the all_in_one is set to True.')
-
-        self.assertEqual(expected, result)
-        self.assertTrue(len(gen.warnings) == 1, 'Should return 1 warning.')
         self.assertFalse(gen.errors, 'No errors should be returned.')
 
     def test_format_output(self):

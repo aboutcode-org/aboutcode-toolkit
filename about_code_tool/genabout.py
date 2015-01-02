@@ -484,7 +484,7 @@ class GenAbout(object):
                         license_list_context.append(gen_path_context)
         return license_list_context
 
-    def pre_generation(self, gen_location, input_list, action_num, all_in_one):
+    def pre_generation(self, gen_location, input_list, action_num):
         """
         Perfom some pre-generation.
         TODO: document me
@@ -506,15 +506,6 @@ class GenAbout(object):
                     file_location = join(file_location, basename(file_location))
                 file_location += '.ABOUT'
 
-            if all_in_one:
-                # This is to get the filename instead of the file path
-                # Note: The following code is the get the filename instead of 
-                # the file path because the tool is going to put ALL the 
-                # generated ABOUT file into one single directory.
-                # However, this option will be removed in the later release
-                # as putting the ALL the ABOUT files in a single directory
-                # doesn't make very much sense.
-                file_location = file_location.rpartition('/')[2]
             about_file_location = join(gen_location, file_location)
             about_file_dir = dirname(about_file_location)
             if not os.path.exists(about_file_dir):
@@ -659,11 +650,6 @@ Handle different behaviors if ABOUT files already existed
 3 - Replace the ABOUT file with the current generation
 """
 
-ALL_IN_ONE_HELP = """\
-Generate all the ABOUT files in the [output_path] without
-any project structure
-"""
-
 COPY_FILES_HELP = """\
 Copy the '*_file' from the project to the generated location
 Project path - Project path
@@ -694,7 +680,6 @@ genabout.py --extract_license --api_url='api_url' --api_username='api_username' 
 def main(parser, options, args):
     verbosity = options.verbosity
     action = options.action
-    all_in_one = options.all_in_one
     copy_files_path = options.copy_files
     license_text_path = options.license_text_location
     mapping_config = options.mapping
@@ -876,8 +861,7 @@ def main(parser, options, args):
                                                 dje_license_dict)
     components_list = gen.pre_generation(output_path,
                                          input_list,
-                                         action_num,
-                                         all_in_one)
+                                         action_num)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
 
@@ -941,8 +925,6 @@ def get_parser():
                       help=VERBOSITY_HELP)
     parser.add_option('--action', type=int,
                       help=ACTION_HELP)
-    parser.add_option('--all_in_one', action='store_true',
-                      help=ALL_IN_ONE_HELP)
     parser.add_option('--copy_files', type='string',
                       help=COPY_FILES_HELP)
     parser.add_option('--license_text_location', type='string',
