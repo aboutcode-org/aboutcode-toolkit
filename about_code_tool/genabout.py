@@ -436,6 +436,7 @@ class GenAbout(object):
         return license_output_list
 
     def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
+        dje_lic_urn = "https://enterprise.dejacode.com/urn/?urn=urn:dje:license:"
         key_text_dict = {}
         license_dict = {}
         for line in input_list:
@@ -455,11 +456,13 @@ class GenAbout(object):
                         line['dje_license_name'] = detail[0]
                         dje_key = detail[1]
                         license_context = detail [2]
+                        line['dje_license_url'] = dje_lic_urn + lic
                         detail_list.append(dje_key)
                         detail_list.append(license_context)
                         key_text_dict[detail[0]] = detail_list
                     else:
                         line['dje_license_name'] = license_dict[lic]
+                        line['dje_license_url'] = dje_lic_urn + lic
             except Exception:
                 err = Warn(VALUE, 'dje_license', '',
                            'Missing "dje_license" for ' + line['about_file'])
