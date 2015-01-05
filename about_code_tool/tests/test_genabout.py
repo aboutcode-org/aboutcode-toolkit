@@ -361,7 +361,7 @@ class GenAboutTest(unittest.TestCase):
                         'version': '0.8.1',
                         'about_resource': '.',
                         'name': 'ABOUT tool',
-                        'dje_license': 'apache-2.0',
+                        'dje_license_key': 'apache-2.0',
                         'dje_license_name': 'Apache License 2.0',
                         'license_text_file': ''}]
         gen_license = True
@@ -390,7 +390,7 @@ class GenAboutTest(unittest.TestCase):
                         'about_resource': '.',
                         'name': 'ABOUT tool',
                         'license_text_file': '',
-                        'dje_license': ''}]
+                        'dje_license_key': ''}]
         gen_license = True
         dje_license_dict = {'Apache License 2.0': [u'apache-2.0',
                                                    'test context']}
@@ -413,7 +413,7 @@ class GenAboutTest(unittest.TestCase):
                         'about_resource': '.',
                         'name': 'ABOUT tool',
                         'dje_license_name': 'Apache License 2.0',
-                        'dje_license': 'Apache License 2.0'}]
+                        'dje_license_key': 'apache-2.0'}]
 
         expected = [('/', 'Apache License 2.0')]
         gen_license = True

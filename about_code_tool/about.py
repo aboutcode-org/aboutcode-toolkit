@@ -180,7 +180,7 @@ CHECKSUM_FIELDS = (
 
 DJE_FIELDS = (
     'dje_component',
-    'dje_license',
+    'dje_license_key',
     'dje_organization',
     'dje_license_name'
 )

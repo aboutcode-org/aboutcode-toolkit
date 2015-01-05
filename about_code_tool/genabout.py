@@ -340,7 +340,7 @@ class GenAbout(object):
                                          username + '/' + api_key, error_msg))
             else:
                 # FIXME: would this be only with a 404?
-                self.errors.append(Error(VALUE, 'dje_license', license_key,
+                self.errors.append(Error(VALUE, 'dje_license_key', license_key,
                                          "Invalid 'dje_license_key'"))
         except urllib2.URLError:
             if about.check_network_connection():
@@ -413,26 +413,26 @@ class GenAbout(object):
                         self.errors.append(Error(FILE, 'license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
-                        if line['dje_license']:
+                        if line['dje_license_key']:
                             license_output_list.append(self.gen_license_list(line))
                             lic_name = line['dje_license_name']
                             line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                         else:
-                            self.warnings.append(Warn(VALUE, 'dje_license', '',
-                                                      "Missing 'dje_license' for " + line['about_file']))
+                            self.warnings.append(Warn(VALUE, 'dje_license_key', '',
+                                                      "Missing 'dje_license_key' for " + line['about_file']))
             # This except condition will force the tool to create the
             # 'license_text_file' key column from the self.gen_license_list(line)
             except Exception:
                 # FIXME: this is too complex
                 if gen_license:
-                    if line['dje_license']:
+                    if line['dje_license_key']:
                         license_output_list.append(self.gen_license_list(line))
                         lic_name = line['dje_license_name']
                         if lic_name:
                             line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                     else:
-                        self.warnings.append(Warn(VALUE, 'dje_license', '',
-                                                  "Missing 'dje_license' for " + line['about_file']))
+                        self.warnings.append(Warn(VALUE, 'dje_license_key', '',
+                                                  "Missing 'dje_license_key' for " + line['about_file']))
         return license_output_list
 
     def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
@@ -441,14 +441,14 @@ class GenAbout(object):
         license_dict = {}
         for line in input_list:
             try:
-                if line['dje_license']:
-                    if '\n' in line['dje_license']:
+                if line['dje_license_key']:
+                    if '\n' in line['dje_license_key']:
                         line['dje_license_name'] = ""
-                        self.errors.append(Error(VALUE, 'dje_license',
-                                                 line['dje_license'],
+                        self.errors.append(Error(VALUE, 'dje_license_key',
+                                                 line['dje_license_key'],
                                                  "No multiple licenses or newline character are accepted."))
                         continue
-                    lic = line['dje_license']
+                    lic = line['dje_license_key']
                     if not lic in license_dict:
                         detail_list = []
                         detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
@@ -464,8 +464,8 @@ class GenAbout(object):
                         line['dje_license_name'] = license_dict[lic]
                         line['dje_license_url'] = dje_lic_urn + lic
             except Exception:
-                err = Warn(VALUE, 'dje_license', '',
-                           'Missing "dje_license" for ' + line['about_file'])
+                err = Warn(VALUE, 'dje_license_key', '',
+                           'Missing "dje_license_key" for ' + line['about_file'])
                 self.warnings.append(err)
         return key_text_dict
 
@@ -823,7 +823,6 @@ def main(parser, options, args):
                 gen.copy_files(output_path, license_list)
 
     if license_text_path:
-        print(normpath(license_text_path))
         if not isdir(license_text_path):
             print("The '--license_text_location' <license_path> "
                   "must be a directory.")
@@ -844,11 +843,11 @@ def main(parser, options, args):
             sys.exit(errno.EINVAL)
         for line in input_list:
             try:
-                if line['dje_license']:
+                if line['dje_license_key']:
                     break
             except Exception as e:
                 print(repr(e))
-                print("The input does not have the 'dje_license' "
+                print("The input does not have the 'dje_license_key' "
                       "key which is required.")
                 sys.exit(errno.EINVAL)
 
