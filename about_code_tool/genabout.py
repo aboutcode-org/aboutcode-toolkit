@@ -35,6 +35,7 @@ import urllib
 import urllib2
 
 from collections import namedtuple
+from urlparse import urljoin, urlparse
 from os import makedirs
 from os.path import exists, dirname, join, abspath, isdir, normpath, basename, expanduser
 
@@ -436,7 +437,9 @@ class GenAbout(object):
         return license_output_list
 
     def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
-        dje_lic_urn = "https://enterprise.dejacode.com/urn/?urn=urn:dje:license:"
+        dje_uri = urlparse(api_url)
+        domain = '{uri.scheme}://{uri.netloc}/'.format(uri=dje_uri)
+        dje_lic_urn = urljoin(domain, "urn/?urn=urn:dje:license:")
         key_text_dict = {}
         license_dict = {}
         for line in input_list:
