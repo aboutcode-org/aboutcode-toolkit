@@ -24,7 +24,7 @@ from unittest.case import skip
 import os
 import re
 import stat
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, join, split
 
 from about_code_tool import about
 
@@ -123,9 +123,14 @@ class CollectorTest(unittest.TestCase):
         output = get_temp_file()
         collector = about.Collector(test_file)
         collector.write_to_csv(output)
+        header_row = ''
         with open(output) as f:
             header_row = f.readline().replace('\n', '').replace('\r', '')
-            self.assertEqual(expected_header, header_row)
+        header_row_array = header_row.split(',')
+        expected_header_array = expected_header.split(',')
+        self.assertEqual(len(expected_header_array), len(header_row_array))
+        for key in header_row_array:
+            self.assertTrue(key in expected_header_array)
 
     def test_collect_can_collect_a_directory_tree(self):
         test_dir = 'about_code_tool/tests/testdata/DateTest'
