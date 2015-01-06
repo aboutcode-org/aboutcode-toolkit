@@ -136,27 +136,36 @@ Options
     --mapping
 
         This tool needs the input CSV to have the required and/or optional keys to work.
-        By understanding the user's input may not have the same keys name as the tool use,
-        there are two ways the users can do.
-        1. Change the keys name directly in the input manually.
-        2. Use the '--mapping' option to configure the keys mapping.
+        Since the user input may not have the same column key names used by the tool,
+        there are two ways to reconcile that:
+        1. Change the key names directly in the input manually to match the field names
+        supported by the AboutCode specification.
+        Note: genabout.py looks for an about_file field and uses it to derive the mandatory
+        output field about_resource.
+        2. Use the '--mapping' option to configure the key mapping. This method provides the
+        most flexiblity and control. 
+        When the '--mapping' option is set, the tool will look into the 'MAPPING.CONFIG'
+        file to determine key mapping.
+        
+        The format of each text line in the MAPPING.CONFIG file is as follows:
+            {{about_file_target_field_name}}: {{input_csv_file_field_name}}
 
-        When the '--mapping' is set, this tool will look into the 'MAPPING.CONFIG'
-        and do the keys mapping.
-
-        For instance, assuming the context of the MAPPING.CONFIG is the following:
+        For instance, assume that MAPPING.CONFIG contains the following:
             about_resource: file_name
             about_file: Resource
             name: Component
             version: file_version
 
-        This tool will look into the input CSV and try to find the column key named
-        'file_name' and configure to map with the 'about_resource' key that this
-        tool use. The 'Resource' will then configure to map with 'about_file' and
+        The tool will look into the input CSV and try to find the column key named
+        'file_name' and configure to map with the 'about_resource' key that the
+        tool uses. The 'Resource' will then configure to map with 'about_file' and
         so on.
 
-        In another word, users do not need to modify the keys name of the
-        input manually but let the 'MAPPING.CONFIG' to do the keys mapping.
+        In another word, you do not need to modify the key names of the
+        input manually, but rather use the MAPPING.CONFIG to do the key mapping.
+        
+        Another advantage of using the MAPPING.CONFIG is the ability to specify 
+        any field names that are important to you, including custom fields.
 
     $ python genabout.py --mapping <input path> <output path>
 
