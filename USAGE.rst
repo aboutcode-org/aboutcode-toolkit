@@ -181,56 +181,53 @@ genattrib.py
 
 Syntax
 ------
+Usage: genattrib.py [options] input_path output_path component_list
 
-    Usage: genattrib.py [options] input_path output_path component_list
-    
-        Input can be a file or directory.
-        Output of rendered template must be a file (e.g. .html).
-        Component List must be a .csv file which has at least an "about_file" column.
-    
-    
-    Options:
-      -h, --help            Display help
-      -v, --version         Display current version, license notice, and copyright notice
-      --overwrite           Overwrites the output file if it exists
-      --verbosity=VERBOSITY
-                            Print more or fewer verbose messages while processing ABOUT files
-                            0 - Do not print any warning or error messages, just a total count (default)
-                            1 - Print error messages
-                            2 - Print error and warning messages
+    Input can be a file or directory.
+    Output of rendered template must be a file (e.g. .html).
+    Component List must be a .csv file which has at least an "about_file" column.
 
-      --template_location=TEMPLATE_LOCATION
-                            Use the custom template for the Attribution Generation
 
-      --mapping             Configure the mapping key from the MAPPING.CONFIG
+Options:
+  -h, --help            Display help
+  -v, --version         Display current version, license notice, and copyright notice
+  --overwrite           Overwrites the output file if it exists
+  --verbosity=VERBOSITY
+                        Print more or fewer verbose messages while processing ABOUT files
+                        0 - Do not print any warning or error messages, just a total count (default)
+                        1 - Print error messages
+                        2 - Print error and warning messages
+
+  --template_location=TEMPLATE_LOCATION
+                        Use the custom template for the Attribution Generation
+
+  --mapping             Configure the mapping key from the MAPPING.CONFIG
 
 Purpose
 -------
+Generate an Attribution HTML file which contains the license information from
+the 'component_list' along with the license text.
 
-    Generate an Attribution HTML file which contains the license information from
-    the 'component_list' along with the license text.
+This tool will look at the components in the 'component_list' and find the
+corresponding .ABOUT files in the 'input_path' and generate the output in
+the 'output_path'. Therefore, please make sure there are .ABOUT files under
+the 'input_path'.
 
-    This tool will look at the components in the 'component_list' and find the
-    corresponding .ABOUT files in the 'input_path' and generate the output in
-    the 'output_path'. Therefore, please make sure there are .ABOUT files under
-    the 'input_path'.
+Assuming the follow:
+'/home/about_files/' contains all the ABOUT files from the component_list
+'/home/attribution/attribution.html' is the user's output path
+'/home/project/component_list.csv' is the component list that user want to be generated
 
-    Assuming the follow:
-    '/home/about_files/' contains all the ABOUT files from the component_list
-    '/home/attribution/attribution.html' is the user's output path
-    '/home/project/component_list.csv' is the component list that user want to be generated
-
-        $ python genattrib.py /home/about_files/ /home/attribution/attribution.html /home/project/component_list.csv
+    $ python genattrib.py /home/about_files/ /home/attribution/attribution.html /home/project/component_list.csv
 
 Options
 -------
+--template_location
 
-    --template_location
+    This option allows you to use your own template for Attribution Generation.
+    For instance, if the custom template you want to use is located at:
+    /home/custom_template/template.html
 
-        This option allows you to use your own template for Attribution Generation.
-        For instance, if the custom template you want to use is located at:
-        /home/custom_template/template.html
-
-            $ python genattrib.py --template_location=/home/custom_template/template.html input_path output_path component_list
+        $ python genattrib.py --template_location=/home/custom_template/template.html input_path output_path component_list
 
 
