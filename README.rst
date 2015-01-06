@@ -122,9 +122,6 @@ information will be saved to the CSV file named "thirdparty_about.csv".
                             1 - Overwrites the current ABOUT field value if existed
                             2 - Keep the current field value and only add the "new" field and field value
                             3 - Replace the ABOUT file with the current generation
-    
-      --all_in_one          Generate all the ABOUT files in the [output_path] without
-                            any project structure
 
       --copy_files=COPY_FILES
                             Copy the '*_file' from the project to the generated location

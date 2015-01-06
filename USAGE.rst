@@ -1,15 +1,19 @@
 about.py
 ========
 
-Syntax
-------
+**Syntax**
 
-    Usage: about.py [options] input_path output_path
+::
 
-    Input can be a file or directory.
-    Output must be a file with a .csv extension.
+    about.py [options] input_path output_path
 
-    Options:
+    - Input can be a file or directory.
+    - Output must be a file with a .csv extension.
+
+**Options:**
+
+::
+
       -h, --help            Display help
       --version             Display current version, license notice, and copyright notice
       --overwrite           Overwrites the output file if it exists
@@ -21,32 +25,36 @@ Syntax
 
 Purpose
 -------
-
-    Extract information from the .ABOUT files and save it to the CSV file.
+Extract information from the .ABOUT files and save it to the CSV file.
 
 Options
 -------
+
+::
 
     --overwrite
  
         Overwrite the extracted data from .ABOUT files to the output location
 
-            $ python about.py --overwrite <input path> <output path>
+    $ python about.py --overwrite <input path> <output path>
 
 
 genabout.py
 ===========
 
-Syntax
-------
+**Syntax**
 
-    Usage: genabout.py [options] input_path output_path
+::
 
-        Input must be a CSV file
-        Output must be a directory location where the ABOUT files should be generated
+    genabout.py [options] input_path output_path
 
+    - Input must be a CSV file
+    - Output must be a directory location where the ABOUT files should be generated
 
-    Options:
+**Options:**
+
+::
+
       -h, --help            Display help
       --version             Display current version, license notice, and copyright notice
       --verbosity=VERBOSITY
@@ -60,9 +68,6 @@ Syntax
                             1 - Overwrites the current ABOUT field value if existed
                             2 - Keep the current field value and only add the "new" field and field value
                             3 - Replace the ABOUT file with the current generation
-
-      --all_in_one          Generate all the ABOUT files in the [output_path] without
-                            any project structure
 
       --copy_files=COPY_FILES
                             Copy the '*_file' from the project to the generated location
@@ -87,24 +92,19 @@ Syntax
 
 Purpose
 -------
-
-    Generate ABOUT files from the input CSV file to output location
+Generate ABOUT files from the input CSV file to output location.
 
 Options
 -------
+
+::
 
     --action=ACTION
 
         Handle different behaviors if ABOUT files already existed.
         For instance, replace the ABOUT files with the current generation
 
-            $ python genabout.py --action=3 <input path> <output path>
-
-    --all_in_one
-
-        Generate all the ABOUT files to the output location without any project structure
-
-            $ python genabout.py --all_in_one <input path> <output path>
+    $ python genabout.py --action=3 <input path> <output path>
 
     --copy_files
 
@@ -119,7 +119,7 @@ Options
         'license_text_file' and 'notice_text_file' from
         /home/project/ to /home/about/
 
-            $ python genabout.py --copy_files=/home/project/ <input path> /home/about/
+    $ python genabout.py --copy_files=/home/project/ <input path> /home/about/
 
     --license_text_location
 
@@ -131,7 +131,7 @@ Options
         /home/license/apache2.LICENSE
         /home/license/jquery.js.LICENSE
 
-            $ python genabout.py --license_text_location=/home/licenses/ <input path> <output path>
+    $ python genabout.py --license_text_location=/home/licenses/ <input path> <output path>
 
     --mapping
 
@@ -158,7 +158,7 @@ Options
         In another word, users do not need to modify the keys name of the
         input manually but let the 'MAPPING.CONFIG' to do the keys mapping.
 
-            $ python genabout.py --mapping <input path> <output path>
+    $ python genabout.py --mapping <input path> <output path>
 
     --extract_license
 
@@ -173,35 +173,37 @@ Options
                         yourself in the API.
         (Please contact us to get the api_* value to use this feature)
 
-            genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key' <input path> <output path>
+    $ python genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key' <input path> <output path>
 
 
 genattrib.py
 ============
 
-Syntax
-------
-Usage: genattrib.py [options] input_path output_path component_list
+**Syntax**
 
-    Input can be a file or directory.
-    Output of rendered template must be a file (e.g. .html).
-    Component List must be a .csv file which has at least an "about_file" column.
+::
 
+    genattrib.py [options] input_path output_path component_list
 
-Options:
-  -h, --help            Display help
-  -v, --version         Display current version, license notice, and copyright notice
-  --overwrite           Overwrites the output file if it exists
-  --verbosity=VERBOSITY
+    - Input can be a file or directory.
+    - Output of rendered template must be a file (e.g. .html).
+    - Component List must be a .csv file which has at least an "about_file" column.
+
+**Options:**
+
+::
+
+    -h, --help          Display help
+    --version           Display current version, license notice, and copyright notice
+    --overwrite         Overwrites the output file if it exists
+    --verbosity=VERBOSITY
                         Print more or fewer verbose messages while processing ABOUT files
                         0 - Do not print any warning or error messages, just a total count (default)
                         1 - Print error messages
                         2 - Print error and warning messages
-
-  --template_location=TEMPLATE_LOCATION
+    --template_location=TEMPLATE_LOCATION
                         Use the custom template for the Attribution Generation
-
-  --mapping             Configure the mapping key from the MAPPING.CONFIG
+    --mapping           Configure the mapping key from the MAPPING.CONFIG
 
 Purpose
 -------
@@ -214,20 +216,28 @@ the 'output_path'. Therefore, please make sure there are .ABOUT files under
 the 'input_path'.
 
 Assuming the follow:
-'/home/about_files/' contains all the ABOUT files from the component_list
-'/home/attribution/attribution.html' is the user's output path
-'/home/project/component_list.csv' is the component list that user want to be generated
+
+::
+
+    '/home/about_files/'** contains all the ABOUT files from the component_list
+    '/home/attribution/attribution.html' is the user's output path
+    '/home/project/component_list.csv' is the component list that user want to be generated
+
+::
 
     $ python genattrib.py /home/about_files/ /home/attribution/attribution.html /home/project/component_list.csv
 
 Options
 -------
---template_location
 
-    This option allows you to use your own template for Attribution Generation.
-    For instance, if the custom template you want to use is located at:
-    /home/custom_template/template.html
+::
 
-        $ python genattrib.py --template_location=/home/custom_template/template.html input_path output_path component_list
+    --template_location
+    
+        This option allows you to use your own template for Attribution Generation.
+        For instance, if the custom template you want to use is located at:
+        /home/custom_template/template.html
+
+    $ python genattrib.py --template_location=/home/custom_template/template.html input_path output_path component_list
 
 
