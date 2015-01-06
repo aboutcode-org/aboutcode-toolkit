@@ -1,8 +1,6 @@
-========
 about.py
 ========
 
-------
 Syntax
 ------
 
@@ -21,13 +19,11 @@ Syntax
                             1 - Print error messages
                             2 - Print error and warning messages
 
--------
 Purpose
 -------
 
     Extract information from the .ABOUT files and save it to the CSV file.
 
--------
 Options
 -------
 
@@ -38,11 +34,9 @@ Options
             $ python about.py --overwrite <input path> <output path>
 
 
-===========
 genabout.py
 ===========
 
-------
 Syntax
 ------
 
@@ -91,13 +85,11 @@ Syntax
                             Example syntax:
                             genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
 
--------
 Purpose
 -------
 
     Generate ABOUT files from the input CSV file to output location
 
--------
 Options
 -------
 
@@ -184,11 +176,9 @@ Options
             genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key' <input path> <output path>
 
 
-============
 genattrib.py
 ============
 
-------
 Syntax
 ------
 
@@ -214,7 +204,6 @@ Syntax
 
       --mapping             Configure the mapping key from the MAPPING.CONFIG
 
--------
 Purpose
 -------
 
@@ -233,7 +222,6 @@ Purpose
 
         $ python genattrib.py /home/about_files/ /home/attribution/attribution.html /home/project/component_list.csv
 
--------
 Options
 -------
 
