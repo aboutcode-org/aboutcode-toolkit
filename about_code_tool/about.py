@@ -1016,7 +1016,7 @@ class AboutFile(object):
             <li> uppercase and lowercase letters from A to Z</li>
             <li> the _ underscore, - dash and . period signs. </li>
         """
-        supported = string.digits + string.ascii_letters + '_-.'
+        supported = string.digits + string.ascii_letters + '_-.+'
         # Using the resource_name(file_path) will yield the following error on
         # windows:
         # Field: None, Value: [':', '\\', '\\', '\\', '\\', '\\', '\\'],

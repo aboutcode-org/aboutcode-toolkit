@@ -185,14 +185,14 @@ class ParserTest(unittest.TestCase):
 
     def test_valid_chars_in_file_name(self):
         about_obj = about.AboutFile()
-        name = string.digits + string.ascii_letters + '_-.'
+        name = string.digits + string.ascii_letters + '_-.+'
         result = about_obj.invalid_chars_in_about_file_name(name)
         expected = []
         self.assertEqual(expected, result)
 
     def test_result_chars_in_file_name(self):
         about_obj = about.AboutFile()
-        result = about_obj.invalid_chars_in_about_file_name('_$as/afg:')
+        result = about_obj.invalid_chars_in_about_file_name('_$a+s/afg:')
         expected = [':']
         self.assertEqual(expected, result)
 
