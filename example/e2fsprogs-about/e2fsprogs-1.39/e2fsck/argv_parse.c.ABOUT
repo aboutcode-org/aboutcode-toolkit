@@ -1,0 +1,14 @@
+about_resource: argv_parse.c
+name: argv_parse.c
+version: 
+
+attribute: yes
+category: Attribution
+checksum_sha1: 318ea46f5d3a08ae60d311b0cfe0b0c19e00a286
+component_type: c language text
+confirmed_license: MIT Old Style legal 2
+copyright: Copyright 1999 by Theodore Ts'o
+dje_license: mit-old-style-legal-2
+dje_license_name: MIT Old Style with legal disclaimer 2
+license_text_file: mit-old-style-legal-2.LICENSE
+owner: Theodore Ts'o

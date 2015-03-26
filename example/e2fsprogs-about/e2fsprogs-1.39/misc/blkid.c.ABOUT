@@ -1,0 +1,16 @@
+about_resource: blkid.c
+name: blkid.c
+version: 
+
+attribute: yes
+category: Copyleft Limited
+checksum_sha1: 6448a75f8212c06bd76f59c6b96024fa94c82f12
+component_type: c language text
+confirmed_license: LGPL 2.1
+copyright: Copyright (C) 2001 Andreas Dilger
+dje_license: lgpl-2.1
+dje_license_name: GNU Lesser General Public License 2.1
+license_text_file: lgpl-2.1.LICENSE
+owner: Theodore Ts'o
+redistribute: yes
+track_changes: yes

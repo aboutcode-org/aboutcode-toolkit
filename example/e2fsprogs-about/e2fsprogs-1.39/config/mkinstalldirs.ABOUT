@@ -1,0 +1,13 @@
+about_resource: mkinstalldirs
+name: mkinstalldirs
+version: 
+
+category: Public Domain
+checksum_sha1: e8066bf9dc4353afffcfc5c2ec1cc9cc757585de
+component_type: posix shell script text executable
+confirmed_license: Public Domain
+dje_license: public-domain
+dje_license_name: Public Domain
+download_url: http://svn.apache.org/repos/asf/axis/axis1/c/trunk/mkinstalldirs
+license_text_file: public-domain.LICENSE
+owner: Noah Friedman

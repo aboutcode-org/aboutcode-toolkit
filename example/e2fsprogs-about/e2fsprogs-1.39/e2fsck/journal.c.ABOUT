@@ -1,0 +1,18 @@
+about_resource: journal.c
+name: journal.c
+version: 
+
+attribute: yes
+category: Copyleft
+checksum_sha1: 02ef021aec0bea6f3a7377ab72d43491c5866dc5
+component_type: c language text
+confirmed_license: GPL 2.0
+copyright: Copyright (C) 2000 Andreas Dilger
+ Copyright (C) 2000 Theodore Ts'o
+ Copyright (C) 1999 Red Hat Software
+dje_license: gpl-2.0
+dje_license_name: GNU General Public License 2.0
+license_text_file: gpl-2.0.LICENSE
+owner: Stephen C. Tweedie
+redistribute: yes
+track_changes: yes

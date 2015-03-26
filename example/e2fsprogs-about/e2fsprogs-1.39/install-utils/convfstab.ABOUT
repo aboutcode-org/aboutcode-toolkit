@@ -1,0 +1,13 @@
+about_resource: convfstab
+name: convfstab
+version: 
+
+category: Public Domain
+checksum_sha1: dde2f47f8abbe15627cd5bfe0e2283fbb820eda6
+component_type: posix shell script text executable
+confirmed_license: Public Domain
+dje_license: Public Domain
+dje_license_name: Public Domain
+download_url: http://stuff.mit.edu/afs/sipb.mit.edu/user/tytso/e2fsprogs/install-utils/convfstab
+license_text_file: public-domain.LICENSE
+owner: M.Weller
