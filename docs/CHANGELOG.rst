@@ -11,8 +11,8 @@
 
     * Breaking API changes:
 
-      * the dje_license field has been renamed to dje_license_keys
-      * when a dje_license-key is present, a new dje_license_url will be
+      * the dje_license field has been renamed to dje_license_key
+      * when a dje_license_key is present, a new dje_license_url will be
         reported when fetching data from the DejaCode API.
       * In genabout, the '--all_in_one' command line option has been removed.
         It was not well specified and did not work as advertised.
