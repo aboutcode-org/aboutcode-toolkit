@@ -252,25 +252,19 @@ Optionally, you can control the generated label names and contents in your .ABOU
 
 You can customize your copy of MAPPING.CONFIG to recognize your own software inventory column names in order to map them to ABOUT File contents. This is especially useful if you prefer not to change some of the actual column names in your software inventory before running genabout.py.  Note that the name on the right side (for example "Directory/Filename") is the name of the field in your software inventory spreadsheet, and the name on the left, followed by a colon, is the field label to go into the .ABOUT file.  Here is an example:
 
-# Essential Fields
-
-about_file: Directory/Filename
-
-# Mandatory Fields
-
-name: Component
-
-version: Confirmed Version
-
-# Optional Fields
-
-copyright: Confirmed Copyright
-
-# Custom Fields
-
-audit_ref_nbr: audit_ref_nbr
-
-confirmed_license: Confirmed License
+        # Essential Fields
+        about_file: Directory/Filename
+        
+        # Mandatory Fields
+        name: Component
+        version: Confirmed Version
+        
+        # Optional Fields</pre>
+        copyright: Confirmed Copyright
+        
+        # Custom Fields
+        audit_ref_nbr: audit_ref_nbr
+        confirmed_license: Confirmed License
 
 ## <a name="Rungenabout.pytoGenerateAboutCodeFiles">Run genabout.py to Generate AboutCode Files</a>
 
@@ -280,7 +274,7 @@ When your software inventory is ready, you can save it as a .csv file, and use i
 
 Here is an example of a genabout.py command: 
 
-python genabout.py --extract_license --api_url='{{your license library api}}' --api_username='{{api-user}}' --api_key='{{your license library api key}}'  --mapping --license_text_location=/Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+<pre><code>python genabout.py --extract_license --api_url='{{your license library api}}' --api_username='{{api-user}}' --api_key='{{your license library api key}}'  --mapping --license_text_location=/Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/ </code></pre>
 
 Note that this example genabout.py command does the following: 
 
@@ -296,25 +290,16 @@ Note that this example genabout.py command does the following:
 
 Review your generated AboutCode files to determine if they meet your requirements. Here is a simple example of a linux-redhat-7.2.ABOUT file that documents the directory /linux-redhat-7.2/ :
 
-about_resource: .
-
-name: Linux RedHat
-
-version: v 7.2
-
-attribute: Y
-
-copyright: Copyright (c) RedHat, Inc.
-
-dje_license: gpl-2.0
-
-dje_license_name: GNU General Public License 2.0
-
-license_text_file: gpl-2.0.LICENSE
-
-owner: Red Hat
-
-redistribute: Y
+        about_resource: .
+        name: Linux RedHat
+        version: v 7.2
+        attribute: Y
+        copyright: Copyright (c) RedHat, Inc.
+        dje_license_key: gpl-2.0
+        dje_license_name: GNU General Public License 2.0
+        license_text_file: gpl-2.0.LICENSE
+        owner: Red Hat
+        redistribute: Y
 
 You can make the appropriate changes to your input software inventory and/or your MAPPING.CONFIG file and then run genabout.py as often as necessary to replace the generated AboutCode files with the improved output. (Note that you will want to delete or move your previously generated output before running genabout.py again.)
 
@@ -347,120 +332,73 @@ The genattrib.py tool makes use of the open source python library **jinja2** ([h
 The simplest modifications to the default.html file involve the labels and standard text.  For example, here is the default template text for the Table of Contents: 
 
         <div class="oss-table-of-contents">
-
             {% for about_object in about_objects %}
-
                 <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}
-
-{% if about_object.version %} {{ about_object.version }}
-
-{% endif %}</a></p>
-
+                {% if about_object.version %} {{ about_object.version }}
+                {% endif %}</a></p>
             {% endfor %}
-
         </div>
 
 If you would prefer something other than a simple space between the component name and the component version, you can modify it to something like this: 
 
         <div class="oss-table-of-contents">
-
             {% for about_object in about_objects %}
-
                 <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}
-
-{% if about_object.version %}  - Version  {{ about_object.version }}
-
-{% endif %}</a></p>
-
+                {% if about_object.version %}  - Version  {{ about_object.version }}
+                {% endif %}</a></p>
             {% endfor %}
-
         </div>
 
 The "if about_object.version" is checking for a component version, and if one exists it generates output text that is either a space followed by the actual version value, or, as in this customized template, it generates output text as “ - Version “, followed by the actual version value. You will, of course, want to test your output to get exactly the results that you need.
 
 Note that you can actually use genattrib.py to generate an AboutCode-sourced document of any kind for varying business purposes, and you may want to change the grouping/ordering of the data for different reporting purposes. (Here we get into somewhat more complex usage of jinja2 features, and you may wish to consult the jinja2 documentation to reach a more comprehensive understanding of the syntax and features.)  The default ordering is by component, but In the following example, which is intended to support a "license reference" rather than an attribution document, the customized template modifies the data grouping to use a custom field called “confirmed license”: 
 
-    <div class="oss-table-of-contents">
-
-        {% for group in about_objects | groupby('confirmed_license') %}
-
-        <p>
-
-            <a href="#group_{{ loop.index0 }}">{{ group.grouper }}
-
-            </a>
-
-        </p>
-
-        {% endfor %}
-
-    </div>
+        <div class="oss-table-of-contents">
+            {% for group in about_objects | groupby('confirmed_license') %}
+            <p>
+                <a href="#group_{{ loop.index0 }}">{{ group.grouper }}
+                </a>
+            </p>
+            {% endfor %}
+        </div>
 
 After the table of contents, this example customized template continues with the license details using the jinja2 for-loop capabilities. Notice that the variable "group.grouper" is actually the license name here, and that “License URL” can be any URL that you have chosen to store in your .ABOUT files: 
 
-{% for group in about_objects | groupby('confirmed_license') %}
+        {% for group in about_objects | groupby('confirmed_license') %}
+            <div id="group_{{ loop.index0 }}">
+            <h3>{{ group.grouper }}</h3>
+            <p>This product contains the following open source software packages licensed under the terms of the license: {{group.grouper}}</p>
+        	
+            <div class="oss-component" id="component_{{ loop.index0 }}">
+        	    {%for about_object in group.list %} 		
+        	        {% if loop.first %}
+        	            {% if about_object.license_url %}
+        		        <p>License URL: <a href="{{about_object.license_url}}
+                                ">{{about_object.license_url }}</a> </p>
+            	        {% endif %}
+                    {% endif %}
+        	        <li>
+                    {{ about_object.name }}{% if about_object.version %}  - Version  
+                    {{ about_object.version }}{% endif %}
+                    </li>
+        		    {% if about_object.copyright %}<pre>{{about_object.copyright}}</pre>{% endif %}
+        		    {% if about_object.notice %}
+        		        <pre>{{ about_object.notice }}</pre>
+        		    {% elif about_object.notice_file %} <pre class="component-notice">
+                        {{ about_object.notice_text }}</pre>
+        		    {% endif %}
+        		    {% if loop.last %}
+        		    <pre>
+                    {{about_object.license_text}}
+        		    </pre>
+        		    {% endif %}
+        	    {% endfor %}
+            </div>
+            <hr>
+            </div>
+        {% endfor %}
+        <hr>
 
-<div id="group_{{ loop.index0 }}">
-
-<h3>{{ group.grouper }}</h3>
-
-<p>This product contains the following open source software packages licensed under the terms of the license: {{group.grouper}}</p>
-
-    
-
-<div class="oss-component" id="component_{{ loop.index0 }}">
-
-    {%for about_object in group.list %}         
-
-    {% if loop.first %}
-
-    {% if about_object.license_url %}
-
-        <p>License URL: <a href="{{about_object.license_url}}
-
-">{{about_object.license_url }}</a> </p>
-
-            {% endif %}
-
-        {% endif %}
-
-    <li>{{ about_object.name }}{% if about_object.version %}  - Version  
-
-{{ about_object.version }}{% endif %}</li>      
-
-        {% if about_object.copyright %}<pre>{{about_object.copyright}}</pre>{% endif %}
-
-        {% if about_object.notice %}<pre>{{ about_object.notice }}</pre>
-
-        {% elif about_object.notice_file %} <pre class="component-notice">
-
-{{ about_object.notice_text }}</pre>
-
-        {% endif %}
-
-        {% if loop.last %}
-
-        <pre>
-
-{{about_object.license_text}}
-
-        </pre>
-
-        {% endif %}
-
-    </div>
-
-    {% endfor %}
-
-    </div>
-
-    {% endfor %}
-
-    <hr>
-
-</div>
-
-<hr> 
 
 In summary, you can start with simple, cosmetic customizations to the default.html template, and gradually introduce a more complex structure to the genattrib.py output to meet varying business requirements.
 
