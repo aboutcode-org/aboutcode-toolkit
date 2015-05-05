@@ -1,8 +1,21 @@
-# **Using AboutCode to Document Your Software Assets**
+#<a name="Using AboutCode to Document Your Software Assets">**Using AboutCode to Document Your Software Assets**</a>
 
-[[TOC]]
+[Using AboutCode to Document Your Software Assets](#Using AboutCode to Document Your Software Assets)  
+[AboutCode Defined](#AboutCode Defined)  
+[Key Terminology](#Key Terminology)  
+[Using genabout.py to Generate AboutCode Files](#Using genabout.py to Generate AboutCode Files)
+* [Prepare Your Software Inventory for genabout.py Standard Column Names](#Prepare Your Software Inventory for genabout.py Standard Column Names)  
+* [Optionally Define Custom Fields for genabout.py with MAPPING.CONFIG](#Optionally Define Custom Fields for genabout.py with MAPPING.CONFIG)  
+* [Run genabout.py to Generate AboutCode Files](#Run genabout.py to Generate AboutCode Files)  
+[Using genattrib.py to Generate a Product Attribution Notice Package](#Using genattrib.py to Generate a Product Attribution Notice Package)  
+* [Prepare a Filtered Product BOM to Use as Input to genattrib.py](#Prepare a Filtered Product BOM to Use as Input to genattrib.py)  
+* [Prepare an Attribution Template to Use as Input to genattrib.py](#Prepare an Attribution Template to Use as Input to genattrib.py)  
+    - [Use jinja2 Features to Customize Your Attribution Template](#Use jinja2 Features to Customize Your Attribution Template)  
+* [Run genattrib.py to Generate a Product Attribution Notice Package](#Run genattrib.py to Generate a Product Attribution Notice Package)  
+[Using about.py to Generate a Software Inventory](#Using about.py to Generate a Software Inventory)
+* [Generate a Software Inventory of Your Codebase from AboutCode Files](#Generate a Software Inventory of Your Codebase from AboutCode Files)  
 
-# AboutCode Defined
+#<a name="AboutCode Defined">AboutCode Defined</a>
 
 AboutCode is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. AboutCode files have a simple, standard format that identifies components and their associated licenses. The current AboutCode tools (Python programs) are: 
 
@@ -18,7 +31,7 @@ Additional AboutCode information is available at:
 
 * [https://github.com/dejacode/about-code-tool](https://github.com/dejacode/about-code-tool)  for the AboutCode tools.
 
-# Key Terminology
+# <a name="Key Terminology">Key Terminology</a>
 
 Some key terminology that applies to AboutCode tool usage:
 
@@ -26,9 +39,9 @@ Some key terminology that applies to AboutCode tool usage:
 
 * **Product BOM or BOM** - means a subset list of the components in a Development codebase (Software Inventory) that are Deployed on a particular Product Release (a Product Bill of Materials).
 
-# Using genabout.py to Generate AboutCode Files
+# <a name="Using genabout.py to Generate AboutCode Files">Using genabout.py to Generate AboutCode Files</a>
 
-## Prepare Your Software Inventory for genabout.py Standard Column Names
+## <a name="Prepare Your Software Inventory for genabout.py Standard Column Names">Prepare Your Software Inventory for genabout.py Standard Column Names</a>
 
 You should start with a software inventory of your codebase in spreadsheet format. You need to prepare a version of it that will identify the column values that you want to appear in your .ABOUT files.  Note the following standard column names (defined in the ABOUT File Specification), which genabout.py will use to look for the values that it will store in your generated .ABOUT files, as well as any additional text files that you identify, which it will copy and store next to the .ABOUT files. 
 
@@ -231,7 +244,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
 </table>
 
 
-## Optionally Define Custom Fields for genabout.py with MAPPING.CONFIG 
+## <a name="Optionally Define Custom Fields for genabout.py with MAPPING.CONFIG">Optionally Define Custom Fields for genabout.py with MAPPING.CONFIG</a>
 
 Optionally, you can control the generated label names and contents in your .ABOUT files using a MAPPING.CONFIG file. You can start with the default version provided at [https://github.com/dejacode/about-code-tool/blob/develop/about_code_tool/MAPPING.CONFIG](https://github.com/dejacode/about-code-tool/blob/develop/about_code_tool/MAPPING.CONFIG)  and you can customize a copy of that file to map the software provenance information that is important to you. When you are ready to run genabout.py, you will want to specify the --mapping option to tell it to look for the MAPPING.CONFIG file and use it.
 
@@ -257,7 +270,7 @@ audit_ref_nbr: audit_ref_nbr
 
 confirmed_license: Confirmed License
 
-## Run genabout.py to Generate AboutCode Files 
+## <a name="Run genabout.py to Generate AboutCode Files">Run genabout.py to Generate AboutCode Files</a>
 
 When your software inventory is ready, you can save it as a .csv file, and use it as input to run genabout.py to generate your AboutCode files. The official genabout.py parameters are defined here:
 
@@ -303,9 +316,9 @@ redistribute: Y
 
 You can make the appropriate changes to your input software inventory and/or your MAPPING.CONFIG file and then run genabout.py as often as necessary to replace the generated AboutCode files with the improved output. (Note that you will want to delete or move your previously generated output before running genabout.py again.)
 
-# Using genattrib.py to Generate a Product Attribution Notice Package
+# <a name="Using genattrib.py to Generate a Product Attribution Notice Package">Using genattrib.py to Generate a Product Attribution Notice Package</a>
 
-## Prepare a Filtered Product BOM to Use as Input to genattrib.py
+## <a name="Prepare a Filtered Product BOM to Use as Input to genattrib.py">Prepare a Filtered Product BOM to Use as Input to genattrib.py</a>
 
 The Software Inventory that you prepared for genabout.py most likely includes components that do not need to appear in a product attribution notice package; for example:   
 
@@ -315,7 +328,7 @@ The Software Inventory that you prepared for genabout.py most likely includes co
 
 You should prepare a filtered version of your software inventory (the one that you used for genabout.py) by removing the rows that identify components which should not be included in a product attribution notice package, and saving that filtered version as your Product BOM.  You should also order the rows in this Product BOM in the sequence that you would like them to appear in the product attribution notice package. 
 
-## Prepare an Attribution Template to Use as Input to genattrib.py
+## <a name="Prepare an Attribution Template to Use as Input to genattrib.py">Prepare an Attribution Template to Use as Input to genattrib.py</a>
 
 You can run genattrib.py using the default.html template provided with the AboutCode tools:   
 
@@ -325,7 +338,7 @@ If you choose to do that, you will most likely want to edit the generated .html 
 
 Running genattrib.py with the default.html file is probably your best choice when you are still testing your AboutCode process. Once you have a good understanding of the generated output, you can customize the template to provide the standard text that you want to see whenever you generate product attribution for your organization.  You can also create alternative versions of the template to use genattrib.py to generate other kinds of documents, such as a License Reference.
 
-### Use jinja2 Features to Customize Your Attribution Template
+### <a name="Use jinja2 Features to Customize Your Attribution Template">Use jinja2 Features to Customize Your Attribution Template</a>
 
 The genattrib.py tool makes use of the open source python library **jinja2** ([http://jinja.pocoo.org/docs/dev/templates/](http://jinja.pocoo.org/docs/dev/templates/)) in order to extend .html capabilities and transform AboutCode input data into the final format of the generated attribution file. The **default.html **file contains text that complies with jinja2 syntax specifications in order to support grouping, ordering, formatting and presentation of your AboutCode data. If your attribution requirements are complex, you may wish to study the jinja2 documentation to modify the default.html logic; alternatively, here are a few relatively simple concepts that relate to the attribution document domain. 
 
@@ -449,7 +462,7 @@ After the table of contents, this example customized template continues with the
 
 In summary, you can start with simple, cosmetic customizations to the default.html template, and gradually introduce a more complex structure to the genattrib.py output to meet varying business requirements.
 
-## Run genattrib.py to Generate a Product Attribution Notice Package 
+## <a name="Run genattrib.py to Generate a Product Attribution Notice Package">Run genattrib.py to Generate a Product Attribution Notice Package</a>
 
 When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run genattrib.py to generate your product attribution notice package. Note that genattrib.py will use the "about_file" column in your software inventory to get all the fields that it needs from your previously generated AboutCode files. The official genattrib.py parameters are defined here:
 
@@ -473,9 +486,9 @@ Note that this example genattrib.py command does the following:
 
 A successful execution of genattrib.py will create a .html file that is ready to use to meet your attribution requirements.
 
-# Using about.py to Generate a Software Inventory
+# <a name="Using about.py to Generate a Software Inventory">Using about.py to Generate a Software Inventory</a>
 
-## Generate a Software Inventory of Your Codebase from AboutCode Files 
+<a name="Generate a Software Inventory of Your Codebase from AboutCode Files">## Generate a Software Inventory of Your Codebase from AboutCode Files</a>
 
 One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually.  For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode files manually.  
 
