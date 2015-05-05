@@ -1,0 +1,10 @@
+about_resource:colorama-0.3.1-py2-none-any.whl
+name: colorama
+version: 0.3.1
+description: Cross-platform colored terminal text.
+homepage: https://pypi.python.org/pypi/colorama
+owner: Jonathan Hartley
+contact: tartley@tartley.com
+license: bds-new
+license_file: colorama.LICENSE
+download_url: https://pypi.python.org/packages/source/c/colorama/colorama-0.3.1.tar.gz#md5=95ce8bf32f5c25adea14b809db3509cb

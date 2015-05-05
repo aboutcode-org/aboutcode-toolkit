@@ -4,8 +4,8 @@ version: 7.0
 
 download_url: https://pypi.python.org/packages/3.4/s/setuptools/setuptools-7.0-py2.py3-none-any.whl#md5=918e7e5ea108507e1ffbbdfccc3496b1
 
-home_url: https://pypi.python.org/pypi/setuptools
+homepage: https://pypi.python.org/pypi/setuptools
 owner: Python Packaging Authority
 
-dje_license: psf
-license_text_file: PSF.LICENSE
+license: psf
+license_file: PSF.LICENSE

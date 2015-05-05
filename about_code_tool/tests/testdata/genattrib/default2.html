@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Open Source Software Information</title>
+    </head>
+
+    <body>
+        <h1>OPEN SOURCE SOFTWARE INFORMATION</h1>
+
+        <div class="oss-table-of-contents">
+            {% for about in abouts %}
+                <p>name: {{ about.name.value }} version: {{ about.version.value }}</p>
+            {% endfor %}
+        </div>
+    </body>
+</html>

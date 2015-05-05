@@ -1,0 +1,22 @@
+about_resource: .
+
+name: AboutCode
+version: 0.11.0
+
+owner: nexB Inc.
+author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
+
+home_url: http://dejacode.org
+
+vcs_tool: git
+vcs_repository: https://github.com/dejacode/about-code-tool.git
+
+description: AboutCode is a tool 
+ to process ABOUT files. 
+ An ABOUT file is a file.
+
+license: apache-2.0
+license_file: apache-2.0.LICENSE
+copyright: Copyright (c) 2013-2014 nexB Inc.
+
+notice_file: NOTICE

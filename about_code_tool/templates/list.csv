@@ -1,0 +1,4 @@
+Name,Version,DejaCode License,Homepage
+{% for about in abouts %}
+"{{about.name}}","{{about.version}}","{{about.license_name}}","{{about.home_url}}"
+{% endfor %}

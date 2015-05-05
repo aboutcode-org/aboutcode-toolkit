@@ -1,7 +1,7 @@
 @echo OFF
 @rem Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
 
-set ROOT_DIR=%~dp0
+set ABOUT_ROOT_DIR=%~dp0
 
 set CFG_CMD_LINE_ARGS= 
 @rem Collect all command line arguments in a variable
@@ -20,8 +20,7 @@ if "%CFG_CMD_LINE_ARGS%"==" " (
 )
 
 :configure
-call %ROOT_DIR%\etc\configure %CFG_CMD_LINE_ARGS%
+call %ABOUT_ROOT_DIR%\etc\configure %CFG_CMD_LINE_ARGS%
 goto EOS
-
 
 :EOS

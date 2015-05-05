@@ -1,0 +1,10 @@
+include *.ABOUT
+include about*
+include *LICENSE*
+include *NOTICE*
+include *README*
+include *USAGE*
+include *SPEC*
+
+recursive-include about_code_tool/tests/testdata *
+recursive-include about_code_tool/templates *

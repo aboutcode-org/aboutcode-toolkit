@@ -1,0 +1,7 @@
+about_resource:license_text_test
+name: license extraction
+version: beta
+notes: this is a test file to see if the license_test() correctly returns the
+ the text of the file in license_text_file field
+license_text_file: license_text.LICENSE
+notice_file: notice_text.NOTICE 

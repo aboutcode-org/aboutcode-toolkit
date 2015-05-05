@@ -1,0 +1,4 @@
+about_resource: test.template
+name: license extraction
+license_file: license_text.LICENSE
+notice_file: notice_text.NOTICE 

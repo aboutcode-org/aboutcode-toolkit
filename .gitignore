@@ -29,4 +29,6 @@ nosetests.xml
 
 # PyCharm project
 .idea/
-/about_code_tool.egg_info
+/aboutcode.egg_info
+AboutCode.egg-info
+/dist

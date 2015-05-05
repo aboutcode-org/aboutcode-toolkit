@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+    <head>
+        <style type="text/css">
+            div.additional-license-text-list {display:block}
+            body {font-family: Helvetica, Arial, sans-serif;}
+            pre {white-space: pre-wrap;}
+        </style>
+        <title>Open Source Software Information</title>
+    </head>
+
+    <body>
+        <h1>OPEN SOURCE SOFTWARE INFORMATION</h1>
+        <div>
+
+            <p>For instructions on how to obtain a copy of any source code
+            being made publicly available by Starship Technology related to
+            software used in this product you may send your request in
+            writing to:</p>
+
+            Starship Technology LLC.<br/>
+            OSS Management<br/>
+            7829 Montague Expressway<br/>
+            Santa Clara, CA 95031<br/>
+            USA<br/>
+
+            <p>The Starship Technology website www.dejacode.com also
+            contains information regarding Starship Technology's use of open
+            source. Starship Technology has created the <a href=
+            "http://www.dejacode.org">www.dejacode.org</a> to
+            serve as a portal for interaction with the software
+            community-at-large.</p>
+
+            <p>This document contains additional information regarding 
+            licenses, acknowledgments and required copyright notices for 
+            open source packages used in this Starship Technology product.
+            This Starship Technology product contains the following open 
+            source software components</p>
+
+        </div>
+
+        <div class="oss-table-of-contents">
+            
+        </div>
+
+        <hr>
+
+        
+        <hr>
+
+        <h3><a id="End">End</a></h3>
+    </body>
+</html>

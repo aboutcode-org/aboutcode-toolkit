@@ -1,0 +1,6 @@
+{% for about in abouts -%}
+{{ about.name.value }}: {{ about.version.value }}
+{% for res in about.about_resource.value -%}
+resource: {{ res }}
+{% endfor -%}
+{% endfor -%}

@@ -5,7 +5,7 @@ python:
   - "2.7"
 install:
     - source configure etc/conf
-    # extra reqs for testings on Travis
+    # extra reqs for coverage on Travis
     - pip install coverage coveralls
 script:
     - coverage run --source=about_code_tool setup.py test

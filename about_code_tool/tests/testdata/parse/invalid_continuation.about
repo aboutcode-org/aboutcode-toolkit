@@ -1,0 +1,8 @@
+ invalid continuation1
+single_line:optional
+other_field: value
+
+multi_line  : some value
+ and more
+
+ invalid continuation2

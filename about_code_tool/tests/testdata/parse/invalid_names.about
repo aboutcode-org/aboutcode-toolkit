@@ -1,0 +1,7 @@
+invalid space:value
+other-field: value
+val3_id_  : some:value
+VALE3_ID_  : some:value
+_invalid_dash: value
+3invalid_number: value
+invalid.dot: value
