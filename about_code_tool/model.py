@@ -52,7 +52,10 @@ class Field(object):
         # normalized names are lowercased per specification
         self.name = name
         # save this and do not mutate it afterwards
-        self.original_value = value
+        if isinstance(value, basestring):
+            self.original_value = value
+        else:
+            self.original_value = repr(value)
 
         # can become a string, list or OrderedDict() after validation
         self.value = value or self.default_value()
@@ -95,12 +98,23 @@ class Field(object):
             else:
                 # present fields with content go through validation...
                 # first trim any trailing spaces on each line
-                value = '\n'.join(s.rstrip() for s
-                                  in self.original_value.splitlines(False))
-                # then strip leading and trailing spaces
-                self.value = value.strip()
-                validation_errors = self._validate(*args, **kwargs)
-                errors.extend(validation_errors)
+                if isinstance(self.original_value, basestring):
+                    value = '\n'.join(s.rstrip() for s
+                                      in self.original_value.splitlines(False))
+                    # then strip leading and trailing spaces
+                    value = value.strip()
+                else:
+                    value = self.original_value
+                self.value = value
+                try:
+                    validation_errors = self._validate(*args, **kwargs)
+                    errors.extend(validation_errors)
+                except Exception, e:
+                    emsg = repr(e)
+                    msg = u'Error validating field %(name)s: %(value)r: %(emsg)r'
+                    errors.append(Error(CRITICAL, msg % locals()))
+                    raise
+
         # set or reset self
         self.errors = errors
         return errors
@@ -203,7 +217,7 @@ class SingleLineField(StringField):
     """
     def _validate(self, *args, **kwargs):
         errors = super(SingleLineField, self)._validate(*args, ** kwargs)
-        if '\n' in self.value:
+        if self.value and isinstance(self.value, basestring) and '\n' in self.value:
             name = self.name
             value = self.original_value
             msg = (u'Field %(name)s: Cannot span multiple lines: %(value)s'
@@ -225,8 +239,15 @@ class ListField(StringField):
 
         # reset
         self.value = []
-        for val in self.original_value.splitlines(False):
-            val = val.strip()
+
+        if isinstance(self.original_value, basestring):
+            values = self.original_value.splitlines(False)
+        else:
+            values = [repr(self.original_value)]
+
+        for val in values:
+            if isinstance(val, basestring):
+                val = val.strip()
             if not val:
                 name = self.name
                 msg = (u'Field %(name)s: ignored empty list value'
@@ -239,7 +260,7 @@ class ListField(StringField):
             else:
                 name = self.name
                 msg = (u'Field %(name)s: ignored duplicated list value: '
-                       '%(val)s' % locals())
+                       '%(val)r' % locals())
                 errors.append(Error(WARNING, msg))
         return errors
 
@@ -388,7 +409,7 @@ class AboutResourceField(PathField):
             self.resolved_paths.append(resolved)
 
 
-class TextField(PathField):
+class FileTextField(PathField):
     """
     A path field pointing to one or more text files such as license files.
     The validated value is an ordered mapping of path->Text or None if no
@@ -400,8 +421,8 @@ class TextField(PathField):
         of errors. base_dir is the directory used to resolve a file location
         from a path.
         """
-        errors = super(TextField, self)._validate(*args, ** kwargs)
-        # a TextField is a PathField
+        errors = super(FileTextField, self)._validate(*args, ** kwargs)
+        # a FileTextField is a PathField
         # self.value is a paths to location ordered mapping
         # we will replace the location with the text content
         name = self.name
@@ -469,19 +490,25 @@ class BooleanField(SingleLineField):
         Return a normalized existing flag value if found in the list of
         possible values or None if empty or False if not found.
         """
-        if not value:
+        if value is None or value == '':
             return None
 
-        value = value.strip()
-        if not value:
-            return None
-
-        value = value.lower()
-        if value in self.flag_values:
-            # of of yes, no, true, etc.
+        if isinstance(value, bool):
             return value
         else:
-            return False
+            if isinstance(value, basestring):
+                value = value.strip()
+                if not value:
+                    return None
+
+                value = value.lower()
+                if value in self.flag_values:
+                    # of of yes, no, true, etc.
+                    return value
+                else:
+                    return False
+            else:
+                return False
 
     @property
     def has_content(self):
@@ -518,8 +545,8 @@ def validate_fields(fields, base_dir):
     Validation may update the Field objects as needed as a side effect.
     """
     errors = []
-    for field in fields:
-        errors.extend(field.validate(base_dir=base_dir))
+    for f in fields:
+        val_err = f.validate(base_dir=base_dir)
     return errors
 
 
@@ -556,10 +583,10 @@ class About(object):
 
             ('license', ListField()),
             ('license_name', StringField()),
-            ('license_file', TextField()),
+            ('license_file', FileTextField()),
             ('license_url', UrlField()),
             ('copyright', StringField()),
-            ('notice_file', TextField()),
+            ('notice_file', FileTextField()),
             ('notice_url', UrlField()),
 
             ('redistribute', BooleanField()),
@@ -567,7 +594,7 @@ class About(object):
             ('track_change', BooleanField()),
             ('modified', BooleanField()),
 
-            ('changelog_file', TextField()),
+            ('changelog_file', FileTextField()),
 
             ('owner', ListField()),
             ('owner_url', UrlField()),
@@ -606,7 +633,7 @@ class About(object):
         self.base_dir = None
         if self.location:
             self.base_dir = os.path.dirname(location)
-            self.load(location)
+            self.load2(location)
 
     def __repr__(self):
         return repr(self.all_fields())
@@ -640,7 +667,7 @@ class About(object):
                          'owner',
                          'author']
 
-        return OrderedDict([(n,o,) for n,o in fields.items() 
+        return OrderedDict([(n, o,) for n, o in fields.items()
                                 if n in attrib_fields])
 
     def same_attribution(self, other):
@@ -724,8 +751,8 @@ class About(object):
                     msg = (u'Field %(orig_name)s is a duplicate '
                            u'with the same value as before.')
                     errors.append(Error(INFO, msg % locals()))
-            else:
-                seen_fields[name] = value
+
+            seen_fields[name] = value
 
             standard_field = self.fields.get(name)
             if standard_field:
@@ -774,7 +801,8 @@ class About(object):
         errors.extend(hydratation_errors)
 
         # we validate all fields, not only these hydrated
-        validation_errors = validate_fields(self.all_fields(), self.base_dir)
+        all_fields = self.all_fields()
+        validation_errors = validate_fields(all_fields, self.base_dir)
         errors.extend(validation_errors)
 
         # do not forget to resolve about resource paths
@@ -793,6 +821,28 @@ class About(object):
         try:
             lines = codecs.open(loc, encoding='utf-8').readlines()
             errs = self.load_lines(lines, base_dir)
+            errors.extend(errs)
+        except Exception, e:
+            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'
+            errors.append(Error(CRITICAL, msg % locals()))
+
+        self.errors = errors
+        return errors
+
+    def load2(self, location):
+        """
+        Read, parse and process the ABOUT file at location.
+        Return a list of errors and update self with errors.
+        """
+        self.location = location
+        loc = util.to_posix(location)
+        base_dir = posixpath.dirname(loc)
+        errors = []
+        try:
+            input_file = codecs.open(loc, encoding='utf-8').read()
+            import yaml
+            dct = yaml.load(input_file)
+            errs = self.load_dict(dct, base_dir)
             errors.extend(errs)
         except Exception, e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'

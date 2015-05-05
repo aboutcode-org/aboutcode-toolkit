@@ -18,18 +18,18 @@ from __future__ import print_function
 
 import posixpath
 import unittest
+from collections import OrderedDict
 
 from about_code_tool.tests import get_test_loc
 from about_code_tool.tests import get_test_lines
 
 
+import about_code_tool
 from about_code_tool import Error
 from about_code_tool import CRITICAL, INFO, WARNING
 from about_code_tool import model
 from about_code_tool import util
 from about_code_tool import ERROR
-from collections import OrderedDict
-import about_code_tool
 from about_code_tool.tests import get_temp_file
 from about_code_tool.tests import get_unicode_content
 from about_code_tool.util import load_csv
@@ -43,7 +43,7 @@ class FieldTest(unittest.TestCase):
         model.UrlField()
         model.BooleanField()
         model.PathField()
-        model.TextField()
+        model.FileTextField()
 
     def test_empty_Field_has_no_content(self):
         field = model.Field()
@@ -80,7 +80,7 @@ class FieldTest(unittest.TestCase):
         self.assertEqual(None, result)
 
     def test_TextField_loads_file(self):
-        field = model.TextField(name='f', value='license.LICENSE',
+        field = model.FileTextField(name='f', value='license.LICENSE',
                                 present=True)
 
 
@@ -336,7 +336,7 @@ class AboutTest(unittest.TestCase):
             Error(WARNING, u'Field Name is a duplicate. Original value: "old" replaced with: "new"'),
             Error(INFO, u'Field About_Resource is a duplicate with the same value as before.')]
         result = a.errors
-        self.assertEqual(expected, result)
+        self.assertEqual(sorted(expected), sorted(result))
 
     def check_About_hydrate(self, about, fields, errors):
         expected = set([
@@ -438,6 +438,16 @@ class AboutTest(unittest.TestCase):
         result = [(n, f.value) for n, f in a.custom_fields.items()]
         expected = [
             (u'single_line', u'README STUFF'),
+            (u'multi_line', u'line1 line2'),
+            (u'empty', '')]
+        self.assertEqual(expected, result)
+
+    def test_About_custom_fields_are_collected_correctly_as_multiline_scalar(self):
+        test_file = get_test_loc('parse/custom_fields_yaml.about')
+        a = model.About(test_file)
+        result = [(n, f.value) for n, f in a.custom_fields.items()]
+        expected = [
+            (u'single_line', u'README STUFF'),
             (u'multi_line', u'line1\nline2'),
             (u'empty', '')]
         self.assertEqual(expected, result)
@@ -523,7 +533,57 @@ this software and releases the component to Public Domain.
         a = model.About(test_file, about_file_path='complete2/about.ABOUT')
         test_file2 = get_test_loc('equal/complete/about.ABOUT')
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
+        self.maxDiff = None
+        print()
+        print('a')
+        print(a.dumps(True))
+        print()
+        print('b')
+        print(b.dumps(True))
+        self.assertEqual(a.dumps(True), b.dumps(True))
         self.assertEqual(a, b)
+
+    def test_About_dumps_does_not_transform_strings_in_lists(self):
+        test_file = get_test_loc('dumps/complete2/about.ABOUT')
+        a = model.About(test_file, about_file_path='complete2/about.ABOUT')
+        expected = u'''about_resource: .
+name: AboutCode
+version: 0.11.0
+download_url:
+description: AboutCode is a tool to process ABOUT files. An ABOUT file is a file.
+home_url: http://dejacode.org
+notes:
+license: apache-2.0 public-domain
+license_name:
+license_file: apache-2.0.LICENSE
+license_url:
+copyright: Copyright (c) 2013-2014 nexB Inc.
+notice_file: NOTICE
+notice_url:
+redistribute:
+attribute:
+track_change:
+modified:
+changelog_file:
+owner: nexB Inc.
+owner_url:
+contact:
+author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
+vcs_tool: git
+vcs_repository: https://github.com/dejacode/about-code-tool.git
+vcs_path:
+vcs_tag:
+vcs_branch:
+vcs_revision:
+checksum:
+spec_version:
+'''
+#         self.maxDiff = None
+#         print()
+#         print('a')
+#         print(a.dumps(True))
+#         print()
+#         self.assertEqual(expected.splitlines(), a.dumps(True).splitlines())
 
     def test_About_same_attribution(self):
         base_dir = 'some_dir'
@@ -911,6 +971,29 @@ custom1: multi
                            with_empty=True)
         self.assertEqual(test, dict(as_dict))
 
+    def test_load_dict_handles_field_validation_correctly(self):
+        self.maxDiff = None
+        test = {u'about_resource': u'.',
+                u'attribute': u'yes',
+                u'author': u'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez',
+                u'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
+                u'description': u'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
+                u'home_url': u'http://dejacode.org',
+                u'license': u'apache-2.0 public-domain',
+                u'license_file': u'apache-2.0.LICENSE',
+                u'name': u'AboutCode',
+                u'notice_file': u'NOTICE',
+                u'owner': u'nexB Inc.',
+                u'vcs_repository': u'https://github.com/dejacode/about-code-tool.git',
+                u'vcs_tool': u'git',
+                u'version': u'0.11.0'}
+        a = model.About()
+        base_dir = 'some_dir'
+        a.load_dict(test, base_dir)
+        as_dict = a.as_dict(with_paths=False, with_absent=False,
+                            with_empty=True)
+        self.assertEqual(test, dict(as_dict))
+
     def check_csvs(self, expected, result):
         """
         Assert that the content of two CSV file locations are equal.
@@ -1025,7 +1108,7 @@ class GroupingsTest(unittest.TestCase):
         results = model.by_license(abouts)
         expected = OrderedDict([
                                 ('', [c]),
-                                ('apache-2.0', [a,b]),
+                                ('apache-2.0', [a, b]),
                                 ('bsd', [d]),
                                 ('cddl-1.0', [a]),
                                 ])
@@ -1046,8 +1129,7 @@ class GroupingsTest(unittest.TestCase):
         results = model.by_name(abouts)
         expected = OrderedDict([
                                 ('', [c]),
-                                ('apache', [a,b]),
+                                ('apache', [a, b]),
                                 ('eclipse', [d]),
                                 ])
         self.assertEqual(expected, results)
-

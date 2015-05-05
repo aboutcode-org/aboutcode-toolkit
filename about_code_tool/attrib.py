@@ -23,7 +23,6 @@ import jinja2
 
 
 
-
 def generate(abouts, template_string=None):
     """
     Generate and return attribution text from a list of ABOUT objects and a
