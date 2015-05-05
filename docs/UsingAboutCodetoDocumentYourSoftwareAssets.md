@@ -13,7 +13,7 @@
     - [Use jinja2 Features to Customize Your Attribution Template](#Use jinja2 Features to Customize Your Attribution Template)  
 * [Run genattrib.py to Generate a Product Attribution Notice Package](#Run genattrib.py to Generate a Product Attribution Notice Package)  
 [Using about.py to Generate a Software Inventory](#Using about.py to Generate a Software Inventory)
-* [Generate a Software Inventory of Your Codebase from AboutCode Files](#Generate a Software Inventory of Your Codebase from AboutCode Files)  
+* [Generate a Software Inventory of Your Codebase from AboutCode Files](#Generate)  
 
 #<a name="AboutCode Defined">AboutCode Defined</a>
 
@@ -488,7 +488,7 @@ A successful execution of genattrib.py will create a .html file that is ready to
 
 # <a name="Using about.py to Generate a Software Inventory">Using about.py to Generate a Software Inventory</a>
 
-<a name="Generate a Software Inventory of Your Codebase from AboutCode Files">## Generate a Software Inventory of Your Codebase from AboutCode Files</a>
+<a name="Generate">## Generate a Software Inventory of Your Codebase from AboutCode Files</a>
 
 One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually.  For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode files manually.  
 
