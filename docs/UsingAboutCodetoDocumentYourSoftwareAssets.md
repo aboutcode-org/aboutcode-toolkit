@@ -7,12 +7,14 @@
 * [Prepare Your Software Inventory for genabout.py Standard Column Names](#PrepareYourSoftwareInventoryforgenabout.pyStandardColumnNames)  
 * [Optionally Define Custom Fields for genabout.py with MAPPING.CONFIG](#OptionallyDefineCustomFieldsforgenabout.pywithMAPPING.CONFIG)  
 * [Run genabout.py to Generate AboutCode Files](#Rungenabout.pytoGenerateAboutCodeFiles)  
+
 [Using genattrib.py to Generate a Product Attribution Notice Package](#Usinggenattrib.pytoGenerateaProductAttributionNoticePackage)  
 * [Prepare a Filtered Product BOM to Use as Input to genattrib.py](#PrepareaFilteredProductBOMtoUseasInputtogenattrib.py)  
 * [Prepare an Attribution Template to Use as Input to genattrib.py](#PrepareanAttributionTemplatetoUseasInputtogenattrib.py)  
     - [Use jinja2 Features to Customize Your Attribution Template](#Usejinja2FeaturestoCustomizeYourAttributionTemplate)  
 * [Run genattrib.py to Generate a Product Attribution Notice Package](#Rungenattrib.pytoGenerateaProductAttributionNoticePackage)  
-[Using about.py to Generate a Software Inventory](#Usingabout.pytoGenerateaSoftwareInventory)
+
+[Using about.py to Generate a Software Inventory](#Usingabout.pytoGenerateaSoftwareInventory)  
 * [Generate a Software Inventory of Your Codebase from AboutCode Files](#GenerateaSoftwareInventoryofYourCodebasefromAboutCodeFiles)  
 
 #<a name="AboutCodeDefined">AboutCode Defined</a>
