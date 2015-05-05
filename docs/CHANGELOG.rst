@@ -1,3 +1,10 @@
+2015-xx-xx  xxxxx
+
+    Release 3.0.0
+
+    * Breaking API changes:
+
+
 2015-03-06  Chin-Yeung Li  <tli@nexb.com>
 
     Release 2.0.0

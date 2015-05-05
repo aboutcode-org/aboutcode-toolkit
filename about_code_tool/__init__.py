@@ -20,12 +20,12 @@ from __future__ import print_function
 import logging
 from collections import namedtuple
 
-__version__ = '2.0.0dev2'
+__version__ = '3.0.0'
 
-__about_spec_version__ = 'simplification'
+__about_spec_version__ = '2.0.0'
 
 __copyright__ = """
-Copyright (c) 2013-2014 nexB Inc. All rights reserved. http://dejacode.org
+Copyright (c) 2013-2015 nexB Inc. All rights reserved. http://dejacode.org
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at

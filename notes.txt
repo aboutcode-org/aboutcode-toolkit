@@ -1,4 +1,0 @@
-http://docs.saltstack.com/en/latest/topics/troubleshooting/yaml_idiosyncrasies.html
-
-http://stackoverflow.com/questions/2890146/how-to-force-pyyaml-to-load-strings-as-unicode-objects
-http://yaml.org/type/bool.html
