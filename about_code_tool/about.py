@@ -46,7 +46,7 @@ import urlparse
 import ntpath
 
 
-__version__ = '1.0.2'
+__version__ = '2.0.0'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'
@@ -180,7 +180,7 @@ CHECKSUM_FIELDS = (
 
 DJE_FIELDS = (
     'dje_component',
-    'dje_license',
+    'dje_license_key',
     'dje_organization',
     'dje_license_name'
 )
@@ -1016,7 +1016,7 @@ class AboutFile(object):
             <li> uppercase and lowercase letters from A to Z</li>
             <li> the _ underscore, - dash and . period signs. </li>
         """
-        supported = string.digits + string.ascii_letters + '_-.'
+        supported = string.digits + string.ascii_letters + '_-.+'
         # Using the resource_name(file_path) will yield the following error on
         # windows:
         # Field: None, Value: [':', '\\', '\\', '\\', '\\', '\\', '\\'],
@@ -1153,7 +1153,7 @@ class Collector(object):
                         if is_about_file(name):
                             paths.append(os.path.join(root, name))
         # normalize the paths to use posix path separators
-        paths = [posix_path(p)for p in paths]
+        paths = [posix_path(p) for p in paths]
         return paths
 
     @property
@@ -1195,14 +1195,15 @@ class Collector(object):
         Return a path for a given ABOUT file location relative to and based on
         the provided collector normalized location.
         """
-        user_loc = self.location
+        user_loc = normpath(self.location)
         if os.path.isdir(self.normalized_location):
-            subpath = location.partition(os.path.basename(os.path.normpath(user_loc)))[2]
+            parent_name = basename(user_loc)
+            subpath = '/' + parent_name + location.partition(user_loc)[2]
             if user_loc[-1] == '/':
                 user_loc = user_loc.rpartition('/')[0]
             if user_loc[-1] == '\\':
                 user_loc = user_loc.rpartition('\\')[0]
-            return (user_loc + subpath).replace('\\', '/')
+            return subpath.replace('\\', '/')
         else:
             return user_loc.replace('\\', '/')
 
@@ -1235,7 +1236,34 @@ class Collector(object):
                 row_data = about_object.get_row_data(relative_path, custom_keys)
                 csv_writer.writerow(row_data)
 
-    def generate_attribution(self, template_path=None, limit_to=None):
+    def get_about_context(self, about_object):
+        about_content = about_object.validated_fields
+        if '\n' in about_object.get_dje_license_name():
+            msg = ('Multiple licenses is not supported. '
+                   'Skipping License generation.')
+            err = Error(GENATTRIB, 'dje_license',
+                        about_object.location, msg)
+            self.genattrib_errors.append(err)
+
+        lic_text = unicode(about_object.license_text(),
+                           errors='replace')
+        notice_text = unicode(about_object.notice_text(),
+                              errors='replace')
+        about_content['license_text'] = lic_text
+        about_content['notice_text'] = notice_text
+
+        # report error if no license_text is found
+        if not about_content.get('license_text')\
+            and not about_content.get('notice_text')\
+            and not '\n' in about_object.get_dje_license_name():
+            msg = ('No license_text found. '
+                   'Skipping License generation.')
+            err = Error(GENATTRIB, 'license_text_file',
+                        about_object.location, msg)
+            self.genattrib_errors.append(err)
+        return about_content
+
+    def generate_attribution(self, template_path=None, limit_to=None, verification=None):
         """
         Generate an attribution file from the current list of ABOUT objects.
         The optional `limit_to` parameter allows to restrict the generated
@@ -1270,46 +1298,21 @@ class Collector(object):
         not_process_components = list(limit_to)
         component_exist = False
 
-        # Following code contains duplication and perhaps needs to do some
-        # refactoring
         if limit_to:
             for component in not_process_components:
                 for about_object in self:
                     # The about_object.location is the absolute path of the ABOUT
-                    # file. The purpose of the following partition is to match
-                    # the about_file's location with the input list.
+                    # file. The purpose of the following string partition is to 
+                    # match the about_file's location with the input list.
                     about_relative_path = about_object.location.partition(
                                                     normpath(self.location))[2]
                     if component == about_relative_path:
                         component_exist = True
-                        about_content = about_object.validated_fields
-                        if '\n' in about_object.get_dje_license_name():
-                            msg = ('Multiple licenses is not supported. '
-                                   'Skipping License generation.')
-                            err = Error(GENATTRIB, 'dje_license',
-                                        about_object.get_dje_license_name(), msg)
-                            self.genattrib_errors.append(err)
-
-                        lic_text = unicode(about_object.license_text(),
-                                           errors='replace')
-                        notice_text = unicode(about_object.notice_text(),
-                                              errors='replace')
-                        about_content['license_text'] = lic_text
-                        about_content['notice_text'] = notice_text
-
+                        about_content = self.get_about_context(about_object)
                         license_dict[about_object.get_dje_license_name()] = about_content['license_text']
-
-                        # report error if no license_text is found
-                        if not about_content.get('license_text')\
-                            and not about_content.get('notice_text')\
-                            and not '\n' in about_object.get_dje_license_name():
-                            msg = ('No license_text found. '
-                                   'Skipping License generation.')
-                            err = Error(GENATTRIB, 'name',
-                                        about_object.get_about_name(), msg)
-                            self.genattrib_errors.append(err)
                         about_object_fields.append(about_content)
                         break
+
                 if not component_exist:
                     loc = self.location + component
                     msg = ('The requested ABOUT file: %r does not exist. '
@@ -1318,32 +1321,8 @@ class Collector(object):
                     self.genattrib_errors.append(err)
         else:
             for about_object in self:
-                about_content = about_object.validated_fields
-                if '\n' in about_object.get_dje_license_name():
-                    msg = ('Multiple licenses is not supported. '
-                           'Skipping License generation.')
-                    err = Error(GENATTRIB, 'dje_license',
-                                about_object.get_dje_license_name(), msg)
-                    self.genattrib_errors.append(err)
-
-                lic_text = unicode(about_object.license_text(),
-                                   errors='replace')
-                notice_text = unicode(about_object.notice_text(),
-                                      errors='replace')
-                about_content['license_text'] = lic_text
-                about_content['notice_text'] = notice_text
-
+                about_content = self.get_about_context(about_object)
                 license_dict[about_object.get_dje_license_name()] = about_content['license_text']
-
-                # report error if no license_text is found
-                if not about_content.get('license_text')\
-                    and not about_content.get('notice_text')\
-                    and not '\n' in about_object.get_dje_license_name():
-                    msg = ('No license_text found. '
-                           'Skipping License generation.')
-                    err = Error(GENATTRIB, 'name',
-                                about_object.get_about_name(), msg)
-                    self.genattrib_errors.append(err)
                 about_object_fields.append(about_content)
 
         # We want to display common_licenses in alphabetical order
@@ -1352,6 +1331,22 @@ class Collector(object):
         for key in sorted(license_dict):
             license_key.append(key)
             license_text_list.append(license_dict[key])
+
+        # Create the verification CSV output
+        if verification:
+            # Define what will be shown in the verification output
+            header_row = ('name', 'version', 'copyright', 'dje_license_name')
+            with open(verification, 'wb') as verification_file:
+                csv_writer = csv.writer(verification_file)
+                csv_writer.writerow(header_row)
+                for component in about_object_fields:
+                    row_data = []
+                    for key in header_row:
+                        try:
+                            row_data.append(component[key])
+                        except:
+                            row_data.append('')
+                    csv_writer.writerow(row_data)
 
         # We should only pass the about_objects to the template.
         # However, this is a temp fix for the license summarization feature.

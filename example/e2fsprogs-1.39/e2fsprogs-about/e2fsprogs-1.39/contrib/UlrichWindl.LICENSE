@@ -1,0 +1,8 @@
+# Create Adobe-PostScript file that graphically displays the output of
+# dumpe2fs(8). Use "dumpe2fs | dconf" to create a PostScript file on stdout.
+# Developed and tested for Linux 1.0.
+# Copyright (c) 1994
+# Ulrich Windl
+# ALte Regensburger Strasse 11a
+# D-93149 Nittenau, Germany
+# <Ulrich.Windl@rz.uni-regensburg.de>
