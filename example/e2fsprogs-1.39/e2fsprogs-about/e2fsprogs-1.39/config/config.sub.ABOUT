@@ -1,0 +1,16 @@
+about_resource: config.sub
+name: config.sub
+version: 
+
+attribute: yes
+category: Copyleft
+checksum_sha1: c6aba2045763f997fc81c1d881304755b09d2e02
+component_type: posix shell script text executable
+confirmed_license: GPL 2.0 with Autoconf exception
+copyright: Copyright (c) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+dje_license: gpl-2.0-autoconf
+dje_license_name: GNU General Public License 2.0 with Autoconf exception
+license_text_file: gpl-2.0-autoconf.LICENSE
+owner: Theodore Ts'o
+redistribute: yes
+track_changes: yes

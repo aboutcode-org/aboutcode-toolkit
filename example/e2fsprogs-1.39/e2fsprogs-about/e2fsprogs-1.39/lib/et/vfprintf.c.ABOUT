@@ -1,0 +1,14 @@
+about_resource: vfprintf.c
+name: vfprintf.c
+version: 
+
+attribute: yes
+category: Attribution
+checksum_sha1: 01a03815e2550f01bbfe0b40c277e0621c52cec1
+component_type: c language text
+confirmed_license: Berkeley Software License Agreement 
+copyright: Copyright (c) 1988 Regents of the University of California
+dje_license: bsla
+dje_license_name: Berkeley Software License Agreement
+license_text_file: bsla.LICENSE
+owner: Theodore Ts'o

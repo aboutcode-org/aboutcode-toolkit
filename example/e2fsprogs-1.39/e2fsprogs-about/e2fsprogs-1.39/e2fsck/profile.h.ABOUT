@@ -1,0 +1,17 @@
+about_resource: profile.h
+name: profile.h
+version: 
+
+attribute: yes
+category: Copyleft
+checksum_sha1: c95dd8d01dc42096b40fa9ac0ee96ce56db61c38
+component_type: c language text
+confirmed_license: GPL 2.0
+copyright: Copyright (C) 2005 by Theodore Ts'o.
+ Copyright (C) 1985-2005 by the Massachusetts Institute of Technology.
+dje_license: gpl-2.0
+dje_license_name: GNU General Public License 2.0
+license_text_file: gpl-2.0.LICENSE
+owner: Theodore Ts'o
+redistribute: yes
+track_changes: yes

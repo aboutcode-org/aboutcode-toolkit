@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+    <head>
+	<style type="text/css">
+		div.additional-license-text-list {display:block}
+		body {font-family: Helvetica, Arial, sans-serif;}
+		pre {white-space: pre-wrap;}
+		li {font-weight: bold;}
+		#header {font-family: Helvetica; font-style:italic}
+	</style>
+        <title>StarGazer Open Source Software Information</title>
+    </head>
+
+    <body>
+        <h1>StarGazer Open Source Software Information</h1>
+	<pre id="header">
+For instructions on how to obtain a copy of any source code being made publicly available by Starship Technology related to software used in this product you may send your request in writing to:
+
+Starship Technology LLC.
+OSS Management
+7829 Montague Expressway
+Santa Clara, CA 95031
+USA
+
+The Starship Technology website <a href="http://www.dejacode.com">www.dejacode.com</a> also contains information regarding Starship Technology's use of open source. Starship Technology has created the <a href="http://www.dejacode.org">www.dejacode.org</a> to serve as a portal for interaction with the software community-at-large.
+
+This document contains additional information regarding licenses, acknowledgments and required copyright notices for open source packages used in this Starship Technology product, which contains the following open source software components.
+	</pre>
+        <div class="oss-table-of-contents">
+            {% for about_object in about_objects %}
+                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}{% if about_object.version %}  - Version  {{ about_object.version }}{% endif %}</a></p>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        {% for about_object in about_objects %}
+            <div class="oss-component" id="component_{{ loop.index0 }}">
+                <h3 class="component-name">{{ about_object.name }}
+                    {% if about_object.version %}  - Version  {{ about_object.version }}{% endif %}
+                </h3>
+                {% if about_object.dje_license_name %}
+                    <p>This component is licensed under {{about_object.dje_license_name }}.
+                {% endif %}
+                {% if about_object.copyright %}
+                    <pre>{{about_object.copyright}}</pre>
+                {% endif %}
+                {% if about_object.notice %}
+                    <pre>{{ about_object.notice }}</pre>
+                {% elif about_object.notice_file %}
+                    <pre class="component-notice">{{ about_object.notice_text }}</pre>
+                {% endif %}
+                {% if about_object.dje_license_name in common_licenses %}
+                    <p>Full text of
+                        <a class="{{ about_object.dje_license_name }}" href="#component-license-{{ about_object.dje_license_name }}">
+                         {{ about_object.dje_license_name }}
+                         </a>
+                            is available at the end of this document.</p>
+                {% else %}
+                    {% if about_object.license_text %}
+                        <pre>{{about_object.license_text | e}}</pre>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <hr>
+
+        <h3>Common Licenses Used in This Product</h3>
+        {% for index in range(license_keys | count) %}
+            {% if license_keys[index] in common_licenses %}
+                <h3 id="component-license-{{ license_keys[index] }}">{{ license_keys[index] }}</h3>
+                <pre>{{ license_texts[index]|e }}</pre>
+            {% endif %}
+        {% endfor %}
+
+        <h3><a id="End">End</a></h3>
+    </body>
+</html>

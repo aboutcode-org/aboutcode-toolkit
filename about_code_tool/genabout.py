@@ -35,12 +35,13 @@ import urllib
 import urllib2
 
 from collections import namedtuple
+from urlparse import urljoin, urlparse
 from os import makedirs
 from os.path import exists, dirname, join, abspath, isdir, normpath, basename, expanduser
 
 import about
 
-__version__ = '1.0.2'
+__version__ = '2.0.0'
 
 __copyright__ = """
 Copyright (c) 2013-2014 nexB Inc. All rights reserved.
@@ -70,13 +71,40 @@ file_logger = logging.getLogger(__name__ + '_file')
 
 ESSENTIAL_FIELDS = ('about_file',)
 
-# The 'dje_license_key' will be removed and will use the 'dje_license' instead.
 SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + ('about_file',)
 
 
-Warn = namedtuple('Warn', 'field_name field_value message',)
-Error = namedtuple('Error', 'field_name field_value message',)
+def repr_problem(obj):
+    """
+    Return a formatted representation of a given Warn or Error object
+    suitable for reporting.
+    """
+    field_name = obj.field_name
+    field_value = obj.field_value
+    message = obj.message
+    return ('Field: %(field_name)s, '
+            'Value: %(field_value)s, '
+            'Message: %(message)s' % locals())
 
+
+Warn = namedtuple('Warn', 'code field_name field_value message',)
+Warn.__repr__ = repr_problem
+
+
+Error = namedtuple('Error', 'code field_name field_value message',)
+Error.__repr__ = repr_problem
+
+IGNORED = 'field or line ignored problem'
+VALUE = 'missing or empty or multiple value problem'
+FILE = 'file problem'
+URL = 'URL problem'
+VCS = 'Version control problem'
+DATE = 'Date problem'
+ASCII = 'ASCII problem'
+SPDX = 'SPDX license problem'
+UNKNOWN = 'Unknown problem'
+GENATTRIB = 'Attribution generation problem'
+NETWORK = 'Network problem'
 
 # Handle different behaviors if ABOUT file already exists
 ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST = 0
@@ -217,7 +245,7 @@ class GenAbout(object):
                 if key in ignored_keys_list:
                     copied_dict.pop(key, None)
         msg = 'The field(s) "%s" is/are not supported and will be ignored.' % ignored_keys_list
-        self.warnings.append(Warn(ignored_keys_list, '', msg))
+        self.warnings.append(Warn(IGNORED, ignored_keys_list, '', msg))
         return copied_list
 
     @staticmethod
@@ -274,7 +302,7 @@ class GenAbout(object):
                         if _exists(path):
                             files_list.append((path, about_parent_dir))
                         else:
-                            self.warnings.append(Warn(file_key, path, "File does not exist."))
+                            self.warnings.append(Warn(FILE, file_key, path, "File does not exist."))
         return files_list
 
     def request_license_data(self, url, username, api_key, license_key):
@@ -288,19 +316,6 @@ class GenAbout(object):
             'api_key': api_key,
             'format': 'json'
         }
-
-        # Check is the provided api_url valid or not.
-        try:
-            request = urllib2.Request(url)
-            response = urllib2.urlopen(request)
-            response_content = response.read()
-        except urllib2.HTTPError as http_e:
-            if http_e.code == 404:
-                error_msg = ("URL not reachable. Invalid '--api_url'."
-                                 " LICENSE generation is skipped.")
-                print("\n" + error_msg + "\n")
-                self.extract_dje_license_error = True
-                self.errors.append(Error('--api_url', url, error_msg))
 
         url = url.rstrip('/')
         encoded_payload = urllib.urlencode(payload)
@@ -322,11 +337,11 @@ class GenAbout(object):
                 print(error_msg)
                 print()
                 self.extract_dje_license_error = True
-                self.errors.append(Error('username/api_key',
+                self.errors.append(Error(VALUE, 'username/api_key',
                                          username + '/' + api_key, error_msg))
             else:
                 # FIXME: would this be only with a 404?
-                self.errors.append(Error('dje_license', license_key,
+                self.errors.append(Error(VALUE, 'dje_license_key', license_key,
                                          "Invalid 'dje_license_key'"))
         except urllib2.URLError:
             if about.check_network_connection():
@@ -334,12 +349,12 @@ class GenAbout(object):
                              " LICENSE generation is skipped.")
                 print("\n" + error_msg + "\n")
                 self.extract_dje_license_error = True
-                self.errors.append(Error('--api_url', url, error_msg))
+                self.errors.append(Error(VALUE, '--api_url', url, error_msg))
             else:
                 error_msg = "Network problem. Please check the Internet connection. LICENSE generation is skipped."
                 print("\n" + error_msg + "\n")
                 self.extract_dje_license_error = True
-                self.errors.append(Error('Network', '', error_msg))
+                self.errors.append(Error(NETWORK, 'Network', '', error_msg))
         except ValueError:
             # FIXME: when does this happen?
             pass
@@ -366,7 +381,7 @@ class GenAbout(object):
                 with open(gen_license_path, 'wb') as output:
                     output.write(license_context)
             except Exception:
-                err = Error('Unknown', gen_license_path,
+                err = Error(UNKNOWN, 'Unknown', gen_license_path,
                             'Something is wrong.')
                 self.errors.append(err)
 
@@ -396,44 +411,47 @@ class GenAbout(object):
                     license_text_file = line['license_text_file']
                     license_file = normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file))
                     if not _exists(license_file):
-                        self.errors.append(Error('license_text_file', license_file, "The 'license_text_file' does not exist."))
+                        self.errors.append(Error(FILE, 'license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
-                        if line['dje_license']:
+                        if line['dje_license_key']:
                             license_output_list.append(self.gen_license_list(line))
                             lic_name = line['dje_license_name']
                             line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                         else:
-                            self.warnings.append(Warn('dje_license', '',
-                                                      "Missing 'dje_license' for " + line['about_file']))
+                            self.warnings.append(Warn(VALUE, 'dje_license_key', '',
+                                                      "Missing 'dje_license_key' for " + line['about_file']))
             # This except condition will force the tool to create the
             # 'license_text_file' key column from the self.gen_license_list(line)
             except Exception:
                 # FIXME: this is too complex
                 if gen_license:
-                    if line['dje_license']:
+                    if line['dje_license_key']:
                         license_output_list.append(self.gen_license_list(line))
                         lic_name = line['dje_license_name']
                         if lic_name:
                             line['license_text_file'] = dje_license_dict[lic_name][0] + '.LICENSE'
                     else:
-                        self.warnings.append(Warn('dje_license', '',
-                                                  "Missing 'dje_license' for " + line['about_file']))
+                        self.warnings.append(Warn(VALUE, 'dje_license_key', '',
+                                                  "Missing 'dje_license_key' for " + line['about_file']))
         return license_output_list
 
     def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
+        dje_uri = urlparse(api_url)
+        domain = '{uri.scheme}://{uri.netloc}/'.format(uri=dje_uri)
+        dje_lic_urn = urljoin(domain, "urn/?urn=urn:dje:license:")
         key_text_dict = {}
         license_dict = {}
         for line in input_list:
             try:
-                if line['dje_license']:
-                    if '\n' in line['dje_license']:
+                if line['dje_license_key']:
+                    if '\n' in line['dje_license_key']:
                         line['dje_license_name'] = ""
-                        self.errors.append(Error('dje_license',
-                                                 line['dje_license'],
+                        self.errors.append(Error(VALUE, 'dje_license_key',
+                                                 line['dje_license_key'],
                                                  "No multiple licenses or newline character are accepted."))
                         continue
-                    lic = line['dje_license']
+                    lic = line['dje_license_key']
                     if not lic in license_dict:
                         detail_list = []
                         detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
@@ -441,14 +459,16 @@ class GenAbout(object):
                         line['dje_license_name'] = detail[0]
                         dje_key = detail[1]
                         license_context = detail [2]
+                        line['dje_license_url'] = dje_lic_urn + lic
                         detail_list.append(dje_key)
                         detail_list.append(license_context)
                         key_text_dict[detail[0]] = detail_list
                     else:
                         line['dje_license_name'] = license_dict[lic]
+                        line['dje_license_url'] = dje_lic_urn + lic
             except Exception:
-                err = Warn('dje_license', '',
-                           'Missing "dje_license" for ' + line['about_file'])
+                err = Warn(VALUE, 'dje_license_key', '',
+                           'Missing "dje_license_key" for ' + line['about_file'])
                 self.warnings.append(err)
         return key_text_dict
 
@@ -470,7 +490,7 @@ class GenAbout(object):
                         license_list_context.append(gen_path_context)
         return license_list_context
 
-    def pre_generation(self, gen_location, input_list, action_num, all_in_one):
+    def pre_generation(self, gen_location, input_list, action_num):
         """
         Perfom some pre-generation.
         TODO: document me
@@ -492,9 +512,6 @@ class GenAbout(object):
                     file_location = join(file_location, basename(file_location))
                 file_location += '.ABOUT'
 
-            if all_in_one:
-                # This is to get the filename instead of the file path
-                file_location = file_location.rpartition('/')[2]
             about_file_location = join(gen_location, file_location)
             about_file_dir = dirname(about_file_location)
             if not os.path.exists(about_file_dir):
@@ -503,7 +520,7 @@ class GenAbout(object):
             if about_file_exist:
                 if action_num == ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST:
                     msg = 'ABOUT file already existed. Generation is skipped.'
-                    self.warnings.append(Warn('about_file',
+                    self.warnings.append(Warn(IGNORED, 'about_file',
                                               about_file_location, msg))
                     continue
                 # Overwrites the current ABOUT field value if it existed
@@ -639,11 +656,6 @@ Handle different behaviors if ABOUT files already existed
 3 - Replace the ABOUT file with the current generation
 """
 
-ALL_IN_ONE_HELP = """\
-Generate all the ABOUT files in the [output_path] without
-any project structure
-"""
-
 COPY_FILES_HELP = """\
 Copy the '*_file' from the project to the generated location
 Project path - Project path
@@ -674,7 +686,6 @@ genabout.py --extract_license --api_url='api_url' --api_username='api_username' 
 def main(parser, options, args):
     verbosity = options.verbosity
     action = options.action
-    all_in_one = options.all_in_one
     copy_files_path = options.copy_files
     license_text_path = options.license_text_location
     mapping_config = options.mapping
@@ -815,7 +826,6 @@ def main(parser, options, args):
                 gen.copy_files(output_path, license_list)
 
     if license_text_path:
-        print(normpath(license_text_path))
         if not isdir(license_text_path):
             print("The '--license_text_location' <license_path> "
                   "must be a directory.")
@@ -836,11 +846,11 @@ def main(parser, options, args):
             sys.exit(errno.EINVAL)
         for line in input_list:
             try:
-                if line['dje_license']:
+                if line['dje_license_key']:
                     break
             except Exception as e:
                 print(repr(e))
-                print("The input does not have the 'dje_license' "
+                print("The input does not have the 'dje_license_key' "
                       "key which is required.")
                 sys.exit(errno.EINVAL)
 
@@ -856,8 +866,7 @@ def main(parser, options, args):
                                                 dje_license_dict)
     components_list = gen.pre_generation(output_path,
                                          input_list,
-                                         action_num,
-                                         all_in_one)
+                                         action_num)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
 
@@ -921,8 +930,6 @@ def get_parser():
                       help=VERBOSITY_HELP)
     parser.add_option('--action', type=int,
                       help=ACTION_HELP)
-    parser.add_option('--all_in_one', action='store_true',
-                      help=ALL_IN_ONE_HELP)
     parser.add_option('--copy_files', type='string',
                       help=COPY_FILES_HELP)
     parser.add_option('--license_text_location', type='string',

@@ -1,0 +1,17 @@
+about_resource: .
+name: blkid
+version: 
+
+attribute: yes
+category: Copyleft Limited
+component_type: directory
+confirmed_license: LGPL 2.1
+copyright: Copyright (C) 2001 Andreas Dilger
+ Copyright (C) 2003 Theodore Ts'o
+ Copyright (C) 1999 by Andries Brouwer
+dje_license: lgpl-2.1
+dje_license_name: GNU Lesser General Public License 2.1
+license_text_file: lgpl-2.1.LICENSE
+owner: Theodore Ts'o
+redistribute: yes
+track_changes: yes

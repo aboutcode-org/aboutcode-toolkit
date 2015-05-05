@@ -43,7 +43,7 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
-__version__ = '1.0.2'
+__version__ = '2.0.0'
 
 __about_spec_version__ = '1.0.0'  # See http://dejacode.org
 
@@ -107,6 +107,8 @@ def check_about_file_existence_and_format(input_list):
 USAGE_SYNTAX = """\
     Input can be a file or directory.
     Output of rendered template must be a file (e.g. .html).
+
+    Optional:
     Component List must be a .csv file which has at least an "about_file" column.
 """
 
@@ -128,12 +130,16 @@ MAPPING_HELP = """\
 Configure the mapping key from the MAPPING.CONFIG
 """
 
+VERIFICATION_HELP = """\
+Create a verification CSV output for the attribution
+"""
 
 def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
     mapping_config = options.mapping
     template_location = options.template_location
+    verification_location = options.verification_location
 
     if options.version:
         print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
@@ -149,8 +155,26 @@ def main(parser, options, args):
             print("The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 
-    if not len(args) >= 2 and not len(args) < 4:
-        print('Path for input and output are required.\n')
+    if template_location:
+        template_location = abspath(expanduser(template_location))
+        if not exists(template_location):
+            print('The defined template location does not exist.')
+            parser.print_help()
+            sys.exit(errno.EINVAL)
+
+    if verification_location:
+        verification_location = abspath(expanduser(verification_location))
+        if not verification_location.endswith('.csv'):
+            print('The verification output must ends with ".csv".')
+            parser.print_help()
+            sys.exit(errno.EINVAL)
+        if not exists(dirname(verification_location)):
+            print('The verification output directory does not exist.')
+            parser.print_help()
+            sys.exit(errno.EINVAL)
+
+    if not len(args) >= 2 or not len(args) < 4:
+        print('The number of arguments is incorrect.\n')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -193,13 +217,6 @@ def main(parser, options, args):
         parser.print_help()
         sys.exit(errno.EEXIST)
 
-    if template_location:
-        template_location = abspath(expanduser(template_location))
-        if not exists(expanduser(template_location)):
-            print('The defined template location does not exist.')
-            parser.print_help()
-            sys.exit(errno.EINVAL)
-
     if component_subset_path and not exists(component_subset_path):
         print('Component Subset path does not exist.')
         parser.print_help()
@@ -230,7 +247,7 @@ def main(parser, options, args):
             sublist = component_subset_to_sublist(updated_list)
             outlist = update_path_to_about(sublist)
 
-        attrib_str = collector.generate_attribution(template_path=template_location, limit_to=outlist)
+        attrib_str = collector.generate_attribution(template_path=template_location, limit_to=outlist, verification=verification_location)
         errors = collector.get_genattrib_errors()
 
         if attrib_str:
@@ -294,7 +311,7 @@ def get_parser():
             return "".join(result)
 
     parser = optparse.OptionParser(
-        usage='%prog [options] input_path output_path component_list',
+        usage='%prog [options] input_path output_path [component_list]',
         description=USAGE_SYNTAX,
         add_help_option=False,
         formatter=MyFormatter(),
@@ -310,6 +327,8 @@ def get_parser():
                       help=TEMPLATE_LOCATION_HELP)
     parser.add_option('--mapping', action='store_true',
                       help=MAPPING_HELP)
+    parser.add_option('--verification_location', type='string',
+                      help=VERIFICATION_HELP)
     return parser
 
 

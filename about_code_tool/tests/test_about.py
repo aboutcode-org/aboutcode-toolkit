@@ -24,7 +24,7 @@ from unittest.case import skip
 import os
 import re
 import stat
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, join, split
 
 from about_code_tool import about
 
@@ -99,7 +99,7 @@ class CollectorTest(unittest.TestCase):
         output = get_temp_file()
         collector = about.Collector(test_file)
         collector.write_to_csv(output)
-        expected = 'about_code_tool/tests/testdata/basic'
+        expected = '/basic'
         # FIXME: why [2]? what this test means?
         with open(output) as f:
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))
@@ -113,20 +113,24 @@ class CollectorTest(unittest.TestCase):
         'notice_file,notice_url,license_text_file,license_url,license_spdx,'
         'redistribute,attribute,track_changes,vcs_tool,vcs_repository,'
         'vcs_path,vcs_tag,vcs_branch,vcs_revision,checksum_sha1,checksum_md5,'
-        'checksum_sha256,dje_component,dje_license,dje_organization,'
+        'checksum_sha256,dje_component,dje_license_key,dje_organization,'
         'dje_license_name,scm_branch,scm_repository,signature_gpg_file,'
-        'redistribute_sources,about_format,usage,'
-        'license_text,notice,'  # These two are not supported and thus treat as custom keys
-        'scm_path,scm_tool,scm_rev,scm_tag,organization,'
+        'redistribute_sources,dje_license,about_format,usage,'
+        'license_text,notice,scm_path,scm_tool,scm_rev,scm_tag,organization,'
         'warnings,errors')
 
         test_file = 'about_code_tool/tests/testdata/basic'
         output = get_temp_file()
         collector = about.Collector(test_file)
         collector.write_to_csv(output)
+        header_row = ''
         with open(output) as f:
             header_row = f.readline().replace('\n', '').replace('\r', '')
-            self.assertEqual(expected_header, header_row)
+        header_row_array = header_row.split(',')
+        expected_header_array = expected_header.split(',')
+        self.assertEqual(len(expected_header_array), len(header_row_array))
+        for key in header_row_array:
+            self.assertTrue(key in expected_header_array)
 
     def test_collect_can_collect_a_directory_tree(self):
         test_dir = 'about_code_tool/tests/testdata/DateTest'
@@ -181,14 +185,14 @@ class ParserTest(unittest.TestCase):
 
     def test_valid_chars_in_file_name(self):
         about_obj = about.AboutFile()
-        name = string.digits + string.ascii_letters + '_-.'
+        name = string.digits + string.ascii_letters + '_-.+'
         result = about_obj.invalid_chars_in_about_file_name(name)
         expected = []
         self.assertEqual(expected, result)
 
     def test_result_chars_in_file_name(self):
         about_obj = about.AboutFile()
-        result = about_obj.invalid_chars_in_about_file_name('_$as/afg:')
+        result = about_obj.invalid_chars_in_about_file_name('_$a+s/afg:')
         expected = [':']
         self.assertEqual(expected, result)
 
@@ -626,6 +630,16 @@ about_resource: about.py
         # Strip all the white spaces
         self.assertEqual(re.sub(r'\s+', '', expected), re.sub(r'\s+', '', result))
 
+    def test_generate_attribution_verification(self):
+        expected = (u'name,version,copyright,dje_license_name\n'
+                    'Apache HTTP Server,2.4.3,,') 
+        test_file = join(TESTDATA_DIR, 'attrib/attrib.ABOUT')
+        collector = about.Collector(test_file)
+        test_path = get_temp_file('test.csv')
+        result = collector.generate_attribution(limit_to=[''], verification=test_path)
+        with open(test_path, 'rU') as f:
+            self.assertEqual(f.read().rstrip(), expected)
+
     def test_license_text_extracted_from_license_text_file(self):
         expected = '''Tester holds the copyright for test component. Tester relinquishes copyright of
 this software and releases the component to Public Domain.
@@ -680,7 +694,8 @@ class OtherTest(unittest.TestCase):
         about_file = about.AboutFile(join(TESTDATA_DIR, 'basic/basic.about'))
         result = about_file.get_custom_field_keys()
         expected = ['scm_branch', 'scm_repository', 'signature_gpg_file',
-                    'redistribute_sources', 'about_format', 'usage',
+                    'redistribute_sources', 'dje_license',
+                    'about_format', 'usage',
                     # These two keys are removed from the spec and therefore
                     # become a custom keys
                     'license_text', 'notice',
