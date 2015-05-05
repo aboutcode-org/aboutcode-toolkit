@@ -47,11 +47,11 @@ class FieldTest(unittest.TestCase):
 
     def test_empty_Field_has_no_content(self):
         field = model.Field()
-        self.assertFalse(field.has_content)
+        assert not field.has_content
 
     def test_empty_Field_has_default_value(self):
         field = model.Field()
-        self.assertEqual('', field.value)
+        assert '' == field.value
 
     def test_PathField_check_location(self):
         test_file = 'license.LICENSE'

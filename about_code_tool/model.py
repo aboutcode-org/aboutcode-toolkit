@@ -54,8 +54,10 @@ class Field(object):
         # save this and do not mutate it afterwards
         if isinstance(value, basestring):
             self.original_value = value
-        else:
+        elif value:
             self.original_value = repr(value)
+        else:
+            self.original_value = value
 
         # can become a string, list or OrderedDict() after validation
         self.value = value or self.default_value()
