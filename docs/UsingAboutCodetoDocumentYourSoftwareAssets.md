@@ -274,7 +274,7 @@ When your software inventory is ready, you can save it as a .csv file, and use i
 
 Here is an example of a genabout.py command: 
 
-<pre><code>python genabout.py --extract_license --api_url='{{your license library api}}' --api_username='{{api-user}}' --api_key='{{your license library api key}}'  --mapping --license_text_location=/Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/ </code></pre>
+python genabout.py --extract_license --api_url='{{your license library api}}' --api_username='{{api-user}}' --api_key='{{your license library api key}}'  --mapping --license_text_location=/Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
 
 Note that this example genabout.py command does the following: 
 
