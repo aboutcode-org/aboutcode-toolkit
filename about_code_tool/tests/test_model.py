@@ -1065,9 +1065,15 @@ class CollectorTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_collect_inventory_works_with_relative_paths(self):
-        model.collect_inventory('.')
-        model.collect_inventory('')
-        model.collect_inventory('./etc')
+        errors1, abouts1 = model.collect_inventory('./testdata/parse/complete/')
+        errors2, abouts2 = model.collect_inventory('../tests/testdata/parse/complete/')
+        self.assertEqual([], errors1)
+        self.assertEqual([], errors2)
+        expected = 'complete/about.ABOUT'
+        result1 = abouts1[0].about_file_path
+        result2 = abouts2[0].about_file_path
+        self.assertEqual(expected, result1)
+        self.assertEqual(expected, result2)
 
 
 class GroupingsTest(unittest.TestCase):

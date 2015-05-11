@@ -1009,13 +1009,13 @@ def collect_inventory(location):
     errors = []
     location = util.get_absolute(location)
     locations = list(util.get_about_locations(location))
+    # FIXME: CY: why do we have 2 check_file_names here?
     duplicate_errors = util.check_file_names(locations)
     errors.extend(duplicate_errors)
 
     name_errors = util.check_file_names(locations)
     errors.extend(name_errors)
     abouts = []
-
     for loc in locations:
         about_file_path = util.get_relative_path(location, loc)
         about = About(loc, about_file_path)
