@@ -549,6 +549,7 @@ def validate_fields(fields, base_dir):
     errors = []
     for f in fields:
         val_err = f.validate(base_dir=base_dir)
+        errors.extend(val_err)
     return errors
 
 
