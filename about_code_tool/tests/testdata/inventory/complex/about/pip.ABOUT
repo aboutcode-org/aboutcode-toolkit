@@ -2,7 +2,7 @@ about_resource: pip-1.5.6-py2.py3-none-any.whl
 version: 1.5.6
 download_url: https://pypi.python.org/packages/source/p/pip/pip-1.5.6.tar.gz#md5=01026f87978932060cc86c1dc527903e
 
-name:pip
+name: pip
 owner: The pip developers
 contact: python-virtualenv@groups.google.com
 home_url: http://www.pip-installer.org

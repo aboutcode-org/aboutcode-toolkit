@@ -4,7 +4,7 @@ download_url: https://pypi.python.org/packages/2.7/c/click/click-3.2-py2.py3-non
 name: click
 owner: Armin Ronacher
 contact: armin.ronacher@active-4.com
-home_url:http://click.pocoo.org/
+home_url: http://click.pocoo.org/
 vcs_tool: git
 vcs_repository: https://github.com/mitsuhiko/click.git
 description: A simple wrapper around optparse for 
