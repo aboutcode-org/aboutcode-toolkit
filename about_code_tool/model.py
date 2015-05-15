@@ -844,7 +844,7 @@ class About(object):
         try:
             input_file = codecs.open(loc, encoding='utf-8').read()
             import yaml
-            dct = yaml.load(input_file)
+            dct = yaml.load(input_file, Loader=yaml.loader.BaseLoader)
             errs = self.load_dict(dct, base_dir)
             errors.extend(errs)
         except Exception, e:
