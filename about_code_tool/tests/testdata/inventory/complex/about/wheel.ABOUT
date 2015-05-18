@@ -7,7 +7,8 @@ home_url: https://bitbucket.org/pypa/wheel
 vcs_tool: hg
 vcs_repository: https://bitbucket.org/pypa/wheel
 
-copyright: copyright (c) 2012-2014 Daniel Holth <dholth@fastmail.fm> and
- contributors.
+copyright: |
+    copyright (c) 2012-2014 Daniel Holth <dholth@fastmail.fm> and
+    contributors.
 dje_license: mit
 license_text_file: wheel.LICENSE
