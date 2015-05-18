@@ -720,7 +720,7 @@ vcs_repository: https://github.com/dejacode/about-code-tool.git
             Error(INFO, u'Field custom1 is a custom field'),
             Error(INFO, u'Field custom2 is a custom field'),
             Error(WARNING, u'Field custom2 is present but empty')]
-        self.assertEqual(expected_error, a.errors)
+        self.assertEqual(sorted(expected_error), sorted(a.errors))
 
         expected = u'''about_resource: .
 name: AboutCode
@@ -768,7 +768,7 @@ custom2:
             Error(INFO, u'Field custom1 is a custom field'),
             Error(INFO, u'Field custom2 is a custom field'),
             Error(WARNING, u'Field custom2 is present but empty')]
-        self.assertEqual(expected_error, a.errors)
+        self.assertEqual(sorted(expected_error), sorted(a.errors))
 
         expected = u'''about_resource: .
 name: AboutCode
