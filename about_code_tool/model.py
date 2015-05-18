@@ -135,9 +135,17 @@ class Field(object):
         name = self.name
         value = self.serialized_value() or u''
         if self.has_content:
-            # add space prefix for continuations
             value = value.splitlines(True)
-            value = u' '.join(value)
+            # multi-line
+            if len(value) > 1:
+                # Insert '|' as the indicator for multi-line follow by a
+                # newline character
+                value.insert(0, u'|\n')
+                # insert 4 spaces for newline values
+                value = u'    '.join(value)
+            else:
+                value = u''.join(value)
+            #print(value)
             serialized = u'%(name)s: %(value)s' % locals()
         else:
             serialized = u'%(name)s:' % locals()
@@ -896,7 +904,7 @@ class About(object):
         If with_empty, include empty fields.
         """
         serialized = []
-        for field  in self.all_fields(with_absent, with_empty):
+        for field in self.all_fields(with_absent, with_empty):
             serialized.append(field.serialize())
         # always end with a new line
         return u'\n'.join(serialized) + u'\n'
