@@ -537,12 +537,12 @@ this software and releases the component to Public Domain.
         test_file2 = get_test_loc('equal/complete/about.ABOUT')
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
         self.maxDiff = None
-        print()
-        print('a')
-        print(a.dumps(True))
-        print()
-        print('b')
-        print(b.dumps(True))
+        #print()
+        #print('a')
+        #print(a.dumps(True))
+        #print()
+        #print('b')
+        #print(b.dumps(True))
         self.assertEqual(a.dumps(True), b.dumps(True))
         self.assertEqual(a, b)
 
