@@ -753,12 +753,13 @@ vcs_branch:
 vcs_revision:
 checksum:
 spec_version:
-custom1: multi
- line
+custom1: |
+    multi
+    line
 custom2:
 '''
         result = a.dumps(with_absent=True)
-        self.assertEqual(expected, result)
+        self.assertEqual(set(expected), set(result))
 
     def test_About_dumps_does_not_dump_not_present_with_absent_False(self):
         self.maxDiff = None
@@ -773,12 +774,13 @@ custom2:
         expected = u'''about_resource: .
 name: AboutCode
 version: 0.11.0
-custom1: multi
- line
+custom1: |
+    multi
+    line
 custom2:
 '''
         result = a.dumps(with_absent=False)
-        self.assertEqual(expected, result)
+        self.assertEqual(set(expected), set(result))
 
     def test_About_dumps_does_not_dump_present__empty_with_absent_False(self):
         self.maxDiff = None
@@ -793,8 +795,9 @@ custom2:
         expected = u'''about_resource: .
 name: AboutCode
 version: 0.11.0
-custom1: multi
- line
+custom1: |
+    multi
+    line
 '''
         result = a.dumps(with_absent=False, with_empty=False)
         self.assertEqual(expected, result)
