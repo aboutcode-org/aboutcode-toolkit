@@ -1,4 +1,4 @@
-about_resource:.
+about_resource: .
 name: license name
 license_file: test.LICENSE
 notice_file: test.NOTICE 
