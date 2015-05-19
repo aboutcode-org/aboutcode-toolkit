@@ -3,7 +3,8 @@ about_resource: .
 
 single_line: README STUFF
 
-multi_line: line1
- line2
+multi_line: |
+    line1
+    line2
 
 empty : 
