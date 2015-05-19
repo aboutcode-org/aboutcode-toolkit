@@ -1065,7 +1065,6 @@ class CollectorTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_collect_inventory_works_with_relative_paths(self):
-        # FIXME: The following path depends on where the user's current directory
         errors1, abouts1 = model.collect_inventory('./testdata/parse/complete/')
         errors2, abouts2 = model.collect_inventory('../tests/testdata/parse/complete/')
         self.assertEqual([], errors1)
