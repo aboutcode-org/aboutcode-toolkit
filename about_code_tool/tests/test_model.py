@@ -329,6 +329,9 @@ test with no colon
 
 class AboutTest(unittest.TestCase):
 
+    # This test is failing because the YAML does not keep the order when
+    # loads the test files. For instance, it treat the 'About_Resource' as the
+    # first element and therefore the dup key is 'about_resource'.
     def test_About_duplicate_field_names_are_detected_with_different_case(self):
         test_file = get_test_loc('parse/dupe_field_name.ABOUT')
         a = model.About(test_file)

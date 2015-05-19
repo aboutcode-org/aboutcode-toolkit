@@ -151,7 +151,6 @@ class Field(object):
                     value = u'    '.join(value)
             else:
                 value = u''.join(value)
-            #print(value)
             serialized = u'%(name)s: %(value)s' % locals()
         else:
             serialized = u'%(name)s:' % locals()
@@ -858,6 +857,7 @@ class About(object):
         try:
             input_file = codecs.open(loc, encoding='utf-8').read()
             import yaml
+            # The yaml.load doesn't keep the original order in the dict
             dct = yaml.load(input_file, Loader=yaml.loader.BaseLoader)
             errs = self.load_dict(dct, base_dir)
             errors.extend(errs)
