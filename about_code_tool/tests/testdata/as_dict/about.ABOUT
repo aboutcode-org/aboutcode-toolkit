@@ -3,8 +3,9 @@ name: AboutCode
 
 owner: nexB Inc.
 author: 
-description: AboutCode is a tool 
- for files.
+description: |
+    AboutCode is a tool 
+    for files.
 license: apache-2.0
 copyright: Copyright (c) 2013-2014 nexB Inc.
 custom1: some custom
