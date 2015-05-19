@@ -696,9 +696,10 @@ class SerializationTest(unittest.TestCase):
         expected = u'''about_resource: .
 name: AboutCode
 version: 0.11.0
-description: AboutCode is a tool
- to process ABOUT files.
- An ABOUT file is a file.
+description: |
+    AboutCode is a tool
+    to process ABOUT files.
+    An ABOUT file is a file.
 home_url: http://dejacode.org
 license: apache-2.0
 license_file: apache-2.0.LICENSE
