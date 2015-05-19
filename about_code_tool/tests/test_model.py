@@ -910,8 +910,9 @@ custom1: multi
         test = u'''about_resource: .
 name: AboutCode
 version: 0.11.0
-custom1: multi
- line
+custom1: |
+    multi
+    line
 '''
         a = model.About()
         base_dir = 'some_dir'
