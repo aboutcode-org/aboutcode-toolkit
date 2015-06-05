@@ -1,0 +1,4 @@
+download_url: http://some.com/this
+name: old
+version: new
+about_resource: .

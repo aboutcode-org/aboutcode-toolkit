@@ -329,10 +329,20 @@ test with no colon
 
 class AboutTest(unittest.TestCase):
 
-    # This test is failing because the YAML does not keep the order when
-    # loads the test files. For instance, it treat the 'About_Resource' as the
-    # first element and therefore the dup key is 'about_resource'.
+    def test_About_load_ignores_original_field_order_and_uses_standard_predefined_order(self):
+        # fields in this file are not in the standard order
+        test_file = get_test_loc('parse/ordered_fields.ABOUT')
+        a = model.About(test_file)
+        assert [] == a.errors
+
+        expected = ['about_resource', 'name', 'version', 'download_url']
+        result = [f.name for f in a.all_fields() if f.present]
+        assert expected == result
+
     def test_About_duplicate_field_names_are_detected_with_different_case(self):
+        # This test is failing because the YAML does not keep the order when
+        # loads the test files. For instance, it treat the 'About_Resource' as the
+        # first element and therefore the dup key is 'about_resource'.
         test_file = get_test_loc('parse/dupe_field_name.ABOUT')
         a = model.About(test_file)
         expected = [

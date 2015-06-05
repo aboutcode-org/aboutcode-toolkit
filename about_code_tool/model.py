@@ -32,6 +32,7 @@ import urlparse
 import posixpath
 from collections import OrderedDict
 
+import saneyaml
 import unicodecsv
 
 from about_code_tool import Error
@@ -855,11 +856,8 @@ class About(object):
         base_dir = posixpath.dirname(loc)
         errors = []
         try:
-            input_file = codecs.open(loc, encoding='utf-8').read()
-            import yaml
-            # The yaml.load doesn't keep the original order in the dict
-            dct = yaml.load(input_file, Loader=yaml.loader.BaseLoader)
-            errs = self.load_dict(dct, base_dir)
+            input_text = codecs.open(loc, encoding='utf-8').read()
+            errs = self.load_dict(saneyaml.load(input_text), base_dir)
             errors.extend(errs)
         except Exception, e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'

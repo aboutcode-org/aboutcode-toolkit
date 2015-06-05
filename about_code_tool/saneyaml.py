@@ -88,7 +88,9 @@ def string_loader(loader, node):
     """
     return loader.construct_scalar(node)
 
+
 SaneLoader.add_constructor(u'tag:yaml.org,2002:str', string_loader)
+
 
 # Load as strings most scalar types: nulls, booleans, ints, (such as in
 # version 01) floats (such version 2.20) and timestamps conversion (in
@@ -120,7 +122,6 @@ def ordered_loader(loader, node):
 
 SaneLoader.add_constructor(u'tag:yaml.org,2002:map', ordered_loader)
 SaneLoader.add_constructor(u'tag:yaml.org,2002:omap', ordered_loader)
-
 
 
 class SaneDumper(SafeDumper):
