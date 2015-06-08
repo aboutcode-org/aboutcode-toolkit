@@ -50,7 +50,7 @@ Python 2.7.x here https://www.python.org/downloads/ :
 
 * Download the .msi installer for Windows or the .dmg archive for Mac.
 * Open and run the installer using all the default options.
-* On Windows, make sure you install Python in the default c:\Python27 and not
+* On Windows, make sure you install Python in the default c:\\Python27 and not
   on another drive.
 
 
@@ -91,7 +91,7 @@ On Linux or Mac, run this::
    source bin/activate
 
 On Windows, run this::
-   bin\activate
+   bin\\activate
 
 
 
