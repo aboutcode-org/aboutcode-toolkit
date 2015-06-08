@@ -9,6 +9,7 @@ lib64
 /Lib
 /Scripts
 /include
+/local
 
 # Installer logs
 pip-log.txt
@@ -29,4 +30,5 @@ nosetests.xml
 
 # PyCharm project
 .idea/
-/about_code_tool.egg_info
+
+/*.egg_info

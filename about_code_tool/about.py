@@ -46,7 +46,7 @@ import urlparse
 import ntpath
 
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'
