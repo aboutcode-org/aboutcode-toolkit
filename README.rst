@@ -71,14 +71,14 @@ And on Windows::
 
 For instance on Linux the whole installation would be like this::
 
-   $ wget https://github.com/dejacode/about-code-tool/archive/v2.0.0.zip
-   $ unzip  v2.0.0.zip
-   $ cd about-code-tool-2.0.0/
+   $ wget https://github.com/dejacode/about-code-tool/archive/v2.0.1.zip
+   $ unzip  v2.0.1.zip
+   $ cd about-code-tool-2.0.1/
    $ source configure
 
 On Windows, the whole installation would be like this:
 
- * Download and extract https://github.com/dejacode/about-code-tool/archive/v2.0.0.zip
+ * Download and extract https://github.com/dejacode/about-code-tool/archive/v2.0.1.zip
  * open a command prompt and cd to the directory where the zip extraction directory
  * run configure
 
