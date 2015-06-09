@@ -1,10 +1,10 @@
 AboutCode tool
 ==============
 
-.. image:: https://api.travis-ci.org/dejacode/about-code-tool.png?branch=master
-   :target: https://travis-ci.org/dejacode/about-code-tool
+.. image:: https://travis-ci.org/dejacode/about-code-tool.svg?branch=master
+  :target: https://travis-ci.org/dejacode/about-code-tool
 
-.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.png?branch=master
+.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.svg?branch=master 
   :target: https://coveralls.io/r/dejacode/about-code-tool?branch=master
 
 
