@@ -83,16 +83,16 @@ On Windows, the whole installation would be like this:
  * run configure
 
 
-
 Later on, if opening a new shell or command prompt on an already installed 
 AboutCode you need to **activate** this installation.
 
 On Linux or Mac, run this::
+
    source bin/activate
 
 On Windows, run this::
-   bin\\activate
 
+   bin\\activate
 
 
 Usage
@@ -203,8 +203,6 @@ In this example, the tool will use the list in the "thirdparty_code.csv" file
 and generate .ABOUT files in a directory tmp/thirdparty_about/
 
 
-
-
 **Using the genattrib.py script**
 
 The genattrib.py script is used to generate a credit and license attribution
@@ -271,10 +269,12 @@ branching model.
 **Tests**
 
 You can run the test suite with::
+
     python setup.py test
 
 
 **Contributing**
+
 We accept bugs, patches and pull requests for code and documentation provided 
 under the same license (Apache-2.0) as this tool.
 When contributing, you are agreeing to the http://developercertificate.org/ 
