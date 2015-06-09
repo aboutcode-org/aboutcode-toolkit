@@ -1,11 +1,11 @@
 AboutCode tool
 ==============
 
-.. image:: https://api.travis-ci.org/dejacode/about-code-tool.png?branch=develop
+.. image:: https://api.travis-ci.org/dejacode/about-code-tool.png?branch=master
    :target: https://travis-ci.org/dejacode/about-code-tool
 
-.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.png?branch=develop
-  :target: https://coveralls.io/r/dejacode/about-code-tool?branch=develop
+.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.png?branch=master
+  :target: https://coveralls.io/r/dejacode/about-code-tool?branch=master
 
 
 The AboutCode tool and ABOUT files provide a simple way to document the
