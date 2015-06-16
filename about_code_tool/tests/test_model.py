@@ -456,7 +456,7 @@ class AboutTest(unittest.TestCase):
         self.assertEqual(sorted(expected), sorted(result))
 
     def test_About_custom_fields_are_collected_correctly_as_multiline_scalar(self):
-        test_file = get_test_loc('parse/custom_fields_yaml.about')
+        test_file = get_test_loc('parse/custom_fields.about')
         a = model.About(test_file)
         result = [(n, f.value) for n, f in a.custom_fields.items()]
         expected = [
