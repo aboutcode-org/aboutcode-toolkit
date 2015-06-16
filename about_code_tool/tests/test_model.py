@@ -1083,8 +1083,12 @@ class CollectorTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_collect_inventory_works_with_relative_paths(self):
-        errors1, abouts1 = model.collect_inventory('./testdata/parse/complete/')
-        errors2, abouts2 = model.collect_inventory('../tests/testdata/parse/complete/')
+        # FIXME:
+        # This test need to be run under about-code-tool/about_code_tool/
+        # or otherwise it will fail as the test depends on the launching
+        # location
+        errors1, abouts1 = model.collect_inventory('./tests/testdata/parse/complete/')
+        errors2, abouts2 = model.collect_inventory('../about_code_tool/tests/testdata/parse/complete/')
         self.assertEqual([], errors1)
         self.assertEqual([], errors2)
         expected = 'complete/about.ABOUT'
