@@ -1088,8 +1088,13 @@ class CollectorTest(unittest.TestCase):
         # This test need to be run under about-code-tool/about_code_tool/
         # or otherwise it will fail as the test depends on the launching
         # location
-        errors1, abouts1 = model.collect_inventory('./tests/testdata/parse/complete/')
-        errors2, abouts2 = model.collect_inventory('../about_code_tool/tests/testdata/parse/complete/')
+        test_loc = get_test_loc('parse/complete')
+        # Use '.' as the indication of the current directory
+        test_loc1 = test_loc + '/./'
+        # Use '..' to go back to the parent directory
+        test_loc2 = test_loc + '/../complete'
+        errors1, abouts1 = model.collect_inventory(test_loc1)
+        errors2, abouts2 = model.collect_inventory(test_loc2)
         self.assertEqual([], errors1)
         self.assertEqual([], errors2)
         expected = 'complete/about.ABOUT'
