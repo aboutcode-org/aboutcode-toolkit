@@ -523,7 +523,8 @@ this software and releases the component to Public Domain.
         a = model.About(test_file)
         result = a.errors
         expected = [
-            Error(CRITICAL, "Invalid line: 3: u'Mat\\xedas: unicode field name\\n'")
+            Error(INFO, u'Field Mat\xedas is a custom field'),
+            Error(CRITICAL, u"Invalid line: u'Mat\\xedas': unicode field name")
                     ]
         self.assertEqual(expected, result)
 
