@@ -1,13 +1,29 @@
 #!/bin/bash
 #
-# Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+# Copyright (c) 2015 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #
+################################
+# change these variables to customize this script locally
+################################
+# you can define one or more thirdparty dirs, each prefixed with TPP_DIR
+export TPP_DIR="thirdparty"
+
+# default configurations
+CONF_DEFAULT="etc/conf"
+#################################
 
 CFG_CMD_LINE_ARGS="$@"
 
-if [ "$1" == "" ]; then
-    # default configuration if not argument is provided
-    CFG_CMD_LINE_ARGS="etc/conf"
+if [ "$1" == "--init" ]; then
+    CFG_CMD_LINE_ARGS=$CONF_INIT
 fi
 
-source etc/configure $CFG_CMD_LINE_ARGS
+if [ "$1" == "" ]; then
+    # default conf if not argument is provided
+    CFG_CMD_LINE_ARGS=$CONF_DEFAULT
+fi
+
+python2.7 etc/configure.py $CFG_CMD_LINE_ARGS
+if [ -f "bin/activate" ]; then
+    source bin/activate
+fi
