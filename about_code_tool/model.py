@@ -804,7 +804,18 @@ class About(object):
                                                    value=value,
                                                    present=True)
                         self.custom_fields[name] = custom_field
-                        setattr(self, name, custom_field)
+                        try:
+                            setattr(self, name, custom_field)
+                        except:
+                            # The intended captured error message should display
+                            # the line number of where the invalid line is,
+                            # but I am not able to get the line number from 
+                            # the original code. By-passing the line number
+                            # for now.
+                            # msg = u'Invalid line: %(line)d: %(orig_name)r'
+                            msg = u'Invalid line: %(orig_name)r: ' % locals()
+                            msg += u'%s' % custom_field.value
+                            errors.append(Error(CRITICAL, msg))
         return errors
 
     def process(self, fields, base_dir=None):
