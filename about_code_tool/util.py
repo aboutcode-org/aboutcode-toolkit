@@ -15,18 +15,21 @@
 
 from __future__ import print_function
 
-import os
-import string
-import posixpath
-import ntpath
 import codecs
-import unicodecsv
 from collections import OrderedDict
+import ntpath
+import os
+import posixpath
+import string
+import sys
 
-
-from about_code_tool import Error
 from about_code_tool import CRITICAL
+from about_code_tool import Error
+import unicodecsv
 
+
+on_windows = 'win32' in sys.platform
+UNC_PREFIX = u'\\\\?\\'
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.'
 
@@ -95,12 +98,27 @@ def get_absolute(location):
     return location
 
 
+def as_unc(location):
+    """
+    Convert a location to an absolute Window UNC path to support long paths
+    on Windows. Return the location unchanged if not on Windows.
+    See https://msdn.microsoft.com/en-us/library/aa365247.aspx
+    """
+    if not on_windows or (on_windows and location.startswith(UNC_PREFIX)):
+        return location
+    return UNC_PREFIX + os.path.abspath(location)
+
+
 def get_locations(location):
     """
     Return a list of locations of files given the location of a
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
+    # See https://bugs.python.org/issue4071
+    if on_windows:
+        location = unicode(location)
+    location = as_unc(location)
     location = get_absolute(location)
     assert os.path.exists(location)
 
@@ -131,6 +149,8 @@ def get_relative_path(base_loc, full_loc):
     returned path.
     """
     def norm(p):
+        if p.startswith(UNC_PREFIX) or p.startswith(to_posix(UNC_PREFIX)):
+            p = p.strip(UNC_PREFIX).strip(to_posix(UNC_PREFIX))
         p = to_posix(p)
         p = p.strip(posixpath.sep)
         p = posixpath.normpath(p)

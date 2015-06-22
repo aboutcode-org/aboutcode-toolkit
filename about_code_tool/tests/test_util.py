@@ -16,18 +16,16 @@
 
 from __future__ import print_function
 
-import unittest
+from collections import OrderedDict
 import string
+import unittest
 
 from about_code_tool.tests import get_test_loc
 from about_code_tool.tests import on_posix
 from about_code_tool.tests import on_windows
-
-from about_code_tool import Error
 from about_code_tool import CRITICAL
-
+from about_code_tool import Error
 from about_code_tool import util
-from collections import OrderedDict
 
 class UtilsTest(unittest.TestCase):
 
@@ -281,3 +279,9 @@ class UtilsTest(unittest.TestCase):
                     ]
         result = util.load_csv(test_file)
         self.assertEqual(expected, result)
+
+    def test_get_locations_with_very_long_path(self):
+        import os
+        longpath = u'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+        test_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), u'testdata', longpath))
+        list(util.get_locations(test_dir))

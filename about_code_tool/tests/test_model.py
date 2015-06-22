@@ -1050,6 +1050,17 @@ class CollectorTest(unittest.TestCase):
         result = [a.about_file_path for a in abouts]
         self.assertEqual(sorted(expected), sorted(result))
 
+    def test_collect_inventory_with_long_path(self):
+        self.maxDiff = None
+        test_loc = get_test_loc('longpath')
+        _errors, abouts = model.collect_inventory(test_loc)
+        self.assertEqual(2, len(abouts))
+
+        expected = ['longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/non-supported_date_format.ABOUT',
+                    'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/supported_date_format.ABOUT']
+        result = [a.about_file_path for a in abouts]
+        self.assertEqual(sorted(expected), sorted(result))
+
     def test_collect_inventory_return_errors(self):
         test_loc = get_test_loc('collect-inventory-errors')
         errors, _abouts = model.collect_inventory(test_loc)
