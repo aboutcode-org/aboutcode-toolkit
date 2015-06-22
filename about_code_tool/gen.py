@@ -105,14 +105,14 @@ def load_inventory(location, base_dir):
         if afpa not in fields:
             msg = ('Missing column: %(afpa)r. '
                    'Cannot generate ABOUT file.' % locals())
-            errors.append(ERROR, msg)
+            errors.append(Error(ERROR, msg))
         else:
             afp = fields.get(afpa)
 
         if not afp or not afp.strip():
             msg = ('Empty column: %(afpa)r. '
                    'Cannot generate ABOUT file.' % locals())
-            errors.append(ERROR, msg)
+            errors.append(Error(ERROR, msg))
         else:
             afp = util.to_posix(afp)
             loc = posixpath.join(base_dir, afp)
