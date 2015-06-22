@@ -1,11 +1,11 @@
 AboutCode tool
 ==============
 
-.. image:: https://api.travis-ci.org/dejacode/about-code-tool.png?branch=develop
-   :target: https://travis-ci.org/dejacode/about-code-tool
+.. image:: https://travis-ci.org/dejacode/about-code-tool.svg?branch=master
+  :target: https://travis-ci.org/dejacode/about-code-tool
 
-.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.png?branch=develop
-  :target: https://coveralls.io/r/dejacode/about-code-tool?branch=develop
+.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.svg?branch=master 
+  :target: https://coveralls.io/r/dejacode/about-code-tool?branch=master
 
 
 The AboutCode tool and ABOUT files provide a simple way to document the
@@ -50,7 +50,7 @@ Python 2.7.x here https://www.python.org/downloads/ :
 
 * Download the .msi installer for Windows or the .dmg archive for Mac.
 * Open and run the installer using all the default options.
-* On Windows, make sure you install Python in the default c:\Python27 and not
+* On Windows, make sure you install Python in the default c:\\Python27 and not
   on another drive.
 
 
@@ -71,28 +71,28 @@ And on Windows::
 
 For instance on Linux the whole installation would be like this::
 
-   $ wget https://github.com/dejacode/about-code-tool/archive/v2.0.0.zip
-   $ unzip  v2.0.0.zip
-   $ cd about-code-tool-2.0.0/
+   $ wget https://github.com/dejacode/about-code-tool/archive/v2.0.1.zip
+   $ unzip  v2.0.1.zip
+   $ cd about-code-tool-2.0.1/
    $ source configure
 
 On Windows, the whole installation would be like this:
 
- * Download and extract https://github.com/dejacode/about-code-tool/archive/v2.0.0.zip
+ * Download and extract https://github.com/dejacode/about-code-tool/archive/v2.0.1.zip
  * open a command prompt and cd to the directory where the zip extraction directory
  * run configure
-
 
 
 Later on, if opening a new shell or command prompt on an already installed 
 AboutCode you need to **activate** this installation.
 
 On Linux or Mac, run this::
+
    source bin/activate
 
 On Windows, run this::
-   bin\activate
 
+   bin\\activate
 
 
 Usage
@@ -203,8 +203,6 @@ In this example, the tool will use the list in the "thirdparty_code.csv" file
 and generate .ABOUT files in a directory tmp/thirdparty_about/
 
 
-
-
 **Using the genattrib.py script**
 
 The genattrib.py script is used to generate a credit and license attribution
@@ -271,10 +269,12 @@ branching model.
 **Tests**
 
 You can run the test suite with::
+
     python setup.py test
 
 
 **Contributing**
+
 We accept bugs, patches and pull requests for code and documentation provided 
 under the same license (Apache-2.0) as this tool.
 When contributing, you are agreeing to the http://developercertificate.org/ 
