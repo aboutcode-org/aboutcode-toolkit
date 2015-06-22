@@ -30,5 +30,6 @@ nosetests.xml
 
 # PyCharm project
 .idea/
-
-/*.egg_info
+/aboutcode.egg_info
+AboutCode.egg-info
+/dist
