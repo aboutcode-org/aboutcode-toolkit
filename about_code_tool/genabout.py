@@ -41,7 +41,7 @@ from os.path import exists, dirname, join, abspath, isdir, normpath, basename, e
 
 import about
 
-__version__ = '2.0.0'
+__version__ = '2.0.2'
 
 __copyright__ = """
 Copyright (c) 2013-2014 nexB Inc. All rights reserved.
@@ -614,6 +614,8 @@ class GenAbout(object):
     @staticmethod
     def write_output(output):
         for about_file_location, context in output:
+            if about.on_windows:
+                about_file_location = about.UNC_PREFIX + os.path.abspath(about_file_location)
             if _exists(about_file_location):
                 os.remove(about_file_location)
             with open(about_file_location, 'wb') as output_file:
@@ -855,6 +857,10 @@ def main(parser, options, args):
                 sys.exit(errno.EINVAL)
 
     if gen_license:
+        # Strip the ' and " for api_url, api_username and api_key from input
+        api_url = api_url.strip("'").strip("\"")
+        api_username = api_username.strip("'").strip("\"")
+        api_key = api_key.strip("'").strip("\"")
         dje_license_dict = gen.pre_process_and_dje_license_dict(input_list,
                                                                 api_url,
                                                                 api_username,

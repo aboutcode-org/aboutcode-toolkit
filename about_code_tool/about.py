@@ -32,21 +32,24 @@ from collections import namedtuple
 import csv
 from datetime import datetime
 from email.parser import HeaderParser
-from os.path import basename, dirname, join, normpath, realpath
 import errno
 import httplib
 import logging
+import ntpath
 import optparse
 import os
+from os.path import basename, dirname, join, normpath, realpath
 import posixpath
 import socket
 import string
 import sys
 import urlparse
-import ntpath
 
 
-__version__ = '2.0.1'
+on_windows = 'win32' in sys.platform
+UNC_PREFIX = u'\\\\?\\'
+
+__version__ = '2.0.2'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'
@@ -1082,7 +1085,10 @@ class AboutFile(object):
         """
         Return the about object's dje_license_name.
         """
-        return self.parsed.get('dje_license_name', '')
+        try:
+            return self.parsed.get('dje_license_name', '')
+        except:
+            return ''
 
 def check_invalid_chars(field_name, line):
     """
@@ -1104,6 +1110,8 @@ def check_invalid_chars(field_name, line):
         warnings = Warn(IGNORED, field_name, line, msg)
     return invalid_chars, warnings
 
+def posix_unc_prefix():
+    return posix_path(u'\\\\?\\')
 
 class Collector(object):
     """
@@ -1144,6 +1152,23 @@ class Collector(object):
         """
         # FIXME: we should not accept both a file and dir location as input
         paths = []
+
+        if on_windows:
+            location = unicode(location)
+        """
+        Convert a location to an absolute Window UNC path to support long paths
+        on Windows. Return the location unchanged if not on Windows.
+        See https://msdn.microsoft.com/en-us/library/aa365247.aspx
+        """
+        if on_windows and not location.startswith(UNC_PREFIX):
+            location = UNC_PREFIX + os.path.abspath(location)
+        location = os.path.expanduser(location)
+        location = os.path.expandvars(location)
+        location = os.path.normpath(location)
+        location = os.path.abspath(location)
+
+        assert os.path.exists(location)
+
         if location:
             if os.path.isfile(location) and is_about_file(location):
                 paths.append(location)
@@ -1241,6 +1266,9 @@ class Collector(object):
         if '\n' in about_object.get_dje_license_name():
             msg = ('Multiple licenses is not supported. '
                    'Skipping License generation.')
+            if on_windows:
+                if about_object.location.startswith(posix_unc_prefix()):
+                    about_object.location = about_object.location.strip(posix_unc_prefix())
             err = Error(GENATTRIB, 'dje_license',
                         about_object.location, msg)
             self.genattrib_errors.append(err)
@@ -1258,6 +1286,9 @@ class Collector(object):
             and not '\n' in about_object.get_dje_license_name():
             msg = ('No license_text found. '
                    'Skipping License generation.')
+            if on_windows:
+                if about_object.location.startswith(posix_unc_prefix()):
+                    about_object.location = about_object.location.strip(posix_unc_prefix())
             err = Error(GENATTRIB, 'license_text_file',
                         about_object.location, msg)
             self.genattrib_errors.append(err)
@@ -1314,6 +1345,9 @@ class Collector(object):
                         break
 
                 if not component_exist:
+                    if on_windows:
+                        if self.location.startswith(posix_unc_prefix()):
+                            self.location = self.location.strip(posix_unc_prefix())
                     loc = self.location + component
                     msg = ('The requested ABOUT file: %r does not exist. '
                            'No attribution generated for this file.' % loc)
@@ -1364,6 +1398,9 @@ class Collector(object):
         for path in paths:
             path = posix_path(path)
             afp = join(self.location, path)
+            if on_windows:
+                if afp.startswith(posix_unc_prefix()):
+                    afp = afp.strip(posix_unc_prefix())
             msg = ('The requested ABOUT file: %(afp)r does not exist. '
                    'No attribution generated for this file.' % locals())
             err = Error(GENATTRIB, 'about_file', path, msg)

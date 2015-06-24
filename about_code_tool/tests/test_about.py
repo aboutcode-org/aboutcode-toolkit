@@ -27,9 +27,12 @@ import stat
 from os.path import abspath, dirname, join, split
 
 from about_code_tool import about
+from pip._vendor.distlib.wheel import to_posix
+from about_code_tool.about import on_windows
 
 
 TESTDATA_DIR = join(abspath(dirname(__file__)), 'testdata')
+UNC_PREFIX = u'\\\\?\\'
 
 
 def create_dir(location):
@@ -134,11 +137,16 @@ class CollectorTest(unittest.TestCase):
 
     def test_collect_can_collect_a_directory_tree(self):
         test_dir = 'about_code_tool/tests/testdata/DateTest'
-        expected = [('about_code_tool/tests/testdata/DateTest'
-                     '/non-supported_date_format.ABOUT'),
-                    ('about_code_tool/tests/testdata/DateTest'
-                     '/supported_date_format.ABOUT')]
+        expected = [(os.path.abspath('about_code_tool/tests/testdata/DateTest'
+                     '/non-supported_date_format.ABOUT')),
+                    (os.path.abspath('about_code_tool/tests/testdata/DateTest'
+                     '/supported_date_format.ABOUT'))]
         result = about.Collector.collect(test_dir)
+        if on_windows:
+            expected = [(to_posix(UNC_PREFIX + os.path.abspath('about_code_tool/tests/testdata/DateTest'
+             '/non-supported_date_format.ABOUT'))),
+            (to_posix(UNC_PREFIX + os.path.abspath('about_code_tool/tests/testdata/DateTest'
+             '/supported_date_format.ABOUT')))]
         self.assertEqual(sorted(expected), sorted(result))
 
     def test_collect_can_collect_a_single_file(self):
@@ -147,7 +155,23 @@ class CollectorTest(unittest.TestCase):
         expected = ['about_code_tool/tests/testdata/thirdparty'
                     '/django_snippets_2413.ABOUT']
         result = about.Collector.collect(test_file)
+        if on_windows:
+            expected = [to_posix(UNC_PREFIX + os.path.abspath('about_code_tool/tests/testdata/thirdparty'
+                    '/django_snippets_2413.ABOUT'))]
         self.assertEqual(expected, result)
+
+    def test_collect_can_collect_a_long_directory_tree(self):
+        test_dir = 'about_code_tool/tests/testdata/longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/'
+        expected = [('about_code_tool/tests/testdata/longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+                     '/non-supported_date_format.ABOUT')]
+        result = about.Collector.collect(test_dir)
+        if on_windows:
+            # For some reasons, the os.path.abspath doesn't work if I have long
+            # path in the parameter. Therefore, I just append to long path
+            # after the os.path.abspath()
+            expected = [to_posix(UNC_PREFIX + os.path.abspath('about_code_tool') + '/tests/testdata/longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+                     '/non-supported_date_format.ABOUT')]
+        self.assertEqual(sorted(expected), sorted(result))
 
     def test_collector_errors_encapsulation(self):
         test_file = 'about_code_tool/tests/testdata/DateTest'
