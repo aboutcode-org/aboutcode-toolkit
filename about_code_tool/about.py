@@ -557,7 +557,14 @@ class AboutFile(object):
     """
     def __init__(self, location=None):
         self.about_resource = None
-        self.location = os.path.abspath(location)
+        # The os.path.abspath(None) will cause error in linux system.
+        # See https://bugs.python.org/issue22587
+        # Note that the os.path.abspath is needed for windows when there
+        # is long path/filename.
+        if on_windows:
+            self.location = os.path.abspath(location)
+        else:
+            self.location = location
 
         self.parsed = None
         self.parsed_fields = None
