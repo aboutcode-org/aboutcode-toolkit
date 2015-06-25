@@ -135,7 +135,7 @@ class GenAbout(object):
         for row in csvfile:
             row_dict = {}
             for key in row:
-                row_dict[key.lower()] = row[key]
+                row_dict[key.lower()] = row[key].rstrip()
             input_list.append(row_dict)
         return input_list
 

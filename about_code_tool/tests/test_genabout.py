@@ -41,6 +41,16 @@ class GenAboutTest(unittest.TestCase):
         result = gen.get_input_list(test_file)
         self.assertEqual(expected, result)
 
+    def test_get_input_with_trailing_spaces(self):
+        gen = genabout.GenAbout()
+        test_file = join(TESTDATA_DIR, 'test_files_for_genabout/about_with_trailling_spaces.csv')
+        expected = [{'about_file': 'about.c',
+                     'about_resource': '.',
+                     'name': 'ABOUT tool',
+                     'version': '0.8.1'}]
+        result = gen.get_input_list(test_file)
+        self.assertEqual(expected, result)
+
     def test_get_input_list_covert_all_keys_to_lower(self):
         gen = genabout.GenAbout()
         test_input = join(TESTDATA_DIR, 'test_files_for_genabout'
