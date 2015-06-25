@@ -455,11 +455,12 @@ class GenAbout(object):
                     if not lic in license_dict:
                         detail_list = []
                         detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
-                        license_dict[lic] = detail[0]
-                        line['dje_license_name'] = detail[0]
                         dje_key = detail[1]
+                        line['dje_license_key'] = dje_key
+                        license_dict[dje_key] = detail[0]
+                        line['dje_license_name'] = detail[0]
                         license_context = detail [2]
-                        line['dje_license_url'] = dje_lic_urn + lic
+                        line['dje_license_url'] = dje_lic_urn + dje_key
                         detail_list.append(dje_key)
                         detail_list.append(license_context)
                         key_text_dict[detail[0]] = detail_list
