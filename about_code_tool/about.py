@@ -557,7 +557,7 @@ class AboutFile(object):
     """
     def __init__(self, location=None):
         self.about_resource = None
-        self.location = location
+        self.location = os.path.abspath(location)
 
         self.parsed = None
         self.parsed_fields = None
@@ -1222,6 +1222,10 @@ class Collector(object):
         """
         user_loc = normpath(self.location)
         if os.path.isdir(self.normalized_location):
+            # Making sure both are in posix path format before
+            # doing any string partition.
+            location = posix_path(location)
+            user_loc = posix_path(user_loc)
             parent_name = basename(user_loc)
             subpath = '/' + parent_name + location.partition(user_loc)[2]
             if user_loc[-1] == '/':
