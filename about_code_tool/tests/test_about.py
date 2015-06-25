@@ -152,8 +152,8 @@ class CollectorTest(unittest.TestCase):
     def test_collect_can_collect_a_single_file(self):
         test_file = ('about_code_tool/tests/testdata/thirdparty'
                       '/django_snippets_2413.ABOUT')
-        expected = ['about_code_tool/tests/testdata/thirdparty'
-                    '/django_snippets_2413.ABOUT']
+        expected = [os.path.abspath('about_code_tool/tests/testdata/thirdparty'
+                    '/django_snippets_2413.ABOUT')]
         result = about.Collector.collect(test_file)
         if on_windows:
             expected = [to_posix(UNC_PREFIX + os.path.abspath('about_code_tool/tests/testdata/thirdparty'
@@ -162,8 +162,8 @@ class CollectorTest(unittest.TestCase):
 
     def test_collect_can_collect_a_long_directory_tree(self):
         test_dir = 'about_code_tool/tests/testdata/longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/'
-        expected = [('about_code_tool/tests/testdata/longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
-                     '/non-supported_date_format.ABOUT')]
+        expected = [os.path.abspath(('about_code_tool/tests/testdata/longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+                     '/non-supported_date_format.ABOUT'))]
         result = about.Collector.collect(test_dir)
         if on_windows:
             # For some reasons, the os.path.abspath doesn't work if I have long
