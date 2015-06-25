@@ -1278,8 +1278,9 @@ class Collector(object):
             msg = ('Multiple licenses is not supported. '
                    'Skipping License generation.')
             if on_windows:
-                if about_object.location.startswith(posix_unc_prefix()):
-                    about_object.location = about_object.location.strip(posix_unc_prefix())
+                if (about_object.location.startswith(posix_unc_prefix())
+                    or about_object.location.startswith(UNC_PREFIX)):
+                    about_object.location = about_object.location.strip(posix_unc_prefix()).strip(UNC_PREFIX)
             err = Error(GENATTRIB, 'dje_license',
                         about_object.location, msg)
             self.genattrib_errors.append(err)
@@ -1298,8 +1299,9 @@ class Collector(object):
             msg = ('No license_text found. '
                    'Skipping License generation.')
             if on_windows:
-                if about_object.location.startswith(posix_unc_prefix()):
-                    about_object.location = about_object.location.strip(posix_unc_prefix())
+                if (about_object.location.startswith(posix_unc_prefix())
+                    or about_object.location.startswith(UNC_PREFIX)):
+                    about_object.location = about_object.location.strip(posix_unc_prefix()).strip(UNC_PREFIX)
             err = Error(GENATTRIB, 'license_text_file',
                         about_object.location, msg)
             self.genattrib_errors.append(err)
