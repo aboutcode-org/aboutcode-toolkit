@@ -516,7 +516,14 @@ class GenAbout(object):
             about_file_location = join(gen_location, file_location)
             about_file_dir = dirname(about_file_location)
             if not os.path.exists(about_file_dir):
-                makedirs(about_file_dir)
+                # Check for invalid file path
+                try:
+                    makedirs(about_file_dir)
+                except:
+                    msg = 'Invalid ABOUT file path.'
+                    self.errors.append(Error(VALUE, 'about_file_path',
+                                             about_file_dir, msg))
+                    continue
             about_file_exist = _exists(about_file_location)
             if about_file_exist:
                 if action_num == ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST:
