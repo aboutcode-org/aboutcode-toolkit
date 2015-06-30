@@ -597,19 +597,22 @@ class GenAbout(object):
         """
         components_list = []
         for about_file_location, about_dict_list in input_list:
+            unified_dict_list = {}
+            for key in about_dict_list:
+                unified_dict_list[key] = u''.join(about_dict_list[key])
             component = []
-            component_name = about_dict_list.get('name', '')
-            component_version = about_dict_list.get('version', '')
+            component_name = unified_dict_list.get('name', '')
+            component_version = unified_dict_list.get('version', '')
             context = 'about_resource: %s\nname: %s\nversion: %s\n\n' % (
-                about_dict_list['about_resource'], component_name, component_version)
+                unified_dict_list['about_resource'], component_name, component_version)
 
-            for item in sorted(about_dict_list.iterkeys()):
+            for item in sorted(unified_dict_list.iterkeys()):
                 if item == 'about_file':
                     continue
                 if not item in about.MANDATORY_FIELDS:
                     # The purpose of the replace('\n', '\n ') is used to
                     # format the continuation strings
-                    value = about_dict_list[item].replace('\n', '\n ')
+                    value = unified_dict_list[item].replace('\n', '\n ')
                     if (value or item in about.MANDATORY_FIELDS) and not item\
                         in about.ERROR_WARN_FIELDS and not item == 'about_resource':
                         context += item + ': ' + value + '\n'
