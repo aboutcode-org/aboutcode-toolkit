@@ -1,3 +1,19 @@
+2015-07-xx  Chin-Yeung Li  <tli@nexb.com>
+
+    Release 2.0.2
+
+    * Handle input's encoding issues
+    * Better error handling
+    * Writing to and reading from Windows OS with paths > 255 chars
+
+
+2015-06-08  Chin-Yeung Li  <tli@nexb.com>
+
+    Release 2.0.1
+
+    * Fixes the configure scripts and updates basic documentation.
+
+
 2015-03-06  Chin-Yeung Li  <tli@nexb.com>
 
     Release 2.0.0
