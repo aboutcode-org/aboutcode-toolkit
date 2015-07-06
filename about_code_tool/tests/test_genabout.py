@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2015 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -38,6 +38,16 @@ class GenAboutTest(unittest.TestCase):
                      'name': 'ABOUT tool',
                      'version': '0.8.1'}]
 
+        result = gen.get_input_list(test_file)
+        self.assertEqual(expected, result)
+
+    def test_get_input_with_trailing_spaces(self):
+        gen = genabout.GenAbout()
+        test_file = join(TESTDATA_DIR, 'test_files_for_genabout/about_with_trailling_spaces.csv')
+        expected = [{'about_file': 'about.c',
+                     'about_resource': '.',
+                     'name': 'ABOUT tool',
+                     'version': '0.8.1'}]
         result = gen.get_input_list(test_file)
         self.assertEqual(expected, result)
 

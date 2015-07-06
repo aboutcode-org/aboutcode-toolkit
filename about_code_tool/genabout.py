@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2015 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ============================================================================
-
 """
 This is a tool to generate ABOUT files based on the input file.
 The input file should be a csv format which contains information about the
@@ -22,29 +21,29 @@ file location, origin and license of the software components etc.
 
 from __future__ import print_function
 
+from collections import namedtuple
 import copy
 import csv
 import errno
 import json
 import logging
 import optparse
+from os import makedirs
 import os
+from os.path import exists, dirname, join, abspath, isdir, normpath, basename, expanduser
 import shutil
 import sys
 import urllib
 import urllib2
-
-from collections import namedtuple
 from urlparse import urljoin, urlparse
-from os import makedirs
-from os.path import exists, dirname, join, abspath, isdir, normpath, basename, expanduser
 
 import about
 
-__version__ = '2.0.0'
+
+__version__ = '2.0.2'
 
 __copyright__ = """
-Copyright (c) 2013-2014 nexB Inc. All rights reserved.
+Copyright (c) 2013-2015 nexB Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -135,7 +134,7 @@ class GenAbout(object):
         for row in csvfile:
             row_dict = {}
             for key in row:
-                row_dict[key.lower()] = row[key]
+                row_dict[key.lower()] = row[key].rstrip()
             input_list.append(row_dict)
         return input_list
 
@@ -455,11 +454,12 @@ class GenAbout(object):
                     if not lic in license_dict:
                         detail_list = []
                         detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
-                        license_dict[lic] = detail[0]
-                        line['dje_license_name'] = detail[0]
                         dje_key = detail[1]
+                        line['dje_license_key'] = dje_key
+                        license_dict[dje_key] = detail[0]
+                        line['dje_license_name'] = detail[0]
                         license_context = detail [2]
-                        line['dje_license_url'] = dje_lic_urn + lic
+                        line['dje_license_url'] = dje_lic_urn + dje_key
                         detail_list.append(dje_key)
                         detail_list.append(license_context)
                         key_text_dict[detail[0]] = detail_list
@@ -515,7 +515,14 @@ class GenAbout(object):
             about_file_location = join(gen_location, file_location)
             about_file_dir = dirname(about_file_location)
             if not os.path.exists(about_file_dir):
-                makedirs(about_file_dir)
+                # Check for invalid file path
+                try:
+                    makedirs(about_file_dir)
+                except:
+                    msg = 'Invalid ABOUT file path.'
+                    self.errors.append(Error(VALUE, 'about_file_path',
+                                             about_file_dir, msg))
+                    continue
             about_file_exist = _exists(about_file_location)
             if about_file_exist:
                 if action_num == ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST:
@@ -604,6 +611,11 @@ class GenAbout(object):
                     value = about_dict_list[item].replace('\n', '\n ')
                     if (value or item in about.MANDATORY_FIELDS) and not item\
                         in about.ERROR_WARN_FIELDS and not item == 'about_resource':
+                        # It will cause error if value has different coding
+                        try:
+                            value = unicode(value, errors='ignore')
+                        except:
+                            pass
                         context += item + ': ' + value + '\n'
 
             component.append(about_file_location)
@@ -614,6 +626,8 @@ class GenAbout(object):
     @staticmethod
     def write_output(output):
         for about_file_location, context in output:
+            if about.on_windows:
+                about_file_location = about.UNC_PREFIX + os.path.abspath(about_file_location)
             if _exists(about_file_location):
                 os.remove(about_file_location)
             with open(about_file_location, 'wb') as output_file:
@@ -855,6 +869,10 @@ def main(parser, options, args):
                 sys.exit(errno.EINVAL)
 
     if gen_license:
+        # Strip the ' and " for api_url, api_username and api_key from input
+        api_url = api_url.strip("'").strip("\"")
+        api_username = api_username.strip("'").strip("\"")
+        api_key = api_key.strip("'").strip("\"")
         dje_license_dict = gen.pre_process_and_dje_license_dict(input_list,
                                                                 api_url,
                                                                 api_username,
