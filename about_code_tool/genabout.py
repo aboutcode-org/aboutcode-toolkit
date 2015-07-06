@@ -611,6 +611,11 @@ class GenAbout(object):
                     value = about_dict_list[item].replace('\n', '\n ')
                     if (value or item in about.MANDATORY_FIELDS) and not item\
                         in about.ERROR_WARN_FIELDS and not item == 'about_resource':
+                        # It will cause error if value has different coding
+                        try:
+                            value = unicode(value, errors='ignore')
+                        except:
+                            pass
                         context += item + ': ' + value + '\n'
 
             component.append(about_file_location)
