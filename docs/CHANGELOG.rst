@@ -1,3 +1,10 @@
+2015-07-31  Chin-Yeung Li  <tli@nexb.com>
+
+    Release 2.0.3
+
+    * Fix the usage of using genattrib.py on Windows OS
+
+
 2015-07-06  Chin-Yeung Li  <tli@nexb.com>
 
     Release 2.0.2
