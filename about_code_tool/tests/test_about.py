@@ -654,6 +654,15 @@ about_resource: about.py
         # Strip all the white spaces
         self.assertEqual(re.sub(r'\s+', '', expected), re.sub(r'\s+', '', result))
 
+    def test_generate_attribution_with_limit_to(self):
+        f = open(join(TESTDATA_DIR, 'attrib/attrib.html'))
+        expected = f.read()
+        test_file = join(TESTDATA_DIR, 'attrib/')
+        collector = about.Collector(test_file)
+        result = collector.generate_attribution(limit_to=['/attrib.ABOUT'])
+        # Strip all the white spaces
+        self.assertEqual(re.sub(r'\s+', '', expected), re.sub(r'\s+', '', result))
+
     def test_generate_attribution_verification(self):
         expected = (u'name,version,copyright,dje_license_name\n'
                     'Apache HTTP Server,2.4.3,,') 
