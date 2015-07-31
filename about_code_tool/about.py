@@ -49,7 +49,7 @@ import urlparse
 on_windows = 'win32' in sys.platform
 UNC_PREFIX = u'\\\\?\\'
 
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'
@@ -1557,6 +1557,9 @@ def get_parser():
 
 
 if __name__ == '__main__':
+    print('\n')
+    print('Running about-code-tool version ' + __version__)
+    print('\n')
     parser = get_parser()
     options, args = parser.parse_args()
     sys.exit(main(parser, options, args))
