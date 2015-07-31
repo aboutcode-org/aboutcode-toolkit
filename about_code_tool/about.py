@@ -1350,7 +1350,7 @@ class Collector(object):
                     # match the about_file's location with the input list.
                     about_relative_path = about_object.location.partition(
                                                     normpath(self.location))[2]
-                    if component == about_relative_path:
+                    if component == posix_path(about_relative_path):
                         component_exist = True
                         about_content = self.get_about_context(about_object)
                         license_dict[about_object.get_dje_license_name()] = about_content['license_text']
