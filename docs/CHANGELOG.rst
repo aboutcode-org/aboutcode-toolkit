@@ -3,6 +3,7 @@
     Release 2.0.3
 
     * Fix the usage of using genattrib.py on Windows OS
+    * Display version when running about.py, genabout.py and genattrib.py
 
 
 2015-07-06  Chin-Yeung Li  <tli@nexb.com>
