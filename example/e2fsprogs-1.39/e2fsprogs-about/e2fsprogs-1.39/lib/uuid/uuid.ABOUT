@@ -7,7 +7,8 @@ category: Attribution
 component_type: directory
 confirmed_license: BSD-Modified
 copyright: Copyright (C) 1996, 1997 Theodore Ts'o
-dje_license: bsd-new
+dje_license_key: bsd-new
 dje_license_name: BSD-Modified
+dje_license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new
 license_text_file: bsd-new.LICENSE
 owner: Theodore Ts'o

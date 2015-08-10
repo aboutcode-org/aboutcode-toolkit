@@ -9,8 +9,9 @@ component_type: c language text
 confirmed_license: LGPL 2.0
 copyright: Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
  Written May 1989 by Mike Haertel.
-dje_license: lgpl-2.0
+dje_license_key: lgpl-2.0
 dje_license_name: GNU Library General Public License 2.0
+dje_license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.0
 license_text_file: lgpl-2.0.LICENSE
 owner: Mike Haertel
 redistribute: yes

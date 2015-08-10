@@ -9,7 +9,8 @@ component_type: c language text
 confirmed_license: BSD-Modified
 copyright: Copyright (c) 2003 by Theodore Ts'o
  Copyright (c) 1997, 1998, 2001 Kungliga Tekniska Hogskolan
-dje_license: bsd-new
+dje_license_key: bsd-new
 dje_license_name: BSD-Modified
+dje_license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new
 license_text_file: bsd-new.LICENSE
 owner: Kerberos4kth

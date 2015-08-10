@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+	<style type="text/css">
+		div.additional-license-text-list {display:block}
+		body {font-family: Helvetica, Arial, sans-serif;}
+		pre {white-space: pre-wrap;}
+		li {font-weight: bold;}
+		#header {font-family: Helvetica; font-style:italic}
+	</style>
+	<title>License Reference for e2fsprogs Version 1.39</title>
+</head>
+<body>
+	<h1>License Reference for e2fsprogs Version 1.39</h1>
+	<pre id="header">
+
+This document provides the open source and third-party license texts and copyright notices that apply to the components of a package.
+
+	</pre>
+
+	<hr>
+	<div class="oss-table-of-contents">
+		{% for group in about_objects | groupby('confirmed_license') %}
+		<p>
+			<a href="#group_{{ loop.index0 }}">{{ group.grouper }}
+			</a>
+		</p>
+		{% endfor %}
+	</div>
+	<hr>
+
+	{% for group in about_objects | groupby('confirmed_license') %}
+	<div id="group_{{ loop.index0 }}">
+	<h3>{{ group.grouper }}</h3>
+	<p>This product contains the following open source software packages licensed under the terms of the license: {{group.grouper}}</p>
+	
+	<div class="oss-component" id="component_{{ loop.index0 }}">
+		{%for about_object in group.list %} 
+		
+		{% if loop.first %}
+			{% if about_object.license_url %}
+    		    <p>License Gallery URL: <a href="{{about_object.license_url }}">{{about_object.license_url }}</a> </p>
+    		{% endif %}
+    	{% endif %}
+			
+		<li>{{ about_object.name }}{% if about_object.version %}  - Version  {{ about_object.version }}{% endif %}</li>		
+        {% if about_object.audit_ref_nbr %}<pre>Audit Ref Nbr: {{about_object.audit_ref_nbr }} </pre>{% endif %}				
+		{% if about_object.copyright %}<pre>{{about_object.copyright}}</pre>{% endif %}
+		{% if about_object.notice %}<pre>{{ about_object.notice }}</pre>
+		{% elif about_object.notice_file %} <pre class="component-notice">{{ about_object.notice_text }}</pre>
+		{% endif %}
+		{% if loop.last %}
+		<pre>
+{{about_object.license_text}}
+		</pre>
+		{% endif %}
+	</div>
+	{% endfor %}
+	</div>
+	{% endfor %}
+	<hr>
+</div>
+<hr> 
+<h3><a id="End">End</a></h3>
+</body>
+</html>

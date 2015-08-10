@@ -8,8 +8,9 @@ checksum_sha1: 1b73dbf5dbc340a945d2bc75f61cc212f5ae3c08
 component_type: tex language text
 confirmed_license: GPL 2.0
 copyright: Copyright (C) 1985, 1986, 1988 Richard M. Stallman
-dje_license: gpl-2.0
+dje_license_key: gpl-2.0
 dje_license_name: GNU General Public License 2.0
+dje_license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0
 license_text_file: gpl-2.0.LICENSE
 owner: Theodore Ts'o
 redistribute: yes

@@ -10,8 +10,9 @@ confirmed_license: LGPL 2.0
 copyright: Copyright (C) 1991, 1992 Free Software Foundation, Inc.
  Written April 2, 1991 by John Gilmore of Cygnus Support.
  Based on mcheck.c by Mike Haertel.
-dje_license: lgpl-2.0
+dje_license_key: lgpl-2.0
 dje_license_name: GNU Library General Public License 2.0
+dje_license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.0
 license_text_file: lgpl-2.0.LICENSE
 owner: Mike Haertel
 redistribute: yes

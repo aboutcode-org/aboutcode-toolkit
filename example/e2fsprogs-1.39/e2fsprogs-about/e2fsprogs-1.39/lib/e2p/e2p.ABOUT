@@ -8,8 +8,9 @@ component_type: directory
 confirmed_license: LGPL 2.0
 copyright: Copyright (C) 1992, 1993, 1994  Remy Card
  Copyright (c) 1999 Theodore Ts
-dje_license: lgpl-2.0
+dje_license_key: lgpl-2.0
 dje_license_name: GNU Library General Public License 2.0
+dje_license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.0
 license_text_file: lgpl-2.0.LICENSE
 owner: Theodore Ts'o
 redistribute: yes

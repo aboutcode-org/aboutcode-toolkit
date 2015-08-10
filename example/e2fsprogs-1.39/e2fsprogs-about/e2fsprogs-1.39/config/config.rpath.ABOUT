@@ -8,8 +8,9 @@ checksum_sha1: 98461658e371e01ef48f2ea173823c96fecc6145
 component_type: posix shell script text executable
 confirmed_license: GPL 2.0 with Autoconf exception
 copyright: Copyright 1996-2002 Free Software Foundation, Inc.
-dje_license: gpl-2.0-autoconf
+dje_license_key: gpl-2.0-autoconf
 dje_license_name: GNU General Public License 2.0 with Autoconf exception
+dje_license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0-autoconf
 license_text_file: gpl-2.0-autoconf.LICENSE
 owner: Theodore Ts'o
 redistribute: yes
