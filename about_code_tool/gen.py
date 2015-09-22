@@ -178,13 +178,15 @@ def generate(location, base_dir, policy=None, conf_location=None,
     Policy defines which action to take for merging or overwriting fields and
     files. Return errors and about objects.
     """
-
     bdir = to_posix(base_dir)
     errors, abouts = load_inventory(location, bdir)
     for about in abouts:
         # TODO: check the paths overlap ...???
-        dump_loc = posixpath.join(bdir, about.about_file_path)
+        # For some reasons, the join does not work, using the '+' for now
+        # dump_loc = posixpath.join(bdir, about.about_file_path)
+        dump_loc = bdir + about.about_file_path
         try:
+            # Write the ABOUT file
             about.dump(dump_loc,
                        with_empty=with_empty,
                        with_absent=with_absent)
