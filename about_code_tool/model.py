@@ -934,7 +934,12 @@ class About(object):
         parent = posixpath.dirname(loc)
         if not os.path.exists(parent):
             os.makedirs(parent)
-        with codecs.open(location, mode='wb', encoding='utf-8') as dumped:
+        about_file_path = loc
+        if not about_file_path.endswith('.ABOUT'):
+            if about_file_path.endswith('/'):
+                about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
+            about_file_path += '.ABOUT'
+        with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
             dumped.write(self.dumps(with_absent, with_empty))
 
 
