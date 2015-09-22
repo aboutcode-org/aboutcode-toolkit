@@ -87,6 +87,7 @@ def inventory(location, output):
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.
     """
+    click.echo('Running about-code-tool version ' + __version__)
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
 
@@ -113,6 +114,7 @@ def gen(location, output):
     Given a CVS inventory of ABOUT files at location, generate ABOUT files in
     base directory.
     """
+    click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating ABOUT files...')
     errors, abouts = about_code_tool.gen.generate(location, output)
     lea = len(abouts)
@@ -123,6 +125,7 @@ def gen(location, output):
 
 @cli.command()
 def export():
+    click.echo('Running about-code-tool version ' + __version__)
     click.echo('Exporting zip archive...')
 
 
@@ -133,6 +136,7 @@ def fetch(location):
     Given a directory of ABOUT files at location, calls the DejaCode API and
     update or create license data fields and license texts.
     """
+    click.echo('Running about-code-tool version ' + __version__)
     click.echo('Updating ABOUT files...')
 
 
@@ -157,6 +161,7 @@ def attrib(location, output, template=None, inventory_location=None,):
     inventory_location CSV file containing a list of ABOUT files path to
     generate attribution for.
     """
+    click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating attribution...')
     errors, abouts = about_code_tool.model.collect_inventory(location)
     about_code_tool.attrib.generate_and_save(abouts, output, 
@@ -175,6 +180,7 @@ def redist(input_dir, output, inventory_location=None,):
      Only collect code when redistribute=yes
      Return a list of errors.
     """
+    click.echo('Running about-code-tool version ' + __version__)
     click.echo('Collecting redistributable files...')
 
 
