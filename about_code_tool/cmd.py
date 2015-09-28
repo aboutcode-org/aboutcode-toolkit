@@ -58,7 +58,17 @@ ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
 ''' % locals()
 
 
-@click.group()
+class AboutCommand(click.Command):
+    def main(self, args=None, prog_name=None, complete_var=None,
+             standalone_mode=True, **extra):
+        """
+        Workaround click 4.0 bug https://github.com/mitsuhiko/click/issues/365
+        """
+        return click.Command.main(self, args=args, prog_name=self.name,
+                                  complete_var=complete_var,
+                                  standalone_mode=standalone_mode, **extra)
+
+@click.group(name='about')
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
 @click.option('-v', '--verbose', count=True,
               help='Increase verbosity. Repeat to print more output.')
@@ -72,9 +82,9 @@ inventory_help = '''
 LOCATION: Path to an ABOUT file or a directory containing ABOUT files
 OUTPUT: Path to CSV file to write the inventory to
 '''
-
 @cli.command(help=inventory_help,
-             short_help='LOCATION: directory, OUTPUT: csv file')
+             short_help='LOCATION: directory, OUTPUT: csv file',
+             cls=AboutCommand)
 @click.argument('location', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=True,
                                 dir_okay=True, writable=False,
@@ -101,7 +111,8 @@ LOCATION: Path to a CSV inventory file
 OUTPUT: Path to the directory to write ABOUT files to
 '''
 @cli.command(help=gen_help,
-             short_help='LOCATION: csv file, OUTPUT: directory')
+             short_help='LOCATION: csv file, OUTPUT: directory',
+             cls=AboutCommand)
 @click.argument('location', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=True,
                                 dir_okay=False, writable=False,
@@ -123,14 +134,14 @@ def gen(location, output):
     log_errors(errors)
 
 
-@cli.command()
+@cli.command(cls=AboutCommand)
 def export():
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Exporting zip archive...')
 
 
 
-@cli.command()
+@cli.command(cls=AboutCommand)
 def fetch(location):
     """
     Given a directory of ABOUT files at location, calls the DejaCode API and
@@ -140,7 +151,7 @@ def fetch(location):
     click.echo('Updating ABOUT files...')
 
 
-@cli.command()
+@cli.command(cls=AboutCommand)
 @click.argument('location', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=True,
                                 dir_okay=True, writable=False,
@@ -170,7 +181,7 @@ def attrib(location, output, template=None, inventory_location=None,):
     log_errors(errors)
 
 
-@cli.command()
+@cli.command(cls=AboutCommand)
 def redist(input_dir, output, inventory_location=None,):
     """
     Collect redistributable code at output location using:
