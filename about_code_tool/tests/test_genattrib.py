@@ -21,6 +21,8 @@ import unittest
 
 from about_code_tool import genattrib
 
+from about_code_tool.tests.test_about import get_temp_file
+
 
 TESTS_DIR = os.path.abspath(os.path.dirname(__file__))
 TESTDATA_DIR = os.path.join(TESTS_DIR, 'testdata')
@@ -69,3 +71,47 @@ class GenAttribTest(unittest.TestCase):
         expected = ['/tmp/', '/tmp/t1/']
         result = genattrib.component_subset_to_sublist(test)
         self.assertEqual(expected, result)
+
+    def test_genattrib_basic(self):
+        self.maxDiff = None
+        about_dir = 'about_code_tool/tests/testdata/genattrib/basic/'
+        generated_attrib = get_temp_file('generated.html')
+        args = [about_dir, generated_attrib]
+        options = None
+        genattrib_command_tester(args, options)
+        result = open(generated_attrib).read()
+        expected = [
+            'ElasticSearch 1.6.0',
+            'bootstrap 2.3.2',
+            'djangosnippets.org_2413 2011-04-12',
+            'Annotator 1.2.10',
+            'component_4',
+        ]
+        for ex in expected:
+            self.assertTrue(ex in result)
+
+    def test_genattrib_from_zipped_dir(self):
+        self.maxDiff = None
+        about_dir = 'about_code_tool/tests/testdata/genattrib/zipped_about.zip'
+        generated_attrib = get_temp_file('generated.html')
+        args = [about_dir, generated_attrib]
+        options = None
+        genattrib_command_tester(args, options)
+        result = open(generated_attrib).read()
+        expected = [
+            'ElasticSearch 1.6.0',
+            'bootstrap 2.3.2',
+            'djangosnippets.org_2413 2011-04-12',
+            'Annotator 1.2.10',
+            'python-memcached 1.53',
+            'component_94',
+            'Groovy 2.4.0',
+        ]
+        for ex in expected:
+            self.assertTrue(ex in result)
+
+
+def genattrib_command_tester(args, options):
+    parser = genattrib.get_parser()
+    options, args = parser.parse_args(args, options)
+    genattrib.main(parser, options, args)

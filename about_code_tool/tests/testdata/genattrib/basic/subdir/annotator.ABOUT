@@ -1,0 +1,14 @@
+about_resource: annotator-full.1.2.10.zip
+download_url: https://github.com/openannotation/annotator/releases/download/v1.2.10/annotator-full.1.2.10.zip
+version: 1.2.10
+
+home_url: http://okfnlabs.org/projects/annotator/
+name: Annotator
+owner: Open Knowledge
+
+license_text_file: annotator.LICENSE
+license_url: https://okfn.org/ip-policy/
+dje_license: mit
+
+vcs_tool: git
+vcs_repository: https://github.com/openannotation/annotator.git
