@@ -73,6 +73,7 @@ class GenAttribTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_genattrib_basic(self):
+        self.maxDiff =None
         about_dir = 'about_code_tool/tests/testdata/genattrib/basic/'
         generated_attrib = get_temp_file('generated.html')
         args = [about_dir, generated_attrib]
@@ -80,9 +81,10 @@ class GenAttribTest(unittest.TestCase):
         genattrib_command_tester(args, options)
         expected = open('about_code_tool/tests/testdata/genattrib/basic.html').read()
         result = open(generated_attrib).read()
-        assert expected ==result
+        self.assertEqual(expected, result)
 
     def test_genattrib_from_zipped_dir(self):
+        self.maxDiff =None
         about_dir = 'about_code_tool/tests/testdata/genattrib/zipped_about.zip'
         generated_attrib = get_temp_file('generated.html')
         args = [about_dir, generated_attrib]
@@ -90,7 +92,7 @@ class GenAttribTest(unittest.TestCase):
         genattrib_command_tester(args, options)
         expected = open('about_code_tool/tests/testdata/genattrib/zipped_about.html').read()
         result = open(generated_attrib).read()
-        assert expected ==result
+        self.assertEqual(expected, result)
 
 
 def genattrib_command_tester(args, options):
