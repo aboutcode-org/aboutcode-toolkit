@@ -1,0 +1,19 @@
+about_resource: elasticsearch-1.6.0-src.tar.xz
+download_url: https://github.com/elasticsearch/elasticsearch/archive/v1.6.0.tar.gz
+version: 1.6.0
+
+owner: ElasticSearch and Shay Banon
+name: ElasticSearch
+
+home_url: http://www.elasticsearch.org/
+
+vcs_tool: git
+vcs_repository: https://github.com/elasticsearch/elasticsearch.git
+
+dje_license: apache-2.0
+notice_file: elasticsearch.NOTICE
+license_text_file: elasticsearch.LICENSE
+copyright: Copyright 2009-2014 Elasticsearch
+
+notes: Source code for the pre-built binaries we use, pruned from docs and 
+ tests to keep the size small enough.

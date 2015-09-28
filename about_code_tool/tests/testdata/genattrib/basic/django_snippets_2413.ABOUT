@@ -1,0 +1,14 @@
+about_resource: django_snippets_2413.py
+version: 2011-04-12
+download_url: http://djangosnippets.org/snippets/2413/download/
+
+name: djangosnippets.org_2413
+home_url: http://djangosnippets.org/snippets/2413/
+
+license_url: http://djangosnippets.org/about/tos/
+license_text_file: django_snippets.LICENSE
+dje_license: mit
+notes: The http://djangosnippets.org/ notice gives us permission to use the
+ stuff under just about any open source license, we assert MIT for them.
+ This file was modified to include the line "register = Library()"
+ without which the template tag is not registered.

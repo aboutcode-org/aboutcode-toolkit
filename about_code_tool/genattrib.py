@@ -134,6 +134,37 @@ VERIFICATION_HELP = """\
 Create a verification CSV output for the attribution
 """
 
+def extract_zip(location):
+    """
+    Extract a zip file at location in a temp directory and return the temporary
+    directory where the archive was extracted.
+    """
+    import zipfile
+    import tempfile
+    if not zipfile.is_zipfile(location):
+        raise Exception('Incorrect zip file %(location)r' % locals())
+
+    archive_base_name = os.path.basename(location).replace('.zip', '')
+    base_dir = tempfile.mkdtemp()
+    target_dir = os.path.join(base_dir, archive_base_name)
+    os.makedirs(target_dir)
+
+    with zipfile.ZipFile(location) as zipf:
+        for info in zipf.infolist():
+            name = info.filename
+            content = zipf.read(name)
+            target = os.path.join(target_dir, name)
+            if not os.path.exists(os.path.dirname(target)):
+                os.makedirs(os.path.dirname(target))
+            if not content and target.endswith(os.path.sep):
+                if not os.path.exists(target):
+                    os.makedirs(target)
+            if not os.path.exists(target):
+                with open(target, 'wb') as f:
+                    f.write(content)
+    return target_dir
+
+
 def main(parser, options, args):
     overwrite = options.overwrite
     verbosity = options.verbosity
@@ -199,6 +230,10 @@ def main(parser, options, args):
         print('Input path does not exist.')
         parser.print_help()
         sys.exit(errno.EEXIST)
+
+    if input_path.lower().endswith('.zip'):
+        # accept zipped ABOUT files as input
+        input_path = extract_zip(input_path)
 
     if isdir(output_path):
         print('Output must be a HTML file.')
