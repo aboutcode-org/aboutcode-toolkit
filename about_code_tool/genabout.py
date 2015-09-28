@@ -40,7 +40,7 @@ from urlparse import urljoin, urlparse
 import about
 
 
-__version__ = '2.0.3'
+__version__ = '2.0.4'
 
 __copyright__ = """
 Copyright (c) 2013-2015 nexB Inc. All rights reserved.
@@ -894,6 +894,7 @@ def main(parser, options, args):
                                                         output_path)
         gen.write_licenses(license_list_context)
 
+    print("Completed.")
     gen.warnings_errors_summary()
     print('Warnings: %s' % len(gen.warnings))
     print('Errors: %s' % len(gen.errors))

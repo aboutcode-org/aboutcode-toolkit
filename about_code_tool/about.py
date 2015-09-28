@@ -49,7 +49,7 @@ import urlparse
 on_windows = 'win32' in sys.platform
 UNC_PREFIX = u'\\\\?\\'
 
-__version__ = '2.0.3'
+__version__ = '2.0.4'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'
@@ -1494,6 +1494,7 @@ def main(parser, options, args):
         or (os.path.exists(output_path) and overwrite)):
         collector = Collector(input_path)
         collector.write_to_csv(output_path)
+        print("Completed.")
         if collector.errors:
             print('%d errors detected.' % len(collector.errors))
         if collector.warnings:

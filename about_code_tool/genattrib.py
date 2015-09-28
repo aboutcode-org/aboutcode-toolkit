@@ -43,7 +43,7 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
-__version__ = '2.0.3'
+__version__ = '2.0.4'
 
 __about_spec_version__ = '1.0.0'  # See http://dejacode.org
 
@@ -293,6 +293,7 @@ def main(parser, options, args):
                 print("Problem occurs. Attribution was not generated.")
                 print(e)
 
+        print("Completed.")
         # Remove the previous log file if exist
         log_path = join(dirname(output_path), LOG_FILENAME)
         if exists(log_path):
