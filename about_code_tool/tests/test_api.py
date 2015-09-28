@@ -24,10 +24,10 @@ from about_code_tool import api
 class ApiTest(unittest.TestCase):
 
     def test_build_api_url(self):
-        url ='http:/dejacode.org/'
-        api_username='phi'
-        api_key='ABCD'
-        license_key='apache'
+        url = 'http:/dejacode.org/'
+        api_username = 'phi'
+        api_key = 'ABCD'
+        license_key = 'apache'
         expected = 'http:/dejacode.org/apache/?username=phi&api_key=ABCD&format=json'
         result = api.build_api_url(url, api_username, api_key, license_key)
-        self.assertEqual(expected, result)
+        assert expected == result

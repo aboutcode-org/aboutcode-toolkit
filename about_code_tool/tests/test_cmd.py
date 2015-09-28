@@ -39,13 +39,12 @@ class CmdTest(unittest.TestCase):
         """
         Compare two CSV files at locations as lists of ordered items.
         """
-        self.maxDiff = None
         def as_items(csvfile):
             return sorted([i.items() for i in util.load_csv(csvfile)])
 
         expected = as_items(expected)
         result = as_items(result)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_collect_inventory_basic_from_directory(self):
         location = get_test_loc('inventory/basic/about')
@@ -55,21 +54,20 @@ class CmdTest(unittest.TestCase):
         model.to_csv(abouts, result)
 
         expected_errors = []
-        self.assertEqual(expected_errors, errors)
+        assert expected_errors == errors
 
         expected = get_test_loc('inventory/basic/expected.csv')
         self.check_csv(expected, result)
 
 
     def test_collect_inventory_complex_from_directory(self):
-        self.maxDiff=None
         location = get_test_loc('inventory/complex/about')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
         model.to_csv(abouts, result)
 
-        self.assertTrue(all(e.severity==INFO for e in errors))
+        assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('inventory/complex/expected.csv')
         self.check_csv(expected, result)
@@ -84,7 +82,7 @@ def test_log_errors(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors,level=NOTSET)
+    cmd.log_errors(errors, level=NOTSET)
     out, err = capsys.readouterr()
     expected_out = '''CRITICAL: msg1
 ERROR: msg2
@@ -94,4 +92,4 @@ DEBUG: msg4
 NOTSET: msg4
 '''
     assert '' == err
-    assert expected_out ==out
+    assert expected_out == out

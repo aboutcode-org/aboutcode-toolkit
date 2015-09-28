@@ -27,75 +27,76 @@ from about_code_tool import CRITICAL
 from about_code_tool import Error
 from about_code_tool import util
 
+
 class UtilsTest(unittest.TestCase):
 
     def test_resource_name(self):
         expected = 'first'
         result = util.resource_name('some/things/first')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_with_extension(self):
         expected = 'first.ABOUT'
         result = util.resource_name('/some/things/first.ABOUT')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_for_dir(self):
         expected = 'first'
         result = util.resource_name('some/things/first/')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_windows(self):
         expected = r'first.'
         result = util.resource_name(r'c:\some\things\first.')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_mixed_windows_posix(self):
         expected = r'first'
         result = util.resource_name(r'c:\some/things\first')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_double_slash(self):
         expected = 'first'
         result = util.resource_name(r'some\thi ngs//first')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_punctuation(self):
         expected = '_$asafg:'
         result = util.resource_name('%6571351()2/75612$/_$asafg:')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_simple_slash(self):
         expected = ''
         result = util.resource_name('/')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_spaces(self):
         expected = ''
         result = util.resource_name('/  /  ')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_resource_name_does_not_recurse_infinitely(self):
         expected = ''
         result = util.resource_name(' / ')
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_to_posix_from_win(self):
         test = r'c:\this\that'
         expected = 'c:/this/that'
         result = util.to_posix(test)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_to_posix_from_posix(self):
         test = r'/this/that'
         expected = '/this/that'
         result = util.to_posix(test)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_to_posix_from_mixed(self):
         test = r'/this/that\this'
         expected = '/this/that/this'
         result = util.to_posix(test)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_to_native_from_win(self):
         test = r'c:\this\that'
@@ -104,7 +105,7 @@ class UtilsTest(unittest.TestCase):
         else:
             expected = test
         result = util.to_native(test)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_to_native_from_posix(self):
         test = r'/this/that'
@@ -113,7 +114,7 @@ class UtilsTest(unittest.TestCase):
         else:
             expected = test
         result = util.to_native(test)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_to_native_from_mixed(self):
         test = r'/this/that\this'
@@ -122,7 +123,7 @@ class UtilsTest(unittest.TestCase):
         else:
             expected = r'/this/that/this'
         result = util.to_native(test)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_get_locations(self):
         test_dir = get_test_loc('locations')
@@ -137,15 +138,13 @@ class UtilsTest(unittest.TestCase):
         result = sorted(util.get_locations(test_dir))
         for i, res in enumerate(result):
             expect = expected[i]
-            self.assertTrue(res.endswith(expect),
-                            '%(res)r does not ends with: %(expect)r'
-                            % locals())
+            assert res.endswith(expect)
 
     def test_get_about_locations_with_no_ABOUT_files(self):
         test_dir = get_test_loc('locations')
         expected = []
         result = list(util.get_about_locations(test_dir))
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_get_about_locations_with_ABOUT_files(self):
         test_dir = get_test_loc('about_locations')
@@ -158,45 +157,43 @@ class UtilsTest(unittest.TestCase):
         result = sorted(util.get_about_locations(test_dir))
         for i, res in enumerate(result):
             expect = expected[i]
-            self.assertTrue(res.endswith(expect),
-                            '%(res)r does not ends with: %(expect)r'
-                            % locals())
+            assert res.endswith(expect)
 
     def test_invalid_chars_with_valid_chars(self):
         name = string.digits + string.ascii_letters + '_-.'
         result = util.invalid_chars(name)
         expected = []
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_invalid_chars_with_invalid_in_name_and_dir(self):
         result = util.invalid_chars('_$as/afg:')
         expected = [':']
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_invalid_chars_in_file_name(self):
         name = '%657!1351()275612$_$asafg:'
         result = util.invalid_chars(name)
         expected = ['%', '!', '(', ')', '$', '$', ':']
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_invalid_chars_with_space(self):
         result = util.invalid_chars('_ Hello')
         expected = [' ']
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_check_file_names_with_dupes_return_errors(self):
         paths = ['some/path',
                  'some/PAth']
         result = util.check_file_names(paths)
         expected = [Error(CRITICAL, "Duplicate files: 'some/PAth' and 'some/path' have the same case-insensitive file name")]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_check_file_names_without_dupes_return_no_error(self):
         paths = ['some/path',
                  'some/otherpath']
         result = util.check_file_names(paths)
         expected = []
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_check_file_names_with_no_invalid_char_return_no_error(self):
         paths = ['locations/file',
@@ -208,7 +205,7 @@ class UtilsTest(unittest.TestCase):
 
         expected = []
         result = util.check_file_names(paths)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_check_file_names_with_invalid_chars_return_errors(self):
         paths = ['locations/file',
@@ -218,18 +215,18 @@ class UtilsTest(unittest.TestCase):
 
         expected = [Error(CRITICAL, "Invalid characters '  ' in file name at: 'locations/file with space'")]
         result = util.check_file_names(paths)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_get_about_locations(self):
         location = get_test_loc('parse/complete')
         result = list(util.get_about_locations(location))
         expected = 'testdata/parse/complete/about.ABOUT'
-        self.assertTrue(result[0].endswith(expected))
+        assert result[0].endswith(expected)
 
     def test_is_about_file(self):
-        self.assertTrue(util.is_about_file('test.About'))
-        self.assertTrue(util.is_about_file('test2.aboUT'))
-        self.assertFalse(util.is_about_file('no_about_ext.something'))
+        assert util.is_about_file('test.About')
+        assert util.is_about_file('test2.aboUT')
+        assert not util.is_about_file('no_about_ext.something')
 
     def test_get_relative_path(self):
         test = [('/some/path', '/some/path/file', 'path/file'),
@@ -243,7 +240,7 @@ class UtilsTest(unittest.TestCase):
                 ]
         for base_loc, full_loc, expected in test:
             result = util.get_relative_path(base_loc, full_loc)
-            self.assertEqual(expected, result)
+            assert expected == result
 
     def test_get_relative_path_with_same_path_twice(self):
         test = [('/some/path/file', 'path/file'),
@@ -256,7 +253,7 @@ class UtilsTest(unittest.TestCase):
                 ]
         for loc, expected in test:
             result = util.get_relative_path(loc, loc)
-            self.assertEqual(expected, result)
+            assert expected == result
 
     def test_load_csv(self):
         test_file = get_test_loc('util/about.csv')
@@ -267,7 +264,7 @@ class UtilsTest(unittest.TestCase):
                      ('version', '0.8.1')])
                     ]
         result = util.load_csv(test_file)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_csv_does_not_convert_column_names_to_lowercase(self):
         test_file = get_test_loc('util/about_key_with_upper_case.csv')
@@ -278,7 +275,7 @@ class UtilsTest(unittest.TestCase):
                      ('Version', '0.8.1')])
                     ]
         result = util.load_csv(test_file)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_get_locations_with_very_long_path(self):
         import os

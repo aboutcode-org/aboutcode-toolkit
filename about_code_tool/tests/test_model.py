@@ -60,11 +60,11 @@ class FieldTest(unittest.TestCase):
 
         errors = field.validate(base_dir=base_dir)
         expected_errrors = []
-        self.assertEqual(expected_errrors, errors)
+        assert expected_errrors == errors
 
         result = field.value[test_file]
         expected = posixpath.join(util.to_posix(base_dir), test_file)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_PathField_check_missing_location(self):
         test_file = 'does.not.exist'
@@ -74,10 +74,10 @@ class FieldTest(unittest.TestCase):
 
         expected_errors = [
             Error(CRITICAL, u'Field f: Path does.not.exist not found')]
-        self.assertEqual(expected_errors, errors)
+        assert expected_errors == errors
 
         result = field.value[test_file]
-        self.assertEqual(None, result)
+        assert None == result
 
     def test_TextField_loads_file(self):
         field = model.FileTextField(name='f', value='license.LICENSE',
@@ -86,34 +86,34 @@ class FieldTest(unittest.TestCase):
 
         base_dir = get_test_loc('fields')
         errors = field.validate(base_dir=base_dir)
-        self.assertEqual([], errors)
+        assert [] == errors
 
         expected = [('license.LICENSE', u'some license text')]
         result = field.value.items()
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_UrlField_is_valid_url(self):
-        self.assertTrue(model.UrlField.is_valid_url('http://www.google.com'))
+        assert model.UrlField.is_valid_url('http://www.google.com')
 
     def test_UrlField_is_valid_url_not_starting_with_www(self):
-        self.assertTrue(model.UrlField.is_valid_url('https://nexb.com'))
-        self.assertTrue(model.UrlField.is_valid_url('http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz'))
-        self.assertTrue(model.UrlField.is_valid_url('http://de.wikipedia.org/wiki/Elf (Begriffsklärung)'))
-        self.assertTrue(model.UrlField.is_valid_url('http://nothing_here.com'))
+        assert model.UrlField.is_valid_url('https://nexb.com')
+        assert model.UrlField.is_valid_url('http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz')
+        assert model.UrlField.is_valid_url('http://de.wikipedia.org/wiki/Elf (Begriffsklärung)')
+        assert model.UrlField.is_valid_url('http://nothing_here.com')
 
     def test_UrlField_is_valid_url_no_schemes(self):
-        self.assertFalse(model.UrlField.is_valid_url('google.com'))
-        self.assertFalse(model.UrlField.is_valid_url('www.google.com'))
-        self.assertFalse(model.UrlField.is_valid_url(''))
+        assert not model.UrlField.is_valid_url('google.com')
+        assert not model.UrlField.is_valid_url('www.google.com')
+        assert not model.UrlField.is_valid_url('')
 
     def test_UrlField_is_valid_url_not_ends_with_com(self):
-        self.assertTrue(model.UrlField.is_valid_url('http://www.google'))
+        assert model.UrlField.is_valid_url('http://www.google')
 
     def test_UrlField_is_valid_url_ends_with_slash(self):
-        self.assertTrue(model.UrlField.is_valid_url('http://www.google.co.uk/'))
+        assert model.UrlField.is_valid_url('http://www.google.co.uk/')
 
     def test_UrlField_is_valid_url_empty_URL(self):
-        self.assertFalse(model.UrlField.is_valid_url('http:'))
+        assert not model.UrlField.is_valid_url('http:')
 
     def check_validate(self, field_class, value, expected, expected_errors):
         """
@@ -123,8 +123,8 @@ class FieldTest(unittest.TestCase):
         # check that validate can be applied multiple times without side effects
         for _ in range(2):
             errors = field.validate()
-            self.assertEqual(expected_errors, errors)
-            self.assertEqual(expected, field.value)
+            assert expected_errors == errors
+            assert expected == field.value
 
     def test_StringField_validate_trailing_spaces_are_removed(self):
         field_class = model.StringField
@@ -139,14 +139,14 @@ class FieldTest(unittest.TestCase):
         self.check_validate(field_class, value, expected, expected_errors=[])
 
     def test_ListField_contains_stripped_strings_after_validate(self):
-        value = '''first line    
+        value = '''first line
                    second line  '''
         field_class = model.ListField
         expected = ['first line', 'second line']
         self.check_validate(field_class, value, expected, expected_errors=[])
 
     def test_PathField_contains_stripped_strings_after_validate(self):
-        value = '''first line    
+        value = '''first line
                    second line  '''
         field_class = model.ListField
         expected = ['first line', 'second line']
@@ -182,7 +182,7 @@ class FieldTest(unittest.TestCase):
         expected = ['some/dir']
         field.resolve(about_file_path)
         result = field.resolved_paths
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def check_AboutResourceField_can_resolve_paths_list(self):
         about_file_path = 'some/dir/me.ABOUT'
@@ -198,7 +198,7 @@ class FieldTest(unittest.TestCase):
                     'some/dir/path2/path3']
         field.resolve(about_file_path)
         result = field.resolved_paths
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_AboutResourceField_can_resolve_paths_list_multiple_times(self):
         for _ in range(3):
@@ -211,30 +211,30 @@ class ParseTest(unittest.TestCase):
         test = get_test_lines('parse/basic.about')
         errors, result = list(model.parse(test))
 
-        self.assertEqual([], errors)
+        assert [] == errors
 
         expected = [(u'single_line', u'optional'),
                     (u'other_field', u'value'),
                     ]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_parse_can_parse_continuations(self):
         test = get_test_lines('parse/continuation.about')
         errors, result = model.parse(test)
 
-        self.assertEqual([], errors)
+        assert [] == errors
 
         expected = [(u'single_line', u'optional'),
                     (u'other_field', u'value'),
                     (u'multi_line', u'some value\n'
                                      u'and more\n'
                                      u' and yet more')]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_parse_can_handle_complex_continuations(self):
         test = get_test_lines('parse/complex.about')
         errors, result = model.parse(test)
-        self.assertEqual([], errors)
+        assert [] == errors
 
         expected = [(u'single_line', u'optional'),
                     (u'other_field', u'value\n'),
@@ -243,14 +243,14 @@ class ParseTest(unittest.TestCase):
                                      u' and yet more\n'
                                      u'  '),
                     (u'yetanother', u'\nsdasd')]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_parse_error_for_invalid_field_name(self):
         test = get_test_lines('parse/invalid_names.about')
         errors, result = model.parse(test)
         expected = [(u'val3_id_', u'some:value'),
                     (u'VALE3_ID_', u'some:value')]
-        self.assertEqual(expected, result)
+        assert expected == result
 
         expected_errors = [
             Error(CRITICAL, "Invalid line: 0: u'invalid space:value\\n'"),
@@ -259,7 +259,7 @@ class ParseTest(unittest.TestCase):
             Error(CRITICAL, "Invalid line: 5: u'3invalid_number: value\\n'"),
             Error(CRITICAL, "Invalid line: 6: u'invalid.dot: value'")
             ]
-        self.assertEqual(expected_errors, errors)
+        assert expected_errors == errors
 
     def test_parse_error_for_invalid_continuation(self):
         test = get_test_lines('parse/invalid_continuation.about')
@@ -267,13 +267,13 @@ class ParseTest(unittest.TestCase):
         expected = [(u'single_line', u'optional'),
                     (u'other_field', u'value'),
                     (u'multi_line', u'some value\n' u'and more')]
-        self.assertEqual(expected, result)
+        assert expected == result
         expected_errors = [
             Error(CRITICAL, "Invalid continuation line: 0:"
                             " u' invalid continuation1\\n'"),
             Error(CRITICAL, "Invalid continuation line: 7:"
                             " u' invalid continuation2\\n'")]
-        self.assertEqual(expected_errors, errors)
+        assert expected_errors == errors
 
     def test_parse_rejects_non_ascii_names_and_accepts_unicode_values(self):
         test = get_test_lines('parse/non_ascii_field_name_value.about')
@@ -281,11 +281,11 @@ class ParseTest(unittest.TestCase):
         expected = [(u'name', u'name'),
                     (u'about_resource', u'.'),
                     (u'owner', u'Mat\xedas Aguirre')]
-        self.assertEqual(expected, result)
+        assert expected == result
 
         expected_errors = [
             Error(CRITICAL, "Invalid line: 3: u'Mat\\xedas: unicode field name\\n'")]
-        self.assertEqual(expected_errors, errors)
+        assert expected_errors == errors
 
     def test_parse_handles_blank_lines_and_spaces_in_field_names(self):
         test = '''
@@ -300,11 +300,11 @@ field with spaces: This is a test case for field with spaces
         expected = [('name', 'test space'),
                     ('version', '0.7.0'),
                     ('about_resource', 'about.py')]
-        self.assertEqual(expected, result)
+        assert expected == result
 
         expected_errors = [
             Error(CRITICAL, "Invalid line: 4: 'field with spaces: This is a test case for field with spaces\\n'")]
-        self.assertEqual(expected_errors, errors)
+        assert expected_errors == errors
 
     def test_parse_ignore_blank_lines_and_lines_without_no_colon(self):
         test = '''
@@ -319,12 +319,12 @@ test with no colon
         expected = [('name', 'no colon test'),
                     ('version', '0.7.0'),
                     ('about_resource', 'about.py')]
-        self.assertEqual(expected, result)
+        assert expected == result
 
         expected_errors = [
             Error(CRITICAL, "Invalid line: 2: 'test\\n'"),
             Error(CRITICAL, "Invalid line: 5: 'test with no colon\\n'")]
-        self.assertEqual(expected_errors, errors)
+        assert expected_errors == errors
 
 
 class AboutTest(unittest.TestCase):
@@ -349,7 +349,7 @@ class AboutTest(unittest.TestCase):
             Error(WARNING, u'Field Name is a duplicate. Original value: "old" replaced with: "new"'),
             Error(INFO, u'Field About_Resource is a duplicate with the same value as before.')]
         result = a.errors
-        self.assertEqual(sorted(expected), sorted(result))
+        assert sorted(expected) == sorted(result)
 
     def check_About_hydrate(self, about, fields, errors):
         expected = set([
@@ -371,23 +371,23 @@ class AboutTest(unittest.TestCase):
 
         errors = about.hydrate(fields)
 
-        self.assertEqual(expected_errors, errors)
+        assert expected_errors == errors
 
         result = set([f.name for f in about.all_fields() if f.present])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_hydrate_normalize_field_names_to_lowercase(self):
         self.maxDiff = None
         test_file = get_test_lines('parser_tests/upper_field_names.ABOUT')
         errors, fields = model.parse(test_file)
-        self.assertEqual([], errors)
+        assert [] == errors
         a = model.About()
         self.check_About_hydrate(a, fields, errors)
 
     def test_About_hydrate_can_be_called_multiple_times(self):
         test_file = get_test_lines('parser_tests/upper_field_names.ABOUT')
         errors, fields = model.parse(test_file)
-        self.assertEqual([], errors)
+        assert [] == errors
         a = model.About()
         for _ in range(3):
             self.check_About_hydrate(a, fields, errors)
@@ -395,7 +395,7 @@ class AboutTest(unittest.TestCase):
     def test_About_with_existing_about_resource_has_no_error(self):
         test_file = get_test_loc('parser_tests/about_resource_field.ABOUT')
         a = model.About(test_file)
-        self.assertEqual([], a.errors)
+        assert [] == a.errors
         result = a.about_resource.value['about_resource.c']
         # this means we have a location
         self.assertNotEqual([], result)
@@ -407,7 +407,7 @@ class AboutTest(unittest.TestCase):
                     Error(CRITICAL, u'Field about_resource is required')
                     ]
         result = a.errors
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_has_errors_when_about_resource_does_not_exist(self):
         test_file = get_test_loc('parser_tests/missing_about_ref.ABOUT')
@@ -415,7 +415,7 @@ class AboutTest(unittest.TestCase):
         expected = [
             Error(CRITICAL, u'Field about_resource: Path about_file_missing.c not found')]
         result = a.errors
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_has_errors_when_missing_required_fields_are_missing(self):
         test_file = get_test_loc('parse/missing_required.ABOUT')
@@ -425,7 +425,7 @@ class AboutTest(unittest.TestCase):
             Error(CRITICAL, u'Field name is required'),
             ]
         result = a.errors
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_has_errors_when_required_fields_are_empty(self):
         test_file = get_test_loc('parse/empty_required.ABOUT')
@@ -435,7 +435,7 @@ class AboutTest(unittest.TestCase):
             Error(CRITICAL, u'Field name is required and empty'),
             ]
         result = a.errors
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_has_errors_with_empty_notice_file_field(self):
         test_file = get_test_loc('parse/empty_notice_field.about')
@@ -443,7 +443,7 @@ class AboutTest(unittest.TestCase):
         expected = [
             Error(WARNING, u'Field notice_file is present but empty')]
         result = a.errors
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_custom_fields_are_collected_correctly(self):
         test_file = get_test_loc('parse/custom_fields.about')
@@ -453,7 +453,7 @@ class AboutTest(unittest.TestCase):
             (u'single_line', u'README STUFF'),
             (u'multi_line', u'line1\nline2'),
             (u'empty', '')]
-        self.assertEqual(sorted(expected), sorted(result))
+        assert sorted(expected) == sorted(result)
 
     def test_About_custom_fields_are_collected_correctly_as_multiline_scalar(self):
         test_file = get_test_loc('parse/custom_fields.about')
@@ -463,7 +463,7 @@ class AboutTest(unittest.TestCase):
             (u'single_line', u'README STUFF'),
             (u'multi_line', u'line1\nline2'),
             (u'empty', '')]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_has_errors_for_illegal_custom_field_name(self):
         test_file = get_test_loc('parse/illegal_custom_field.about')
@@ -471,7 +471,7 @@ class AboutTest(unittest.TestCase):
         result = a.custom_fields.items()
         expected = [
             ]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_file_fields_are_empty_if_present_and_path_missing(self):
         test_file = get_test_loc('parse/missing_notice_license_files.ABOUT')
@@ -480,14 +480,14 @@ class AboutTest(unittest.TestCase):
             Error(CRITICAL, u'Field license_file: Path test.LICENSE not found'),
             Error(CRITICAL, u'Field notice_file: Path test.NOTICE not found'),
             ]
-        self.assertEqual(expected_errors, a.errors)
+        assert expected_errors == a.errors
         expected = [(u'test.LICENSE', None)]
         result = a.license_file.value.items()
-        self.assertEqual(expected, result)
+        assert expected == result
 
         expected = [(u'test.NOTICE', None)]
         result = a.notice_file.value.items()
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_notice_and_license_text_are_loaded_from_file(self):
         test_file = get_test_loc('parse/license_file_notice_file.ABOUT')
@@ -499,24 +499,24 @@ this software and releases the component to Public Domain.
 * Email Test@tester.com for any questions'''
 
         result = a.license_file.value['license_text.LICENSE']
-        self.assertEqual(expected, result)
+        assert expected == result
 
         expected = '''Test component is released to Public Domain.'''
         result = a.notice_file.value['notice_text.NOTICE']
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_license_and_notice_text_are_empty_if_field_missing(self):
         test_file = get_test_loc('parse/no_file_fields.ABOUT')
         a = model.About(test_file)
 
         expected_errors = []
-        self.assertEqual(expected_errors, a.errors)
+        assert expected_errors == a.errors
 
         result = a.license_file.value
-        self.assertEqual({}, result)
+        assert {} == result
 
         result = a.notice_file.value
-        self.assertEqual({}, result)
+        assert {} == result
 
     def test_About_rejects_non_ascii_names_and_accepts_unicode_values(self):
         test_file = get_test_loc('parse/non_ascii_field_name_value.about')
@@ -526,21 +526,21 @@ this software and releases the component to Public Domain.
             Error(INFO, u'Field Mat\xedas is a custom field'),
             Error(CRITICAL, u"Invalid line: u'Mat\\xedas': unicode field name")
                     ]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_contains_about_file_path(self):
         test_file = get_test_loc('parse/complete/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
-        self.assertEqual([], a.errors)
+        assert [] == a.errors
         expected = 'complete/about.ABOUT'
         result = a.about_file_path
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_equals(self):
         test_file = get_test_loc('equal/complete/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         b = model.About(test_file, about_file_path='complete/about.ABOUT')
-        self.assertEqual(a, b)
+        assert a == b
 
     def FAILING_test_About_equals_with_small_text_differences(self):
         test_file = get_test_loc('equal/complete2/about.ABOUT')
@@ -548,14 +548,14 @@ this software and releases the component to Public Domain.
         test_file2 = get_test_loc('equal/complete/about.ABOUT')
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
         self.maxDiff = None
-        #print()
-        #print('a')
-        #print(a.dumps(True))
-        #print()
-        #print('b')
-        #print(b.dumps(True))
-        self.assertEqual(a.dumps(True), b.dumps(True))
-        self.assertEqual(a, b)
+        # print()
+        # print('a')
+        # print(a.dumps(True))
+        # print()
+        # print('b')
+        # print(b.dumps(True))
+        assert a.dumps(True) == b.dumps(True)
+        assert a == b
 
     def test_About_dumps_does_not_transform_strings_in_lists(self):
         test_file = get_test_loc('dumps/complete2/about.ABOUT')
@@ -575,7 +575,7 @@ copyright: Copyright (c) 2013-2014 nexB Inc.
 notice_file: NOTICE
 notice_url:
 redistribute:
-attribute:
+attribute: 
 track_change:
 modified:
 changelog_file:
@@ -592,12 +592,11 @@ vcs_revision:
 checksum:
 spec_version:
 '''
-#         self.maxDiff = None
 #         print()
 #         print('a')
 #         print(a.dumps(True))
 #         print()
-#         self.assertEqual(expected.splitlines(), a.dumps(True).splitlines())
+        assert expected == a.dumps(with_absent=True)
 
     def test_About_same_attribution(self):
         base_dir = 'some_dir'
@@ -605,7 +604,7 @@ spec_version:
         a.load_dict({'name': u'apache', 'version': u'1.1' }, base_dir)
         b = model.About()
         b.load_dict({'name': u'apache', 'version': u'1.1' }, base_dir)
-        self.assertTrue(a.same_attribution(b))
+        assert a.same_attribution(b)
 
     def test_About_same_attribution_with_different_resource(self):
         base_dir = 'some_dir'
@@ -613,7 +612,7 @@ spec_version:
         a.load_dict({'about_resource': u'resource', 'name': u'apache', 'version': u'1.1' }, base_dir)
         b = model.About()
         b.load_dict({'about_resource': u'other', 'name': u'apache', 'version': u'1.1' }, base_dir)
-        self.assertTrue(a.same_attribution(b))
+        assert a.same_attribution(b)
 
     def test_About_same_attribution_different_data(self):
         base_dir = 'some_dir'
@@ -621,8 +620,8 @@ spec_version:
         a.load_dict({'about_resource': u'resource', 'name': u'apache', 'version': u'1.1' }, base_dir)
         b = model.About()
         b.load_dict({'about_resource': u'other', 'name': u'apache', 'version': u'1.2' }, base_dir)
-        self.assertFalse(a.same_attribution(b))
-        self.assertFalse(b.same_attribution(a))
+        assert not a.same_attribution(b)
+        assert not b.same_attribution(a)
 
     def test_field_names(self):
         a = model.About()
@@ -671,7 +670,7 @@ spec_version:
             'f',
             'g']
         result = model.field_names(abouts)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_field_names_does_not_return_duplicates_custom_fields(self):
         a = model.About()
@@ -697,7 +696,7 @@ spec_version:
         result = model.field_names(abouts, with_paths=False,
                                    with_absent=False,
                                    with_empty=False)
-        self.assertEqual(expected, result)
+        assert expected == result
 
 
 class SerializationTest(unittest.TestCase):
@@ -705,7 +704,7 @@ class SerializationTest(unittest.TestCase):
         self.maxDiff = None
         test_file = get_test_loc('parse/complete/about.ABOUT')
         a = model.About(test_file)
-        self.assertEqual([], a.errors)
+        assert [] == a.errors
 
         expected = u'''about_resource: .
 name: AboutCode
@@ -725,17 +724,16 @@ vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 '''
         result = a.dumps()
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_dumps_all_fields_if_not_present_with_absent_True(self):
-        self.maxDiff = None
         test_file = get_test_loc('parse/complete2/about.ABOUT')
         a = model.About(test_file)
         expected_error = [
             Error(INFO, u'Field custom1 is a custom field'),
             Error(INFO, u'Field custom2 is a custom field'),
             Error(WARNING, u'Field custom2 is present but empty')]
-        self.assertEqual(sorted(expected_error), sorted(a.errors))
+        assert sorted(expected_error) == sorted(a.errors)
 
         expected = u'''about_resource: .
 name: AboutCode
@@ -774,17 +772,16 @@ custom1: |
 custom2:
 '''
         result = a.dumps(with_absent=True)
-        self.assertEqual(set(expected), set(result))
+        assert set(expected) == set(result)
 
     def test_About_dumps_does_not_dump_not_present_with_absent_False(self):
-        self.maxDiff = None
         test_file = get_test_loc('parse/complete2/about.ABOUT')
         a = model.About(test_file)
         expected_error = [
             Error(INFO, u'Field custom1 is a custom field'),
             Error(INFO, u'Field custom2 is a custom field'),
             Error(WARNING, u'Field custom2 is present but empty')]
-        self.assertEqual(sorted(expected_error), sorted(a.errors))
+        assert sorted(expected_error) == sorted(a.errors)
 
         expected = u'''about_resource: .
 name: AboutCode
@@ -795,17 +792,16 @@ custom1: |
 custom2:
 '''
         result = a.dumps(with_absent=False)
-        self.assertEqual(set(expected), set(result))
+        assert set(expected) == set(result)
 
     def test_About_dumps_does_not_dump_present__empty_with_absent_False(self):
-        self.maxDiff = None
         test_file = get_test_loc('parse/complete2/about.ABOUT')
         a = model.About(test_file)
         expected_error = [
             Error(INFO, u'Field custom1 is a custom field'),
             Error(INFO, u'Field custom2 is a custom field'),
             Error(WARNING, u'Field custom2 is present but empty')]
-        self.assertEqual(sorted(expected_error), sorted(a.errors))
+        assert sorted(expected_error) == sorted(a.errors)
 
         expected = u'''about_resource: .
 name: AboutCode
@@ -815,25 +811,23 @@ custom1: |
     line
 '''
         result = a.dumps(with_absent=False, with_empty=False)
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_as_dict_contains_special_paths(self):
-        self.maxDiff = None
         test_file = get_test_loc('parse/complete/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         expected_errors = []
-        self.assertEqual(expected_errors, a.errors)
+        assert expected_errors == a.errors
         as_dict = a.as_dict(with_paths=True, with_empty=False, with_absent=False)
         expected = 'complete/about.ABOUT'
         result = as_dict[model.About.about_file_path_attr]
-        self.assertEqual(expected, result)
+        assert expected == result
 
         expected = 'complete'
         result = as_dict[model.About.about_resource_path_attr]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_About_as_dict_with_empty(self):
-        self.maxDiff = None
         test_file = get_test_loc('as_dict/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         expected_errors = [
@@ -841,7 +835,7 @@ custom1: |
             Error(INFO, u'Field custom_empty is a custom field'),
             Error(WARNING, u'Field author is present but empty'),
             Error(WARNING, u'Field custom_empty is present but empty')]
-        self.assertEqual(expected_errors, a.errors)
+        assert expected_errors == a.errors
         expected = {'about_resource': u'.',
                     'author': u'',
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
@@ -854,10 +848,9 @@ custom1: |
         result = a.as_dict(with_paths=False,
                            with_empty=True,
                            with_absent=False)
-        self.assertEqual(expected, dict(result))
+        assert expected == dict(result)
 
     def test_About_as_dict_with_present(self):
-        self.maxDiff = None
         test_file = get_test_loc('as_dict/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         expected_errors = [
@@ -865,7 +858,7 @@ custom1: |
             Error(INFO, u'Field custom_empty is a custom field'),
             Error(WARNING, u'Field author is present but empty'),
             Error(WARNING, u'Field custom_empty is present but empty')]
-        self.assertEqual(expected_errors, a.errors)
+        assert expected_errors == a.errors
         expected = {'about_resource': u'.',
                     'attribute': u'',
                     'changelog_file': u'',
@@ -900,10 +893,9 @@ custom1: |
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=True)
-        self.assertEqual(expected, dict(result))
+        assert expected == dict(result)
 
     def test_About_as_dict_with_nothing(self):
-        self.maxDiff = None
         test_file = get_test_loc('as_dict/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         expected_errors = [
@@ -911,7 +903,7 @@ custom1: |
             Error(INFO, u'Field custom_empty is a custom field'),
             Error(WARNING, u'Field author is present but empty'),
             Error(WARNING, u'Field custom_empty is present but empty')]
-        self.assertEqual(expected_errors, a.errors)
+        assert expected_errors == a.errors
         expected = {'about_resource': u'.',
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     u'custom1': u'some custom',
@@ -922,7 +914,7 @@ custom1: |
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=False)
-        self.assertEqual(expected, dict(result))
+        assert expected == dict(result)
 
     def test_loads_dumps_is_idempotent(self):
         test = u'''about_resource: .
@@ -936,18 +928,18 @@ custom1: |
         base_dir = 'some_dir'
         a.loads(test, base_dir)
         dumped = a.dumps(with_absent=False, with_empty=False)
-        self.assertEqual(test, dumped)
+        assert test == dumped
 
     def test_load_dump_is_idempotent(self):
         test_file = get_test_loc('load/this.ABOUT')
         a = model.About()
         a.load(test_file)
-        dumped_file = get_temp_file()
+        dumped_file = get_temp_file('that.ABOUT')
         a.dump(dumped_file, with_absent=False, with_empty=False)
 
         expected = get_unicode_content(test_file).splitlines()
         result = get_unicode_content(dumped_file).splitlines()
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_can_load_unicode(self):
         test_file = get_test_loc('unicode/nose-selecttests.ABOUT')
@@ -960,17 +952,17 @@ custom1: |
             Error(INFO, u'Field scm_repository is a custom field'),
             Error(INFO, u'Field test is a custom field'),
             Error(CRITICAL, u'Field about_resource: Path nose-selecttests-0.3.zip not found')]
-        self.assertEqual(errors, a.errors)
-        self.assertEqual(u'Copyright (c) 2012, Domen Kožar', a.copyright.value)
+        assert errors == a.errors
+        assert u'Copyright (c) 2012, Domen Kožar' == a.copyright.value
 
     def test_load_has_errors_for_non_unicode(self):
         test_file = get_test_loc('unicode/not-unicode.ABOUT')
         a = model.About()
         a.load(test_file)
         err = a.errors[0]
-        self.assertEqual(CRITICAL, err.severity)
-        self.assertTrue('Cannot load invalid ABOUT file' in err.message)
-        self.assertTrue('UnicodeDecodeError' in err.message)
+        assert CRITICAL == err.severity
+        assert 'Cannot load invalid ABOUT file' in err.message
+        assert 'UnicodeDecodeError' in err.message
 
     def test_as_dict_load_dict_is_idempotent(self):
         test = {'about_resource': u'.',
@@ -988,7 +980,7 @@ custom1: |
         a.load_dict(test, base_dir)
         as_dict = a.as_dict(with_paths=False, with_absent=False,
                            with_empty=True)
-        self.assertEqual(test, dict(as_dict))
+        assert test == dict(as_dict)
 
     def test_load_dict_handles_field_validation_correctly(self):
         self.maxDiff = None
@@ -1011,7 +1003,7 @@ custom1: |
         a.load_dict(test, base_dir)
         as_dict = a.as_dict(with_paths=False, with_absent=False,
                             with_empty=True)
-        self.assertEqual(test, dict(as_dict))
+        assert test == dict(as_dict)
 
     def check_csvs(self, expected, result):
         """
@@ -1023,7 +1015,7 @@ custom1: |
             res = result[ie]
             for ii, exp in enumerate(expect):
                 r = res[ii]
-                self.assertEqual(exp, r)
+                assert exp == r
 
     def test_to_csv(self):
         path = 'load/this.ABOUT'
@@ -1040,26 +1032,24 @@ custom1: |
 class CollectorTest(unittest.TestCase):
 
     def test_collect_inventory_in_directory_with_correct_about_file_path(self):
-        self.maxDiff = None
         test_loc = get_test_loc('collect-inventory-errors')
         _errors, abouts = model.collect_inventory(test_loc)
-        self.assertEqual(2, len(abouts))
+        assert 2 == len(abouts)
 
         expected = ['collect-inventory-errors/non-supported_date_format.ABOUT',
                     'collect-inventory-errors/supported_date_format.ABOUT']
         result = [a.about_file_path for a in abouts]
-        self.assertEqual(sorted(expected), sorted(result))
+        assert sorted(expected) == sorted(result)
 
     def test_collect_inventory_with_long_path(self):
-        self.maxDiff = None
         test_loc = get_test_loc('longpath')
         _errors, abouts = model.collect_inventory(test_loc)
-        self.assertEqual(2, len(abouts))
+        assert 2 == len(abouts)
 
         expected = ['longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/non-supported_date_format.ABOUT',
                     'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/supported_date_format.ABOUT']
         result = [a.about_file_path for a in abouts]
-        self.assertEqual(sorted(expected), sorted(result))
+        assert sorted(expected) == sorted(result)
 
     def test_collect_inventory_return_errors(self):
         test_loc = get_test_loc('collect-inventory-errors')
@@ -1069,30 +1059,30 @@ class CollectorTest(unittest.TestCase):
             Error(CRITICAL, u'Field about_resource: Path distribute_setup.py not found'),
             Error(INFO, u'Field date is a custom field'),
             Error(CRITICAL, u'Field about_resource: Path date_test.py not found')]
-        self.assertEqual(sorted(expected_errors), sorted(errors))
+        assert sorted(expected_errors) == sorted(errors)
 
     def test_collect_inventory_can_collect_a_single_file(self):
         test_loc = get_test_loc('thirdparty/django_snippets_2413.ABOUT')
         _errors, abouts = model.collect_inventory(test_loc)
-        self.assertEqual(1, len(abouts))
+        assert 1 == len(abouts)
         expected = ['thirdparty/django_snippets_2413.ABOUT']
         result = [a.about_file_path for a in abouts]
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_collect_inventory_return_no_warnings(self):
         test_loc = get_test_loc('allAboutInOneDir')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = []
         result = [(level, e) for level, e in errors if level > about_code_tool.INFO]
-        self.assertEqual(expected_errors, result)
+        assert expected_errors == result
 
     def test_collect_inventory_populate_about_file_path(self):
         test_loc = get_test_loc('parse/complete')
         errors, abouts = model.collect_inventory(test_loc)
-        self.assertEqual([], errors)
+        assert [] == errors
         expected = 'complete/about.ABOUT'
         result = abouts[0].about_file_path
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_collect_inventory_works_with_relative_paths(self):
         # FIXME:
@@ -1106,13 +1096,49 @@ class CollectorTest(unittest.TestCase):
         test_loc2 = test_loc + '/../complete'
         errors1, abouts1 = model.collect_inventory(test_loc1)
         errors2, abouts2 = model.collect_inventory(test_loc2)
-        self.assertEqual([], errors1)
-        self.assertEqual([], errors2)
+        assert [] == errors1
+        assert [] == errors2
         expected = 'complete/about.ABOUT'
         result1 = abouts1[0].about_file_path
         result2 = abouts2[0].about_file_path
-        self.assertEqual(expected, result1)
-        self.assertEqual(expected, result2)
+        assert expected == result1
+        assert expected == result2
+
+    def check_csv(self, expected, result):
+        """
+        Compare two CSV files at locations as lists of ordered items.
+        """
+        def as_items(csvfile):
+            return sorted([i.items() for i in util.load_csv(csvfile)])
+
+        expected = as_items(expected)
+        result = as_items(result)
+        assert expected == result
+
+    def test_collect_inventory_basic_from_directory(self):
+        location = get_test_loc('inventory/basic/about')
+        result = get_temp_file()
+        errors, abouts = model.collect_inventory(location)
+
+        model.to_csv(abouts, result)
+
+        expected_errors = []
+        assert expected_errors == errors
+
+        expected = get_test_loc('inventory/basic/expected.csv')
+        self.check_csv(expected, result)
+
+    def test_collect_inventory_complex_from_directory(self):
+        location = get_test_loc('inventory/complex/about')
+        result = get_temp_file()
+        errors, abouts = model.collect_inventory(location)
+
+        model.to_csv(abouts, result)
+
+        assert all(e.severity == INFO for e in errors)
+
+        expected = get_test_loc('inventory/complex/expected.csv')
+        self.check_csv(expected, result)
 
 
 class GroupingsTest(unittest.TestCase):
@@ -1136,7 +1162,7 @@ class GroupingsTest(unittest.TestCase):
         b.load_dict(test, base_dir)
         abouts = [a, b]
         results = model.unique(abouts)
-        self.assertEqual([a], results)
+        assert [a] == results
 
     def test_by_license(self):
         base_dir = 'some_dir'
@@ -1157,7 +1183,7 @@ class GroupingsTest(unittest.TestCase):
                                 ('bsd', [d]),
                                 ('cddl-1.0', [a]),
                                 ])
-        self.assertEqual(expected, results)
+        assert expected == results
 
     def test_by_name(self):
         base_dir = 'some_dir'
@@ -1177,4 +1203,4 @@ class GroupingsTest(unittest.TestCase):
                                 ('apache', [a, b]),
                                 ('eclipse', [d]),
                                 ])
-        self.assertEqual(expected, results)
+        assert expected == results
