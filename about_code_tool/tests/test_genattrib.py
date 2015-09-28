@@ -110,6 +110,21 @@ class GenAttribTest(unittest.TestCase):
         for ex in expected:
             self.assertTrue(ex in result)
 
+    def test_genattrib_from_zipped_dir_with_filter_list(self):
+        self.maxDiff = None
+        about_dir = 'about_code_tool/tests/testdata/genattrib/test.zip'
+        generated_attrib = get_temp_file('generated.html')
+        filter_list = 'about_code_tool/tests/testdata/genattrib/filter_list.csv'
+        args = [about_dir, generated_attrib, filter_list]
+        options = None
+        genattrib_command_tester(args, options)
+        result = open(generated_attrib).read()
+        expected = [
+            'bootstrap 2.3.2',
+            'Annotator 1.2.10',
+        ]
+        for ex in expected:
+            self.assertTrue(ex in result)
 
 def genattrib_command_tester(args, options):
     parser = genattrib.get_parser()
