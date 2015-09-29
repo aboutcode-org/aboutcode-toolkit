@@ -32,3 +32,4 @@ nosetests.xml
 .idea/
 
 /*.egg-info/
+/.cache/
