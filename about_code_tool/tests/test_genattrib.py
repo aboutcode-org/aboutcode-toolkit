@@ -90,6 +90,32 @@ class GenAttribTest(unittest.TestCase):
         for ex in expected:
             self.assertTrue(ex in result)
 
+    def test_genattrib_basic_with_filter(self):
+        self.maxDiff = None
+        # note: this contains an about_files subdir that is the root of all ABOUT files in the "project"
+        about_dir = 'about_code_tool/tests/testdata/genattrib/project'
+        generated_attrib = get_temp_file('generated.html')
+        # note: all the about_fioles columns are paths starting with /about_files
+        filter_csv = 'about_code_tool/tests/testdata/genattrib/project_filter.csv'
+        args = [about_dir, generated_attrib, filter_csv]
+        options = None
+        genattrib_command_tester(args, options)
+        result = open(generated_attrib).read()
+        expected = [
+            'ElasticSearch 1.6.0',
+            'bootstrap 2.3.2',
+        ]
+        for ex in expected:
+            self.assertTrue(ex in result, ex)
+
+        not_expected = [
+            'Annotator 1.2.10',
+            'component_4',
+        'djangosnippets.org_2413 2011-04-12',
+        ]
+        for ex in not_expected:
+            self.assertFalse(ex in result, ex)
+
     def test_genattrib_from_zipped_dir(self):
         self.maxDiff = None
         about_dir = 'about_code_tool/tests/testdata/genattrib/zipped_about.zip'
@@ -108,23 +134,34 @@ class GenAttribTest(unittest.TestCase):
             'Groovy 2.4.0',
         ]
         for ex in expected:
-            self.assertTrue(ex in result)
+            self.assertTrue(ex in result, ex)
 
-    def test_genattrib_from_zipped_dir_with_filter_list(self):
+
+    def test_genattrib_zip_with_filter(self):
         self.maxDiff = None
-        about_dir = 'about_code_tool/tests/testdata/genattrib/test.zip'
+        # note: this contains an about_files subdir that is the root of all ABOUT files in the "project"
+        about_dir = 'about_code_tool/tests/testdata/genattrib/about_files.zip'
         generated_attrib = get_temp_file('generated.html')
-        filter_list = 'about_code_tool/tests/testdata/genattrib/filter_list.csv'
-        args = [about_dir, generated_attrib, filter_list]
+        # note: all the about_fioles columns are paths starting with /about_files
+        filter_csv = 'about_code_tool/tests/testdata/genattrib/project_filter.csv'
+        args = [about_dir, generated_attrib, filter_csv]
         options = None
         genattrib_command_tester(args, options)
         result = open(generated_attrib).read()
         expected = [
+            'ElasticSearch 1.6.0',
             'bootstrap 2.3.2',
-            'Annotator 1.2.10',
         ]
         for ex in expected:
-            self.assertTrue(ex in result)
+            self.assertTrue(ex in result, ex)
+
+        not_expected = [
+            'Annotator 1.2.10',
+            'component_4',
+        'djangosnippets.org_2413 2011-04-12',
+        ]
+        for ex in not_expected:
+            self.assertFalse(ex in result, ex)
 
 def genattrib_command_tester(args, options):
     parser = genattrib.get_parser()

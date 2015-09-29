@@ -1,0 +1,22 @@
+about_resource: elasticsearch-1.6.0.zip
+download_url: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.6.0.zip
+version: 1.6.0
+
+owner: ElasticSearch and Shay Banon
+name: ElasticSearch
+
+home_url: http://www.elasticsearch.org/
+
+vcs_tool: git
+vcs_repository: https://github.com/elasticsearch/elasticsearch.git
+
+dje_license: apache-2.0
+notice_file: elasticsearch.NOTICE
+license_text_file: elasticsearch.LICENSE
+copyright: Copyright 2009-2015 Elasticsearch
+
+notes: This a prebuilt version working on all OSes.
+ The tar.gz works only with POSIX OSses and not Windows while the zip works on
+ all OS. See https://github.com/elasticsearch/elasticsearch/pull/2793
+ ES contains a prebuilt binary of Apache-licensed Hyperic Sigar, Apache Lucene
+ and Apache Log4J as well as JNA which is LGPL-licensed.
