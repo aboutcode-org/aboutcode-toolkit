@@ -1,0 +1,16 @@
+about_resource: bootstrap-2.3.2.zip
+download_url: https://github.com/twbs/bootstrap/archive/v2.3.2.zip
+version: 2.3.2
+
+name: bootstrap
+home_url: http://twitter.github.com/bootstrap/
+owner: Twitter, Inc.
+
+description: Sleek, intuitive, and powerful front-end framework for faster and easier web development.
+dje_license: apache-2.0
+license_text_file: bootstrap.LICENSE
+copyright: Copyright 2012 Twitter, Inc.
+
+vcs_tool: git
+vcs_repository: https://github.com/twitter/bootstrap.git
+vcs_branch: /tree/v2.3.2
