@@ -626,8 +626,7 @@ class GenAbout(object):
     @staticmethod
     def write_output(output):
         for about_file_location, context in output:
-            if about.on_windows:
-                about_file_location = about.UNC_PREFIX + os.path.abspath(about_file_location)
+            about_file_location = about.add_unc(about_file_location)
             if _exists(about_file_location):
                 os.remove(about_file_location)
             with open(about_file_location, 'wb') as output_file:

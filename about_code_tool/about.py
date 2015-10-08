@@ -47,7 +47,6 @@ import urlparse
 
 
 on_windows = 'win32' in sys.platform
-UNC_PREFIX = u'\\\\?\\'
 
 __version__ = '2.0.4'
 
@@ -505,12 +504,37 @@ COMMON_LICENSES = (
     'ZLIB License',
 )
 
+
 def posix_path(path):
     """
     Return a path using the posixpath separator given a path that may
     contain posix or windows separators, converting \ to /.
     """
     return path.replace(ntpath.sep, posixpath.sep)
+
+
+UNC_PREFIX = u'\\\\?\\'
+UNC_PREFIX_POSIX = posix_path(UNC_PREFIX)
+UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
+
+def add_unc(location):
+    """
+    Convert a location to an absolute Window UNC path to support long paths on
+    Windows. Return the location unchanged if not on Windows. See
+    https://msdn.microsoft.com/en-us/library/aa365247.aspx
+    """
+    if on_windows and not location.startswith(UNC_PREFIXES):
+        return UNC_PREFIX + os.path.abspath(location)
+    return location
+
+
+def remove_unc(location):
+    """
+    Remove UNC prefix from location if present.
+    """
+    if on_windows and location.startswith(UNC_PREFIXES):
+        return location[len(UNC_PREFIX):]
+    return location
 
 
 def is_about_file(path):
@@ -523,7 +547,7 @@ def is_about_file(path):
 def resource_name(resource_path):
     """
     Return a resource name based on a posix path (either the filename or
-    directory name). Recurse to handle paths that ends with a path separator
+    directory name). Recurse to handle paths that ends with a path separator.
     """
     left, right = posixpath.split(resource_path)
     if right:
@@ -1117,8 +1141,7 @@ def check_invalid_chars(field_name, line):
         warnings = Warn(IGNORED, field_name, line, msg)
     return invalid_chars, warnings
 
-def posix_unc_prefix():
-    return posix_path(u'\\\\?\\')
+
 
 class Collector(object):
     """
@@ -1162,13 +1185,7 @@ class Collector(object):
 
         if on_windows:
             location = unicode(location)
-        """
-        Convert a location to an absolute Window UNC path to support long paths
-        on Windows. Return the location unchanged if not on Windows.
-        See https://msdn.microsoft.com/en-us/library/aa365247.aspx
-        """
-        if on_windows and not location.startswith(UNC_PREFIX):
-            location = UNC_PREFIX + os.path.abspath(location)
+        location = add_unc(location)
         location = os.path.expanduser(location)
         location = os.path.expandvars(location)
         location = os.path.normpath(location)
@@ -1274,36 +1291,23 @@ class Collector(object):
 
     def get_about_context(self, about_object):
         about_content = about_object.validated_fields
-        if '\n' in about_object.get_dje_license_name():
-            msg = ('Multiple licenses is not supported. '
-                   'Skipping License generation.')
-            if on_windows:
-                if (about_object.location.startswith(posix_unc_prefix())
-                    or about_object.location.startswith(UNC_PREFIX)):
-                    about_object.location = about_object.location.strip(posix_unc_prefix()).strip(UNC_PREFIX)
-            err = Error(GENATTRIB, 'dje_license',
-                        about_object.location, msg)
+        has_multiple_licenses = '\n' in about_object.get_dje_license_name()
+        if has_multiple_licenses:
+            msg = 'Multiple licenses is not supported. Skipping License generation.'
+            about_object.location = remove_unc(about_object.location)
+            err = Error(GENATTRIB, 'dje_license', about_object.location, msg)
             self.genattrib_errors.append(err)
 
-        lic_text = unicode(about_object.license_text(),
-                           errors='replace')
-        notice_text = unicode(about_object.notice_text(),
-                              errors='replace')
+        lic_text = unicode(about_object.license_text(), errors='replace')
+        notice_text = unicode(about_object.notice_text(), errors='replace')
         about_content['license_text'] = lic_text
         about_content['notice_text'] = notice_text
 
         # report error if no license_text is found
-        if not about_content.get('license_text')\
-            and not about_content.get('notice_text')\
-            and not '\n' in about_object.get_dje_license_name():
-            msg = ('No license_text found. '
-                   'Skipping License generation.')
-            if on_windows:
-                if (about_object.location.startswith(posix_unc_prefix())
-                    or about_object.location.startswith(UNC_PREFIX)):
-                    about_object.location = about_object.location.strip(posix_unc_prefix()).strip(UNC_PREFIX)
-            err = Error(GENATTRIB, 'license_text_file',
-                        about_object.location, msg)
+        if not lic_text and not notice_text and not has_multiple_licenses:
+            msg = 'No license_text found. Skipping License generation.'
+            about_object.location = remove_unc(about_object.location)
+            err = Error(GENATTRIB, 'license_text_file', about_object.location, msg)
             self.genattrib_errors.append(err)
         return about_content
 
@@ -1358,9 +1362,7 @@ class Collector(object):
                         break
 
                 if not component_exist:
-                    if on_windows:
-                        if self.location.startswith(posix_unc_prefix()):
-                            self.location = self.location.strip(posix_unc_prefix())
+                    self.location = remove_unc(self.location)
                     loc = self.location + component
                     msg = ('The requested ABOUT file: %r does not exist. '
                            'No attribution generated for this file.' % loc)
@@ -1411,9 +1413,7 @@ class Collector(object):
         for path in paths:
             path = posix_path(path)
             afp = join(self.location, path)
-            if on_windows:
-                if afp.startswith(posix_unc_prefix()):
-                    afp = afp.strip(posix_unc_prefix())
+            afp = remove_unc(afp)
             msg = ('The requested ABOUT file: %(afp)r does not exist. '
                    'No attribution generated for this file.' % locals())
             err = Error(GENATTRIB, 'about_file', path, msg)
