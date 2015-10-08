@@ -141,7 +141,7 @@ class GenAttribTest(unittest.TestCase):
         # note: this contains an about_files subdir that is the root of all ABOUT files in the "project"
         about_dir = 'about_code_tool/tests/testdata/genattrib/about_files.zip'
         generated_attrib = get_temp_file('generated.html')
-        # note: all the about_fioles columns are paths starting with /about_files
+        # note: all the about_files columns are paths starting with /about_files
         filter_csv = 'about_code_tool/tests/testdata/genattrib/project_filter.csv'
         args = [about_dir, generated_attrib, filter_csv]
         options = None
@@ -166,8 +166,11 @@ class GenAttribTest(unittest.TestCase):
         test_zip = 'about_code_tool/tests/testdata/longpath.zip'
         extracted = genattrib.extract_zip(test_zip)
         unc_extracted = about.add_unc(extracted)
+        all_files = []
         for root, dirs, files in os.walk(unc_extracted):
-            self.assertTrue('non-supported_date_format.ABOUT' in files)
+            all_files.extend(files)
+        self.assertTrue('non-supported_date_format.ABOUT' in all_files)
+
 
 def genattrib_command_tester(args, options):
     parser = genattrib.get_parser()
