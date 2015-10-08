@@ -25,14 +25,17 @@ from __future__ import print_function
 import csv
 import errno
 import logging
+import ntpath
 import optparse
 import os
+import posixpath
 import sys
 
 from os.path import exists, dirname, join, abspath, isdir, basename, expanduser, normpath
-
+from about_code_tool.about import on_windows
 from about import Collector
 import genabout
+import about
 
 LOG_FILENAME = 'error.log'
 
@@ -147,16 +150,27 @@ def extract_zip(location):
     archive_base_name = os.path.basename(location).replace('.zip', '')
     base_dir = tempfile.mkdtemp()
     target_dir = os.path.join(base_dir, archive_base_name)
+    target_dir = about.add_unc(target_dir)
     os.makedirs(target_dir)
+
+    if target_dir.endswith((ntpath.sep, posixpath.sep)):
+        target_dir = target_dir[:-1]
 
     with zipfile.ZipFile(location) as zipf:
         for info in zipf.infolist():
             name = info.filename
             content = zipf.read(name)
             target = os.path.join(target_dir, name)
-            if not os.path.exists(os.path.dirname(target)):
-                os.makedirs(os.path.dirname(target))
-            if not content and target.endswith(os.path.sep):
+            is_dir = target.endswith((ntpath.sep, posixpath.sep))
+            if is_dir:
+                target = target[:-1]
+            parent = os.path.dirname(target)
+            if on_windows:
+                target = target.replace(posixpath.sep, ntpath.sep)
+                parent = parent.replace(posixpath.sep, ntpath.sep)
+            if not os.path.exists(parent):
+                os.makedirs(parent)
+            if not content and is_dir:
                 if not os.path.exists(target):
                     os.makedirs(target)
             if not os.path.exists(target):

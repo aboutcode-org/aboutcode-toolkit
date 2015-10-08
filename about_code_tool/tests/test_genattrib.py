@@ -19,7 +19,7 @@ from __future__ import print_function
 import os
 import unittest
 
-from about_code_tool import genattrib
+from about_code_tool import genattrib, about
 
 from about_code_tool.tests.test_about import get_temp_file
 
@@ -111,7 +111,7 @@ class GenAttribTest(unittest.TestCase):
         not_expected = [
             'Annotator 1.2.10',
             'component_4',
-        'djangosnippets.org_2413 2011-04-12',
+            'djangosnippets.org_2413 2011-04-12',
         ]
         for ex in not_expected:
             self.assertFalse(ex in result, ex)
@@ -136,7 +136,6 @@ class GenAttribTest(unittest.TestCase):
         for ex in expected:
             self.assertTrue(ex in result, ex)
 
-
     def test_genattrib_zip_with_filter(self):
         self.maxDiff = None
         # note: this contains an about_files subdir that is the root of all ABOUT files in the "project"
@@ -158,10 +157,17 @@ class GenAttribTest(unittest.TestCase):
         not_expected = [
             'Annotator 1.2.10',
             'component_4',
-        'djangosnippets.org_2413 2011-04-12',
+            'djangosnippets.org_2413 2011-04-12',
         ]
         for ex in not_expected:
             self.assertFalse(ex in result, ex)
+
+    def test_extract_deep_zip(self):
+        test_zip = 'about_code_tool/tests/testdata/longpath.zip'
+        extracted = genattrib.extract_zip(test_zip)
+        unc_extracted = about.add_unc(extracted)
+        for root, dirs, files in os.walk(unc_extracted):
+            self.assertTrue('non-supported_date_format.ABOUT' in files)
 
 def genattrib_command_tester(args, options):
     parser = genattrib.get_parser()
