@@ -163,8 +163,8 @@ class GenAbout(object):
         self.extract_dje_license_error = False
 
     @staticmethod
-        # FIXME: why use a static and not a regular function?
     def get_duplicated_keys(input_file):
+        # FIXME: why use a static and not a regular function?
         csv_context = csv.reader(open(input_file, 'rU'))
         keys_row = csv_context.next()
         lower_case_keys_row = [k.lower() for k in keys_row]
@@ -173,40 +173,49 @@ class GenAbout(object):
     def validate(self, input_list):
         if not self.validate_mandatory_fields(input_list):
             required_keys = MANDATORY_FIELDS + ('about_file',)
-            print("Required keys not found.")
+            print('ERROR: Required column/keys not found in the <input_path> CSV.')
             print(required_keys)
             print("Use the '--mapping' option to map the input keys and verify the mapping information are correct.")
-            print("OR correct the header keys from the input CSV.")
+            print("OR correct the column names in the <input_path> CSV.")
             sys.exit(errno.EINVAL)
 
         elif not self.validate_value_in_essential_fields(input_list):
-            print("Some of the essential fields value are missing.")
+            print("ERROR: Some of the essential column/fields value are missing in the <input_path> CSV.")
             print(ESSENTIAL_FIELDS)
-            print("Please check the input CSV.")
-            print("No ABOUT file is created.")
+            print("Please check the the <input_path> CSV.")
+            print("No ABOUT file was generated.")
             sys.exit(errno.EINVAL)
 
         elif has_duplicate_about_file_paths(input_list):
-            print("The input has duplicated 'about_file'.")
-            print("Duplication is not supported. Please correct the input and rerun the tool.")
-            print("No ABOUT file is created.")
+            print("ERROR: The <input_path> CSV has duplicated 'about_file' values.")
+            print("Duplication is not supported. Please correct the the <input_path> CSV and rerun the tool.")
+            print("No ABOUT file was generated.")
             sys.exit(errno.EINVAL)
 
     @staticmethod
-    def validate_mandatory_fields(input_list):
+    def validate_mandatory_fields(abouts):
+        """
+        Given a list of About data dictionaries, validate the presence of
+        mandatory fields. Return True if they are present.
+        """
         # FIXME: why use a static and not a regular function?
-        for line in input_list:
+        
+        for about in abouts:
             for key in MANDATORY_FIELDS + ESSENTIAL_FIELDS:
-                if not key in line.keys():
+                if not key in about:
                     return False
         return True
 
     @staticmethod
-    def validate_value_in_essential_fields(input_list):
+    def validate_value_in_essential_fields(abouts):
+        """
+        Given a list of About data dictionaries, validate the presence of
+        essential fields. Return True if they are present.
+        """
         # FIXME: why use a static and not a regular function?
-        for line in input_list:
+        for about in abouts:
             for key in ESSENTIAL_FIELDS:
-                if not line[key]:
+                if not about.get(key):
                     return False
         return True
 
@@ -604,16 +613,15 @@ class GenAbout(object):
                 file_logger.warning(warning_msg)
 
 
-def filter_empty_values(abouts):
+def filter_dicts_of_empty_values(abouts):
     """
-    Return a list of About data dictionaries without any empty value for all
-    key/value pairs.
+    Return a list of About data dictionaries filtering dictionaries composed
+    entirely of empty values.
     """
     filtered = []
     for about in abouts:
-        about_items = [(key, value,) for key, value in about.items() if value and value.strip()]
-        if about_items:
-            filtered.append(dict(about_items))
+        if any(v and v.strip() for v in about.values()):
+            filtered.append(dict(about))
     return filtered
 
 
@@ -767,7 +775,7 @@ def main(parser, options, args):
     file_logger.addHandler(file_handler)
 
     input_data = load_data_from_csv(input_path)
-    input_data = filter_empty_values(input_data)
+    input_data = filter_dicts_of_empty_values(input_data)
 
     user_keys = []
     if mapping_config:
@@ -777,7 +785,7 @@ def main(parser, options, args):
 
     gen.validate(input_data)
 
-    ignored_fields_list = gen.get_unknown_fields(input_data, user_keys)
+    ignored_fields_list = get_unknown_fields(input_data, user_keys)
     if ignored_fields_list:
         input_list = gen.get_only_supported_fields(input_data, ignored_fields_list)
 

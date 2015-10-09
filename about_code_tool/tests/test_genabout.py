@@ -24,9 +24,7 @@ from os.path import dirname
 from os.path import join
 
 from about_code_tool import genabout
-
 from about_code_tool.tests.tstutil import get_temp_dir
-
 from about_code_tool.tests import test_about
 
 
@@ -66,7 +64,7 @@ class GenAboutTest(unittest.TestCase):
         result = genabout.load_data_from_csv(test_input)
         self.assertEqual(expected, result)
 
-    def test_filter_empty_values(self):
+    def test_filter_dicts_of_empty_values(self):
         test_abouts = [
             {'about_file': '/about.ABOUT',
              'about_resource': '.',
@@ -83,8 +81,23 @@ class GenAboutTest(unittest.TestCase):
                      'name': 'ABOUT tool',
                      'version': '0.8.1'}]
 
-        result = genabout.filter_empty_values(test_abouts)
-        self.assertEqual(result, expected)
+        result = genabout.filter_dicts_of_empty_values(test_abouts)
+        self.assertEqual(expected, result)
+
+    def test_filter_dicts_of_empty_values_does_not_filter_data_with_value(self):
+        test_abouts = [{'asaszname': '', 'version': '1'}]
+        result = genabout.filter_dicts_of_empty_values(test_abouts)
+        self.assertEqual(test_abouts, result)
+
+    def test_filter_dicts_of_empty_values_does_filter_data_with_empty_string_values(self):
+        test_abouts = [{'asaszname': '', 'version': ''}]
+        result = genabout.filter_dicts_of_empty_values(test_abouts)
+        self.assertEqual([], result)
+
+    def test_filter_dicts_of_empty_values_does_filter_data_with_space_only_values(self):
+        test_abouts = [{'asaszname': ' ', 'version': ' '}]
+        result = genabout.filter_dicts_of_empty_values(test_abouts)
+        self.assertEqual([], result)
 
     def test_validate_value_in_essential_missing_about_file(self):
         gen = genabout.GenAbout()
@@ -523,15 +536,13 @@ class GenAboutTest(unittest.TestCase):
 
     def test_format_output_with_continuation(self):
         gen = genabout.GenAbout()
-        test_fields = [[join(TESTDATA_DIR,
-                             'test_files_for_genabout/about.py.ABOUT'),
+        test_fields = [[join(TESTDATA_DIR, 'test_files_for_genabout/about.py.ABOUT'),
                         {'about_file': '/about.py.ABOUT',
                          'version': '0.8.1',
                          'about_resource': '.',
                          'name': 'ABOUT Tool',
                          'readme': 'This is a readme test with \nline continuation.'}]]
-        expected = [[join(TESTDATA_DIR,
-                          'test_files_for_genabout/about.py.ABOUT'),
+        expected = [[join(TESTDATA_DIR, 'test_files_for_genabout/about.py.ABOUT'),
                      'about_resource: .\nname: ABOUT Tool\n'
                      'version: 0.8.1\n\n'
                      'readme: This is a readme test with \n line continuation.\n']]
@@ -672,7 +683,7 @@ class GenAboutTest(unittest.TestCase):
         test_path = '/test'
         expected = [[join(u'/test', 'test_key.LICENSE'), 'This is a test license.']]
         result = gen.process_dje_licenses(test_license_list, test_license_dict, test_path)
-        self.assertEqual(result, expected)
+        self.assertEqual(expected, result)
 
     def test_update_about_resource_about_file_and_field_exist(self):
         gen = genabout.GenAbout()
