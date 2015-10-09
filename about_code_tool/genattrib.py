@@ -150,29 +150,29 @@ def main(parser, options, args):
 
     if mapping_config:
         if not exists('MAPPING.CONFIG'):
-            print("The 'MAPPING.CONFIG' file does not exist.")
+            print("ERROR: The 'MAPPING.CONFIG' file does not exist.")
             sys.exit(errno.EINVAL)
 
     if template_location:
         template_location = abspath(expanduser(template_location))
         if not exists(template_location):
-            print('The TEMPLATE_LOCATION file does not exist.')
+            print('ERROR: The TEMPLATE_LOCATION file does not exist.')
             parser.print_help()
             sys.exit(errno.EINVAL)
 
     if verification_location:
         verification_location = abspath(expanduser(verification_location))
         if not verification_location.endswith('.csv'):
-            print('The VERIFICATION_LOCATION path must end with ".csv".')
+            print('ERROR: The VERIFICATION_LOCATION file path must end with ".csv".')
             parser.print_help()
             sys.exit(errno.EINVAL)
         if not exists(dirname(verification_location)):
-            print('The VERIFICATION_LOCATION file parent directory does not exist.')
+            print('ERROR: The VERIFICATION_LOCATION file parent directory does not exist.')
             parser.print_help()
             sys.exit(errno.EINVAL)
 
     if not len(args) >= 2 or not len(args) < 4:
-        print('The number of arguments is incorrect.\n')
+        print('ERROR: The number of arguments is incorrect.')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -194,7 +194,7 @@ def main(parser, options, args):
     sys.setdefaultencoding('utf-8')  # @UndefinedVariable
 
     if not exists(input_path):
-        print('<input_path> does not exist.')
+        print('ERROR: <input_path> does not exist.')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -203,23 +203,23 @@ def main(parser, options, args):
         input_path = extract_zip(input_path)
 
     if isdir(output_path):
-        print('<output_path> must be an HTML file, not a directory')
+        print('ERROR: <output_path> must be an HTML file, not a directory')
         parser.print_help()
         sys.exit(errno.EISDIR)
 
     # We only support HTML currently
     if not output_path.endswith('.html'):
-        print('<output_path> must be an HTML file.')
+        print('ERROR: <output_path> must be an HTML file.')
         parser.print_help()
         sys.exit(errno.EINVAL)
 
     if exists(output_path) and not overwrite:
-        print('A file at <output_path> already exists. Select a different file name or use the --overwrite option.')
+        print('ERROR: A file at <output_path> already exists. Select a different file name or use the --overwrite option.')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
     if component_subset_path and not exists(component_subset_path):
-        print('<component_list> CSV file does not exist.')
+        print('ERROR: the <component_list> CSV file does not exist.')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -240,7 +240,7 @@ def main(parser, options, args):
                 abouts = apply_mappings(abouts)
 
             if not has_about_file_keys(abouts):
-                print('The required key "about_file" was not found.')
+                print('ERROR: The required column key "about_file" was not found in the <component_list> CSV file.')
                 print('Please use the "--mapping" option to map the input keys and verify the mapping information are correct.')
                 print('OR, correct the header keys from the component list.')
                 parser.print_help()

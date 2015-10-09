@@ -654,7 +654,7 @@ genabout.py --extract_license --api_url='api_url' --api_username='api_username' 
 
 def main(parser, options, args):
     """
-    Main commnad line entry point.
+    Main commnand line entry point.
     """
     verbosity = options.verbosity
     action = options.action
@@ -684,25 +684,25 @@ def main(parser, options, args):
         if action in valid_actions:
             action_num = action
         else:
-            print('Invalid action: should be 0, 1, 2 or 3')
+            print('ERROR: Invalid action: must be one of: 0, 1, 2 or 3')
             sys.exit(errno.EINVAL)
 
     if copy_files_path:
         # code to handle tilde character
         copy_files_path = os.path.abspath(expanduser(copy_files_path))
         if not path_exists(copy_files_path):
-            print("The project path does not exist.")
+            print("ERROR: The COPY_FILES path does not exist.")
             sys.exit(errno.EINVAL)
 
     if license_text_path:
         # code to handle tilde character
         license_text_path = os.path.abspath(expanduser(license_text_path))
         if not path_exists(license_text_path):
-            print("The license text path does not exist.")
+            print("ERROR: LICENSE_TEXT_LOCATION path does not exist.")
             sys.exit(errno.EINVAL)
 
     if mapping_config and not path_exists('MAPPING.CONFIG'):
-            print("The file 'MAPPING.CONFIG' does not exist.")
+            print("ERROR: The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 
     if extract_license:
@@ -712,7 +712,7 @@ def main(parser, options, args):
         gen_license = True
 
     if not len(args) == 2:
-        print('Input and Output paths are required.')
+        print('ERROR: <input_path> and <utput_path> are required.')
         print()
         parser.print_help()
         sys.exit(errno.EEXIST)
@@ -724,25 +724,25 @@ def main(parser, options, args):
         output_path += '/'
 
     if not exists(input_path):
-        print('Input path does not exist.')
+        print('ERROR: <input_path> file does not exist.')
         print()
         parser.print_help()
         sys.exit(errno.EEXIST)
 
     if not exists(output_path):
-        print('Output path does not exist.')
+        print('ERROR: <output_path> directory does not exist.')
         print()
         parser.print_help()
         sys.exit(errno.EEXIST)
 
     if not isdir(output_path):
-        print('Output must be a directory, not a file.')
+        print('ERROR: <output_path> must be a directory, not a file.')
         print()
         parser.print_help()
         sys.exit(errno.EISDIR)
 
     if not input_path.endswith('.csv'):
-        print("Input file name must be a CSV file ends with '.csv'")
+        print("ERROR: <input_path> file must be a CSV file ends with '.csv'")
         print()
         parser.print_help()
         sys.exit(errno.EINVAL)
@@ -751,8 +751,8 @@ def main(parser, options, args):
 
     dup_keys = gen.get_duplicated_keys(input_path)
     if dup_keys:
-        print('The input file contains duplicated keys. '
-              'Duplicated keys are not allowed.')
+        print('ERROR: The <input_path> CSV file contains duplicated column keys. '
+              'Duplicated column keys are not allowed.')
         print(dup_keys)
         print()
         print('Please fix the input file and re-run the tool.')
@@ -783,35 +783,35 @@ def main(parser, options, args):
 
     if copy_files_path:
         if not isdir(copy_files_path):
-            print("The COPY_FILES path must be a directory.")
-            print("'--copy_files' is skipped.")
+            print("WARNING: The COPY_FILES path must be a directory.")
+            print("'--copy_files' option ignored.")
         else:
             licenses_in_project = True
             license_list = gen.verify_files_existence(input_list,
                                                       copy_files_path,
                                                       licenses_in_project)
             if not license_list:
-                print("None of the file was found. '--copy_files' is ignored.")
+                print("WARNING: No file found. '--copy_files' is ignored.")
             else:
                 gen.copy_files(output_path, license_list)
 
     if license_text_path:
         if not isdir(license_text_path):
-            print("The LICENSE_TEXT_LOCATION  path must be a directory.")
-            print("'--license_text_location' is skipped.")
+            print("WARNING: The LICENSE_TEXT_LOCATION  path must be a directory.")
+            print("'--license_text_location' option ignored.")
         else:
             licenses_in_project = False
             license_list = gen.verify_files_existence(input_list,
                                                       license_text_path,
                                                       licenses_in_project)
             if not license_list:
-                print("None of the file was found. '--copy_files' is ignored.")
+                print("WARNING: No file found. '--copy_files' option ignored.")
             else:
                 gen.copy_files(output_path, license_list)
 
     if extract_license:
         if not api_url or not api_username or not api_key:
-            print("Missing argument for --extract_license")
+            print("ERROR: Missing argument for --extract_license")
             sys.exit(errno.EINVAL)
         for line in input_list:
             try:
@@ -819,7 +819,7 @@ def main(parser, options, args):
                     break
             except Exception as e:
                 print(repr(e))
-                print("The <input_path> CSV does not contain the required column 'dje_license_key' ")
+                print("ERROR: The <input_path> CSV does not contain the required column 'dje_license_key' ")
                 sys.exit(errno.EINVAL)
 
     if gen_license:

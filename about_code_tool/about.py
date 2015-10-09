@@ -1077,7 +1077,7 @@ OK = 1
 
 def main(parser, options, args):
     """
-    Main command line entry point.
+    Main commnand line entry point.
     """
     overwrite = options.overwrite
     verbosity = options.verbosity
@@ -1092,7 +1092,7 @@ def main(parser, options, args):
         handler.setLevel(logging.WARNING)
 
     if not len(args) == 2:
-        print('Input and Output paths are required.')
+        print('ERROR: <input_path> and <output_path> are required.')
         print()
         parser.print_help()
         return errno.EEXIST
@@ -1101,25 +1101,25 @@ def main(parser, options, args):
     output_path = os.path.abspath(output_path)
 
     if not path_exists(input_path):
-        print('Input path does not exist.')
+        print('ERROR: <input_path>  does not exist.')
         print()
         parser.print_help()
         return errno.EEXIST
 
     if os.path.isdir(output_path):
-        print('Output must be a file, not a directory.')
+        print('ERROR: <output_path> must be a file, not a directory.')
         print()
         parser.print_help()
         return errno.EISDIR
 
     if not output_path.endswith('.csv'):
-        print('Output file name must end with ".csv".')
+        print('ERROR: <output_path> must be a CSV file ending with ".csv".')
         print()
         parser.print_help()
         return errno.EINVAL
 
     if path_exists(output_path) and not overwrite:
-        print('Output file already exists. Select a different file name or use the --overwrite option.')
+        print('ERROR: <output_path> file already exists. Select a different file name or use the --overwrite option.')
         print()
         parser.print_help()
         return errno.EEXIST
@@ -1136,7 +1136,7 @@ def main(parser, options, args):
         return OK
     else:
         # we should never reach this
-        assert False, 'Unsupported option(s).'
+        assert False, 'ERROR: Unsupported option(s).'
 
 
 def get_parser():
