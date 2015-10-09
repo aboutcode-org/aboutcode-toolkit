@@ -37,22 +37,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-__version_info__ = 'AboutCode v {0}\n'.format(__version__)
+__version_info__ = 'AboutCode v{0}\n'.format(__version__)
 
 
-__full_info__ = 'AboutCode tool v {0}\n{1}'.format(__version__, __copyright__)
+__full_info__ = 'AboutCode tool v{0}\n{1}'.format(__version__, __copyright__)
 
 
 VERBOSITY_HELP = """\
-Print more or less verbose messages while processing:
+Control warning and errors printed while processing:
 0 - Do not print warning or error messages, only a total count (default).
-1 - Print error messages.
+1 - Print only error messages.
 2 - Print error and warning messages.
 """
 
 
 MAPPING_HELP = """\
-Load the about_code_tool/MAPPING.CONFIG file. This file contains a mapping between AboutCode keys 
-(or column names) and custom keys (or column names).
+Load the about_code_tool/MAPPING.CONFIG file. This file contains a mapping between 
+known AboutCode key/column names and custom key/column name used in your CSVs files.
 """
 
