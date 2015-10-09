@@ -5,12 +5,12 @@ from __future__ import print_function
 
 from setuptools import setup
 
-from about_code_tool import about
+import about_code_tool.help
 
 
 setup(
     name='about-code-tool',
-    version=about.__version__,
+    version=about_code_tool.help.__version__,
     description=('Document the provenance (origin and license) of '
                 'third-party software. Collect inventories, generate '
                 'attribution docs.'),

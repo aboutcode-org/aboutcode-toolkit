@@ -15,9 +15,10 @@
 # ============================================================================
 
 """
-This tool is used to generate component attribution based on a set of .ABOUT
-files. Optionally, one could pass a subset list of specific components for set
-of .ABOUT files to generate attribution.
+Tool to generate component attribution based on a set of .ABOUTfiles. 
+
+Optionally accepts a list (i.e. a subset) of ABOUT file paths to limit the
+generated attribution to this subset.
 """
 
 from __future__ import print_function
@@ -25,17 +26,30 @@ from __future__ import print_function
 import csv
 import errno
 import logging
-import ntpath
 import optparse
 import os
+from os.path import exists
+from os.path import dirname
+from os.path import join
+from os.path import abspath
+from os.path import isdir
+from os.path import basename
+from os.path import expanduser
+from os.path import normpath
 import posixpath
 import sys
 
-from os.path import exists, dirname, join, abspath, isdir, basename, expanduser, normpath
-from about_code_tool.about import on_windows
+from help import __version_info__
+from help import __full_info__
+from help import VERBOSITY_HELP
+from help import MAPPING_HELP
+
 from about import Collector
-import genabout
-import about
+
+from util import apply_mappings
+from util import extract_zip
+from util import ImprovedFormatter
+
 
 LOG_FILENAME = 'error.log'
 
@@ -46,138 +60,77 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
-__version__ = '2.0.4'
 
-__about_spec_version__ = '1.0.0'  # See http://dejacode.org
-
-__copyright__ = """
-Copyright (c) 2013-2015 nexB Inc. All rights reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+def get_about_file_paths(abouts):
+    """
+    Return a list of about_file paths given a list of About data dictionaries.
+    """
+    return [row['about_file'] for row in abouts if 'about_file' in row]
 
 
-def component_subset_to_sublist(input_list):
-    sublist = [row["about_file"] for row in input_list
-                   if "about_file" in row.keys()]
-    return sublist
-
-
-def update_path_to_about(input_list):
-    output_list = []
-    for row in input_list:
-        if not row.endswith('.ABOUT'):
-            if row.endswith('/'):
-                row += basename(dirname(row))
-            output_list.append(row + '.ABOUT')
+def as_about_paths(paths):
+    """
+    Given a list of paths, return a list of paths that point all to .ABOUT files.
+    """
+    normalized_paths = []
+    for path in paths:
+        if path.endswith('.ABOUT'):
+            normalized_paths.append(path)
         else:
-            output_list.append(row)
-    return output_list
+            if path.endswith('/'):
+                path += basename(dirname(path))
+            normalized_paths.append(path + '.ABOUT')
+    return normalized_paths
 
 
-def convert_dict_key_to_lower_case(input_list):
-    output_list = []
-    for line in input_list:
-        lower_dict = {}
-        for key in line:
-            lower_dict[key.lower()] = line[key]
-        output_list.append(lower_dict)
-    return output_list
+def lower_keys(dicts):
+    """
+    Return a new a list of 'dicts' dictionaries such that all the keys are
+    lowercased.
+    """
+    lowered_dicts = []
+    for dct in dicts:
+        lowered = {}
+        for key, value in dct.items():
+            lowered[key.lower()] = value
+        lowered_dicts.append(lowered)
+    return lowered_dicts
 
 
-def check_about_file_existence_and_format(input_list):
-    try:
-        for row in input_list:
-            # Force the path to start with the '/' to map with the project
-            # structure
-            if not row['about_file'].startswith('/'):
-                row['about_file'] = '/' + row['about_file']
-        return input_list
-    except Exception:
-        return []
+def has_about_file_keys(abouts):
+    """
+    Return True if all dicts in a list of About dictionaries have an about_file key.
+    """
+    return all(about.get('about_file') for about in abouts)
+
+
+def normalize_about_file_paths(abouts):
+    """
+    Update a list of About data dictionaries such that all 'about_file' paths are
+    absolute POSIX paths (i.e. prefixed with a POSIX / "slash").
+    """
+    for about in abouts:
+        about_file_path = about.get('about_file')
+        if about_file_path and not about_file_path.startswith(posixpath.sep):
+            about['about_file'] = '/' + about_file_path
+    return abouts
 
 
 USAGE_SYNTAX = """\
-    Input can be a file or directory.
-    Output of rendered template must be a file (e.g. .html).
-
-    Optional:
-    Component List must be a .csv file which has at least an "about_file" column.
-"""
-
-
-VERBOSITY_HELP = """\
-Print more or fewer verbose messages while processing ABOUT files
-0 - Do not print any warning or error messages, just a total count (default)
-1 - Print error messages
-2 - Print error and warning messages
+    <input_path> can be a file or directory containing ABOUT files.
+    <output_path> is a file path to save the rendered attribution (e.g. .html).
+    <component_list> is an optional .csv file with at least an "about_file" column to limit attribution generation to that list.
 """
 
 
 TEMPLATE_LOCATION_HELP = """\
-Use the custom template for the Attribution Generation
-"""
-
-
-MAPPING_HELP = """\
-Configure the mapping key from the MAPPING.CONFIG
+Optional path to a custom template to use for the generating the attribution.
+Default to 'about_code_tool/templates/default.html'
 """
 
 VERIFICATION_HELP = """\
-Create a verification CSV output for the attribution
+Optional path to a verification CSV file created from the generated attribution.
 """
-
-def extract_zip(location):
-    """
-    Extract a zip file at location in a temp directory and return the temporary
-    directory where the archive was extracted.
-    """
-    import zipfile
-    import tempfile
-    if not zipfile.is_zipfile(location):
-        raise Exception('Incorrect zip file %(location)r' % locals())
-
-    archive_base_name = os.path.basename(location).replace('.zip', '')
-    base_dir = tempfile.mkdtemp()
-    target_dir = os.path.join(base_dir, archive_base_name)
-    target_dir = about.add_unc(target_dir)
-    os.makedirs(target_dir)
-
-    if target_dir.endswith((ntpath.sep, posixpath.sep)):
-        target_dir = target_dir[:-1]
-
-    with zipfile.ZipFile(location) as zipf:
-        for info in zipf.infolist():
-            name = info.filename
-            content = zipf.read(name)
-            target = os.path.join(target_dir, name)
-            is_dir = target.endswith((ntpath.sep, posixpath.sep))
-            if is_dir:
-                target = target[:-1]
-            parent = os.path.dirname(target)
-            if on_windows:
-                target = target.replace(posixpath.sep, ntpath.sep)
-                parent = parent.replace(posixpath.sep, ntpath.sep)
-            if not os.path.exists(parent):
-                os.makedirs(parent)
-            if not content and is_dir:
-                if not os.path.exists(target):
-                    os.makedirs(target)
-            if not os.path.exists(target):
-                with open(target, 'wb') as f:
-                    f.write(content)
-    return target_dir
-
 
 def main(parser, options, args):
     overwrite = options.overwrite
@@ -187,7 +140,7 @@ def main(parser, options, args):
     verification_location = options.verification_location
 
     if options.version:
-        print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
+        print(__full_info__)
         sys.exit(0)
 
     if verbosity == 1:
@@ -197,24 +150,24 @@ def main(parser, options, args):
 
     if mapping_config:
         if not exists('MAPPING.CONFIG'):
-            print("The file 'MAPPING.CONFIG' does not exist.")
+            print("The 'MAPPING.CONFIG' file does not exist.")
             sys.exit(errno.EINVAL)
 
     if template_location:
         template_location = abspath(expanduser(template_location))
         if not exists(template_location):
-            print('The defined template location does not exist.')
+            print('The TEMPLATE_LOCATION file does not exist.')
             parser.print_help()
             sys.exit(errno.EINVAL)
 
     if verification_location:
         verification_location = abspath(expanduser(verification_location))
         if not verification_location.endswith('.csv'):
-            print('The verification output must ends with ".csv".')
+            print('The VERIFICATION_LOCATION path must end with ".csv".')
             parser.print_help()
             sys.exit(errno.EINVAL)
         if not exists(dirname(verification_location)):
-            print('The verification output directory does not exist.')
+            print('The VERIFICATION_LOCATION file parent directory does not exist.')
             parser.print_help()
             sys.exit(errno.EINVAL)
 
@@ -241,7 +194,7 @@ def main(parser, options, args):
     sys.setdefaultencoding('utf-8')  # @UndefinedVariable
 
     if not exists(input_path):
-        print('Input path does not exist.')
+        print('<input_path> does not exist.')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -250,24 +203,23 @@ def main(parser, options, args):
         input_path = extract_zip(input_path)
 
     if isdir(output_path):
-        print('Output must be a HTML file.')
+        print('<output_path> must be an HTML file, not a directory')
         parser.print_help()
         sys.exit(errno.EISDIR)
 
     # We only support HTML currently
     if not output_path.endswith('.html'):
-        print('Output must be a HTML file.')
+        print('<output_path> must be an HTML file.')
         parser.print_help()
         sys.exit(errno.EINVAL)
 
     if exists(output_path) and not overwrite:
-        print('Output file already exists. Select a different file name '
-              'or use the --overwrite option.')
+        print('A file at <output_path> already exists. Select a different file name or use the --overwrite option.')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
     if component_subset_path and not exists(component_subset_path):
-        print('Component Subset path does not exist.')
+        print('<component_list> CSV file does not exist.')
         parser.print_help()
         sys.exit(errno.EEXIST)
 
@@ -276,38 +228,41 @@ def main(parser, options, args):
         outlist = None
         if not component_subset_path:
             sublist = None
+
         else:
-            input_list = []
-            with open(component_subset_path, "rU") as f:
-                input_dict = csv.DictReader(f)
-                for row in input_dict:
-                    input_list.append(row)
-            updated_list = convert_dict_key_to_lower_case(input_list)
+            with open(component_subset_path, 'rU') as inp:
+                reader = csv.DictReader(inp)
+                abouts = [data for data in reader]
+
+            abouts = lower_keys(abouts)
+
             if mapping_config:
-                mapping_list = genabout.GenAbout().get_mapping_list()
-                updated_list = genabout.GenAbout().convert_input_list(updated_list, mapping_list)
-            if not check_about_file_existence_and_format(updated_list):
+                abouts = apply_mappings(abouts)
+
+            if not has_about_file_keys(abouts):
                 print('The required key "about_file" was not found.')
-                print('Please use the "--mapping" option to map the input '
-                      'keys and verify the mapping information are correct.')
+                print('Please use the "--mapping" option to map the input keys and verify the mapping information are correct.')
                 print('OR, correct the header keys from the component list.')
                 parser.print_help()
                 sys.exit(errno.EISDIR)
-            sublist = component_subset_to_sublist(updated_list)
-            outlist = update_path_to_about(sublist)
+
+            abouts = normalize_about_file_paths(abouts)
+
+            sublist = get_about_file_paths(abouts)
+            outlist = as_about_paths(sublist)
 
         attrib_str = collector.generate_attribution(template_path=template_location, limit_to=outlist, verification=verification_location)
         errors = collector.get_genattrib_errors()
 
         if attrib_str:
             try:
-                with open(output_path, "w") as f:
+                with open(output_path, 'w') as f:
                     f.write(attrib_str)
             except Exception as e:
-                print("Problem occurs. Attribution was not generated.")
+                print('An error occurred. Attribution was not generated.')
                 print(e)
 
-        print("Completed.")
+        print('Completed.')
         # Remove the previous log file if exist
         log_path = join(dirname(output_path), LOG_FILENAME)
         if exists(log_path):
@@ -319,73 +274,35 @@ def main(parser, options, args):
             logger.error(error_msg)
             file_logger.error(error_msg)
         if errors:
-            print("%d errors detected." % len(errors))
+            print('%d errors detected.' % len(errors))
 
     else:
         # we should never reach this
-        assert False, "Unsupported option(s)."
+        assert False, 'Unsupported option(s).'
 
 
 def get_parser():
-    class MyFormatter(optparse.IndentedHelpFormatter):
-        def _format_text(self, text):
-            """
-            Overridden to allow description to be printed without
-            modification
-            """
-            return text
-
-        def format_option(self, option):
-            """
-            Overridden to allow options help text to be printed without
-            modification
-            """
-            result = []
-            opts = self.option_strings[option]
-            opt_width = self.help_position - self.current_indent - 2
-            if len(opts) > opt_width:
-                opts = "%*s%s\n" % (self.current_indent, "", opts)
-                indent_first = self.help_position
-            else:  # start help on same line as opts
-                opts = "%*s%-*s  " % (self.current_indent, "", opt_width, opts)
-                indent_first = 0
-            result.append(opts)
-            if option.help:
-                help_text = self.expand_default(option)
-                help_lines = help_text.split('\n')
-                result.append("%*s%s\n" % (indent_first, "", help_lines[0]))
-                result.extend(["%*s%s\n" % (self.help_position, "", line)
-                               for line in help_lines[1:]])
-            elif opts[-1] != "\n":
-                result.append("\n")
-            return "".join(result)
-
+    """
+    Return a command line options parser.
+    """
     parser = optparse.OptionParser(
         usage='%prog [options] input_path output_path [component_list]',
         description=USAGE_SYNTAX,
         add_help_option=False,
-        formatter=MyFormatter(),
+        formatter=ImprovedFormatter(),
     )
-    parser.add_option("-h", "--help", action="help", help="Display help")
-    parser.add_option("-v", "--version", action="store_true",
-        help='Display current version, license notice, and copyright notice')
-    parser.add_option('--overwrite', action='store_true',
-                      help='Overwrites the output file if it exists')
-    parser.add_option('--verbosity', type=int,
-                      help=VERBOSITY_HELP)
-    parser.add_option('--template_location', type='string',
-                      help=TEMPLATE_LOCATION_HELP)
-    parser.add_option('--mapping', action='store_true',
-                      help=MAPPING_HELP)
-    parser.add_option('--verification_location', type='string',
-                      help=VERIFICATION_HELP)
+    parser.add_option('-h', '--help', action='help', help='Print this help message and exit.')
+    parser.add_option('--version', action='store_true', help='Print the current version and copyright notice and exit')
+    parser.add_option('--overwrite', action='store_true', help='Overwrites the <output_path> file if it exists.')
+    parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
+    parser.add_option('--template_location', type='string', help=TEMPLATE_LOCATION_HELP)
+    parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
+    parser.add_option('--verification_location', type='string', help=VERIFICATION_HELP)
     return parser
 
 
-if __name__ == "__main__":
-    print('\n')
-    print('Running about-code-tool version ' + __version__)
-    print('\n')
+if __name__ == '__main__':
+    print(__version_info__)
     parser = get_parser()
     options, args = parser.parse_args()
     main(parser, options, args)

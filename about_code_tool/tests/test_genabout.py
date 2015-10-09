@@ -19,10 +19,15 @@ from __future__ import print_function
 import os
 import unittest
 
-from os.path import abspath, dirname, join
+from os.path import abspath
+from os.path import dirname
+from os.path import join
 
-import test_about
 from about_code_tool import genabout
+
+from about_code_tool.tests.tstutil import get_temp_dir
+
+from about_code_tool.tests import test_about
 
 
 TESTDATA_DIR = join(abspath(dirname(__file__)), 'testdata')
@@ -30,91 +35,55 @@ GEN_LOCATION = join(TESTDATA_DIR, 'test_files_for_genabout')
 
 
 class GenAboutTest(unittest.TestCase):
-    def test_get_input_list(self):
-        gen = genabout.GenAbout()
+    def test_load_data_from_csv(self):
         test_file = join(TESTDATA_DIR, 'test_files_for_genabout/about.csv')
-        expected = [{'about_file': 'about.ABOUT',
-                     'about_resource': '.',
-                     'name': 'ABOUT tool',
-                     'version': '0.8.1'}]
-
-        result = gen.get_input_list(test_file)
+        expected = [
+            {
+             'about_file': 'about.ABOUT',
+             'about_resource': '.',
+             'name': 'ABOUT tool',
+             'version': '0.8.1'
+             }
+        ]
+        result = genabout.load_data_from_csv(test_file)
         self.assertEqual(expected, result)
 
-    def test_get_input_with_trailing_spaces(self):
-        gen = genabout.GenAbout()
+    def test_load_data_from_csv_with_trailing_spaces(self):
         test_file = join(TESTDATA_DIR, 'test_files_for_genabout/about_with_trailling_spaces.csv')
         expected = [{'about_file': 'about.c',
                      'about_resource': '.',
                      'name': 'ABOUT tool',
                      'version': '0.8.1'}]
-        result = gen.get_input_list(test_file)
+        result = genabout.load_data_from_csv(test_file)
         self.assertEqual(expected, result)
 
-    def test_get_input_list_covert_all_keys_to_lower(self):
-        gen = genabout.GenAbout()
-        test_input = join(TESTDATA_DIR, 'test_files_for_genabout'
-                          '/about_key_with_upper_case.csv')
-
+    def test_load_data_from_csv_does_converts_all_keys_to_lower(self):
+        test_input = join(TESTDATA_DIR, 'test_files_for_genabout/about_key_with_upper_case.csv')
         expected = [{'about_file': 'about.ABOUT',
                      'about_resource': '.',
                      'name': 'ABOUT tool',
                      'version': '0.8.1'}]
-
-        result = gen.get_input_list(test_input)
+        result = genabout.load_data_from_csv(test_input)
         self.assertEqual(expected, result)
 
-    def test_get_non_empty_rows_list(self):
-        gen = genabout.GenAbout()
-        test_fields = [{'about_file': '/about.ABOUT',
-                        'about_resource': '.',
-                        'name': 'ABOUT tool',
-                        'version': '0.8.1'},
-                       {'about_file': '',
-                        'about_resource': '',
-                        'name': '',
-                        'version': ''}]
+    def test_filter_empty_values(self):
+        test_abouts = [
+            {'about_file': '/about.ABOUT',
+             'about_resource': '.',
+             'name': 'ABOUT tool',
+             'version': '0.8.1'},
+            {'about_file': '',
+             'about_resource': '',
+             'name': '',
+             'version': ''}
+        ]
 
         expected = [{'about_file': '/about.ABOUT',
                      'about_resource': '.',
                      'name': 'ABOUT tool',
                      'version': '0.8.1'}]
 
-        result = gen.get_non_empty_rows_list(test_fields)
-        self.assertEqual(result, expected)
-
-    def test_get_mapping_list(self):
-        gen = genabout.GenAbout()
-        expected = {'about_file': 'directory/filename',
-                    'version': 'confirmed version',
-                    'name': 'component',
-                    'copyright': 'confirmed copyright',
-                    'confirmed_license': 'confirmed license'}
-
-        result = gen.get_mapping_list()
-        self.assertEqual(result, expected)
-
-    def test_convert_input_list(self):
-        gen = genabout.GenAbout()
-        mappings = {'about_file': 'Directory/Filename',
-                    'version': 'Confirmed Version',
-                    'about_resource': 'file_name',
-                    'name': 'Component'}
-
-        test_fields = [{'file_name': 'opensans',
-                        'ignore field': 'i',
-                        'Component': 'OpenSans Fonts',
-                        'Confirmed Version': '1',
-                        'Directory/Filename':
-                            '/extension/streamer/opensans/'}]
-
-        expected = [{'about_file': '/extension/streamer/opensans/',
-                     'name': 'OpenSans Fonts',
-                     'ignore field': 'i',
-                     'version': '1',
-                     'about_resource': 'opensans'}]
-
-        result = gen.convert_input_list(test_fields, mappings)
+        result = genabout.filter_empty_values(test_abouts)
         self.assertEqual(result, expected)
 
     def test_validate_value_in_essential_missing_about_file(self):
@@ -156,8 +125,7 @@ class GenAboutTest(unittest.TestCase):
                         'version': '0.8.1'}]
         self.assertTrue(gen.validate_value_in_essential_fields(test_fields))
 
-    def test_validate_duplication_with_duplicates(self):
-        gen = genabout.GenAbout()
+    def test_has_duplicate_about_file_paths_with_duplicates(self):
         test_fields = [{'about_file': '/about.ABOUT',
                        'about_resource': '.',
                        'name': 'ABOUT tool', 'version': '0.8.1'},
@@ -166,11 +134,10 @@ class GenAboutTest(unittest.TestCase):
                        'name': 'ABOUT tool',
                        'version': ''}]
 
-        result = gen.validate_duplication(test_fields)
+        result = genabout.has_duplicate_about_file_paths(test_fields)
         self.assertTrue(result)
 
-    def test_validate_duplication_with_no_duplicates(self):
-        gen = genabout.GenAbout()
+    def test_has_duplicate_about_file_paths_with_no_duplicates(self):
         test_fields = [{'about_file': '/about.ABOUT',
                        'about_resource': '.',
                        'name': 'ABOUT tool',
@@ -180,7 +147,7 @@ class GenAboutTest(unittest.TestCase):
                        'name': 'ABOUT tool',
                        'version': ''}]
 
-        result = gen.validate_duplication(test_fields)
+        result = genabout.has_duplicate_about_file_paths(test_fields)
         self.assertFalse(result)
 
     def test_get_duplicated_keys_have_dup(self):
@@ -192,8 +159,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_get_duplicated_keys_have_dup_diff_case(self):
         gen = genabout.GenAbout()
-        test_file = join(TESTDATA_DIR, 'test_files_for_genabout'
-                         '/dup_keys_with_diff_case.csv')
+        test_file = join(TESTDATA_DIR, 'test_files_for_genabout/dup_keys_with_diff_case.csv')
 
         expected = ['copyright', 'Copyright']
         result = gen.get_duplicated_keys(test_file)
@@ -224,28 +190,26 @@ class GenAboutTest(unittest.TestCase):
         result = gen.validate_mandatory_fields(test_fields)
         self.assertTrue(result)
 
-    def test_get_non_supported_fields_no_mapping(self):
-        gen = genabout.GenAbout()
-        test_fields = [{'about_file': '',
+    def test_get_unknown_fields_with_no_user_keys(self):
+        test_abouts = [{'about_file': '',
                         'name': 'OpenSans Fonts',
                         'non_supported field': 'TEST',
                         'version': '1',
                         'about_resource': 'opensans'}]
-        mapping_keys = []
-        result = gen.get_non_supported_fields(test_fields, mapping_keys)
+        user_keys = []
+        result = genabout.get_unknown_fields(test_abouts, user_keys)
         expected = ['non_supported field']
         self.assertEqual(expected, result)
 
-    def test_get_non_supported_fields_with_mapping(self):
-        gen = genabout.GenAbout()
+    def test_get_unknown_fields__with_user_keys(self):
         test_fields = [{'about_file': '',
                         'name': 'OpenSans Fonts',
                         'non_supported field': 'TEST',
                         'version': '1',
                         'about_resource': 'opensans'}]
 
-        mapping_keys = ['non_supported field']
-        result = gen.get_non_supported_fields(test_fields, mapping_keys)
+        user_keys = ['non_supported field']
+        result = genabout.get_unknown_fields(test_fields, user_keys)
         expected = []
         self.assertEqual(expected, result)
 
@@ -262,8 +226,7 @@ class GenAboutTest(unittest.TestCase):
                      'name': 'ABOUT tool',
                      'version': '0.8.1'}]
 
-        results = gen.get_only_supported_fields(test_fields,
-                                                ['non_supported'])
+        results = gen.get_only_supported_fields(test_fields, ['non_supported'])
         self.assertEqual(expected, results)
 
     def test_get_dje_license_list_no_gen_license_with_no_license_text_file(self):
@@ -679,7 +642,7 @@ class GenAboutTest(unittest.TestCase):
         # FIXME: this is using the files at the root, not testfiles
         gen = genabout.GenAbout()
         test = [('apache-2.0.LICENSE', '.')]
-        test_dir = test_about.get_temp_dir()
+        test_dir = get_temp_dir()
         gen.copy_files(test_dir, test)
         expected = ['apache-2.0.LICENSE']
         self.assertEqual(expected, os.listdir(test_dir))
@@ -689,7 +652,7 @@ class GenAboutTest(unittest.TestCase):
         # FIXME: this is using the files at the root, not testfiles
         test = [('apache-2.0.LICENSE', '.')]
         expected = ['apache-2.0.LICENSE']
-        test_dir = test_about.get_temp_dir() + '/'
+        test_dir = get_temp_dir() + '/'
         gen.copy_files(test_dir, test)
         self.assertEqual(expected, os.listdir(test_dir))
 
@@ -705,14 +668,10 @@ class GenAboutTest(unittest.TestCase):
     def test_process_dje_licenses(self):
         gen = genabout.GenAbout()
         test_license_list = [('/', 'test')]
-        test_license_dict = {'test': [u'test_key',
-                                      u'This is a test license.']}
+        test_license_dict = {'test': [u'test_key', u'This is a test license.']}
         test_path = '/test'
-        expected = [[join(u'/test', 'test_key.LICENSE'),
-                     'This is a test license.']]
-        result = gen.process_dje_licenses(test_license_list,
-                                          test_license_dict,
-                                          test_path)
+        expected = [[join(u'/test', 'test_key.LICENSE'), 'This is a test license.']]
+        result = gen.process_dje_licenses(test_license_list, test_license_dict, test_path)
         self.assertEqual(result, expected)
 
     def test_update_about_resource_about_file_and_field_exist(self):

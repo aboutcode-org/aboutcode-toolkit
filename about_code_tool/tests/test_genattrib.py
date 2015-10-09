@@ -19,9 +19,10 @@ from __future__ import print_function
 import os
 import unittest
 
-from about_code_tool import genattrib, about
+from about_code_tool import genattrib
 
 from about_code_tool.tests.test_about import get_temp_file
+from about_code_tool.util import add_unc
 
 
 TESTS_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -29,47 +30,64 @@ TESTDATA_DIR = os.path.join(TESTS_DIR, 'testdata')
 GEN_LOCATION = os.path.join(TESTDATA_DIR, 'test_files_for_genabout')
 
 
+def check_about_file_existence_and_format(input_list):
+    try:
+        for row in input_list:
+            # Force the path to start with the '/' to map with the project
+            # structure
+            if not row['about_file'].startswith('/'):
+                row['about_file'] = '/' + row['about_file']
+        return input_list
+    except Exception:
+        return []
+
 class GenAttribTest(unittest.TestCase):
     def test_convert_dict_key_to_lower_case(self):
-        test = [{'Directory': '/test/', 'file_name': 'test.c'}]
-        expected = [{'directory': '/test/', 'file_name': 'test.c'}]
-        result = genattrib.convert_dict_key_to_lower_case(test)
+        test = [{'Directory': '/Test/', 'filE_name': 'tesT.c'}]
+        expected = [{'directory': '/Test/', 'file_name': 'tesT.c'}]
+        result = genattrib.lower_keys(test)
         self.assertEqual(expected, result)
 
-    def test_check_no_about_file_existence(self):
+    def test_has_about_file_keys(self):
         test = [{'Directory': '/test/', 'file_name': '/test.c'}]
-        result = genattrib.check_about_file_existence_and_format(test)
+        result = genattrib.has_about_file_keys(test)
         self.assertFalse(result)
 
-    def test_check_have_about_file_existence(self):
+    def test_normalize_about_file_paths(self):
         test = [{'Directory': '/test/', 'about_file': '/test.ABOUT'}]
-        result = genattrib.check_about_file_existence_and_format(test)
+        result = genattrib.normalize_about_file_paths(test)
         self.assertEqual(test, result)
 
-    def test_check_no_about_file_not_start_with_slash(self):
+    def test_normalize_about_file_paths_does_not_change_other_paths(self):
         test = [{'Directory': '/test/', 'file_name': 'test.c'}]
-        result = genattrib.check_about_file_existence_and_format(test)
-        self.assertFalse(result)
+        result = genattrib.normalize_about_file_paths(test)
+        self.assertEqual(test, result)
 
-    def test_check_have_about_file_not_start_with_slash(self):
+    def test_normalize_about_file_paths_updates_about_file_paths(self):
         test = [{'Directory': '/test/', 'about_file': 'test.ABOUT'}]
         expected = [{'Directory': '/test/', 'about_file': '/test.ABOUT'}]
-        result = genattrib.check_about_file_existence_and_format(test)
+        result = genattrib.normalize_about_file_paths(test)
         self.assertEqual(expected, result)
 
-    def test_update_path_to_about(self):
-        test = ['/test/test1.ABOUT', '/test/test2/', 'test/test3.c']
-        expected = ['/test/test1.ABOUT',
-                    '/test/test2/test2.ABOUT',
-                    'test/test3.c.ABOUT']
-        result = genattrib.update_path_to_about(test)
+    def test_as_about_paths(self):
+        test = [
+            '/test/test1.ABOUT', 
+            '/test/test2/', 
+            'test/test3.c'
+        ]
+        expected = [
+            '/test/test1.ABOUT',
+            '/test/test2/test2.ABOUT',
+            'test/test3.c.ABOUT'
+        ]
+        result = genattrib.as_about_paths(test)
         self.assertEqual(expected, result)
 
-    def test_component_subset_to_sublist(self):
+    def test_get_about_file_paths(self):
         test = [{'about_file': '/tmp/', 'notes': 'test'},
                 {'about_file': '/tmp/t1/', 'dje_license': 'bsd-new'}]
         expected = ['/tmp/', '/tmp/t1/']
-        result = genattrib.component_subset_to_sublist(test)
+        result = genattrib.get_about_file_paths(test)
         self.assertEqual(expected, result)
 
     def test_genattrib_basic(self):
@@ -165,10 +183,10 @@ class GenAttribTest(unittest.TestCase):
     def test_extract_deep_zip(self):
         test_zip = 'about_code_tool/tests/testdata/longpath.zip'
         extracted = genattrib.extract_zip(test_zip)
-        unc_extracted = about.add_unc(extracted)
-        all_files = []
-        for root, dirs, files in os.walk(unc_extracted):
-            all_files.extend(files)
+        unc_extracted = add_unc(extracted)
+        all_files = set()
+        for _, _, files in os.walk(unc_extracted):
+            all_files.update(files)
         self.assertTrue('non-supported_date_format.ABOUT' in all_files)
 
 
