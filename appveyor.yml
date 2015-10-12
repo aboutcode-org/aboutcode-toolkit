@@ -1,0 +1,9 @@
+version: '{build}'
+
+install:
+    - configure
+
+build: off
+
+test_script:
+    - python setup.py test
