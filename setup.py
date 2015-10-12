@@ -51,4 +51,5 @@ setup(
         'Topic :: System :: Software Distribution',
         'Topic :: Utilities',
     ],
+    install_requires=['jinja2 >= 2.7.3, < 3.0.0',]
 )
