@@ -43,11 +43,14 @@ from about_code_tool.util import UNC_PREFIX
 from about_code_tool.util import posix_path
 
 from about_code_tool.tests.tstutil import get_temp_file
+from about_code_tool.util import extract_zip
 
 TESTDATA_DIR = join(abspath(dirname(__file__)), 'testdata')
 
 
 class CollectorTest(unittest.TestCase):
+    maxDiff = None
+
     def test_return_path_is_not_abspath_and_contains_subdirs_on_file(self):
         # Using a relative path for the purpose of this test
         test_file = 'about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'
@@ -123,19 +126,22 @@ class CollectorTest(unittest.TestCase):
         result = Collector.collect(test_file)
         self.assertEqual(expected, result)
 
-    def test_collect_can_collect_a_long_directory_tree(self):
-        longpath = 'longpath1/' * 28
-        test_dir = 'about_code_tool/tests/testdata/longpath/' + longpath
-        if on_windows:
-            # For some reasons, the os.path.abspath doesn't work if I have long
-            # path in the parameter. Therefore, I just append to long path
-            # after the os.path.abspath()
-            expected = [posix_path(UNC_PREFIX + os.path.abspath('about_code_tool') + '/tests/testdata/longpath/' + longpath + '/non-supported_date_format.ABOUT')]
-        else:
-            expected = [os.path.abspath(('about_code_tool/tests/testdata/longpath/' + longpath + 'non-supported_date_format.ABOUT'))]
+    def test_collect_can_collect_a_directory_tree_with_long_and_deep_paths(self):
+        test_zip = 'about_code_tool/tests/testdata/longpath/longpath.zip'
+        test_dir = extract_zip(test_zip)
 
-        result = Collector.collect(test_dir)
-        self.assertEqual(sorted(expected), sorted(result))
+
+        longpath = 'longpath1/' * 28
+        expected = 'longpath/' + longpath + 'non-supported_date_format.ABOUT'
+
+        result = Collector.collect(test_dir)[0]
+        def rel_path(pth):
+            p = posix_path(pth)
+            return p.partition('/longpath/')[2]
+        print()
+        print(result)
+        print(rel_path(result))
+        self.assertEqual(expected, rel_path(result))
 
     def test_collector_errors_encapsulation(self):
         test_file = 'about_code_tool/tests/testdata/DateTest'
@@ -149,7 +155,10 @@ class CollectorTest(unittest.TestCase):
         # No warning is thrown as all fields from ABOUT files are accepted.
         self.assertEqual(0, len(collector.warnings))
 
+
 class ParserTest(unittest.TestCase):
+    maxDiff = None
+
     def test_valid_chars_in_field_name(self):
         name = string.digits + string.ascii_letters + '_'
         line = string.digits + string.ascii_letters + '_'

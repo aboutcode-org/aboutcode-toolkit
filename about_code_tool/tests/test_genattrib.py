@@ -181,7 +181,7 @@ class GenAttribTest(unittest.TestCase):
             self.assertFalse(ex in result, ex)
 
     def test_extract_deep_zip(self):
-        test_zip = 'about_code_tool/tests/testdata/longpath.zip'
+        test_zip = 'about_code_tool/tests/testdata/longpath/longpath.zip'
         extracted = genattrib.extract_zip(test_zip)
         unc_extracted = add_unc(extracted)
         all_files = set()
