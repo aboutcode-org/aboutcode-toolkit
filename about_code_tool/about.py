@@ -48,7 +48,7 @@ import urlparse
 
 on_windows = 'win32' in sys.platform
 
-__version__ = '2.0.4'
+__version__ = '2.1.0'
 
 # See http://dejacode.org
 __about_spec_version__ = '1.0'

@@ -40,7 +40,7 @@ from urlparse import urljoin, urlparse
 import about
 
 
-__version__ = '2.0.4'
+__version__ = '2.1.0'
 
 __copyright__ = """
 Copyright (c) 2013-2015 nexB Inc. All rights reserved.
