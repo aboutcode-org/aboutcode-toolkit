@@ -33,7 +33,7 @@ The execution order is:
  - python scripts execution
  - shell scripts execution
 
-On posix, posix Python and shell scripts are executed before mac or linux 
+On posix, posix Python and shell scripts are executed before mac or linux
 scripts.
 
 The base scripts or packages are always installed first before platform-
@@ -78,6 +78,7 @@ else:
     raise Exception('Unsupported OS/platform')
     platform_names = tuple()
 
+
 # common file basenames for requirements and scripts
 base = ('base',)
 
@@ -96,28 +97,44 @@ if on_win:
     shell_scripts = ('win.bat',)
 
 
-def call(cmd):
+def call(cmd, root_dir):
     """ Run a `cmd` command (as a list of args) with all env vars."""
     cmd = ' '.join(cmd)
-    if  subprocess.Popen(cmd, shell=True, env=dict(os.environ)).wait() != 0:
+    if  subprocess.Popen(cmd, shell=True, env=dict(os.environ), cwd=root_dir).wait() != 0:
         print()
-        print('Failed to execute command:\n%(cmd)s' % locals())
+        print('Failed to execute command:\n%(cmd)s. Aborting...' % locals())
         sys.exit(1)
+
+
+def find_pycache(root_dir):
+    """
+    Yield __pycache__ directory paths found in root_dir as paths relative to
+    root_dir.
+    """
+    for top, dirs, _files in os.walk(root_dir):
+        for d in dirs:
+            if d == '__pycache__':
+                dir_path = os.path.join(top, d)
+                dir_path = dir_path.replace(root_dir, '', 1)
+                dir_path = dir_path.strip(os.path.sep)
+                yield dir_path
 
 
 def clean(root_dir):
     """
-    Remove cleanable directories and files.
+    Remove cleanable directories and files in root_dir.
     """
     print('* Cleaning ...')
-    cleanable = '''build bin lib include Scripts
+    cleanable = '''build bin lib Lib include Include Scripts local
                    django_background_task.log
-                   develop-eggs eggs parts .installed.cfg 
+                   develop-eggs eggs parts .installed.cfg
                    .Python
                    .cache
-                   .settings
                    pip-selfcheck.json
                    '''.split()
+
+    # also clean __pycache__ if any
+    cleanable.extend(find_pycache(root_dir))
 
     for d in cleanable:
         try:
@@ -130,19 +147,23 @@ def clean(root_dir):
         except:
             pass
 
-def build_pip_dirs_args(paths, option='--extra-search-dir='):
+
+def build_pip_dirs_args(paths, root_dir, option='--extra-search-dir='):
     """
-    Return an iterable of pip command line arguments for the `option` pip
-    command line option using a list of `paths` to directories.
+    Return an iterable of pip command line options for `option` of pip using a
+    list of `paths` to directories.
     """
     for path in paths:
+        if not os.path.isabs(path):
+            path = os.path.join(root_dir, path)
         if os.path.exists(path):
             yield option + path
 
-def create_virtualenv(std_python, root_dir, tpp_dirs):
+
+def create_virtualenv(std_python, root_dir, tpp_dirs, quiet=False):
     """
     Create a virtualenv in `root_dir` using the `std_python` Python
-    executable. One of the tpp_dirs must contain a vendored virtualenv.py and
+    executable. One of the `tpp_dirs` must contain a vendored virtualenv.py and
     virtualenv dependencies such as setuptools and pip packages.
 
     @std_python: Path or name of the Python executable to use.
@@ -155,22 +176,28 @@ def create_virtualenv(std_python, root_dir, tpp_dirs):
     vendored Python distributions that pip will use to find required
     components.
     """
-    print()
     print("* Configuring Python ...")
     # search virtualenv.py in the tpp_dirs. keep the first found
     venv_py = None
     for tpd in tpp_dirs:
-        venv = os.path.join(tpd, 'virtualenv.py')
+        venv = os.path.join(root_dir, tpd, 'virtualenv.py')
         if os.path.exists(venv):
             venv_py = venv
             break
-    # TODO: error out if venv_py not found
+
+    # error out if venv_py not found
+    if not venv_py:
+        print("Configuration Error ... aborting.")
+        exit(1)
+
     vcmd = [std_python, venv_py, '--never-download']
+    if quiet:
+        vcmd += ['--quiet']
     # third parties may be in more than one directory
-    vcmd.extend(build_pip_dirs_args(tpp_dirs))
+    vcmd.extend(build_pip_dirs_args(tpp_dirs, root_dir))
     # we create the virtualenv in the root_dir
     vcmd.append(root_dir)
-    call(vcmd)
+    call(vcmd, root_dir)
 
 
 def activate(root_dir):
@@ -181,36 +208,43 @@ def activate(root_dir):
         exec(code, dict(__file__=activate_this))
 
 
-def install_3pp(configs, root_dir, tpp_dirs):
-    """ Install requirements with pip."""
-    print()
+def install_3pp(configs, root_dir, tpp_dirs, quiet=False):
+    """
+    Install requirements from requirement files found in `configs` with pip,
+    using the vendored components in `tpp_dirs`.
+    """
     print("* Installing components ...")
-    for req_file in get_conf_files(configs, requirements):
-        pcmd = ['pip', 'install', '--no-allow-external', 
+    requirement_files = get_conf_files(configs, root_dir, requirements)
+    for req_file in requirement_files:
+        pcmd = ['pip', 'install', '--no-allow-external',
                 '--use-wheel', '--no-index']
-        pcmd.extend(build_pip_dirs_args(tpp_dirs, '--find-links='))
+        if quiet:
+            pcmd += ['--quiet']
+        pip_dir_args = list(build_pip_dirs_args(tpp_dirs, root_dir, '--find-links='))
+        pcmd.extend(pip_dir_args)
         req_loc = os.path.join(root_dir, req_file)
         pcmd.extend(['-r' , req_loc])
-        call(pcmd)
+        call(pcmd, root_dir)
 
 
 def run_scripts(configs, root_dir, configured_python):
-    """ Run py_script and sh_script scripts."""
-    print()
+    """
+    Run Python scripts and shell scripts found in `configs`.
+    """
     print("* Configuring ...")
     # Run Python scripts for each configurations
-    for py_script in get_conf_files(configs, python_scripts):
+    for py_script in get_conf_files(configs, root_dir, python_scripts):
         cmd = [configured_python, os.path.join(root_dir, py_script)]
-        call(cmd)
+        call(cmd, root_dir)
 
     # Run sh_script scripts for each configurations
-    for sh_script in get_conf_files(configs, shell_scripts):
+    for sh_script in get_conf_files(configs, root_dir, shell_scripts):
         # we source the scripts on posix
         cmd = ['.']
         if on_win:
             cmd = []
-        cmd = cmd  + [os.path.join(root_dir, sh_script)]
-        call(cmd)
+        cmd = cmd + [os.path.join(root_dir, sh_script)]
+        call(cmd, root_dir)
 
 
 def chmod_bin(directory):
@@ -224,15 +258,17 @@ def chmod_bin(directory):
             os.chmod(os.path.join(path, f), rwx)
 
 
-def get_conf_files(config_dir_paths, file_names=requirements):
+def get_conf_files(config_dir_paths, root_dir, file_names=requirements):
     """
-    Based on config_dir_paths return a list of collected path-prefixed file
-    paths matching names in a file_names tuple. Returned paths are posix
-    paths.
+    Return a list of collected path-prefixed file paths matching names in a
+    file_names tuple, based on config_dir_paths, root_dir and the types of
+    file_names requested. Returned paths are posix paths.
 
     @config_dir_paths: Each config_dir_path is a relative from the project
     root to a config dir. This script should always be called from the project
     root dir.
+
+    @root_dir: The project absolute root dir.
 
     @file_names: get requirements, python or shell files based on list of
     supported file names provided as a tuple of supported file_names.
@@ -247,10 +283,10 @@ def get_conf_files(config_dir_paths, file_names=requirements):
     """
     # collect files for each requested dir path
     collected = []
-
     for config_dir_path in config_dir_paths:
-        if not os.path.exists(config_dir_path):
-            print('Configurtaion directory %(config_dir_path)s '
+        abs_config_dir_path = os.path.join(root_dir, config_dir_path)
+        if not os.path.exists(abs_config_dir_path):
+            print('Configuration directory %(config_dir_path)s '
                   'does not exists. Skipping.' % locals())
             continue
         # Support args like enterprise or enterprise/dev
@@ -259,19 +295,18 @@ def get_conf_files(config_dir_paths, file_names=requirements):
         current = None
         for path in paths:
             if not current:
-                current = (path, os.path.abspath(path),)
+                current = (path, os.path.join(root_dir, path),)
             else:
                 base_path, base_loc = current
                 current = (os.path.join(base_path, path),
                            os.path.join(base_loc, path),)
-
             path, loc = current
             # we iterate on known filenames to ensure the defined precedence
             # is respected (posix over mac, linux), etc
             for n in file_names:
                 for f in os.listdir(loc):
                     if f == n:
-                        f_loc = os.path.join(path, f)
+                        f_loc = os.path.join(loc, f)
                         if f_loc not in collected:
                             collected.append(f_loc)
 
@@ -292,6 +327,9 @@ if __name__ == '__main__':
     bin_dir = os.path.join(root_dir, 'bin')
     standard_python = sys.executable
 
+    # you must create a CONFIGURE_QUIET env var if you want to run quietly
+    run_quiet = 'CONFIGURE_QUIET' in os.environ
+
     if on_win:
         configured_python = os.path.join(bin_dir, 'python.exe')
         scripts_dir = os.path.join(root_dir, 'Scripts')
@@ -300,30 +338,34 @@ if __name__ == '__main__':
             os.makedirs(scripts_dir)
         if not os.path.exists(bin_dir):
             cmd = ('mklink /J %(bin_dir)s %(scripts_dir)s' % locals()).split()
-            call(cmd)
+            call(cmd, root_dir)
     else:
         configured_python = os.path.join(bin_dir, 'python')
         scripts_dir = bin_dir
 
-    # get requested configuration paths and install components and run scripts
+    # Get requested configuration paths to collect components and scripts later
     configs = []
     for path in args[:]:
-        if os.path.exists(path):
-            configs.append(path)
+        if not os.path.isabs(path):
+            abs_path = os.path.join(root_dir, path)
+            if os.path.exists(abs_path):
+                configs.append(path)
         else:
             print()
             print('WARNING: Skipping missing Configuration directory:\n'
                   '  %(path)s does not exist.' % locals())
             print()
 
-    # one or more third-party directories may exist
-    # as environment variables prefixed with TPP_DIR
+    # Collect vendor directories from environment variables: one or more third-
+    # party directories may exist as environment variables prefixed with TPP_DIR
     thirdparty_dirs = []
     for envvar, path in os.environ.items():
         if not envvar.startswith('TPP_DIR'):
             continue
-        if os.path.exists(path):
-            thirdparty_dirs.append(path)
+        if not os.path.isabs(path):
+            abs_path = os.path.join(root_dir, path)
+            if os.path.exists(abs_path):
+                thirdparty_dirs.append(path)
         else:
             print()
             print('WARNING: Skipping missing Python thirdparty directory:\n'
@@ -332,10 +374,13 @@ if __name__ == '__main__':
                   '  set %(envvar)s=%(path)s' % locals())
             print()
 
+    # Finally execute our three steps: venv, install and scripts
     if not os.path.exists(configured_python):
-        create_virtualenv(standard_python, root_dir, thirdparty_dirs)
+        create_virtualenv(standard_python, root_dir, thirdparty_dirs, quiet=run_quiet)
     activate(root_dir)
 
-    install_3pp(configs, root_dir, thirdparty_dirs,)
+    install_3pp(configs, root_dir, thirdparty_dirs, quiet=run_quiet)
     run_scripts(configs, root_dir, configured_python)
     chmod_bin(bin_dir)
+    print("* Configuration completed.")
+    print()

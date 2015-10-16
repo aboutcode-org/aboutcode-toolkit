@@ -13,50 +13,51 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ============================================================================
+
 """
-This is a tool to generate ABOUT files based on the input file.
-The input file should be a csv format which contains information about the
-file location, origin and license of the software components etc.
+Generate ABOUT files based on CSV file. The input file contains data such as the
+ABOUT file location, the origin and license of the software components etc.
 """
 
 from __future__ import print_function
 
+from about import AboutFile
+from about import ERROR_WARN_FIELDS
+from about import MANDATORY_FIELDS
+from about import OPTIONAL_FIELDS
+from about import check_network_connection
 from collections import namedtuple
+from help import MAPPING_HELP
+from help import VERBOSITY_HELP
+from help import __full_info__
+from help import __version_info__
+from os import makedirs
+from os.path import abspath
+from os.path import basename
+from os.path import dirname
+from os.path import exists
+from os.path import expanduser
+from os.path import isdir
+from os.path import join
+from os.path import normpath
+from urlparse import urljoin, urlparse
+from util import ImprovedFormatter
+from util import add_unc
+from util import apply_mappings
+from util import get_mappings
+from util import path_exists
+
 import copy
 import csv
 import errno
 import json
 import logging
 import optparse
-from os import makedirs
 import os
-from os.path import exists, dirname, join, abspath, isdir, normpath, basename, expanduser
 import shutil
 import sys
 import urllib
 import urllib2
-from urlparse import urljoin, urlparse
-
-import about
-
-
-__version__ = '2.1.0'
-
-__copyright__ = """
-Copyright (c) 2013-2015 nexB Inc. All rights reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
 
 
 LOG_FILENAME = 'error.log'
@@ -68,9 +69,10 @@ handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
+
 ESSENTIAL_FIELDS = ('about_file',)
 
-SUPPORTED_FIELDS = about.OPTIONAL_FIELDS + about.MANDATORY_FIELDS + ('about_file',)
+SUPPORTED_FIELDS = OPTIONAL_FIELDS + MANDATORY_FIELDS + ESSENTIAL_FIELDS
 
 
 def repr_problem(obj):
@@ -105,11 +107,51 @@ UNKNOWN = 'Unknown problem'
 GENATTRIB = 'Attribution generation problem'
 NETWORK = 'Network problem'
 
+
 # Handle different behaviors if ABOUT file already exists
 ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST = 0
 ACTION_OVERWRITES_THE_CURRENT_ABOUT_FIELD_VALUE_IF_EXIST = 1
 ACTION_KEEP_CURRENT_FIELDS_UNCHANGED_AND_ONLY_ADD_NEW_FIELDS = 2
 ACTION_REPLACE_THE_ABOUT_FILE_WITH_THE_CURRENT_GENERATED_FILE = 3
+
+
+def load_data_from_csv(location):
+    """
+    Load data from CSV at location and return a list of About data dictionaries.
+    Keys are converted to lowercase.
+    """
+    abouts = []
+    with open(location, 'rU') as inp:
+        csvfile = csv.DictReader(inp)
+        for row in csvfile:
+            row_dict = {}
+            for key, value in row.items():
+                row_dict[key.lower()] = value.strip()
+            abouts.append(row_dict)
+    return abouts
+
+
+def get_unknown_fields(abouts, user_keys):
+    """
+    Return a list of the non-supported fields given a list of About data
+    dictionaries and a list of user-defined keys in MAPPING.CONFIG.
+    """
+    first = abouts[0]
+    return [field for field in first
+            if not field in SUPPORTED_FIELDS and not field in user_keys]
+
+
+def has_duplicate_about_file_paths(abouts):
+    """
+    Given a list of About data dictionaries, check if there are any
+    duplicated about_file paths. Return True if this is the case.
+    """
+    seen = set()
+    for about in abouts:
+        about_file_path = about['about_file']
+        if about_file_path in seen:
+            return True
+        seen.add(about_file_path)
 
 
 class GenAbout(object):
@@ -119,146 +161,77 @@ class GenAbout(object):
         self.extract_dje_license_error = False
 
     @staticmethod
-        # FIXME: why use a static and not a regular function?
     def get_duplicated_keys(input_file):
+        # FIXME: why use a static and not a regular function?
         csv_context = csv.reader(open(input_file, 'rU'))
         keys_row = csv_context.next()
         lower_case_keys_row = [k.lower() for k in keys_row]
         return ([key for key in keys_row if lower_case_keys_row.count(key.lower()) > 1])
 
-    @staticmethod
-    def get_input_list(input_file):
-        # FIXME: why use a static and not a regular function?
-        csvfile = csv.DictReader(open(input_file, 'rU'))
-        input_list = []
-        for row in csvfile:
-            row_dict = {}
-            for key in row:
-                row_dict[key.lower()] = row[key].rstrip()
-            input_list.append(row_dict)
-        return input_list
-
-    @staticmethod
-    def get_non_empty_rows_list(input_list):
-        # FIXME: why use a static and not a regular function?
-        copied_list = copy.deepcopy(input_list)
-        new_list = []
-        for line in copied_list:
-            for key in line.keys():
-                if line[key]:
-                    new_list.append(line)
-                    break
-        return new_list
-
-    @staticmethod
-    def get_mapping_list():
-        """
-        Read the MAPPING.CONFIG
-        """
-        # FIXME: why use a static and not a regular function?
-        self_path = abspath(dirname(__file__))
-        mapping_list = {}
-        try:
-            with open(join(self_path, 'MAPPING.CONFIG'), 'rU') as file_in:
-                for line in file_in.readlines():
-                    if not line.startswith('#') and ':' in line:
-                        about_spec_key = line.partition(':')[0]
-                        user_spec_key = line.partition(':')[2].strip()
-                        # Handle cases which keys contain spaces
-                        if about_spec_key.endswith(' '):
-                            about_spec_key = about_spec_key.strip()
-                        about_spec_key = about_spec_key.replace(' ', '_')
-                        mapping_list[about_spec_key.lower()] = user_spec_key.lower()
-        except Exception as e:
-            print(repr(e))
-            print('The "MAPPING.CONFIG" file cannot be opened.')
-            sys.exit(errno.EACCES)
-        return mapping_list
-
-    @staticmethod
-    def convert_input_list(input_list, mapping_list):
-        """
-        Perform the key mapping
-        """
-        # FIXME: why use a static and not a regular function?
-        copied_list = copy.deepcopy(input_list)
-        for copied_dict in copied_list:
-            for about_spec_key in mapping_list:
-                if mapping_list[about_spec_key] in copied_dict.keys():
-                    copied_dict[about_spec_key] = copied_dict.pop(mapping_list[about_spec_key])
-        return copied_list
-
     def validate(self, input_list):
         if not self.validate_mandatory_fields(input_list):
-            required_keys = about.MANDATORY_FIELDS + ('about_file',)
-            print("Required keys not found.")
+            required_keys = MANDATORY_FIELDS + ('about_file',)
+            print('ERROR: Required column/keys not found in the <input_path> CSV.')
             print(required_keys)
             print("Use the '--mapping' option to map the input keys and verify the mapping information are correct.")
-            print("OR correct the header keys from the input CSV.")
+            print("OR correct the column names in the <input_path> CSV.")
             sys.exit(errno.EINVAL)
-        if not self.validate_value_in_essential_fields(input_list):
-            print("Some of the essential fields value are missing.")
+
+        elif not self.validate_value_in_essential_fields(input_list):
+            print("ERROR: Some of the essential column/fields value are missing in the <input_path> CSV.")
             print(ESSENTIAL_FIELDS)
-            print("Please check the input CSV.")
-            print("No ABOUT file is created.")
+            print("Please check the the <input_path> CSV.")
+            print("No ABOUT file was generated.")
             sys.exit(errno.EINVAL)
-        if self.validate_duplication(input_list):
-            print("The input has duplicated 'about_file'.")
-            print("Duplication is not supported. Please correct the input and rerun the tool.")
-            print("No ABOUT file is created.")
+
+        elif has_duplicate_about_file_paths(input_list):
+            print("ERROR: The <input_path> CSV has duplicated 'about_file' values.")
+            print("Duplication is not supported. Please correct the the <input_path> CSV and rerun the tool.")
+            print("No ABOUT file was generated.")
             sys.exit(errno.EINVAL)
 
     @staticmethod
-    def validate_mandatory_fields(input_list):
+    def validate_mandatory_fields(abouts):
+        """
+        Given a list of About data dictionaries, validate the presence of
+        mandatory fields. Return True if they are present.
+        """
         # FIXME: why use a static and not a regular function?
-        for line in input_list:
-            for key in about.MANDATORY_FIELDS + ('about_file',):
-                if not key in line.keys():
+        
+        for about in abouts:
+            for key in MANDATORY_FIELDS + ESSENTIAL_FIELDS:
+                if not key in about:
                     return False
         return True
 
     @staticmethod
-    def validate_value_in_essential_fields(input_list):
+    def validate_value_in_essential_fields(abouts):
+        """
+        Given a list of About data dictionaries, validate the presence of
+        essential fields. Return True if they are present.
+        """
         # FIXME: why use a static and not a regular function?
-        for line in input_list:
+        for about in abouts:
             for key in ESSENTIAL_FIELDS:
-                if not line[key]:
+                if not about.get(key):
                     return False
         return True
 
-    @staticmethod
-    def validate_duplication(input_list):
-        # FIXME: why use a static and not a regular function?
-        check_duplication = []
-        for line in input_list:
-            component = line['about_file']
-            if component in check_duplication:
-                return True
-            check_duplication.append(component)
-        return False
-
-    def get_only_supported_fields(self, input_list, ignored_keys_list):
+    def get_only_supported_fields(self, input_list, ignored_keys):
         copied_list = copy.deepcopy(input_list)
         for copied_dict in copied_list:
             for key in copied_dict.keys():
-                if key in ignored_keys_list:
+                if key in ignored_keys:
                     copied_dict.pop(key, None)
-        msg = 'The field(s) "%s" is/are not supported and will be ignored.' % ignored_keys_list
-        self.warnings.append(Warn(IGNORED, ignored_keys_list, '', msg))
+        msg = 'Field(s) %r not supported and will be ignored.' % ignored_keys
+        self.warnings.append(Warn(IGNORED, ignored_keys, '', msg))
         return copied_list
 
-    @staticmethod
-    def get_non_supported_fields(input_list, mapping_keys):
-        """
-        Returns a list of the non-supported fields in a given line.
-        """
-        # FIXME: why use a static and not a regular function?
-        first_line = input_list[0]
-        return [field for field in first_line.keys() if not field in SUPPORTED_FIELDS and not field in mapping_keys]
 
     def verify_files_existence(self, input_list, project_dir, file_in_project):
         """
-        Verify the existence of the 'license text file'
+        Verify the existence of a file pointed to by ' _file' suffixed fields
+        such as 'license_text_file'.
         """
         files_list = []
         # Get all the dictionary keys
@@ -273,42 +246,45 @@ class GenAbout(object):
         # FIXME: this loop is too complex
         for line in input_list:
             for file_key in file_keys:
-                if line[file_key]:
-                    file_path_list = []
-                    file_value = []
-                    file_location = line['about_file']
-                    if file_location.startswith('/'):
-                        file_location = file_location.partition('/')[2]
-                    about_parent_dir = dirname(file_location)
-                    if file_in_project:
-                        if '\n' in line[file_key]:
-                            file_value = line[file_key].split('\n')
-                        else:
-                            file_value.append(line[file_key])
-                        for value in file_value:
-                            if file_location.endswith('/'):
-                                about_parent_dir = normpath(dirname(join(file_location, value)))
-                            file_path_list.append(join(project_dir, dirname(file_location), value))
-                    else:
-                        if '\n' in line[file_key]:
-                            file_value = line[file_key].split('\n')
-                        else:
-                            file_value.append(line[file_key])
-                        for value in file_value:
-                            file_path_list.append(join(project_dir, value))
+                if not line[file_key]:
+                    continue
 
-                    for path in file_path_list:
-                        if _exists(path):
-                            files_list.append((path, about_parent_dir))
-                        else:
-                            self.warnings.append(Warn(FILE, file_key, path, "File does not exist."))
+                file_path_list = []
+                file_value = []
+                file_location = line['about_file']
+                if file_location.startswith('/'):
+                    file_location = file_location.partition('/')[2]
+                about_parent_dir = dirname(file_location)
+                if file_in_project:
+                    if '\n' in line[file_key]:
+                        file_value = line[file_key].split('\n')
+                    else:
+                        file_value.append(line[file_key])
+                    for value in file_value:
+                        if file_location.endswith('/'):
+                            about_parent_dir = normpath(dirname(join(file_location, value)))
+                        file_path_list.append(join(project_dir, dirname(file_location), value))
+                else:
+                    if '\n' in line[file_key]:
+                        file_value = line[file_key].split('\n')
+                    else:
+                        file_value.append(line[file_key])
+                    for value in file_value:
+                        file_path_list.append(join(project_dir, value))
+
+                for path in file_path_list:
+                    if path_exists(path):
+                        files_list.append((path, about_parent_dir))
+                    else:
+                        self.warnings.append(Warn(FILE, file_key, path, 'File does not exist.'))
         return files_list
 
     def request_license_data(self, url, username, api_key, license_key):
         """
+        Return a dictionary of license data. 
+
         Send a request to a given API URL to gather license data for
-        license_key, authenticating through an api_key and username. Return a
-        python dictionary of results returned by the API.
+        license_key, authenticating through an api_key and username.
         """
         payload = {
             'username': username,
@@ -327,31 +303,25 @@ class GenAbout(object):
             response = urllib2.urlopen(request)
             response_content = response.read()
             license_data = json.loads(response_content)
-        except urllib2.HTTPError as http_e:
+        except urllib2.HTTPError, http_e:
             # some auth problem
             if http_e.code == 401:
-                error_msg = ("Authorization denied. Invalid '--api_username' or '--api_key'."
-                            " License data collection skipped.")
-                print()
-                print(error_msg)
-                print()
+                error_msg = ("Authorization denied. Invalid '--api_username' or '--api_key'. License data collection skipped.")
+                print('\n%(error_msg)s\n' % locals())
                 self.extract_dje_license_error = True
-                self.errors.append(Error(VALUE, 'username/api_key',
-                                         username + '/' + api_key, error_msg))
+                self.errors.append(Error(VALUE, 'username/api_key', username + '/' + api_key, error_msg))
             else:
                 # FIXME: would this be only with a 404?
-                self.errors.append(Error(VALUE, 'dje_license_key', license_key,
-                                         "Invalid 'dje_license_key'"))
-        except urllib2.URLError:
-            if about.check_network_connection():
-                error_msg = ("URL not reachable. Invalid '--api_url'."
-                             " LICENSE generation is skipped.")
-                print("\n" + error_msg + "\n")
+                self.errors.append(Error(VALUE, 'dje_license_key', license_key, "Invalid 'dje_license_key'"))
+        except urllib2.URLError, url_e:
+            if check_network_connection():
+                error_msg = ("URL not reachable. Invalid '--api_url'. LICENSE generation skipped.")
+                print('\n%(error_msg)s\n' % locals())
                 self.extract_dje_license_error = True
                 self.errors.append(Error(VALUE, '--api_url', url, error_msg))
             else:
-                error_msg = "Network problem. Please check the Internet connection. LICENSE generation is skipped."
-                print("\n" + error_msg + "\n")
+                error_msg = "Network problem. Please check your Internet connection. LICENSE generation skipped."
+                print('\n%(error_msg)s\n' % locals())
                 self.extract_dje_license_error = True
                 self.errors.append(Error(NETWORK, 'Network', '', error_msg))
         except ValueError:
@@ -368,14 +338,14 @@ class GenAbout(object):
         # FIXME : why use a static and not a regular function?
         for file_path, component_path in files_list:
             output_file_path = join(gen_location, component_path)
-            if not _exists(output_file_path):
+            if not path_exists(output_file_path):
                 makedirs(output_file_path)
             shutil.copy2(file_path, output_file_path)
 
     def write_licenses(self, license_context_list):
         for gen_license_path, license_context in license_context_list:
             try:
-                if not _exists(dirname(gen_license_path)):
+                if not path_exists(dirname(gen_license_path)):
                     makedirs(dirname(gen_license_path))
                 with open(gen_license_path, 'wb') as output:
                     output.write(license_context)
@@ -389,12 +359,11 @@ class GenAbout(object):
         Returns the license_text of a given license_key using an API request.
         Returns an empty string if the text is not available.
         """
-        license_data = self.request_license_data(url, username,
-                                                 api_key, license_key)
+        license_data = self.request_license_data(url, username, api_key, license_key)
         license_name = license_data.get('name', '')
         license_text = license_data.get('full_text', '')
         license_key = license_data.get('key', '')
-        return [license_name, license_key, license_text]
+        return license_name, license_key, license_text
 
     def get_dje_license_list(self, gen_location, input_list, gen_license, dje_license_dict):
         # FIXME : this is too complex
@@ -409,7 +378,7 @@ class GenAbout(object):
                     about_parent_dir = dirname(file_location)
                     license_text_file = line['license_text_file']
                     license_file = normpath(gen_location.rpartition('/')[0] + join(about_parent_dir, license_text_file))
-                    if not _exists(license_file):
+                    if not path_exists(license_file):
                         self.errors.append(Error(FILE, 'license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
                     if gen_license:
@@ -436,9 +405,13 @@ class GenAbout(object):
         return license_output_list
 
     def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
+        """
+        Modify a list of About data dictionaries by adding license information
+        fetched from the DejaCode API.
+        """
         dje_uri = urlparse(api_url)
         domain = '{uri.scheme}://{uri.netloc}/'.format(uri=dje_uri)
-        dje_lic_urn = urljoin(domain, "urn/?urn=urn:dje:license:")
+        dje_lic_urn = urljoin(domain, 'urn/?urn=urn:dje:license:')
         key_text_dict = {}
         license_dict = {}
         for line in input_list:
@@ -446,29 +419,24 @@ class GenAbout(object):
                 if line['dje_license_key']:
                     if '\n' in line['dje_license_key']:
                         line['dje_license_name'] = ""
-                        self.errors.append(Error(VALUE, 'dje_license_key',
-                                                 line['dje_license_key'],
-                                                 "No multiple licenses or newline character are accepted."))
+                        self.errors.append(Error(VALUE, 'dje_license_key', line['dje_license_key'], "No multiple licenses or newline character are accepted."))
                         continue
                     lic = line['dje_license_key']
                     if not lic in license_dict:
                         detail_list = []
-                        detail = self.get_license_details_from_api(api_url, api_username, api_key, lic)
-                        dje_key = detail[1]
-                        line['dje_license_key'] = dje_key
-                        license_dict[dje_key] = detail[0]
-                        line['dje_license_name'] = detail[0]
-                        license_context = detail [2]
-                        line['dje_license_url'] = dje_lic_urn + dje_key
-                        detail_list.append(dje_key)
-                        detail_list.append(license_context)
-                        key_text_dict[detail[0]] = detail_list
+                        license_name, license_key, license_text = self.get_license_details_from_api(api_url, api_username, api_key, lic)
+                        line['dje_license_key'] = license_key
+                        license_dict[license_key] = license_name
+                        line['dje_license_name'] = license_name
+                        line['dje_license_url'] = dje_lic_urn + license_key
+                        detail_list.append(license_key)
+                        detail_list.append(license_text)
+                        key_text_dict[license_name] = detail_list
                     else:
                         line['dje_license_name'] = license_dict[lic]
                         line['dje_license_url'] = dje_lic_urn + lic
             except Exception:
-                err = Warn(VALUE, 'dje_license_key', '',
-                           'Missing "dje_license_key" for ' + line['about_file'])
+                err = Warn(VALUE, 'dje_license_key', '', 'Missing "dje_license_key" for ' + line['about_file'])
                 self.warnings.append(err)
         return key_text_dict
 
@@ -481,7 +449,7 @@ class GenAbout(object):
             if lic:
                 license_key = dje_license_dict[lic][0]
                 gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
-                if not _exists(gen_license_path) and not self.extract_dje_license_error:
+                if not path_exists(gen_license_path) and not self.extract_dje_license_error:
                     context = dje_license_dict[lic][1]
                     if context:
                         gen_path_context = []
@@ -523,7 +491,7 @@ class GenAbout(object):
                     self.errors.append(Error(VALUE, 'about_file_path',
                                              about_file_dir, msg))
                     continue
-            about_file_exist = _exists(about_file_location)
+            about_file_exist = path_exists(about_file_location)
             if about_file_exist:
                 if action_num == ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST:
                     msg = 'ABOUT file already existed. Generation is skipped.'
@@ -532,7 +500,7 @@ class GenAbout(object):
                     continue
                 # Overwrites the current ABOUT field value if it existed
                 elif action_num == ACTION_OVERWRITES_THE_CURRENT_ABOUT_FIELD_VALUE_IF_EXIST:
-                    about_object = about.AboutFile(about_file_location)
+                    about_object = AboutFile(about_file_location)
                     for field_name, value in about_object.parsed.items():
                         field_name = field_name.lower()
                         if not field_name in line.keys() or not line[field_name]:
@@ -540,7 +508,7 @@ class GenAbout(object):
                 # Keep the current field value and only add the "new" field
                 # and field value
                 elif action_num == ACTION_KEEP_CURRENT_FIELDS_UNCHANGED_AND_ONLY_ADD_NEW_FIELDS:
-                    about_object = about.AboutFile(about_file_location)
+                    about_object = AboutFile(about_file_location)
                     for field_name, value in about_object.parsed.items():
                         field_name = field_name.lower()
                         line[field_name] = value
@@ -605,12 +573,11 @@ class GenAbout(object):
             for item in sorted(about_dict_list.iterkeys()):
                 if item == 'about_file':
                     continue
-                if not item in about.MANDATORY_FIELDS:
+                if not item in MANDATORY_FIELDS:
                     # The purpose of the replace('\n', '\n ') is used to
                     # format the continuation strings
                     value = about_dict_list[item].replace('\n', '\n ')
-                    if (value or item in about.MANDATORY_FIELDS) and not item\
-                        in about.ERROR_WARN_FIELDS and not item == 'about_resource':
+                    if (value or item in MANDATORY_FIELDS) and not item in ERROR_WARN_FIELDS and not item == 'about_resource':
                         # It will cause error if value has different coding
                         try:
                             value = unicode(value, errors='ignore')
@@ -626,8 +593,8 @@ class GenAbout(object):
     @staticmethod
     def write_output(output):
         for about_file_location, context in output:
-            about_file_location = about.add_unc(about_file_location)
-            if _exists(about_file_location):
+            about_file_location = add_unc(about_file_location)
+            if path_exists(about_file_location):
                 os.remove(about_file_location)
             with open(about_file_location, 'wb') as output_file:
                 output_file.write(context)
@@ -644,52 +611,47 @@ class GenAbout(object):
                 file_logger.warning(warning_msg)
 
 
-def _exists(location):
-    # FIXME: duplicated code with about.py
-    return location and  exists(abspath(location))
+def filter_dicts_of_empty_values(abouts):
+    """
+    Return a list of About data dictionaries filtering dictionaries composed
+    entirely of empty values.
+    """
+    filtered = []
+    for about in abouts:
+        if any(v and v.strip() for v in about.values()):
+            filtered.append(dict(about))
+    return filtered
+
 
 
 USAGE_SYNTAX = """\
-    Input must be a CSV file
-    Output must be a directory location where the ABOUT files should be generated
-"""
-
-VERBOSITY_HELP = """\
-Print more or fewer verbose messages while processing ABOUT files
-0 - Do not print any warning or error messages, just a total count (default)
-1 - Print error messages
-2 - Print error and warning messages
+    <input_path> must be a file with a .csv extension containing an inventory of ABOUT data.
+    <output_path> must be a directory where ABOUT files should be generated.
 """
 
 ACTION_HELP = """\
-Handle different behaviors if ABOUT files already existed
-0 - Do nothing if ABOUT file existed (default)
-1 - Overwrites the current ABOUT field value if existed
-2 - Keep the current field value and only add the "new" field and field value
-3 - Replace the ABOUT file with the current generation
+Handle different behaviors if ABOUT files already exist:
+0 - Do nothing if an ABOUT file exists (default).
+1 - Merge and overwrite existing ABOUT files field values with new generated field/value.
+2 - Merge and keep existing ABOUT files field value. Add new generated field/value.
+3 - Overwrite existing ABOUT files with generated files.
 """
 
 COPY_FILES_HELP = """\
-Copy the '*_file' from the project to the generated location
-Project path - Project path
+Copy the '*_file' from the COPY_FILES directory to the generated location.
 """
 
 LICENSE_TEXT_LOCATION_HELP = """\
-Copy the 'license_text_file' from the directory to the generated location
-License path - License text files path
-"""
-
-MAPPING_HELP = """\
-Configure the mapping key from the MAPPING.CONFIG
+Copy the 'license_text_file' from the LICENSE_TEXT_LOCATION directory to the generated location.
 """
 
 EXTRACT_LICENSE_HELP = """\
-Extract License text and create <license_key>.LICENSE side-by-side
-    with the .ABOUT from DJE License Library.
-api_url - URL to the DJE License Library
-api_username - The regular DJE username
-api_key - Hash attached to your username which is used to authenticate
-            yourself in the API. Contact us to get the hash key.
+Fetch and save license texts in <license_key>.LICENSE files side-by-side with the
+.ABOUT files using the DejaCode License Library API.
+api_url - URL to the DejaCode License Library.
+api_username - The DejaCode username.
+api_key - Key attached to your username and used to authenticate
+          yourself in the API. Contact us to get an API key.
 
 Example syntax:
 genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
@@ -697,6 +659,9 @@ genabout.py --extract_license --api_url='api_url' --api_username='api_username' 
 
 
 def main(parser, options, args):
+    """
+    Main commnand line entry point.
+    """
     verbosity = options.verbosity
     action = options.action
     copy_files_path = options.copy_files
@@ -710,10 +675,9 @@ def main(parser, options, args):
     api_key = ''
     gen_license = False
     dje_license_dict = {}
-    mapping_keys = []
 
     if options.version:
-        print('ABOUT tool {0}\n{1}'.format(__version__, __copyright__))
+        print(__full_info__)
         sys.exit(0)
 
     if verbosity == 1:
@@ -726,25 +690,25 @@ def main(parser, options, args):
         if action in valid_actions:
             action_num = action
         else:
-            print('Invalid action: should be 0, 1, 2 or 3')
+            print('ERROR: Invalid action: must be one of: 0, 1, 2 or 3')
             sys.exit(errno.EINVAL)
 
     if copy_files_path:
         # code to handle tilde character
         copy_files_path = os.path.abspath(expanduser(copy_files_path))
-        if not _exists(copy_files_path):
-            print("The project path does not exist.")
+        if not path_exists(copy_files_path):
+            print("ERROR: The COPY_FILES path does not exist.")
             sys.exit(errno.EINVAL)
 
     if license_text_path:
         # code to handle tilde character
         license_text_path = os.path.abspath(expanduser(license_text_path))
-        if not _exists(license_text_path):
-            print("The license text path does not exist.")
+        if not path_exists(license_text_path):
+            print("ERROR: LICENSE_TEXT_LOCATION path does not exist.")
             sys.exit(errno.EINVAL)
 
-    if mapping_config and not _exists('MAPPING.CONFIG'):
-            print("The file 'MAPPING.CONFIG' does not exist.")
+    if mapping_config and not path_exists('MAPPING.CONFIG'):
+            print("ERROR: The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 
     if extract_license:
@@ -754,7 +718,7 @@ def main(parser, options, args):
         gen_license = True
 
     if not len(args) == 2:
-        print('Input and Output paths are required.')
+        print('ERROR: <input_path> and <utput_path> are required.')
         print()
         parser.print_help()
         sys.exit(errno.EEXIST)
@@ -766,25 +730,25 @@ def main(parser, options, args):
         output_path += '/'
 
     if not exists(input_path):
-        print('Input path does not exist.')
+        print('ERROR: <input_path> file does not exist.')
         print()
         parser.print_help()
         sys.exit(errno.EEXIST)
 
     if not exists(output_path):
-        print('Output path does not exist.')
+        print('ERROR: <output_path> directory does not exist.')
         print()
         parser.print_help()
         sys.exit(errno.EEXIST)
 
     if not isdir(output_path):
-        print('Output must be a directory, not a file.')
+        print('ERROR: <output_path> must be a directory, not a file.')
         print()
         parser.print_help()
         sys.exit(errno.EISDIR)
 
     if not input_path.endswith('.csv'):
-        print("Input file name must be a CSV file ends with '.csv'")
+        print("ERROR: <input_path> file must be a CSV file ends with '.csv'")
         print()
         parser.print_help()
         sys.exit(errno.EINVAL)
@@ -793,8 +757,8 @@ def main(parser, options, args):
 
     dup_keys = gen.get_duplicated_keys(input_path)
     if dup_keys:
-        print('The input file contains duplicated keys. '
-              'Duplicated keys are not allowed.')
+        print('ERROR: The <input_path> CSV file contains duplicated column keys. '
+              'Duplicated column keys are not allowed.')
         print(dup_keys)
         print()
         print('Please fix the input file and re-run the tool.')
@@ -808,54 +772,52 @@ def main(parser, options, args):
     file_handler = logging.FileHandler(log_path)
     file_logger.addHandler(file_handler)
 
-    input_list = gen.get_input_list(input_path)
-    input_list = gen.get_non_empty_rows_list(input_list)
+    input_data = load_data_from_csv(input_path)
+    input_data = filter_dicts_of_empty_values(input_data)
 
+    user_keys = []
     if mapping_config:
-        mapping_list = gen.get_mapping_list()
-        input_list = gen.convert_input_list(input_list, mapping_list)
-        mapping_keys = mapping_list.keys()
+        mappings = get_mappings(location=None)
+        input_data = apply_mappings(input_data, mappings)
+        user_keys = mappings.values()
 
-    gen.validate(input_list)
+    gen.validate(input_data)
 
-    ignored_fields_list = gen.get_non_supported_fields(input_list,
-                                                       mapping_keys)
+    ignored_fields_list = get_unknown_fields(input_data, user_keys)
     if ignored_fields_list:
-        input_list = gen.get_only_supported_fields(input_list,
-                                                   ignored_fields_list)
+        input_list = gen.get_only_supported_fields(input_data, ignored_fields_list)
 
     if copy_files_path:
         if not isdir(copy_files_path):
-            print("The '--copy_files' <project_path> must be a directory.")
-            print("'--copy_files' is skipped.")
+            print("WARNING: The COPY_FILES path must be a directory.")
+            print("'--copy_files' option ignored.")
         else:
             licenses_in_project = True
             license_list = gen.verify_files_existence(input_list,
                                                       copy_files_path,
                                                       licenses_in_project)
             if not license_list:
-                print("None of the file is found. '--copy_files' is ignored.")
+                print("WARNING: No file found. '--copy_files' is ignored.")
             else:
                 gen.copy_files(output_path, license_list)
 
     if license_text_path:
         if not isdir(license_text_path):
-            print("The '--license_text_location' <license_path> "
-                  "must be a directory.")
-            print("'--license_text_location' is skipped.")
+            print("WARNING: The LICENSE_TEXT_LOCATION  path must be a directory.")
+            print("'--license_text_location' option ignored.")
         else:
             licenses_in_project = False
             license_list = gen.verify_files_existence(input_list,
                                                       license_text_path,
                                                       licenses_in_project)
             if not license_list:
-                print("None of the file is found. '--copy_files' is ignored.")
+                print("WARNING: No file found. '--copy_files' option ignored.")
             else:
                 gen.copy_files(output_path, license_list)
 
     if extract_license:
         if not api_url or not api_username or not api_key:
-            print("Missing argument for --extract_license")
+            print("ERROR: Missing argument for --extract_license")
             sys.exit(errno.EINVAL)
         for line in input_list:
             try:
@@ -863,8 +825,7 @@ def main(parser, options, args):
                     break
             except Exception as e:
                 print(repr(e))
-                print("The input does not have the 'dje_license_key' "
-                      "key which is required.")
+                print("ERROR: The <input_path> CSV does not contain the required column 'dje_license_key' ")
                 sys.exit(errno.EINVAL)
 
     if gen_license:
@@ -872,97 +833,46 @@ def main(parser, options, args):
         api_url = api_url.strip("'").strip("\"")
         api_username = api_username.strip("'").strip("\"")
         api_key = api_key.strip("'").strip("\"")
-        dje_license_dict = gen.pre_process_and_dje_license_dict(input_list,
-                                                                api_url,
-                                                                api_username,
-                                                                api_key)
+        dje_license_dict = gen.pre_process_and_dje_license_dict(input_list, api_url, api_username, api_key)
 
-    dje_license_list = gen.get_dje_license_list(output_path,
-                                                input_list,
-                                                gen_license,
-                                                dje_license_dict)
-    components_list = gen.pre_generation(output_path,
-                                         input_list,
-                                         action_num)
+    dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license, dje_license_dict)
+    components_list = gen.pre_generation(output_path, input_list, action_num)
     formatted_output = gen.format_output(components_list)
     gen.write_output(formatted_output)
 
     if dje_license_list:
-        license_list_context = gen.process_dje_licenses(dje_license_list,
-                                                        dje_license_dict,
-                                                        output_path)
+        license_list_context = gen.process_dje_licenses(dje_license_list, dje_license_dict, output_path)
         gen.write_licenses(license_list_context)
 
-    print("Completed.")
+    print('Completed.')
     gen.warnings_errors_summary()
     print('Warnings: %s' % len(gen.warnings))
     print('Errors: %s' % len(gen.errors))
 
 
 def get_parser():
-
-    class MyFormatter(optparse.IndentedHelpFormatter):
-        def _format_text(self, text):
-            """
-            Overridden to allow description to be printed without
-            modification
-            """
-            return text
-
-        def format_option(self, option):
-            """
-            Overridden to allow options help text to be printed without
-            modification
-            """
-            result = []
-            opts = self.option_strings[option]
-            opt_width = self.help_position - self.current_indent - 2
-            if len(opts) > opt_width:
-                opts = '%*s%s\n' % (self.current_indent, '', opts)
-                indent_first = self.help_position
-            else:  # start help on same line as opts
-                opts = '%*s%-*s  ' % (self.current_indent, '', opt_width, opts)
-                indent_first = 0
-            result.append(opts)
-            if option.help:
-                help_text = self.expand_default(option)
-                help_lines = help_text.split('\n')
-                # help_lines = textwrap.wrap(help_text, self.help_width)
-                result.append('%*s%s\n' % (indent_first, '', help_lines[0]))
-                result.extend(['%*s%s\n' % (self.help_position, '', line)
-                               for line in help_lines[1:]])
-            elif opts[-1] != '\n':
-                result.append('\n')
-            return ''.join(result)
-
+    """
+    Return a command line options parser.
+    """
     parser = optparse.OptionParser(
         usage='%prog [options] input_path output_path',
         description=USAGE_SYNTAX,
         add_help_option=False,
-        formatter=MyFormatter(),
+        formatter=ImprovedFormatter(),
     )
-    parser.add_option('-h', '--help', action='help', help='Display help')
-    parser.add_option('--version', action='store_true',
-                      help='Display version, license and copyright notice')
-    parser.add_option('--verbosity', type=int,
-                      help=VERBOSITY_HELP)
-    parser.add_option('--action', type=int,
-                      help=ACTION_HELP)
-    parser.add_option('--copy_files', type='string',
-                      help=COPY_FILES_HELP)
-    parser.add_option('--license_text_location', type='string',
-                      help=LICENSE_TEXT_LOCATION_HELP)
-    parser.add_option('--mapping', action='store_true',
-                      help=MAPPING_HELP)
-    parser.add_option('--extract_license', type='string', nargs=3,
-                      help=EXTRACT_LICENSE_HELP)
+    parser.add_option('-h', '--help', action='help', help='Print this help message and exit.')
+    parser.add_option('--version', action='store_true', help='Print the current version and copyright notice and exit.')
+    parser.add_option('--verbosity', type=int, help=VERBOSITY_HELP)
+    parser.add_option('--action', type=int, help=ACTION_HELP)
+    parser.add_option('--copy_files', type='string', help=COPY_FILES_HELP)
+    parser.add_option('--license_text_location', type='string', help=LICENSE_TEXT_LOCATION_HELP)
+    parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
+    parser.add_option('--extract_license', type='string', nargs=3, help=EXTRACT_LICENSE_HELP)
     return parser
 
 
 if __name__ == '__main__':
-    print('\n')
-    print('Running about-code-tool version ' + __version__)
-    print('\n')
+    print(__version_info__)
     parser = get_parser()
     options, args = parser.parse_args()
     main(parser, options, args)
