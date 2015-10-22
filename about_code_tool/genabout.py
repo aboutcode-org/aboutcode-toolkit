@@ -158,7 +158,7 @@ class GenAbout(object):
     def __init__(self):
         self.warnings = []
         self.errors = []
-        self.extract_dje_license_error = False
+        self.extract_license_api_error = False
 
     @staticmethod
     def get_duplicated_keys(input_file):
@@ -299,32 +299,26 @@ class GenAbout(object):
         full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
         license_data = {}
         try:
-            request = urllib2.Request(full_url)
-            response = urllib2.urlopen(request)
-            response_content = response.read()
-            license_data = json.loads(response_content)
+            # The 'self.extract_license_api_error' is True if any of the
+            # api_url/api_username/api_key/network status have problem.
+            if not self.extract_license_api_error:
+                request = urllib2.Request(full_url)
+                response = urllib2.urlopen(request)
+                response_content = response.read()
+                license_data = json.loads(response_content)
         except urllib2.HTTPError, http_e:
             # some auth problem
             if http_e.code == 401:
-                error_msg = ("Authorization denied. Invalid '--api_username' or '--api_key'. License data collection skipped.")
+                error_msg = ("Authorization denied. Invalid '--api_username' or '--api_key'. License generation is skipped.")
                 print('\n%(error_msg)s\n' % locals())
-                self.extract_dje_license_error = True
+                self.extract_license_api_error = True
                 self.errors.append(Error(VALUE, 'username/api_key', username + '/' + api_key, error_msg))
             else:
-                # FIXME: would this be only with a 404?
+                # Since no api_url/api_username/api_key/network status have
+                # problem detected, it yields 'dje_license_key' is the cause of
+                # this exception. 
                 self.errors.append(Error(VALUE, 'dje_license_key', license_key, "Invalid 'dje_license_key'"))
-        except urllib2.URLError, url_e:
-            if check_network_connection():
-                error_msg = ("URL not reachable. Invalid '--api_url'. LICENSE generation skipped.")
-                print('\n%(error_msg)s\n' % locals())
-                self.extract_dje_license_error = True
-                self.errors.append(Error(VALUE, '--api_url', url, error_msg))
-            else:
-                error_msg = "Network problem. Please check your Internet connection. LICENSE generation skipped."
-                print('\n%(error_msg)s\n' % locals())
-                self.extract_dje_license_error = True
-                self.errors.append(Error(NETWORK, 'Network', '', error_msg))
-        except ValueError:
+        except ValueError as e:
             # FIXME: when does this happen?
             pass
         finally:
@@ -381,7 +375,7 @@ class GenAbout(object):
                     if not path_exists(license_file):
                         self.errors.append(Error(FILE, 'license_text_file', license_file, "The 'license_text_file' does not exist."))
                 else:
-                    if gen_license:
+                    if gen_license and not self.extract_license_api_error:
                         if line['dje_license_key']:
                             license_output_list.append(self.gen_license_list(line))
                             lic_name = line['dje_license_name']
@@ -414,6 +408,17 @@ class GenAbout(object):
         dje_lic_urn = urljoin(domain, 'urn/?urn=urn:dje:license:')
         key_text_dict = {}
         license_dict = {}
+        if check_network_connection():
+            if not self.valid_api_url(api_url):
+                error_msg = "URL not reachable. Invalid '--api_url'. License generation is skipped."
+                print('\n%(error_msg)s\n' % locals())
+                self.extract_license_api_error = True
+                self.errors.append(Error(VALUE, '--api_url', api_url, error_msg))
+        else:
+            error_msg = "Network problem. Please check your Internet connection. License generation is skipped."
+            print('\n%(error_msg)s\n' % locals())
+            self.extract_license_api_error = True
+            self.errors.append(Error(NETWORK, 'Network', '', error_msg))
         for line in input_list:
             try:
                 if line['dje_license_key']:
@@ -435,10 +440,26 @@ class GenAbout(object):
                     else:
                         line['dje_license_name'] = license_dict[lic]
                         line['dje_license_url'] = dje_lic_urn + lic
-            except Exception:
+            except Exception as e:
                 err = Warn(VALUE, 'dje_license_key', '', 'Missing "dje_license_key" for ' + line['about_file'])
                 self.warnings.append(err)
         return key_text_dict
+
+    def valid_api_url(self, api_url):
+        try:
+            request = urllib2.Request(api_url)
+            # This will always goes to exception as no username/key are provided.
+            # The purpose of this code is to validate the provided api_url is correct
+            response = urllib2.urlopen(request)
+        except urllib2.HTTPError, http_e:
+            # The 405 error code is refer to "Method not allowed".
+            # This is correct as no username and key are provided.
+            if http_e.code == 405:
+                return True
+        except:
+            # All other exceptions yield to invalid api_url
+            pass
+        return False
 
     def process_dje_licenses(self, dje_license_list, dje_license_dict, output_path):
         license_list_context = []
@@ -449,7 +470,7 @@ class GenAbout(object):
             if lic:
                 license_key = dje_license_dict[lic][0]
                 gen_license_path = join(output_path, gen_path, license_key) + '.LICENSE'
-                if not path_exists(gen_license_path) and not self.extract_dje_license_error:
+                if not path_exists(gen_license_path) and not self.extract_license_api_error:
                     context = dje_license_dict[lic][1]
                     if context:
                         gen_path_context = []
