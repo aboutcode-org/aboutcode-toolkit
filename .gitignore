@@ -1,35 +1,46 @@
 *.py[cod]
 
+# virtualenv and other misc bits
+*.egg-info
+/dist
 /build
 /bin
-/var
 /lib
-lib64
-/Include
-/Lib
+/scripts
 /Scripts
+/Lib
+/pip-selfcheck.json
+/tmp
+.Python
 /include
+/Include
 /local
 
 # Installer logs
 pip-log.txt
 
 # Unit test / coverage reports
+.cache
 .coverage
-.tox
+.coverage.*
 nosetests.xml
+htmlcov
 
 # Translations
 *.mo
 
-# Mr Developer
-.mr.developer.cfg
+# IDEs
 .project
 .pydevproject
-/.settings
+.idea
 
-# PyCharm project
-.idea/
-/aboutcode.egg_info
-AboutCode.egg-info
-/dist
+# Sphinx
+docs/_build
+
+.DS_Store
+*~
+.*.sw[po]
+.build
+.ve
+*.bak
+/.cache/

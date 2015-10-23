@@ -12,11 +12,10 @@ setup(
     name='AboutCode',
     version=about_code_tool.__version__,
     description=('Document the provenance (origin and license) of '
-                'third-party software using small text files. '
-                'Collect inventories, generate attribution documentation.'),
+                 'third-party software using small text files. '
+                 'Collect inventories, generate attribution documentation.'),
 
-    author=('Jillian Daguil, Thomas Druez, Chin-Yeung Li, '
-            'Philippe Ombredanne and others.'),
+    author='Jillian Daguil, Thomas Druez, Chin-Yeung Li, Philippe Ombredanne and others.',
 
     author_email='info@nexb.com',
 

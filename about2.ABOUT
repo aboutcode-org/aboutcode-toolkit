@@ -1,7 +1,7 @@
 about_resource: .
 
 name: AboutCode
-version: 2.0.0.dev2
+version: 3.0.0-dev
 
 owner: nexB Inc.
 author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez

@@ -1,0 +1,5 @@
+# for tests
+pytest==2.6.1
+colorama==0.3.1
+py==1.4.23
+

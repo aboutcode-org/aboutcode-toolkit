@@ -40,7 +40,6 @@ On Linux and Mac, Python is typically pre-installed. To verify which
 version may be pre-installed, open a terminal and type::
 
     python --version
-    python2.6 --version
     python2.7 --version
 
 On Windows or Mac, you can download the latest Python 2.7.x here:
@@ -61,134 +60,17 @@ or on windows::
     configure
 
 
-TESTS
------
+TESTS and DEVLOPMENT
+--------------------
+To install all the needed development dependencies, run (on posix)::
+    source configure etc/conf/dev
+or on windows::
+    configure etc/conf/dev
+
 To verify that everything works fine you can run the test suite with::
-    python setup.py test
+    py.test
 
 
-USAGE
------
-The ABOUT tool command syntax is:
-
-**about.py**
-
-::
-
-    Usage: about.py [options] input_path output_path
-
-    Input can be a file or directory.
-    Output must be a file with a .csv extension.
-
-    Options:
-      -h, --help            Display help
-      --version             Display current version, license notice, and copyright notice
-      --overwrite           Overwrites the output file if it exists
-      --verbosity=VERBOSITY
-                            Print more or fewer verbose messages while processing ABOUT files
-                            0 - Do not print any warning or error messages, just a total count (default)
-                            1 - Print error messages
-                            2 - Print error and warning messages
-
-Example::
-
-    $ python about.py ./thirdparty_code/ thirdparty_about.csv
-
-In this example, the .ABOUT files in the directory /thirdparty_code/ will
-be parsed and validated to collect the data they contain. The collected
-information will be saved to the CSV file named "thirdparty_about.csv".
-
-**genabout.py**
-
-::
-
-    Usage: genabout.py [options] input_path output_path
-    
-        Input must be a CSV file
-        Output must be a directory location where the ABOUT files should be generated
-    
-    
-    Options:
-      -h, --help            Display help
-      --version             Display current version, license notice, and copyright notice
-      --verbosity=VERBOSITY
-                            Print more or fewer verbose messages while processing ABOUT files
-                            0 - Do not print any warning or error messages, just a total count (default)
-                            1 - Print error messages
-                            2 - Print error and warning messages
-    
-      --action=ACTION       Handle different behaviors if ABOUT files already existed
-                            0 - Do nothing if ABOUT file existed (default)
-                            1 - Overwrites the current ABOUT field value if existed
-                            2 - Keep the current field value and only add the "new" field and field value
-                            3 - Replace the ABOUT file with the current generation
-
-      --copy_files=COPY_FILES
-                            Copy the '*_file' from the project to the generated location
-                            Project path - Project path
-
-      --license_text_location=LICENSE_TEXT_LOCATION
-                            Copy the 'license_text_file' from the directory to the generated location
-                            License path - License text files path
-    
-      --mapping             Configure the mapping key from the MAPPING.CONFIG
-    
-      --extract_license=EXTRACT_LICENSE
-                            Extract License text and create <license_key>.LICENSE side-by-side
-                                with the .ABOUT from DJE License Library.
-                            api_url - URL to the DJE License Library
-                            api_username - The regular DJE username
-                            api_key - Hash attached to your username which is used to authenticate
-                                        yourself in the API. Contact us to get the hash key.
-    
-                            Example syntax:
-                            genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
-
-
-Example::
-
-    $ python genabout.py thirdparty_code.csv /tmp/thirdparty_about/
-
-In this example, the tool will look at the "thirdparty_code.csv" and generate
-the .ABOUT files in the directory /tmp/thirdparty_about/.
-
-
-**genattrib.py**
-
-::
-
-    Usage: genattrib.py [options] input_path output_path component_list
-    
-        Input can be a file or directory.
-        Output of rendered template must be a file (e.g. .html).
-        Component List must be a .csv file which has at least an "about_file" column.
-    
-    
-    Options:
-      -h, --help            Display help
-      -v, --version         Display current version, license notice, and copyright notice
-      --overwrite           Overwrites the output file if it exists
-      --verbosity=VERBOSITY
-                            Print more or fewer verbose messages while processing ABOUT files
-                            0 - Do not print any warning or error messages, just a total count (default)
-                            1 - Print error messages
-                            2 - Print error and warning messages
-
-      --template_location=TEMPLATE_LOCATION
-                            Use the custom template for the Attribution Generation
-
-      --mapping             Configure the mapping key from the MAPPING.CONFIG
-
-Example::
-
-    $ python genattrib.py /tmp/thirdparty_about/ /tmp/thirdparty_attribution/attribution.html thirdparty_code.csv
-
-In this example, the tool will look at the .ABOUT files listed in the "thirdparty_code.csv" 
-from the /tmp/thirdparty_about/ and then generate the attribution output to
-/tmp/thirdparty_attribution/attribution.html
-
-
-(See USAGE for a details explaining of each scripts and options.)
 
 HELP and SUPPORT
 ----------------
