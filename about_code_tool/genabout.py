@@ -807,6 +807,8 @@ def main(parser, options, args):
     ignored_fields_list = get_unknown_fields(input_data, user_keys)
     if ignored_fields_list:
         input_list = gen.get_only_supported_fields(input_data, ignored_fields_list)
+    else:
+        input_list = input_data
 
     if copy_files_path:
         if not isdir(copy_files_path):
