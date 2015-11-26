@@ -1,3 +1,31 @@
+2015-10-22  Chin-Yeung Li  <tli@nexb.com>
+
+    Release 2.2.0
+
+    * Improved CLI error messages
+    * Fixed the filtering of dicts with empty values.
+    * Refined help texts
+    * Updated configure script
+    * Refactorings and code simplifications
+    * Fixed misleading error message when using invalid api_url
+
+
+2015-10-08  Chin-Yeung Li  <tli@nexb.com>
+
+    Release 2.1.0
+
+    * Minor code refactoring
+    * Handle long path error on Windows OS when using genattrib with a zip
+
+
+2015-09-28  Chin-Yeung Li  <tli@nexb.com>
+
+    Release 2.0.4
+
+    * Added support to run genattrib with a zip file and tests
+    * Display a "Completed" message once the generation is completed
+
+
 2015-07-31  Chin-Yeung Li  <tli@nexb.com>
 
     Release 2.0.3
