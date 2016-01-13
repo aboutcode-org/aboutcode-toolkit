@@ -19,10 +19,10 @@ from __future__ import print_function
 
 __about_spec_version__ = '1.0'
 
-__version__ = '2.2.0'
+__version__ = '2.2.1'
 
 __copyright__ = """
-Copyright (c) 2013-2015 nexB Inc. All rights reserved.
+Copyright (c) 2013-2016 nexB Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

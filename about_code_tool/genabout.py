@@ -800,7 +800,7 @@ def main(parser, options, args):
     if mapping_config:
         mappings = get_mappings(location=None)
         input_data = apply_mappings(input_data, mappings)
-        user_keys = mappings.values()
+        user_keys = mappings.keys()
 
     gen.validate(input_data)
 
