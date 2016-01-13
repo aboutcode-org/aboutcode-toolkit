@@ -25,11 +25,11 @@ class UtilTest(unittest.TestCase):
 
     def test_get_mappings(self):
         expected = {
-            'component': 'name',
-            'confirmed copyright': 'copyright',
-            'confirmed license': 'confirmed_license',
-            'confirmed version': 'version',
-            'directory/filename': 'about_file'
+            'name': 'component',
+            'copyright': 'confirmed copyright',
+            'confirmed_license': 'confirmed license',
+            'version': 'confirmed version',
+            'about_file': 'directory/filename'
         }
 
         result = util.get_mappings()
@@ -37,10 +37,10 @@ class UtilTest(unittest.TestCase):
 
     def test_apply_mappings(self):
         mappings = {
-            'Directory/Filename': 'about_file',
-            'Confirmed Version': 'version',
-            'file_name': 'about_resource',
-            'Component': 'name'
+            'about_file': 'Directory/Filename',
+            'version': 'Confirmed Version',
+            'about_resource': 'file_name',
+            'name': 'Component'
         }
 
         test_fields = [
