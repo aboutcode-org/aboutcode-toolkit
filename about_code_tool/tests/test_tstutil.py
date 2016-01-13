@@ -66,6 +66,39 @@ class UtilTest(unittest.TestCase):
         result = util.apply_mappings(test_fields, mappings)
         self.assertEqual(expected, result)
 
+    def test_apply_mappings_same_name(self):
+        mappings = {
+            'about_file': 'Directory/Filename',
+            'version': 'Confirmed Version',
+            'about_resource': 'file_name',
+            'name': 'Component',
+            'component' : 'Component'
+        }
+
+        test_fields = [
+            {
+             'file_name': 'opensans',
+             'ignore field': 'i',
+             'Component': 'OpenSans Fonts',
+             'Confirmed Version': '1',
+             'Directory/Filename': '/extension/streamer/opensans/',
+            }
+        ]
+
+        expected = [
+            {
+             'about_resource': 'opensans',
+             'ignore field': 'i',
+             'name': 'OpenSans Fonts',
+             'version': '1',
+             'about_file': '/extension/streamer/opensans/',
+             'component': 'OpenSans Fonts',
+            }
+        ]
+
+        result = util.apply_mappings(test_fields, mappings)
+        self.assertEqual(expected, result)
+
     def test_util_resource_name(self):
         expected = 'first'
         result = util.resource_name('some/things/first')
