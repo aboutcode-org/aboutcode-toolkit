@@ -718,10 +718,11 @@ class GenAboutTest(unittest.TestCase):
         gen = genabout.GenAbout()
         test_fields = {'about_resource': 'test.c',
                        'about_file': '/tmp/test.c'}
+        expected_fields = {'about_resource': 'test.c',
+                       'about_file': '/tmp/test.c'}
         about_file_exist = False
         gen.update_about_resource(test_fields, about_file_exist)
-        # FIXME: this will always be true: the test is incorrect
-        self.assertTrue(test_fields == test_fields, 'The dict should not be changed.')
+        self.assertTrue(test_fields == expected_fields, 'The dict should not be changed.')
 
     def test_update_about_resource_no_about_file_no_field_isFile(self):
         gen = genabout.GenAbout()
