@@ -59,6 +59,10 @@ class CollectorTest(unittest.TestCase):
         collector.write_to_csv(output)
         expected = 'about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'
         # FIXME: why [2]? what this test means?
+        # CY: Since the output is going to have 2 rows (header row and row with
+        # the test file data), the below partition('\n')[2] means to only read
+        # the data row and ignroe the header row. This test is to make sure 
+        # the path in the data row is not an absolute path.
         with open(output) as f:
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))
 
@@ -70,6 +74,10 @@ class CollectorTest(unittest.TestCase):
         collector.write_to_csv(output)
         expected = '/basic'
         # FIXME: why [2]? what this test means?
+        # CY: Since the output is going to have 2 rows (header row and row with
+        # the test file data), the below partition('\n')[2] means to only read
+        # the data row and ignroe the header row. This test is to make sure 
+        # the path in the data row is not an absolute path.
         with open(output) as f:
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))
 
