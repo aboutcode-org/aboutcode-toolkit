@@ -514,6 +514,21 @@ class GenAboutTest(unittest.TestCase):
         self.assertFalse(gen.warnings, 'No warnings should be returned.')
         self.assertFalse(gen.errors, 'No errors should be returned.')
 
+    def test_pre_generation_dir_endswith_space(self):
+        gen = genabout.GenAbout()
+        test_fields = [{'about_file': '/abc /about.py.ABOUT',
+                        'version': '0.8.2',
+                        'about_resource': '.',
+                        'name': '',
+                        'test': 'test sample'}]
+
+        result = gen.pre_generation(GEN_LOCATION,
+                                    test_fields,
+                                    action_num=0)
+
+        self.assertTrue(len(gen.errors) == 1, 'Should return 1 error.')
+        self.assertTrue(gen.errors, 'It should prompt error because directory ends with sapce')
+
     def test_format_output(self):
         gen = genabout.GenAbout()
         test_fields = [

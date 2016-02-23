@@ -481,7 +481,7 @@ class GenAbout(object):
 
     def pre_generation(self, gen_location, input_list, action_num):
         """
-        Perfom some pre-generation.
+        Perform some pre-generation.
         TODO: document me
         """
         output_list = []
@@ -500,6 +500,18 @@ class GenAbout(object):
                     file_location = dirname(file_location)
                     file_location = join(file_location, basename(file_location))
                 file_location += '.ABOUT'
+            # The following code is to check if there is any directory ends with spaces
+            split_path = file_location.split('/')
+            dir_endswith_space = False
+            for segment in split_path:
+                if segment.endswith(' '):
+                    msg = 'File path contains directory name ends with spaces which is not allowed. Generation skipped.'
+                    self.errors.append(Error(VALUE, 'about_file_path',
+                                             file_location, msg))
+                    dir_endswith_space = True
+                    break
+            if dir_endswith_space:
+                continue
 
             about_file_location = join(gen_location, file_location)
             about_file_dir = dirname(about_file_location)
