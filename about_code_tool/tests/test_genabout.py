@@ -284,13 +284,12 @@ class GenAboutTest(unittest.TestCase):
 
     def test_get_dje_license_list_file_no_gen_license_with_license_text_file_key_exist(self):
         gen = genabout.GenAbout()
-        # FIXME: this is using the about own license, not a test file
         gen_location = join(TESTDATA_DIR, 'test_files_for_genabout/')
         test_fields = [{'about_file': '/about.py.ABOUT',
                         'version': '0.8.1',
                         'about_resource': '.',
                         'name': 'ABOUT tool',
-                        'license_text_file': '../../../../apache-2.0.LICENSE'}]
+                        'license_text_file': 'apache-2.0.LICENSE'}]
         result = gen.get_dje_license_list(gen_location=gen_location,
                                           input_list=test_fields,
                                           gen_license=False,
@@ -302,14 +301,13 @@ class GenAboutTest(unittest.TestCase):
 
     def test_get_dje_license_list_dir_no_gen_license_with_license_text_file_key_exist(self):
         gen = genabout.GenAbout()
-        # FIXME: this is using the about own license, not a test file
         gen_location = join(TESTDATA_DIR, 'test_files_for_genabout/')
         test_fields = [{'about_file': '/ABOUT/',
                         'version': '0.8.1',
                         'about_resource': '.',
                         'name': 'ABOUT tool',
                         'license_text_file':
-                            '../../../../../apache-2.0.LICENSE'}]
+                            '../apache-2.0.LICENSE'}]
         expected = []
         result = gen.get_dje_license_list(gen_location,
                                                    test_fields,
@@ -358,10 +356,8 @@ class GenAboutTest(unittest.TestCase):
                                           gen_license,
                                           dje_license_dict)
 
-        # FIXME: not why a loop is needed asserting on actual test data?
-        for field in test_fields:
-            self.assertEqual(field['license_text_file'],
-                              'apache-2.0.LICENSE')
+        self.assertEqual(test_fields[0]['license_text_file'],
+                         'apache-2.0.LICENSE')
 
         expected = [('/', 'Apache License 2.0')]
         self.assertEqual(expected, result)
@@ -553,31 +549,32 @@ class GenAboutTest(unittest.TestCase):
 
     def test_verify_files_existence_exist(self):
         gen = genabout.GenAbout()
-        # FIXME: this is using the files at the root, not testfiles
+        gen_location = join(TESTDATA_DIR, 'test_files_for_genabout/')
         test_fields = [{'version': '0.8.1',
                         'about_file': '/TESTCASE/',
                         'license_text_file': 'apache-2.0.LICENSE',
                         'name': 'ABOUT tool',
                         'about_resource': '.'}]
-        expected = [(join('.', 'apache-2.0.LICENSE'), 'TESTCASE')]
+        expected = [(join(gen_location, 'apache-2.0.LICENSE'), 'TESTCASE')]
         result = gen.verify_files_existence(input_list=test_fields,
-                                            project_dir='.',
+                                            project_dir=gen_location,
                                             file_in_project=False)
+        print(result)
         self.assertEqual(expected, result)
         self.assertFalse(gen.warnings, 'No warnings should be returned.')
         self.assertFalse(gen.errors, 'No errors should be returned.')
 
     def test_verify_files_existence_exist_license_in_project(self):
         gen = genabout.GenAbout()
-        # FIXME: this is using the files at the root, not testfiles
+        gen_location = join(TESTDATA_DIR, 'test_files_for_genabout/')
         test_fields = [{'version': '0.8.1',
                         'about_file': '.',
                         'license_text_file': 'apache-2.0.LICENSE',
                         'name': 'ABOUT tool',
                         'about_resource': '.'}]
-        expected = [(join('.', 'apache-2.0.LICENSE'), '')]
+        expected = [(join(gen_location, 'apache-2.0.LICENSE'), '')]
         result = gen.verify_files_existence(input_list=test_fields,
-                                            project_dir='.',
+                                            project_dir=gen_location,
                                             file_in_project=True)
         self.assertEqual(expected, result)
         self.assertFalse(gen.warnings, 'No warnings should be returned.')
@@ -650,9 +647,8 @@ class GenAboutTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_copy_files_test_path_not_endswith_slash(self):
-        # FIXME: this is using the files at the root, not testfiles
         gen = genabout.GenAbout()
-        test = [('apache-2.0.LICENSE', '.')]
+        test = [(join(TESTDATA_DIR, 'test_files_for_genabout/apache-2.0.LICENSE'), '.')]
         test_dir = get_temp_dir()
         gen.copy_files(test_dir, test)
         expected = ['apache-2.0.LICENSE']
@@ -660,8 +656,7 @@ class GenAboutTest(unittest.TestCase):
 
     def test_copy_files_test_path_endswith_slash(self):
         gen = genabout.GenAbout()
-        # FIXME: this is using the files at the root, not testfiles
-        test = [('apache-2.0.LICENSE', '.')]
+        test = [(join(TESTDATA_DIR, 'test_files_for_genabout/apache-2.0.LICENSE'), '.')]
         expected = ['apache-2.0.LICENSE']
         test_dir = get_temp_dir() + '/'
         gen.copy_files(test_dir, test)
