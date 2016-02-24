@@ -187,11 +187,10 @@ as an input.
                             with the generated .ABOUT file using data fetched from a DejaCode License Library.
                             The following additional options are required:
                             --api_url - URL to the DejaCode License Library API endpoint
-                            --api_username - DejaCode username
-                            --api_key - DejaCode API key for this username
-    
+                            --api_key - DejaCode API key
+
                             Example syntax:
-                            python about_code_tool/genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
+                            python about_code_tool/genabout.py --extract_license --api_url='api_url' --api_key='api_key'
 
 
 Example::

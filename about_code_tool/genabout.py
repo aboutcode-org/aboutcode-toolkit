@@ -279,50 +279,51 @@ class GenAbout(object):
                         self.warnings.append(Warn(FILE, file_key, path, 'File does not exist.'))
         return files_list
 
-    def request_license_data(self, url, username, api_key, license_key):
+    def request_license_data(self, url, api_key, license_key):
         """
-        Return a dictionary of license data. 
-
+        Return a dictionary of license data.
         Send a request to a given API URL to gather license data for
-        license_key, authenticating through an api_key and username.
+        license_key, authenticating through an api_key.
         """
         payload = {
-            'username': username,
             'api_key': api_key,
+            'key': license_key,
             'format': 'json'
         }
 
         url = url.rstrip('/')
         encoded_payload = urllib.urlencode(payload)
-        full_url = '%(url)s/%(license_key)s/?%(encoded_payload)s' % locals()
+        full_url = '%(url)s/?%(encoded_payload)s' % locals()
         # handle special characters in URL such as space etc.
         full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
+        headers = {'Authorization': 'Token %s' % api_key}
         license_data = {}
         try:
             # The 'self.extract_license_api_error' is True if any of the
-            # api_url/api_username/api_key/network status have problem.
+            # api_url/api_key/network status have problem.
             if not self.extract_license_api_error:
-                request = urllib2.Request(full_url)
+                request = urllib2.Request(full_url, headers=headers)
                 response = urllib2.urlopen(request)
                 response_content = response.read()
                 license_data = json.loads(response_content)
         except urllib2.HTTPError, http_e:
             # some auth problem
             if http_e.code == 401:
-                error_msg = ("Authorization denied. Invalid '--api_username' or '--api_key'. License generation is skipped.")
+                error_msg = ("Authorization denied. Invalid '--api_key'. License generation is skipped.")
                 print('\n%(error_msg)s\n' % locals())
                 self.extract_license_api_error = True
-                self.errors.append(Error(VALUE, 'username/api_key', username + '/' + api_key, error_msg))
+                self.errors.append(Error(VALUE, 'api_key', api_key, error_msg))
             else:
-                # Since no api_url/api_username/api_key/network status have
+                # Since no api_url/api_key/network status have
                 # problem detected, it yields 'dje_license_key' is the cause of
-                # this exception. 
+                # this exception.
                 self.errors.append(Error(VALUE, 'dje_license_key', license_key, "Invalid 'dje_license_key'"))
         except ValueError as e:
             # FIXME: when does this happen?
             pass
         finally:
-            return license_data
+            license_data = license_data.get('results')[0] if license_data.get('count') == 1 else {}
+        return license_data
 
     @staticmethod
     def copy_files(gen_location, files_list):
@@ -348,12 +349,12 @@ class GenAbout(object):
                             'Something is wrong.')
                 self.errors.append(err)
 
-    def get_license_details_from_api(self, url, username, api_key, license_key):
+    def get_license_details_from_api(self, url, api_key, license_key):
         """
         Returns the license_text of a given license_key using an API request.
         Returns an empty string if the text is not available.
         """
-        license_data = self.request_license_data(url, username, api_key, license_key)
+        license_data = self.request_license_data(url, api_key, license_key)
         license_name = license_data.get('name', '')
         license_text = license_data.get('full_text', '')
         license_key = license_data.get('key', '')
@@ -398,7 +399,7 @@ class GenAbout(object):
                                                   "Missing 'dje_license_key' for " + line['about_file']))
         return license_output_list
 
-    def pre_process_and_dje_license_dict(self, input_list, api_url, api_username, api_key):
+    def pre_process_and_dje_license_dict(self, input_list, api_url, api_key):
         """
         Modify a list of About data dictionaries by adding license information
         fetched from the DejaCode API.
@@ -427,9 +428,9 @@ class GenAbout(object):
                         self.errors.append(Error(VALUE, 'dje_license_key', line['dje_license_key'], "No multiple licenses or newline character are accepted."))
                         continue
                     lic = line['dje_license_key']
-                    if not lic in license_dict:
+                    if lic not in license_dict:
                         detail_list = []
-                        license_name, license_key, license_text = self.get_license_details_from_api(api_url, api_username, api_key, lic)
+                        license_name, license_key, license_text = self.get_license_details_from_api(api_url, api_key, lic)
                         line['dje_license_key'] = license_key
                         license_dict[license_key] = license_name
                         line['dje_license_name'] = license_name
@@ -448,13 +449,13 @@ class GenAbout(object):
     def valid_api_url(self, api_url):
         try:
             request = urllib2.Request(api_url)
-            # This will always goes to exception as no username/key are provided.
+            # This will always goes to exception as no key are provided.
             # The purpose of this code is to validate the provided api_url is correct
             response = urllib2.urlopen(request)
         except urllib2.HTTPError, http_e:
-            # The 405 error code is refer to "Method not allowed".
-            # This is correct as no username and key are provided.
-            if http_e.code == 405:
+            # The 403 error code is refer to "Authentication credentials were not provided.".
+            # This is correct as no key are provided.
+            if http_e.code == 403:
                 return True
         except:
             # All other exceptions yield to invalid api_url
@@ -682,12 +683,11 @@ EXTRACT_LICENSE_HELP = """\
 Fetch and save license texts in <license_key>.LICENSE files side-by-side with the
 .ABOUT files using the DejaCode License Library API.
 api_url - URL to the DejaCode License Library.
-api_username - The DejaCode username.
-api_key - Key attached to your username and used to authenticate
-          yourself in the API. Contact us to get an API key.
+api_key - Key used to authenticate yourself in the API.
+          Contact us to get an API key.
 
 Example syntax:
-genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
+genabout.py --extract_license --api_url='api_url' --api_key='api_key'
 """
 
 
@@ -704,7 +704,6 @@ def main(parser, options, args):
 
     action_num = 0
     api_url = ''
-    api_username = ''
     api_key = ''
     gen_license = False
     dje_license_dict = {}
@@ -746,12 +745,11 @@ def main(parser, options, args):
 
     if extract_license:
         api_url = extract_license[0].partition('--api_url=')[2]
-        api_username = extract_license[1].partition('--api_username=')[2]
-        api_key = extract_license[2].partition('--api_key=')[2]
+        api_key = extract_license[1].partition('--api_key=')[2]
         gen_license = True
 
     if not len(args) == 2:
-        print('ERROR: <input_path> and <utput_path> are required.')
+        print('ERROR: <input_path> and <output_path> are required.')
         print()
         parser.print_help()
         sys.exit(errno.EEXIST)
@@ -851,8 +849,8 @@ def main(parser, options, args):
                 gen.copy_files(output_path, license_list)
 
     if extract_license:
-        if not api_url or not api_username or not api_key:
-            print("ERROR: Missing argument for --extract_license")
+        if not api_url or not api_key:
+            print("Missing argument for --extract_license")
             sys.exit(errno.EINVAL)
         for line in input_list:
             try:
@@ -864,11 +862,10 @@ def main(parser, options, args):
                 sys.exit(errno.EINVAL)
 
     if gen_license:
-        # Strip the ' and " for api_url, api_username and api_key from input
+        # Strip the ' and " for api_url, and api_key from input
         api_url = api_url.strip("'").strip("\"")
-        api_username = api_username.strip("'").strip("\"")
         api_key = api_key.strip("'").strip("\"")
-        dje_license_dict = gen.pre_process_and_dje_license_dict(input_list, api_url, api_username, api_key)
+        dje_license_dict = gen.pre_process_and_dje_license_dict(input_list, api_url, api_key)
 
     dje_license_list = gen.get_dje_license_list(output_path, input_list, gen_license, dje_license_dict)
     components_list = gen.pre_generation(output_path, input_list, action_num)
@@ -902,7 +899,7 @@ def get_parser():
     parser.add_option('--copy_files', type='string', help=COPY_FILES_HELP)
     parser.add_option('--license_text_location', type='string', help=LICENSE_TEXT_LOCATION_HELP)
     parser.add_option('--mapping', action='store_true', help=MAPPING_HELP)
-    parser.add_option('--extract_license', type='string', nargs=3, help=EXTRACT_LICENSE_HELP)
+    parser.add_option('--extract_license', type='string', nargs=2, help=EXTRACT_LICENSE_HELP)
     return parser
 
 
