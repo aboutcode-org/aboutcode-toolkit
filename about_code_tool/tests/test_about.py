@@ -365,20 +365,28 @@ version: 1.2.3
 
     def test_validate_mand_fields_name_and_version_and_about_resource_present(self):
         about_file = AboutFile(join(TESTDATA_DIR, 'parser_tests/missing_mand.ABOUT'))
-        expected_errors = [(VALUE, 'name'),
-                           (VALUE, 'version'), ]
-        self.assertEqual(2, len(about_file.errors))
+        expected_errors = [(VALUE, 'name'),]
+        expected_warnings = [(VALUE, 'version'),]
+        self.assertEqual(1, len(about_file.errors))
+        self.assertEqual(1, len(about_file.warnings))
         for i, w in enumerate(about_file.errors):
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
+        for i, w in enumerate(about_file.warnings):
+            self.assertEqual(expected_warnings[i][0], w.code)
+            self.assertEqual(expected_warnings[i][1], w.field_name)
 
         about_file = AboutFile(join(TESTDATA_DIR, 'parser_tests/missing_mand_values.ABOUT'))
-        expected_errors = [(VALUE, 'name'),
-                             (VALUE, 'version')]
-        self.assertEqual(2, len(about_file.errors))
+        expected_errors = [(VALUE, 'name'),]
+        expected_warnings = [(VALUE, 'version'),]
+        self.assertEqual(1, len(about_file.errors))
+        self.assertEqual(1, len(about_file.warnings))
         for i, w in enumerate(about_file.errors):
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
+        for i, w in enumerate(about_file.warnings):
+            self.assertEqual(expected_warnings[i][0], w.code)
+            self.assertEqual(expected_warnings[i][1], w.field_name)
 
     def test_validate_optional_file_field_value(self):
         about_file = AboutFile(join(TESTDATA_DIR, 'parser_tests/about_file_ref.c.ABOUT'))

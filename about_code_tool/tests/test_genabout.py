@@ -574,7 +574,6 @@ class GenAboutTest(unittest.TestCase):
         result = gen.verify_files_existence(input_list=test_fields,
                                             project_dir=gen_location,
                                             file_in_project=False)
-        print(result)
         self.assertEqual(expected, result)
         self.assertFalse(gen.warnings, 'No warnings should be returned.')
         self.assertFalse(gen.errors, 'No errors should be returned.')
