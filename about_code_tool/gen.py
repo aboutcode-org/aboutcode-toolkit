@@ -60,7 +60,7 @@ def check_duplicated_columns(location):
     """
     Return a list of errors for duplicated column names in a CSV file at location.
     """
-    with codecs.open(location, 'rb', encoding='utf-8') as csvfile:
+    with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
         reader = unicodecsv.UnicodeReader(csvfile)
         columns = reader.next()
         columns = [col for col in columns]
