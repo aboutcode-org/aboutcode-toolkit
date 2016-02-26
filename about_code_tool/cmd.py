@@ -199,7 +199,7 @@ def redist(input_dir, output, inventory_location=None,):
     click.echo('Collecting redistributable files...')
 
 
-def log_errors(errors, base_dir=dir, level=NOTSET):
+def log_errors(errors, base_dir=False, level=NOTSET):
     """
     Iterate of sequence of Error objects and print and log errors with a severity
     superior or equal to level.
@@ -212,7 +212,6 @@ def log_errors(errors, base_dir=dir, level=NOTSET):
     file_logger = logging.getLogger(__name__ + '_file')
 
     msg_format = '%(sever)s: %(message)s'
-
     # Create error.log
     if base_dir:
         bdir = to_posix(base_dir)
