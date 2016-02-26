@@ -199,34 +199,36 @@ def redist(input_dir, output, inventory_location=None,):
     click.echo('Collecting redistributable files...')
 
 
-def log_errors(errors, base_dir, level=NOTSET):
+def log_errors(errors, base_dir=dir, level=NOTSET):
     """
     Iterate of sequence of Error objects and print and log errors with a severity
     superior or equal to level.
     """
-    bdir = to_posix(base_dir)
-    LOG_FILENAME = 'error.log'
-
     logger = logging.getLogger(__name__)
     handler = logging.StreamHandler()
     handler.setLevel(logging.CRITICAL)
     handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
     logger.addHandler(handler)
     file_logger = logging.getLogger(__name__ + '_file')
-    # Create error.log
-    log_path = join(bdir, LOG_FILENAME)
-    if exists(log_path):
-        os.remove(log_path)
-
-    file_handler = logging.FileHandler(log_path)
-    file_logger.addHandler(file_handler)
 
     msg_format = '%(sever)s: %(message)s'
+
+    # Create error.log
+    if base_dir:
+        bdir = to_posix(base_dir)
+        LOG_FILENAME = 'error.log'
+        log_path = join(bdir, LOG_FILENAME)
+        if exists(log_path):
+            os.remove(log_path)
+
+        file_handler = logging.FileHandler(log_path)
+        file_logger.addHandler(file_handler)
 
     for severity, message in errors:
         sever = about_code_tool.severities[severity]
         print(msg_format % locals())
-        file_logger.log(30, msg_format % locals())
+        if base_dir:
+            file_logger.log(30, msg_format % locals())
 
 
 if __name__ == '__main__':

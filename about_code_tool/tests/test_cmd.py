@@ -82,7 +82,7 @@ def test_log_errors(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors, level=NOTSET)
+    cmd.log_errors(errors, base_dir='', level=NOTSET)
     out, err = capsys.readouterr()
     expected_out = '''CRITICAL: msg1
 ERROR: msg2

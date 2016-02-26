@@ -1,6 +1,6 @@
 name: no colon test
 version 0.7.0
-about_resource: about.py
+about_resource: about_no_colon.py
 
 test
 test with no colon
