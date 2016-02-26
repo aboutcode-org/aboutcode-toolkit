@@ -66,6 +66,18 @@ class GenTest(unittest.TestCase):
                         for a in abouts]
         assert expected == result
 
+    def test_generation_dir_endswith_space(self):
+        location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
+        gen_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location,
+                                      base_dir=gen_dir,
+                                      with_empty=False, with_absent=False)
+
+        expected_errors_msg = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
+        assert (len(errors) == 1, 'Should return 1 error.')
+        assert expected_errors_msg in errors[0].message
+
     @expectedFailure
     def test_generate(self):
         location = get_test_loc('gen/inv.csv')

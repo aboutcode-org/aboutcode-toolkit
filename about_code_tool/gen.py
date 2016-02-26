@@ -184,7 +184,24 @@ def generate(location, base_dir, policy=None, conf_location=None,
         # TODO: check the paths overlap ...???
         # For some reasons, the join does not work, using the '+' for now
         # dump_loc = posixpath.join(bdir, about.about_file_path)
+
         dump_loc = bdir + about.about_file_path
+
+        # The following code is to check if there is any directory ends with spaces
+        split_path = about.about_file_path.split('/')
+        dir_endswith_space = False
+        for segment in split_path:
+            if segment.endswith(' '):
+                msg = (u'File path : '
+                       u'%(dump_loc)s '
+                       u'contains directory name ends with spaces which is not '
+                       u'allowed. Generation skipped.' % locals())
+                errors.append(Error(ERROR, msg))
+                dir_endswith_space = True
+                break
+        if dir_endswith_space:
+            continue
+
         try:
             # Write the ABOUT file
             about.dump(dump_loc,
