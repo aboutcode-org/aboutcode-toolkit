@@ -53,7 +53,7 @@ __copyright__ = """
 
 
 prog_name = 'AboutCode'
-
+no_stdout = 0
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
@@ -77,6 +77,10 @@ class AboutCommand(click.Command):
               help='Increase verbosity. Repeat to print more output.')
 @click.option('-q', '--quiet', count=True, help='Do not print any output.')
 def cli(verbose, quiet):
+    # Update the no_stdout value globally
+    global no_stdout
+    no_stdout = quiet
+
     pass
     # click.echo('Verbosity: %s' % verbose)
 
@@ -98,7 +102,7 @@ OUTPUT: Path to CSV file to write the inventory to
 def inventory(location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
-    files.
+    files.    
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Collecting the inventory from location: ''%(location)s '
@@ -222,10 +226,10 @@ def log_errors(errors, base_dir=False, level=NOTSET):
 
         file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
-
     for severity, message in errors:
         sever = about_code_tool.severities[severity]
-        print(msg_format % locals())
+        if no_stdout == 0:
+            print(msg_format % locals())
         if base_dir:
             file_logger.log(30, msg_format % locals())
 
