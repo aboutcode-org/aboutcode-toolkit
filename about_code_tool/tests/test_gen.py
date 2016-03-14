@@ -31,6 +31,7 @@ from about_code_tool.tests import to_posix
 from about_code_tool.tests import get_test_loc
 from about_code_tool.tests import get_temp_dir
 from unittest.case import expectedFailure
+from collections import OrderedDict
 
 
 class GenTest(unittest.TestCase):
@@ -77,6 +78,19 @@ class GenTest(unittest.TestCase):
         expected_errors_msg = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
         assert (len(errors) == 1, 'Should return 1 error.')
         assert expected_errors_msg in errors[0].message
+
+    def test_generation_with_no_about_resource(self):
+        location = get_test_loc('gen/inv2.csv')
+        gen_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location,
+                                      base_dir=gen_dir,
+                                      with_empty=False, with_absent=False)
+        expected_dict = OrderedDict()
+        expected_dict[u'.'] = None
+
+        assert abouts[0].about_resource.value == expected_dict
+        assert len(errors) == 0
 
     @expectedFailure
     def test_generate(self):

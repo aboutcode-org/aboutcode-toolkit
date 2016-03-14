@@ -16,27 +16,25 @@
 
 from __future__ import print_function
 
-import ConfigParser as configparser
+import codecs
+from collections import OrderedDict
+import collections
 import errno
 import logging
 import optparse
+import os
+from os.path import exists, dirname, abspath, isdir
+from posixpath import basename
+import posixpath
 import sys
 
-from os.path import exists, dirname, abspath, isdir
-
-import unicodecsv
-import codecs
-import posixpath
-import os
-
-
-from about_code_tool import Error
+import ConfigParser as configparser
 from about_code_tool import ERROR
-
-from about_code_tool import util
+from about_code_tool import Error
 from about_code_tool import model
-from collections import OrderedDict
+from about_code_tool import util
 from about_code_tool.util import to_posix
+import unicodecsv
 
 
 LOG_FILENAME = 'error.log'
@@ -121,6 +119,11 @@ def load_inventory(location, base_dir):
         about = model.About(about_file_path=afp)
         about.location = loc
         ld_errors = about.load_dict(fields, base_dir, with_empty=False)
+        # 'about_resource' field will be generated during the process.
+        # No error need to be raise for the missing 'about_resource'.
+        for e in ld_errors:
+            if e.message == 'Field about_resource is required':
+                ld_errors.remove(e)
         errors.extend(ld_errors)
         abouts.append(about)
     return errors, abouts
@@ -203,6 +206,16 @@ def generate(location, base_dir, policy=None, conf_location=None,
             continue
 
         try:
+            # Generate value for 'about_resource' if it does not exist
+            if not about.about_resource.value:
+                about.about_resource.value = OrderedDict()
+                if about.about_file_path.endswith('/'):
+                    about.about_resource.value[u'.'] = None
+                    about.about_resource.original_value = u'.'
+                else:
+                    about.about_resource.value[basename(about.about_file_path)] = None
+                    about.about_resource.original_value = basename(about.about_file_path)
+                about.about_resource.present = True
             # Write the ABOUT file
             about.dump(dump_loc,
                        with_empty=with_empty,
