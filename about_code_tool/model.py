@@ -31,6 +31,7 @@ import re
 import urlparse
 import posixpath
 from collections import OrderedDict
+from posixpath import dirname
 
 import saneyaml
 import unicodecsv
@@ -930,6 +931,7 @@ class About(object):
         If with_absent, include absent (not present) fields.
         If with_empty, include empty fields.
         """
+        errors = []
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
         if not os.path.exists(parent):
@@ -941,7 +943,14 @@ class About(object):
             about_file_path += '.ABOUT'
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
             dumped.write(self.dumps(with_absent, with_empty))
-
+            for about_resource_value in self.about_resource.value:
+                path = posixpath.join(dirname(about_file_path), about_resource_value)
+                if not posixpath.exists(path):
+                    msg = (u'The reference file : '
+                           u'%(path)s '
+                           u'does not exist' % locals())
+                    errors.append(msg)
+        return errors
 
 # valid field name
 field_name = r'(?P<name>[a-z][0-9a-z_]*)'

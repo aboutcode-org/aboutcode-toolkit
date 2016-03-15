@@ -216,10 +216,12 @@ def generate(location, base_dir, policy=None, conf_location=None,
                     about.about_resource.value[basename(about.about_file_path)] = None
                     about.about_resource.original_value = basename(about.about_file_path)
                 about.about_resource.present = True
-            # Write the ABOUT file
-            about.dump(dump_loc,
-                       with_empty=with_empty,
-                       with_absent=with_absent)
+            # Write the ABOUT file and check does the referenced file exist
+            not_exist_errors = about.dump(dump_loc,
+                                   with_empty=with_empty,
+                                   with_absent=with_absent)
+            for e in not_exist_errors:
+                errors.append(Error(ERROR, e))
         except Exception, e:
             # only keep the first 100 char of the exception
             emsg = repr(e)[:100]
