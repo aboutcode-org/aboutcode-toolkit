@@ -92,6 +92,21 @@ class GenTest(unittest.TestCase):
         assert abouts[0].about_resource.value == expected_dict
         assert len(errors) == 0
 
+    def test_generation_with_no_about_resource_reference(self):
+        location = get_test_loc('gen/inv3.csv')
+        gen_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location,
+                                      base_dir=gen_dir,
+                                      with_empty=False, with_absent=False)
+        expected_dict = OrderedDict()
+        expected_dict[u'test.tar.gz'] = None
+
+        assert abouts[0].about_resource.value == expected_dict
+        assert len(errors) == 1
+        msg = u'The reference file'
+        assert msg in errors[0].message
+
     @expectedFailure
     def test_generate(self):
         location = get_test_loc('gen/inv.csv')
