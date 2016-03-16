@@ -1123,6 +1123,19 @@ def to_csv(abouts, location, with_absent=False, with_empty=True):
             ad = a.as_dict(with_paths=True,
                            with_absent=with_absent,
                            with_empty=with_empty)
+            if 'about_file_path' in ad.keys():
+                afp = ad['about_file_path']
+                afp = '/' + afp if not afp.startswith('/') else afp
+                ad['about_file_path'] = afp 
+            if 'about_resource_path' in ad.keys():
+                arp = ad['about_resource_path']
+                arp = '/' + arp if not arp.startswith('/') else arp
+                ad['about_resource_path'] = arp
+            # Make the 'about_resource_path' endswith '/' if the 'about_resource'
+            # reference the current directory 
+            if 'about_resource' in ad.keys() and ad['about_resource'] == '.':
+                if not ad['about_resource_path'].endswith('/'):
+                    ad['about_resource_path'] += '/'
             writer.writerow(ad)
 
 
