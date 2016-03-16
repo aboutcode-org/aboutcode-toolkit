@@ -99,12 +99,27 @@ OUTPUT: Path to CSV file to write the inventory to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
-def inventory(location, output):
+@click.option('--overwrite', count=True, help='Overwrites the output file if it exists')
+def inventory(overwrite, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.    
     """
     click.echo('Running about-code-tool version ' + __version__)
+    # Check is the <OUTPUT> valid.
+    if os.path.exists(output) and not overwrite:
+        click.echo('ERROR: <output> file already exists. Select a different file name or use the --overwrite option.')
+        click.echo()
+        return
+    if not output.endswith('.csv'):
+        click.echo('ERROR: <output> must be a CSV file ending with ".csv".')
+        click.echo()
+        return
+    if not os.path.exists(output):
+        click.echo('ERROR: <output> does not exists. Please check and correct the <output>.')
+        click.echo()
+        return
+
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
 
