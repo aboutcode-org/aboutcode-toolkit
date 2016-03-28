@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2015 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -25,11 +25,11 @@ class UtilTest(unittest.TestCase):
 
     def test_get_mappings(self):
         expected = {
-            'component': 'name',
-            'confirmed copyright': 'copyright',
-            'confirmed license': 'confirmed_license',
-            'confirmed version': 'version',
-            'directory/filename': 'about_file'
+            'name': 'component',
+            'copyright': 'confirmed copyright',
+            'confirmed_license': 'confirmed license',
+            'version': 'confirmed version',
+            'about_file': 'directory/filename'
         }
 
         result = util.get_mappings()
@@ -37,10 +37,10 @@ class UtilTest(unittest.TestCase):
 
     def test_apply_mappings(self):
         mappings = {
-            'Directory/Filename': 'about_file',
-            'Confirmed Version': 'version',
-            'file_name': 'about_resource',
-            'Component': 'name'
+            'about_file': 'Directory/Filename',
+            'version': 'Confirmed Version',
+            'about_resource': 'file_name',
+            'name': 'Component'
         }
 
         test_fields = [
@@ -60,6 +60,39 @@ class UtilTest(unittest.TestCase):
              'name': 'OpenSans Fonts',
              'version': '1',
              'about_file': '/extension/streamer/opensans/',
+            }
+        ]
+
+        result = util.apply_mappings(test_fields, mappings)
+        self.assertEqual(expected, result)
+
+    def test_apply_mappings_same_name(self):
+        mappings = {
+            'about_file': 'Directory/Filename',
+            'version': 'Confirmed Version',
+            'about_resource': 'file_name',
+            'name': 'Component',
+            'component' : 'Component'
+        }
+
+        test_fields = [
+            {
+             'file_name': 'opensans',
+             'ignore field': 'i',
+             'Component': 'OpenSans Fonts',
+             'Confirmed Version': '1',
+             'Directory/Filename': '/extension/streamer/opensans/',
+            }
+        ]
+
+        expected = [
+            {
+             'about_resource': 'opensans',
+             'ignore field': 'i',
+             'name': 'OpenSans Fonts',
+             'version': '1',
+             'about_file': '/extension/streamer/opensans/',
+             'component': 'OpenSans Fonts',
             }
         ]
 

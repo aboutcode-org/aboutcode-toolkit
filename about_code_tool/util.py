@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2015 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -197,7 +197,8 @@ def get_mappings(location=None):
                     key, sep, value = line.partition(':')
                     about_key = key.strip().replace(' ', '_')
                     user_key = value.strip()
-                    mappings[user_key] = about_key
+                    #mappings[user_key] = about_key
+                    mappings[about_key] = user_key
 
     except Exception as e:
         print(repr(e))
@@ -218,10 +219,15 @@ def apply_mappings(abouts, mappings=None):
     mapped_abouts = []
     for about in abouts:
         mapped_about = {}
-        for key, value in about.items(): 
-            # we default to the key if the key is not in the mappings 
-            mapped = mappings.get(key, key)
-            mapped_about[mapped] = value
+        for key in about:
+            mapped = []
+            for mapping_keys, input_keys in mappings.items():
+                if key == input_keys:
+                    mapped.append(mapping_keys)
+            if not mapped:
+                mapped.append(key)
+            for mapped_key in mapped:
+                mapped_about[mapped_key] = about[key]
         mapped_abouts.append(mapped_about)
     return mapped_abouts
 

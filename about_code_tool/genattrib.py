@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2015 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -200,15 +200,17 @@ def main(parser, options, args):
         input_path = extract_zip(input_path)
 
     if isdir(output_path):
-        print('ERROR: <output_path> must be an HTML file, not a directory')
+        print('ERROR: <output_path> cannot be a directory')
         parser.print_help()
         sys.exit(errno.EISDIR)
 
+    """
     # We only support HTML currently
     if not output_path.endswith('.html'):
         print('ERROR: <output_path> must be an HTML file.')
         parser.print_help()
         sys.exit(errno.EINVAL)
+    """
 
     if exists(output_path) and not overwrite:
         print('ERROR: A file at <output_path> already exists. Select a different file name or use the --overwrite option.')

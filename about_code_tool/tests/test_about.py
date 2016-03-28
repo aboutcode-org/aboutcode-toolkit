@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2015 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -59,6 +59,10 @@ class CollectorTest(unittest.TestCase):
         collector.write_to_csv(output)
         expected = 'about_code_tool/tests/testdata/thirdparty/django_snippets_2413.ABOUT'
         # FIXME: why [2]? what this test means?
+        # CY: Since the output is going to have 2 rows (header row and row with
+        # the test file data), the below partition('\n')[2] means to only read
+        # the data row and ignroe the header row. This test is to make sure 
+        # the path in the data row is not an absolute path.
         with open(output) as f:
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))
 
@@ -70,6 +74,10 @@ class CollectorTest(unittest.TestCase):
         collector.write_to_csv(output)
         expected = '/basic'
         # FIXME: why [2]? what this test means?
+        # CY: Since the output is going to have 2 rows (header row and row with
+        # the test file data), the below partition('\n')[2] means to only read
+        # the data row and ignroe the header row. This test is to make sure 
+        # the path in the data row is not an absolute path.
         with open(output) as f:
             self.assertTrue(f.read().partition('\n')[2].startswith(expected))
 
@@ -357,20 +365,28 @@ version: 1.2.3
 
     def test_validate_mand_fields_name_and_version_and_about_resource_present(self):
         about_file = AboutFile(join(TESTDATA_DIR, 'parser_tests/missing_mand.ABOUT'))
-        expected_errors = [(VALUE, 'name'),
-                           (VALUE, 'version'), ]
-        self.assertEqual(2, len(about_file.errors))
+        expected_errors = [(VALUE, 'name'),]
+        expected_warnings = [(VALUE, 'version'),]
+        self.assertEqual(1, len(about_file.errors))
+        self.assertEqual(1, len(about_file.warnings))
         for i, w in enumerate(about_file.errors):
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
+        for i, w in enumerate(about_file.warnings):
+            self.assertEqual(expected_warnings[i][0], w.code)
+            self.assertEqual(expected_warnings[i][1], w.field_name)
 
         about_file = AboutFile(join(TESTDATA_DIR, 'parser_tests/missing_mand_values.ABOUT'))
-        expected_errors = [(VALUE, 'name'),
-                             (VALUE, 'version')]
-        self.assertEqual(2, len(about_file.errors))
+        expected_errors = [(VALUE, 'name'),]
+        expected_warnings = [(VALUE, 'version'),]
+        self.assertEqual(1, len(about_file.errors))
+        self.assertEqual(1, len(about_file.warnings))
         for i, w in enumerate(about_file.errors):
             self.assertEqual(expected_errors[i][0], w.code)
             self.assertEqual(expected_errors[i][1], w.field_name)
+        for i, w in enumerate(about_file.warnings):
+            self.assertEqual(expected_warnings[i][0], w.code)
+            self.assertEqual(expected_warnings[i][1], w.field_name)
 
     def test_validate_optional_file_field_value(self):
         about_file = AboutFile(join(TESTDATA_DIR, 'parser_tests/about_file_ref.c.ABOUT'))

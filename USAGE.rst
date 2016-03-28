@@ -83,12 +83,11 @@ genabout.py
                             Extract License text and create <license_key>.LICENSE side-by-side
                                 with the .ABOUT from DJE License Library.
                             api_url - URL to the DJE License Library
-                            api_username - The regular DJE username
-                            api_key - Hash attached to your username which is used to authenticate
-                                        yourself in the API. Contact us to get the hash key.
+                            api_key - Hash which is used to authenticate yourself in the API.
+                                      Contact us to get the hash key.
 
                             Example syntax:
-                            genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
+                            genabout.py --extract_license --api_url='api_url' --api_key='api_key'
 
 Purpose
 -------
@@ -177,12 +176,11 @@ Options
 
         This option requires 3 parameters:
             api_url - URL to the DJE License Library
-            api_username - The regular DJE username
-            api_key - Hash attached to your username which is used to authenticate
-                        yourself in the API.
+            api_key - Hash which is used to authenticate yourself in the API.
+                      Contact us to get the hash key.
         (Please contact us to get the api_* value to use this feature)
 
-    $ python genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key' <input path> <output path>
+    $ python genabout.py --extract_license --api_url='api_url' --api_key='api_key' <input path> <output path>
 
 
 genattrib.py

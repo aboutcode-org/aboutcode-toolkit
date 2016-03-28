@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2015 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -428,9 +428,14 @@ class AboutFile(object):
                 continue
 
             if field_name in MANDATORY_FIELDS:
-                err = Error(VALUE, field_name, None,
-                            'This mandatory field has no value.')
-                self.errors.append(err)
+                if field_name == 'version':
+                    err = Warn(VALUE, field_name, None,
+                           'This mandatory field has no value.')
+                    self.warnings.append(err)
+                else:
+                    err = Error(VALUE, field_name, None,
+                                'This mandatory field has no value.')
+                    self.errors.append(err)
             elif field_name in OPTIONAL_FIELDS:
                 err = Warn(VALUE, field_name, None,
                            'This optional field has no value.')
@@ -517,8 +522,12 @@ class AboutFile(object):
         """
         for field_name in MANDATORY_FIELDS:
             if field_name not in self.validated_fields:
-                self.errors.append(Error(VALUE, field_name, None,
+                if field_name == 'version' :
+                    self.warnings.append(Error(VALUE, field_name, None,
                                          'Mandatory field missing'))
+                else:
+                    self.errors.append(Error(VALUE, field_name, None,
+                                             'Mandatory field missing'))
 
     def validate_known_optional_fields(self, field_name):
         """
