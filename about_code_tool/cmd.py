@@ -108,7 +108,8 @@ def inventory(overwrite, location, output):
     click.echo('Running about-code-tool version ' + __version__)
     # Check is the <OUTPUT> valid.
     if os.path.exists(output) and not overwrite:
-        click.echo('ERROR: <output> file already exists. Select a different file name or use the --overwrite option.')
+        click.echo('ERROR: <output> file already exists.')
+        click.echo('Select a different file name or use the --overwrite option after the `inventory`.')
         click.echo()
         return
     if not output.endswith('.csv'):
