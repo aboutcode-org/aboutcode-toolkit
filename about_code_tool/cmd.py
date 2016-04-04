@@ -58,6 +58,7 @@ __copyright__ = """
 
 prog_name = 'AboutCode'
 no_stdout = False
+verbosity_num = 30
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
@@ -77,14 +78,19 @@ class AboutCommand(click.Command):
 
 @click.group(name='about')
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
-@click.option('-v', '--verbose', count=True,
-              help='Increase verbosity. Repeat to print more output.')
+@click.option('-v', '--verbose', type=int, default=30,
+              help='Increase verbosity. Repeat to print more output (Default: 30).\n'
+                    '50 - CRITICAL\n'
+                    '40 - ERROR\n'
+                    '30 - WARNING\n'
+                    '20 - INFO\n'
+                    '10 - DEBUG')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any output.')
 def cli(verbose, quiet):
     # Update the no_stdout value globally
-    global no_stdout
+    global no_stdout, verbosity_num
     no_stdout = quiet
-
+    verbosity_num = verbose
     pass
     # click.echo('Verbosity: %s' % verbose)
 
@@ -104,14 +110,7 @@ OUTPUT: Path to CSV file to write the inventory to
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
 @click.option('--overwrite', is_flag=True, help='Overwrites the output file if it exists')
-@click.option('--verbosity', default=30,
-                help='Print more or fewer verbose messages while processing ABOUT files (Default: 30)\n'
-                    '50 - CRITICAL\n'
-                    '40 - ERROR\n'
-                    '30 - WARNING\n'
-                    '20 - INFO\n'
-                    '10 - DEBUG')
-def inventory(overwrite, verbosity, location, output):
+def inventory(overwrite, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.    
@@ -136,7 +135,7 @@ def inventory(overwrite, verbosity, location, output):
                'and writing CSV output to: %(output)s' % locals())
 
     errors, abouts = about_code_tool.model.collect_inventory(location)
-    log_errors(errors, level=verbosity)
+    log_errors(errors, level=verbosity_num)
     about_code_tool.model.to_csv(abouts, output)
 
 
