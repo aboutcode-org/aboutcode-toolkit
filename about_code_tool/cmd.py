@@ -29,6 +29,10 @@ import about_code_tool.model
 import about_code_tool.attrib
 
 from os.path import exists, join
+from about_code_tool import CRITICAL
+from about_code_tool import WARNING
+from about_code_tool import ERROR
+from about_code_tool import INFO
 from about_code_tool import NOTSET
 from about_code_tool.util import to_posix
 
@@ -54,7 +58,6 @@ __copyright__ = """
 
 prog_name = 'AboutCode'
 no_stdout = False
-msg_verbosity = 30
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
@@ -131,12 +134,9 @@ def inventory(overwrite, verbosity, location, output):
 
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
-    
-    global msg_verbosity
-    msg_verbosity = verbosity
 
     errors, abouts = about_code_tool.model.collect_inventory(location)
-    log_errors(errors)
+    log_errors(errors, level=verbosity)
     about_code_tool.model.to_csv(abouts, output)
 
 
@@ -254,12 +254,12 @@ def log_errors(errors, base_dir=False, level=NOTSET):
         file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
     for severity, message in errors:
-        if severity >= msg_verbosity:
+        if severity >= level:
             sever = about_code_tool.severities[severity]
             if not no_stdout:
                 print(msg_format % locals())
             if base_dir:
-                file_logger.log(30, msg_format % locals())
+                file_logger.log(severity, msg_format % locals())
 
 
 if __name__ == '__main__':
