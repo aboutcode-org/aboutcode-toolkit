@@ -54,6 +54,7 @@ __copyright__ = """
 
 prog_name = 'AboutCode'
 no_stdout = False
+msg_verbosity = 30
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
@@ -100,7 +101,14 @@ OUTPUT: Path to CSV file to write the inventory to
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
 @click.option('--overwrite', is_flag=True, help='Overwrites the output file if it exists')
-def inventory(overwrite, location, output):
+@click.option('--verbosity', default=30,
+                help='Print more or fewer verbose messages while processing ABOUT files (Default: 30)\n'
+                    '50 - CRITICAL\n'
+                    '40 - ERROR\n'
+                    '30 - WARNING\n'
+                    '20 - INFO\n'
+                    '10 - DEBUG')
+def inventory(overwrite, verbosity, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.    
@@ -123,6 +131,9 @@ def inventory(overwrite, location, output):
 
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
+    
+    global msg_verbosity
+    msg_verbosity = verbosity
 
     errors, abouts = about_code_tool.model.collect_inventory(location)
     log_errors(errors)
@@ -243,11 +254,12 @@ def log_errors(errors, base_dir=False, level=NOTSET):
         file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
     for severity, message in errors:
-        sever = about_code_tool.severities[severity]
-        if not no_stdout:
-            print(msg_format % locals())
-        if base_dir:
-            file_logger.log(30, msg_format % locals())
+        if severity >= msg_verbosity:
+            sever = about_code_tool.severities[severity]
+            if not no_stdout:
+                print(msg_format % locals())
+            if base_dir:
+                file_logger.log(30, msg_format % locals())
 
 
 if __name__ == '__main__':
