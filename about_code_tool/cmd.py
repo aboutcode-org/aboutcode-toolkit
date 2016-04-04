@@ -99,7 +99,7 @@ OUTPUT: Path to CSV file to write the inventory to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
-@click.option('--overwrite', count=True, help='Overwrites the output file if it exists')
+@click.option('--overwrite', is_flag=True, help='Overwrites the output file if it exists')
 def inventory(overwrite, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
