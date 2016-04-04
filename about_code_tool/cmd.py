@@ -53,7 +53,7 @@ __copyright__ = """
 
 
 prog_name = 'AboutCode'
-no_stdout = 0
+no_stdout = False
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
@@ -75,7 +75,7 @@ class AboutCommand(click.Command):
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
 @click.option('-v', '--verbose', count=True,
               help='Increase verbosity. Repeat to print more output.')
-@click.option('-q', '--quiet', count=True, help='Do not print any output.')
+@click.option('-q', '--quiet', is_flag=True, help='Do not print any output.')
 def cli(verbose, quiet):
     # Update the no_stdout value globally
     global no_stdout
@@ -244,7 +244,7 @@ def log_errors(errors, base_dir=False, level=NOTSET):
         file_logger.addHandler(file_handler)
     for severity, message in errors:
         sever = about_code_tool.severities[severity]
-        if no_stdout == 0:
+        if not no_stdout:
             print(msg_format % locals())
         if base_dir:
             file_logger.log(30, msg_format % locals())
