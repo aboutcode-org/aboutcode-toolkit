@@ -84,6 +84,7 @@ class Field(object):
             if self.required:
                 msg = u'Field %(name)s is required'
                 errors.append(Error(CRITICAL, msg % locals()))
+                return errors
             else:
                 # no error for not present non required fields
                 # FIXME: should we add an info?

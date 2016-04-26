@@ -47,13 +47,6 @@ logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
 
-# Handle different behaviors if ABOUT file already exists
-ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST = 0
-ACTION_OVERWRITES_THE_CURRENT_ABOUT_FIELD_VALUE_IF_EXIST = 1
-ACTION_KEEP_CURRENT_FIELDS_UNCHANGED_AND_ONLY_ADD_NEW_FIELDS = 2
-ACTION_REPLACE_THE_ABOUT_FILE_WITH_THE_CURRENT_GENERATED_FILE = 3
-
-
 def check_duplicated_columns(location):
     """
     Return a list of errors for duplicated column names in a CSV file at location.
@@ -82,7 +75,8 @@ def check_duplicated_columns(location):
             msg = '%(name)s with %(names)s' % locals()
             dup_msg.append(msg)
         dup_msg = u', '.join(dup_msg)
-        msg = 'Duplicated column name(s): %(dup_msg)s' % locals()
+        msg = ('Duplicated column name(s): %(dup_msg)s\n' % locals() +
+               'Please correct the input and re-run.')
         errors.append(Error(ERROR, msg))
     return errors
 
@@ -94,17 +88,22 @@ def load_inventory(location, base_dir):
     """
     errors = []
     abouts = []
-    errors.extend(check_duplicated_columns(location))
+    dup_cols = check_duplicated_columns(location)
+    if dup_cols:
+        errors.extend(check_duplicated_columns(location))
+        return errors, abouts
+
     base_dir = util.to_posix(base_dir)
     inventory = util.load_csv(location)
     for i, fields in enumerate(inventory):
         # get then remove the about file path
         afpa = model.About.about_file_path_attr
         if afpa not in fields:
-            msg = ('Missing column: %(afpa)r. '
-                   'Cannot generate ABOUT file.' % locals())
+            msg = ('Required column: %(afpa)r not found.\n' % locals() +
+                   'Use the \'--mapping\' option to map the input keys and verify the mapping information are correct.\n' +
+                   'OR correct the column names in the <input>.')
             errors.append(Error(ERROR, msg))
-            continue
+            return errors, abouts
         else:
             afp = fields.get(afpa)
 
@@ -183,6 +182,14 @@ def generate(location, base_dir, policy=None, conf_location=None,
     """
     bdir = to_posix(base_dir)
     errors, abouts = load_inventory(location, bdir)
+    # Check if there is any Critical Error which should halt the generation
+    for e in errors:
+        if e.severity == 50:
+            # Clear the errors and abouts object
+            errors = []
+            abouts = []
+            errors.append(e)
+            return errors, abouts
     for about in abouts:
         # TODO: check the paths overlap ...???
         # For some reasons, the join does not work, using the '+' for now
