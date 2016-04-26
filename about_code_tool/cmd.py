@@ -153,7 +153,10 @@ OUTPUT: Path to the directory to write ABOUT files to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=False, writable=True,
                                 dir_okay=True, resolve_path=True))
-def gen(location, output):
+@click.option('--mapping', is_flag=True, help='Use the mapping between columns names'
+                        'in your CSV and the ABOUT field names as defined in'
+                        'the MAPPING.CONFIG mapping configuration file.')
+def gen(mapping, location, output):
     """
     Given a CVS inventory of ABOUT files at location, generate ABOUT files in
     base directory.
