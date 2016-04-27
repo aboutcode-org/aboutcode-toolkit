@@ -186,6 +186,7 @@ def generate(mapping, location, base_dir, policy=None, conf_location=None,
     errors, abouts = load_inventory(mapping, location, bdir)
     # Check if there is any Critical Error which should halt the generation
     for e in errors:
+        # Severity 50 = Critical Error
         if e.severity == 50:
             # Clear the errors and abouts object
             errors = []
