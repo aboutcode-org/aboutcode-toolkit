@@ -49,9 +49,10 @@ class GenTest(unittest.TestCase):
 
     def test_load_inventory(self):
         self.maxDiff = None
+        mapping = None
         location = get_test_loc('gen/inv.csv')
         base_dir = get_test_loc('inv')
-        errors, abouts = gen.load_inventory(location, base_dir)
+        errors, abouts = gen.load_inventory(mapping, location, base_dir)
         expected_errors = [
             Error(INFO, u'Field custom1 is a custom field'),
             Error(CRITICAL, u'Field about_resource: Path . not found')]
@@ -68,10 +69,11 @@ class GenTest(unittest.TestCase):
         assert expected == result
 
     def test_generation_dir_endswith_space(self):
+        mapping = None
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location,
+        errors, abouts = gen.generate(mapping, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
 
@@ -80,10 +82,11 @@ class GenTest(unittest.TestCase):
         assert expected_errors_msg in errors[0].message
 
     def test_generation_with_no_about_resource(self):
+        mapping = None
         location = get_test_loc('gen/inv2.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location,
+        errors, abouts = gen.generate(mapping, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
         expected_dict = OrderedDict()
@@ -93,10 +96,11 @@ class GenTest(unittest.TestCase):
         assert len(errors) == 0
 
     def test_generation_with_no_about_resource_reference(self):
+        mapping = None
         location = get_test_loc('gen/inv3.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location,
+        errors, abouts = gen.generate(mapping, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
         expected_dict = OrderedDict()

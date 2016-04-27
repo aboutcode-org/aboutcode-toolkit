@@ -17,8 +17,12 @@ from __future__ import print_function
 
 import codecs
 from collections import OrderedDict
+import errno
 import ntpath
 import os
+from os.path import abspath
+from os.path import dirname
+from os.path import join
 import posixpath
 import string
 import sys
@@ -234,13 +238,74 @@ class OrderedDictReader(unicodecsv.DictReader):
             result[name] = row_dict[name]
         return result
 
+def get_mappings(location=None):
+    """
+    Return a mapping of user key names to About key names by reading the
+    MAPPING.CONFIG file from location or the directory of this source file if
+    location was not provided.
+    """
+    if not location:
+        location = abspath(dirname(__file__))
+    mappings = {}
+    try:
+        with open(join(location, 'MAPPING.CONFIG'), 'rU') as mapping_file:
+            for line in mapping_file:
+                if not line or not line.strip() or line.strip().startswith('#'):
+                    continue
 
-def load_csv(location):
+                if ':' in line:
+                    line = line.lower()
+                    key, sep, value = line.partition(':')
+                    about_key = key.strip().replace(' ', '_')
+                    user_key = value.strip()
+                    #mappings[user_key] = about_key
+                    mappings[about_key] = user_key
+
+    except Exception as e:
+        print(repr(e))
+        print('Cannot open or process MAPPING.CONFIG file at %(location)r.' %locals())
+        # this is rather brutal
+        sys.exit(errno.EACCES)
+    return mappings
+
+
+def apply_mappings(abouts, mappings=None):
+    """
+    Given a list of About data dictionaries and a dictionary of mappings,
+    return a new About data dictionaries list where the keys have been
+    replaced by the About mapped_abouts key if present.
+    """
+    mappings = mappings or get_mappings()
+    mapped_abouts = []
+    for about in abouts:
+        mapped_about = {}
+        for key in about:
+            mapped = []
+            for mapping_keys, input_keys in mappings.items():
+                if key == input_keys:
+                    mapped.append(mapping_keys)
+            if not mapped:
+                mapped.append(key)
+            for mapped_key in mapped:
+                mapped_about[mapped_key] = about[key]
+        mapped_abouts.append(mapped_about)
+    return mapped_abouts
+
+
+def load_csv(mapping, location):
     """
     Read CSV at location, return a list of ordered mappings, one for each row.
     """
     results = []
     with codecs.open(location, mode='rb', encoding='utf-8', errors='ignore') as csvfile:
+        input_row = {}
         for row in OrderedDictReader(csvfile):
-            results.append(row)
+            # convert all the column keys to lower case as the same behavior as
+            # when user use the --mapping
+            for key in row.keys():
+                input_row[key.lower()] = row[key]
+            results.append(input_row)
+    # user has the mapping option set
+    if mapping:
+        results = apply_mappings(results)
     return results

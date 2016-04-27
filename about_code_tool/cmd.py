@@ -163,7 +163,7 @@ def gen(mapping, location, output):
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating ABOUT files...')
-    errors, abouts = about_code_tool.gen.generate(location, output)
+    errors, abouts = about_code_tool.gen.generate(mapping, location, output)
 
     lea = len(abouts)
     lee = len(errors)

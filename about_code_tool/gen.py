@@ -81,7 +81,7 @@ def check_duplicated_columns(location):
     return errors
 
 
-def load_inventory(location, base_dir):
+def load_inventory(mapping, location, base_dir):
     """
     Load the inventory CSV file at location. Return a list of errors and a
     list of About objects validated against the base_dir.
@@ -94,7 +94,7 @@ def load_inventory(location, base_dir):
         return errors, abouts
 
     base_dir = util.to_posix(base_dir)
-    inventory = util.load_csv(location)
+    inventory = util.load_csv(mapping, location)
     for i, fields in enumerate(inventory):
         # check does the input contains the required fields
         requied_fileds = model.About.required_fields
@@ -174,7 +174,7 @@ policies = ('skip',  # DO_NOTHING_IF_ABOUT_FILE_EXIST
             )
 
 
-def generate(location, base_dir, policy=None, conf_location=None,
+def generate(mapping, location, base_dir, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
     Load ABOUT data from an inventory at csv_location. Write ABOUT files to
@@ -183,7 +183,7 @@ def generate(location, base_dir, policy=None, conf_location=None,
     files. Return errors and about objects.
     """
     bdir = to_posix(base_dir)
-    errors, abouts = load_inventory(location, bdir)
+    errors, abouts = load_inventory(mapping, location, bdir)
     # Check if there is any Critical Error which should halt the generation
     for e in errors:
         if e.severity == 50:

@@ -1009,8 +1009,9 @@ custom1: |
         """
         Assert that the content of two CSV file locations are equal.
         """
-        expected = [d.items() for d in load_csv(expected)]
-        result = [d.items() for d in load_csv(result)]
+        mapping = None
+        expected = [d.items() for d in load_csv(mapping, expected)]
+        result = [d.items() for d in load_csv(mapping, result)]
         for ie, expect in enumerate(expected):
             res = result[ie]
             for ii, exp in enumerate(expect):
@@ -1109,7 +1110,8 @@ class CollectorTest(unittest.TestCase):
         Compare two CSV files at locations as lists of ordered items.
         """
         def as_items(csvfile):
-            return sorted([i.items() for i in util.load_csv(csvfile)])
+            mapping= None
+            return sorted([i.items() for i in util.load_csv(mapping, csvfile)])
 
         expected = as_items(expected)
         result = as_items(result)
