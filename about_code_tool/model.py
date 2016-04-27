@@ -50,7 +50,7 @@ class Field(object):
     will alter the value type as needed.
     """
 
-    def __init__(self, name=None, value=None, required=False, present=False):
+    def __init__(self, name=None, value=None, required=False, present=False, capture=False):
         # normalized names are lowercased per specification
         self.name = name
         # save this and do not mutate it afterwards
@@ -67,6 +67,9 @@ class Field(object):
         self.required = required
         # True if the field is present in an About object
         self.present = present
+        # True if the field should be capture in the generated ABOUT files
+        self.capture = capture
+
         self.errors = []
 
     def default_value(self):
