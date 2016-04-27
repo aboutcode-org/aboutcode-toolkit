@@ -37,13 +37,13 @@ from collections import OrderedDict
 class GenTest(unittest.TestCase):
     def test_check_duplicated_columns(self):
         test_file = get_test_loc('gen/dup_keys.csv')
-        expected = [Error(ERROR, u'Duplicated column name(s): copyright with copyright')]
+        expected = [Error(ERROR, u'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
     def test_check_duplicated_columns_handles_lower_upper_case(self):
         test_file = get_test_loc('gen/dup_keys_with_diff_case.csv')
-        expected = [Error(ERROR, u'Duplicated column name(s): copyright with Copyright')]
+        expected = [Error(ERROR, u'Duplicated column name(s): copyright with Copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
