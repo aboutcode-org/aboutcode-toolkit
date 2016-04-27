@@ -581,6 +581,9 @@ class About(object):
 
     # name of the attribute containing the resolved relative Resources paths
     about_resource_path_attr = 'about_resource_path'
+    
+    # Required fields
+    required_fields = [about_file_path_attr, 'name']
 
     def create_fields(self):
         """

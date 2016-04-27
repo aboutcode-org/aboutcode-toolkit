@@ -96,16 +96,18 @@ def load_inventory(location, base_dir):
     base_dir = util.to_posix(base_dir)
     inventory = util.load_csv(location)
     for i, fields in enumerate(inventory):
-        # get then remove the about file path
-        afpa = model.About.about_file_path_attr
-        if afpa not in fields:
-            msg = ('Required column: %(afpa)r not found.\n' % locals() +
-                   'Use the \'--mapping\' option to map the input keys and verify the mapping information are correct.\n' +
-                   'OR correct the column names in the <input>.')
-            errors.append(Error(ERROR, msg))
-            return errors, abouts
-        else:
-            afp = fields.get(afpa)
+        # check does the input contains the required fields
+        requied_fileds = model.About.required_fields
+
+        for f in requied_fileds:
+            if f not in fields:
+                msg = ('Required column: %(f)r not found.\n' % locals() +
+                       'Use the \'--mapping\' option to map the input keys and verify the mapping information are correct.\n' +
+                       'OR correct the column names in the <input>.')
+                errors.append(Error(ERROR, msg))
+                return errors, abouts
+
+        afp = fields.get(model.About.about_file_path_attr)
 
         if not afp or not afp.strip():
             msg = ('Empty column: %(afpa)r. '
