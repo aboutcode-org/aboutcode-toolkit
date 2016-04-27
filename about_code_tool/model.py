@@ -67,7 +67,7 @@ class Field(object):
         self.required = required
         # True if the field is present in an About object
         self.present = present
-        # True if the field should be capture in the generated ABOUT files
+        # True if the field should be captured in the generated ABOUT files
         self.capture = capture
 
         self.errors = []
@@ -648,7 +648,6 @@ class About(object):
         self.custom_fields = OrderedDict()
 
         self.errors = []
-
         # about file path relative to the root of an inventory using posix
         # path separators
         self.about_file_path = about_file_path
