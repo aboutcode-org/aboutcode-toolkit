@@ -106,7 +106,6 @@ def load_inventory(mapping, location, base_dir):
                        'OR correct the column names in the <input>.')
                 errors.append(Error(ERROR, msg))
                 return errors, abouts
-
         afp = fields.get(model.About.about_file_path_attr)
 
         if not afp or not afp.strip():
@@ -125,7 +124,9 @@ def load_inventory(mapping, location, base_dir):
         for e in ld_errors:
             if e.message == 'Field about_resource is required':
                 ld_errors.remove(e)
-        errors.extend(ld_errors)
+        for e in ld_errors:
+            if not e in errors:
+                errors.extend(ld_errors)
         abouts.append(about)
     return errors, abouts
 
