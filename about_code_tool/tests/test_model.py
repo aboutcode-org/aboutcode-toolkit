@@ -920,7 +920,7 @@ custom1: |
         test = u'''about_resource: .
 name: AboutCode
 version: 0.11.0
-custom1: |
+copyright: |
     multi
     line
 '''
@@ -1056,9 +1056,9 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('collect-inventory-errors')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = [
-            Error(INFO, u'Field date is a custom field'),
+            Error(INFO, u'Field date is not a supported field and is ignored.'),
             Error(CRITICAL, u'Field about_resource: Path distribute_setup.py not found'),
-            Error(INFO, u'Field date is a custom field'),
+            Error(INFO, u'Field date is not a supported field and is ignored.'),
             Error(CRITICAL, u'Field about_resource: Path date_test.py not found')]
         assert sorted(expected_errors) == sorted(errors)
 

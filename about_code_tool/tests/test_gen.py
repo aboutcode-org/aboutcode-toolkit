@@ -79,6 +79,8 @@ class GenTest(unittest.TestCase):
 
         expected_errors_msg = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
         assert (len(errors) == 1, 'Should return 1 error.')
+        print("!!!!!!!!!!!!!!!!!!!")
+        print(errors[0].message)
         assert expected_errors_msg in errors[0].message
 
     def test_generation_with_no_about_resource(self):
