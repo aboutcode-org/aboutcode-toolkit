@@ -166,8 +166,13 @@ def gen(mapping, location, output):
     errors, abouts = about_code_tool.gen.generate(mapping, location, output)
 
     lea = len(abouts)
-    lee = len(errors)
-    click.echo('Generated %(lea)d ABOUT files with %(lee)d errors or warning' % locals())
+    lee = 0
+
+    for e in errors:
+        # Only count as warning/error if CRITICAL, ERROR and WARNING
+        if e.severity > 20:
+            lee = lee + 1
+    click.echo('Generated %(lea)d ABOUT files with %(lee)d errors and/or warning' % locals())
     log_errors(errors, output)
 
 
