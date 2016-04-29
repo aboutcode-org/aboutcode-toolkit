@@ -33,6 +33,7 @@ import posixpath
 from collections import OrderedDict
 from posixpath import dirname
 
+import about_code_tool
 import saneyaml
 import unicodecsv
 
@@ -69,7 +70,6 @@ class Field(object):
         self.present = present
         # True if the field should be captured in the generated ABOUT files
         self.capture = capture
-
         self.errors = []
 
     def default_value(self):
@@ -179,8 +179,9 @@ class Field(object):
         required = self.required
         has_content = self.has_content
         present = self.present
+        capture = self.capture
         r = ('Field(name=%(name)r, value=%(value)r, required=%(required)r, '
-             'present=%(present)r)')
+             'present=%(present)r, capture=%(capture)r)')
         return r % locals()
 
     def __eq__(self, other):
@@ -597,44 +598,44 @@ class About(object):
         TODO: use schematics
         """
         self.fields = OrderedDict([
-            ('about_resource', AboutResourceField(required=True)),
-            ('name', SingleLineField(required=True)),
+            ('about_resource', AboutResourceField(required=True, capture=True)),
+            ('name', SingleLineField(required=True, capture=True)),
 
-            ('version', SingleLineField()),
-            ('download_url', UrlField()),
-            ('description', StringField()),
-            ('home_url', UrlField()),
-            ('notes', StringField()),
+            ('version', SingleLineField(capture=True)),
+            ('download_url', UrlField(capture=True)),
+            ('description', StringField(capture=True)),
+            ('home_url', UrlField(capture=True)),
+            ('notes', StringField(capture=True)),
 
-            ('license', ListField()),
-            ('license_name', StringField()),
-            ('license_file', FileTextField()),
-            ('license_url', UrlField()),
-            ('copyright', StringField()),
-            ('notice_file', FileTextField()),
-            ('notice_url', UrlField()),
+            ('license', ListField(capture=True)),
+            ('license_name', StringField(capture=True)),
+            ('license_file', FileTextField(capture=True)),
+            ('license_url', UrlField(capture=True)),
+            ('copyright', StringField(capture=True)),
+            ('notice_file', FileTextField(capture=True)),
+            ('notice_url', UrlField(capture=True)),
 
-            ('redistribute', BooleanField()),
-            ('attribute', BooleanField()),
-            ('track_change', BooleanField()),
-            ('modified', BooleanField()),
+            ('redistribute', BooleanField(capture=True)),
+            ('attribute', BooleanField(capture=True)),
+            ('track_change', BooleanField(capture=True)),
+            ('modified', BooleanField(capture=True)),
 
-            ('changelog_file', FileTextField()),
+            ('changelog_file', FileTextField(capture=True)),
 
-            ('owner', ListField()),
-            ('owner_url', UrlField()),
-            ('contact', ListField()),
-            ('author', ListField()),
+            ('owner', ListField(capture=True)),
+            ('owner_url', UrlField(capture=True)),
+            ('contact', ListField(capture=True)),
+            ('author', ListField(capture=True)),
 
-            ('vcs_tool', SingleLineField()),
-            ('vcs_repository', SingleLineField()),
-            ('vcs_path', SingleLineField()),
-            ('vcs_tag', SingleLineField()),
-            ('vcs_branch', SingleLineField()),
-            ('vcs_revision', SingleLineField()),
+            ('vcs_tool', SingleLineField(capture=True)),
+            ('vcs_repository', SingleLineField(capture=True)),
+            ('vcs_path', SingleLineField(capture=True)),
+            ('vcs_tag', SingleLineField(capture=True)),
+            ('vcs_branch', SingleLineField(capture=True)),
+            ('vcs_revision', SingleLineField(capture=True)),
 
-            ('checksum', ListField()),
-            ('spec_version', SingleLineField()),
+            ('checksum', ListField(capture=True)),
+            ('spec_version', SingleLineField(capture=True)),
         ])
 
         for name, field in self.fields.items():
@@ -710,7 +711,7 @@ class About(object):
         abrf.resolve(self.about_file_path)
         return u'\n'.join(abrf.resolved_paths)
 
-    def all_fields(self, with_absent=True, with_empty=True):
+    def all_fields(self, with_absent=True, with_empty=True, with_capture=True):
         """
         Return the list of all Field objects.
         If with_absent, include absent (not present) fields.
@@ -721,15 +722,19 @@ class About(object):
             if field.required:
                 all_fields.append(field)
             else:
-                if field.present:
-                    if not field.has_content:
-                        if with_empty:
-                            all_fields.append(field)
-                    else:
+                if with_capture:
+                    if field.present and field.capture:
                         all_fields.append(field)
                 else:
-                    if with_absent:
-                        all_fields.append(field)
+                    if field.present:
+                        if not field.has_content:
+                            if with_empty:
+                                all_fields.append(field)
+                        else:
+                            all_fields.append(field)
+                    else:
+                        if with_absent:
+                            all_fields.append(field)
         return all_fields
 
     def as_dict(self, with_paths=False, with_absent=True, with_empty=True):
@@ -760,6 +765,8 @@ class About(object):
         """
         errors = []
         seen_fields = OrderedDict()
+        if about_code_tool.util.have_mapping:
+            mapping = util.get_mappings(None)
         for name, value in fields:
             # normalize to lower case
             orig_name = name
@@ -784,45 +791,56 @@ class About(object):
                 standard_field.value = value
                 standard_field.present = True
             else:
-                # this is a special attribute
-                if name == self.about_file_path_attr:
-                    setattr(self, self.about_file_path_attr, value)
-                    continue
+                if about_code_tool.util.have_mapping:
+                    if name in mapping.keys():
+                        # this is a special attribute
+                        if name == self.about_file_path_attr:
+                            setattr(self, self.about_file_path_attr, value)
+                            continue
 
-                # this is a special attribute, skip entirely
-                if name == self.about_resource_path_attr:
-                    continue
+                        # this is a special attribute, skip entirely
+                        if name == self.about_resource_path_attr:
+                            continue
 
-                msg = (u'Field %(orig_name)s is a custom field')
-                errors.append(Error(INFO, msg % locals()))
-                custom_field = self.custom_fields.get(name)
-                if custom_field:
-                    custom_field.original_value = value
-                    custom_field.value = value
-                    custom_field.present = True
-                else:
-                    if name in dir(self):
-                        msg = (u'Field %(orig_name)s has an '
-                               u'illegal reserved name')
-                        errors.append(Error(ERROR, msg % locals()))
+                        msg = (u'Field %(orig_name)s is a custom field')
+                        errors.append(Error(INFO, msg % locals()))
+                        custom_field = self.custom_fields.get(name)
+                        if custom_field:
+                            custom_field.original_value = value
+                            custom_field.value = value
+                            custom_field.present = True
+                        else:
+                            if name in dir(self):
+                                msg = (u'Field %(orig_name)s has an '
+                                       u'illegal reserved name')
+                                errors.append(Error(ERROR, msg % locals()))
+                            else:
+                                # custom fields are always handled as StringFields
+                                custom_field = StringField(name=name,
+                                                           value=value,
+                                                           present=True,
+                                                           capture=True)
+                                self.custom_fields[name] = custom_field
+                                try:
+                                    setattr(self, name, custom_field)
+                                except:
+                                    # The intended captured error message should display
+                                    # the line number of where the invalid line is,
+                                    # but I am not able to get the line number from 
+                                    # the original code. By-passing the line number
+                                    # for now.
+                                    # msg = u'Invalid line: %(line)d: %(orig_name)r'
+                                    msg = u'Invalid line: %(orig_name)r: ' % locals()
+                                    msg += u'%s' % custom_field.value
+                                    errors.append(Error(CRITICAL, msg))
                     else:
-                        # custom fields are always handled as StringFields
-                        custom_field = StringField(name=name,
-                                                   value=value,
-                                                   present=True)
-                        self.custom_fields[name] = custom_field
-                        try:
-                            setattr(self, name, custom_field)
-                        except:
-                            # The intended captured error message should display
-                            # the line number of where the invalid line is,
-                            # but I am not able to get the line number from 
-                            # the original code. By-passing the line number
-                            # for now.
-                            # msg = u'Invalid line: %(line)d: %(orig_name)r'
-                            msg = u'Invalid line: %(orig_name)r: ' % locals()
-                            msg += u'%s' % custom_field.value
-                            errors.append(Error(CRITICAL, msg))
+                        msg = (u'Field %(orig_name)s is not a supported field and is not '+
+                               u'defined in the mapping file. This field is ignored.')
+                        errors.append(Error(INFO, msg % locals()))
+                else:
+                    if not name == self.about_file_path_attr:
+                        msg = (u'Field %(orig_name)s is not a supported field and is ignored.')
+                        errors.append(Error(INFO, msg % locals()))
         return errors
 
     def process(self, fields, base_dir=None):
@@ -919,19 +937,19 @@ class About(object):
         self.errors = errors
         return errors
 
-    def dumps(self, with_absent=False, with_empty=True):
+    def dumps(self, with_absent=False, with_empty=True, with_capture=True):
         """
         Return self as a formatted ABOUT string.
         If with_absent, include absent (not present) fields.
         If with_empty, include empty fields.
         """
         serialized = []
-        for field in self.all_fields(with_absent, with_empty):
+        for field in self.all_fields(with_absent, with_empty, with_capture):
             serialized.append(field.serialize())
         # always end with a new line
         return u'\n'.join(serialized) + u'\n'
 
-    def dump(self, location, with_absent=False, with_empty=True):
+    def dump(self, location, with_absent=False, with_empty=True, with_capture=True):
         """
         Write formatted ABOUT representation of self to location.
         If with_absent, include absent (not present) fields.
@@ -948,7 +966,7 @@ class About(object):
                 about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
             about_file_path += '.ABOUT'
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
-            dumped.write(self.dumps(with_absent, with_empty))
+            dumped.write(self.dumps(with_absent, with_empty, with_capture))
             for about_resource_value in self.about_resource.value:
                 path = posixpath.join(dirname(about_file_path), about_resource_value)
                 if not posixpath.exists(path):

@@ -37,6 +37,7 @@ UNC_PREFIX = u'\\\\?\\'
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.'
 
+have_mapping = False
 
 def invalid_chars(path):
     """
@@ -296,10 +297,13 @@ def load_csv(mapping, location):
     """
     Read CSV at location, return a list of ordered mappings, one for each row.
     """
+    global have_mapping
+    have_mapping = mapping
+
     results = []
     with codecs.open(location, mode='rb', encoding='utf-8', errors='ignore') as csvfile:
-        input_row = {}
         for row in OrderedDictReader(csvfile):
+            input_row = {}
             # convert all the column keys to lower case as the same behavior as
             # when user use the --mapping
             for key in row.keys():
