@@ -153,9 +153,20 @@ OUTPUT: Path to the directory to write ABOUT files to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=False, writable=True,
                                 dir_okay=True, resolve_path=True))
+# FIXME: The --mapping should have a feature for user to identify the 
+# specific mapping file instead of using only the default "MAPPING.CONFIG"
 @click.option('--mapping', is_flag=True, help='Use the mapping between columns names'
                         'in your CSV and the ABOUT field names as defined in'
                         'the MAPPING.CONFIG mapping configuration file.')
+@click.option('--extract_license', type=str, nargs=2,
+              help='Extract License text and create <license_key>.LICENSE side-by-side'
+                    'with the generated .ABOUT file using data fetched from a DejaCode License Library.'
+                    'The following additional options are required:\n\n'
+                    '--api_url - URL to the DejaCode License Library API endpoint\n\n'
+                    '--api_key - DejaCode API key'
+                    
+                    '\nExample syntax:\n\n'
+                    'about gen --extract_license --api_url=\'api_url\' --api_key=\'api_key\'')
 def gen(mapping, location, output):
     """
     Given a CVS inventory of ABOUT files at location, generate ABOUT files in
