@@ -54,14 +54,14 @@ class GenTest(unittest.TestCase):
         base_dir = get_test_loc('inv')
         errors, abouts = gen.load_inventory(mapping, location, base_dir)
         expected_errors = [
-            Error(INFO, u'Field custom1 is a custom field'),
+            Error(INFO, u'Field custom1 is not a supported field and is ignored.'),
             Error(CRITICAL, u'Field about_resource: Path . not found')]
         assert expected_errors == errors
 
         expected = [u'about_resource: .\n'
                     u'name: AboutCode\n'
                     u'version: 0.11.0\n'
-                    u'custom1: |\n'
+                    u'description: |\n'
                     u'    multi\n'
                     u'    line\n']
         result = [a.dumps(with_absent=False, with_empty=False)
