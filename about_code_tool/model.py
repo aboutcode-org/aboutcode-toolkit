@@ -721,10 +721,16 @@ class About(object):
         for field in self.fields.values() + self.custom_fields.values():
             if field.required:
                 all_fields.append(field)
+            # TODO: The following code need refactor
             else:
-                if with_capture:
-                    if field.present and field.capture:
+                if with_absent:
+                    all_fields.append(field)
+                elif field.present and with_capture:
+                    if with_empty:
                         all_fields.append(field)
+                    elif field.present and field.has_content:
+                        all_fields.append(field)
+                    
                 else:
                     if field.present:
                         if not field.has_content:
