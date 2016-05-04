@@ -175,7 +175,7 @@ policies = ('skip',  # DO_NOTHING_IF_ABOUT_FILE_EXIST
             )
 
 
-def generate(mapping, location, base_dir, policy=None, conf_location=None,
+def generate(mapping, extract_license, location, base_dir, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
     Load ABOUT data from an inventory at csv_location. Write ABOUT files to
@@ -183,8 +183,25 @@ def generate(mapping, location, base_dir, policy=None, conf_location=None,
     Policy defines which action to take for merging or overwriting fields and
     files. Return errors and about objects.
     """
+    api_url = ''
+    api_key = ''
+    # Check if the extract_license contains valid argument
+    if extract_license:
+        # Strip the ' and " for api_url, and api_key from input
+        api_url = extract_license[0].strip("'").strip("\"")
+        api_key = extract_license[1].strip("'").strip("\"")
+        gen_license = True
+
     bdir = to_posix(base_dir)
     errors, abouts = load_inventory(mapping, location, bdir)
+
+    if gen_license:
+        dje_license_dict, err = model.pre_process_and_dje_license_dict(abouts, api_url, api_key)
+        if err:
+            for e in err:
+                if not e in errors:
+                    errors.append(e)
+
     # Check if there is any Critical Error which should halt the generation
     for e in errors:
         # Severity 50 = Critical Error
@@ -233,6 +250,9 @@ def generate(mapping, location, base_dir, policy=None, conf_location=None,
                                    with_absent=with_absent)
             for e in not_exist_errors:
                 errors.append(Error(ERROR, e))
+            if gen_license:
+                # Write generated LICENSE file
+                about.dump_lic(dump_loc, dje_license_dict)
         except Exception, e:
             # only keep the first 100 char of the exception
             emsg = repr(e)[:100]

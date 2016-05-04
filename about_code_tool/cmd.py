@@ -162,19 +162,19 @@ OUTPUT: Path to the directory to write ABOUT files to
               help='Extract License text and create <license_key>.LICENSE side-by-side'
                     'with the generated .ABOUT file using data fetched from a DejaCode License Library.'
                     'The following additional options are required:\n\n'
-                    '--api_url - URL to the DejaCode License Library API endpoint\n\n'
-                    '--api_key - DejaCode API key'
-                    
+                    'api_url - URL to the DejaCode License Library API endpoint\n\n'
+                    'api_key - DejaCode API key'
+
                     '\nExample syntax:\n\n'
-                    'about gen --extract_license --api_url=\'api_url\' --api_key=\'api_key\'')
-def gen(mapping, location, output):
+                    'about gen --extract_license \'api_url\' \'api_key\'')
+def gen(mapping, extract_license, location, output):
     """
     Given a CVS inventory of ABOUT files at location, generate ABOUT files in
     base directory.
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating ABOUT files...')
-    errors, abouts = about_code_tool.gen.generate(mapping, location, output)
+    errors, abouts = about_code_tool.gen.generate(mapping, extract_license, location, output)
 
     lea = len(abouts)
     lee = 0

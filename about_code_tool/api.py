@@ -103,3 +103,65 @@ def get_license_info(self, url, api_username, api_key, license_key,
     name = data.get('name')
     text = data.get('full_text')
     return errors, LicenseInfo(key, name, text)
+
+
+def request_license_data(url, api_key, license_key):
+    """
+    Return a dictionary of license data.
+    Send a request to a given API URL to gather license data for
+    license_key, authenticating through an api_key.
+    """
+    payload = {
+        'api_key': api_key,
+        'key': license_key,
+        'format': 'json'
+    }
+
+    url = url.rstrip('/')
+    encoded_payload = urllib.urlencode(payload)
+    full_url = '%(url)s/?%(encoded_payload)s' % locals()
+    # handle special characters in URL such as space etc.
+    full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
+    headers = {'Authorization': 'Token %s' % api_key}
+    license_data = {}
+    errors = []
+    try:
+        request = urllib2.Request(full_url, headers=headers)
+        response = urllib2.urlopen(request)
+        response_content = response.read()
+        license_data = json.loads(response_content)
+        if not license_data['results']:
+            msg = (u'Invalid \'dje_license_key\': ' + license_key)
+            errors.append(Error(ERROR, msg))
+    except urllib2.HTTPError, http_e:
+        # some auth problem
+        if http_e.code == 403:
+            msg = (u'Authorization denied. Invalid \'--api_key\'. License generation is skipped.')
+            errors.append(Error(ERROR, msg))
+        else:
+            # Since no api_url/api_key/network status have
+            # problem detected, it yields 'dje_license_key' is the cause of
+            # this exception.
+            msg = (u'Invalid \'dje_license_key\': ' + license_key)
+            errors.append(Error(ERROR, msg))
+            #self.errors.append(Error(VALUE, 'dje_license_key', license_key, "Invalid 'dje_license_key'"))
+    except ValueError as e:
+        # FIXME: when does this happen?
+        pass
+    except Exception as e:
+        pass
+    finally:
+        license_data = license_data.get('results')[0] if license_data.get('count') == 1 else {}
+    return license_data, errors
+
+
+def get_license_details_from_api(url, api_key, license_key):
+    """
+    Returns the license_text of a given license_key using an API request.
+    Returns an empty string if the text is not available.
+    """
+    license_data, errors = request_license_data(url, api_key, license_key)
+    license_name = license_data.get('name', '')
+    license_text = license_data.get('full_text', '')
+    license_key = license_data.get('key', '')
+    return license_name, license_key, license_text, errors

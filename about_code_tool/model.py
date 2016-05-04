@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ============================================================================
-
 """
 AboutCode is a tool to process ABOUT files. ABOUT files are small text files
 that document the provenance (aka. the origin and license) of software
@@ -26,23 +25,24 @@ inventories.
 from __future__ import print_function
 
 import codecs
-import os
-import re
-import urlparse
-import posixpath
 from collections import OrderedDict
+import os
 from posixpath import dirname
+import posixpath
+import re
+import urllib2
+from urlparse import urljoin, urlparse
 
+from about_code_tool import CRITICAL
+from about_code_tool import ERROR
+from about_code_tool import Error
+from about_code_tool import INFO
+from about_code_tool import WARNING
+from about_code_tool import util
+from about_code_tool import api
 import about_code_tool
 import saneyaml
 import unicodecsv
-
-from about_code_tool import Error
-from about_code_tool import CRITICAL
-from about_code_tool import WARNING
-from about_code_tool import ERROR
-from about_code_tool import INFO
-from about_code_tool import util
 
 
 class Field(object):
@@ -335,7 +335,7 @@ class UrlField(ListField):
         """
         Return True if a URL is valid.
         """
-        scheme, netloc, _path, _p, _q, _frg = urlparse.urlparse(url)
+        scheme, netloc, _path, _p, _q, _frg = urlparse(url)
         valid = scheme in ('http', 'https', 'ftp') and netloc
         return valid
 
@@ -636,6 +636,9 @@ class About(object):
 
             ('checksum', ListField(capture=True)),
             ('spec_version', SingleLineField(capture=True)),
+
+            # DJE Field
+            ('dje_license_key', SingleLineField(capture=True)),
         ])
 
         for name, field in self.fields.items():
@@ -982,6 +985,37 @@ class About(object):
                     errors.append(msg)
         return errors
 
+    def dump_lic(self, location, license_dict):
+        """
+        Write LICENSE files
+        """
+        errors = []
+        loc = util.to_posix(location)
+        parent = posixpath.dirname(loc)
+        if not os.path.exists(parent):
+            os.makedirs(parent)
+        about_file_path = loc
+
+        if self.dje_license_key:
+            #print(self.about_file_path)
+            #print(self.dje_license_key.value)
+            #print(license_dict)
+            print(license_dict[self.dje_license_key.value])
+        """if not about_file_path.endswith('.ABOUT'):
+            if about_file_path.endswith('/'):
+                about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
+            about_file_path += '.ABOUT'
+        with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
+            dumped.write(self.dumps(with_absent, with_empty, with_capture))
+            for about_resource_value in self.about_resource.value:
+                path = posixpath.join(dirname(about_file_path), about_resource_value)
+                if not posixpath.exists(path):
+                    msg = (u'The reference file : '
+                           u'%(path)s '
+                           u'does not exist' % locals())
+                    errors.append(msg)
+        return errors"""
+
 # valid field name
 field_name = r'(?P<name>[a-z][0-9a-z_]*)'
 
@@ -1253,3 +1287,67 @@ def common_licenses(abouts):
     the list of about objects with license references for repeated licenses.
     """
     pass
+
+def pre_process_and_dje_license_dict(abouts, api_url, api_key):
+    """
+    Modify a list of About data dictionaries by adding license information
+    fetched from the DejaCode API.
+    """
+    dje_uri = urlparse(api_url)
+    domain = '{uri.scheme}://{uri.netloc}/'.format(uri=dje_uri)
+    dje_lic_urn = urljoin(domain, 'urn/?urn=urn:dje:license:')
+    key_text_dict = {}
+    license_dict = {}
+    errors = []
+    if util.have_network_connection():
+        if not valid_api_url(api_url):
+            msg = u'URL not reachable. Invalid \'--api_url\'. License generation is skipped.'
+            errors.append(Error(ERROR, msg))
+    else:
+        msg = u'Network problem. Please check your Internet connection. License generation is skipped.'
+        errors.append(Error(ERROR, msg))
+    for about in abouts:
+        # No need to go thru all the about objects for license extraction if we detected
+        # invalid '--api_key'
+        auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
+        if auth_error in errors:
+            break
+        if about.dje_license_key:
+            if about.dje_license_key.present:
+                lic_key = about.dje_license_key.value
+                if '\n' in lic_key:
+                    msg = u'No multiple licenses or newline character are accepted in the \'dje_license_key\': ' + about.dje_license_key.value
+                    errors.append(Error(ERROR, msg))
+                    continue
+                if lic_key not in license_dict:
+                    detail_list = []
+                    license_name, license_key, license_text, errs = api.get_license_details_from_api(api_url, api_key, lic_key)
+                    for e in errs:
+                        if e not in errors:
+                            errors.append(e)
+                    if license_key:
+                        license_dict[license_key] = license_name
+                        dje_lic_url = dje_lic_urn + license_key
+                        detail_list.append(license_name)
+                        detail_list.append(license_text)
+                        detail_list.append(dje_lic_url)
+                        key_text_dict[license_key] = detail_list
+            else:
+                pass
+    return key_text_dict, errors
+
+def valid_api_url(api_url):
+    try:
+        request = urllib2.Request(api_url)
+        # This will always goes to exception as no key are provided.
+        # The purpose of this code is to validate the provided api_url is correct
+        response = urllib2.urlopen(request)
+    except urllib2.HTTPError, http_e:
+        # The 403 error code is refer to "Authentication credentials were not provided.".
+        # This is correct as no key are provided.
+        if http_e.code == 403:
+            return True
+    except:
+        # All other exceptions yield to invalid api_url
+        pass
+    return False

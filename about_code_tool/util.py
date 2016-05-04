@@ -18,12 +18,14 @@ from __future__ import print_function
 import codecs
 from collections import OrderedDict
 import errno
+import httplib
 import ntpath
 import os
 from os.path import abspath
 from os.path import dirname
 from os.path import join
 import posixpath
+import socket
 import string
 import sys
 
@@ -313,3 +315,15 @@ def load_csv(mapping, location):
     if mapping:
         results = apply_mappings(results)
     return results
+
+def have_network_connection():
+    """
+    Return True if an HTTP connection to some public web site is possible.
+    """
+    http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)
+    try:
+        http_connection.connect()
+    except socket.error:
+        return False
+    else:
+        return True
