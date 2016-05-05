@@ -989,32 +989,21 @@ class About(object):
         """
         Write LICENSE files
         """
-        errors = []
+        license_name = license_context = license_url = ''
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
         if not os.path.exists(parent):
             os.makedirs(parent)
-        about_file_path = loc
 
-        if self.dje_license_key:
-            #print(self.about_file_path)
-            #print(self.dje_license_key.value)
-            #print(license_dict)
-            print(license_dict[self.dje_license_key.value])
-        """if not about_file_path.endswith('.ABOUT'):
-            if about_file_path.endswith('/'):
-                about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
-            about_file_path += '.ABOUT'
-        with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
-            dumped.write(self.dumps(with_absent, with_empty, with_capture))
-            for about_resource_value in self.about_resource.value:
-                path = posixpath.join(dirname(about_file_path), about_resource_value)
-                if not posixpath.exists(path):
-                    msg = (u'The reference file : '
-                           u'%(path)s '
-                           u'does not exist' % locals())
-                    errors.append(msg)
-        return errors"""
+        if self.dje_license_key.present:
+            lic_key = self.dje_license_key.value
+            if license_dict[lic_key]:
+                license_path = posixpath.join(parent, lic_key)
+                license_path += u'.LICENSE'
+                license_name, license_context, license_url = license_dict[lic_key]
+                with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
+                    lic.write(license_context)
+        return license_name, license_context, license_url
 
 # valid field name
 field_name = r'(?P<name>[a-z][0-9a-z_]*)'
