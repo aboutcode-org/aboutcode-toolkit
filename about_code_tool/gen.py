@@ -185,6 +185,7 @@ def generate(mapping, extract_license, location, base_dir, policy=None, conf_loc
     """
     api_url = ''
     api_key = ''
+    gen_license = False
     # Check if the extract_license contains valid argument
     if extract_license:
         # Strip the ' and " for api_url, and api_key from input
@@ -245,24 +246,27 @@ def generate(mapping, extract_license, location, base_dir, policy=None, conf_loc
                     about.about_resource.original_value = basename(about.about_file_path)
                 about.about_resource.present = True
 
+            if gen_license:
+                # Write generated LICENSE file
+                lic_name, lic_context, lic_url = about.dump_lic(dump_loc, dje_license_dict)
+                if lic_name:
+                    if not about.license_name.present:
+                        about.license_name.value = lic_name
+                        about.license_name.present = True
+                    if not about.license_file.present:
+                        about.license_file.value = [about.dje_license_key.value + u'.LICENSE']
+                        about.license_file.present = True
+                    if not about.license_url.present:
+                        about.license_url.value = [lic_url]
+                        about.license_url.present = True
+
             # Write the ABOUT file and check does the referenced file exist
             not_exist_errors = about.dump(dump_loc,
                                    with_empty=with_empty,
                                    with_absent=with_absent)
             for e in not_exist_errors:
                 errors.append(Error(ERROR, e))
-            if gen_license:
-                # Write generated LICENSE file
-                lic_name, lic_context, lic_url = about.dump_lic(dump_loc, dje_license_dict)
-                if not about.license_name.present:
-                    about.license_name.value = lic_name
-                    about.license_name.present = True
-                if not about.license_file.present:
-                    about.license_file.value = about.dje_license_key.value + u'.LICENSE'
-                    about.license_file.present = True
-                if not about.license_url.present:
-                    about.license_url.value = lic_url
-                    about.license_url.present = True
+
         except Exception, e:
             # only keep the first 100 char of the exception
             emsg = repr(e)[:100]

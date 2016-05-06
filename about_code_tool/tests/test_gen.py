@@ -70,25 +70,25 @@ class GenTest(unittest.TestCase):
 
     def test_generation_dir_endswith_space(self):
         mapping = None
+        extract_license = False
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, location,
+        errors, abouts = gen.generate(mapping, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
 
         expected_errors_msg = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
         assert (len(errors) == 1, 'Should return 1 error.')
-        print("!!!!!!!!!!!!!!!!!!!")
-        print(errors[0].message)
         assert expected_errors_msg in errors[0].message
 
     def test_generation_with_no_about_resource(self):
         mapping = None
+        extract_license = False
         location = get_test_loc('gen/inv2.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, location,
+        errors, abouts = gen.generate(mapping, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
         expected_dict = OrderedDict()
@@ -99,10 +99,11 @@ class GenTest(unittest.TestCase):
 
     def test_generation_with_no_about_resource_reference(self):
         mapping = None
+        extract_license = False
         location = get_test_loc('gen/inv3.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, location,
+        errors, abouts = gen.generate(mapping, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
         expected_dict = OrderedDict()
@@ -115,10 +116,12 @@ class GenTest(unittest.TestCase):
 
     @expectedFailure
     def test_generate(self):
+        mapping = ''
+        extract_license = False
         location = get_test_loc('gen/inv.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location, base_dir=gen_dir,
+        errors, abouts = gen.generate(mapping, extract_license, location, base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
 
         expected_errors = [Error(INFO, u'Field custom1 is a custom field')]
@@ -140,10 +143,12 @@ class GenTest(unittest.TestCase):
 
     @expectedFailure
     def test_generate_complex_inventory(self):
+        mapping = ''
+        extract_license = False
         location = get_test_loc('inventory/complex/about/expected.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location,
+        errors, abouts = gen.generate(mapping, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
 

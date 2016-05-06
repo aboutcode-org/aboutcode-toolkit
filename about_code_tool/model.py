@@ -140,7 +140,7 @@ class Field(object):
         """
         name = self.name
         value = self.serialized_value() or u''
-        if self.has_content:
+        if self.has_content or self.value:
             value = value.splitlines(True)
             # multi-line
             if len(value) > 1:
@@ -204,7 +204,7 @@ class StringField(Field):
         return errors
 
     def _serialized_value(self):
-        return self.value if self.has_content else u''
+        return self.value if self.value else u''
 
     def __eq__(self, other):
         """
@@ -287,7 +287,7 @@ class ListField(StringField):
         return errors
 
     def _serialized_value(self):
-        return u'\n'.join(self.value) if self.has_content else u''
+        return u'\n'.join(self.value) if self.value else u''
 
     def __eq__(self, other):
         """
@@ -731,12 +731,12 @@ class About(object):
                 elif field.present and with_capture:
                     if with_empty:
                         all_fields.append(field)
-                    elif field.present and field.has_content:
+                    elif field.present and field.value:
                         all_fields.append(field)
                     
                 else:
                     if field.present:
-                        if not field.has_content:
+                        if not field.value:
                             if with_empty:
                                 all_fields.append(field)
                         else:
@@ -997,12 +997,15 @@ class About(object):
 
         if self.dje_license_key.present:
             lic_key = self.dje_license_key.value
-            if license_dict[lic_key]:
-                license_path = posixpath.join(parent, lic_key)
-                license_path += u'.LICENSE'
-                license_name, license_context, license_url = license_dict[lic_key]
-                with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
-                    lic.write(license_context)
+            try:
+                if license_dict[lic_key]:
+                    license_path = posixpath.join(parent, lic_key)
+                    license_path += u'.LICENSE'
+                    license_name, license_context, license_url = license_dict[lic_key]
+                    with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
+                        lic.write(license_context)
+            except:
+                pass
         return license_name, license_context, license_url
 
 # valid field name
