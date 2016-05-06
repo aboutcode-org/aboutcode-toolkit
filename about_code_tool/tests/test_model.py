@@ -594,7 +594,7 @@ vcs_branch:
 vcs_revision:
 checksum:
 spec_version:
-dje_license_key:    
+dje_license_key:
 '''
 #         print()
 #         print('a')
