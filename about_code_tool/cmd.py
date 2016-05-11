@@ -212,9 +212,9 @@ def fetch(location):
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
-@click.argument('template', nargs=1, required=False,
-                type=click.Path(exists=False, file_okay=True, writable=True,
-                                dir_okay=False, resolve_path=True))
+#@click.argument('template', nargs=1, required=False,
+#                type=click.Path(exists=False, file_okay=True, writable=True,
+#                                dir_okay=False, resolve_path=True))
 @click.argument('inventory_location', nargs=1, required=False,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))

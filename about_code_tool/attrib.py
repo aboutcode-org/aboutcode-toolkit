@@ -20,6 +20,9 @@ import os
 import codecs
 
 import jinja2
+import posixpath
+
+from licenses import COMMON_LICENSES
 
 
 
@@ -35,7 +38,21 @@ def generate(abouts, template_string=None):
     template = jinja2.Template(template_string)
 
     try:
-        rendered = template.render(abouts=abouts)
+        lic_dict = {}
+        lic_name_dict = {}
+        lic_data = {}
+        for about in abouts:
+            lic_name = about.license_name.value
+            if about.license_file.value and lic_name:
+                for lic_key in about.license_file.value.keys():
+                    if not lic_key in lic_dict:
+                        lic_dict[lic_key] = about.license_file.value[lic_key]
+                        lic_name_dict[lic_key] = lic_name
+
+        for key in sorted(lic_dict):
+            lic_data[lic_name_dict[key]] = lic_dict[key]
+
+        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, lic_data=lic_data)
     except Exception, e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
@@ -59,7 +76,7 @@ def check_template(template_string):
 # FIXME: the template dir should be outside the code tree
 # FIXME: use posix paths
 default_template = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                'templates', 'default2.html')
+                                'templates', 'default3.html')
 
 def generate_from_file(abouts, template_loc=None):
     """
@@ -83,7 +100,6 @@ def generate_and_save(abouts, output_location, template_loc=None,
     # TODO: Filter abouts based on CSV at inventory_location.
     if inventory_location:
         pass
-
     rendered = generate_from_file(abouts, template_loc=template_loc)
 
     if rendered:
