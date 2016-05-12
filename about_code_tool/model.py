@@ -1113,7 +1113,10 @@ def collect_inventory(location):
     for loc in locations:
         about_file_path = util.get_relative_path(location, loc)
         about = About(loc, about_file_path)
-        errors.extend(about.errors)
+        # Avoid logging duplicated/same errors multiple times
+        for about_error in about.errors:
+            if not about_error in errors:
+                errors.append(about_error)
         abouts.append(about)
     return errors, abouts
 

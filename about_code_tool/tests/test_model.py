@@ -1053,7 +1053,6 @@ class CollectorTest(unittest.TestCase):
         expected_errors = [
             Error(INFO, u'Field date is not a supported field and is ignored.'),
             Error(CRITICAL, u'Field about_resource: Path distribute_setup.py not found'),
-            Error(INFO, u'Field date is not a supported field and is ignored.'),
             Error(CRITICAL, u'Field about_resource: Path date_test.py not found')]
         assert sorted(expected_errors) == sorted(errors)
 
