@@ -96,7 +96,6 @@ def generate_and_save(abouts, output_location, template_loc=None,
     Filter the list of about object based on the inventory CSV at 
     inventory_location.
     """
-    # TODO: Filter abouts based on CSV at inventory_location.
     updated_abouts = []
     filter_afp = []
     if inventory_location:
@@ -109,7 +108,7 @@ def generate_and_save(abouts, output_location, template_loc=None,
                     afp = afp.partition('/')[2]
                 filter_afp.append(afp)
         list = as_about_paths(filter_afp)
-        
+
         for about in abouts:
             for fp in list:
                 if about.about_file_path == fp:
@@ -121,7 +120,7 @@ def generate_and_save(abouts, output_location, template_loc=None,
     if rendered:
         with codecs.open(output_location, 'wb', encoding='utf-8') as of:
             of.write(rendered)
-
+    
 
 def as_about_paths(paths):
     """
