@@ -16,14 +16,13 @@
 
 from __future__ import print_function
 
-import os
 import codecs
+import csv
+import os
 
 import jinja2
-import posixpath
-
 from licenses import COMMON_LICENSES
-
+from posixpath import basename, dirname
 
 
 def generate(abouts, template_string=None):
@@ -98,10 +97,42 @@ def generate_and_save(abouts, output_location, template_loc=None,
     inventory_location.
     """
     # TODO: Filter abouts based on CSV at inventory_location.
+    updated_abouts = []
+    filter_afp = []
     if inventory_location:
-        pass
-    rendered = generate_from_file(abouts, template_loc=template_loc)
+        with open(inventory_location, 'rU') as inp:
+            reader = csv.DictReader(inp)
+            about_data = [data for data in reader]
+            for data in about_data:
+                afp = data['about_file_path']
+                if afp.startswith('/'):
+                    afp = afp.partition('/')[2]
+                filter_afp.append(afp)
+        list = as_about_paths(filter_afp)
+        
+        for about in abouts:
+            for fp in list:
+                if about.about_file_path == fp:
+                    updated_abouts.append(about)
+    else:
+        updated_abouts = abouts
+    rendered = generate_from_file(updated_abouts, template_loc=template_loc)
 
     if rendered:
         with codecs.open(output_location, 'wb', encoding='utf-8') as of:
             of.write(rendered)
+
+
+def as_about_paths(paths):
+    """
+    Given a list of paths, return a list of paths that point all to .ABOUT files.
+    """
+    normalized_paths = []
+    for path in paths:
+        if path.endswith('.ABOUT'):
+            normalized_paths.append(path)
+        else:
+            if path.endswith('/'):
+                path += basename(dirname(path))
+            normalized_paths.append(path + '.ABOUT')
+    return normalized_paths
