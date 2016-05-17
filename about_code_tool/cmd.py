@@ -227,10 +227,15 @@ def attrib(location, output, template, inventory_location=None,):
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating attribution...')
     errors, abouts = about_code_tool.model.collect_inventory(location)
-    about_code_tool.attrib.generate_and_save(abouts, output, 
+    err = about_code_tool.attrib.generate_and_save(abouts, output, 
                                              template_loc=template, 
                                              inventory_location=inventory_location)
-    log_errors(errors)
+    if err:
+        click.echo('The paths in the provided \'inventory_location\' do not match with ' +
+                'the \'LOCATION\'.')
+        click.echo('Generation halted.')
+    else:
+        click.echo('Attribution generation finished.')
 
 
 @cli.command(cls=AboutCommand)

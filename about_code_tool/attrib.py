@@ -19,10 +19,10 @@ from __future__ import print_function
 import codecs
 import csv
 import os
+from posixpath import basename, dirname
 
 import jinja2
 from licenses import COMMON_LICENSES
-from posixpath import basename, dirname
 
 
 def generate(abouts, template_string=None):
@@ -115,12 +115,17 @@ def generate_and_save(abouts, output_location, template_loc=None,
                     updated_abouts.append(about)
     else:
         updated_abouts = abouts
+    if not updated_abouts:
+        # return false if paths in 'inventory_location' do not match with
+        # the location 
+        return False
     rendered = generate_from_file(updated_abouts, template_loc=template_loc)
 
     if rendered:
         with codecs.open(output_location, 'wb', encoding='utf-8') as of:
             of.write(rendered)
-    
+    # return True if no error is detected
+    return True
 
 def as_about_paths(paths):
     """
