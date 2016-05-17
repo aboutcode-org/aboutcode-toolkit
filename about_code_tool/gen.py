@@ -200,6 +200,7 @@ def generate(mapping, extract_license, location, base_dir, policy=None, conf_loc
         dje_license_dict, err = model.pre_process_and_dje_license_dict(abouts, api_url, api_key)
         if err:
             for e in err:
+                # Avoid having same error multiple times
                 if not e in errors:
                     errors.append(e)
 
@@ -256,9 +257,11 @@ def generate(mapping, extract_license, location, base_dir, policy=None, conf_loc
                     if not about.license_file.present:
                         about.license_file.value = [about.dje_license_key.value + u'.LICENSE']
                         about.license_file.present = True
-                    if not about.license_url.present:
-                        about.license_url.value = [lic_url]
-                        about.license_url.present = True
+                        # The only time the tool fills in the license URL is
+                        # when no license file present
+                        if not about.license_url.present:
+                            about.license_url.value = [lic_url]
+                            about.license_url.present = True
 
             # Write the ABOUT file and check does the referenced file exist
             not_exist_errors = about.dump(dump_loc,
