@@ -159,6 +159,11 @@ OUTPUT: Path to the directory to write ABOUT files to
 @click.option('--mapping', is_flag=True, help='Use the mapping between columns names'
                         'in your CSV and the ABOUT field names as defined in'
                         'the MAPPING.CONFIG mapping configuration file.')
+@click.option('--license_text_location', nargs=1,
+                type=click.Path(exists=True, file_okay=False,
+                                dir_okay=True, writable=False,
+                                readable=True, resolve_path=True),
+              help = 'Copy the \'license_text_file\' from the directory to the generated location')
 @click.option('--extract_license', type=str, nargs=2,
               help='Extract License text and create <license_key>.LICENSE side-by-side'
                     'with the generated .ABOUT file using data fetched from a DejaCode License Library.'
@@ -168,7 +173,7 @@ OUTPUT: Path to the directory to write ABOUT files to
 
                     '\nExample syntax:\n\n'
                     'about gen --extract_license \'api_url\' \'api_key\'')
-def gen(mapping, extract_license, location, output):
+def gen(mapping, license_text_location, extract_license, location, output):
     """
     Given a CVS inventory of ABOUT files at location, generate ABOUT files in
     base directory.
@@ -176,6 +181,7 @@ def gen(mapping, extract_license, location, output):
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating ABOUT files...')
     errors, abouts = about_code_tool.gen.generate(mapping, extract_license, location, output)
+
 
     lea = len(abouts)
     lee = 0
