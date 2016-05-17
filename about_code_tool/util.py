@@ -35,11 +35,24 @@ import unicodecsv
 
 
 on_windows = 'win32' in sys.platform
+
+
+def posix_path(path):
+    """
+    Return a path using POSIX path separators given a path that may
+    contain POSIX or windows separators, converting \ to /.
+    """
+    return path.replace(ntpath.sep, posixpath.sep)
+
+
 UNC_PREFIX = u'\\\\?\\'
+UNC_PREFIX_POSIX = posix_path(UNC_PREFIX)
+UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.'
 
 have_mapping = False
+
 
 def invalid_chars(path):
     """
@@ -327,3 +340,55 @@ def have_network_connection():
         return False
     else:
         return True
+
+def extract_zip(location):
+    """
+    Extract a zip file at location in a temp directory and return the temporary
+    directory where the archive was extracted.
+    """
+    import zipfile
+    import tempfile
+    if not zipfile.is_zipfile(location):
+        raise Exception('Incorrect zip file %(location)r' % locals())
+
+    archive_base_name = os.path.basename(location).replace('.zip', '')
+    base_dir = tempfile.mkdtemp()
+    target_dir = os.path.join(base_dir, archive_base_name)
+    target_dir = add_unc(target_dir)
+    os.makedirs(target_dir)
+
+    if target_dir.endswith((ntpath.sep, posixpath.sep)):
+        target_dir = target_dir[:-1]
+
+    with zipfile.ZipFile(location) as zipf:
+        for info in zipf.infolist():
+            name = info.filename
+            content = zipf.read(name)
+            target = os.path.join(target_dir, name)
+            is_dir = target.endswith((ntpath.sep, posixpath.sep))
+            if is_dir:
+                target = target[:-1]
+            parent = os.path.dirname(target)
+            if on_windows:
+                target = target.replace(posixpath.sep, ntpath.sep)
+                parent = parent.replace(posixpath.sep, ntpath.sep)
+            if not os.path.exists(parent):
+                os.makedirs(parent)
+            if not content and is_dir:
+                if not os.path.exists(target):
+                    os.makedirs(target)
+            if not os.path.exists(target):
+                with open(target, 'wb') as f:
+                    f.write(content)
+    return target_dir
+
+
+def add_unc(location):
+    """
+    Convert a location to an absolute Window UNC path to support long paths on
+    Windows. Return the location unchanged if not on Windows. See
+    https://msdn.microsoft.com/en-us/library/aa365247.aspx
+    """
+    if on_windows and not location.startswith(UNC_PREFIXES):
+        return UNC_PREFIX + os.path.abspath(location)
+    return location

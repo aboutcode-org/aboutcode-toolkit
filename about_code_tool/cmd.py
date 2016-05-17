@@ -34,7 +34,8 @@ from about_code_tool import WARNING
 from about_code_tool import ERROR
 from about_code_tool import INFO
 from about_code_tool import NOTSET
-from about_code_tool.util import to_posix
+from util import to_posix
+from util import extract_zip
 
 
 __version__ = '3.0.0dev'
@@ -226,6 +227,11 @@ def attrib(location, output, template, inventory_location=None,):
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating attribution...')
+
+    if location.lower().endswith('.zip'):
+        # accept zipped ABOUT files as input
+        location = extract_zip(location)
+
     errors, abouts = about_code_tool.model.collect_inventory(location)
     no_match_errors = about_code_tool.attrib.generate_and_save(abouts, output, 
                                              template_loc=template, 
