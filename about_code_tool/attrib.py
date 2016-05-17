@@ -22,6 +22,8 @@ import os
 from posixpath import basename, dirname
 
 import jinja2
+from about_code_tool import ERROR
+from about_code_tool import Error
 from licenses import COMMON_LICENSES
 
 
@@ -98,6 +100,9 @@ def generate_and_save(abouts, output_location, template_loc=None,
     """
     updated_abouts = []
     filter_afp = []
+    afp_list = []
+    not_match_path = []
+    errors = []
     if inventory_location:
         with open(inventory_location, 'rU') as inp:
             reader = csv.DictReader(inp)
@@ -109,23 +114,37 @@ def generate_and_save(abouts, output_location, template_loc=None,
                 filter_afp.append(afp)
         list = as_about_paths(filter_afp)
 
+        # Get the not matching list if any
+        for about in abouts:
+            afp_list.append(about.about_file_path)
+        for fp in list:
+            if not fp in afp_list:
+                not_match_path.append(fp)
+
+        if not_match_path:
+            if len(not_match_path) == len(list):
+                msg = ('None of the paths in the provided \'inventory_location\' match with the \'LOCATION\'.')
+                errors.append(Error(ERROR, msg))
+                return errors
+            else:
+                for p in not_match_path:
+                    msg = ('Path: ' + p + ' cannot be found.')
+                    errors.append(Error(ERROR, msg))
+
         for about in abouts:
             for fp in list:
                 if about.about_file_path == fp:
                     updated_abouts.append(about)
     else:
         updated_abouts = abouts
-    if not updated_abouts:
-        # return false if paths in 'inventory_location' do not match with
-        # the location 
-        return False
+
     rendered = generate_from_file(updated_abouts, template_loc=template_loc)
 
     if rendered:
         with codecs.open(output_location, 'wb', encoding='utf-8') as of:
             of.write(rendered)
-    # return True if no error is detected
-    return True
+
+    return errors
 
 def as_about_paths(paths):
     """
