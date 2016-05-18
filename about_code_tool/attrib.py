@@ -25,6 +25,7 @@ import jinja2
 from about_code_tool import ERROR
 from about_code_tool import Error
 from licenses import COMMON_LICENSES
+from util import get_mappings
 
 
 def generate(abouts, template_string=None):
@@ -91,7 +92,7 @@ def generate_from_file(abouts, template_loc=None):
     return generate(abouts, template_string=tpls)
 
 
-def generate_and_save(abouts, output_location, template_loc=None,
+def generate_and_save(abouts, output_location,  mapping, template_loc=None,
                       inventory_location=None):
     """
     Generate attribution using template and save at output_location.
@@ -107,8 +108,22 @@ def generate_and_save(abouts, output_location, template_loc=None,
         with open(inventory_location, 'rU') as inp:
             reader = csv.DictReader(inp)
             about_data = [data for data in reader]
+            map_key = 'about_file_path'
+
+            if mapping:
+                mapping = get_mappings()
+                if 'about_file_path' in mapping:
+                    map_key = mapping['about_file_path']
+
             for data in about_data:
-                afp = data['about_file_path']
+                try:
+                    afp = data[map_key]
+                except Exception, e:
+                    # 'about_file_path' key/column doesn't exist
+                    msg = (u'The required key: \'about_file_path\' does not exist. Generation halted.')
+                    errors.append(Error(ERROR, msg))
+                    return errors
+
                 if afp.startswith('/'):
                     afp = afp.partition('/')[2]
                 filter_afp.append(afp)

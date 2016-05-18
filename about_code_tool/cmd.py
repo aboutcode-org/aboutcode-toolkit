@@ -237,7 +237,8 @@ def fetch(location):
                                 dir_okay=False, resolve_path=True))
 @click.option('--template', type=click.Path(exists=True), nargs=1,
               help='Use the custom template for the Attribution Generation')
-def attrib(location, output, template, inventory_location=None,):
+@click.option('--mapping', is_flag=True, help='Configure the mapping key from the MAPPING.CONFIG')
+def attrib(location, output, template, mapping, inventory_location=None,):
     """
     Generate attribution document at output using the directory of
     ABOUT files at location, the template file (or a default) and an
@@ -252,8 +253,8 @@ def attrib(location, output, template, inventory_location=None,):
         location = extract_zip(location)
 
     errors, abouts = about_code_tool.model.collect_inventory(location)
-    no_match_errors = about_code_tool.attrib.generate_and_save(abouts, output, 
-                                             template_loc=template, 
+    no_match_errors = about_code_tool.attrib.generate_and_save(abouts, output, mapping,
+                                             template_loc=template,
                                              inventory_location=inventory_location)
 
     log_errors(no_match_errors, os.path.dirname(output))
