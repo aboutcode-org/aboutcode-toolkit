@@ -25,11 +25,13 @@ from os.path import abspath
 from os.path import dirname
 from os.path import join
 import posixpath
+import shutil
 import socket
 import string
 import sys
 
 from about_code_tool import CRITICAL
+from about_code_tool import ERROR
 from about_code_tool import Error
 import unicodecsv
 
@@ -392,3 +394,32 @@ def add_unc(location):
     if on_windows and not location.startswith(UNC_PREFIXES):
         return UNC_PREFIX + os.path.abspath(location)
     return location
+
+
+def verify_license_files(abouts, lic_location):
+    lic_loc_dict = {}
+    errors = []
+
+    for about in abouts:
+        if about.license_file.value:
+            for lic in about.license_file.value:
+                lic_path = posix_path(posixpath.join(lic_location, lic))
+                if posixpath.exists(lic_path):
+                    copy_to = posixpath.dirname(about.about_file_path)
+                    lic_loc_dict[copy_to] = lic_path
+                else:
+                    msg = ('The file, ' + lic + ' in \'license_file\' field does not exist')
+                    errors.append(Error(ERROR, msg))
+    return lic_loc_dict, errors
+
+
+def copy_files(license_location_dict, gen_location):
+    """
+    Copy the files into the gen_location
+    """
+    for loc in license_location_dict:
+        location = loc
+        if loc.startswith('/'):
+            location = loc.strip('/')
+        copy_to = posixpath.join(posix_path(gen_location), location)
+        shutil.copy2(license_location_dict[loc], copy_to)

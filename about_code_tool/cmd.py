@@ -34,8 +34,10 @@ from about_code_tool import WARNING
 from about_code_tool import ERROR
 from about_code_tool import INFO
 from about_code_tool import NOTSET
-from util import to_posix
+from util import copy_files
 from util import extract_zip
+from util import to_posix
+from util import verify_license_files
 
 
 __version__ = '3.0.0dev'
@@ -182,6 +184,17 @@ def gen(mapping, license_text_location, extract_license, location, output):
     click.echo('Generating ABOUT files...')
     errors, abouts = about_code_tool.gen.generate(mapping, extract_license, location, output)
 
+    if license_text_location:
+        lic_loc_dict, lic_file_err = verify_license_files(abouts, license_text_location)
+        if lic_loc_dict:
+            copy_files(lic_loc_dict, output)
+        if lic_file_err:
+            update_errors = errors
+            errors = []
+            for err in update_errors:
+                errors.append(err)
+            for file_err in lic_file_err:
+                errors.append(file_err)
 
     lea = len(abouts)
     lee = 0

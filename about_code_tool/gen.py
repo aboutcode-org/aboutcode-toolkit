@@ -204,15 +204,6 @@ def generate(mapping, extract_license, location, base_dir, policy=None, conf_loc
                 if not e in errors:
                     errors.append(e)
 
-    # Check if there is any Critical Error which should halt the generation
-    for e in errors:
-        # Severity 50 = Critical Error
-        if e.severity == 50:
-            # Clear the errors and abouts object
-            errors = []
-            abouts = []
-            errors.append(e)
-            return errors, abouts
     for about in abouts:
         # TODO: check the paths overlap ...???
         # For some reasons, the join does not work, using the '+' for now
