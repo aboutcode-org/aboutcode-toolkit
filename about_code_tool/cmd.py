@@ -17,23 +17,21 @@
 
 from __future__ import print_function
 
-import logging
 import codecs
-
-import click
+import logging
 import os
-import unicodecsv
-
-import about_code_tool.gen
-import about_code_tool.model
-import about_code_tool.attrib
-
 from os.path import exists, join
+
 from about_code_tool import CRITICAL
-from about_code_tool import WARNING
-from about_code_tool import ERROR
+from about_code_tool import ERROR, Error
 from about_code_tool import INFO
 from about_code_tool import NOTSET
+from about_code_tool import WARNING
+import about_code_tool.attrib
+import about_code_tool.gen
+import about_code_tool.model
+import click
+import unicodecsv
 from util import copy_files
 from util import extract_zip
 from util import to_posix
@@ -129,16 +127,24 @@ def inventory(overwrite, location, output):
         click.echo('ERROR: <output> must be a CSV file ending with ".csv".')
         click.echo()
         return
-    if not os.path.exists(output):
-        click.echo('ERROR: <output> does not exists. Please check and correct the <output>.')
+    if not exists(os.path.dirname(output)):
+        click.echo('ERROR: Path to the <output> does not exists. Please check and correct the <output>.')
         click.echo()
         return
 
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
 
+    if location.lower().endswith('.zip'):
+        # accept zipped ABOUT files as input
+        location = extract_zip(location)
+
     errors, abouts = about_code_tool.model.collect_inventory(location)
-    about_code_tool.model.to_csv(abouts, output)
+
+    if not abouts:
+        errors = [Error(ERROR, u'No ABOUT files is found. Generation halted.')]
+    else:
+        about_code_tool.model.to_csv(abouts, output)
     log_errors(errors, os.path.dirname(output), level=verbosity_num)
 
 
