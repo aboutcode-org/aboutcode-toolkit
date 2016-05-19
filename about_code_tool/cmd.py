@@ -138,8 +138,8 @@ def inventory(overwrite, location, output):
                'and writing CSV output to: %(output)s' % locals())
 
     errors, abouts = about_code_tool.model.collect_inventory(location)
-    log_errors(errors, level=verbosity_num)
     about_code_tool.model.to_csv(abouts, output)
+    log_errors(errors, os.path.dirname(output), level=verbosity_num)
 
 
 gen_help = '''
