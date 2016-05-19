@@ -47,6 +47,14 @@ class GenTest(unittest.TestCase):
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
+    def test_check_duplicated_about_file_path(self):
+        test_dict = [{'about_file_path': u'/test/test.c', u'version': u'1.03', u'name': u'test.c'},
+                     {'about_file_path': u'/test/abc/', u'version': u'1.0', u'name': u'abc'},
+                     {'about_file_path': u'/test/test.c', u'version': u'1.04', u'name': u'test1.c'}]
+        expected = [Error(CRITICAL, u'The input has duplicated values in \'about_file_path\' field: /test/test.c')]
+        result = gen.check_duplicated_about_file_path(test_dict)
+        assert expected == result
+
     def test_load_inventory(self):
         self.maxDiff = None
         mapping = None

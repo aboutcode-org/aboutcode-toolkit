@@ -29,7 +29,7 @@ import posixpath
 import sys
 
 import ConfigParser as configparser
-from about_code_tool import ERROR
+from about_code_tool import ERROR, CRITICAL
 from about_code_tool import Error
 from about_code_tool import model
 from about_code_tool import util
@@ -81,6 +81,19 @@ def check_duplicated_columns(location):
     return errors
 
 
+def check_duplicated_about_file_path(inventory_dict):
+    afp_list = []
+    errors = []
+    for component in inventory_dict:
+        if component['about_file_path'] in afp_list:
+            msg = ('The input has duplicated values in \'about_file_path\' field: ' +
+                   component['about_file_path'])
+            errors.append(Error(CRITICAL, msg))
+        else:
+            afp_list.append(component['about_file_path'])
+    return errors
+
+
 def load_inventory(mapping, location, base_dir):
     """
     Load the inventory CSV file at location. Return a list of errors and a
@@ -88,13 +101,19 @@ def load_inventory(mapping, location, base_dir):
     """
     errors = []
     abouts = []
-    dup_cols = check_duplicated_columns(location)
-    if dup_cols:
-        errors.extend(check_duplicated_columns(location))
+    dup_cols_err = check_duplicated_columns(location)
+    if dup_cols_err:
+        errors.extend(dup_cols_err)
         return errors, abouts
 
     base_dir = util.to_posix(base_dir)
     inventory = util.load_csv(mapping, location)
+
+    dup_about_paths_err = check_duplicated_about_file_path(inventory)
+    if dup_about_paths_err:
+        errors.extend(dup_about_paths_err)
+        return errors, abouts
+
     for i, fields in enumerate(inventory):
         # check does the input contains the required fields
         requied_fileds = model.About.required_fields
