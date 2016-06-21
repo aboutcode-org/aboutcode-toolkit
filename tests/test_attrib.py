@@ -19,7 +19,7 @@ from __future__ import print_function
 
 import unittest
 
-from about_code_tool.tests import get_test_loc
+from utils import get_test_loc
 
 from about_code_tool import attrib, model
 

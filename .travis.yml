@@ -2,11 +2,9 @@ language: python
 
 python:
   - "2.7"
+
 install:
-    - source configure etc/conf
-    # extra reqs for coverage on Travis
-    - pip install coverage coveralls
+    - ./configure etc/conf/dev
+
 script:
-    - coverage run --source=about_code_tool setup.py test
-after_success:
-    - coveralls
+    - py.test -vvs tests

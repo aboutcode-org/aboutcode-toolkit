@@ -1,8 +1,7 @@
 about_resource: .
 
 name: AboutCode
-version: 2.0.0
-
+version: 3.0.0.dev1
 
 owner: nexB Inc.
 author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
@@ -18,9 +17,9 @@ description: AboutCode is a tool to process ABOUT files. An ABOUT file
  codebase side-by-side with the documented software component.
 
 
-dje_license_key: apache-2.0
-license_text_file: apache-2.0.LICENSE
-license_spdx: Apache-2.0
-copyright: Copyright (c) 2013-2015 nexB Inc.
+license: apache-2.0
+license_name: Apache 2.0
+license_file: apache-2.0.LICENSE
+copyright: Copyright (c) 2013-2014 nexB Inc.
 
 notice_file: NOTICE

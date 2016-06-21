@@ -19,8 +19,8 @@ from __future__ import print_function
 
 import unittest
 
-from about_code_tool.tests import get_test_loc
-from about_code_tool.tests import get_temp_file
+from utils import get_test_loc
+from utils import get_temp_file
 
 from about_code_tool import model
 from about_code_tool import util

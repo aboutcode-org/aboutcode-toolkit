@@ -21,9 +21,10 @@ from collections import OrderedDict
 import string
 import unittest
 
-from about_code_tool.tests import get_test_loc
-from about_code_tool.tests import on_posix
-from about_code_tool.tests import on_windows
+from utils import get_test_loc
+from utils import on_posix
+from utils import on_windows
+
 from about_code_tool import CRITICAL
 from about_code_tool import Error
 from about_code_tool import util

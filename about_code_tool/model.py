@@ -33,8 +33,9 @@ import posixpath
 import re
 import urlparse
 
-import saneyaml
 import unicodecsv
+
+from about_code_tool import saneyaml
 
 from about_code_tool import Error
 from about_code_tool import CRITICAL

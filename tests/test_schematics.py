@@ -19,10 +19,8 @@ from __future__ import print_function
 
 import unittest
 
-import schematics
 from schematics.exceptions import ValidationError
 
-import about_code_tool
 from about_code_tool import schematics_model
 
 

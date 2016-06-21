@@ -19,7 +19,7 @@ from __future__ import print_function
 from schematics.models import Model
 from schematics.types import StringType
 from schematics.exceptions import ValidationError
-from schematics.types import BaseType
+
 
 class About(Model):
     # The min_length is needed to make sure the key has value

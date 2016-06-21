@@ -21,6 +21,10 @@ import posixpath
 import unittest
 from unittest.case import expectedFailure
 
+from utils import get_test_loc
+from utils import get_temp_dir
+from utils import to_posix
+
 from about_code_tool import Error
 from about_code_tool import ERROR
 from about_code_tool import INFO
@@ -28,10 +32,6 @@ from about_code_tool import CRITICAL
 
 from about_code_tool import gen
 from about_code_tool import model
-
-from about_code_tool.tests import to_posix
-from about_code_tool.tests import get_test_loc
-from about_code_tool.tests import get_temp_dir
 
 
 class GenTest(unittest.TestCase):

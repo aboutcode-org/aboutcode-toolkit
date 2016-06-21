@@ -21,8 +21,10 @@ from collections import OrderedDict
 import posixpath
 import unittest
 
-from about_code_tool.tests import get_test_loc
-from about_code_tool.tests import get_test_lines
+from utils import get_temp_file
+from utils import get_test_loc
+from utils import get_test_lines
+from utils import get_unicode_content
 
 import about_code_tool
 from about_code_tool import Error
@@ -30,8 +32,6 @@ from about_code_tool import CRITICAL, INFO, WARNING
 from about_code_tool import model
 from about_code_tool import util
 from about_code_tool import ERROR
-from about_code_tool.tests import get_temp_file
-from about_code_tool.tests import get_unicode_content
 from about_code_tool.util import load_csv
 
 
@@ -592,10 +592,6 @@ vcs_revision:
 checksum:
 spec_version:
 '''
-#         print()
-#         print('a')
-#         print(a.dumps(True))
-#         print()
         assert expected == a.dumps(with_absent=True)
 
     def test_About_same_attribution(self):

@@ -1,9 +1,9 @@
 version: '{build}'
 
 install:
-    - configure
+    - configure etc/conf/dev
 
 build: off
 
 test_script:
-    - python setup.py test
+    - py.test -vvs tests

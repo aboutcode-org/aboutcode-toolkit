@@ -26,22 +26,25 @@ setup(
         'you use in your project. This documentation is stored in *.ABOUT'
         'files, side-by-side with the documented code.'),
 
-    license='Apache 2.0',
+    license='Apache-2.0',
     packages=find_packages(),
     include_package_data=True,
 
-    data_files=[('about', 
-                 ['about.ABOUT',
-#                 'about.bat',
-#                  'about',
-                   'about.cfg',
-                   'README.rst',
-                   'apache-2.0.LICENSE',
-                   'NOTICE',
-                   'SPEC',
-                   'USAGE',
-                   ]),
-                ],
+    data_files=[('about',
+        [
+            'about.ABOUT',
+            'about.bat',
+            'about',
+            'configure.bat',
+            'configure',
+            'about.cfg',
+            'README.rst',
+            'apache-2.0.LICENSE',
+            'NOTICE',
+            'SPEC',
+            'USAGE.rst',
+        ]),
+    ],
 
     zip_safe=False,
     entry_points='''
