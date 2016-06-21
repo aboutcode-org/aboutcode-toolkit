@@ -14,18 +14,19 @@
 #  limitations under the License.
 # ============================================================================
 
+from __future__ import absolute_import
 from __future__ import print_function
 
+import codecs
+import logging
 import os
+import posixpath
+import ntpath
 import stat
+import string
+import sys
 import tempfile
 import unittest
-import logging
-import codecs
-import posixpath
-import sys
-import string
-import ntpath
 
 from about_code_tool.util import to_posix, to_native
 

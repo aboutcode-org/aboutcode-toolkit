@@ -14,21 +14,22 @@
 #  limitations under the License.
 # ============================================================================
 
+from __future__ import absolute_import
 from __future__ import print_function
 
-import schematics
 import unittest
+
+import schematics
+from schematics.exceptions import ValidationError
 
 import about_code_tool
 from about_code_tool import schematics_model
-
-from schematics.exceptions import ValidationError
 
 
 class ExampleTest(unittest.TestCase):
 
     def test_Field_has_content(self):
-        #about = schematics_model.About({'name': u'component', 'version': u'1.0'})
+        # about = schematics_model.About({'name': u'component', 'version': u'1.0'})
         about = schematics_model.About()
         about.name = u'component'
         about.version = u'1.0'
@@ -40,7 +41,7 @@ class ExampleTest(unittest.TestCase):
         try:
             about.validate()
         except ValidationError, e:
-            expected_error =  {'version': ['This field is required.']}
+            expected_error = {'version': ['This field is required.']}
             assert expected_error == e.messages
 
     def test_missing_value(self):

@@ -14,29 +14,25 @@
 #  limitations under the License.
 # ============================================================================
 
-
+from __future__ import absolute_import
 from __future__ import print_function
 
 import logging
 import codecs
+import os
+from os.path import exists, join
 
 import click
-import os
 import unicodecsv
+
+from about_code_tool import __version__
+from about_code_tool import __about_spec_version__
 
 import about_code_tool.gen
 import about_code_tool.model
 import about_code_tool.attrib
-
-from os.path import exists, join
 from about_code_tool import NOTSET
 from about_code_tool.util import to_posix
-
-
-__version__ = '3.0.0dev'
-
-
-__about_spec_version__ = '2.0.0dev'
 
 
 __copyright__ = """

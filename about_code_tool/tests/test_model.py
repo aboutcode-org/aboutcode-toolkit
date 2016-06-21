@@ -14,15 +14,15 @@
 #  limitations under the License.
 # ============================================================================
 
+from __future__ import absolute_import
 from __future__ import print_function
 
+from collections import OrderedDict
 import posixpath
 import unittest
-from collections import OrderedDict
 
 from about_code_tool.tests import get_test_loc
 from about_code_tool.tests import get_test_lines
-
 
 import about_code_tool
 from about_code_tool import Error

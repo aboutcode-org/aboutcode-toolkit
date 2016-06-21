@@ -13,6 +13,7 @@
 #  limitations under the License.
 # ============================================================================
 
+from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
@@ -23,9 +24,10 @@ import posixpath
 import string
 import sys
 
+import unicodecsv
+
 from about_code_tool import CRITICAL
 from about_code_tool import Error
-import unicodecsv
 
 
 on_windows = 'win32' in sys.platform
@@ -47,7 +49,7 @@ def invalid_chars(path):
 def check_file_names(paths):
     """
     Given a sequence of file paths, check that file names are valid and that
-    there are no case-insensitive duplicates in any given directories. 
+    there are no case-insensitive duplicates in any given directories.
     Return a list of errors.
 
     From spec :

@@ -14,10 +14,12 @@
 #  limitations under the License.
 # ============================================================================
 
+from __future__ import absolute_import
 from __future__ import print_function
 
-import unittest
 import posixpath
+import unittest
+from unittest.case import expectedFailure
 
 from about_code_tool import Error
 from about_code_tool import ERROR
@@ -30,7 +32,6 @@ from about_code_tool import model
 from about_code_tool.tests import to_posix
 from about_code_tool.tests import get_test_loc
 from about_code_tool.tests import get_temp_dir
-from unittest.case import expectedFailure
 
 
 class GenTest(unittest.TestCase):

@@ -14,28 +14,30 @@
 #  limitations under the License.
 # ============================================================================
 
+from __future__ import absolute_import
 from __future__ import print_function
 
+import codecs
+from collections import OrderedDict
 import ConfigParser as configparser
 import errno
 import logging
 import optparse
+import os
+from os.path import exists, dirname, abspath, isdir
+import posixpath
 import sys
 
-from os.path import exists, dirname, abspath, isdir
-
 import unicodecsv
-import codecs
-import posixpath
-import os
 
+from about_code_tool import __version__
+from about_code_tool import __about_spec_version__
 
 from about_code_tool import Error
 from about_code_tool import ERROR
 
 from about_code_tool import util
 from about_code_tool import model
-from collections import OrderedDict
 from about_code_tool.util import to_posix
 
 

@@ -14,14 +14,14 @@
 #  limitations under the License.
 # ============================================================================
 
+from __future__ import absolute_import
 from __future__ import print_function
 
-import urllib
-import urllib2
+from collections import namedtuple
 import httplib
 import json
-from collections import namedtuple
-
+import urllib
+import urllib2
 
 from about_code_tool import Error
 from about_code_tool import ERROR

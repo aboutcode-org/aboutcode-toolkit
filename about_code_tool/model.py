@@ -23,14 +23,15 @@ AbouCode reads and validates ABOUT files and collect software components
 inventories.
 """
 
+from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
+from collections import OrderedDict
 import os
+import posixpath
 import re
 import urlparse
-import posixpath
-from collections import OrderedDict
 
 import saneyaml
 import unicodecsv
