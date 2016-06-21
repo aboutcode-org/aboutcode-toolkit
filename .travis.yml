@@ -7,4 +7,4 @@ install:
     - ./configure etc/conf/dev
 
 script:
-    - py.test -vvs tests
+    - bin/py.test -vvs tests
