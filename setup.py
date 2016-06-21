@@ -10,8 +10,6 @@ from os.path import basename
 from os.path import dirname
 from os.path import join
 from os.path import splitext
-import re
-
 from setuptools import find_packages
 from setuptools import setup
 
