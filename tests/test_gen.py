@@ -25,13 +25,13 @@ from utils import get_test_loc
 from utils import get_temp_dir
 from utils import to_posix
 
-from about_code_tool import Error
-from about_code_tool import ERROR
-from about_code_tool import INFO
-from about_code_tool import CRITICAL
+from about_tool import Error
+from about_tool import ERROR
+from about_tool import INFO
+from about_tool import CRITICAL
 
-from about_code_tool import gen
-from about_code_tool import model
+from about_tool import gen
+from about_tool import model
 
 
 class GenTest(unittest.TestCase):

@@ -25,9 +25,9 @@ from utils import get_test_loc
 from utils import on_posix
 from utils import on_windows
 
-from about_code_tool import CRITICAL
-from about_code_tool import Error
-from about_code_tool import util
+from about_tool import CRITICAL
+from about_tool import Error
+from about_tool import util
 
 
 class UtilsTest(unittest.TestCase):

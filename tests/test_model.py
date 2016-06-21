@@ -26,13 +26,13 @@ from utils import get_test_loc
 from utils import get_test_lines
 from utils import get_unicode_content
 
-import about_code_tool
-from about_code_tool import Error
-from about_code_tool import CRITICAL, INFO, WARNING
-from about_code_tool import model
-from about_code_tool import util
-from about_code_tool import ERROR
-from about_code_tool.util import load_csv
+import about_tool
+from about_tool import Error
+from about_tool import CRITICAL, INFO, WARNING
+from about_tool import model
+from about_tool import util
+from about_tool import ERROR
+from about_tool.util import load_csv
 
 
 class FieldTest(unittest.TestCase):
@@ -1069,7 +1069,7 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('allAboutInOneDir')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = []
-        result = [(level, e) for level, e in errors if level > about_code_tool.INFO]
+        result = [(level, e) for level, e in errors if level > about_tool.INFO]
         assert expected_errors == result
 
     def test_collect_inventory_populate_about_file_path(self):
@@ -1082,7 +1082,7 @@ class CollectorTest(unittest.TestCase):
 
     def test_collect_inventory_works_with_relative_paths(self):
         # FIXME:
-        # This test need to be run under about-code-tool/about_code_tool/
+        # This test need to be run under about-code-tool/about_tool/
         # or otherwise it will fail as the test depends on the launching
         # location
         test_loc = get_test_loc('parse/complete')

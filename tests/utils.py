@@ -28,7 +28,7 @@ import sys
 import tempfile
 import unittest
 
-from about_code_tool.util import to_posix, to_native
+from about_tool.util import to_posix, to_native
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()

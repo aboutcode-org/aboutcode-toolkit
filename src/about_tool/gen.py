@@ -30,15 +30,15 @@ import sys
 
 import unicodecsv
 
-from about_code_tool import __version__
-from about_code_tool import __about_spec_version__
+from about_tool import __version__
+from about_tool import __about_spec_version__
 
-from about_code_tool import Error
-from about_code_tool import ERROR
+from about_tool import Error
+from about_tool import ERROR
 
-from about_code_tool import util
-from about_code_tool import model
-from about_code_tool.util import to_posix
+from about_tool import util
+from about_tool import model
+from about_tool.util import to_posix
 
 
 LOG_FILENAME = 'error.log'

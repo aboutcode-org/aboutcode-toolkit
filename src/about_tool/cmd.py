@@ -25,14 +25,14 @@ from os.path import exists, join
 import click
 import unicodecsv
 
-from about_code_tool import __version__
-from about_code_tool import __about_spec_version__
+from about_tool import __version__
+from about_tool import __about_spec_version__
 
-import about_code_tool.gen
-import about_code_tool.model
-import about_code_tool.attrib
-from about_code_tool import NOTSET
-from about_code_tool.util import to_posix
+import about_tool.gen
+import about_tool.model
+import about_tool.attrib
+from about_tool import NOTSET
+from about_tool.util import to_posix
 
 
 __copyright__ = """
@@ -104,9 +104,9 @@ def inventory(location, output):
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
 
-    errors, abouts = about_code_tool.model.collect_inventory(location)
+    errors, abouts = about_tool.model.collect_inventory(location)
     log_errors(errors)
-    about_code_tool.model.to_csv(abouts, output)
+    about_tool.model.to_csv(abouts, output)
 
 
 gen_help = '''
@@ -130,7 +130,7 @@ def gen(location, output):
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating ABOUT files...')
-    errors, abouts = about_code_tool.gen.generate(location, output)
+    errors, abouts = about_tool.gen.generate(location, output)
 
     lea = len(abouts)
     lee = len(errors)
@@ -178,8 +178,8 @@ def attrib(location, output, template=None, inventory_location=None,):
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating attribution...')
-    errors, abouts = about_code_tool.model.collect_inventory(location)
-    about_code_tool.attrib.generate_and_save(abouts, output, 
+    errors, abouts = about_tool.model.collect_inventory(location)
+    about_tool.attrib.generate_and_save(abouts, output, 
                                              template_loc=template, 
                                              inventory_location=inventory_location)
     log_errors(errors)
@@ -223,7 +223,7 @@ def log_errors(errors, base_dir=False, level=NOTSET):
         file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
     for severity, message in errors:
-        sever = about_code_tool.severities[severity]
+        sever = about_tool.severities[severity]
         if no_stdout == 0:
             print(msg_format % locals())
         if base_dir:

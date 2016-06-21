@@ -19,7 +19,7 @@ from __future__ import print_function
 
 import unittest
 
-from about_code_tool import api
+from about_tool import api
 
 
 class ApiTest(unittest.TestCase):

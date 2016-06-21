@@ -26,8 +26,8 @@ import sys
 
 import unicodecsv
 
-from about_code_tool import CRITICAL
-from about_code_tool import Error
+from about_tool import CRITICAL
+from about_tool import Error
 
 
 on_windows = 'win32' in sys.platform

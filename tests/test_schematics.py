@@ -21,7 +21,7 @@ import unittest
 
 from schematics.exceptions import ValidationError
 
-from about_code_tool import schematics_model
+from about_tool import schematics_model
 
 
 class ExampleTest(unittest.TestCase):

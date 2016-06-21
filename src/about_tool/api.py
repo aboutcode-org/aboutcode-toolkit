@@ -23,8 +23,8 @@ import json
 import urllib
 import urllib2
 
-from about_code_tool import Error
-from about_code_tool import ERROR
+from about_tool import Error
+from about_tool import ERROR
 
 """
 API call helpers
