@@ -21,7 +21,7 @@ from __future__ import print_function
 from collections import namedtuple
 import logging
 
-__version__ = '3.0.0.dev1'
+__version__ = '3.0.0.dev2'
 
 __about_spec_version__ = '2.0.0.dev2'
 
