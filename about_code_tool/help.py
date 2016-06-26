@@ -19,7 +19,7 @@ from __future__ import print_function
 
 __about_spec_version__ = '1.0'
 
-__version__ = '2.3.1'
+__version__ = '2.3.2'
 
 __copyright__ = """
 Copyright (c) 2013-2016 nexB Inc. All rights reserved.
