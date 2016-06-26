@@ -14,17 +14,17 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
 from __future__ import print_function
 
-from collections import namedtuple
-import httplib
-import json
 import urllib
 import urllib2
+import httplib
+import json
+from collections import namedtuple
 
-from about_tool import Error
-from about_tool import ERROR
+
+from about_code_tool import Error
+from about_code_tool import ERROR
 
 """
 API call helpers
@@ -103,6 +103,7 @@ def get_license_info(self, url, api_username, api_key, license_key,
     name = data.get('name')
     text = data.get('full_text')
     return errors, LicenseInfo(key, name, text)
+
 
 def request_license_data(url, api_key, license_key):
     """

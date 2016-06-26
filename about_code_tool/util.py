@@ -13,27 +13,47 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
 from collections import OrderedDict
+import errno
+import httplib
 import ntpath
 import os
+from os.path import abspath
+from os.path import dirname
+from os.path import join
 import posixpath
+import shutil
+import socket
 import string
 import sys
 
+from about_code_tool import CRITICAL
+from about_code_tool import ERROR
+from about_code_tool import Error
 import unicodecsv
-
-from about_tool import CRITICAL
-from about_tool import Error
 
 
 on_windows = 'win32' in sys.platform
+
+
+def posix_path(path):
+    """
+    Return a path using POSIX path separators given a path that may
+    contain POSIX or windows separators, converting \ to /.
+    """
+    return path.replace(ntpath.sep, posixpath.sep)
+
+
 UNC_PREFIX = u'\\\\?\\'
+UNC_PREFIX_POSIX = posix_path(UNC_PREFIX)
+UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.'
+
+have_mapping = False
 
 
 def invalid_chars(path):
@@ -49,7 +69,7 @@ def invalid_chars(path):
 def check_file_names(paths):
     """
     Given a sequence of file paths, check that file names are valid and that
-    there are no case-insensitive duplicates in any given directories.
+    there are no case-insensitive duplicates in any given directories. 
     Return a list of errors.
 
     From spec :
