@@ -20,11 +20,13 @@ from __future__ import print_function
 import codecs
 from collections import OrderedDict
 import ConfigParser as configparser
+import collections
 import errno
 import logging
 import optparse
 import os
 from os.path import exists, dirname, abspath, isdir
+from posixpath import basename
 import posixpath
 import sys
 
@@ -33,7 +35,7 @@ import unicodecsv
 from about_tool import __version__
 from about_tool import __about_spec_version__
 
-from about_tool import Error
+from about_tool import Error, CRITICAL
 from about_tool import ERROR
 
 from about_tool import util
@@ -86,31 +88,57 @@ def check_duplicated_columns(location):
             msg = '%(name)s with %(names)s' % locals()
             dup_msg.append(msg)
         dup_msg = u', '.join(dup_msg)
-        msg = 'Duplicated column name(s): %(dup_msg)s' % locals()
+        msg = ('Duplicated column name(s): %(dup_msg)s\n' % locals() +
+               'Please correct the input and re-run.')
         errors.append(Error(ERROR, msg))
     return errors
 
 
-def load_inventory(location, base_dir):
+def check_duplicated_about_file_path(inventory_dict):
+    afp_list = []
+    errors = []
+    for component in inventory_dict:
+        if component['about_file_path'] in afp_list:
+            msg = ('The input has duplicated values in \'about_file_path\' field: ' +
+                   component['about_file_path'])
+            errors.append(Error(CRITICAL, msg))
+        else:
+            afp_list.append(component['about_file_path'])
+    return errors
+
+
+def load_inventory(mapping, location, base_dir):
     """
     Load the inventory CSV file at location. Return a list of errors and a
     list of About objects validated against the base_dir.
     """
     errors = []
     abouts = []
-    errors.extend(check_duplicated_columns(location))
+    dup_cols_err = check_duplicated_columns(location)
+    if dup_cols_err:
+        errors.extend(dup_cols_err)
+        return errors, abouts
+
     base_dir = util.to_posix(base_dir)
-    inventory = util.load_csv(location)
+    inventory = util.load_csv(mapping, location)
+
+    dup_about_paths_err = check_duplicated_about_file_path(inventory)
+    if dup_about_paths_err:
+        errors.extend(dup_about_paths_err)
+        return errors, abouts
+
     for i, fields in enumerate(inventory):
-        # get then remove the about file path
-        afpa = model.About.about_file_path_attr
-        if afpa not in fields:
-            msg = ('Missing column: %(afpa)r. '
-                   'Cannot generate ABOUT file.' % locals())
-            errors.append(Error(ERROR, msg))
-            continue
-        else:
-            afp = fields.get(afpa)
+        # check does the input contains the required fields
+        requied_fileds = model.About.required_fields
+
+        for f in requied_fileds:
+            if f not in fields:
+                msg = ('Required column: %(f)r not found.\n' % locals() +
+                       'Use the \'--mapping\' option to map the input keys and verify the mapping information are correct.\n' +
+                       'OR correct the column names in the <input>.')
+                errors.append(Error(ERROR, msg))
+                return errors, abouts
+        afp = fields.get(model.About.about_file_path_attr)
 
         if not afp or not afp.strip():
             msg = ('Empty column: %(afpa)r. '
@@ -123,7 +151,14 @@ def load_inventory(location, base_dir):
         about = model.About(about_file_path=afp)
         about.location = loc
         ld_errors = about.load_dict(fields, base_dir, with_empty=False)
-        errors.extend(ld_errors)
+        # 'about_resource' field will be generated during the process.
+        # No error need to be raise for the missing 'about_resource'.
+        for e in ld_errors:
+            if e.message == 'Field about_resource is required':
+                ld_errors.remove(e)
+        for e in ld_errors:
+            if not e in errors:
+                errors.extend(ld_errors)
         abouts.append(about)
     return errors, abouts
 
@@ -172,7 +207,7 @@ policies = ('skip',  # DO_NOTHING_IF_ABOUT_FILE_EXIST
             )
 
 
-def generate(location, base_dir, policy=None, conf_location=None,
+def generate(mapping, extract_license, location, base_dir, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
     Load ABOUT data from an inventory at csv_location. Write ABOUT files to
@@ -180,8 +215,27 @@ def generate(location, base_dir, policy=None, conf_location=None,
     Policy defines which action to take for merging or overwriting fields and
     files. Return errors and about objects.
     """
+    api_url = ''
+    api_key = ''
+    gen_license = False
+    # Check if the extract_license contains valid argument
+    if extract_license:
+        # Strip the ' and " for api_url, and api_key from input
+        api_url = extract_license[0].strip("'").strip("\"")
+        api_key = extract_license[1].strip("'").strip("\"")
+        gen_license = True
+
     bdir = to_posix(base_dir)
-    errors, abouts = load_inventory(location, bdir)
+    errors, abouts = load_inventory(mapping, location, bdir)
+
+    if gen_license:
+        dje_license_dict, err = model.pre_process_and_dje_license_dict(abouts, api_url, api_key)
+        if err:
+            for e in err:
+                # Avoid having same error multiple times
+                if not e in errors:
+                    errors.append(e)
+
     for about in abouts:
         # TODO: check the paths overlap ...???
         # For some reasons, the join does not work, using the '+' for now
@@ -205,10 +259,40 @@ def generate(location, base_dir, policy=None, conf_location=None,
             continue
 
         try:
-            # Write the ABOUT file
-            about.dump(dump_loc,
-                       with_empty=with_empty,
-                       with_absent=with_absent)
+            # Generate value for 'about_resource' if it does not exist
+            if not about.about_resource.value:
+                about.about_resource.value = OrderedDict()
+                if about.about_file_path.endswith('/'):
+                    about.about_resource.value[u'.'] = None
+                    about.about_resource.original_value = u'.'
+                else:
+                    about.about_resource.value[basename(about.about_file_path)] = None
+                    about.about_resource.original_value = basename(about.about_file_path)
+                about.about_resource.present = True
+
+            if gen_license:
+                # Write generated LICENSE file
+                lic_name, lic_context, lic_url = about.dump_lic(dump_loc, dje_license_dict)
+                if lic_name:
+                    if not about.license_name.present:
+                        about.license_name.value = lic_name
+                        about.license_name.present = True
+                    if not about.license_file.present:
+                        about.license_file.value = [about.dje_license_key.value + u'.LICENSE']
+                        about.license_file.present = True
+                        # The only time the tool fills in the license URL is
+                        # when no license file present
+                        if not about.license_url.present:
+                            about.license_url.value = [lic_url]
+                            about.license_url.present = True
+
+            # Write the ABOUT file and check does the referenced file exist
+            not_exist_errors = about.dump(dump_loc,
+                                   with_empty=with_empty,
+                                   with_absent=with_absent)
+            for e in not_exist_errors:
+                errors.append(Error(ERROR, e))
+
         except Exception, e:
             # only keep the first 100 char of the exception
             emsg = repr(e)[:100]

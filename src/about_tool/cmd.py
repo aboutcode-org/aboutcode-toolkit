@@ -17,8 +17,8 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import logging
 import codecs
+import logging
 import os
 from os.path import exists, join
 
@@ -31,8 +31,16 @@ from about_tool import __about_spec_version__
 import about_tool.gen
 import about_tool.model
 import about_tool.attrib
+
+from about_tool import CRITICAL
+from about_tool import ERROR, Error
+from about_tool import INFO
 from about_tool import NOTSET
+from about_tool import WARNING
 from about_tool.util import to_posix
+from about_tool.util import copy_files
+from about_tool.util import extract_zip
+from about_tool.util import verify_license_files
 
 
 __copyright__ = """
@@ -49,7 +57,8 @@ __copyright__ = """
 
 
 prog_name = 'AboutCode'
-no_stdout = 0
+no_stdout = False
+verbosity_num = 30
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
@@ -69,14 +78,19 @@ class AboutCommand(click.Command):
 
 @click.group(name='about')
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
-@click.option('-v', '--verbose', count=True,
-              help='Increase verbosity. Repeat to print more output.')
-@click.option('-q', '--quiet', count=True, help='Do not print any output.')
+@click.option('-v', '--verbose', type=int, default=30,
+              help='Increase verbosity. Repeat to print more output (Default: 30).\n'
+                    '50 - CRITICAL\n'
+                    '40 - ERROR\n'
+                    '30 - WARNING\n'
+                    '20 - INFO\n'
+                    '10 - DEBUG')
+@click.option('-q', '--quiet', is_flag=True, help='Do not print any output.')
 def cli(verbose, quiet):
     # Update the no_stdout value globally
-    global no_stdout
+    global no_stdout, verbosity_num
     no_stdout = quiet
-
+    verbosity_num = verbose
     pass
     # click.echo('Verbosity: %s' % verbose)
 
@@ -95,18 +109,42 @@ OUTPUT: Path to CSV file to write the inventory to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
-def inventory(location, output):
+@click.option('--overwrite', is_flag=True, help='Overwrites the output file if it exists')
+def inventory(overwrite, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.    
     """
     click.echo('Running about-code-tool version ' + __version__)
+    # Check is the <OUTPUT> valid.
+    if os.path.exists(output) and not overwrite:
+        click.echo('ERROR: <output> file already exists.')
+        click.echo('Select a different file name or use the --overwrite option after the `inventory`.')
+        click.echo()
+        return
+    if not output.endswith('.csv'):
+        click.echo('ERROR: <output> must be a CSV file ending with ".csv".')
+        click.echo()
+        return
+    if not exists(os.path.dirname(output)):
+        click.echo('ERROR: Path to the <output> does not exists. Please check and correct the <output>.')
+        click.echo()
+        return
+
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing CSV output to: %(output)s' % locals())
 
-    errors, abouts = about_tool.model.collect_inventory(location)
-    log_errors(errors)
-    about_tool.model.to_csv(abouts, output)
+    if location.lower().endswith('.zip'):
+        # accept zipped ABOUT files as input
+        location = extract_zip(location)
+
+    errors, abouts = about_code_tool.model.collect_inventory(location)
+
+    if not abouts:
+        errors = [Error(ERROR, u'No ABOUT files is found. Generation halted.')]
+    else:
+        about_code_tool.model.to_csv(abouts, output)
+    log_errors(errors, os.path.dirname(output), level=verbosity_num)
 
 
 gen_help = '''
@@ -123,18 +161,54 @@ OUTPUT: Path to the directory to write ABOUT files to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=False, writable=True,
                                 dir_okay=True, resolve_path=True))
-def gen(location, output):
+# FIXME: The --mapping should have a feature for user to identify the 
+# specific mapping file instead of using only the default "MAPPING.CONFIG"
+@click.option('--mapping', is_flag=True, help='Use the mapping between columns names'
+                        'in your CSV and the ABOUT field names as defined in'
+                        'the MAPPING.CONFIG mapping configuration file.')
+@click.option('--license_text_location', nargs=1,
+                type=click.Path(exists=True, file_okay=False,
+                                dir_okay=True, writable=False,
+                                readable=True, resolve_path=True),
+              help = 'Copy the \'license_text_file\' from the directory to the generated location')
+@click.option('--extract_license', type=str, nargs=2,
+              help='Extract License text and create <license_key>.LICENSE side-by-side'
+                    'with the generated .ABOUT file using data fetched from a DejaCode License Library.'
+                    'The following additional options are required:\n\n'
+                    'api_url - URL to the DejaCode License Library API endpoint\n\n'
+                    'api_key - DejaCode API key'
+
+                    '\nExample syntax:\n\n'
+                    'about gen --extract_license \'api_url\' \'api_key\'')
+def gen(mapping, license_text_location, extract_license, location, output):
     """
     Given a CVS inventory of ABOUT files at location, generate ABOUT files in
     base directory.
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating ABOUT files...')
-    errors, abouts = about_tool.gen.generate(location, output)
+    errors, abouts = about_code_tool.gen.generate(mapping, extract_license, location, output)
+
+    if license_text_location:
+        lic_loc_dict, lic_file_err = verify_license_files(abouts, license_text_location)
+        if lic_loc_dict:
+            copy_files(lic_loc_dict, output)
+        if lic_file_err:
+            update_errors = errors
+            errors = []
+            for err in update_errors:
+                errors.append(err)
+            for file_err in lic_file_err:
+                errors.append(file_err)
 
     lea = len(abouts)
-    lee = len(errors)
-    click.echo('Generated %(lea)d ABOUT files with %(lee)d errors or warning' % locals())
+    lee = 0
+
+    for e in errors:
+        # Only count as warning/error if CRITICAL, ERROR and WARNING
+        if e.severity > 20:
+            lee = lee + 1
+    click.echo('Generated %(lea)d ABOUT files with %(lee)d errors and/or warning' % locals())
     log_errors(errors, output)
 
 
@@ -163,13 +237,13 @@ def fetch(location):
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
-@click.argument('template', nargs=1, required=False,
-                type=click.Path(exists=False, file_okay=True, writable=True,
-                                dir_okay=False, resolve_path=True))
 @click.argument('inventory_location', nargs=1, required=False,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
-def attrib(location, output, template=None, inventory_location=None,):
+@click.option('--template', type=click.Path(exists=True), nargs=1,
+              help='Use the custom template for the Attribution Generation')
+@click.option('--mapping', is_flag=True, help='Configure the mapping key from the MAPPING.CONFIG')
+def attrib(location, output, template, mapping, inventory_location=None,):
     """
     Generate attribution document at output using the directory of
     ABOUT files at location, the template file (or a default) and an
@@ -178,12 +252,18 @@ def attrib(location, output, template=None, inventory_location=None,):
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating attribution...')
-    errors, abouts = about_tool.model.collect_inventory(location)
-    about_tool.attrib.generate_and_save(abouts, output, 
-                                             template_loc=template, 
-                                             inventory_location=inventory_location)
-    log_errors(errors)
 
+    if location.lower().endswith('.zip'):
+        # accept zipped ABOUT files as input
+        location = extract_zip(location)
+
+    errors, abouts = about_code_tool.model.collect_inventory(location)
+    no_match_errors = about_code_tool.attrib.generate_and_save(abouts, output, mapping,
+                                             template_loc=template,
+                                             inventory_location=inventory_location)
+
+    log_errors(no_match_errors, os.path.dirname(output))
+    click.echo('Finished.')
 
 @cli.command(cls=AboutCommand)
 def redist(input_dir, output, inventory_location=None,):
@@ -223,11 +303,12 @@ def log_errors(errors, base_dir=False, level=NOTSET):
         file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
     for severity, message in errors:
-        sever = about_tool.severities[severity]
-        if no_stdout == 0:
-            print(msg_format % locals())
-        if base_dir:
-            file_logger.log(30, msg_format % locals())
+        if severity >= level:
+            sever = about_code_tool.severities[severity]
+            if not no_stdout:
+                print(msg_format % locals())
+            if base_dir:
+                file_logger.log(severity, msg_format % locals())
 
 
 if __name__ == '__main__':

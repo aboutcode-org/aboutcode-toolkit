@@ -18,22 +18,40 @@ from __future__ import print_function
 
 import codecs
 from collections import OrderedDict
+import errno
+import httplibs
 import ntpath
 import os
 import posixpath
+import shutil
+import socket
 import string
 import sys
 
 import unicodecsv
 
-from about_tool import CRITICAL
+from about_tool import CRITICAL, ERROR
 from about_tool import Error
 
 
 on_windows = 'win32' in sys.platform
+
+
+def posix_path(path):
+    """
+    Return a path using POSIX path separators given a path that may
+    contain POSIX or windows separators, converting \ to /.
+    """
+    return path.replace(ntpath.sep, posixpath.sep)
+
+
 UNC_PREFIX = u'\\\\?\\'
+UNC_PREFIX_POSIX = posix_path(UNC_PREFIX)
+UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.'
+
+have_mapping = False
 
 
 def invalid_chars(path):
