@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import posixpath
 import unittest
+from collections import OrderedDict
 from unittest.case import expectedFailure
 
 from utils import get_test_loc
@@ -37,30 +38,39 @@ from about_tool import model
 class GenTest(unittest.TestCase):
     def test_check_duplicated_columns(self):
         test_file = get_test_loc('gen/dup_keys.csv')
-        expected = [Error(ERROR, u'Duplicated column name(s): copyright with copyright')]
+        expected = [Error(ERROR, u'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
     def test_check_duplicated_columns_handles_lower_upper_case(self):
         test_file = get_test_loc('gen/dup_keys_with_diff_case.csv')
-        expected = [Error(ERROR, u'Duplicated column name(s): copyright with Copyright')]
+        expected = [Error(ERROR, u'Duplicated column name(s): copyright with Copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
+        assert expected == result
+
+    def test_check_duplicated_about_file_path(self):
+        test_dict = [{'about_file_path': u'/test/test.c', u'version': u'1.03', u'name': u'test.c'},
+                     {'about_file_path': u'/test/abc/', u'version': u'1.0', u'name': u'abc'},
+                     {'about_file_path': u'/test/test.c', u'version': u'1.04', u'name': u'test1.c'}]
+        expected = [Error(CRITICAL, u'The input has duplicated values in \'about_file_path\' field: /test/test.c')]
+        result = gen.check_duplicated_about_file_path(test_dict)
         assert expected == result
 
     def test_load_inventory(self):
         self.maxDiff = None
+        mapping = None
         location = get_test_loc('gen/inv.csv')
         base_dir = get_test_loc('inv')
-        errors, abouts = gen.load_inventory(location, base_dir)
+        errors, abouts = gen.load_inventory(mapping, location, base_dir)
         expected_errors = [
-            Error(INFO, u'Field custom1 is a custom field'),
+            Error(INFO, u'Field custom1 is not a supported field and is ignored.'),
             Error(CRITICAL, u'Field about_resource: Path . not found')]
         assert expected_errors == errors
 
         expected = [u'about_resource: .\n'
                     u'name: AboutCode\n'
                     u'version: 0.11.0\n'
-                    u'custom1: |\n'
+                    u'description: |\n'
                     u'    multi\n'
                     u'    line\n']
         result = [a.dumps(with_absent=False, with_empty=False)
@@ -68,10 +78,12 @@ class GenTest(unittest.TestCase):
         assert expected == result
 
     def test_generation_dir_endswith_space(self):
+        mapping = None
+        extract_license = False
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location,
+        errors, abouts = gen.generate(mapping, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
 
@@ -79,12 +91,46 @@ class GenTest(unittest.TestCase):
         assert (len(errors) == 1, 'Should return 1 error.')
         assert expected_errors_msg in errors[0].message
 
+    def test_generation_with_no_about_resource(self):
+        mapping = None
+        extract_license = False
+        location = get_test_loc('gen/inv2.csv')
+        gen_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(mapping, extract_license, location,
+                                      base_dir=gen_dir,
+                                      with_empty=False, with_absent=False)
+        expected_dict = OrderedDict()
+        expected_dict[u'.'] = None
+
+        assert abouts[0].about_resource.value == expected_dict
+        assert len(errors) == 0
+
+    def test_generation_with_no_about_resource_reference(self):
+        mapping = None
+        extract_license = False
+        location = get_test_loc('gen/inv3.csv')
+        gen_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(mapping, extract_license, location,
+                                      base_dir=gen_dir,
+                                      with_empty=False, with_absent=False)
+        expected_dict = OrderedDict()
+        expected_dict[u'test.tar.gz'] = None
+
+        assert abouts[0].about_resource.value == expected_dict
+        assert len(errors) == 1
+        msg = u'The reference file'
+        assert msg in errors[0].message
+
     @expectedFailure
     def test_generate(self):
+        mapping = ''
+        extract_license = False
         location = get_test_loc('gen/inv.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location, base_dir=gen_dir,
+        errors, abouts = gen.generate(mapping, extract_license, location, base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
 
         expected_errors = [Error(INFO, u'Field custom1 is a custom field')]
@@ -106,10 +152,12 @@ class GenTest(unittest.TestCase):
 
     @expectedFailure
     def test_generate_complex_inventory(self):
+        mapping = ''
+        extract_license = False
         location = get_test_loc('inventory/complex/about/expected.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location,
+        errors, abouts = gen.generate(mapping, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
 
