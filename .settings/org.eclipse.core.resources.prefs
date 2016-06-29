@@ -1,7 +1,5 @@
 eclipse.preferences.version=1
-encoding//about_code_tool/licenses.py=utf8
 encoding//src/about_tool/__init__.py=utf8
-encoding//src/about_tool/api.py=utf8
 encoding//src/about_tool/attrib.py=utf8
 encoding//src/about_tool/licenses.py=utf8
 encoding//src/about_tool/util.py=utf8
