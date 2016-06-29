@@ -17,30 +17,19 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
+import click
 import codecs
 import logging
 import os
-from os.path import exists, join
-
-import click
 import unicodecsv
 
-from about_tool import __version__
+from os.path import exists, join
+
+from about_tool import CRITICAL, ERROR, Error, INFO, NOTSET, WARNING
 from about_tool import __about_spec_version__
-
-import about_tool.gen
-import about_tool.model
-import about_tool.attrib
-
-from about_tool import CRITICAL
-from about_tool import ERROR, Error
-from about_tool import INFO
-from about_tool import NOTSET
-from about_tool import WARNING
-from about_tool.util import to_posix
-from about_tool.util import copy_files
-from about_tool.util import extract_zip
-from about_tool.util import verify_license_files
+from about_tool import __version__
+from about_tool import attrib, gen, model, severities
+from about_tool.util import copy_files, extract_zip, to_posix, verify_license_files
 
 
 __copyright__ = """
@@ -138,12 +127,12 @@ def inventory(overwrite, location, output):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    errors, abouts = about_code_tool.model.collect_inventory(location)
+    errors, abouts = model.collect_inventory(location)
 
     if not abouts:
         errors = [Error(ERROR, u'No ABOUT files is found. Generation halted.')]
     else:
-        about_code_tool.model.to_csv(abouts, output)
+        model.to_csv(abouts, output)
     log_errors(errors, os.path.dirname(output), level=verbosity_num)
 
 
@@ -187,7 +176,7 @@ def gen(mapping, license_text_location, extract_license, location, output):
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating ABOUT files...')
-    errors, abouts = about_code_tool.gen.generate(mapping, extract_license, location, output)
+    errors, abouts = gen.generate(mapping, extract_license, location, output)
 
     if license_text_location:
         lic_loc_dict, lic_file_err = verify_license_files(abouts, license_text_location)
@@ -257,8 +246,8 @@ def attrib(location, output, template, mapping, inventory_location=None,):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    errors, abouts = about_code_tool.model.collect_inventory(location)
-    no_match_errors = about_code_tool.attrib.generate_and_save(abouts, output, mapping,
+    errors, abouts = model.collect_inventory(location)
+    no_match_errors = attrib.generate_and_save(abouts, output, mapping,
                                              template_loc=template,
                                              inventory_location=inventory_location)
 
@@ -304,7 +293,7 @@ def log_errors(errors, base_dir=False, level=NOTSET):
         file_logger.addHandler(file_handler)
     for severity, message in errors:
         if severity >= level:
-            sever = about_code_tool.severities[severity]
+            sever = severities[severity]
             if not no_stdout:
                 print(msg_format % locals())
             if base_dir:

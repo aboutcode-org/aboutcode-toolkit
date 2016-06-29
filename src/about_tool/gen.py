@@ -17,29 +17,23 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import codecs
-from collections import OrderedDict
 import ConfigParser as configparser
-import collections
+import codecs
 import errno
 import logging
 import optparse
 import os
-from os.path import exists, dirname, abspath, isdir
-from posixpath import basename
 import posixpath
 import sys
-
 import unicodecsv
 
-from about_tool import __version__
-from about_tool import __about_spec_version__
+from collections import OrderedDict
+from os.path import exists, dirname, abspath, isdir
+from posixpath import basename
 
-from about_tool import Error, CRITICAL
-from about_tool import ERROR
-
-from about_tool import util
-from about_tool import model
+from about_tool import ERROR, Error, CRITICAL
+from about_tool import __about_spec_version__, __version__
+from about_tool import model, util
 from about_tool.util import to_posix
 
 

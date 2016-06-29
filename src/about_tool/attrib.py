@@ -22,12 +22,12 @@ import csv
 import jinja2
 import os
 
-from licenses import COMMON_LICENSES
 from posixpath import basename, dirname
-from util import get_mappings
 
-from about_tool import ERROR
-from about_tool import Error
+from about_tool import ERROR, Error
+from about_tool.licenses import COMMON_LICENSES
+from about_tool.util import get_mappings
+
 
 def generate(abouts, template_string=None):
     """

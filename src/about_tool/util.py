@@ -17,9 +17,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
-from collections import OrderedDict
 import errno
-import httplibs
+import httplib
 import ntpath
 import os
 import posixpath
@@ -27,11 +26,14 @@ import shutil
 import socket
 import string
 import sys
-
 import unicodecsv
 
-from about_tool import CRITICAL, ERROR
-from about_tool import Error
+from collections import OrderedDict
+from os.path import abspath
+from os.path import dirname
+from os.path import join
+
+from about_tool import CRITICAL, ERROR, Error
 
 
 on_windows = 'win32' in sys.platform
