@@ -25,11 +25,14 @@ import unicodecsv
 
 from os.path import exists, join
 
+import about_tool
+
 from about_tool import CRITICAL, ERROR, Error, INFO, NOTSET, WARNING
 from about_tool import __about_spec_version__
 from about_tool import __version__
 from about_tool import attrib, gen, model, severities
 from about_tool.util import copy_files, extract_zip, to_posix, verify_license_files
+from about_tool.model import About
 
 
 __copyright__ = """
@@ -127,7 +130,7 @@ def inventory(overwrite, location, output):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    errors, abouts = model.collect_inventory(location)
+    errors, abouts = about_tool.model.collect_inventory(location)
 
     if not abouts:
         errors = [Error(ERROR, u'No ABOUT files is found. Generation halted.')]
@@ -176,7 +179,7 @@ def gen(mapping, license_text_location, extract_license, location, output):
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating ABOUT files...')
-    errors, abouts = gen.generate(mapping, extract_license, location, output)
+    errors, abouts = about_tool.gen.generate(mapping, extract_license, location, output)
 
     if license_text_location:
         lic_loc_dict, lic_file_err = verify_license_files(abouts, license_text_location)
@@ -247,7 +250,7 @@ def attrib(location, output, template, mapping, inventory_location=None,):
         location = extract_zip(location)
 
     errors, abouts = model.collect_inventory(location)
-    no_match_errors = attrib.generate_and_save(abouts, output, mapping,
+    no_match_errors = about_tool.attrib.generate_and_save(abouts, output, mapping,
                                              template_loc=template,
                                              inventory_location=inventory_location)
 

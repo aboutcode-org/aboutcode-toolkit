@@ -116,9 +116,14 @@ def load_inventory(mapping, location, base_dir):
     base_dir = util.to_posix(base_dir)
     inventory = util.load_csv(mapping, location)
 
-    dup_about_paths_err = check_duplicated_about_file_path(inventory)
-    if dup_about_paths_err:
-        errors.extend(dup_about_paths_err)
+    try:
+        dup_about_paths_err = check_duplicated_about_file_path(inventory)
+        if dup_about_paths_err:
+            errors.extend(dup_about_paths_err)
+            return errors, abouts
+    except:
+        msg = ('The essential field \'about_file_path\' is not found.')
+        errors.append(Error(CRITICAL, msg))
         return errors, abouts
 
     for i, fields in enumerate(inventory):
