@@ -13,5 +13,7 @@ encoding//src/about_tool/util.py=utf8
 encoding//tests/test_api.py=utf8
 encoding//tests/test_attrib.py=utf8
 encoding//tests/test_cmd.py=utf8
+encoding//tests/test_gen.py=utf8
+encoding//tests/test_model.py=utf8
 encoding//tests/utils.py=utf8
 encoding/setup.py=utf-8

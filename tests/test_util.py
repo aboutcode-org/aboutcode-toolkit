@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -258,6 +258,7 @@ class UtilsTest(unittest.TestCase):
             assert expected == result
 
     def test_load_csv(self):
+        mapping = None
         test_file = get_test_loc('util/about.csv')
         expected = [OrderedDict(
                     [('about_file', 'about.ABOUT'),
@@ -265,10 +266,13 @@ class UtilsTest(unittest.TestCase):
                      ('name', 'ABOUT tool'),
                      ('version', '0.8.1')])
                     ]
-        result = util.load_csv(test_file)
+        result = util.load_csv(mapping, test_file)
         assert expected == result
 
-    def test_load_csv_does_not_convert_column_names_to_lowercase(self):
+    # The column names should be converted to lowercase as the same behavior as
+    # when user use the MAPPING.CONFIG
+    """def test_load_csv_does_not_convert_column_names_to_lowercase(self):
+        mapping = None
         test_file = get_test_loc('util/about_key_with_upper_case.csv')
         expected = [OrderedDict(
                     [('about_file', 'about.ABOUT'),
@@ -276,8 +280,8 @@ class UtilsTest(unittest.TestCase):
                      ('nAme', 'ABOUT tool'),
                      ('Version', '0.8.1')])
                     ]
-        result = util.load_csv(test_file)
-        assert expected == result
+        result = util.load_csv(mapping, test_file)
+        assert expected == result"""
 
     def test_get_locations_with_very_long_path(self):
         import os
