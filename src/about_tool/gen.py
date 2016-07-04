@@ -103,18 +103,21 @@ def check_duplicated_about_file_path(inventory_dict):
 
 def load_inventory(mapping, location, base_dir):
     """
-    Load the inventory CSV file at location. Return a list of errors and a
+    Load the inventory file at location. Return a list of errors and a
     list of About objects validated against the base_dir.
     """
     errors = []
     abouts = []
-    dup_cols_err = check_duplicated_columns(location)
-    if dup_cols_err:
-        errors.extend(dup_cols_err)
-        return errors, abouts
-
     base_dir = util.to_posix(base_dir)
-    inventory = util.load_csv(mapping, location)
+    if location.endswith('.csv'):
+        dup_cols_err = check_duplicated_columns(location)
+        if dup_cols_err:
+            errors.extend(dup_cols_err)
+            return errors, abouts
+
+        inventory = util.load_csv(mapping, location)
+    else:
+        inventory = util.load_json(mapping, location)
 
     try:
         dup_about_paths_err = check_duplicated_about_file_path(inventory)

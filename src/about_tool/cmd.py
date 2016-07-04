@@ -149,11 +149,11 @@ def inventory(overwrite, format, location, output):
 
 
 gen_help = '''
-LOCATION: Path to a CSV inventory file
+LOCATION: Path to a inventory file (CSV or JSON file)
 OUTPUT: Path to the directory to write ABOUT files to
 '''
 @cli.command(help=gen_help,
-             short_help='LOCATION: csv file, OUTPUT: directory',
+             short_help='LOCATION: input file, OUTPUT: directory',
              cls=AboutCommand)
 @click.argument('location', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=True,
@@ -162,8 +162,6 @@ OUTPUT: Path to the directory to write ABOUT files to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=False, writable=True,
                                 dir_okay=True, resolve_path=True))
-# FIXME: The --mapping should have a feature for user to identify the 
-# specific mapping file instead of using only the default "MAPPING.CONFIG"
 @click.option('--mapping', is_flag=True, help='Use the mapping between columns names'
                         'in your CSV and the ABOUT field names as defined in'
                         'the MAPPING.CONFIG mapping configuration file.')
@@ -183,10 +181,14 @@ OUTPUT: Path to the directory to write ABOUT files to
                     'about gen --extract_license \'api_url\' \'api_key\'')
 def gen(mapping, license_text_location, extract_license, location, output):
     """
-    Given a CVS inventory of ABOUT files at location, generate ABOUT files in
+    Given an inventory of ABOUT files at location, generate ABOUT files in
     base directory.
     """
     click.echo('Running about-code-tool version ' + __version__)
+    if not location.endswith('.csv') and not location.endswith('.json'):
+        click.echo('ERROR: Input file. Only .csv and .json files are supported.')
+        click.echo()
+        return
     click.echo('Generating ABOUT files...')
     errors, abouts = about_tool.gen.generate(mapping, extract_license, location, output)
 
