@@ -1023,6 +1023,16 @@ copyright: |
         expected = get_test_loc('load/expected.csv')
         self.check_csvs(expected, csv_file)
 
+    def test_to_json(self):
+        path = 'load/this.ABOUT'
+        test_file = get_test_loc(path)
+        a = model.About(location=test_file, about_file_path=path)
+
+        json_file = get_temp_file()
+        model.to_json([a], json_file)
+
+        expected = get_test_loc('load/expected.json')
+        self.check_csvs(expected, json_file)
 
 class CollectorTest(unittest.TestCase):
 

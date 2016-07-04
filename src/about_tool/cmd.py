@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env py`hon
 # -*- coding: utf8 -*-
 
 # ============================================================================
@@ -17,22 +17,20 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import click
 import codecs
 import logging
 import os
-import unicodecsv
-
 from os.path import exists, join
-
-import about_tool
 
 from about_tool import CRITICAL, ERROR, Error, INFO, NOTSET, WARNING
 from about_tool import __about_spec_version__
 from about_tool import __version__
 from about_tool import attrib, gen, model, severities
-from about_tool.util import copy_files, extract_zip, to_posix, verify_license_files
+import about_tool
 from about_tool.model import About
+from about_tool.util import copy_files, extract_zip, to_posix, verify_license_files
+import click
+import unicodecsv
 
 
 __copyright__ = """
@@ -91,6 +89,7 @@ inventory_help = '''
 LOCATION: Path to an ABOUT file or a directory containing ABOUT files
 OUTPUT: Path to CSV file to write the inventory to
 '''
+formats = ['csv', 'json']
 @cli.command(help=inventory_help,
              short_help='LOCATION: directory, OUTPUT: csv file',
              cls=AboutCommand)
@@ -102,7 +101,9 @@ OUTPUT: Path to CSV file to write the inventory to
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
 @click.option('--overwrite', is_flag=True, help='Overwrites the output file if it exists')
-def inventory(overwrite, location, output):
+@click.option('-f', '--format', is_flag=False, default='csv', show_default=True, metavar='<style>',
+              help='Set <output_file> format <style> to one of the supported formats: %s' % ' or '.join(formats),)
+def inventory(overwrite, format, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.    
@@ -114,17 +115,22 @@ def inventory(overwrite, location, output):
         click.echo('Select a different file name or use the --overwrite option after the `inventory`.')
         click.echo()
         return
-    if not output.endswith('.csv'):
-        click.echo('ERROR: <output> must be a CSV file ending with ".csv".')
-        click.echo()
-        return
     if not exists(os.path.dirname(output)):
         click.echo('ERROR: Path to the <output> does not exists. Please check and correct the <output>.')
         click.echo()
         return
+    if format not in formats:
+        click.echo('ERROR: Output format: %s is not supported.' % format)
+        click.echo()
+        return
+    if not format == 'json':
+        if not output.endswith('.csv'):
+            click.echo('ERROR: <output> must be a CSV file ending with ".csv".')
+            click.echo()
+            return
 
     click.echo('Collecting the inventory from location: ''%(location)s '
-               'and writing CSV output to: %(output)s' % locals())
+               'and writing output to: %(output)s' % locals())
 
     if location.lower().endswith('.zip'):
         # accept zipped ABOUT files as input
@@ -135,7 +141,10 @@ def inventory(overwrite, location, output):
     if not abouts:
         errors = [Error(ERROR, u'No ABOUT files is found. Generation halted.')]
     else:
-        model.to_csv(abouts, output)
+        if format == 'json':
+            model.to_json(abouts, output)
+        else:
+            model.to_csv(abouts, output)
     log_errors(errors, os.path.dirname(output), level=verbosity_num)
 
 

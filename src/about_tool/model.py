@@ -27,6 +27,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
+import json
 import os
 import posixpath
 import re
@@ -1192,6 +1193,42 @@ def to_csv(abouts, location, with_absent=False, with_empty=True):
                 if not ad['about_resource_path'].endswith('/'):
                     ad['about_resource_path'] += '/'
             writer.writerow(ad)
+
+
+def to_json(abouts, location, with_absent=False, with_empty=True):
+    """
+    Write a JSON file at location given a list of About objects.
+    """
+    output = []
+    with codecs.open(location, mode='wb', encoding='utf-8') as jsonfile:
+        for a in abouts:
+            ad = a.as_dict(with_paths=True,
+                           with_absent=with_absent,
+                           with_empty=with_empty)
+            if 'about_file_path' in ad.keys():
+                afp = ad['about_file_path']
+                afp = '/' + afp if not afp.startswith('/') else afp
+                ad['about_file_path'] = afp 
+            if 'about_resource_path' in ad.keys():
+                arp = ad['about_resource_path']
+                arp = '/' + arp if not arp.startswith('/') else arp
+                ad['about_resource_path'] = arp
+            # Make the 'about_resource_path' endswith '/' if the 'about_resource'
+            # reference the current directory 
+            if 'about_resource' in ad.keys() and ad['about_resource'] == '.':
+                if not ad['about_resource_path'].endswith('/'):
+                    ad['about_resource_path'] += '/'
+            output.append(ad)
+        jsonfile.write(json.dumps(output, indent=2))
+    
+    
+    """print(fieldnames)
+    test1 = {'abc': 'asdasd', 'another': '321'}
+    test2 = {'ac': 'aasd', 'anot': '321'}
+    test = []
+    test.append(test1)
+    test.append(test2)
+    print(json.dumps(test, indent=2))"""
 
 
 def from_csv(location, base_dir):
