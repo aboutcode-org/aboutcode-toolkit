@@ -114,7 +114,6 @@ def load_inventory(mapping, location, base_dir):
         if dup_cols_err:
             errors.extend(dup_cols_err)
             return errors, abouts
-
         inventory = util.load_csv(mapping, location)
     else:
         inventory = util.load_json(mapping, location)

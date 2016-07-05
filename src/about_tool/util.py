@@ -342,22 +342,9 @@ def load_json(mapping, location):
 
     with open(location) as json_file:    
         results = json.load(json_file)
-    """if mapping:
-        results = apply_mappings(results)"""
-    print(results)
-    return results
-    """with codecs.open(location, mode='rb', encoding='utf-8', errors='ignore') as csvfile:
-        for row in OrderedDictReader(csvfile):
-            input_row = {}
-            # convert all the column keys to lower case as the same behavior as
-            # when user use the --mapping
-            for key in row.keys():
-                input_row[key.lower()] = row[key]
-            results.append(input_row)
-    # user has the mapping option set
     if mapping:
         results = apply_mappings(results)
-    return results"""
+    return results
 
 
 def have_network_connection():
