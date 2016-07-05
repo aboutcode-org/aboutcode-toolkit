@@ -250,7 +250,7 @@ def attrib(location, output, template, mapping, inventory_location=None,):
     """
     Generate attribution document at output using the directory of
     ABOUT files at location, the template file (or a default) and an
-    inventory_location CSV file containing a list of ABOUT files path to
+    inventory_location file containing a list of ABOUT files path to
     generate attribution for.
     """
     click.echo('Running about-code-tool version ' + __version__)

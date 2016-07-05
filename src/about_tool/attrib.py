@@ -18,15 +18,14 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
-import csv
 import jinja2
 import os
+import about_tool
 
-from posixpath import basename, dirname
+from posixpath import basename, dirname, exists
 
 from about_tool import ERROR, Error
 from about_tool.licenses import COMMON_LICENSES
-from about_tool.util import get_mappings
 
 
 def generate(abouts, template_string=None):
@@ -105,29 +104,34 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
     afp_list = []
     not_match_path = []
     errors = []
+    afp_key = 'about_file_path'
+
     if inventory_location:
-        with open(inventory_location, 'rU') as inp:
-            reader = csv.DictReader(inp)
-            about_data = [data for data in reader]
-            map_key = 'about_file_path'
+        if not exists(inventory_location):
+            msg = (u'"INVENTORY_LOCATOIN" does not exist. Generation halted.')
+            errors.append(Error(ERROR, msg))
+            return errors
+        if inventory_location.endswith('.csv'):
+            about_data = about_tool.util.load_csv(mapping, inventory_location)
+        elif inventory_location.endswith('.json'):
+            about_data = about_tool.util.load_json(mapping, inventory_location)
+        else:
+            msg = (u'Only .csv and .json are supported for the "INVENTORY_LOCATOIN". Generation halted.')
+            errors.append(Error(ERROR, msg))
+            return errors
 
-            if mapping:
-                mapping = get_mappings()
-                if 'about_file_path' in mapping:
-                    map_key = mapping['about_file_path']
+        for data in about_data:
+            try:
+                afp = data[afp_key]
+            except Exception, e:
+                # 'about_file_path' key/column doesn't exist
+                msg = (u'The required key: \'about_file_path\' does not exist. Generation halted.')
+                errors.append(Error(ERROR, msg))
+                return errors
 
-            for data in about_data:
-                try:
-                    afp = data[map_key]
-                except Exception, e:
-                    # 'about_file_path' key/column doesn't exist
-                    msg = (u'The required key: \'about_file_path\' does not exist. Generation halted.')
-                    errors.append(Error(ERROR, msg))
-                    return errors
-
-                if afp.startswith('/'):
-                    afp = afp.partition('/')[2]
-                filter_afp.append(afp)
+            if afp.startswith('/'):
+                afp = afp.partition('/')[2]
+            filter_afp.append(afp)
         list = as_about_paths(filter_afp)
 
         # Get the not matching list if any
