@@ -301,7 +301,8 @@ def generate(mapping, extract_license, location, base_dir, policy=None, conf_loc
                    u'%(dump_loc)s '
                    u'with error: %(emsg)s' % locals())
             errors.append(Error(ERROR, msg))
-    return errors, abouts
+    dedup_errors = model.list_dedup(errors)
+    return dedup_errors, abouts
 
 
 def fetch_texts(abouts):

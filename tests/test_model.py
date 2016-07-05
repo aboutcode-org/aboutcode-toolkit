@@ -1212,3 +1212,9 @@ class GroupingsTest(unittest.TestCase):
                                 ('eclipse', [d]),
                                 ])
         assert expected == results
+
+    def test_list_dedup(self):
+        items = ['a', 'b', 'd', 'b', 'c', 'a']
+        expected = ['a', 'b', 'd', 'c']
+        results = model.list_dedup(items)
+        assert expected == results

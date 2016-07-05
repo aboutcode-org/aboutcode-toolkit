@@ -1220,15 +1220,17 @@ def to_json(abouts, location, with_absent=False, with_empty=True):
                     ad['about_resource_path'] += '/'
             output.append(ad)
         jsonfile.write(json.dumps(output, indent=2))
-    
-    
-    """print(fieldnames)
-    test1 = {'abc': 'asdasd', 'another': '321'}
-    test2 = {'ac': 'aasd', 'anot': '321'}
-    test = []
-    test.append(test1)
-    test.append(test2)
-    print(json.dumps(test, indent=2))"""
+
+
+def list_dedup(list_item):
+    """
+    Deduping the list
+    """
+    dedup_list = []
+    for item in list_item:
+        if not item in dedup_list:
+            dedup_list.append(item)
+    return dedup_list
 
 
 def from_csv(location, base_dir):
