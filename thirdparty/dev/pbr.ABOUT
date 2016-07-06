@@ -1,0 +1,15 @@
+about_resource: pbr-1.10.0-py2.py3-none-any.whl
+version: 1.10.0
+download_url: https://pypi.python.org/packages/0c/53/014354fc93c591ccc4abff12c473ad565a2eb24dcd82490fae33dbf2539f/mock-2.0.0.tar.gz#md5=0febfafd14330c9dcaa40de2d82d40ad
+
+name: pbr
+description: |
+    PBR is a library that injects some useful and sensible default behaviors into your setuptools run.
+    It started off life as the chunks of code that were copied between all of the OpenStack projects.
+    Around the time that OpenStack hit 18 different projects each with at least 3 active branches, it seemed like a good time to make that code into a proper reusable library.
+
+homepage: http://git.openstack.org/cgit/openstack-dev/pbr
+owner: OpenStack
+license: apache-2.0
+license_file: pbr.LICENSE
+copyright: Copyright (c) OpenStack.org
