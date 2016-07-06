@@ -73,8 +73,11 @@ class FieldTest(unittest.TestCase):
         base_dir = get_test_loc('fields')
         errors = field.validate(base_dir=base_dir)
 
+        file_path = posixpath.join(base_dir, test_file)
+        err_msg = u'Field f: Path %s not found' % file_path
+
         expected_errors = [
-            Error(CRITICAL, u'Field f: Path does.not.exist not found')]
+            Error(CRITICAL, err_msg)]
         assert expected_errors == errors
 
         result = field.value[test_file]
@@ -409,9 +412,11 @@ class AboutTest(unittest.TestCase):
 
     def test_About_has_errors_when_about_resource_does_not_exist(self):
         test_file = get_test_loc('parser_tests/missing_about_ref.ABOUT')
+        file_path = posixpath.join(posixpath.dirname(test_file), 'about_file_missing.c')
         a = model.About(test_file)
+        err_msg = u'Field about_resource: Path %s not found' % file_path
         expected = [
-            Error(CRITICAL, u'Field about_resource: Path about_file_missing.c not found')]
+            Error(CRITICAL, err_msg)]
         result = a.errors
         assert expected == result
 
@@ -480,9 +485,16 @@ class AboutTest(unittest.TestCase):
     def test_About_file_fields_are_empty_if_present_and_path_missing(self):
         test_file = get_test_loc('parse/missing_notice_license_files.ABOUT')
         a = model.About(test_file)
+
+        file_path1 = posixpath.join(posixpath.dirname(test_file), 'test.LICENSE')
+        file_path2 = posixpath.join(posixpath.dirname(test_file), 'test.NOTICE')
+
+        err_msg1 = u'Field license_file: Path %s not found' % file_path1
+        err_msg2 = u'Field notice_file: Path %s not found' % file_path2
+
         expected_errors = [
-            Error(CRITICAL, u'Field license_file: Path test.LICENSE not found'),
-            Error(CRITICAL, u'Field notice_file: Path test.NOTICE not found'),
+            Error(CRITICAL, err_msg1),
+            Error(CRITICAL, err_msg2),
             ]
         assert expected_errors == a.errors
         expected = [(u'test.LICENSE', None)]
@@ -931,13 +943,15 @@ copyright: |
         test_file = get_test_loc('unicode/nose-selecttests.ABOUT')
         a = model.About()
         a.load(test_file)
+        file_path = posixpath.join(posixpath.dirname(test_file), 'nose-selecttests-0.3.zip')
+        err_msg = u'Field about_resource: Path %s not found' % file_path
         errors = [
             Error(INFO, u'Field dje_license is not a supported field and is ignored.'),
             Error(INFO, u'Field license_text_file is not a supported field and is ignored.'),
             Error(INFO, u'Field scm_tool is not a supported field and is ignored.'),
             Error(INFO, u'Field scm_repository is not a supported field and is ignored.'),
             Error(INFO, u'Field test is not a supported field and is ignored.'),
-            Error(CRITICAL, u'Field about_resource: Path nose-selecttests-0.3.zip not found')]
+            Error(CRITICAL, err_msg)]
         assert errors == a.errors
         assert u'Copyright (c) 2012, Domen Kožar' == a.copyright.value
 
@@ -1059,11 +1073,16 @@ class CollectorTest(unittest.TestCase):
     def test_collect_inventory_return_errors(self):
         test_loc = get_test_loc('collect-inventory-errors')
         errors, _abouts = model.collect_inventory(test_loc)
+        file_path1 = posixpath.join(about_tool.util.UNC_PREFIX_POSIX, test_loc, 'distribute_setup.py')
+        file_path2 = posixpath.join(about_tool.util.UNC_PREFIX_POSIX, test_loc, 'date_test.py')
+
+        err_msg1 = u'Field about_resource: Path %s not found' % file_path1
+        err_msg2 = u'Field about_resource: Path %s not found' % file_path2
         expected_errors = [
             Error(INFO, u'Field date is not a supported field and is ignored.'),
-            Error(CRITICAL, u'Field about_resource: Path distribute_setup.py not found'),
-            Error(CRITICAL, u'Field about_resource: Path date_test.py not found')]
-        assert sorted(expected_errors) == sorted(errors)
+            Error(CRITICAL, err_msg1),
+            Error(CRITICAL, err_msg2)]
+        assert expected_errors == errors
 
     def test_collect_inventory_can_collect_a_single_file(self):
         test_loc = get_test_loc('thirdparty/django_snippets_2413.ABOUT')

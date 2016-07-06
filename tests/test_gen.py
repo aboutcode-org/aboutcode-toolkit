@@ -62,9 +62,13 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('gen/inv.csv')
         base_dir = get_test_loc('inv')
         errors, abouts = gen.load_inventory(mapping, location, base_dir)
+
+        file_path = posixpath.normpath(posixpath.join(base_dir, '.'))
+        err_msg = u'Field about_resource: Path %s not found' % file_path
+
         expected_errors = [
             Error(INFO, u'Field custom1 is not a supported field and is ignored.'),
-            Error(CRITICAL, u'Field about_resource: Path . not found')]
+            Error(CRITICAL, err_msg)]
         assert expected_errors == errors
 
         expected = [u'about_resource: .\n'

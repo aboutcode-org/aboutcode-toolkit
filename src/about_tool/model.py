@@ -382,15 +382,15 @@ class PathField(ListField):
                 location = util.to_posix(location)
 
                 if not os.path.exists(location):
-                    msg = (u'Field %(name)s: Path %(path)s not found'
+                    msg = (u'Field %(name)s: Path %(location)s not found'
                            % locals())
                     errors.append(Error(CRITICAL, msg))
                     location = None
             else:
-                location = None
                 msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
                        u' No base directory provided' % locals())
                 errors.append(Error(ERROR, msg))
+                location = None
 
             paths[path] = location
 
