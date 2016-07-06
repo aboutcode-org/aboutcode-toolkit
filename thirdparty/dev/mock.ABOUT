@@ -7,7 +7,7 @@ description: mock is a library for testing in Python. It allows you to replace p
 homepage: https://github.com/testing-cabal/mock
 owner: Testing Cabal
 contact: http://lists.idyll.org/listinfo/testing-in-python
-license: bsd-new
+license: bsd-simplified
 license_file: mock.LICENSE
 copyright: Copyright (c) 2003-2013, Michael Foord & the mock team
 
