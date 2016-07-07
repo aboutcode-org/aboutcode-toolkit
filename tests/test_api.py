@@ -40,3 +40,9 @@ class ApiTest(unittest.TestCase):
         mock_data.return_value = [], {'key': 'test', 'name': 'test_name', 'full_text': 'test_full_text' }
         result = api.get_license_info(self, '', '', '', '')
         assert result == ([], LicenseInfo(key='test', name='test_name', text='test_full_text'))
+
+    @patch.object(about_tool.api, 'request_license_data')
+    def test_get_license_details_from_api(self, mock_data):
+        mock_data.return_value = {'name': 'test_name', 'full_text': 'test_full_text', 'key': 'test'}, []
+        result = api.get_license_details_from_api('', '', '')
+        assert result == ('test_name', 'test', 'test_full_text', [])
