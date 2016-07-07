@@ -418,6 +418,10 @@ class AboutResourceField(PathField):
         Set a list attribute on self called resolved_paths 
         """
         self.resolved_paths = []
+        if not about_file_path:
+            # FIXME: should we return an info or warning?
+            # The existence of about_file_path has been checked in the load_inventory()
+            return
         base_dir = posixpath.dirname(about_file_path).strip(posixpath.sep)
         for path in self.value.keys():
             resolved = posixpath.join(base_dir, path)
