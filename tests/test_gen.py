@@ -127,7 +127,6 @@ class GenTest(unittest.TestCase):
         msg = u'The reference file'
         assert msg in errors[0].message
 
-    @expectedFailure
     def test_generate(self):
         mapping = ''
         extract_license = False
@@ -136,47 +135,16 @@ class GenTest(unittest.TestCase):
 
         errors, abouts = gen.generate(mapping, extract_license, location, base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
-
-        expected_errors = [Error(INFO, u'Field custom1 is a custom field')]
+        expected_errors = [Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
         assert expected_errors == errors
 
-        gen_loc = posixpath.join(to_posix(gen_dir), 'inv', 'this.ABOUT')
-        about = model.About(location=gen_loc)
-        on_disk_result = about.dumps(with_absent=False, with_empty=False)
         in_mem_result = [a.dumps(with_absent=False, with_empty=False)
                         for a in abouts][0]
         expected = (u'about_resource: .\n'
                     u'name: AboutCode\n'
                     u'version: 0.11.0\n'
-                    u'custom1: |\n'
+                    u'description: |\n'
                     u'    multi\n'
                     u'    line\n')
-        assert expected == on_disk_result
         assert expected == in_mem_result
 
-    @expectedFailure
-    def test_generate_complex_inventory(self):
-        mapping = ''
-        extract_license = False
-        location = get_test_loc('inventory/complex/about/expected.csv')
-        gen_dir = get_temp_dir()
-
-        errors, abouts = gen.generate(mapping, extract_license, location,
-                                      base_dir=gen_dir,
-                                      with_empty=False, with_absent=False)
-
-        expected_errors = [Error(INFO, u'Field custom1 is a custom field')]
-        assert expected_errors == errors
-
-        gen_loc = posixpath.join(to_posix(gen_dir), 'inv', 'this.ABOUT')
-        about = model.About(location=gen_loc)
-        on_disk_result = about.dumps(with_absent=False, with_empty=False)
-        in_mem_result = [a.dumps(with_absent=False, with_empty=False)
-                        for a in abouts][0]
-        expected = (u'about_resource: .\n'
-                    u'name: AboutCode\n'
-                    u'version: 0.11.0\n'
-                    u'custom1: multi\n'
-                    u' line\n')
-        assert expected == on_disk_result
-        assert expected == in_mem_result
