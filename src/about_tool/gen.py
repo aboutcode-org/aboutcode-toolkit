@@ -185,29 +185,6 @@ def get_column_mappings(location_or_config):
     return config['mappings']
 
 
-# FIXME: are mappings really needed and useful? is this too complex?
-def apply_mapping(inventory, config):
-    """
-    Given a config object, applies mapping if present to the inventory.
-    Return the updated inventory.
-    """
-    mappings = config.get('mappings')
-    if not mappings:
-        return inventory
-    else:
-        # iterate over the inventory
-        # rename fields
-        pass
-
-
-# FIXME: are policies really needed?
-
-policies = ('skip',  # DO_NOTHING_IF_ABOUT_FILE_EXIST
-            'overwrite',  # OVERWRITE_ABOUT_FIELDS_OR FILE
-            'new',  # KEEP_FIELDS_UNCHANGED_AND_ONLY_ADD_NEW_FIELDS
-            )
-
-
 def generate(mapping, extract_license, location, base_dir, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
