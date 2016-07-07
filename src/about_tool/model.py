@@ -85,10 +85,11 @@ class Field(object):
                 msg = u'Field %(name)s is required'
                 errors.append(Error(CRITICAL, msg % locals()))
                 return errors
-            else:
+            """else:
                 # no error for not present non required fields
                 # FIXME: should we add an info?
-                pass
+                # CY: I don't think so.
+                pass"""
         else:
             # present fields should have content ...
             if not self.has_content:
@@ -416,10 +417,6 @@ class AboutResourceField(PathField):
         Resolve resource paths relative to an ABOUT file path.
         Set a list attribute on self called resolved_paths 
         """
-        if not about_file_path:
-            # FIXME: should we return an info or warning?
-            return
-        # clear
         self.resolved_paths = []
         base_dir = posixpath.dirname(about_file_path).strip(posixpath.sep)
         for path in self.value.keys():
@@ -1100,9 +1097,6 @@ def collect_inventory(location):
     errors = []
     location = util.get_absolute(location)
     locations = list(util.get_about_locations(location))
-    # FIXME: CY: why do we have 2 check_file_names here?
-    duplicate_errors = util.check_file_names(locations)
-    errors.extend(duplicate_errors)
 
     name_errors = util.check_file_names(locations)
     errors.extend(name_errors)
