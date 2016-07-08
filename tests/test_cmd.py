@@ -48,19 +48,6 @@ class CmdTest(unittest.TestCase):
         result = as_items(result)
         assert expected == result
 
-    def test_collect_inventory_basic_from_directory(self):
-        location = get_test_loc('inventory/basic/about')
-        result = get_temp_file()
-        errors, abouts = model.collect_inventory(location)
-
-        model.to_csv(abouts, result)
-
-        expected_errors = []
-        assert expected_errors == errors
-
-        expected = get_test_loc('inventory/basic/expected.csv')
-        self.check_csv(expected, result)
-
     # FIXME: The self.chec_csv is failing because there are many keys in the ABOUT files that are
     # not supported. Instead of removing all the non-supported keys in the output
     # and do the comparson, it may be best to apply the mapping to include theses keys
