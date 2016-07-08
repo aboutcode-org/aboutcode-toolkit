@@ -28,12 +28,15 @@ import sys
 import unicodecsv
 
 from collections import OrderedDict
-from os.path import exists, dirname, abspath, isdir
 from posixpath import basename
 
-from about_tool import ERROR, Error, CRITICAL
-from about_tool import __about_spec_version__, __version__
-from about_tool import model, util
+from about_tool import ERROR
+from about_tool import CRITICAL
+from about_tool import Error
+from about_tool import __about_spec_version__
+from about_tool import __version__
+from about_tool import model
+from about_tool import util
 from about_tool.util import to_posix
 
 

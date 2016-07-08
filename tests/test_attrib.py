@@ -21,7 +21,8 @@ import unittest
 
 from utils import get_test_loc
 
-from about_tool import attrib, model
+from about_tool import attrib
+from about_tool import model
 
 
 class AttribTest(unittest.TestCase):

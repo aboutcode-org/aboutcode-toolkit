@@ -38,8 +38,14 @@ from collections import OrderedDict
 from posixpath import dirname
 from urlparse import urljoin, urlparse
 
-from about_tool import ERROR, Error, CRITICAL, INFO, WARNING
-from about_tool import api, saneyaml, util
+from about_tool import ERROR
+from about_tool import CRITICAL
+from about_tool import INFO
+from about_tool import WARNING
+from about_tool import Error
+from about_tool import api
+from about_tool import saneyaml
+from about_tool import util
 
 
 class Field(object):
