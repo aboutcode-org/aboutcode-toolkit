@@ -21,10 +21,13 @@ import codecs
 import jinja2
 import os
 import about_tool
+from posixpath import basename
+from posixpath import dirname
+from posixpath import exists
+from posixpath import join
 
-from posixpath import basename, dirname, exists
-
-from about_tool import ERROR, Error
+from about_tool import ERROR
+from about_tool import Error
 from about_tool.licenses import COMMON_LICENSES
 
 
@@ -39,6 +42,7 @@ def generate(abouts, template_string=None):
         return 'Template validation error at line: %r: %r' % (syntax_error)
     template = jinja2.Template(template_string)
 
+    # FIXME: it's confusing. Need better documentation/implementation
     try:
         lic_dict = {}
         lic_name_dict = {}
@@ -46,6 +50,7 @@ def generate(abouts, template_string=None):
         for about in abouts:
             lic_name = about.license_name.value
             if about.license_file.value and lic_name:
+                # FIXME: it's not a license key, it's in fact path and license text
                 for lic_key in about.license_file.value.keys():
                     if not lic_key in lic_dict:
                         lic_dict[lic_key] = about.license_file.value[lic_key]
@@ -70,15 +75,13 @@ def check_template(template_string):
     """
     try:
         jinja2.Template(template_string)
-        return
     except (jinja2.TemplateSyntaxError, jinja2.TemplateAssertionError,), e:
         return e.lineno, e.message
 
 
 # FIXME: the template dir should be outside the code tree
-# FIXME: use posix paths
-default_template = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                'templates', 'default3.html')
+default_template = join(os.path.dirname(os.path.realpath(__file__)),
+                                'templates', 'default.html')
 
 def generate_from_file(abouts, template_loc=None):
     """
@@ -106,11 +109,13 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
     errors = []
     afp_key = 'about_file_path'
 
+    # FIXME: Need extract as function. Loop is too huge.
     if inventory_location:
         if not exists(inventory_location):
             msg = (u'"INVENTORY_LOCATOIN" does not exist. Generation halted.')
             errors.append(Error(ERROR, msg))
             return errors
+        # FIXME: create a load() and should return About objects instead of dictionary
         if inventory_location.endswith('.csv'):
             about_data = about_tool.util.load_csv(mapping, inventory_location)
         elif inventory_location.endswith('.json'):
@@ -128,10 +133,9 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
                 msg = (u'The required key: \'about_file_path\' does not exist. Generation halted.')
                 errors.append(Error(ERROR, msg))
                 return errors
+            filter_afp.append(afp.lstrip('/'))
 
-            if afp.startswith('/'):
-                afp = afp.partition('/')[2]
-            filter_afp.append(afp)
+        # FIXME: 'list' is a bad name. Need meaningful name.
         list = as_about_paths(filter_afp)
 
         # Get the not matching list if any

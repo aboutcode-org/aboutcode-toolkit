@@ -412,20 +412,22 @@ def add_unc(location):
     return location
 
 
+# FIXME: This should be part of the model
 def verify_license_files(abouts, lic_location):
     lic_loc_dict = {}
     errors = []
 
     for about in abouts:
-        if about.license_file.value:
-            for lic in about.license_file.value:
-                lic_path = posix_path(posixpath.join(lic_location, lic))
-                if posixpath.exists(lic_path):
-                    copy_to = posixpath.dirname(about.about_file_path)
-                    lic_loc_dict[copy_to] = lic_path
-                else:
-                    msg = ('The file, ' + lic + ' in \'license_file\' field does not exist')
-                    errors.append(Error(ERROR, msg))
+        if not about.license_file.value:
+            continue
+        for lic in about.license_file.value:
+            lic_path = posix_path(posixpath.join(lic_location, lic))
+            if posixpath.exists(lic_path):
+                copy_to = posixpath.dirname(about.about_file_path)
+                lic_loc_dict[copy_to] = lic_path
+            else:
+                msg = ('The file, ' + lic + ' in \'license_file\' field does not exist')
+                errors.append(Error(ERROR, msg))
     return lic_loc_dict, errors
 
 
