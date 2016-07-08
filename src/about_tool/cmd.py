@@ -22,15 +22,27 @@ import logging
 import os
 from os.path import exists, join
 
-from about_tool import CRITICAL, ERROR, Error, INFO, NOTSET, WARNING
-from about_tool import __about_spec_version__
-from about_tool import __version__
-from about_tool import attrib, gen, model, severities
-import about_tool
-from about_tool.model import About
-from about_tool.util import copy_files, extract_zip, to_posix, verify_license_files
 import click
 import unicodecsv
+
+import about_tool
+from about_tool import CRITICAL
+from about_tool import ERROR
+from about_tool import INFO
+from about_tool import NOTSET
+from about_tool import WARNING
+from about_tool import Error
+from about_tool import __about_spec_version__
+from about_tool import __version__
+from about_tool import attrib
+from about_tool import gen
+from about_tool import model
+from about_tool import severities
+from about_tool.model import About
+from about_tool.util import copy_files
+from about_tool.util import extract_zip
+from about_tool.util import to_posix
+from about_tool.util import verify_license_files
 
 
 __copyright__ = """
@@ -48,7 +60,6 @@ __copyright__ = """
 
 prog_name = 'AboutCode'
 no_stdout = False
-verbosity_num = 30
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
@@ -68,19 +79,11 @@ class AboutCommand(click.Command):
 
 @click.group(name='about')
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
-@click.option('-v', '--verbose', type=int, default=30,
-              help='Increase verbosity. Repeat to print more output (Default: 30).\n'
-                    '50 - CRITICAL\n'
-                    '40 - ERROR\n'
-                    '30 - WARNING\n'
-                    '20 - INFO\n'
-                    '10 - DEBUG')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any output.')
-def cli(verbose, quiet):
+def cli(quiet):
     # Update the no_stdout value globally
-    global no_stdout, verbosity_num
+    global no_stdout
     no_stdout = quiet
-    verbosity_num = verbose
     pass
     # click.echo('Verbosity: %s' % verbose)
 
@@ -145,7 +148,7 @@ def inventory(overwrite, format, location, output):
             model.to_json(abouts, output)
         else:
             model.to_csv(abouts, output)
-    log_errors(errors, os.path.dirname(output), level=verbosity_num)
+    log_errors(errors, os.path.dirname(output))
 
 
 gen_help = '''
@@ -282,7 +285,7 @@ def redist(input_dir, output, inventory_location=None,):
     click.echo('Collecting redistributable files...')
 
 
-def log_errors(errors, base_dir=False, level=NOTSET):
+def log_errors(errors, base_dir=False):
     """
     Iterate of sequence of Error objects and print and log errors with a severity
     superior or equal to level.
@@ -306,12 +309,11 @@ def log_errors(errors, base_dir=False, level=NOTSET):
         file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
     for severity, message in errors:
-        if severity >= level:
-            sever = severities[severity]
-            if not no_stdout:
-                print(msg_format % locals())
-            if base_dir:
-                file_logger.log(severity, msg_format % locals())
+        sever = severities[severity]
+        if not no_stdout:
+            print(msg_format % locals())
+        if base_dir:
+            file_logger.log(severity, msg_format % locals())
 
 
 if __name__ == '__main__':

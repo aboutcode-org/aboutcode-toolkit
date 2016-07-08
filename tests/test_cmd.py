@@ -86,7 +86,7 @@ def test_log_errors(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors, base_dir='', level=NOTSET)
+    cmd.log_errors(errors, base_dir='')
     out, err = capsys.readouterr()
     expected_out = '''CRITICAL: msg1
 ERROR: msg2
@@ -98,19 +98,3 @@ NOTSET: msg4
     assert '' == err
     assert expected_out == out
 
-def test_log_errors_verbose(capsys):
-    errors = [Error(CRITICAL, 'msg1'),
-              Error(ERROR, 'msg2'),
-              Error(INFO, 'msg3'),
-              Error(WARNING, 'msg4'),
-              Error(DEBUG, 'msg4'),
-              Error(NOTSET, 'msg4'),
-              ]
-    cmd.log_errors(errors, base_dir='', level=WARNING)
-    out, err = capsys.readouterr()
-    expected_out = '''CRITICAL: msg1
-ERROR: msg2
-WARNING: msg4
-'''
-    assert '' == err
-    assert expected_out == out
