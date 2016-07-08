@@ -103,21 +103,15 @@ formats = ['csv', 'json']
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
-@click.option('--overwrite', is_flag=True, help='Overwrites the output file if it exists')
 @click.option('-f', '--format', is_flag=False, default='csv', show_default=True, metavar='<style>',
               help='Set <output_file> format <style> to one of the supported formats: %s' % ' or '.join(formats),)
-def inventory(overwrite, format, location, output):
+def inventory(format, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.    
     """
     click.echo('Running about-code-tool version ' + __version__)
     # Check is the <OUTPUT> valid.
-    if os.path.exists(output) and not overwrite:
-        click.echo('ERROR: <output> file already exists.')
-        click.echo('Select a different file name or use the --overwrite option after the `inventory`.')
-        click.echo()
-        return
     if not exists(os.path.dirname(output)):
         click.echo('ERROR: Path to the <output> does not exists. Please check and correct the <output>.')
         click.echo()
@@ -126,11 +120,14 @@ def inventory(overwrite, format, location, output):
         click.echo('ERROR: Output format: %s is not supported.' % format)
         click.echo()
         return
-    if not format == 'json':
-        if not output.endswith('.csv'):
-            click.echo('ERROR: <output> must be a CSV file ending with ".csv".')
-            click.echo()
-            return
+    if format == 'csv' and not output.endswith('.csv'):
+        click.echo('ERROR: <output> does not ends with ".csv".')
+        click.echo()
+        return
+    if format == 'json' and not output.endswith('.json'):
+        click.echo('ERROR: <output> does not ends with ".json".')
+        click.echo()
+        return
 
     click.echo('Collecting the inventory from location: ''%(location)s '
                'and writing output to: %(output)s' % locals())
@@ -144,10 +141,7 @@ def inventory(overwrite, format, location, output):
     if not abouts:
         errors = [Error(ERROR, u'No ABOUT files is found. Generation halted.')]
     else:
-        if format == 'json':
-            model.to_json(abouts, output)
-        else:
-            model.to_csv(abouts, output)
+        model.write_output(abouts, output, format)
     log_errors(errors, os.path.dirname(output))
 
 

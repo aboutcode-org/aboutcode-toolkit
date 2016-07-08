@@ -1165,59 +1165,44 @@ def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
     return fields
 
 
-def to_csv(abouts, location, with_absent=False, with_empty=True):
+def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=True):
     """
-    Write a CSV file at location given a list of About objects.
+    Convert About objects to a list of dictionaries
     """
-    fieldnames = field_names(abouts)
-    with codecs.open(location, mode='wb', encoding='utf-8') as csvfile:
-        writer = unicodecsv.DictWriter(csvfile, fieldnames)
-        writer.writeheader()
-        for a in abouts:
-            ad = a.as_dict(with_paths=True,
-                           with_absent=with_absent,
-                           with_empty=with_empty)
-            if 'about_file_path' in ad.keys():
-                afp = ad['about_file_path']
-                afp = '/' + afp if not afp.startswith('/') else afp
-                ad['about_file_path'] = afp 
-            if 'about_resource_path' in ad.keys():
-                arp = ad['about_resource_path']
-                arp = '/' + arp if not arp.startswith('/') else arp
-                ad['about_resource_path'] = arp
-            # Make the 'about_resource_path' endswith '/' if the 'about_resource'
-            # reference the current directory 
-            if 'about_resource' in ad.keys() and ad['about_resource'] == '.':
-                if not ad['about_resource_path'].endswith('/'):
-                    ad['about_resource_path'] += '/'
-            writer.writerow(ad)
+    abouts_dictionary_list = []
+    for about in abouts:
+        ad = about.as_dict(with_paths=True, with_absent=with_absent, with_empty=with_empty)
+        if 'about_file_path' in ad.keys():
+            afp = ad['about_file_path']
+            afp = '/' + afp if not afp.startswith('/') else afp
+            ad['about_file_path'] = afp 
+        if 'about_resource_path' in ad.keys():
+            arp = ad['about_resource_path']
+            arp = '/' + arp if not arp.startswith('/') else arp
+            ad['about_resource_path'] = arp
+        # Make the 'about_resource_path' endswith '/' if the 'about_resource'
+        # reference the current directory 
+        if 'about_resource' in ad.keys() and ad['about_resource'] == '.':
+            if not ad['about_resource_path'].endswith('/'):
+                ad['about_resource_path'] += '/'
+        abouts_dictionary_list.append(ad)
+    return abouts_dictionary_list
 
 
-def to_json(abouts, location, with_absent=False, with_empty=True):
+def write_output(abouts, location, format, with_absent=False, with_empty=True):
     """
-    Write a JSON file at location given a list of About objects.
+    Write a CSV/JSON file at location given a list of About objects
     """
-    output = []
-    with codecs.open(location, mode='wb', encoding='utf-8') as jsonfile:
-        for a in abouts:
-            ad = a.as_dict(with_paths=True,
-                           with_absent=with_absent,
-                           with_empty=with_empty)
-            if 'about_file_path' in ad.keys():
-                afp = ad['about_file_path']
-                afp = '/' + afp if not afp.startswith('/') else afp
-                ad['about_file_path'] = afp 
-            if 'about_resource_path' in ad.keys():
-                arp = ad['about_resource_path']
-                arp = '/' + arp if not arp.startswith('/') else arp
-                ad['about_resource_path'] = arp
-            # Make the 'about_resource_path' endswith '/' if the 'about_resource'
-            # reference the current directory 
-            if 'about_resource' in ad.keys() and ad['about_resource'] == '.':
-                if not ad['about_resource_path'].endswith('/'):
-                    ad['about_resource_path'] += '/'
-            output.append(ad)
-        jsonfile.write(json.dumps(output, indent=2))
+    about_dictionary_list = about_object_to_list_of_dictionary(abouts, with_absent, with_empty)
+    with codecs.open(location, mode='wb', encoding='utf-8') as output_file:
+        if format == 'csv':
+            fieldnames = field_names(abouts)
+            writer = unicodecsv.DictWriter(output_file, fieldnames)
+            writer.writeheader()
+            for row in about_dictionary_list:
+                writer.writerow(row)
+        else:
+            output_file.write(json.dumps(about_dictionary_list, indent=2))
 
 
 def list_dedup(list_item):
@@ -1234,6 +1219,13 @@ def list_dedup(list_item):
 def from_csv(location, base_dir):
     """
     Load a CSV file at location and return a list of About objects.
+    """
+    # TODO: use this instead of load inventory
+
+
+def from_json(location, base_dir):
+    """
+    Load a JSON file at location and return a list of About objects.
     """
     # TODO: use this instead of load inventory
 

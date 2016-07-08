@@ -1026,27 +1026,29 @@ copyright: |
                 r = res[ii]
                 assert exp == r
 
-    def test_to_csv(self):
+    def test_write_output_csv(self):
         path = 'load/this.ABOUT'
         test_file = get_test_loc(path)
         a = model.About(location=test_file, about_file_path=path)
 
-        csv_file = get_temp_file()
-        model.to_csv([a], csv_file)
+        tmp_file = get_temp_file()
+        format = 'csv'
+        model.write_output([a], tmp_file, format)
 
         expected = get_test_loc('load/expected.csv')
-        self.check_csvs(expected, csv_file)
+        self.check_csvs(expected, tmp_file)
 
-    def test_to_json(self):
+    def test_write_output_json(self):
         path = 'load/this.ABOUT'
         test_file = get_test_loc(path)
         a = model.About(location=test_file, about_file_path=path)
 
-        json_file = get_temp_file()
-        model.to_json([a], json_file)
+        tmp_file = get_temp_file()
+        format = 'json'
+        model.write_output([a], tmp_file, format)
 
         expected = get_test_loc('load/expected.json')
-        self.check_csvs(expected, json_file)
+        self.check_csvs(expected, tmp_file)
 
 class CollectorTest(unittest.TestCase):
 
@@ -1144,7 +1146,8 @@ class CollectorTest(unittest.TestCase):
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.to_csv(abouts, result)
+        format = 'csv'
+        model.write_output(abouts, result, format)
 
         expected_errors = []
         assert expected_errors == errors
@@ -1160,13 +1163,13 @@ class CollectorTest(unittest.TestCase):
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.to_csv(abouts, result)
+        format = 'csv'
+        model.write_output(abouts, result, format)
 
         assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('inventory/complex/expected.csv')
         #self.check_csv(expected, result)
-
 
 class GroupingsTest(unittest.TestCase):
 
