@@ -44,3 +44,4 @@ docs/_build
 .ve
 *.bak
 /.cache/
+/.settings/
