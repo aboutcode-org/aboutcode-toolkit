@@ -311,6 +311,21 @@ def apply_mappings(abouts, mappings=None):
     return mapped_abouts
 
 
+def get_about_file_path(mapping, location):
+    """
+    Read file at location, return a list of about_file_path.
+    """
+    afp_list = []
+    if location.endswith('.csv'):
+        about_data = load_csv(mapping, location)
+    else:
+        about_data = load_json(mapping, location)
+
+    for about in about_data:
+        afp_list.append(about['about_file_path'])
+    return afp_list
+
+
 def load_csv(mapping, location):
     """
     Read CSV at location, return a list of ordered mappings, one for each row.

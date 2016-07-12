@@ -103,64 +103,63 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
     inventory_location.
     """
     updated_abouts = []
-    filter_afp = []
+    lstrip_afp = []
     afp_list = []
     not_match_path = []
     errors = []
-    afp_key = 'about_file_path'
 
-    # FIXME: Need extract as function. Loop is too huge.
-    if inventory_location:
+    if not inventory_location:
+        updated_abouts = abouts
+    # Do the following if an filter list (inventory_location) is provided
+    else:
         if not exists(inventory_location):
             msg = (u'"INVENTORY_LOCATOIN" does not exist. Generation halted.')
             errors.append(Error(ERROR, msg))
             return errors
-        # FIXME: create a load() and should return About objects instead of dictionary
-        if inventory_location.endswith('.csv'):
-            about_data = about_tool.util.load_csv(mapping, inventory_location)
-        elif inventory_location.endswith('.json'):
-            about_data = about_tool.util.load_json(mapping, inventory_location)
+
+        if inventory_location.endswith('.csv') or inventory_location.endswith('.json'):
+            try:
+                # Return a list which contains only the about file path
+                about_list = about_tool.util.get_about_file_path(mapping, inventory_location)
+            except Exception, e:
+                # 'about_file_path' key/column doesn't exist
+                msg = (u'The required key: \'about_file_path\' does not exist. Generation halted.')
+                errors.append(Error(ERROR, msg))
+                return errors 
         else:
             msg = (u'Only .csv and .json are supported for the "INVENTORY_LOCATOIN". Generation halted.')
             errors.append(Error(ERROR, msg))
             return errors
 
-        for data in about_data:
-            try:
-                afp = data[afp_key]
-            except Exception, e:
-                # 'about_file_path' key/column doesn't exist
-                msg = (u'The required key: \'about_file_path\' does not exist. Generation halted.')
-                errors.append(Error(ERROR, msg))
-                return errors
-            filter_afp.append(afp.lstrip('/'))
+        for afp in about_list:
+            lstrip_afp.append(afp.lstrip('/'))
 
-        # FIXME: 'list' is a bad name. Need meaningful name.
-        list = as_about_paths(filter_afp)
+        # return a list of paths that point all to .ABOUT files
+        about_files_list = as_about_paths(lstrip_afp)
 
-        # Get the not matching list if any
+        # Collect all the about_file_path
         for about in abouts:
             afp_list.append(about.about_file_path)
-        for fp in list:
+
+        # Get the not matching list if any
+        for fp in about_files_list:
             if not fp in afp_list:
                 not_match_path.append(fp)
 
         if not_match_path:
-            if len(not_match_path) == len(list):
+            if len(not_match_path) == len(about_files_list):
                 msg = ('None of the paths in the provided \'inventory_location\' match with the \'LOCATION\'.')
                 errors.append(Error(ERROR, msg))
                 return errors
             else:
-                for p in not_match_path:
-                    msg = ('Path: ' + p + ' cannot be found.')
+                for path in not_match_path:
+                    msg = ('Path: ' + path + ' cannot be found.')
                     errors.append(Error(ERROR, msg))
 
         for about in abouts:
-            for fp in list:
+            for fp in about_files_list:
                 if about.about_file_path == fp:
                     updated_abouts.append(about)
-    else:
-        updated_abouts = abouts
 
     rendered = generate_from_file(updated_abouts, template_loc=template_loc)
 

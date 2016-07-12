@@ -282,6 +282,20 @@ class UtilsTest(unittest.TestCase):
         result = util.load_json(mapping, test_file)
         assert expected == result
 
+    def test_get_about_file_path_from_csv(self):
+        mapping = True
+        test_file = get_test_loc('util/about.csv')
+        expected = ['about.ABOUT']
+        result = util.get_about_file_path(mapping, test_file)
+        assert expected == result
+
+    def test_get_about_file_path_from_json(self):
+        mapping = True
+        test_file = get_test_loc('load/expected.json')
+        expected = ['/load/this.ABOUT']
+        result = util.get_about_file_path(mapping, test_file)
+        assert expected == result
+
     # The column names should be converted to lowercase as the same behavior as
     # when user use the MAPPING.CONFIG
     """def test_load_csv_does_not_convert_column_names_to_lowercase(self):
