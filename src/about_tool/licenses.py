@@ -281,6 +281,7 @@ COMMON_LICENSES = (
     'Microsoft TrueType Fonts EULA',
     'MIT License',
     'Mozilla Public License 1.1',
+    'Mozilla Public License 2.0',
     'Net SNMP License',
     'Netscape Public License 1.1',
     'NTP License',
