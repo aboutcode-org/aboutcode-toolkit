@@ -105,7 +105,9 @@ formats = ['csv', 'json']
                                 dir_okay=False, resolve_path=True))
 @click.option('-f', '--format', is_flag=False, default='csv', show_default=True, metavar='<style>',
               help='Set <output_file> format <style> to one of the supported formats: %s' % ' or '.join(formats),)
-def inventory(format, location, output):
+@click.option('--mapping', is_flag=True, help='Use for mapping between the input'
+                            ' keys and the ABOUT field names - MAPPING.CONFIG')
+def inventory(mapping, format, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.    
@@ -136,6 +138,8 @@ def inventory(format, location, output):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
+    if mapping:
+        about_tool.util.have_mapping = True
     errors, abouts = about_tool.model.collect_inventory(location)
 
     if not abouts:
@@ -159,9 +163,8 @@ OUTPUT: Path to the directory to write ABOUT files to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=False, writable=True,
                                 dir_okay=True, resolve_path=True))
-@click.option('--mapping', is_flag=True, help='Use the mapping between columns names'
-                        'in your CSV and the ABOUT field names as defined in'
-                        'the MAPPING.CONFIG mapping configuration file.')
+@click.option('--mapping', is_flag=True, help='Use for mapping between the input'
+                            ' keys and the ABOUT field names - MAPPING.CONFIG')
 @click.option('--license_text_location', nargs=1,
                 type=click.Path(exists=True, file_okay=False,
                                 dir_okay=True, writable=False,
@@ -242,7 +245,8 @@ def fetch(location):
                                 dir_okay=False, resolve_path=True))
 @click.option('--template', type=click.Path(exists=True), nargs=1,
               help='Use the custom template for the Attribution Generation')
-@click.option('--mapping', is_flag=True, help='Configure the mapping key from the MAPPING.CONFIG')
+@click.option('--mapping', is_flag=True, help='Use for mapping between the input'
+                            ' keys and the ABOUT field names - MAPPING.CONFIG')
 def attrib(location, output, template, mapping, inventory_location=None,):
     """
     Generate attribution document at output using the directory of
