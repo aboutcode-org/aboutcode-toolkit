@@ -1,0 +1,21 @@
+{
+    "ossAttribution": {
+        "title": "Open Source Software Information",
+        "entries": [
+        {% for about_object in abouts %}
+            {
+                "name": "{{ about_object.name.value }}"{% if about_object.version.value -%},{%- endif %}
+                {% if about_object.version.value -%}
+                "version": "{{ about_object.version.value }}"{% if about_object.license_name.value -%},{%- endif %}
+                {%- endif %}
+                {% if about_object.license_name.value -%}
+                "license_name": "{{ about_object.license_name.value }}"{% if about_object.copyright.value -%},{%- endif %}
+                {%- endif %}
+                {% if about_object.copyright.value -%}
+                "license_name": "{{ about_object.copyright.value }}"
+                {%- endif %}
+            }{% if not loop.last -%},{%- endif %}
+        {%- endfor %}
+        ]
+    }
+}

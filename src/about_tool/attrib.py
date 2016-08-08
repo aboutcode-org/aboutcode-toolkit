@@ -81,7 +81,7 @@ def check_template(template_string):
 
 # FIXME: the template dir should be outside the code tree
 default_template = join(os.path.dirname(os.path.realpath(__file__)),
-                                'templates', 'default.html')
+                                'templates', 'default_html.template')
 
 def generate_from_file(abouts, template_loc=None):
     """
