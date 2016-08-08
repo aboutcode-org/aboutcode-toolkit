@@ -257,6 +257,9 @@ def attrib(location, output, template, mapping, inventory_location=None,):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
+    if mapping:
+        about_tool.util.have_mapping = True
+
     errors, abouts = model.collect_inventory(location)
     no_match_errors = about_tool.attrib.generate_and_save(abouts, output, mapping,
                                              template_loc=template,

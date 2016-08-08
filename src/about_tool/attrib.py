@@ -20,12 +20,12 @@ from __future__ import print_function
 import codecs
 import jinja2
 import os
-import about_tool
 from posixpath import basename
 from posixpath import dirname
 from posixpath import exists
 from posixpath import join
 
+import about_tool
 from about_tool import ERROR
 from about_tool import Error
 from about_tool.licenses import COMMON_LICENSES
