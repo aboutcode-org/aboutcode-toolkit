@@ -215,24 +215,29 @@ def gen(mapping, license_text_location, extract_license, location, output):
     log_errors(errors, output)
 
 
-@cli.command(cls=AboutCommand)
-def export():
-    click.echo('Running about-code-tool version ' + __version__)
-    click.echo('Exporting zip archive...')
+#@cli.command(cls=AboutCommand)
+#def export():
+#    click.echo('Running about-code-tool version ' + __version__)
+#    click.echo('Exporting zip archive...')
 
 
-
-@cli.command(cls=AboutCommand)
-def fetch(location):
+#@cli.command(cls=AboutCommand)
+#def fetch(location):
     """
     Given a directory of ABOUT files at location, calls the DejaCode API and
     update or create license data fields and license texts.
     """
-    click.echo('Running about-code-tool version ' + __version__)
-    click.echo('Updating ABOUT files...')
+#    click.echo('Running about-code-tool version ' + __version__)
+#    click.echo('Updating ABOUT files...')
 
 
-@cli.command(cls=AboutCommand)
+attrib_help = '''
+LOCATION: Path to an ABOUT file or a directory containing ABOUT files
+OUTPUT: Path to output file to write the attribution to
+'''
+@cli.command(help=attrib_help,
+             short_help='LOCATION: directory, OUTPUT: output file',
+             cls=AboutCommand)
 @click.argument('location', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=True,
                                 dir_okay=True, writable=False,
@@ -272,8 +277,8 @@ def attrib(location, output, template, mapping, inventory_location=None,):
     log_errors(no_match_errors, os.path.dirname(output))
     click.echo('Finished.')
 
-@cli.command(cls=AboutCommand)
-def redist(input_dir, output, inventory_location=None,):
+#@cli.command(cls=AboutCommand)
+#def redist(input_dir, output, inventory_location=None,):
     """
     Collect redistributable code at output location using:
      - the input_dir of code and ABOUT files,
@@ -282,8 +287,8 @@ def redist(input_dir, output, inventory_location=None,):
      Only collect code when redistribute=yes
      Return a list of errors.
     """
-    click.echo('Running about-code-tool version ' + __version__)
-    click.echo('Collecting redistributable files...')
+#    click.echo('Running about-code-tool version ' + __version__)
+#    click.echo('Collecting redistributable files...')
 
 
 def log_errors(errors, base_dir=False):
