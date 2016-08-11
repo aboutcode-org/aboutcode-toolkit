@@ -190,19 +190,7 @@ def gen(mapping, license_text_location, extract_license, location, output):
         click.echo()
         return
     click.echo('Generating ABOUT files...')
-    errors, abouts = about_tool.gen.generate(mapping, extract_license, location, output)
-
-    if license_text_location:
-        lic_loc_dict, lic_file_err = verify_license_files(abouts, license_text_location)
-        if lic_loc_dict:
-            copy_files(lic_loc_dict, output)
-        if lic_file_err:
-            update_errors = errors
-            errors = []
-            for err in update_errors:
-                errors.append(err)
-            for file_err in lic_file_err:
-                errors.append(file_err)
+    errors, abouts = about_tool.gen.generate(mapping, license_text_location, extract_license, location, output)
 
     lea = len(abouts)
     lee = 0

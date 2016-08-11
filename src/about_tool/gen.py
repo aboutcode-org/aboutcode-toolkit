@@ -37,7 +37,9 @@ from about_tool import __about_spec_version__
 from about_tool import __version__
 from about_tool import model
 from about_tool import util
+from about_tool.util import copy_files
 from about_tool.util import to_posix
+from about_tool.util import verify_license_files
 
 
 LOG_FILENAME = 'error.log'
@@ -95,12 +97,14 @@ def check_duplicated_about_file_path(inventory_dict):
     afp_list = []
     errors = []
     for component in inventory_dict:
-        if component['about_file_path'] in afp_list:
-            msg = ('The input has duplicated values in \'about_file_path\' field: ' +
-                   component['about_file_path'])
-            errors.append(Error(CRITICAL, msg))
-        else:
-            afp_list.append(component['about_file_path'])
+        # Ignore all the empty path
+        if component['about_file_path']:
+            if component['about_file_path'] in afp_list:
+                msg = ('The input has duplicated values in \'about_file_path\' field: ' +
+                       component['about_file_path'])
+                errors.append(Error(CRITICAL, msg))
+            else:
+                afp_list.append(component['about_file_path'])
     return errors
 
 
@@ -145,7 +149,7 @@ def load_inventory(mapping, location, base_dir):
         afp = fields.get(model.About.about_file_path_attr)
 
         if not afp or not afp.strip():
-            msg = ('Empty column: %(afpa)r. '
+            msg = ('Empty column: %(afp)r. '
                    'Cannot generate ABOUT file.' % locals())
             errors.append(Error(ERROR, msg))
             continue
@@ -188,7 +192,8 @@ def get_column_mappings(location_or_config):
     return config['mappings']
 
 
-def generate(mapping, extract_license, location, base_dir, policy=None, conf_location=None,
+#FIXME: This function is too huge
+def generate(mapping, license_text_location, extract_license, location, base_dir, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
     Load ABOUT data from an inventory at csv_location. Write ABOUT files to
@@ -266,6 +271,14 @@ def generate(mapping, extract_license, location, base_dir, policy=None, conf_loc
                         if not about.license_url.present:
                             about.license_url.value = [lic_url]
                             about.license_url.present = True
+
+            if license_text_location:
+                lic_loc_dict, lic_file_err = verify_license_files(abouts, license_text_location)
+                if lic_loc_dict:
+                    copy_files(lic_loc_dict, base_dir)
+                if lic_file_err:
+                    for file_err in lic_file_err:
+                        errors.append(file_err)
 
             # Write the ABOUT file and check does the referenced file exist
             not_exist_errors = about.dump(dump_loc,

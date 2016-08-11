@@ -83,11 +83,12 @@ class GenTest(unittest.TestCase):
 
     def test_generation_dir_endswith_space(self):
         mapping = None
+        license_text_location = None
         extract_license = False
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, extract_license, location,
+        errors, abouts = gen.generate(mapping, license_text_location, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
 
@@ -97,11 +98,12 @@ class GenTest(unittest.TestCase):
 
     def test_generation_with_no_about_resource(self):
         mapping = None
+        license_text_location = None
         extract_license = False
         location = get_test_loc('gen/inv2.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, extract_license, location,
+        errors, abouts = gen.generate(mapping, license_text_location, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
         expected_dict = OrderedDict()
@@ -112,11 +114,12 @@ class GenTest(unittest.TestCase):
 
     def test_generation_with_no_about_resource_reference(self):
         mapping = None
+        license_text_location = None
         extract_license = False
         location = get_test_loc('gen/inv3.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, extract_license, location,
+        errors, abouts = gen.generate(mapping, license_text_location, extract_license, location,
                                       base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
         expected_dict = OrderedDict()
@@ -129,11 +132,12 @@ class GenTest(unittest.TestCase):
 
     def test_generate(self):
         mapping = ''
+        license_text_location = None
         extract_license = False
         location = get_test_loc('gen/inv.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, extract_license, location, base_dir=gen_dir,
+        errors, abouts = gen.generate(mapping, license_text_location, extract_license, location, base_dir=gen_dir,
                                       with_empty=False, with_absent=False)
         expected_errors = [Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
         assert expected_errors == errors
