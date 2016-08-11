@@ -439,15 +439,22 @@ def verify_license_files(abouts, lic_location):
         the existence of the license file provided in the license_field from the
         license_text_location.
         """
-        if about.license_file.value and not about.dje_license_key.value:
+        if about.license_file.value:
             for lic in about.license_file.value:
                 lic_path = posix_path(posixpath.join(lic_location, lic))
                 if posixpath.exists(lic_path):
                     copy_to = posixpath.dirname(about.about_file_path)
                     lic_loc_dict[copy_to] = lic_path
                 else:
-                    msg = ('The file, ' + lic + ' in \'license_file\' field does not exist')
-                    errors.append(Error(ERROR, msg))
+                    # The code is supposed to get the 'license_file' from the provided
+                    # license_text_location. However, the 'license_file' will be
+                    # generated during the 'extract_license' process if it's not
+                    # already set. Therefore, in this case, the code need to 
+                    # check the existence of the generated license instead of 
+                    # searching the license_file in the license_text_location.
+                    if not posixpath.join(posixpath.dirname(about.about_file_path), lic):
+                        msg = ('The file, ' + lic + ' in \'license_file\' field does not exist')
+                        errors.append(Error(ERROR, msg))
     return lic_loc_dict, errors
 
 

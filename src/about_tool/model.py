@@ -987,6 +987,17 @@ class About(object):
                            u'%(path)s '
                            u'does not exist' % locals())
                     errors.append(msg)
+
+            # Check the existence of the license_file
+            license_files = self.license_file.value
+            if license_files:
+                for license in license_files:
+                    license_location = posixpath.join(posixpath.dirname(about_file_path), license)
+                    if not posixpath.exists(license_location):
+                        msg = (u'The license file : '
+                           u'%(license_location)s '
+                           u'does not exist' % locals())
+                        errors.append(msg)
         return errors
 
     def dump_lic(self, location, license_dict):
@@ -999,7 +1010,7 @@ class About(object):
         if not os.path.exists(parent):
             os.makedirs(parent)
 
-        if self.dje_license_key.present:
+        if self.dje_license_key.present and not self.license_file.present:
             lic_key = self.dje_license_key.value
             try:
                 if license_dict[lic_key]:
