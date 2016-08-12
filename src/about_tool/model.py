@@ -978,15 +978,15 @@ class About(object):
         # always end with a new line
         return u'\n'.join(serialized) + u'\n'
 
-    def dump(self, location, with_absent=False, with_empty=True, with_capture=True):
+    def dump(self, loc, with_absent=False, with_empty=True, with_capture=True):
         """
         Write formatted ABOUT representation of self to location.
         If with_absent, include absent (not present) fields.
         If with_empty, include empty fields.
         """
         errors = []
-        loc = util.to_posix(location)
-        parent = posixpath.dirname(loc)
+        #loc = util.to_posix(location)
+        parent = os.path.dirname(loc)
         if not os.path.exists(parent):
             os.makedirs(parent)
         about_file_path = loc
@@ -1006,13 +1006,13 @@ class About(object):
         return errors
 
 
-    def dump_lic(self, location, license_dict):
+    def dump_lic(self, loc, license_dict):
         """
         Write LICENSE files
         """
         license_name = license_context = license_url = ''
-        loc = util.to_posix(location)
-        parent = posixpath.dirname(loc)
+        #loc = util.to_posix(location)
+        parent = os.path.dirname(loc)
         if not os.path.exists(parent):
             os.makedirs(parent)
 
@@ -1020,7 +1020,7 @@ class About(object):
             lic_key = self.dje_license_key.value
             try:
                 if license_dict[lic_key]:
-                    license_path = posixpath.join(parent, lic_key)
+                    license_path = os.path.join(parent, lic_key)
                     license_path += u'.LICENSE'
                     license_name, license_context, license_url = license_dict[lic_key]
                     with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
@@ -1422,11 +1422,11 @@ def verify_license_files_in_location(about, lic_location):
     return lic_loc_dict, errors
 
 # Check the existence of the license_file
-def check_file_field_exist(about, location):
+def check_file_field_exist(about, loc):
     errors = []
-    loc = util.to_posix(location)
-    parent = posixpath.dirname(loc)
-    about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
+    #loc = util.to_posix(location)
+    parent = os.path.dirname(loc)
+    about_file_path = os.path.join(parent, os.path.basename(parent))
     # The model only has the following as FileTextField
     license_files = about.license_file.value
     notice_files = about.notice_file.value
@@ -1434,8 +1434,8 @@ def check_file_field_exist(about, location):
 
     if license_files:
         for lic in license_files:
-            lic_path = posixpath.join(posixpath.dirname(about_file_path), lic)
-            if not posixpath.exists(lic_path):
+            lic_path = os.path.join(os.path.dirname(about_file_path), lic)
+            if not os.path.exists(lic_path):
                 msg = (u'Field license_file: Path '
                    u'%(lic_path)s '
                    u'not found' % locals())
@@ -1443,8 +1443,8 @@ def check_file_field_exist(about, location):
 
     if notice_files:
         for notice in notice_files:
-            notice_path = posixpath.join(posixpath.dirname(about_file_path), notice)
-            if not posixpath.exists(lic_path):
+            notice_path = os.path.join(os.path.dirname(about_file_path), notice)
+            if not os.path.exists(lic_path):
                 msg = (u'Field notice_file: Path '
                    u'%(notice_path)s '
                    u'not found' % locals())
@@ -1452,8 +1452,8 @@ def check_file_field_exist(about, location):
 
     if changelog_files:
         for changelog in changelog_files:
-            changelog_path = posixpath.join(posixpath.dirname(about_file_path), changelog)
-            if not posixpath.exists(changelog_path):
+            changelog_path = os.path.join(os.path.dirname(about_file_path), changelog)
+            if not os.path.exists(changelog_path):
                 msg = (u'Field changelog_file: Path '
                    u'%(changelog_path)s '
                    u'not found' % locals())

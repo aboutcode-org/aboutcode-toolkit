@@ -39,7 +39,7 @@ from about_tool import model
 from about_tool import util
 from about_tool.model import verify_license_files_in_location
 from about_tool.model import check_file_field_exist
-from about_tool.util import copy_files
+from about_tool.util import copy_files, add_unc
 from about_tool.util import to_posix
 
 
@@ -228,6 +228,7 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
         # For some reasons, the join does not work, using the '+' for now
         # dump_loc = posixpath.join(bdir, about.about_file_path)
         dump_loc = bdir + about.about_file_path
+        dump_loc = add_unc(dump_loc)
 
         # The following code is to check if there is any directory ends with spaces
         split_path = about.about_file_path.split('/')

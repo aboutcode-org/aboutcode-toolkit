@@ -436,4 +436,6 @@ def copy_files(license_location_dict, gen_location):
         if loc.startswith('/'):
             location = loc.strip('/')
         copy_to = posixpath.join(posix_path(gen_location), location)
+        if not posixpath.exists(copy_to):
+            os.makedirs(copy_to)
         shutil.copy2(license_location_dict[loc], copy_to)
