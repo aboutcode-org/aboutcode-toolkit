@@ -46,6 +46,7 @@ from about_tool import Error
 from about_tool import api
 from about_tool import saneyaml
 from about_tool import util
+from about_tool.util import posix_path
 
 
 class Field(object):
@@ -447,7 +448,22 @@ class FileTextField(PathField):
         of errors. base_dir is the directory used to resolve a file location
         from a path.
         """
-        errors = super(FileTextField, self)._validate(*args, ** kwargs)
+
+        # FIXME
+        # The value in the 'license_file' field does not only represent there should
+        # be license side by side with the ABOUT file, but this can also be used for
+        # copying the license from the provided 'license_text_location'. In another
+        # word, the license file in the 'license_file' field may not always located
+        # side by side with the ABOUT file. However, our code will check the
+        # existence of the file by joining the 'base_dir' and the value in the 
+        # 'license_file' field when the about object is created which will yield error.
+        # I am commenting out the errors for now.
+        # I am checking the existence of the 'license_file' in the dump()
+
+        #errors = super(FileTextField, self)._validate(*args, ** kwargs)
+        super(FileTextField, self)._validate(*args, ** kwargs)
+        errors = []
+
         # a FileTextField is a PathField
         # self.value is a paths to location ordered mapping
         # we will replace the location with the text content
@@ -987,18 +1003,8 @@ class About(object):
                            u'%(path)s '
                            u'does not exist' % locals())
                     errors.append(msg)
-
-            # Check the existence of the license_file
-            license_files = self.license_file.value
-            if license_files:
-                for license in license_files:
-                    license_location = posixpath.join(posixpath.dirname(about_file_path), license)
-                    if not posixpath.exists(license_location):
-                        msg = (u'The license file : '
-                           u'%(license_location)s '
-                           u'does not exist' % locals())
-                        errors.append(msg)
         return errors
+
 
     def dump_lic(self, location, license_dict):
         """
@@ -1373,6 +1379,7 @@ def pre_process_and_dje_license_dict(abouts, api_url, api_key):
                 pass
     return key_text_dict, errors
 
+
 def valid_api_url(api_url):
     try:
         request = urllib2.Request(api_url)
@@ -1388,3 +1395,67 @@ def valid_api_url(api_url):
         # All other exceptions yield to invalid api_url
         pass
     return False
+
+
+def verify_license_files_in_location(about, lic_location):
+    lic_loc_dict = {}
+    errors = []
+
+    """
+    The license_file field is filled if the input has dje_license_key and 
+    the 'extract_license' option is used. This function only wants to check
+    the existence of the license file provided in the license_field from the
+    license_text_location.
+    """
+    if about.license_file.value:
+        for lic in about.license_file.value:
+            lic_path = posix_path(posixpath.join(lic_location, lic))
+            if posixpath.exists(lic_path):
+                copy_to = posixpath.dirname(about.about_file_path)
+                lic_loc_dict[copy_to] = lic_path
+            else:
+                msg = (u'The license file : '
+                       u'%(lic)s '
+                       u'does not exist in ' 
+                       u'%(lic_path)s and therefore cannot be copied' % locals())
+                errors.append(Error(ERROR, msg))
+    return lic_loc_dict, errors
+
+# Check the existence of the license_file
+def check_file_field_exist(about, location):
+    errors = []
+    loc = util.to_posix(location)
+    parent = posixpath.dirname(loc)
+    about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
+    # The model only has the following as FileTextField
+    license_files = about.license_file.value
+    notice_files = about.notice_file.value
+    changelog_files = about.changelog_file.value
+
+    if license_files:
+        for lic in license_files:
+            lic_path = posixpath.join(posixpath.dirname(about_file_path), lic)
+            if not posixpath.exists(lic_path):
+                msg = (u'Field license_file: Path '
+                   u'%(lic_path)s '
+                   u'not found' % locals())
+                errors.append(msg)
+
+    if notice_files:
+        for notice in notice_files:
+            notice_path = posixpath.join(posixpath.dirname(about_file_path), notice)
+            if not posixpath.exists(lic_path):
+                msg = (u'Field notice_file: Path '
+                   u'%(notice_path)s '
+                   u'not found' % locals())
+                errors.append(msg)
+
+    if changelog_files:
+        for changelog in changelog_files:
+            changelog_path = posixpath.join(posixpath.dirname(about_file_path), changelog)
+            if not posixpath.exists(changelog_path):
+                msg = (u'Field changelog_file: Path '
+                   u'%(changelog_path)s '
+                   u'not found' % locals())
+                errors.append(msg)
+    return errors

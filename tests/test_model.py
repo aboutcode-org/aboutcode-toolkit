@@ -493,10 +493,11 @@ class AboutTest(unittest.TestCase):
         err_msg2 = u'Field notice_file: Path %s not found' % file_path2
 
         expected_errors = [
-            Error(CRITICAL, err_msg1),
-            Error(CRITICAL, err_msg2),
+            err_msg1, err_msg2
             ]
-        assert expected_errors == a.errors
+
+        errors = model.check_file_field_exist(a, test_file)
+        assert expected_errors == errors
         expected = [(u'test.LICENSE', None)]
         result = a.license_file.value.items()
         assert expected == result

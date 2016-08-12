@@ -42,7 +42,6 @@ from about_tool.model import About
 from about_tool.util import copy_files
 from about_tool.util import extract_zip
 from about_tool.util import to_posix
-from about_tool.util import verify_license_files
 
 
 __copyright__ = """

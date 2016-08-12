@@ -427,37 +427,6 @@ def add_unc(location):
     return location
 
 
-# FIXME: This should be part of the model
-def verify_license_files(abouts, lic_location):
-    lic_loc_dict = {}
-    errors = []
-
-    for about in abouts:
-        """
-        The license_file field is filled if the input has dje_license_key and 
-        the 'extract_license' option is used. This function only wants to check
-        the existence of the license file provided in the license_field from the
-        license_text_location.
-        """
-        if about.license_file.value:
-            for lic in about.license_file.value:
-                lic_path = posix_path(posixpath.join(lic_location, lic))
-                if posixpath.exists(lic_path):
-                    copy_to = posixpath.dirname(about.about_file_path)
-                    lic_loc_dict[copy_to] = lic_path
-                else:
-                    # The code is supposed to get the 'license_file' from the provided
-                    # license_text_location. However, the 'license_file' will be
-                    # generated during the 'extract_license' process if it's not
-                    # already set. Therefore, in this case, the code need to 
-                    # check the existence of the generated license instead of 
-                    # searching the license_file in the license_text_location.
-                    if not posixpath.join(posixpath.dirname(about.about_file_path), lic):
-                        msg = ('The file, ' + lic + ' in \'license_file\' field does not exist')
-                        errors.append(Error(ERROR, msg))
-    return lic_loc_dict, errors
-
-
 def copy_files(license_location_dict, gen_location):
     """
     Copy the files into the gen_location

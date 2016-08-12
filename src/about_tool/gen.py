@@ -37,9 +37,10 @@ from about_tool import __about_spec_version__
 from about_tool import __version__
 from about_tool import model
 from about_tool import util
+from about_tool.model import verify_license_files_in_location
+from about_tool.model import check_file_field_exist
 from about_tool.util import copy_files
 from about_tool.util import to_posix
-from about_tool.util import verify_license_files
 
 
 LOG_FILENAME = 'error.log'
@@ -226,7 +227,6 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
         # TODO: check the paths overlap ...???
         # For some reasons, the join does not work, using the '+' for now
         # dump_loc = posixpath.join(bdir, about.about_file_path)
-
         dump_loc = bdir + about.about_file_path
 
         # The following code is to check if there is any directory ends with spaces
@@ -256,6 +256,14 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
                     about.about_resource.original_value = basename(about.about_file_path)
                 about.about_resource.present = True
 
+            if license_text_location:
+                lic_loc_dict, lic_file_err = verify_license_files_in_location(about, license_text_location)
+                if lic_loc_dict:
+                    copy_files(lic_loc_dict, base_dir)
+                if lic_file_err:
+                    for file_err in lic_file_err:
+                        errors.append(file_err)
+
             if gen_license:
                 # Write generated LICENSE file
                 lic_name, lic_context, lic_url = about.dump_lic(dump_loc, dje_license_dict)
@@ -272,19 +280,16 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
                             about.license_url.value = [lic_url]
                             about.license_url.present = True
 
-            if license_text_location:
-                lic_loc_dict, lic_file_err = verify_license_files(abouts, license_text_location)
-                if lic_loc_dict:
-                    copy_files(lic_loc_dict, base_dir)
-                if lic_file_err:
-                    for file_err in lic_file_err:
-                        errors.append(file_err)
 
             # Write the ABOUT file and check does the referenced file exist
             not_exist_errors = about.dump(dump_loc,
                                    with_empty=with_empty,
                                    with_absent=with_absent)
+            file_field_not_exist_errors = check_file_field_exist(about, dump_loc)
+
             for e in not_exist_errors:
+                errors.append(Error(ERROR, e))
+            for e in file_field_not_exist_errors:
                 errors.append(Error(ERROR, e))
 
         except Exception, e:
