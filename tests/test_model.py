@@ -487,8 +487,8 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('parse/missing_notice_license_files.ABOUT')
         a = model.About(test_file)
 
-        file_path1 = os.path.join(posixpath.dirname(test_file), 'test.LICENSE')
-        file_path2 = os.path.join(posixpath.dirname(test_file), 'test.NOTICE')
+        file_path1 = posixpath.join(posixpath.dirname(test_file), 'test.LICENSE')
+        file_path2 = posixpath.join(posixpath.dirname(test_file), 'test.NOTICE')
 
         err_msg1 = u'Field license_file: Path %s not found' % file_path1
         err_msg2 = u'Field notice_file: Path %s not found' % file_path2

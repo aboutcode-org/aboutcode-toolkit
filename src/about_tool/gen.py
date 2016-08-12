@@ -228,7 +228,6 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
         # For some reasons, the join does not work, using the '+' for now
         # dump_loc = posixpath.join(bdir, about.about_file_path)
         dump_loc = bdir + about.about_file_path
-        dump_loc = add_unc(dump_loc)
 
         # The following code is to check if there is any directory ends with spaces
         split_path = about.about_file_path.split('/')
