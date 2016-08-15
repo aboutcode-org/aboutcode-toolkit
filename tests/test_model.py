@@ -917,18 +917,32 @@ version: 0.11.0
         assert expected == dict(result)
 
     def test_loads_dumps_is_idempotent(self):
-        test = u'''about_resource: .
+        test1 = u'''about_resource: .
 name: AboutCode
 version: 0.11.0
 copyright: |
     multi
     line
 '''
+
+        test2 = u'''about_resource: .
+name: AboutCode
+version: 0.11.0
+copyright: >
+    multi
+    line
+'''
         a = model.About()
         base_dir = 'some_dir'
-        a.loads(test, base_dir)
+        a.loads(test1, base_dir)
         dumped = a.dumps(with_absent=False, with_empty=False)
-        assert test == dumped
+        assert test1 == dumped
+
+        b = model.About()
+        base_dir = 'some_dir'
+        b.loads(test2, base_dir)
+        dumped = b.dumps(with_absent=False, with_empty=False)
+        assert test2 == dumped
 
     def test_load_dump_is_idempotent(self):
         test_file = get_test_loc('load/this.ABOUT')
