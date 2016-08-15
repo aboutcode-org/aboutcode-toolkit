@@ -124,17 +124,6 @@ def get_absolute(location):
     return location
 
 
-def as_unc(location):
-    """
-    Convert a location to an absolute Window UNC path to support long paths
-    on Windows. Return the location unchanged if not on Windows.
-    See https://msdn.microsoft.com/en-us/library/aa365247.aspx
-    """
-    if not on_windows or (on_windows and location.startswith(UNC_PREFIX)):
-        return location
-    return UNC_PREFIX + os.path.abspath(location)
-
-
 def get_locations(location):
     """
     Return a list of locations of files given the location of a
@@ -144,7 +133,7 @@ def get_locations(location):
     # See https://bugs.python.org/issue4071
     if on_windows:
         location = unicode(location)
-    location = as_unc(location)
+    location = add_unc(location)
     location = get_absolute(location)
     assert os.path.exists(location)
 
@@ -398,10 +387,10 @@ def extract_zip(location):
                 target = target.replace(posixpath.sep, ntpath.sep)
                 parent = parent.replace(posixpath.sep, ntpath.sep)
             if not os.path.exists(parent):
-                os.makedirs(parent)
+                os.makedirs(add_unc(parent))
             if not content and is_dir:
                 if not os.path.exists(target):
-                    os.makedirs(target)
+                    os.makedirs(add_unc(target))
             if not os.path.exists(target):
                 with open(target, 'wb') as f:
                     f.write(content)
@@ -414,7 +403,9 @@ def add_unc(location):
     Windows. Return the location unchanged if not on Windows. See
     https://msdn.microsoft.com/en-us/library/aa365247.aspx
     """
-    if on_windows and not location.startswith(UNC_PREFIXES):
+    if on_windows and not location.startswith(UNC_PREFIX):
+        if location.startswith(UNC_PREFIX_POSIX):
+            return UNC_PREFIX + os.path.abspath(location.strip(UNC_PREFIX_POSIX))
         return UNC_PREFIX + os.path.abspath(location)
     return location
 
@@ -429,5 +420,5 @@ def copy_files(license_location_dict, gen_location):
             location = loc.strip('/')
         copy_to = posixpath.join(to_posix(gen_location), location)
         if not posixpath.exists(copy_to):
-            os.makedirs(copy_to)
+            os.makedirs(add_unc(copy_to))
         shutil.copy2(license_location_dict[loc], copy_to)
