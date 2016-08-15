@@ -46,7 +46,7 @@ from about_tool import Error
 from about_tool import api
 from about_tool import saneyaml
 from about_tool import util
-from about_tool.util import posix_path, add_unc
+from about_tool.util import add_unc, UNC_PREFIX
 
 
 class Field(object):
@@ -388,8 +388,11 @@ class PathField(ListField):
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
                 location = util.to_posix(location)
+                location = add_unc(location)
 
                 if not os.path.exists(location):
+                    # We don't want to show the UNC_PREFIX in the error message
+                    location = util.to_posix(location.strip(UNC_PREFIX))
                     msg = (u'Field %(name)s: Path %(location)s not found'
                            % locals())
                     errors.append(Error(CRITICAL, msg))
@@ -476,6 +479,7 @@ class FileTextField(PathField):
                 continue
             try:
                 # TODO: we have lots the location by replacing it with a text
+                location = add_unc(location)
                 text = codecs.open(location, encoding='utf-8').read()
                 self.value[path] = text
             except Exception, e:
@@ -901,6 +905,7 @@ class About(object):
         base_dir = posixpath.dirname(loc)
         errors = []
         try:
+            loc = add_unc(loc)
             lines = codecs.open(loc, encoding='utf-8').readlines()
             errs = self.load_lines(lines, base_dir)
             errors.extend(errs)
@@ -921,6 +926,7 @@ class About(object):
         base_dir = posixpath.dirname(loc)
         errors = []
         try:
+            loc = add_unc(loc)
             input_text = codecs.open(loc, encoding='utf-8').read()
             errs = self.load_dict(saneyaml.load(input_text), base_dir)
             errors.extend(errs)
@@ -987,17 +993,16 @@ class About(object):
         errors = []
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
-        loc = add_unc(loc)
-        parent = add_unc(parent)
 
-        if not os.path.exists(parent):
-            os.makedirs(parent)
+        if not posixpath.exists(parent):
+            os.makedirs(add_unc(parent))
 
         about_file_path = loc
         if not about_file_path.endswith('.ABOUT'):
             if about_file_path.endswith('/'):
                 about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
             about_file_path += '.ABOUT'
+        about_file_path = add_unc(about_file_path)
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
             dumped.write(self.dumps(with_absent, with_empty, with_capture))
             for about_resource_value in self.about_resource.value:
@@ -1018,8 +1023,8 @@ class About(object):
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
 
-        if not posixpath.exists(add_unc(parent)):
-            os.makedirs(parent)
+        if not posixpath.exists(parent):
+            os.makedirs(add_unc(parent))
 
         if self.dje_license_key.present and not self.license_file.present:
             lic_key = self.dje_license_key.value
@@ -1128,15 +1133,15 @@ def collect_inventory(location):
     About objects.
     """
     errors = []
-    location = util.get_absolute(location)
-    locations = list(util.get_about_locations(location))
+    input_location = util.get_absolute(location)
+    about_locations = list(util.get_about_locations(input_location))
 
-    name_errors = util.check_file_names(locations)
+    name_errors = util.check_file_names(about_locations)
     errors.extend(name_errors)
     abouts = []
-    for loc in locations:
-        about_file_path = util.get_relative_path(location, loc)
-        about = About(loc, about_file_path)
+    for about_loc in about_locations:
+        about_file_path = util.get_relative_path(input_location, about_loc)
+        about = About(about_loc, about_file_path)
         # Avoid logging duplicated/same errors multiple times
         for about_error in about.errors:
             if not about_error in errors:
@@ -1223,6 +1228,7 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True):
     Write a CSV/JSON file at location given a list of About objects
     """
     about_dictionary_list = about_object_to_list_of_dictionary(abouts, with_absent, with_empty)
+    location = add_unc(location)
     with codecs.open(location, mode='wb', encoding='utf-8') as output_file:
         if format == 'csv':
             fieldnames = field_names(abouts)
@@ -1415,9 +1421,9 @@ def verify_license_files_in_location(about, lic_location):
     """
     if about.license_file.value:
         for lic in about.license_file.value:
-            lic_path = posix_path(posixpath.join(lic_location, lic))
+            lic_path = util.to_posix(posixpath.join(lic_location, lic))
             if posixpath.exists(lic_path):
-                copy_to = posixpath.dirname(about.about_file_path)
+                copy_to = dirname(about.about_file_path)
                 lic_loc_dict[copy_to] = lic_path
             else:
                 msg = (u'The license file : '

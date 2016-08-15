@@ -64,6 +64,7 @@ def check_duplicated_columns(location):
     """
     Return a list of errors for duplicated column names in a CSV file at location.
     """
+    location = add_unc(location)
     with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
         reader = unicodecsv.UnicodeReader(csvfile)
         columns = reader.next()
@@ -177,6 +178,7 @@ def load_conf(location):
     Load the about configuration file at location.
     Return a dictionary of dictionary.
     """
+    location = add_unc(location)
     with codecs.open(location, mode='rb', encoding='utf-8') as conf_file:
         config = configparser.ConfigParser()
         config.read_file(conf_file)

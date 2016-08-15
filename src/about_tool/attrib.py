@@ -29,6 +29,7 @@ import about_tool
 from about_tool import ERROR
 from about_tool import Error
 from about_tool.licenses import COMMON_LICENSES
+from about_tool.util import add_unc
 
 
 def generate(abouts, template_string=None):
@@ -90,6 +91,7 @@ def generate_from_file(abouts, template_loc=None):
     """
     if not template_loc:
         template_loc = default_template
+    template_loc = add_unc(template_loc)
     with codecs.open(template_loc, 'rb', encoding='utf-8') as tplf:
         tpls = tplf.read()
     return generate(abouts, template_string=tpls)
@@ -164,6 +166,7 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
     rendered = generate_from_file(updated_abouts, template_loc=template_loc)
 
     if rendered:
+        output_location = add_unc(output_location)
         with codecs.open(output_location, 'wb', encoding='utf-8') as of:
             of.write(rendered)
 

@@ -34,7 +34,7 @@ from about_tool import CRITICAL, INFO, WARNING
 from about_tool import model
 from about_tool import util
 from about_tool import ERROR
-from about_tool.util import load_csv
+from about_tool.util import load_csv, add_unc
 
 
 class FieldTest(unittest.TestCase):
@@ -65,7 +65,7 @@ class FieldTest(unittest.TestCase):
         assert expected_errrors == errors
 
         result = field.value[test_file]
-        expected = posixpath.join(util.to_posix(base_dir), test_file)
+        expected = add_unc(posixpath.join(util.to_posix(base_dir), test_file))
         assert expected == result
 
     def test_PathField_check_missing_location(self):
@@ -1069,16 +1069,20 @@ class CollectorTest(unittest.TestCase):
         _errors, abouts = model.collect_inventory(test_loc)
         assert 2 == len(abouts)
 
-        expected = ['longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/non-supported_date_format.ABOUT',
+        expected_path = ['longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/non-supported_date_format.ABOUT',
                     'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/supported_date_format.ABOUT']
-        result = [a.about_file_path for a in abouts]
-        assert sorted(expected) == sorted(result)
+        result_path = [a.about_file_path for a in abouts]
+        assert sorted(expected_path) == sorted(result_path)
+
+        expected_name = ['distribute', 'date_test']
+        result_name = [a.name.value for a in abouts]
+        assert sorted(expected_name) == sorted(result_name)
 
     def test_collect_inventory_return_errors(self):
         test_loc = get_test_loc('collect-inventory-errors')
         errors, _abouts = model.collect_inventory(test_loc)
-        file_path1 = posixpath.join(about_tool.util.UNC_PREFIX_POSIX, test_loc, 'distribute_setup.py')
-        file_path2 = posixpath.join(about_tool.util.UNC_PREFIX_POSIX, test_loc, 'date_test.py')
+        file_path1 = posixpath.join(test_loc, 'distribute_setup.py')
+        file_path2 = posixpath.join(test_loc, 'date_test.py')
 
         err_msg1 = u'Field about_resource: Path %s not found' % file_path1
         err_msg2 = u'Field about_resource: Path %s not found' % file_path2
