@@ -40,16 +40,19 @@ from about_tool import CRITICAL, ERROR, Error
 on_windows = 'win32' in sys.platform
 
 
-def posix_path(path):
+def to_posix(path):
     """
-    Return a path using POSIX path separators given a path that may
-    contain POSIX or windows separators, converting \ to /.
+    Return a path using the posix path separator given a path that may contain
+    posix or windows separators, converting \ to /. NB: this path will still
+    be valid in the windows explorer (except if UNC or share name). It will be
+    a valid path everywhere in Python. It will not be valid for windows
+    command line operations.
     """
     return path.replace(ntpath.sep, posixpath.sep)
 
 
 UNC_PREFIX = u'\\\\?\\'
-UNC_PREFIX_POSIX = posix_path(UNC_PREFIX)
+UNC_PREFIX_POSIX = to_posix(UNC_PREFIX)
 UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.'
@@ -203,17 +206,6 @@ def get_relative_path(base_loc, full_loc):
         relative = posixpath.join(base_name, relative)
 
     return relative
-
-
-def to_posix(path):
-    """
-    Return a path using the posix path separator given a path that may contain
-    posix or windows separators, converting \ to /. NB: this path will still
-    be valid in the windows explorer (except if UNC or share name). It will be
-    a valid path everywhere in Python. It will not be valid for windows
-    command line operations.
-    """
-    return path.replace(ntpath.sep, posixpath.sep)
 
 
 def to_native(path):
@@ -435,7 +427,7 @@ def copy_files(license_location_dict, gen_location):
         location = loc
         if loc.startswith('/'):
             location = loc.strip('/')
-        copy_to = posixpath.join(posix_path(gen_location), location)
+        copy_to = posixpath.join(to_posix(gen_location), location)
         if not posixpath.exists(copy_to):
             os.makedirs(copy_to)
         shutil.copy2(license_location_dict[loc], copy_to)
