@@ -1,252 +1,179 @@
-about.py
-========
+inventory
+=========
 
 **Syntax**
 
 ::
 
-    about.py [options] input_path output_path
+    about inventory [OPTIONS] LOCATION OUTPUT
 
-    - Input can be a file or directory.
-    - Output must be a file with a .csv extension.
+    LOCATION: Path to an ABOUT file or a directory containing ABOUT files
+    OUTPUT: Path to CSV file to write the inventory to
 
 **Options:**
 
 ::
 
-      -h, --help            Display help
-      --version             Display current version, license notice, and copyright notice
-      --overwrite           Overwrites the output file if it exists
-      --verbosity=VERBOSITY
-                            Print more or fewer verbose messages while processing ABOUT files
-                            0 - Do not print any warning or error messages, just a total count (default)
-                            1 - Print error messages
-                            2 - Print error and warning messages
+    -f, --format <style>  Set <output_file> format <style> to one of the
+                          supported formats: csv or json  [default: csv]
+    --mapping             Use for mapping between the input keys and the ABOUT
+                          field names - MAPPING.CONFIG
+    --help                Show this message and exit.
 
 Purpose
 -------
-Extract information from the .ABOUT files and save it to the CSV file.
+Extract information from the .ABOUT files and save it to a CSV or JSON file.
 
 Options
 -------
 
 ::
 
-    --overwrite
+    -f, --format
  
-        Overwrite the extracted data from .ABOUT files to the output location
+        Set the output format [default: csv]
 
-    $ python about.py --overwrite <input path> <output path>
+    $ about inventory -f json [OPTIONS] LOCATION OUTPUT
+
+    --mapping
+
+        See MAPPING.CONFIG for details
 
 
-genabout.py
-===========
+gen
+===
 
 **Syntax**
 
 ::
 
-    genabout.py [options] input_path output_path
+    about gen [OPTIONS] LOCATION OUTPUT
 
-    - Input must be a CSV file
-    - Output must be a directory location where the ABOUT files should be generated
+    LOCATION: Path to a inventory file (CSV or JSON file)
+    OUTPUT: Path to the directory to write ABOUT files to
 
 **Options:**
 
 ::
 
-      -h, --help            Display help
-      --version             Display current version, license notice, and copyright notice
-      --verbosity=VERBOSITY
-                            Print more or fewer verbose messages while processing ABOUT files
-                            0 - Do not print any warning or error messages, just a total count (default)
-                            1 - Print error messages
-                            2 - Print error and warning messages
+    --mapping                       Use for mapping between the input keys and
+                                    the ABOUT field names - MAPPING.CONFIG
+    --license_text_location DIRECTORY
+                                    Copy the 'license_text_file' from the
+                                    directory to the generated location
+    --extract_license TEXT...       Extract License text and create
+                                    <dje_license_key>.LICENSE side-by-side with the
+                                    generated .ABOUT file using data fetched
+                                    from a DejaCode License Library. The
+                                    following additional options are required:
 
-      --action=ACTION       Handle different behaviors if ABOUT files already existed
-                            0 - Do nothing if ABOUT file existed (default)
-                            1 - Overwrites the current ABOUT field value if existed
-                            2 - Keep the current field value and only add the "new" field and field value
-                            3 - Replace the ABOUT file with the current generation
+                                    api_url - URL to the DejaCode License
+                                    Library API endpoint
 
-      --copy_files=COPY_FILES
-                            Copy the '*_file' from the project to the generated location
-                            Project path - Project path
+                                    api_key - DejaCode API key
+                                    Example syntax:
 
-      --license_text_location=LICENSE_TEXT_LOCATION
-                            Copy the 'license_text_file' from the directory to the generated location
-                            License path - License text files path
-
-      --mapping             Configure the mapping key from the MAPPING.CONFIG
-
-      --extract_license=EXTRACT_LICENSE
-                            Extract License text and create <license_key>.LICENSE side-by-side
-                                with the .ABOUT from DJE License Library.
-                            api_url - URL to the DJE License Library
-                            api_username - The regular DJE username
-                            api_key - Hash attached to your username which is used to authenticate
-                                        yourself in the API. Contact us to get the hash key.
-
-                            Example syntax:
-                            genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key'
+                                    about gen --extract_license 'api_url' 'api_key'
+    --help                          Show this message and exit.
 
 Purpose
 -------
-Generate ABOUT files from the input CSV file to output location.
+Generate ABOUT files from the input to the output location.
 
 Options
 -------
 
 ::
 
-    --action=ACTION
+    --mapping
 
-        Handle different behaviors if ABOUT files already existed.
-        For instance, replace the ABOUT files with the current generation
-
-    $ python genabout.py --action=3 <input path> <output path>
-
-    --copy_files
-
-        Copy the files to the generated location based on the 
-        *_file value in the input from the project
-
-        Purpose of this option is for users who want to generate ABOUT files
-        in a different location other than the project side by side with the code.
-
-        For instance, the project is located at /home/project/, and users want to
-        generate ABOUT files to /home/about/ and also want to copy the
-        'license_text_file' and 'notice_text_file' from
-        /home/project/ to /home/about/
-
-    $ python genabout.py --copy_files=/home/project/ <input path> /home/about/
+        See MAPPING.CONFIG for details
 
     --license_text_location
 
         Copy the license files to the generated location based on the 
-        'license_text_file' value in the input from the directory
+        'license_file' value in the input from the directory
 
         For instance,
         the directory, /home/licenses/, contains all the licenses that users want:
         /home/license/apache2.LICENSE
         /home/license/jquery.js.LICENSE
 
-    $ python genabout.py --license_text_location=/home/licenses/ <input path> <output path>
-
-    --mapping
-
-        This tool needs the input CSV to have the required and/or optional keys to work.
-        Since the user input may not have the same column key names used by the tool,
-        there are two ways to reconcile that:
-        1. Change the key names directly in the input manually to match the field names
-        supported by the AboutCode specification.
-        Note: genabout.py looks for an about_file field and uses it to derive the mandatory
-        output field about_resource.
-        2. Use the '--mapping' option to configure the key mapping. This method provides the
-        most flexiblity and control. 
-        When the '--mapping' option is set, the tool will look into the 'MAPPING.CONFIG'
-        file to determine key mapping.
-        
-        The format of each text line in the MAPPING.CONFIG file is as follows:
-            {{about_file_target_field_name}}: {{input_csv_file_field_name}}
-
-        For instance, assume that MAPPING.CONFIG contains the following:
-            about_resource: file_name
-            about_file: Resource
-            name: Component
-            version: file_version
-
-        The tool will look into the input CSV and try to find the column key named
-        'file_name' and configure to map with the 'about_resource' key that the
-        tool uses. The 'Resource' will then configure to map with 'about_file' and
-        so on.
-
-        In another word, you do not need to modify the key names of the
-        input manually, but rather use the MAPPING.CONFIG to do the key mapping.
-        
-        Another advantage of using the MAPPING.CONFIG is the ability to specify 
-        any field names that are important to you, including custom fields.
-
-    $ python genabout.py --mapping <input path> <output path>
+    $ about gen --license_text_location /home/licenses/ LOCATION OUTPUT
 
     --extract_license
 
         Extract license text(s) from DJE License Library and create
-        <license_key>.LICENSE side-by-side with the generated .ABOUT files based
-        on the 'dje_license' value in the input CSV.
+        <dje_license_key>.LICENSE side-by-side with the generated .ABOUT files based
+        on the 'dje_license_key' value in the input.
 
-        This option requires 3 parameters:
+        This option requires 2 parameters:
             api_url - URL to the DJE License Library
-            api_username - The regular DJE username
-            api_key - Hash attached to your username which is used to authenticate
-                        yourself in the API.
+            api_key - Hash key to authenticate yourself in the API.
         (Please contact us to get the api_* value to use this feature)
 
-    $ python genabout.py --extract_license --api_url='api_url' --api_username='api_username' --api_key='api_key' <input path> <output path>
+    $ about gen --extract_license 'api_url' 'api_key' LOCATION OUTPUT
 
 
-genattrib.py
-============
+attrib
+======
 
 **Syntax**
 
 ::
 
-    genattrib.py [options] input_path output_path component_list
+    about attrib [OPTIONS] LOCATION OUTPUT [INVENTORY_LOCATION]
 
-    - Input can be a file or directory.
-    - Output of rendered template must be a file (e.g. .html).
-    - Component List must be a .csv file which has at least an "about_file" column.
+    LOCATION: Path to an ABOUT file or a directory containing ABOUT files
+    OUTPUT: Path to output file to write the attribution to
+    INVENTORY_LOCATION: Path to a CSV file which contains the 'about_file_path' key [OPTIONAL]
 
 **Options:**
 
 ::
 
-    -h, --help          Display help
-    --version           Display current version, license notice, and copyright notice
-    --overwrite         Overwrites the output file if it exists
-    --verbosity=VERBOSITY
-                        Print more or fewer verbose messages while processing ABOUT files
-                        0 - Do not print any warning or error messages, just a total count (default)
-                        1 - Print error messages
-                        2 - Print error and warning messages
-    --template_location=TEMPLATE_LOCATION
-                        Use the custom template for the Attribution Generation
-    --mapping           Configure the mapping key from the MAPPING.CONFIG
+    --template PATH  Use the custom template for the Attribution Generation
+    --mapping        Use for mapping between the input keys and the ABOUT field
+                     names - MAPPING.CONFIG
+    --help           Show this message and exit.
 
 Purpose
 -------
-Generate an Attribution HTML file which contains the license information from
-the 'component_list' along with the license text.
+Generate an attribution file which contains the all license information
+from the LOCATION along with the license text.
 
-This tool will look at the components in the 'component_list' and find the
-corresponding .ABOUT files in the 'input_path' and generate the output in
-the 'output_path'. Therefore, please make sure there are .ABOUT files under
-the 'input_path'.
+Supplying an INVENTORY_LOCATION will generate an attribution file which contains
+license information for ONLY the listed components in the INVENTORY_LOCATION.
+
+This tool will look at the components in the INVENTORY_LOCATION and find the
+corresponding .ABOUT files in the LOCATION and generate the output. 
 
 Assuming the follow:
 
 ::
 
-    '/home/about_files/'** contains all the ABOUT files from the component_list
+    '/home/about_files/'** contains all the ABOUT files
     '/home/attribution/attribution.html' is the user's output path
-    '/home/project/component_list.csv' is the component list that user want to be generated
+    '/home/project/component_list.csv' is the INVENTORY_LOCATION that user want to be generated
 
 ::
 
-    $ python genattrib.py /home/about_files/ /home/attribution/attribution.html /home/project/component_list.csv
+    $ about attrib /home/about_files/ /home/attribution/attribution.html /home/project/component_list.csv
 
 Options
 -------
 
 ::
 
-    --template_location
+    --template
     
-        This option allows you to use your own template for Attribution Generation.
-        For instance, if the custom template you want to use is located at:
+        This option allows users to use their own template for Attribution Generation.
+        For instance, if user has a custom template located at:
         /home/custom_template/template.html
 
-    $ python genattrib.py --template_location=/home/custom_template/template.html input_path output_path component_list
+    $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT [INVENTORY_LOCATION]
 
+    --mapping
+
+        See MAPPING.CONFIG for details
 
