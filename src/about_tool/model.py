@@ -1227,6 +1227,7 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True):
     """
     Write a CSV/JSON file at location given a list of About objects
     """
+    errors = []
     about_dictionary_list = about_object_to_list_of_dictionary(abouts, with_absent, with_empty)
     location = add_unc(location)
     with codecs.open(location, mode='wb', encoding='utf-8') as output_file:
@@ -1235,10 +1236,14 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True):
             writer = unicodecsv.DictWriter(output_file, fieldnames)
             writer.writeheader()
             for row in about_dictionary_list:
-                writer.writerow(row)
+                try:
+                    writer.writerow(row)
+                except Exception as e:
+                    msg = u'Generation skipped for ' + row['about_file_path'] + u' : ' + str(e)
+                    errors.append(Error(CRITICAL, msg))
         else:
             output_file.write(json.dumps(about_dictionary_list, indent=2))
-
+    return errors
 
 def list_dedup(list_item):
     """

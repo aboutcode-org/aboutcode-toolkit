@@ -144,7 +144,9 @@ def inventory(mapping, format, location, output):
     if not abouts:
         errors = [Error(ERROR, u'No ABOUT files is found. Generation halted.')]
     else:
-        model.write_output(abouts, output, format)
+        write_errors = model.write_output(abouts, output, format)
+        for err in write_errors:
+            errors.append(err)
     log_errors(errors, os.path.dirname(output))
 
 
