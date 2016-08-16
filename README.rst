@@ -60,6 +60,11 @@ or on windows::
     configure
 
 
+USAGE
+-----
+See https://github.com/dejacode/about-code-tool/blob/master/USAGE.rst for USAGE.
+
+
 TESTS and DEVLOPMENT
 --------------------
 To install all the needed development dependencies, run (on posix)::
