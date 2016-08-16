@@ -170,10 +170,10 @@ OUTPUT: Path to the directory to write ABOUT files to
                 type=click.Path(exists=True, file_okay=False,
                                 dir_okay=True, writable=False,
                                 readable=True, resolve_path=True),
-              help = 'Copy the \'license_text_file\' from the directory to the generated location')
+              help = 'Copy the \'license_file\' from the directory to the generated location')
 @click.option('--extract_license', type=str, nargs=2,
-              help='Extract License text and create <license_key>.LICENSE side-by-side'
-                    'with the generated .ABOUT file using data fetched from a DejaCode License Library.'
+              help='Extract License text and create <dje_license_key>.LICENSE side-by-side '
+                    'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
                     'The following additional options are required:\n\n'
                     'api_url - URL to the DejaCode License Library API endpoint\n\n'
                     'api_key - DejaCode API key'
@@ -223,6 +223,7 @@ def gen(mapping, license_text_location, extract_license, location, output):
 attrib_help = '''
 LOCATION: Path to an ABOUT file or a directory containing ABOUT files
 OUTPUT: Path to output file to write the attribution to
+INVENTORY_LOCATION: Path to a CSV file which contains the 'about_file_path' key [OPTIONAL]
 '''
 @cli.command(help=attrib_help,
              short_help='LOCATION: directory, OUTPUT: output file',
