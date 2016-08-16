@@ -1,17 +1,16 @@
 about_resource: mtrace.h
 name: mtrace.h
-version: 
-
-attribute: yes
-category: Copyleft Limited
-checksum_sha1: 3fd39f30399e003b1de7772173597bdef2993df3
-component_type: c language text
-confirmed_license: LGPL 2.0
-copyright: Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
- Written May 1989 by Mike Haertel.
-dje_license: lgpl-2.0
-dje_license_name: GNU Library General Public License 2.0
-license_text_file: lgpl-2.0.LICENSE
-owner: Mike Haertel
+license_name: GNU Library General Public License 2.0
+license_file: lgpl-2.0.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.0
+copyright: |
+    Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+    Written May 1989 by Mike Haertel.
 redistribute: yes
-track_changes: yes
+attribute: yes
+owner: Mike Haertel
+dje_license_key: lgpl-2.0
+category: Copyleft Limited
+confirmed_license: LGPL 2.0
+component_type: c language text
+checksum_sha1: 3fd39f30399e003b1de7772173597bdef2993df3

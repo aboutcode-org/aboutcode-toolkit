@@ -1,13 +1,10 @@
 about_resource: dict.h
 name: dict.h
-version: 
-
-attribute: yes
-category: Attribution
-checksum_sha1: 0f99603368345b82318e0fb186421cbaa3d8c3a2
-component_type: c language text
-confirmed_license: Kaz Kylheku License
+license_file: KazKylheku.LICENSE
 copyright: Copyright (C) 1997 Kaz Kylheku <kaz@ashi.footprints.net>
-license_text_file: KazKylheku.LICENSE
+attribute: yes
 owner: Kaz Kylheku
-track_changes: yes
+category: Attribution
+confirmed_license: Kaz Kylheku License
+component_type: c language text
+checksum_sha1: 0f99603368345b82318e0fb186421cbaa3d8c3a2

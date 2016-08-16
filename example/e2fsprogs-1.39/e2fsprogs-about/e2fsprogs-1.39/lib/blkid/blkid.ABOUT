@@ -1,17 +1,16 @@
 about_resource: .
 name: blkid
-version: 
-
-attribute: yes
-category: Copyleft Limited
-component_type: directory
-confirmed_license: LGPL 2.1
-copyright: Copyright (C) 2001 Andreas Dilger
- Copyright (C) 2003 Theodore Ts'o
- Copyright (C) 1999 by Andries Brouwer
-dje_license: lgpl-2.1
-dje_license_name: GNU Lesser General Public License 2.1
-license_text_file: lgpl-2.1.LICENSE
-owner: Theodore Ts'o
+license_name: GNU Lesser General Public License 2.1
+license_file: lgpl-2.1.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.1
+copyright: |
+    Copyright (C) 2001 Andreas Dilger
+    Copyright (C) 2003 Theodore Ts'o
+    Copyright (C) 1999 by Andries Brouwer
 redistribute: yes
-track_changes: yes
+attribute: yes
+owner: Theodore Ts'o
+dje_license_key: lgpl-2.1
+category: Copyleft Limited
+confirmed_license: LGPL 2.1
+component_type: directory

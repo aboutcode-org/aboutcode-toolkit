@@ -1,14 +1,13 @@
 about_resource: fpopen.c
 name: fpopen.c
-version: 
-
-attribute: yes
-category: Attribution
-checksum_sha1: 6bd791a73921839a749fce1086ff1ede0c434ec2
-component_type: c language text
-confirmed_license: Berkeley Software License Agreement 
+license_name: Berkeley Software License Agreement
+license_file: bsla.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsla
 copyright: Copyright Theodore Ts'o, 1996-1999.
-dje_license: bsla
-dje_license_name: Berkeley Software License Agreement
-license_text_file: bsla.LICENSE
+attribute: yes
 owner: Theodore Ts'o
+dje_license_key: bsla
+category: Attribution
+confirmed_license: Berkeley Software License Agreement
+component_type: c language text
+checksum_sha1: 6bd791a73921839a749fce1086ff1ede0c434ec2

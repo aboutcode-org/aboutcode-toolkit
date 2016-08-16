@@ -1,13 +1,12 @@
 about_resource: .
 name: uuid
-version: 
-
-attribute: yes
-category: Attribution
-component_type: directory
-confirmed_license: BSD-Modified
+license_name: BSD-Modified
+license_file: bsd-new.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new
 copyright: Copyright (C) 1996, 1997 Theodore Ts'o
-dje_license: bsd-new
-dje_license_name: BSD-Modified
-license_text_file: bsd-new.LICENSE
+attribute: yes
 owner: Theodore Ts'o
+dje_license_key: bsd-new
+category: Attribution
+confirmed_license: BSD-Modified
+component_type: directory

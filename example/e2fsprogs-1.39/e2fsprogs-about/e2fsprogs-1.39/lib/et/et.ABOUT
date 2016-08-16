@@ -1,13 +1,12 @@
 about_resource: .
 name: et
-version: 
-
-attribute: yes
-category: Attribution
-component_type: directory
-confirmed_license: Kerberos License
+license_name: Kerberos License
+license_file: kerberos.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:kerberos
 copyright: Copyright 2003 by MIT Student Information Processing Board
-dje_license: kerberos
-dje_license_name: Kerberos License
-license_text_file: kerberos.LICENSE
+attribute: yes
 owner: Theodore Ts'o
+dje_license_key: kerberos
+category: Attribution
+confirmed_license: Kerberos License
+component_type: directory

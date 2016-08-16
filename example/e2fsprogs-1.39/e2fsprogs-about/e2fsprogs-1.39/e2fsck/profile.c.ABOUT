@@ -1,17 +1,16 @@
 about_resource: profile.c
 name: profile.c
-version: 
-
-attribute: yes
-category: Copyleft
-checksum_sha1: 87fde75c46dc2248516dda298ef6357ec3a2df6a
-component_type: c language text
-confirmed_license: GPL 2.0
-copyright: Copyright (C) 2005 by Theodore Ts'o.
- Copyright (C) 1985-2005 by the Massachusetts Institute of Technology.
-dje_license: gpl-2.0
-dje_license_name: GNU General Public License 2.0
-license_text_file: gpl-2.0.LICENSE
-owner: Theodore Ts'o
+license_name: GNU General Public License 2.0
+license_file: gpl-2.0.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0
+copyright: |
+    Copyright (C) 2005 by Theodore Ts'o.
+    Copyright (C) 1985-2005 by the Massachusetts Institute of Technology.
 redistribute: yes
-track_changes: yes
+attribute: yes
+owner: Theodore Ts'o
+dje_license_key: gpl-2.0
+category: Copyleft
+confirmed_license: GPL 2.0
+component_type: c language text
+checksum_sha1: 87fde75c46dc2248516dda298ef6357ec3a2df6a

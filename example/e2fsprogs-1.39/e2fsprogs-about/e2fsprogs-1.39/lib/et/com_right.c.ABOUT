@@ -1,15 +1,15 @@
 about_resource: com_right.c
 name: com_right.c
-version: 
-
+license_name: BSD-Modified
+license_file: bsd-new.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new
+copyright: |
+    Copyright (c) 2003 by Theodore Ts'o
+    Copyright (c) 1997, 1998, 2001 Kungliga Tekniska Hgskolan
 attribute: yes
-category: Attribution
-checksum_sha1: 3d14b06ab31477a1fec4354d8b9f9c82b35896bb
-component_type: c language text
-confirmed_license: BSD-Modified
-copyright: Copyright (c) 2003 by Theodore Ts'o
- Copyright (c) 1997, 1998, 2001 Kungliga Tekniska Hogskolan
-dje_license: bsd-new
-dje_license_name: BSD-Modified
-license_text_file: bsd-new.LICENSE
 owner: Kerberos4kth
+dje_license_key: bsd-new
+category: Attribution
+confirmed_license: BSD-Modified
+component_type: c language text
+checksum_sha1: 3d14b06ab31477a1fec4354d8b9f9c82b35896bb

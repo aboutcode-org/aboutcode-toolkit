@@ -1,11 +1,10 @@
 about_resource: alocal.m4
 name: alocal.m4
-version: 
-
+license_name: Public Domain
+license_file: public-domain.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
+copyright: Copyright (c) 1995-2003 Free Software Foundation, Inc.
+owner: Free Software Foundation
+dje_license_key: public-domain
 category: Public Domain
 confirmed_license: Public Domain
-copyright: Copyright (c) 1995-2003 Free Software Foundation, Inc.
-dje_license: public-domain
-dje_license_name: Public Domain
-license_text_file: public-domain.LICENSE
-owner: Free Software Foundation

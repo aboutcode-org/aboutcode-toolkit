@@ -1,16 +1,14 @@
 about_resource: config.guess
 name: config.guess
-version: 
-
-attribute: yes
-category: Copyleft
-checksum_sha1: 6bf255982f9104c1423347581c55b4a34336e933
-component_type: posix shell script text executable
-confirmed_license: GPL 2.0 with Autoconf exception
+license_name: GNU General Public License 2.0 with Autoconf exception
+license_file: gpl-2.0-autoconf.LICENSE
+license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0-autoconf
 copyright: Copyright (c) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
-dje_license: gpl-2.0-autoconf
-dje_license_name: GNU General Public License 2.0 with Autoconf exception
-license_text_file: gpl-2.0-autoconf.LICENSE
-owner: Theodore Ts'o
 redistribute: yes
-track_changes: yes
+attribute: yes
+owner: Theodore Ts'o
+dje_license_key: gpl-2.0-autoconf
+category: Copyleft
+confirmed_license: GPL 2.0 with Autoconf exception
+component_type: posix shell script text executable
+checksum_sha1: 6bf255982f9104c1423347581c55b4a34336e933
