@@ -53,13 +53,6 @@ logger.addHandler(handler)
 file_logger = logging.getLogger(__name__ + '_file')
 
 
-# Handle different behaviors if ABOUT file already exists
-ACTION_DO_NOTHING_IF_ABOUT_FILE_EXIST = 0
-ACTION_OVERWRITES_THE_CURRENT_ABOUT_FIELD_VALUE_IF_EXIST = 1
-ACTION_KEEP_CURRENT_FIELDS_UNCHANGED_AND_ONLY_ADD_NEW_FIELDS = 2
-ACTION_REPLACE_THE_ABOUT_FILE_WITH_THE_CURRENT_GENERATED_FILE = 3
-
-
 def check_duplicated_columns(location):
     """
     Return a list of errors for duplicated column names in a CSV file at location.
@@ -96,6 +89,9 @@ def check_duplicated_columns(location):
 
 
 def check_duplicated_about_file_path(inventory_dict):
+    """
+    Return a list of errors for duplicated about_file_path in a CSV file at location.
+    """
     afp_list = []
     errors = []
     for component in inventory_dict:

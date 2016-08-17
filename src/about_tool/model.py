@@ -1017,7 +1017,7 @@ class About(object):
 
     def dump_lic(self, location, license_dict):
         """
-        Write LICENSE files
+        Write LICENSE files and return the name, context and the url
         """
         license_name = license_context = license_url = ''
         loc = util.to_posix(location)
@@ -1236,6 +1236,7 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True):
             writer = unicodecsv.DictWriter(output_file, fieldnames)
             writer.writeheader()
             for row in about_dictionary_list:
+                # See https://github.com/dejacode/about-code-tool/issues/167
                 try:
                     writer.writerow(row)
                 except Exception as e:
@@ -1415,31 +1416,35 @@ def valid_api_url(api_url):
 
 
 def verify_license_files_in_location(about, lic_location):
-    lic_loc_dict = {}
-    errors = []
-
     """
-    The license_file field is filled if the input has dje_license_key and 
-    the 'extract_license' option is used. This function only wants to check
-    the existence of the license file provided in the license_field from the
+    Check the existence of the license file provided in the license_field from the
     license_text_location.
+    Return a dictionary of the path of where the license should be copied to as 
+    the key and the path of where the license should be copied from as the value
     """
+    license_location_dict = {}
+    errors = []
+    # The license_file field is filled if the input has dje_license_key and 
+    # the 'extract_license' option is used.
     if about.license_file.value:
         for lic in about.license_file.value:
             lic_path = util.to_posix(posixpath.join(lic_location, lic))
             if posixpath.exists(lic_path):
                 copy_to = dirname(about.about_file_path)
-                lic_loc_dict[copy_to] = lic_path
+                license_location_dict[copy_to] = lic_path
             else:
                 msg = (u'The license file : '
                        u'%(lic)s '
                        u'does not exist in ' 
                        u'%(lic_path)s and therefore cannot be copied' % locals())
                 errors.append(Error(ERROR, msg))
-    return lic_loc_dict, errors
+    return license_location_dict, errors
 
-# Check the existence of the license_file
+
 def check_file_field_exist(about, location):
+    """
+    Return a list of errors for non-existence file in file fields
+    """
     errors = []
     loc = util.to_posix(location)
     parent = posixpath.dirname(loc)

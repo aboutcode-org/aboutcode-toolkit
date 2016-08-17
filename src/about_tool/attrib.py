@@ -43,24 +43,22 @@ def generate(abouts, template_string=None):
         return 'Template validation error at line: %r: %r' % (syntax_error)
     template = jinja2.Template(template_string)
 
-    # FIXME: it's confusing. Need better documentation/implementation
     try:
-        lic_dict = {}
-        lic_name_dict = {}
-        lic_data = {}
+        captured_license = []
+        license_short_name_and_context = {}
         for about in abouts:
-            lic_name = about.license_name.value
-            if about.license_file.value and lic_name:
-                # FIXME: it's not a license key, it's in fact path and license text
-                for lic_key in about.license_file.value.keys():
-                    if not lic_key in lic_dict:
-                        lic_dict[lic_key] = about.license_file.value[lic_key]
-                        lic_name_dict[lic_key] = lic_name
+            license_short_name = about.license_name.value
+            # about.license_file.value is a OrderDict with license_text_name as
+            # the key and the license text as the value
+            if about.license_file.value and license_short_name:
+                # We want to create a dictionary which have the license short name as
+                # the key and license text as the value
+                for license_text_name in about.license_file.value:
+                    if not license_text_name in captured_license:
+                        captured_license.append(license_text_name)
+                        license_short_name_and_context[license_short_name] = about.license_file.value[license_text_name]
 
-        for key in sorted(lic_dict):
-            lic_data[lic_name_dict[key]] = lic_dict[key]
-
-        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, lic_data=lic_data)
+        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, lic_data=license_short_name_and_context)
     except Exception, e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
