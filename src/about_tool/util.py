@@ -238,6 +238,7 @@ class OrderedDictReader(unicodecsv.DictReader):
             result[name] = row_dict[name]
         return result
 
+
 def get_mappings(location=None):
     """
     Return a mapping of user key names to About key names by reading the
