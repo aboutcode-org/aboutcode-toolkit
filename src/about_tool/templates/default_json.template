@@ -12,7 +12,7 @@
                 "license_name": "{{ about_object.license_name.value }}"{% if about_object.copyright.value -%},{%- endif %}
                 {%- endif %}
                 {% if about_object.copyright.value -%}
-                "license_name": "{{ about_object.copyright.value }}"
+                "copyrigth": "{{ about_object.copyright.value }}"
                 {%- endif %}
             }{% if not loop.last -%},{%- endif %}
         {%- endfor %}
