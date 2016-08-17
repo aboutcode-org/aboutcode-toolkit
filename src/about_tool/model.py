@@ -55,7 +55,7 @@ class Field(object):
     will alter the value type as needed.
     """
 
-    def __init__(self, name=None, value=None, required=False, present=False, capture=False):
+    def __init__(self, name=None, value=None, required=False, present=False):
         # normalized names are lowercased per specification
         self.name = name
         # save this and do not mutate it afterwards
@@ -72,8 +72,7 @@ class Field(object):
         self.required = required
         # True if the field is present in an About object
         self.present = present
-        # True if the field should be captured in the generated ABOUT files
-        self.capture = capture
+
         self.errors = []
 
     def default_value(self):
@@ -184,14 +183,12 @@ class Field(object):
         required = self.required
         has_content = self.has_content
         present = self.present
-        capture = self.capture
-        r = ('Field(name=%(name)r, value=%(value)r, required=%(required)r, '
-             'present=%(present)r, capture=%(capture)r)')
+        r = ('Field(name=%(name)r, value=%(value)r, required=%(required)r, present=%(present)r)')
         return r % locals()
 
     def __eq__(self, other):
         """
-        Equality based on string content value, ignoring spaces
+        Equality based on string content value, ignoring spaces.
         """
         return (isinstance(other, self.__class__)
                 and self.name == other.name
@@ -619,50 +616,49 @@ class About(object):
         could use a metaclass to track ordering django-like but this approach
         is simpler.
 
-        TODO: use schematics
         """
         self.fields = OrderedDict([
-            ('about_resource', AboutResourceField(required=True, capture=True)),
-            ('name', SingleLineField(required=True, capture=True)),
+            ('about_resource', AboutResourceField(required=True)),
+            ('name', SingleLineField(required=True)),
 
-            ('version', SingleLineField(capture=True)),
-            ('download_url', UrlField(capture=True)),
-            ('description', StringField(capture=True)),
-            ('home_url', UrlField(capture=True)),
-            ('notes', StringField(capture=True)),
+            ('version', SingleLineField()),
+            ('download_url', UrlField()),
+            ('description', StringField()),
+            ('home_url', UrlField()),
+            ('notes', StringField()),
 
-            ('license', ListField(capture=True)),
-            ('license_name', StringField(capture=True)),
-            ('license_file', FileTextField(capture=True)),
-            ('license_url', UrlField(capture=True)),
-            ('copyright', StringField(capture=True)),
-            ('notice_file', FileTextField(capture=True)),
-            ('notice_url', UrlField(capture=True)),
+            ('license', ListField()),
+            ('license_name', StringField()),
+            ('license_file', FileTextField()),
+            ('license_url', UrlField()),
+            ('copyright', StringField()),
+            ('notice_file', FileTextField()),
+            ('notice_url', UrlField()),
 
-            ('redistribute', BooleanField(capture=True)),
-            ('attribute', BooleanField(capture=True)),
-            ('track_change', BooleanField(capture=True)),
-            ('modified', BooleanField(capture=True)),
+            ('redistribute', BooleanField()),
+            ('attribute', BooleanField()),
+            ('track_change', BooleanField()),
+            ('modified', BooleanField()),
 
-            ('changelog_file', FileTextField(capture=True)),
+            ('changelog_file', FileTextField()),
 
-            ('owner', ListField(capture=True)),
-            ('owner_url', UrlField(capture=True)),
-            ('contact', ListField(capture=True)),
-            ('author', ListField(capture=True)),
+            ('owner', ListField()),
+            ('owner_url', UrlField()),
+            ('contact', ListField()),
+            ('author', ListField()),
 
-            ('vcs_tool', SingleLineField(capture=True)),
-            ('vcs_repository', SingleLineField(capture=True)),
-            ('vcs_path', SingleLineField(capture=True)),
-            ('vcs_tag', SingleLineField(capture=True)),
-            ('vcs_branch', SingleLineField(capture=True)),
-            ('vcs_revision', SingleLineField(capture=True)),
+            ('vcs_tool', SingleLineField()),
+            ('vcs_repository', SingleLineField()),
+            ('vcs_path', SingleLineField()),
+            ('vcs_tag', SingleLineField()),
+            ('vcs_branch', SingleLineField()),
+            ('vcs_revision', SingleLineField()),
 
-            ('checksum', ListField(capture=True)),
-            ('spec_version', SingleLineField(capture=True)),
+            ('checksum', ListField()),
+            ('spec_version', SingleLineField()),
 
             # DJE Field
-            ('dje_license_key', SingleLineField(capture=True)),
+            ('dje_license_key', SingleLineField()),
         ])
 
         for name, field in self.fields.items():
@@ -738,7 +734,7 @@ class About(object):
         abrf.resolve(self.about_file_path)
         return u'\n'.join(abrf.resolved_paths)
 
-    def all_fields(self, with_absent=True, with_empty=True, with_capture=True):
+    def all_fields(self, with_absent=True, with_empty=True):
         """
         Return the list of all Field objects.
         If with_absent, include absent (not present) fields.
@@ -752,7 +748,7 @@ class About(object):
             else:
                 if with_absent:
                     all_fields.append(field)
-                elif field.present and with_capture:
+                elif field.present:
                     if with_empty:
                         all_fields.append(field)
                     elif field.present and field.value:
@@ -851,8 +847,7 @@ class About(object):
                                 # custom fields are always handled as StringFields
                                 custom_field = StringField(name=name,
                                                            value=value,
-                                                           present=True,
-                                                           capture=True)
+                                                           present=True)
                                 self.custom_fields[name] = custom_field
                                 try:
                                     setattr(self, name, custom_field)
@@ -972,19 +967,19 @@ class About(object):
         self.errors = errors
         return errors
 
-    def dumps(self, with_absent=False, with_empty=True, with_capture=True):
+    def dumps(self, with_absent=False, with_empty=True):
         """
         Return self as a formatted ABOUT string.
         If with_absent, include absent (not present) fields.
         If with_empty, include empty fields.
         """
         serialized = []
-        for field in self.all_fields(with_absent, with_empty, with_capture):
+        for field in self.all_fields(with_absent, with_empty):
             serialized.append(field.serialize())
         # always end with a new line
         return u'\n'.join(serialized) + u'\n'
 
-    def dump(self, location, with_absent=False, with_empty=True, with_capture=True):
+    def dump(self, location, with_absent=False, with_empty=True):
         """
         Write formatted ABOUT representation of self to location.
         If with_absent, include absent (not present) fields.
@@ -1004,7 +999,7 @@ class About(object):
             about_file_path += '.ABOUT'
         about_file_path = add_unc(about_file_path)
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
-            dumped.write(self.dumps(with_absent, with_empty, with_capture))
+            dumped.write(self.dumps(with_absent, with_empty))
             for about_resource_value in self.about_resource.value:
                 path = posixpath.join(dirname(about_file_path), about_resource_value)
                 if not posixpath.exists(path):
