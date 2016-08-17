@@ -1,3 +1,29 @@
+about
+=====
+
+**Syntax**
+
+::
+
+    about [OPTIONS] [COMMANDS]
+
+**Options:**
+
+::
+
+    --version    Show the version and exit.
+    -q, --quiet  Do not print any output.
+    --help       Show this message and exit.
+
+**Commands:**
+
+::
+
+    attrib     LOCATION: directory, OUTPUT: output file
+    gen        LOCATION: input file, OUTPUT: directory
+    inventory  LOCATION: directory, OUTPUT: csv file
+
+
 inventory
 =========
 
