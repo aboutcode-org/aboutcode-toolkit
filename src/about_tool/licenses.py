@@ -236,7 +236,7 @@ SPDX_LICENSES = (
 # Maps lowercase id to standard ids with official case
 SPDX_LICENSE_IDS = dict((name.lower(), name) for name in SPDX_LICENSES)
 
-
+# FIXME: we shoul use license keys or determine this automatically.
 # Use DJE License Name
 COMMON_LICENSES = (
     'AES-128 v3.0 License',
