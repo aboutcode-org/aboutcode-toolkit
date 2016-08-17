@@ -12,7 +12,6 @@ about
 ::
 
     --version    Show the version and exit.
-    -q, --quiet  Do not print any output.
     --help       Show this message and exit.
 
 **Commands:**
@@ -40,6 +39,7 @@ inventory
 
 ::
 
+    -q, --quiet           Do not print any error/warning.
     -f, --format <style>  Set <output_file> format <style> to one of the
                           supported formats: csv or json  [default: csv]
     --mapping             Use for mapping between the input keys and the ABOUT
@@ -82,6 +82,7 @@ gen
 
 ::
 
+    -q, --quiet                     Do not print any error/warning.
     --mapping                       Use for mapping between the input keys and
                                     the ABOUT field names - MAPPING.CONFIG
     --license_text_location DIRECTORY
@@ -158,6 +159,7 @@ attrib
 
 ::
 
+    -q, --quiet      Do not print any error/warning.
     --template PATH  Use the custom template for the Attribution Generation
     --mapping        Use for mapping between the input keys and the ABOUT field
                      names - MAPPING.CONFIG

@@ -58,7 +58,6 @@ __copyright__ = """
 
 
 prog_name = 'AboutCode'
-no_stdout = False
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
@@ -78,11 +77,7 @@ class AboutCommand(click.Command):
 
 @click.group(name='about')
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
-@click.option('-q', '--quiet', is_flag=True, help='Do not print any output.')
-def cli(quiet):
-    # Update the no_stdout value globally
-    global no_stdout
-    no_stdout = quiet
+def cli():
     pass
     # click.echo('Verbosity: %s' % verbose)
 
@@ -102,11 +97,12 @@ formats = ['csv', 'json']
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
+@click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 @click.option('-f', '--format', is_flag=False, default='csv', show_default=True, metavar='<style>',
               help='Set <output_file> format <style> to one of the supported formats: %s' % ' or '.join(formats),)
 @click.option('--mapping', is_flag=True, help='Use for mapping between the input'
                             ' keys and the ABOUT field names - MAPPING.CONFIG')
-def inventory(mapping, format, location, output):
+def inventory(quiet, mapping, format, location, output):
     """
     Inventory components from an ABOUT file or a directory tree of ABOUT
     files.    
@@ -147,7 +143,7 @@ def inventory(mapping, format, location, output):
         write_errors = model.write_output(abouts, output, format)
         for err in write_errors:
             errors.append(err)
-    log_errors(errors, os.path.dirname(output))
+    log_errors(quiet, errors, os.path.dirname(output))
 
 
 gen_help = '''
@@ -164,6 +160,7 @@ OUTPUT: Path to the directory to write ABOUT files to
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=False, writable=True,
                                 dir_okay=True, resolve_path=True))
+@click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 @click.option('--mapping', is_flag=True, help='Use for mapping between the input'
                             ' keys and the ABOUT field names - MAPPING.CONFIG')
 @click.option('--license_text_location', nargs=1,
@@ -180,7 +177,7 @@ OUTPUT: Path to the directory to write ABOUT files to
 
                     '\nExample syntax:\n\n'
                     'about gen --extract_license \'api_url\' \'api_key\'')
-def gen(mapping, license_text_location, extract_license, location, output):
+def gen(quiet, mapping, license_text_location, extract_license, location, output):
     """
     Given an inventory of ABOUT files at location, generate ABOUT files in
     base directory.
@@ -201,23 +198,7 @@ def gen(mapping, license_text_location, extract_license, location, output):
         if e.severity > 20:
             lee = lee + 1
     click.echo('Generated %(lea)d ABOUT files with %(lee)d errors and/or warning' % locals())
-    log_errors(errors, output)
-
-
-#@cli.command(cls=AboutCommand)
-#def export():
-#    click.echo('Running about-code-tool version ' + __version__)
-#    click.echo('Exporting zip archive...')
-
-
-#@cli.command(cls=AboutCommand)
-#def fetch(location):
-    """
-    Given a directory of ABOUT files at location, calls the DejaCode API and
-    update or create license data fields and license texts.
-    """
-#    click.echo('Running about-code-tool version ' + __version__)
-#    click.echo('Updating ABOUT files...')
+    log_errors(quiet, errors, output)
 
 
 attrib_help = '''
@@ -238,11 +219,12 @@ INVENTORY_LOCATION: Path to a CSV file which contains the 'about_file_path' key 
 @click.argument('inventory_location', nargs=1, required=False,
                 type=click.Path(exists=False, file_okay=True, writable=True,
                                 dir_okay=False, resolve_path=True))
+@click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 @click.option('--template', type=click.Path(exists=True), nargs=1,
               help='Use the custom template for the Attribution Generation')
 @click.option('--mapping', is_flag=True, help='Use for mapping between the input'
                             ' keys and the ABOUT field names - MAPPING.CONFIG')
-def attrib(location, output, template, mapping, inventory_location=None,):
+def attrib(quiet, location, output, template, mapping, inventory_location=None,):
     """
     Generate attribution document at output using the directory of
     ABOUT files at location, the template file (or a default) and an
@@ -264,8 +246,25 @@ def attrib(location, output, template, mapping, inventory_location=None,):
                                              template_loc=template,
                                              inventory_location=inventory_location)
 
-    log_errors(no_match_errors, os.path.dirname(output))
+    log_errors(quiet, no_match_errors, os.path.dirname(output))
     click.echo('Finished.')
+
+
+#@cli.command(cls=AboutCommand)
+#def export():
+#    click.echo('Running about-code-tool version ' + __version__)
+#    click.echo('Exporting zip archive...')
+
+
+#@cli.command(cls=AboutCommand)
+#def fetch(location):
+    """
+    Given a directory of ABOUT files at location, calls the DejaCode API and
+    update or create license data fields and license texts.
+    """
+#    click.echo('Running about-code-tool version ' + __version__)
+#    click.echo('Updating ABOUT files...')
+
 
 #@cli.command(cls=AboutCommand)
 #def redist(input_dir, output, inventory_location=None,):
@@ -281,7 +280,7 @@ def attrib(location, output, template, mapping, inventory_location=None,):
 #    click.echo('Collecting redistributable files...')
 
 
-def log_errors(errors, base_dir=False):
+def log_errors(quiet, errors, base_dir=False):
     """
     Iterate of sequence of Error objects and print and log errors with a severity
     superior or equal to level.
@@ -306,7 +305,7 @@ def log_errors(errors, base_dir=False):
         file_logger.addHandler(file_handler)
     for severity, message in errors:
         sever = severities[severity]
-        if not no_stdout:
+        if not quiet:
             print(msg_format % locals())
         if base_dir:
             file_logger.log(severity, msg_format % locals())
