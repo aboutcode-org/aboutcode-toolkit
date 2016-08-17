@@ -11,7 +11,6 @@ MarkupSafe==0.23
 
 click==3.3
 
-schematics==1.0-0
 # used by schematics
 six
 

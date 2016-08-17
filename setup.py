@@ -82,7 +82,6 @@ setup(
         'jinja2 >= 2.7.3, < 2.8',
         'click >= 3.2, < 4',
         'unicodecsv >= 0.9.4,  < 1.0',
-        'schematics >= 1.0-0, <2.0',
         'pyyaml >= 3.11, < 3.13',
      ],
 
