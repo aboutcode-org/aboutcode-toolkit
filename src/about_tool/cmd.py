@@ -82,113 +82,83 @@ def cli():
     # click.echo('Verbosity: %s' % verbose)
 
 
-inventory_help = '''
-LOCATION: Path to an ABOUT file or a directory containing ABOUT files
-OUTPUT: Path to CSV file to write the inventory to
-'''
+# inventory_help = '''
+# '''
 formats = ['csv', 'json']
-@cli.command(help=inventory_help,
-             short_help='LOCATION: directory, OUTPUT: csv file',
-             cls=AboutCommand)
-@click.argument('location', nargs=1, required=True,
-                type=click.Path(exists=True, file_okay=True,
-                                dir_okay=True, writable=False,
-                                readable=True, resolve_path=True))
-@click.argument('output', nargs=1, required=True,
-                type=click.Path(exists=False, file_okay=True, writable=True,
-                                dir_okay=False, resolve_path=True))
+@cli.command(cls=AboutCommand, short_help='LOCATION: directory, OUTPUT: csv file')
+@click.argument('location', nargs=1, required=True, 
+                type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
+@click.argument('output', nargs=1, required=True, 
+                type=click.Path(exists=False, resolve_path=True))
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
-@click.option('-f', '--format', is_flag=False, default='csv', show_default=True, metavar='<style>',
-              help='Set <output_file> format <style> to one of the supported formats: %s' % ' or '.join(formats),)
-@click.option('--mapping', is_flag=True, help='Use for mapping between the input'
-                            ' keys and the ABOUT field names - MAPPING.CONFIG')
-def inventory(quiet, mapping, format, location, output):
+@click.option('-f', '--format', is_flag=False, default='csv', show_default=True, type=click.Choice(['json', 'csv']), 
+              help='Set OUTPUT file format.')
+def inventory(location, output, quiet, format):
     """
-    Inventory components from an ABOUT file or a directory tree of ABOUT
-    files.    
+Collect a JSON or CSV inventory of components from ABOUT files.
+
+LOCATION: Path to an ABOUT file or a directory with ABOUT files.
+
+OUTPUT: Path to the JSON or CSV inventory file to create.
     """
     click.echo('Running about-code-tool version ' + __version__)
-    # Check is the <OUTPUT> valid.
+    # Check that the <OUTPUT> parent directory exists
     if not exists(os.path.dirname(output)):
-        click.echo('ERROR: Path to the <output> does not exists. Please check and correct the <output>.')
-        click.echo()
-        return
-    if format not in formats:
-        click.echo('ERROR: Output format: %s is not supported.' % format)
-        click.echo()
-        return
-    if format == 'csv' and not output.endswith('.csv'):
-        click.echo('ERROR: <output> does not ends with ".csv".')
-        click.echo()
-        return
-    if format == 'json' and not output.endswith('.json'):
-        click.echo('ERROR: <output> does not ends with ".json".')
-        click.echo()
+        # FIXME: there is likely a better way to return an error
+        click.echo('ERROR: Path to the OUTPUT does not exists. Please check and correct the <output>.')
         return
 
-    click.echo('Collecting the inventory from location: ''%(location)s '
-               'and writing output to: %(output)s' % locals())
+    click.echo('Collecting inventory from: ''%(location)s and writing output to: %(output)s' % locals())
 
+    # FIXME: do we really want to continue support zip as an input?
     if location.lower().endswith('.zip'):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    if mapping:
-        about_tool.util.have_mapping = True
     errors, abouts = about_tool.model.collect_inventory(location)
 
-    if not abouts:
-        errors = [Error(ERROR, u'No ABOUT files is found. Generation halted.')]
-    else:
-        write_errors = model.write_output(abouts, output, format)
-        for err in write_errors:
-            errors.append(err)
+    write_errors = model.write_output(abouts, output, format)
+    for err in write_errors:
+        errors.append(err)
     log_errors(quiet, errors, os.path.dirname(output))
 
 
-gen_help = '''
-LOCATION: Path to a inventory file (CSV or JSON file)
-OUTPUT: Path to the directory to write ABOUT files to
-'''
-@cli.command(help=gen_help,
-             short_help='LOCATION: input file, OUTPUT: directory',
-             cls=AboutCommand)
-@click.argument('location', nargs=1, required=True,
-                type=click.Path(exists=True, file_okay=True,
-                                dir_okay=False, writable=False,
-                                readable=True, resolve_path=True))
+@cli.command(cls=AboutCommand, short_help='LOCATION: input file, OUTPUT: directory',)
+@click.argument('location', nargs=1, required=True, 
+                type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True))
 @click.argument('output', nargs=1, required=True,
-                type=click.Path(exists=True, file_okay=False, writable=True,
-                                dir_okay=True, resolve_path=True))
-@click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
-@click.option('--mapping', is_flag=True, help='Use for mapping between the input'
-                            ' keys and the ABOUT field names - MAPPING.CONFIG')
-@click.option('--license_text_location', nargs=1,
-                type=click.Path(exists=True, file_okay=False,
-                                dir_okay=True, writable=False,
-                                readable=True, resolve_path=True),
-              help = 'Copy the \'license_file\' from the directory to the generated location')
-@click.option('--extract_license', type=str, nargs=2,
-              help='Extract License text and create <dje_license_key>.LICENSE side-by-side '
-                    'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
-                    'The following additional options are required:\n\n'
-                    'api_url - URL to the DejaCode License Library API endpoint\n\n'
-                    'api_key - DejaCode API key'
+                type=click.Path(exists=True, writable=True, dir_okay=True, resolve_path=True))
+@click.option('--mapping', is_flag=True,  help='Use for mapping between the input keys and the ABOUT field names - MAPPING.CONFIG')
+@click.option('--license-text-location', nargs=1,
+              type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
+              help="Copy the 'license_file' from the directory to the generated location")
+@click.option('--fetch-license', type=str, nargs=2,
+              help=('Fetch licenses text from a DejaCode API. and create <dje_license_key>.LICENSE side-by-side '
+                'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
+                'The following additional options are required:\n\n'
+                'api_url - URL to the DejaCode License Library API endpoint\n\n'
+                'api_key - DejaCode API key'
 
-                    '\nExample syntax:\n\n'
-                    'about gen --extract_license \'api_url\' \'api_key\'')
-def gen(quiet, mapping, license_text_location, extract_license, location, output):
+                '\nExample syntax:\n\n'
+                "about gen --extract_license 'api_url' 'api_key'")
+              )
+@click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
+def gen(location, output, mapping, license_text_location, fetch_license, quiet):
     """
-    Given an inventory of ABOUT files at location, generate ABOUT files in
-    base directory.
+Given an inventory of ABOUT files at location, generate ABOUT files in base
+directory.
+
+LOCATION: Path to a JSON or CSV inventory file.
+
+OUTPUT: Path to a directory where ABOUT files are generated.
     """
     click.echo('Running about-code-tool version ' + __version__)
     if not location.endswith('.csv') and not location.endswith('.json'):
         click.echo('ERROR: Input file. Only .csv and .json files are supported.')
-        click.echo()
         return
     click.echo('Generating ABOUT files...')
-    errors, abouts = about_tool.gen.generate(mapping, license_text_location, extract_license, location, output)
+
+    errors, abouts = about_tool.gen.generate(mapping, license_text_location, fetch_license, location, output)
 
     lea = len(abouts)
     lee = 0
@@ -201,35 +171,27 @@ def gen(quiet, mapping, license_text_location, extract_license, location, output
     log_errors(quiet, errors, output)
 
 
-attrib_help = '''
-LOCATION: Path to an ABOUT file or a directory containing ABOUT files
-OUTPUT: Path to output file to write the attribution to
-INVENTORY_LOCATION: Path to a CSV file which contains the 'about_file_path' key [OPTIONAL]
-'''
-@cli.command(help=attrib_help,
-             short_help='LOCATION: directory, OUTPUT: output file',
-             cls=AboutCommand)
-@click.argument('location', nargs=1, required=True,
-                type=click.Path(exists=True, file_okay=True,
-                                dir_okay=True, writable=False,
-                                readable=True, resolve_path=True))
-@click.argument('output', nargs=1, required=True,
-                type=click.Path(exists=False, file_okay=True, writable=True,
-                                dir_okay=False, resolve_path=True))
-@click.argument('inventory_location', nargs=1, required=False,
-                type=click.Path(exists=False, file_okay=True, writable=True,
-                                dir_okay=False, resolve_path=True))
+@cli.command(cls=AboutCommand, short_help='LOCATION: directory, OUTPUT: output file')
+@click.argument('location', nargs=1, required=True, type=click.Path(exists=True, readable=True, resolve_path=True))
+@click.argument('output', nargs=1, required=True, type=click.Path(exists=False, writable=True, resolve_path=True))
+@click.option('--template', type=click.Path(exists=True), nargs=1, 
+              help='Path to a custom attribution template')
+@click.option('--inventory', required=False, type=click.Path(exists=True, file_okay=True, resolve_path=True),
+              help='Path to an inventory file')
+@click.option('--mapping', is_flag=True, help='Use for mapping between the input keys and the ABOUT field names - MAPPING.CONFIG')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
-@click.option('--template', type=click.Path(exists=True), nargs=1,
-              help='Use the custom template for the Attribution Generation')
-@click.option('--mapping', is_flag=True, help='Use for mapping between the input'
-                            ' keys and the ABOUT field names - MAPPING.CONFIG')
-def attrib(quiet, location, output, template, mapping, inventory_location=None,):
+def attrib(quiet, location, output, template, mapping, inventory):
     """
-    Generate attribution document at output using the directory of
-    ABOUT files at location, the template file (or a default) and an
-    inventory_location file containing a list of ABOUT files path to
-    generate attribution for.
+Generate an attribution OUTPUT document using the directory of ABOUT files at
+LOCATION. You can provide a custom template file. You can also provide an inventory
+file listing the subset of ABOUT files path to consider when generating
+attribution and its column mapping file.
+
+LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
+
+OUTPUT: Path to output file to write the attribution to.
+
+INVENTORY_LOCATION: Optional path to a CSV inventory file with an 'about_file_path' column.
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating attribution...')
@@ -243,8 +205,8 @@ def attrib(quiet, location, output, template, mapping, inventory_location=None,)
 
     err, abouts = model.collect_inventory(location)
     no_match_errors = about_tool.attrib.generate_and_save(abouts, output, mapping,
-                                             template_loc=template,
-                                             inventory_location=inventory_location)
+                                                          template_loc=template,
+                                                          inventory_location=inventory)
     errors = []
     for e in err:
         errors.append(e)
@@ -254,14 +216,14 @@ def attrib(quiet, location, output, template, mapping, inventory_location=None,)
     click.echo('Finished.')
 
 
-#@cli.command(cls=AboutCommand)
-#def export():
+# @cli.command(cls=AboutCommand)
+# def export():
 #    click.echo('Running about-code-tool version ' + __version__)
 #    click.echo('Exporting zip archive...')
 
 
-#@cli.command(cls=AboutCommand)
-#def fetch(location):
+# @cli.command(cls=AboutCommand)
+# def fetch(location):
     """
     Given a directory of ABOUT files at location, calls the DejaCode API and
     update or create license data fields and license texts.
@@ -270,8 +232,8 @@ def attrib(quiet, location, output, template, mapping, inventory_location=None,)
 #    click.echo('Updating ABOUT files...')
 
 
-#@cli.command(cls=AboutCommand)
-#def redist(input_dir, output, inventory_location=None,):
+# @cli.command(cls=AboutCommand)
+# def redist(input_dir, output, inventory_location=None,):
     """
     Collect redistributable code at output location using:
      - the input_dir of code and ABOUT files,
