@@ -241,12 +241,16 @@ def attrib(quiet, location, output, template, mapping, inventory_location=None,)
     if mapping:
         about_tool.util.have_mapping = True
 
-    errors, abouts = model.collect_inventory(location)
+    err, abouts = model.collect_inventory(location)
     no_match_errors = about_tool.attrib.generate_and_save(abouts, output, mapping,
                                              template_loc=template,
                                              inventory_location=inventory_location)
-
-    log_errors(quiet, no_match_errors, os.path.dirname(output))
+    errors = []
+    for e in err:
+        errors.append(e)
+    for no_match_error in no_match_errors:
+        errors.append(no_match_error)
+    log_errors(quiet, errors, os.path.dirname(output))
     click.echo('Finished.')
 
 

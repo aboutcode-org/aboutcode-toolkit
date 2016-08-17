@@ -50,6 +50,7 @@ class CmdTest(unittest.TestCase):
 
 # NB: this test depends on py.test stdout/err capture capabilities
 def test_log_errors(capsys):
+    quiet = False
     errors = [Error(CRITICAL, 'msg1'),
               Error(ERROR, 'msg2'),
               Error(INFO, 'msg3'),
@@ -57,7 +58,7 @@ def test_log_errors(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors, base_dir='')
+    cmd.log_errors(quiet, errors, base_dir='')
     out, err = capsys.readouterr()
     expected_out = '''CRITICAL: msg1
 ERROR: msg2
@@ -69,3 +70,17 @@ NOTSET: msg4
     assert '' == err
     assert expected_out == out
 
+def test_log_errors_with_quiet(capsys):
+    quiet = True
+    errors = [Error(CRITICAL, 'msg1'),
+              Error(ERROR, 'msg2'),
+              Error(INFO, 'msg3'),
+              Error(WARNING, 'msg4'),
+              Error(DEBUG, 'msg4'),
+              Error(NOTSET, 'msg4'),
+              ]
+    cmd.log_errors(quiet, errors, base_dir='')
+    out, err = capsys.readouterr()
+    expected_out = ''
+    assert '' == err
+    assert expected_out == out
