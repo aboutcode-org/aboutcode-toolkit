@@ -17,24 +17,16 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import ConfigParser as configparser
 import codecs
-import errno
+from collections import OrderedDict
 import logging
-import optparse
-import os
 import posixpath
-import sys
 import unicodecsv
 
-from collections import OrderedDict
-from posixpath import basename
 
 from about_tool import ERROR
 from about_tool import CRITICAL
 from about_tool import Error
-from about_tool import __about_spec_version__
-from about_tool import __version__
 from about_tool import model
 from about_tool import util
 from about_tool.model import verify_license_files_in_location
@@ -98,8 +90,7 @@ def check_duplicated_about_file_path(inventory_dict):
         # Ignore all the empty path
         if component['about_file_path']:
             if component['about_file_path'] in afp_list:
-                msg = ('The input has duplicated values in \'about_file_path\' field: ' +
-                       component['about_file_path'])
+                msg = ("The input has duplicated values in 'about_file_path' field: " + component['about_file_path'])
                 errors.append(Error(CRITICAL, msg))
             else:
                 afp_list.append(component['about_file_path'])
@@ -108,8 +99,8 @@ def check_duplicated_about_file_path(inventory_dict):
 
 def load_inventory(mapping, location, base_dir):
     """
-    Load the inventory file at location. Return a list of errors and a
-    list of About objects validated against the base_dir.
+    Load the inventory file at location. Return a list of errors and a list of About
+    objects validated against the base_dir.
     """
     errors = []
     abouts = []
@@ -139,16 +130,19 @@ def load_inventory(mapping, location, base_dir):
 
         for f in requied_fileds:
             if f not in fields:
-                msg = ('Required column: %(f)r not found.\n' % locals() +
-                       'Use the \'--mapping\' option to map the input keys and verify the mapping information are correct.\n' +
-                       'OR correct the column names in the <input>.')
+                msg = (
+                    "Required column: %(f)r not found.\n"
+                    "Use the --mapping option to map the input keys and verify the "
+                    "mapping information are correct.\n"
+                    "OR correct the column names in the <input>"
+                ) % locals()
+
                 errors.append(Error(ERROR, msg))
                 return errors, abouts
         afp = fields.get(model.About.about_file_path_attr)
 
         if not afp or not afp.strip():
-            msg = ('Empty column: %(afp)r. '
-                   'Cannot generate ABOUT file.' % locals())
+            msg = 'Empty column: %(afp)r. Cannot generate ABOUT file.' % locals()
             errors.append(Error(ERROR, msg))
             continue
         else:
@@ -168,27 +162,6 @@ def load_inventory(mapping, location, base_dir):
         abouts.append(about)
     return errors, abouts
 
-
-def load_conf(location):
-    """
-    Load the about configuration file at location.
-    Return a dictionary of dictionary.
-    """
-    location = add_unc(location)
-    with codecs.open(location, mode='rb', encoding='utf-8') as conf_file:
-        config = configparser.ConfigParser()
-        config.read_file(conf_file)
-        return config
-
-
-def get_column_mappings(location_or_config):
-    """
-    Given the location of a config file or configuration object, return a dict 
-    of mapping from an ABOUT field to a CSV inventory column.
-    """
-    if isinstance(location_or_config, basestring):
-        config = load_conf(location_or_config)
-    return config['mappings']
 
 
 def generate(mapping, license_text_location, extract_license, location, base_dir, policy=None, conf_location=None,
@@ -249,8 +222,8 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
                     about.about_resource.value[u'.'] = None
                     about.about_resource.original_value = u'.'
                 else:
-                    about.about_resource.value[basename(about.about_file_path)] = None
-                    about.about_resource.original_value = basename(about.about_file_path)
+                    about.about_resource.value[posixpath.basename(about.about_file_path)] = None
+                    about.about_resource.original_value = posixpath.basename(about.about_file_path)
                 about.about_resource.present = True
 
             if license_text_location:
@@ -298,8 +271,3 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
             errors.append(Error(ERROR, msg))
     dedup_errors = model.list_dedup(errors)
     return dedup_errors, abouts
-
-def fetch_texts(abouts):
-    """
-    Given a list of About object, fetch updated data from the DejaCode API.
-    """
