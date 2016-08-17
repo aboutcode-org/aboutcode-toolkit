@@ -681,7 +681,7 @@ class About(object):
         self.base_dir = None
         if self.location:
             self.base_dir = os.path.dirname(location)
-            self.load2(location)
+            self.load(location)
 
     def __repr__(self):
         return repr(self.all_fields())
@@ -891,27 +891,6 @@ class About(object):
         return errors
 
     def load(self, location):
-        """
-        Read, parse, hydrate and validate the ABOUT file at location.
-        Return a list of errors and update self with errors.
-        """
-        self.location = location
-        loc = util.to_posix(location)
-        base_dir = posixpath.dirname(loc)
-        errors = []
-        try:
-            loc = add_unc(loc)
-            lines = codecs.open(loc, encoding='utf-8').readlines()
-            errs = self.load_lines(lines, base_dir)
-            errors.extend(errs)
-        except Exception, e:
-            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'
-            errors.append(Error(CRITICAL, msg % locals()))
-
-        self.errors = errors
-        return errors
-
-    def load2(self, location):
         """
         Read, parse and process the ABOUT file at location.
         Return a list of errors and update self with errors.
