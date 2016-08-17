@@ -195,7 +195,6 @@ def get_column_mappings(location_or_config):
     return config['mappings']
 
 
-#FIXME: This function is too huge
 def generate(mapping, license_text_location, extract_license, location, base_dir, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
@@ -226,10 +225,9 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
                     errors.append(e)
 
     for about in abouts:
-        # TODO: check the paths overlap ...???
-        # For some reasons, the join does not work, using the '+' for now
-        # dump_loc = posixpath.join(bdir, about.about_file_path)
-        dump_loc = bdir + about.about_file_path
+        if about.about_file_path.startswith('/'):
+            about.about_file_path = about.about_file_path.lstrip('/')
+        dump_loc = posixpath.join(bdir, about.about_file_path.lstrip('/'))
 
         # The following code is to check if there is any directory ends with spaces
         split_path = about.about_file_path.split('/')
@@ -244,6 +242,7 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
                 dir_endswith_space = True
                 break
         if dir_endswith_space:
+            # Continue to work on the next about object
             continue
 
         try:
