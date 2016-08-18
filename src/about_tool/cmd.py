@@ -79,20 +79,16 @@ class AboutCommand(click.Command):
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
 def cli():
     pass
-    # click.echo('Verbosity: %s' % verbose)
 
 
-# inventory_help = '''
-# '''
-formats = ['csv', 'json']
 @cli.command(cls=AboutCommand, short_help='LOCATION: directory, OUTPUT: csv file')
 @click.argument('location', nargs=1, required=True, 
                 type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 @click.argument('output', nargs=1, required=True, 
-                type=click.Path(exists=False, resolve_path=True))
-@click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
+                type=click.Path(exists=False, dir_okay=False, resolve_path=True))
 @click.option('-f', '--format', is_flag=False, default='csv', show_default=True, type=click.Choice(['json', 'csv']), 
               help='Set OUTPUT file format.')
+@click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 def inventory(location, output, quiet, format):
     """
 Collect a JSON or CSV inventory of components from ABOUT files.
@@ -120,7 +116,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
         errors.append(err)
-    log_errors(quiet, errors, os.path.dirname(output))
+    log_errors(errors, quiet, os.path.dirname(output))
 
 
 @cli.command(cls=AboutCommand, short_help='LOCATION: input file, OUTPUT: directory',)
@@ -128,10 +124,6 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
                 type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True))
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, writable=True, dir_okay=True, resolve_path=True))
-@click.option('--mapping', is_flag=True,  help='Use for mapping between the input keys and the ABOUT field names - MAPPING.CONFIG')
-@click.option('--license-text-location', nargs=1,
-              type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-              help="Copy the 'license_file' from the directory to the generated location")
 @click.option('--fetch-license', type=str, nargs=2,
               help=('Fetch licenses text from a DejaCode API. and create <dje_license_key>.LICENSE side-by-side '
                 'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
@@ -140,8 +132,12 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
                 'api_key - DejaCode API key'
 
                 '\nExample syntax:\n\n'
-                "about gen --extract_license 'api_url' 'api_key'")
+                "about gen --fetch-license 'api_url' 'api_key'")
               )
+@click.option('--license-text-location', nargs=1,
+              type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
+              help="Copy the 'license_file' from the directory to the generated location")
+@click.option('--mapping', is_flag=True,  help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 def gen(location, output, mapping, license_text_location, fetch_license, quiet):
     """
@@ -160,27 +156,27 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     errors, abouts = about_tool.gen.generate(mapping, license_text_location, fetch_license, location, output)
 
-    lea = len(abouts)
-    lee = 0
+    number_of_about_file = len(abouts)
+    number_of_error = 0
 
     for e in errors:
         # Only count as warning/error if CRITICAL, ERROR and WARNING
         if e.severity > 20:
-            lee = lee + 1
-    click.echo('Generated %(lea)d ABOUT files with %(lee)d errors and/or warning' % locals())
-    log_errors(quiet, errors, output)
+            number_of_error = number_of_error + 1
+    click.echo('Generated %(number_of_about_file)d ABOUT files with %(number_of_error)d errors and/or warning' % locals())
+    log_errors(errors, quiet, output)
 
 
 @cli.command(cls=AboutCommand, short_help='LOCATION: directory, OUTPUT: output file')
 @click.argument('location', nargs=1, required=True, type=click.Path(exists=True, readable=True, resolve_path=True))
 @click.argument('output', nargs=1, required=True, type=click.Path(exists=False, writable=True, resolve_path=True))
-@click.option('--template', type=click.Path(exists=True), nargs=1, 
-              help='Path to a custom attribution template')
 @click.option('--inventory', required=False, type=click.Path(exists=True, file_okay=True, resolve_path=True),
               help='Path to an inventory file')
-@click.option('--mapping', is_flag=True, help='Use for mapping between the input keys and the ABOUT field names - MAPPING.CONFIG')
+@click.option('--mapping', is_flag=True,  help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
+@click.option('--template', type=click.Path(exists=True), nargs=1, 
+              help='Path to a custom attribution template')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
-def attrib(quiet, location, output, template, mapping, inventory):
+def attrib(location, output, template, mapping, inventory, quiet):
     """
 Generate an attribution OUTPUT document using the directory of ABOUT files at
 LOCATION. You can provide a custom template file. You can also provide an inventory
@@ -190,8 +186,6 @@ attribution and its column mapping file.
 LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
 
 OUTPUT: Path to output file to write the attribution to.
-
-INVENTORY_LOCATION: Optional path to a CSV inventory file with an 'about_file_path' column.
     """
     click.echo('Running about-code-tool version ' + __version__)
     click.echo('Generating attribution...')
@@ -212,41 +206,11 @@ INVENTORY_LOCATION: Optional path to a CSV inventory file with an 'about_file_pa
         errors.append(e)
     for no_match_error in no_match_errors:
         errors.append(no_match_error)
-    log_errors(quiet, errors, os.path.dirname(output))
+    log_errors(errors, quiet, os.path.dirname(output))
     click.echo('Finished.')
 
 
-# @cli.command(cls=AboutCommand)
-# def export():
-#    click.echo('Running about-code-tool version ' + __version__)
-#    click.echo('Exporting zip archive...')
-
-
-# @cli.command(cls=AboutCommand)
-# def fetch(location):
-    """
-    Given a directory of ABOUT files at location, calls the DejaCode API and
-    update or create license data fields and license texts.
-    """
-#    click.echo('Running about-code-tool version ' + __version__)
-#    click.echo('Updating ABOUT files...')
-
-
-# @cli.command(cls=AboutCommand)
-# def redist(input_dir, output, inventory_location=None,):
-    """
-    Collect redistributable code at output location using:
-     - the input_dir of code and ABOUT files,
-     - an inventory_location CSV file containing a list of ABOUT files to
-     generate redistribution for.
-     Only collect code when redistribute=yes
-     Return a list of errors.
-    """
-#    click.echo('Running about-code-tool version ' + __version__)
-#    click.echo('Collecting redistributable files...')
-
-
-def log_errors(quiet, errors, base_dir=False):
+def log_errors(errors, quiet, base_dir=False):
     """
     Iterate of sequence of Error objects and print and log errors with a severity
     superior or equal to level.

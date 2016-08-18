@@ -32,38 +32,31 @@ inventory
 
     about inventory [OPTIONS] LOCATION OUTPUT
 
-    LOCATION: Path to an ABOUT file or a directory containing ABOUT files
-    OUTPUT: Path to CSV file to write the inventory to
+    LOCATION: Path to an ABOUT file or a directory with ABOUT files.
+    OUTPUT: Path to the JSON or CSV inventory file to create.
 
 **Options:**
 
 ::
 
-    -q, --quiet           Do not print any error/warning.
-    -f, --format <style>  Set <output_file> format <style> to one of the
-                          supported formats: csv or json  [default: csv]
-    --mapping             Use for mapping between the input keys and the ABOUT
-                          field names - MAPPING.CONFIG
-    --help                Show this message and exit.
+    -f, --format [json|csv]  Set OUTPUT file format.  [default: csv]
+    -q, --quiet              Do not print any error/warning.
+    --help                   Show this message and exit.
 
 Purpose
 -------
-Extract information from the .ABOUT files and save it to a CSV or JSON file.
+Collect a JSON or CSV inventory of components from ABOUT files.
 
 Options
 -------
 
 ::
 
-    -f, --format
+    -f, --format [json|csv]
  
-        Set the output format [default: csv]
+        Set OUTPUT file format.  [default: csv]
 
     $ about inventory -f json [OPTIONS] LOCATION OUTPUT
-
-    --mapping
-
-        See MAPPING.CONFIG for details
 
 
 gen
@@ -75,46 +68,51 @@ gen
 
     about gen [OPTIONS] LOCATION OUTPUT
 
-    LOCATION: Path to a inventory file (CSV or JSON file)
-    OUTPUT: Path to the directory to write ABOUT files to
+    LOCATION: Path to a JSON or CSV inventory file.
+    OUTPUT: Path to a directory where ABOUT files are generated.
 
 **Options:**
 
 ::
 
-    -q, --quiet                     Do not print any error/warning.
-    --mapping                       Use for mapping between the input keys and
-                                    the ABOUT field names - MAPPING.CONFIG
-    --license_text_location DIRECTORY
-                                    Copy the 'license_text_file' from the
-                                    directory to the generated location
-    --extract_license TEXT...       Extract License text and create
-                                    <dje_license_key>.LICENSE side-by-side with the
-                                    generated .ABOUT file using data fetched
-                                    from a DejaCode License Library. The
+    --fetch-license TEXT...         Fetch licenses text from a DejaCode API. and
+                                    create <license>.LICENSE side-by-side
+                                    with the generated .ABOUT file using data
+                                    fetched from a DejaCode License Library. The
                                     following additional options are required:
 
-                                    api_url - URL to the DejaCode License
-                                    Library API endpoint
-
+                                    api_url - URL to the DejaCode License Library
+                                    API endpoint
+    
                                     api_key - DejaCode API key
                                     Example syntax:
-
-                                    about gen --extract_license 'api_url' 'api_key'
+    
+                                    about gen --fetch-license 'api_url' 'api_key'
+    --license-text-location PATH    Copy the 'license_file' from the directory to
+                                    the generated location
+    --mapping                       Use for mapping between the input keys and
+                                    the ABOUT field names - mapping.config
+    -q, --quiet                     Do not print any error/warning.
     --help                          Show this message and exit.
 
 Purpose
 -------
-Generate ABOUT files from the input to the output location.
+Given an inventory of ABOUT files at location, generate ABOUT files in base directory.
 
 Options
 -------
 
 ::
 
-    --mapping
+    --fetch-license
 
-        See MAPPING.CONFIG for details
+        Fetch licenses text from a DejaCode API. and create <license>.LICENSE side-by-side
+        with the generated .ABOUT file using data fetched from a DejaCode License Library.
+
+        This option requires 2 parameters:
+            api_url - URL to the DJE License Library
+            api_key - Hash key to authenticate yourself in the API.
+        (Please contact us to get the api_* value to use this feature)
 
     --license_text_location
 
@@ -128,16 +126,9 @@ Options
 
     $ about gen --license_text_location /home/licenses/ LOCATION OUTPUT
 
-    --extract_license
+    --mapping
 
-        Extract license text(s) from DJE License Library and create
-        <dje_license_key>.LICENSE side-by-side with the generated .ABOUT files based
-        on the 'dje_license_key' value in the input.
-
-        This option requires 2 parameters:
-            api_url - URL to the DJE License Library
-            api_key - Hash key to authenticate yourself in the API.
-        (Please contact us to get the api_* value to use this feature)
+        See mapping.config for details
 
     $ about gen --extract_license 'api_url' 'api_key' LOCATION OUTPUT
 
@@ -149,32 +140,26 @@ attrib
 
 ::
 
-    about attrib [OPTIONS] LOCATION OUTPUT [INVENTORY_LOCATION]
+    about attrib [OPTIONS] LOCATION OUTPUT
 
-    LOCATION: Path to an ABOUT file or a directory containing ABOUT files
-    OUTPUT: Path to output file to write the attribution to
-    INVENTORY_LOCATION: Path to a CSV file which contains the 'about_file_path' key [OPTIONAL]
+    LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
+    OUTPUT: Path to output file to write the attribution to.
 
 **Options:**
 
 ::
 
-    -q, --quiet      Do not print any error/warning.
-    --template PATH  Use the custom template for the Attribution Generation
-    --mapping        Use for mapping between the input keys and the ABOUT field
-                     names - MAPPING.CONFIG
-    --help           Show this message and exit.
+    --inventory PATH  Path to an inventory file
+    --mapping         Use for mapping between the input keys and the ABOUT field
+                      names - mapping.config
+    --template PATH   Path to a custom attribution template
+    -q, --quiet       Do not print any error/warning.
+    --help            Show this message and exit.
 
 Purpose
 -------
 Generate an attribution file which contains the all license information
 from the LOCATION along with the license text.
-
-Supplying an INVENTORY_LOCATION will generate an attribution file which contains
-license information for ONLY the listed components in the INVENTORY_LOCATION.
-
-This tool will look at the components in the INVENTORY_LOCATION and find the
-corresponding .ABOUT files in the LOCATION and generate the output. 
 
 Assuming the follow:
 
@@ -182,7 +167,7 @@ Assuming the follow:
 
     '/home/about_files/'** contains all the ABOUT files
     '/home/attribution/attribution.html' is the user's output path
-    '/home/project/component_list.csv' is the INVENTORY_LOCATION that user want to be generated
+    '/home/project/component_list.csv' is the inventory that user want to be generated
 
 ::
 
@@ -193,15 +178,22 @@ Options
 
 ::
 
-    --template
-    
-        This option allows users to use their own template for Attribution Generation.
-        For instance, if user has a custom template located at:
-        /home/custom_template/template.html
+    --inventory
 
-    $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT [INVENTORY_LOCATION]
+        This option allows user to define which ABOUT files should be used for attribution generation.
+        For instance,
+        '/home/project/component_list.csv' is the inventory that user want to be generated
+
+    $ about attrib --inventory /home/project/component_list.csv LOCATION OUTPUT
 
     --mapping
 
-        See MAPPING.CONFIG for details
+        See mapping.config for details
 
+    --template
+
+        This option allows users to use their own template for attribution generation.
+        For instance, if user has a custom template located at:
+        /home/custom_template/template.html
+
+    $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT

@@ -242,14 +242,14 @@ class OrderedDictReader(unicodecsv.DictReader):
 def get_mappings(location=None):
     """
     Return a mapping of user key names to About key names by reading the
-    MAPPING.CONFIG file from location or the directory of this source file if
+    mapping.config file from location or the directory of this source file if
     location was not provided.
     """
     if not location:
         location = abspath(dirname(__file__))
     mappings = {}
     try:
-        with open(join(location, 'MAPPING.CONFIG'), 'rU') as mapping_file:
+        with open(join(location, 'mapping.config'), 'rU') as mapping_file:
             for line in mapping_file:
                 if not line or not line.strip() or line.strip().startswith('#'):
                     continue
@@ -264,7 +264,7 @@ def get_mappings(location=None):
 
     except Exception as e:
         print(repr(e))
-        print('Cannot open or process MAPPING.CONFIG file at %(location)r.' %locals())
+        print('Cannot open or process mapping.config file at %(location)r.' %locals())
         # this is rather brutal
         sys.exit(errno.EACCES)
     return mappings

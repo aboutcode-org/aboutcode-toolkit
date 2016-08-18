@@ -297,7 +297,7 @@ class UtilsTest(unittest.TestCase):
         assert expected == result
 
     # The column names should be converted to lowercase as the same behavior as
-    # when user use the MAPPING.CONFIG
+    # when user use the mapping.config
     """def test_load_csv_does_not_convert_column_names_to_lowercase(self):
         mapping = None
         test_file = get_test_loc('util/about_key_with_upper_case.csv')
