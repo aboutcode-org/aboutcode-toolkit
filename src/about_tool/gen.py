@@ -164,7 +164,7 @@ def load_inventory(mapping, location, base_dir):
 
 
 
-def generate(mapping, license_text_location, extract_license, location, base_dir, policy=None, conf_location=None,
+def generate(location, base_dir, mapping, license_text_location, fetch_license, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
     Load ABOUT data from an inventory at csv_location. Write ABOUT files to
@@ -175,18 +175,18 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
     api_url = ''
     api_key = ''
     gen_license = False
-    # Check if the extract_license contains valid argument
-    if extract_license:
+    # Check if the fetch_license contains valid argument
+    if fetch_license:
         # Strip the ' and " for api_url, and api_key from input
-        api_url = extract_license[0].strip("'").strip("\"")
-        api_key = extract_license[1].strip("'").strip("\"")
+        api_url = fetch_license[0].strip("'").strip("\"")
+        api_key = fetch_license[1].strip("'").strip("\"")
         gen_license = True
 
     bdir = to_posix(base_dir)
     errors, abouts = load_inventory(mapping, location, bdir)
 
     if gen_license:
-        dje_license_dict, err = model.pre_process_and_dje_license_dict(abouts, api_url, api_key)
+        license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)
         if err:
             for e in err:
                 # Avoid having same error multiple times
@@ -236,20 +236,19 @@ def generate(mapping, license_text_location, extract_license, location, base_dir
 
             if gen_license:
                 # Write generated LICENSE file
-                lic_name, lic_context, lic_url = about.dump_lic(dump_loc, dje_license_dict)
-                if lic_name:
-                    if not about.license_name.present:
-                        about.license_name.value = lic_name
-                        about.license_name.present = True
+                license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
+                if license_key_name_context_url_list:
+                    # Do not help user to fill in the license name
+                    #if not about.license_name.present:
+                    #    about.license_name.value = lic_name
+                    #    about.license_name.present = True
                     if not about.license_file.present:
-                        about.license_file.value = [about.dje_license_key.value + u'.LICENSE']
-                        about.license_file.present = True
-                        # The only time the tool fills in the license URL is
-                        # when no license file present
-                        if not about.license_url.present:
-                            about.license_url.value = [lic_url]
-                            about.license_url.present = True
-
+                        for lic_key, lic_name, lic_context, lic_url in license_key_name_context_url_list:
+                            gen_license_name = lic_key + u'.LICENSE'
+                            about.license_file.value[gen_license_name] = lic_context
+                            about.license_file.present = True
+                            if not about.license_url.present:
+                                about.license_url.value.append(lic_url)
 
             # Write the ABOUT file and check does the referenced file exist
             not_exist_errors = about.dump(dump_loc,

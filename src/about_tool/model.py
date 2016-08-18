@@ -656,9 +656,6 @@ class About(object):
 
             ('checksum', ListField()),
             ('spec_version', SingleLineField()),
-
-            # DJE Field
-            ('dje_license_key', SingleLineField()),
         ])
 
         for name, field in self.fields.items():
@@ -991,28 +988,32 @@ class About(object):
 
     def dump_lic(self, location, license_dict):
         """
-        Write LICENSE files and return the name, context and the url
+        Write LICENSE files and return the a list of key, name, context and the url
+        as these information are needed for the ABOUT file
         """
         license_name = license_context = license_url = ''
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
+        license_key_name_context_url = []
 
         if not posixpath.exists(parent):
             os.makedirs(add_unc(parent))
 
-        if self.dje_license_key.present and not self.license_file.present:
-            lic_key = self.dje_license_key.value
-            try:
-                if license_dict[lic_key]:
-                    license_path = posixpath.join(parent, lic_key)
-                    license_path += u'.LICENSE'
-                    license_path = add_unc(license_path)
-                    license_name, license_context, license_url = license_dict[lic_key]
-                    with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
-                        lic.write(license_context)
-            except:
-                pass
-        return license_name, license_context, license_url
+        if self.license.present and not self.license_file.present:
+            for lic_key in self.license.value:
+                try:
+                    if license_dict[lic_key]:
+                        license_path = posixpath.join(parent, lic_key)
+                        license_path += u'.LICENSE'
+                        license_path = add_unc(license_path)
+                        license_name, license_context, license_url = license_dict[lic_key]
+                        license_info = (lic_key, license_name, license_context, license_url)
+                        license_key_name_context_url.append(license_info)
+                        with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
+                            lic.write(license_context)
+                except:
+                    pass
+        return license_key_name_context_url
 
 # valid field name
 field_name = r'(?P<name>[a-z][0-9a-z_]*)'
@@ -1323,7 +1324,7 @@ def common_licenses(abouts):
     """
     pass
 
-def pre_process_and_dje_license_dict(abouts, api_url, api_key):
+def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
     """
     Modify a list of About data dictionaries by adding license information
     fetched from the DejaCode API.
@@ -1332,11 +1333,11 @@ def pre_process_and_dje_license_dict(abouts, api_url, api_key):
     domain = '{uri.scheme}://{uri.netloc}/'.format(uri=dje_uri)
     dje_lic_urn = urljoin(domain, 'urn/?urn=urn:dje:license:')
     key_text_dict = {}
-    license_dict = {}
+    captured_license = []
     errors = []
     if util.have_network_connection():
         if not valid_api_url(api_url):
-            msg = u'URL not reachable. Invalid \'--api_url\'. License generation is skipped.'
+            msg = u"URL not reachable. Invalid '--api_url'. License generation is skipped."
             errors.append(Error(ERROR, msg))
     else:
         msg = u'Network problem. Please check your Internet connection. License generation is skipped.'
@@ -1347,28 +1348,21 @@ def pre_process_and_dje_license_dict(abouts, api_url, api_key):
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
-        if about.dje_license_key:
-            if about.dje_license_key.present:
-                lic_key = about.dje_license_key.value
-                if '\n' in lic_key:
-                    msg = u'No multiple licenses or newline character are accepted in the \'dje_license_key\': ' + about.dje_license_key.value
-                    errors.append(Error(ERROR, msg))
-                    continue
-                if lic_key not in license_dict:
+        if about.license.present:
+            for lic_key in about.license.value:
+                if not lic_key in captured_license:
                     detail_list = []
                     license_name, license_key, license_text, errs = api.get_license_details_from_api(api_url, api_key, lic_key)
                     for e in errs:
                         if e not in errors:
                             errors.append(e)
                     if license_key:
-                        license_dict[license_key] = license_name
+                        captured_license.append(lic_key)
                         dje_lic_url = dje_lic_urn + license_key
                         detail_list.append(license_name)
                         detail_list.append(license_text)
                         detail_list.append(dje_lic_url)
                         key_text_dict[license_key] = detail_list
-            else:
-                pass
     return key_text_dict, errors
 
 
@@ -1398,8 +1392,8 @@ def verify_license_files_in_location(about, lic_location):
     """
     license_location_dict = {}
     errors = []
-    # The license_file field is filled if the input has dje_license_key and 
-    # the 'extract_license' option is used.
+    # The license_file field is filled if the input has license value and 
+    # the 'fetch_license' option is used.
     if about.license_file.value:
         for lic in about.license_file.value:
             lic_path = util.to_posix(posixpath.join(lic_location, lic))

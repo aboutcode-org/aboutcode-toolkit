@@ -88,9 +88,7 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, license_text_location, extract_license, location,
-                                      base_dir=gen_dir,
-                                      with_empty=False, with_absent=False)
+        errors, abouts = gen.generate(location, gen_dir, mapping, license_text_location, extract_license, with_empty=False, with_absent=False)
 
         expected_errors_msg = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
         assert (len(errors) == 1, 'Should return 1 error.')
@@ -103,9 +101,7 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('gen/inv2.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, license_text_location, extract_license, location,
-                                      base_dir=gen_dir,
-                                      with_empty=False, with_absent=False)
+        errors, abouts = gen.generate(location, gen_dir, mapping, license_text_location, extract_license, with_empty=False, with_absent=False)
         expected_dict = OrderedDict()
         expected_dict[u'.'] = None
 
@@ -119,9 +115,7 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('gen/inv3.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, license_text_location, extract_license, location,
-                                      base_dir=gen_dir,
-                                      with_empty=False, with_absent=False)
+        errors, abouts = gen.generate(location, gen_dir, mapping, license_text_location, extract_license, with_empty=False, with_absent=False)
         expected_dict = OrderedDict()
         expected_dict[u'test.tar.gz'] = None
 
@@ -137,8 +131,7 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('gen/inv.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(mapping, license_text_location, extract_license, location, base_dir=gen_dir,
-                                      with_empty=False, with_absent=False)
+        errors, abouts = gen.generate(location, gen_dir, mapping, license_text_location, extract_license, with_empty=False, with_absent=False)
         expected_errors = [Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
         assert expected_errors == errors
 

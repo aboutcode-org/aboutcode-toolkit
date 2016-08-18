@@ -607,12 +607,7 @@ vcs_branch:
 vcs_revision:
 checksum:
 spec_version:
-dje_license_key:
 '''
-#         print()
-#         print('a')
-#         print(a.dumps(True))
-#         print()
         assert expected == a.dumps(with_absent=True)
 
     def test_About_same_attribution(self):
@@ -684,7 +679,6 @@ dje_license_key:
             'vcs_revision',
             'checksum',
             'spec_version',
-            'dje_license_key',
             'f',
             'g']
         result = model.field_names(abouts)
@@ -783,7 +777,6 @@ vcs_branch:
 vcs_revision:
 checksum:
 spec_version:
-dje_license_key:
 '''
         result = a.dumps(with_absent=True)
         assert set(expected) == set(result)
@@ -890,8 +883,7 @@ version: 0.11.0
                     'vcs_revision': u'',
                     'vcs_tag': u'',
                     'vcs_tool': u'',
-                    'version': u'',
-                    'dje_license_key': u''}
+                    'version': u''}
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=True)

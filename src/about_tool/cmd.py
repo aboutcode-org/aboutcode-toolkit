@@ -125,7 +125,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, writable=True, dir_okay=True, resolve_path=True))
 @click.option('--fetch-license', type=str, nargs=2,
-              help=('Fetch licenses text from a DejaCode API. and create <dje_license_key>.LICENSE side-by-side '
+              help=('Fetch licenses text from a DejaCode API. and create <license>.LICENSE side-by-side '
                 'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
                 'The following additional options are required:\n\n'
                 'api_url - URL to the DejaCode License Library API endpoint\n\n'
@@ -154,7 +154,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         return
     click.echo('Generating ABOUT files...')
 
-    errors, abouts = about_tool.gen.generate(mapping, license_text_location, fetch_license, location, output)
+    errors, abouts = about_tool.gen.generate(location, output, mapping, license_text_location, fetch_license)
 
     number_of_about_file = len(abouts)
     number_of_error = 0
