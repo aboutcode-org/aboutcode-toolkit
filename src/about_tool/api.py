@@ -133,7 +133,7 @@ def request_license_data(url, api_key, license_key):
         response_content = response.read()
         license_data = json.loads(response_content)
         if not license_data['results']:
-            msg = (u'Invalid \'dje_license_key\': ' + license_key)
+            msg = (u'Invalid \'license\': ' + license_key)
             errors.append(Error(ERROR, msg))
     except urllib2.HTTPError, http_e:
         # some auth problem
@@ -142,16 +142,12 @@ def request_license_data(url, api_key, license_key):
             errors.append(Error(ERROR, msg))
         else:
             # Since no api_url/api_key/network status have
-            # problem detected, it yields 'dje_license_key' is the cause of
+            # problem detected, it yields 'license' is the cause of
             # this exception.
-            msg = (u'Invalid \'dje_license_key\': ' + license_key)
+            msg = (u'Invalid \'license\': ' + license_key)
             errors.append(Error(ERROR, msg))
-            #self.errors.append(Error(VALUE, 'dje_license_key', license_key, "Invalid 'dje_license_key'"))
-    except ValueError as e:
-        # FIXME: when does this happen?
-        pass
     except Exception as e:
-        pass
+        errors.append(Error(ERROR, str(e)))
     finally:
         license_data = license_data.get('results')[0] if license_data.get('count') == 1 else {}
     return license_data, errors
