@@ -46,6 +46,7 @@ def generate(abouts, template_string=None):
     try:
         captured_license = []
         license_key_and_context = {}
+        license_text_name_and_key = {}
         for about in abouts:
             # about.license_file.value is a OrderDict with license_text_name as
             # the key and the license text as the value
@@ -60,8 +61,10 @@ def generate(abouts, template_string=None):
                         else:
                             license_key = license_text_name
                         license_key_and_context[license_key] = about.license_file.value[license_text_name]
+                        license_text_name_and_key[license_text_name] = license_key
 
-        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=license_key_and_context)
+        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=license_key_and_context, 
+                                   license_text_name_and_key = license_text_name_and_key)
     except Exception, e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''

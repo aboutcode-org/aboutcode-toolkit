@@ -249,8 +249,14 @@ def generate(location, base_dir, mapping, license_text_location, fetch_license, 
                             about.license_file.present = True
                             if not about.license_url.present:
                                 about.license_url.value.append(lic_url)
+                        if about.license_url.value:
+                            about.license_url.present = True
 
             # Write the ABOUT file and check does the referenced file exist
+            # This function is not purposed to throw error. However, since I've commented
+            # out the error throwing in FileTextField (See model.py), I have add error handling
+            # in this function. This error handling should be removed once the fetch-license option
+            # is treated as a subcommand.
             not_exist_errors = about.dump(dump_loc,
                                    with_empty=with_empty,
                                    with_absent=with_absent)

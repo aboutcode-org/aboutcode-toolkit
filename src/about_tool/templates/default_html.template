@@ -42,23 +42,31 @@
                     <pre class="component-notice">{{ about_object.notice_file.value[notice] }}</pre>
                 {% endfor %}
             {% endif %}
-            {% for license_key in about_object.license.value %}
-                {% if license_key in common_licenses %}
-                    <p>Full text of
-                        <a class="{{ license_key }}" href="#component-license-{{ license_key }}">
-                        {{ license_key }}
-                        </a>
-                        is available at the end of this document.</p>
-                {% else %}
-                    {% if about_object.license_file.value %}
-                        {% for lic_text_name in about_object.license_file.value %}
-                            {% if not license_key_and_context[lic_text_name] in common_licenses %}
-                                <pre>{{ about_object.license_file.value[lic_text_name] | e}}</pre>
-                            {% endif %}
-                        {% endfor %}
+            {% if about_object.license.value %}
+                {% for license_key in about_object.license.value %}
+                    {% if license_key in common_licenses %}
+                        <p>Full text of
+                            <a class="{{ license_key }}" href="#component-license-{{ license_key }}">
+                            {{ license_key }}
+                            </a>
+                            is available at the end of this document.</p>
+                    {% else %}
+                        {% if about_object.license_file.value %}
+                            {% for lic_text_name in about_object.license_file.value %}
+                                {% if not license_text_name_and_key[lic_text_name] in common_licenses %}
+                                    <pre>{{ about_object.license_file.value[lic_text_name] | e}}</pre>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
                     {% endif %}
+                 {% endfor %}
+            {% else %}
+                {% if about_object.license_file.value %}
+                    {% for lic_text_name in about_object.license_file.value %}
+                        <pre>{{ about_object.license_file.value[lic_text_name] | e}}</pre>
+                    {% endfor %}
                 {% endif %}
-             {% endfor %}
+            {% endif %}
         </div>
     {% endfor %}
 
