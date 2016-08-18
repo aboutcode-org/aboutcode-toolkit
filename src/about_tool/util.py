@@ -259,7 +259,6 @@ def get_mappings(location=None):
                     key, sep, value = line.partition(':')
                     about_key = key.strip().replace(' ', '_')
                     user_key = value.strip()
-                    #mappings[user_key] = about_key
                     mappings[about_key] = user_key
 
     except Exception as e:

@@ -1237,20 +1237,6 @@ def list_dedup(list_item):
     return dedup_list
 
 
-def from_csv(location, base_dir):
-    """
-    Load a CSV file at location and return a list of About objects.
-    """
-    # TODO: use this instead of load inventory
-
-
-def from_json(location, base_dir):
-    """
-    Load a JSON file at location and return a list of About objects.
-    """
-    # TODO: use this instead of load inventory
-
-
 def by_license(abouts):
     """
     Return an ordered dict sorted by key of About objects grouped by license
