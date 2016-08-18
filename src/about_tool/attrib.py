@@ -45,20 +45,23 @@ def generate(abouts, template_string=None):
 
     try:
         captured_license = []
-        license_short_name_and_context = {}
+        license_key_and_context = {}
         for about in abouts:
-            license_short_name = about.license_name.value
             # about.license_file.value is a OrderDict with license_text_name as
             # the key and the license text as the value
-            if about.license_file.value and license_short_name:
+            if about.license_file:
                 # We want to create a dictionary which have the license short name as
                 # the key and license text as the value
                 for license_text_name in about.license_file.value:
                     if not license_text_name in captured_license:
                         captured_license.append(license_text_name)
-                        license_short_name_and_context[license_short_name] = about.license_file.value[license_text_name]
+                        if license_text_name.endswith('.LICENSE'):
+                            license_key = license_text_name.strip('.LICENSE')
+                        else:
+                            license_key = license_text_name
+                        license_key_and_context[license_key] = about.license_file.value[license_text_name]
 
-        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, lic_data=license_short_name_and_context)
+        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=license_key_and_context)
     except Exception, e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
