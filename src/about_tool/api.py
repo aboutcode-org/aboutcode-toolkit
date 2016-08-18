@@ -133,18 +133,18 @@ def request_license_data(url, api_key, license_key):
         response_content = response.read()
         license_data = json.loads(response_content)
         if not license_data['results']:
-            msg = (u'Invalid \'license\': ' + license_key)
+            msg = (u"Invalid 'license': " + license_key)
             errors.append(Error(ERROR, msg))
     except urllib2.HTTPError, http_e:
         # some auth problem
         if http_e.code == 403:
-            msg = (u'Authorization denied. Invalid \'--api_key\'. License generation is skipped.')
+            msg = (u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
             errors.append(Error(ERROR, msg))
         else:
             # Since no api_url/api_key/network status have
             # problem detected, it yields 'license' is the cause of
             # this exception.
-            msg = (u'Invalid \'license\': ' + license_key)
+            msg = (u"Invalid 'license': " + license_key)
             errors.append(Error(ERROR, msg))
     except Exception as e:
         errors.append(Error(ERROR, str(e)))

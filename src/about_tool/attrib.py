@@ -129,7 +129,7 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
                 about_list = about_tool.util.get_about_file_path(mapping, inventory_location)
             except Exception, e:
                 # 'about_file_path' key/column doesn't exist
-                msg = (u'The required key: \'about_file_path\' does not exist. Generation halted.')
+                msg = (u"The required key: 'about_file_path' does not exist. Generation halted.")
                 errors.append(Error(ERROR, msg))
                 return errors 
         else:
@@ -154,7 +154,7 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
 
         if not_match_path:
             if len(not_match_path) == len(about_files_list):
-                msg = ('None of the paths in the provided \'inventory_location\' match with the \'LOCATION\'.')
+                msg = ("None of the paths in the provided 'inventory_location' match with the 'LOCATION'.")
                 errors.append(Error(ERROR, msg))
                 return errors
             else:

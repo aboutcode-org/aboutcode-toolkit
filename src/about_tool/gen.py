@@ -120,7 +120,7 @@ def load_inventory(mapping, location, base_dir):
             errors.extend(dup_about_paths_err)
             return errors, abouts
     except:
-        msg = ('The essential field \'about_file_path\' is not found.')
+        msg = ("The essential field 'about_file_path' is not found.")
         errors.append(Error(CRITICAL, msg))
         return errors, abouts
 
