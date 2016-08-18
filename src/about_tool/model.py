@@ -459,6 +459,11 @@ class FileTextField(PathField):
         # 'license_file' field when the about object is created which will yield error.
         # I am commenting out the errors for now.
         # I am checking the existence of the 'license_file' in the dump()
+        
+        # One solution is to extract out the fetch-license option to a subcommand.
+        # Users need to run the fetch-license command first to generate/copy all
+        # the licenses first and then generate the ABOUT files afterward so that
+        # this code can check the existense of the license_file.
 
         #errors = super(FileTextField, self)._validate(*args, ** kwargs)
         super(FileTextField, self)._validate(*args, ** kwargs)
