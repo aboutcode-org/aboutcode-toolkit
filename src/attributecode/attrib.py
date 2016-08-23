@@ -63,8 +63,8 @@ def generate(abouts, template_string=None):
                         license_key_and_context[license_key] = about.license_file.value[license_text_name]
                         license_text_name_and_key[license_text_name] = license_key
 
-        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=license_key_and_context, 
-                                   license_text_name_and_key = license_text_name_and_key)
+        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=license_key_and_context,
+                                   license_text_name_and_key=license_text_name_and_key)
     except Exception, e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
@@ -101,11 +101,11 @@ def generate_from_file(abouts, template_loc=None):
     return generate(abouts, template_string=tpls)
 
 
-def generate_and_save(abouts, output_location,  mapping, template_loc=None,
+def generate_and_save(abouts, output_location, mapping, template_loc=None,
                       inventory_location=None):
     """
     Generate attribution using template and save at output_location.
-    Filter the list of about object based on the inventory CSV at 
+    Filter the list of about object based on the inventory CSV at
     inventory_location.
     """
     updated_abouts = []
@@ -127,11 +127,11 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
             try:
                 # Return a list which contains only the about file path
                 about_list = attributecode.util.get_about_file_path(mapping, inventory_location)
-            except Exception, e:
+            except Exception:
                 # 'about_file_path' key/column doesn't exist
                 msg = (u"The required key: 'about_file_path' does not exist. Generation halted.")
                 errors.append(Error(ERROR, msg))
-                return errors 
+                return errors
         else:
             msg = (u'Only .csv and .json are supported for the "INVENTORY_LOCATOIN". Generation halted.')
             errors.append(Error(ERROR, msg))

@@ -82,11 +82,11 @@ def cli():
 
 
 @cli.command(cls=AboutCommand, short_help='LOCATION: directory, OUTPUT: csv file')
-@click.argument('location', nargs=1, required=True, 
+@click.argument('location', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-@click.argument('output', nargs=1, required=True, 
+@click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=False, dir_okay=False, resolve_path=True))
-@click.option('-f', '--format', is_flag=False, default='csv', show_default=True, type=click.Choice(['json', 'csv']), 
+@click.option('-f', '--format', is_flag=False, default='csv', show_default=True, type=click.Choice(['json', 'csv']),
               help='Set OUTPUT file format.')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 def inventory(location, output, quiet, format):
@@ -120,7 +120,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 
 @cli.command(cls=AboutCommand, short_help='LOCATION: input file, OUTPUT: directory',)
-@click.argument('location', nargs=1, required=True, 
+@click.argument('location', nargs=1, required=True,
                 type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True))
 @click.argument('output', nargs=1, required=True,
                 type=click.Path(exists=True, writable=True, dir_okay=True, resolve_path=True))
@@ -137,7 +137,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.option('--license-text-location', nargs=1,
               type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
               help="Copy the 'license_file' from the directory to the generated location")
-@click.option('--mapping', is_flag=True,  help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
+@click.option('--mapping', is_flag=True, help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 def gen(location, output, mapping, license_text_location, fetch_license, quiet):
     """
@@ -172,8 +172,8 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.argument('output', nargs=1, required=True, type=click.Path(exists=False, writable=True, resolve_path=True))
 @click.option('--inventory', required=False, type=click.Path(exists=True, file_okay=True, resolve_path=True),
               help='Path to an inventory file')
-@click.option('--mapping', is_flag=True,  help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
-@click.option('--template', type=click.Path(exists=True), nargs=1, 
+@click.option('--mapping', is_flag=True, help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
+@click.option('--template', type=click.Path(exists=True), nargs=1,
               help='Path to a custom attribution template')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 def attrib(location, output, template, mapping, inventory, quiet):

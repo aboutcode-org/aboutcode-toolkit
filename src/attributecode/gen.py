@@ -239,7 +239,7 @@ def generate(location, base_dir, mapping, license_text_location, fetch_license, 
                 license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
                     # Do not help user to fill in the license name
-                    #if not about.license_name.present:
+                    # if not about.license_name.present:
                     #    about.license_name.value = lic_name
                     #    about.license_name.present = True
                     if not about.license_file.present:

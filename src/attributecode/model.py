@@ -354,7 +354,7 @@ class PathField(ListField):
     def _validate(self, *args, **kwargs):
         """
         Ensure that paths point to existing resources. Normalize to posix
-        paths. Return a list of errors. 
+        paths. Return a list of errors.
 
         base_dir is the directory location of the ABOUT file used to resolve
         relative paths to actual file locations.
@@ -422,7 +422,7 @@ class AboutResourceField(PathField):
     def resolve(self, about_file_path):
         """
         Resolve resource paths relative to an ABOUT file path.
-        Set a list attribute on self called resolved_paths 
+        Set a list attribute on self called resolved_paths
         """
         self.resolved_paths = []
         if not about_file_path:
@@ -455,17 +455,17 @@ class FileTextField(PathField):
         # copying the license from the provided 'license_text_location'. In another
         # word, the license file in the 'license_file' field may not always located
         # side by side with the ABOUT file. However, our code will check the
-        # existence of the file by joining the 'base_dir' and the value in the 
+        # existence of the file by joining the 'base_dir' and the value in the
         # 'license_file' field when the about object is created which will yield error.
         # I am commenting out the errors for now.
         # I am checking the existence of the 'license_file' in the dump()
-        
+
         # One solution is to extract out the fetch-license option to a subcommand.
         # Users need to run the fetch-license command first to generate/copy all
         # the licenses first and then generate the ABOUT files afterward so that
         # this code can check the existense of the license_file.
 
-        #errors = super(FileTextField, self)._validate(*args, ** kwargs)
+        # errors = super(FileTextField, self)._validate(*args, ** kwargs)
         super(FileTextField, self)._validate(*args, ** kwargs)
         errors = []
 
@@ -611,7 +611,7 @@ class About(object):
 
     # name of the attribute containing the resolved relative Resources paths
     about_resource_path_attr = 'about_resource_path'
-    
+
     # Required fields
     required_fields = [about_file_path_attr, 'name']
 
@@ -755,7 +755,7 @@ class About(object):
                         all_fields.append(field)
                     elif field.present and field.value:
                         all_fields.append(field)
-                    
+
                 else:
                     if field.present:
                         if not field.value:
@@ -856,7 +856,7 @@ class About(object):
                                 except:
                                     # The intended captured error message should display
                                     # the line number of where the invalid line is,
-                                    # but I am not able to get the line number from 
+                                    # but I am not able to get the line number from
                                     # the original code. By-passing the line number
                                     # for now.
                                     # msg = u'Invalid line: %(line)d: %(orig_name)r'
@@ -864,7 +864,7 @@ class About(object):
                                     msg += u'%s' % custom_field.value
                                     errors.append(Error(CRITICAL, msg))
                     else:
-                        msg = (u'Field %(orig_name)s is not a supported field and is not '+
+                        msg = (u'Field %(orig_name)s is not a supported field and is not ' +
                                u'defined in the mapping file. This field is ignored.')
                         errors.append(Error(INFO, msg % locals()))
                 else:
@@ -936,7 +936,7 @@ class About(object):
 
     def load_dict(self, fields_dict, base_dir, with_empty=True):
         """
-        Load the ABOUT file from a fields name/value mapping. 
+        Load the ABOUT file from a fields name/value mapping.
         If with_empty, create fields with no value for empty fields.
         Return a list of
         errors.
@@ -1189,13 +1189,13 @@ def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=Tru
         if 'about_file_path' in ad.keys():
             afp = ad['about_file_path']
             afp = '/' + afp if not afp.startswith('/') else afp
-            ad['about_file_path'] = afp 
+            ad['about_file_path'] = afp
         if 'about_resource_path' in ad.keys():
             arp = ad['about_resource_path']
             arp = '/' + arp if not arp.startswith('/') else arp
             ad['about_resource_path'] = arp
         # Make the 'about_resource_path' endswith '/' if the 'about_resource'
-        # reference the current directory 
+        # reference the current directory
         if 'about_resource' in ad.keys() and ad['about_resource'] == '.':
             if not ad['about_resource_path'].endswith('/'):
                 ad['about_resource_path'] += '/'
@@ -1378,12 +1378,12 @@ def verify_license_files_in_location(about, lic_location):
     """
     Check the existence of the license file provided in the license_field from the
     license_text_location.
-    Return a dictionary of the path of where the license should be copied to as 
-    the key and the path of where the license should be copied from as the value
+    Return a dictionary of the path of where the license should be copied to as
+    the key and the path of where the license should be copied from as the value.
     """
     license_location_dict = {}
     errors = []
-    # The license_file field is filled if the input has license value and 
+    # The license_file field is filled if the input has license value and
     # the 'fetch_license' option is used.
     if about.license_file.value:
         for lic in about.license_file.value:
@@ -1394,7 +1394,7 @@ def verify_license_files_in_location(about, lic_location):
             else:
                 msg = (u'The license file : '
                        u'%(lic)s '
-                       u'does not exist in ' 
+                       u'does not exist in '
                        u'%(lic_path)s and therefore cannot be copied' % locals())
                 errors.append(Error(ERROR, msg))
     return license_location_dict, errors
@@ -1408,7 +1408,7 @@ def check_file_field_exist(about, location):
     loc = util.to_posix(location)
     parent = posixpath.dirname(loc)
 
-    about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))   
+    about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
 
     # The model only has the following as FileTextField
     license_files = about.license_file.value

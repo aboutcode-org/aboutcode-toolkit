@@ -34,7 +34,7 @@ from os.path import abspath
 from os.path import dirname
 from os.path import join
 
-from attributecode import CRITICAL, ERROR, Error
+from attributecode import CRITICAL, Error
 
 
 on_windows = 'win32' in sys.platform
@@ -263,7 +263,7 @@ def get_mappings(location=None):
 
     except Exception as e:
         print(repr(e))
-        print('Cannot open or process mapping.config file at %(location)r.' %locals())
+        print('Cannot open or process mapping.config file at %(location)r.' % locals())
         # this is rather brutal
         sys.exit(errno.EACCES)
     return mappings
@@ -336,7 +336,7 @@ def load_json(mapping, location):
     global have_mapping
     have_mapping = mapping
 
-    with open(location) as json_file:    
+    with open(location) as json_file:
         results = json.load(json_file)
     if mapping:
         results = apply_mappings(results)
