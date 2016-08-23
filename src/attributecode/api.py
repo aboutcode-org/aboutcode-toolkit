@@ -24,8 +24,8 @@ import urllib2
 
 from collections import namedtuple
 
-from about_tool import ERROR
-from about_tool import Error
+from attributecode import ERROR
+from attributecode import Error
 
 
 """

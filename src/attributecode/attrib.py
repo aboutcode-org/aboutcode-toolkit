@@ -25,11 +25,11 @@ from posixpath import dirname
 from posixpath import exists
 from posixpath import join
 
-import about_tool
-from about_tool import ERROR
-from about_tool import Error
-from about_tool.licenses import COMMON_LICENSES
-from about_tool.util import add_unc
+import attributecode
+from attributecode import ERROR
+from attributecode import Error
+from attributecode.licenses import COMMON_LICENSES
+from attributecode.util import add_unc
 
 
 def generate(abouts, template_string=None):
@@ -126,7 +126,7 @@ def generate_and_save(abouts, output_location,  mapping, template_loc=None,
         if inventory_location.endswith('.csv') or inventory_location.endswith('.json'):
             try:
                 # Return a list which contains only the about file path
-                about_list = about_tool.util.get_about_file_path(mapping, inventory_location)
+                about_list = attributecode.util.get_about_file_path(mapping, inventory_location)
             except Exception, e:
                 # 'about_file_path' key/column doesn't exist
                 msg = (u"The required key: 'about_file_path' does not exist. Generation halted.")

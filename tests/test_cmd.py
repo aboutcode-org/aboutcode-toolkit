@@ -19,19 +19,16 @@ from __future__ import print_function
 
 import unittest
 
-from about_tool import CRITICAL
-from about_tool import DEBUG
-from about_tool import ERROR
-from about_tool import Error
-from about_tool import INFO
-from about_tool import NOTSET
-from about_tool import WARNING
-from about_tool import cmd
-from about_tool import model
-from about_tool import util
+from attributecode import CRITICAL
+from attributecode import DEBUG
+from attributecode import ERROR
+from attributecode import Error
+from attributecode import INFO
+from attributecode import NOTSET
+from attributecode import WARNING
+from attributecode import cmd
+from attributecode import util
 
-from utils import get_temp_file
-from utils import get_test_loc
 
 
 class CmdTest(unittest.TestCase):
@@ -81,4 +78,5 @@ def test_log_errors_with_quiet(capsys):
               ]
     cmd.log_errors(errors, quiet, base_dir='')
     out, err = capsys.readouterr()
-    expected_out = ''
+    assert '' == out
+    assert '' == err    

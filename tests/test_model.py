@@ -18,23 +18,22 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 from collections import OrderedDict
-import os
 import posixpath
 import unittest
 
 from unittest.case import expectedFailure
-from utils import get_temp_file
-from utils import get_test_loc
-from utils import get_test_lines
-from utils import get_unicode_content
+from testing_utils import get_temp_file
+from testing_utils import get_test_loc
+from testing_utils import get_test_lines
+from testing_utils import get_unicode_content
 
-import about_tool
-from about_tool import Error
-from about_tool import CRITICAL, INFO, WARNING
-from about_tool import model
-from about_tool import util
-from about_tool import ERROR
-from about_tool.util import load_csv, add_unc
+import attributecode
+from attributecode import Error
+from attributecode import CRITICAL, INFO, WARNING
+from attributecode import model
+from attributecode import util
+from attributecode import ERROR
+from attributecode.util import load_csv, add_unc
 
 
 class FieldTest(unittest.TestCase):
@@ -1040,8 +1039,7 @@ copyright: >
         a = model.About(location=test_file, about_file_path=path)
 
         tmp_file = get_temp_file()
-        format = 'csv'
-        model.write_output([a], tmp_file, format)
+        model.write_output([a], tmp_file, format = 'csv')
 
         expected = get_test_loc('load/expected.csv')
         self.check_csvs(expected, tmp_file)
@@ -1052,8 +1050,7 @@ copyright: >
         a = model.About(location=test_file, about_file_path=path)
 
         tmp_file = get_temp_file()
-        format = 'json'
-        model.write_output([a], tmp_file, format)
+        model.write_output([a], tmp_file, format = 'json')
 
         expected = get_test_loc('load/expected.json')
         self.check_csvs(expected, tmp_file)
@@ -1110,7 +1107,7 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('allAboutInOneDir')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = []
-        result = [(level, e) for level, e in errors if level > about_tool.INFO]
+        result = [(level, e) for level, e in errors if level > attributecode.INFO]
         assert expected_errors == result
 
     def test_collect_inventory_populate_about_file_path(self):
@@ -1122,8 +1119,7 @@ class CollectorTest(unittest.TestCase):
         assert expected == result
 
     def test_collect_inventory_works_with_relative_paths(self):
-        # FIXME:
-        # This test need to be run under about-code-tool/about_code_tool/
+        # FIXME: This test need to be run under src/attributecode/
         # or otherwise it will fail as the test depends on the launching
         # location
         test_loc = get_test_loc('parse/complete')
@@ -1158,8 +1154,7 @@ class CollectorTest(unittest.TestCase):
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        format = 'csv'
-        model.write_output(abouts, result, format)
+        model.write_output(abouts, result, format = 'csv')
 
         expected_errors = []
         assert expected_errors == errors
@@ -1170,18 +1165,18 @@ class CollectorTest(unittest.TestCase):
     # FIXME: The self.chec_csv is failing because there are many keys in the ABOUT files that are
     # not supported. Instead of removing all the non-supported keys in the output
     # and do the comparson, it may be best to apply the mapping to include theses keys
+    @expectedFailure
     def test_collect_inventory_complex_from_directory(self):
         location = get_test_loc('inventory/complex/about')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        format = 'csv'
-        model.write_output(abouts, result, format)
+        model.write_output(abouts, result, format = 'csv')
 
         assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('inventory/complex/expected.csv')
-        #self.check_csv(expected, result)
+        self.check_csv(expected, result)
 
 class GroupingsTest(unittest.TestCase):
 

@@ -25,23 +25,23 @@ from os.path import exists, join
 import click
 import unicodecsv
 
-import about_tool
-from about_tool import CRITICAL
-from about_tool import ERROR
-from about_tool import INFO
-from about_tool import NOTSET
-from about_tool import WARNING
-from about_tool import Error
-from about_tool import __about_spec_version__
-from about_tool import __version__
-from about_tool import attrib
-from about_tool import gen
-from about_tool import model
-from about_tool import severities
-from about_tool.model import About
-from about_tool.util import copy_files
-from about_tool.util import extract_zip
-from about_tool.util import to_posix
+import attributecode
+from attributecode import CRITICAL
+from attributecode import ERROR
+from attributecode import INFO
+from attributecode import NOTSET
+from attributecode import WARNING
+from attributecode import Error
+from attributecode import __about_spec_version__
+from attributecode import __version__
+from attributecode import attrib
+from attributecode import gen
+from attributecode import model
+from attributecode import severities
+from attributecode.model import About
+from attributecode.util import copy_files
+from attributecode.util import extract_zip
+from attributecode.util import to_posix
 
 
 __copyright__ = """
@@ -97,7 +97,7 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
 OUTPUT: Path to the JSON or CSV inventory file to create.
     """
-    click.echo('Running about-code-tool version ' + __version__)
+    click.echo('Running attributecode version ' + __version__)
     # Check that the <OUTPUT> parent directory exists
     if not exists(os.path.dirname(output)):
         # FIXME: there is likely a better way to return an error
@@ -111,7 +111,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    errors, abouts = about_tool.model.collect_inventory(location)
+    errors, abouts = attributecode.model.collect_inventory(location)
 
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
@@ -148,13 +148,13 @@ LOCATION: Path to a JSON or CSV inventory file.
 
 OUTPUT: Path to a directory where ABOUT files are generated.
     """
-    click.echo('Running about-code-tool version ' + __version__)
+    click.echo('Running attributecode version ' + __version__)
     if not location.endswith('.csv') and not location.endswith('.json'):
         click.echo('ERROR: Input file. Only .csv and .json files are supported.')
         return
     click.echo('Generating ABOUT files...')
 
-    errors, abouts = about_tool.gen.generate(location, output, mapping, license_text_location, fetch_license)
+    errors, abouts = attributecode.gen.generate(location, output, mapping, license_text_location, fetch_license)
 
     number_of_about_file = len(abouts)
     number_of_error = 0
@@ -187,7 +187,7 @@ LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
 
 OUTPUT: Path to output file to write the attribution to.
     """
-    click.echo('Running about-code-tool version ' + __version__)
+    click.echo('Running attributecode version ' + __version__)
     click.echo('Generating attribution...')
 
     if location.lower().endswith('.zip'):
@@ -195,10 +195,10 @@ OUTPUT: Path to output file to write the attribution to.
         location = extract_zip(location)
 
     if mapping:
-        about_tool.util.have_mapping = True
+        attributecode.util.have_mapping = True
 
     err, abouts = model.collect_inventory(location)
-    no_match_errors = about_tool.attrib.generate_and_save(abouts, output, mapping,
+    no_match_errors = attributecode.attrib.generate_and_save(abouts, output, mapping,
                                                           template_loc=template,
                                                           inventory_location=inventory)
     errors = []

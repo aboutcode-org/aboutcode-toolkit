@@ -38,15 +38,15 @@ from collections import OrderedDict
 from posixpath import dirname
 from urlparse import urljoin, urlparse
 
-from about_tool import ERROR
-from about_tool import CRITICAL
-from about_tool import INFO
-from about_tool import WARNING
-from about_tool import Error
-from about_tool import api
-from about_tool import saneyaml
-from about_tool import util
-from about_tool.util import add_unc, UNC_PREFIX
+from attributecode import ERROR
+from attributecode import CRITICAL
+from attributecode import INFO
+from attributecode import WARNING
+from attributecode import Error
+from attributecode import api
+from attributecode import saneyaml
+from attributecode import util
+from attributecode.util import add_unc, UNC_PREFIX
 
 
 class Field(object):

@@ -21,13 +21,13 @@ from collections import OrderedDict
 import string
 import unittest
 
-from utils import get_test_loc
-from utils import on_posix
-from utils import on_windows
+from testing_utils import get_test_loc
+from testing_utils import on_posix
+from testing_utils import on_windows
 
-from about_tool import CRITICAL
-from about_tool import Error
-from about_tool import util
+from attributecode import CRITICAL
+from attributecode import Error
+from attributecode import util
 
 
 class UtilsTest(unittest.TestCase):

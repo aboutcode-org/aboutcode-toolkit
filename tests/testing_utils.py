@@ -21,14 +21,11 @@ import codecs
 import logging
 import os
 import posixpath
-import ntpath
 import stat
-import string
 import sys
 import tempfile
-import unittest
 
-from about_tool.util import to_posix, to_native
+from attributecode.util import to_posix
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -81,7 +78,7 @@ def create_dir(location):
                  | stat.S_IROTH | stat.S_IXOTH)
 
 
-def build_temp_dir(prefix='test-about-code-'):
+def build_temp_dir(prefix='test-attributecode-'):
     """
     Create and return a new unique empty directory created in base_dir.
     """
@@ -90,7 +87,7 @@ def build_temp_dir(prefix='test-about-code-'):
     return location
 
 
-def get_temp_file(file_name='test-about-code-tempfile'):
+def get_temp_file(file_name='test-attributecode-tempfile'):
     """
     Return a unique new temporary file location to a non-existing
     temporary file that can safely be created without a risk of name

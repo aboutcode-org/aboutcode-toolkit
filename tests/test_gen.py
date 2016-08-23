@@ -20,19 +20,16 @@ from __future__ import print_function
 import posixpath
 import unittest
 from collections import OrderedDict
-from unittest.case import expectedFailure
 
-from utils import get_test_loc
-from utils import get_temp_dir
-from utils import to_posix
+from testing_utils import get_test_loc
+from testing_utils import get_temp_dir
 
-from about_tool import Error
-from about_tool import ERROR
-from about_tool import INFO
-from about_tool import CRITICAL
+from attributecode import Error
+from attributecode import ERROR
+from attributecode import INFO
+from attributecode import CRITICAL
 
-from about_tool import gen
-from about_tool import model
+from attributecode import gen
 
 
 class GenTest(unittest.TestCase):
@@ -88,7 +85,7 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
         gen_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location, gen_dir, mapping, license_text_location, extract_license, with_empty=False, with_absent=False)
+        errors, _abouts = gen.generate(location, gen_dir, mapping, license_text_location, extract_license, with_empty=False, with_absent=False)
 
         expected_errors_msg = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
         assert (len(errors) == 1, 'Should return 1 error.')

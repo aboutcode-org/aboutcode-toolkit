@@ -22,19 +22,19 @@ def read(*names, **kwargs):
 
 
 setup(
-    name='AboutCode',
-    version='3.0.0.dev3',
+    name='attributecode',
+    version='3.0.0.dev4',
     license='Apache-2.0',
     description=('Document the provenance (origin and license) of '
                  'third-party software using small text files. '
                  'Collect inventories, generate attribution documentation.'),
-    long_description=('AboutCode provides a simple way to document the'
+    long_description=('AttributeCode provides a simple way to document the'
         'provenance (i.e. origin and license) of software components that'
         'you use in your project. This documentation is stored in *.ABOUT'
         'files, side-by-side with the documented code.'),
-    author='Jillian Daguil, Thomas Druez, Chin-Yeung Li, Philippe Ombredanne and others.',
+    author='Chin-Yeung Li, Jillian Daguil, Thomas Druez, Philippe Ombredanne and others.',
     author_email='info@nexb.com',
-    url='http://dejacode.org',
+    url='http://aboutcode.org',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
@@ -56,7 +56,8 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=[
-        'license', 'about', 'metadata', 'package', 'copyright', 'attribution', 'software', 'inventory',
+        'license', 'about', 'metadata', 'package', 'copyright', 
+        'attribution', 'software', 'inventory',
     ],
     data_files=[('about',
         [
@@ -76,7 +77,7 @@ setup(
 
     entry_points='''
         [console_scripts]
-        about-code=about_tool.cmd:cli
+        attrib=about_tool.cmd:cli
     ''',
     install_requires=[
         'jinja2 >= 2.7.3, < 2.8',

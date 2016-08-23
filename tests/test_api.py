@@ -20,9 +20,9 @@ from __future__ import print_function
 import unittest
 from mock import patch
 
-import about_tool
-from about_tool import api
-from about_tool.api import LicenseInfo
+import attributecode
+from attributecode import api
+from attributecode.api import LicenseInfo
 
 class ApiTest(unittest.TestCase):
 
@@ -35,13 +35,13 @@ class ApiTest(unittest.TestCase):
         result = api.build_api_url(url, api_username, api_key, license_key)
         assert expected == result
 
-    @patch.object(about_tool.api, 'get_license_data')
+    @patch.object(attributecode.api, 'get_license_data')
     def test_get_license_info(self, mock_data):
         mock_data.return_value = [], {'key': 'test', 'name': 'test_name', 'full_text': 'test_full_text' }
         result = api.get_license_info(self, '', '', '', '')
         assert result == ([], LicenseInfo(key='test', name='test_name', text='test_full_text'))
 
-    @patch.object(about_tool.api, 'request_license_data')
+    @patch.object(attributecode.api, 'request_license_data')
     def test_get_license_details_from_api(self, mock_data):
         mock_data.return_value = {'name': 'test_name', 'full_text': 'test_full_text', 'key': 'test'}, []
         result = api.get_license_details_from_api('', '', '')

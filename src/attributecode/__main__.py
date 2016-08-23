@@ -16,5 +16,5 @@
 
 
 if __name__ == '__main__':
-    from about_tool import cmd
+    from attributecode import cmd
     cmd.cli()

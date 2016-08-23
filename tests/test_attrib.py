@@ -19,10 +19,10 @@ from __future__ import print_function
 
 import unittest
 
-from utils import get_test_loc
+from testing_utils import get_test_loc
 
-from about_tool import attrib
-from about_tool import model
+from attributecode import attrib
+from attributecode import model
 
 
 class AttribTest(unittest.TestCase):

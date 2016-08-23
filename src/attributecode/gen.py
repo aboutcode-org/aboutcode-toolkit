@@ -24,15 +24,15 @@ import posixpath
 import unicodecsv
 
 
-from about_tool import ERROR
-from about_tool import CRITICAL
-from about_tool import Error
-from about_tool import model
-from about_tool import util
-from about_tool.model import verify_license_files_in_location
-from about_tool.model import check_file_field_exist
-from about_tool.util import copy_files, add_unc
-from about_tool.util import to_posix
+from attributecode import ERROR
+from attributecode import CRITICAL
+from attributecode import Error
+from attributecode import model
+from attributecode import util
+from attributecode.model import verify_license_files_in_location
+from attributecode.model import check_file_field_exist
+from attributecode.util import copy_files, add_unc
+from attributecode.util import to_posix
 
 
 LOG_FILENAME = 'error.log'

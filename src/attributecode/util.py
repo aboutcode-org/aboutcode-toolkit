@@ -34,7 +34,7 @@ from os.path import abspath
 from os.path import dirname
 from os.path import join
 
-from about_tool import CRITICAL, ERROR, Error
+from attributecode import CRITICAL, ERROR, Error
 
 
 on_windows = 'win32' in sys.platform
