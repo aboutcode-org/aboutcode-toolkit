@@ -8,3 +8,6 @@ install:
 
 script:
     - bin/py.test -vvs tests
+
+notifications:
+  irc: "chat.freenode.net#aboutcode"
