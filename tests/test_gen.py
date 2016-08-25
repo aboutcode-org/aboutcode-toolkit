@@ -142,3 +142,8 @@ class GenTest(unittest.TestCase):
                     u'    line\n')
         assert expected == in_mem_result
 
+    def test_deduplicate(self):
+        items = ['a', 'b', 'd', 'b', 'c', 'a']
+        expected = ['a', 'b', 'd', 'c']
+        results = gen.deduplicate(items)
+        assert expected == results

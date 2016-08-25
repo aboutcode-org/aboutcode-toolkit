@@ -1226,16 +1226,6 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True):
             output_file.write(json.dumps(about_dictionary_list, indent=2))
     return errors
 
-def list_dedup(list_item):
-    """
-    Deduping the list
-    """
-    dedup_list = []
-    for item in list_item:
-        if not item in dedup_list:
-            dedup_list.append(item)
-    return dedup_list
-
 
 def by_license(abouts):
     """

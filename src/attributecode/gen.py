@@ -274,5 +274,17 @@ def generate(location, base_dir, mapping, license_text_location, fetch_license, 
                    u'%(dump_loc)s '
                    u'with error: %(emsg)s' % locals())
             errors.append(Error(ERROR, msg))
-    dedup_errors = model.list_dedup(errors)
+    dedup_errors = deduplicate(errors)
     return dedup_errors, abouts
+
+
+def deduplicate(sequence):
+    """
+    Return a list of unique items found in sequence. Preserve the original
+    sequence order.
+    """
+    deduped = []
+    for item in sequence:
+        if item not in deduped:
+            deduped.append(item)
+    return deduped
