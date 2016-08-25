@@ -84,6 +84,8 @@ setup(
         'click >= 3.2, < 4',
         'unicodecsv >= 0.9.4,  < 1.0',
         'pyyaml >= 3.11, < 3.13',
+        'boolean.py',
+        'license_expression',
      ],
 
     extras_require={

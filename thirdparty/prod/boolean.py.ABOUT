@@ -1,0 +1,11 @@
+about_resource: boolean.py-3.0.dev5-py2.py3-none-any.whl
+version: 3.0.dev5
+download_url: https://pypi.python.org/packages/dc/07/6c3ed91d7c02ba9a8584fbac997378b329a69a9b06dc90fa18242b8ef020/boolean.py-3.0.dev5-py2.py3-none-any.whl
+
+name: boolean.py
+
+copyright: Copyright (c) 2009-2016 Sebastian Kraemer, basti.kr@gmail.com and others
+dje_license: bsd-simplified
+license_text_file: boolean.py.LICENSE
+
+home_url: https://github.com/bastikr/boolean.py

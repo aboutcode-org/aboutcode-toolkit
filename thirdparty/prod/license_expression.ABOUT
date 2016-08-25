@@ -1,0 +1,11 @@
+about_resource: license_expression-0.4-py2-none-any.whl
+name: license-expression
+version: 0.4
+download_url: https://pypi.python.org/packages/72/70/aed8505711db9c3c295658914e83f114161451017c20c34a2280d2d228f2/license_expression-0.4-py2-none-any.whl#md5=8c5ca89b7826d564f140032be5800fc3
+
+copyright: Copyright (c) 2016 nexB Inc. and others.
+
+dje_license: apache-2.0
+license_text_file: apache-2.0.LICENSE
+
+home_url: https://github.com/nexB/license-expression

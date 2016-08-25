@@ -19,4 +19,8 @@ pyyaml==3.11
 
 unicodecsv==0.9.4
 
+# license expression support
+license_expression
+boolean.py
+
 -e .
