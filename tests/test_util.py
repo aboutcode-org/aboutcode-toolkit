@@ -28,6 +28,7 @@ from testing_utils import on_windows
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import util
+from testing_utils import extract_test_loc
 
 
 class UtilsTest(unittest.TestCase):
@@ -311,7 +312,13 @@ class UtilsTest(unittest.TestCase):
         assert expected == result"""
 
     def test_get_locations_with_very_long_path(self):
-        import os
-        longpath = u'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
-        test_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), u'testdata', longpath))
-        list(util.get_locations(test_dir))
+        longpath = (
+            u'longpath'
+            u'/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            u'/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            u'/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            u'/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+        )
+        test_loc = extract_test_loc('longpath.zip')
+        result = list(util.get_locations(test_loc))
+        assert any(longpath in r for r in result)

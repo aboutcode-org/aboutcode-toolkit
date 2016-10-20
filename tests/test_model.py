@@ -34,6 +34,7 @@ from attributecode import model
 from attributecode import util
 from attributecode import ERROR
 from attributecode.util import load_csv, add_unc
+from testing_utils import extract_test_loc
 
 
 class FieldTest(unittest.TestCase):
@@ -1068,14 +1069,24 @@ class CollectorTest(unittest.TestCase):
         assert sorted(expected) == sorted(result)
 
     def test_collect_inventory_with_long_path(self):
-        test_loc = get_test_loc('longpath')
+        test_loc = extract_test_loc('longpath.zip')
         _errors, abouts = model.collect_inventory(test_loc)
         assert 2 == len(abouts)
 
-        expected_path = ['longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/non-supported_date_format.ABOUT',
-                    'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/supported_date_format.ABOUT']
-        result_path = [a.about_file_path for a in abouts]
-        assert sorted(expected_path) == sorted(result_path)
+        expected_paths = (
+            'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            '/longpath1/non-supported_date_format.ABOUT',
+            'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
+            '/longpath1/supported_date_format.ABOUT'
+        )
+        results = [a.about_file_path for a in abouts]
+        assert all(r.endswith(expected_paths) for r in results)
 
         expected_name = ['distribute', 'date_test']
         result_name = [a.name.value for a in abouts]

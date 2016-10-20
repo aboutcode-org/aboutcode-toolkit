@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -24,6 +24,7 @@ import posixpath
 import stat
 import sys
 import tempfile
+import zipfile
 
 from attributecode.util import to_posix
 
@@ -48,8 +49,9 @@ def get_test_loc(path):
     base = to_posix(TESTDATA_DIR)
     path = to_posix(path)
     path = posixpath.join(base, path)
-    #path = to_native(path)
+    # path = to_native(path)
     return path
+
 
 def get_unicode_content(location):
     """
@@ -113,3 +115,36 @@ def get_temp_dir(sub_dir_path=None):
         create_dir(new_temp_dir)
     return new_temp_dir
 
+
+def extract_zip(location, target_dir):
+    """
+    Extract a zip archive file at location in the target_dir directory.
+    """
+    if not os.path.isfile(location) and zipfile.is_zipfile(location):
+        raise Exception('Incorrect zip file %(location)r' % locals())
+
+    with zipfile.ZipFile(location) as zipf:
+        for info in zipf.infolist():
+            name = info.filename
+            content = zipf.read(name)
+            target = os.path.join(target_dir, name)
+            if not os.path.exists(os.path.dirname(target)):
+                os.makedirs(os.path.dirname(target))
+            if not content and target.endswith(os.path.sep):
+                if not os.path.exists(target):
+                    os.makedirs(target)
+            if not os.path.exists(target):
+                with open(target, 'wb') as f:
+                    f.write(content)
+
+
+def extract_test_loc(path, extract_func=extract_zip):
+    """
+    Given an archive file identified by a path relative
+    to a test files directory, return a new temp directory where the
+    archive file has been extracted using extract_func.
+    """
+    archive = get_test_loc(path)
+    target_dir = get_temp_dir()
+    extract_func(archive, target_dir)
+    return target_dir
