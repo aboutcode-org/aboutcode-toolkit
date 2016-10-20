@@ -6,4 +6,5 @@ install:
 build: off
 
 test_script:
+    - set
     - py.test -vvs tests
