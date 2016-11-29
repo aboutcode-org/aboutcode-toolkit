@@ -1,0 +1,18 @@
+{
+    "ossAttribution": {
+        "product": "",
+        "productVersion": "",
+        "entries": [
+        {% for about_object in about_objects %}
+            {
+                "component": {{ about_object.component }}
+                "componentVersion": {{ about_object.version }}
+                "componentUrl": {{ about_object.componenturl }}
+                "license": {{ about_object.license }}
+                "licenseUrl": {{ about_object.licenseurl }}
+                "notice": {{ about_object.copyright }}
+            },
+        {% endfor %}
+        ]
+    }
+}
