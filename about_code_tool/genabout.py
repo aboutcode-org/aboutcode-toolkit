@@ -739,7 +739,8 @@ def main(parser, options, args):
             print("ERROR: LICENSE_TEXT_LOCATION path does not exist.")
             sys.exit(errno.EINVAL)
 
-    if mapping_config and not path_exists('MAPPING.CONFIG'):
+    mapping_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'MAPPING.CONFIG')
+    if mapping_config and not path_exists(mapping_config_path):
             print("ERROR: The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 

@@ -46,7 +46,7 @@ def path_exists(location):
     """
     Return True if the path exists.
     """
-    return location and  os.path.exists(abspath(location))
+    return location and os.path.exists(abspath(location))
 
 
 def canonical_path(location):
