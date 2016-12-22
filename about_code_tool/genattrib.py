@@ -15,7 +15,7 @@
 # ============================================================================
 
 """
-Tool to generate component attribution based on a set of .ABOUTfiles. 
+Tool to generate component attribution based on a set of .ABOUTfiles.
 
 Optionally accepts a list (i.e. a subset) of ABOUT file paths to limit the
 generated attribution to this subset.
@@ -145,9 +145,9 @@ def main(parser, options, args):
     elif verbosity >= 2:
         handler.setLevel(logging.WARNING)
 
-    if mapping_config:
-        if not exists('MAPPING.CONFIG'):
-            print("ERROR: The 'MAPPING.CONFIG' file does not exist.")
+    mapping_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'MAPPING.CONFIG')
+    if mapping_config and not exists(mapping_config_path):
+            print("ERROR: The file 'MAPPING.CONFIG' does not exist.")
             sys.exit(errno.EINVAL)
 
     if template_location:
