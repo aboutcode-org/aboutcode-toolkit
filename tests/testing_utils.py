@@ -148,6 +148,9 @@ def extract_test_loc(path, extract_func=extract_zip):
     archive file has been extracted using extract_func.
     """
     archive = get_test_loc(path)
-    target_dir = add_unc(get_temp_dir())
+    if on_windows:
+        target_dir = add_unc(get_temp_dir())
+    else:
+        target_dir = get_temp_dir()
     extract_func(archive, target_dir)
     return target_dir
