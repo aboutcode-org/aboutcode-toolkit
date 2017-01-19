@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import codecs
 import logging
+import ntpath
 import os
 import posixpath
 import stat
@@ -26,7 +27,7 @@ import sys
 import tempfile
 import zipfile
 
-from attributecode.util import to_posix
+from attributecode.util import to_posix, add_unc
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -128,6 +129,8 @@ def extract_zip(location, target_dir):
             name = info.filename
             content = zipf.read(name)
             target = os.path.join(target_dir, name)
+            if on_windows:
+                target = target.replace(posixpath.sep, ntpath.sep)
             if not os.path.exists(os.path.dirname(target)):
                 os.makedirs(os.path.dirname(target))
             if not content and target.endswith(os.path.sep):
@@ -145,6 +148,6 @@ def extract_test_loc(path, extract_func=extract_zip):
     archive file has been extracted using extract_func.
     """
     archive = get_test_loc(path)
-    target_dir = get_temp_dir()
+    target_dir = add_unc(get_temp_dir())
     extract_func(archive, target_dir)
     return target_dir
