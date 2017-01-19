@@ -1104,7 +1104,7 @@ class CollectorTest(unittest.TestCase):
             Error(INFO, u'Field date is not a supported field and is ignored.'),
             Error(CRITICAL, err_msg1),
             Error(CRITICAL, err_msg2)]
-        assert expected_errors == errors
+        assert sorted(expected_errors) == sorted(errors)
 
     def test_collect_inventory_can_collect_a_single_file(self):
         test_loc = get_test_loc('thirdparty/django_snippets_2413.ABOUT')
