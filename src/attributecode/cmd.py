@@ -57,7 +57,7 @@ __copyright__ = """
     limitations under the License."""
 
 
-prog_name = 'AboutCode'
+prog_name = 'AttributeCode'
 
 intro = '''%(prog_name)s, version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
