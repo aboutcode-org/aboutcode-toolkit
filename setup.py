@@ -77,7 +77,7 @@ setup(
 
     entry_points='''
         [console_scripts]
-        attrib=about_tool.cmd:cli
+        attrib=attributecode.cmd:cli
     ''',
     install_requires=[
         'jinja2 >= 2.7.3, < 2.8',
