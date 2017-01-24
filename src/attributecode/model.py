@@ -46,7 +46,7 @@ from attributecode import Error
 from attributecode import api
 from attributecode import saneyaml
 from attributecode import util
-from attributecode.util import add_unc, UNC_PREFIX
+from attributecode.util import add_unc, UNC_PREFIX, on_windows
 
 
 class Field(object):
@@ -978,11 +978,12 @@ class About(object):
             if about_file_path.endswith('/'):
                 about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
             about_file_path += '.ABOUT'
-        about_file_path = add_unc(about_file_path)
+        if on_windows:
+            about_file_path = add_unc(about_file_path)
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
             dumped.write(self.dumps(with_absent, with_empty))
             for about_resource_value in self.about_resource.value:
-                path = posixpath.join(dirname(about_file_path), about_resource_value)
+                path = posixpath.join(dirname(util.to_posix(about_file_path)), about_resource_value)
                 if not posixpath.exists(path):
                     msg = (u'The reference file : '
                            u'%(path)s '
@@ -1399,6 +1400,8 @@ def check_file_field_exist(about, location):
     parent = posixpath.dirname(loc)
 
     about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
+    if on_windows:
+        about_file_path = add_unc(about_file_path)
 
     # The model only has the following as FileTextField
     license_files = about.license_file.value
@@ -1407,8 +1410,8 @@ def check_file_field_exist(about, location):
 
     if license_files:
         for lic in license_files:
-            lic_path = posixpath.join(posixpath.dirname(about_file_path), lic)
-            if not posixpath.exists(add_unc(lic_path)):
+            lic_path = posixpath.join(dirname(util.to_posix(about_file_path)), lic)
+            if not posixpath.exists(lic_path):
                 msg = (u'Field license_file: Path '
                    u'%(lic_path)s '
                    u'not found' % locals())
@@ -1416,8 +1419,8 @@ def check_file_field_exist(about, location):
 
     if notice_files:
         for notice in notice_files:
-            notice_path = posixpath.join(posixpath.dirname(about_file_path), notice)
-            if not posixpath.exists(add_unc(notice_path)):
+            notice_path = posixpath.join(dirname(util.to_posix(about_file_path)), notice)
+            if not posixpath.exists(notice_path):
                 msg = (u'Field notice_file: Path '
                    u'%(notice_path)s '
                    u'not found' % locals())
@@ -1425,8 +1428,8 @@ def check_file_field_exist(about, location):
 
     if changelog_files:
         for changelog in changelog_files:
-            changelog_path = posixpath.join(posixpath.dirname(about_file_path), changelog)
-            if not posixpath.exists(add_unc(changelog_path)):
+            changelog_path = posixpath.join(dirname(util.to_posix(about_file_path)), changelog)
+            if not posixpath.exists(changelog_path):
                 msg = (u'Field changelog_file: Path '
                    u'%(changelog_path)s '
                    u'not found' % locals())
