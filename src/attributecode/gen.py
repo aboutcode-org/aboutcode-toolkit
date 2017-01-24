@@ -163,7 +163,6 @@ def load_inventory(mapping, location, base_dir):
     return errors, abouts
 
 
-
 def generate(location, base_dir, mapping, license_text_location, fetch_license, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
