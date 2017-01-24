@@ -410,15 +410,24 @@ def add_unc(location):
     return location
 
 
-def copy_files(license_location_dict, gen_location):
-    """
-    Copy the files into the gen_location
-    """
-    for loc in license_location_dict:
-        location = loc
-        if loc.startswith('/'):
-            location = loc.strip('/')
-        copy_to = posixpath.join(to_posix(gen_location), location)
-        if not posixpath.exists(copy_to):
-            os.makedirs(add_unc(copy_to))
-        shutil.copy2(license_location_dict[loc], copy_to)
+def copy_license_files(fields, base_dir, license_text_location, afp):
+    lic_name = u''
+    for key, value in fields:
+        if key == u'license_file':
+            lic_name = value
+
+            from_lic_path = posixpath.join(to_posix(license_text_location), lic_name)
+            about_file_dir = dirname(to_posix(afp)).lstrip('/')
+            to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
+
+            if on_windows:
+                from_lic_path = add_unc(from_lic_path)
+                to_lic_path = add_unc(to_lic_path)
+
+            # Errors will be captured when doing the validation
+            if not posixpath.exists(from_lic_path):
+                continue
+
+            if not posixpath.exists(to_lic_path):
+                os.makedirs(to_lic_path)
+            shutil.copy2(from_lic_path, to_lic_path)

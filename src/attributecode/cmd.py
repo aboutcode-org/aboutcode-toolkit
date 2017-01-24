@@ -39,7 +39,6 @@ from attributecode import gen
 from attributecode import model
 from attributecode import severities
 from attributecode.model import About
-from attributecode.util import copy_files
 from attributecode.util import extract_zip
 from attributecode.util import to_posix
 

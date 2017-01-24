@@ -38,15 +38,16 @@ from collections import OrderedDict
 from posixpath import dirname
 from urlparse import urljoin, urlparse
 
-from attributecode import ERROR
 from attributecode import CRITICAL
+from attributecode import ERROR
+from attributecode import Error
 from attributecode import INFO
 from attributecode import WARNING
-from attributecode import Error
 from attributecode import api
 from attributecode import saneyaml
 from attributecode import util
-from attributecode.util import add_unc, UNC_PREFIX, on_windows
+from attributecode.util import add_unc, UNC_PREFIX, on_windows, \
+    copy_license_files, UNC_PREFIX_POSIX
 
 
 class Field(object):
@@ -361,6 +362,8 @@ class PathField(ListField):
         """
         errors = super(PathField, self)._validate(*args, ** kwargs)
         self.base_dir = kwargs.get('base_dir')
+        self.license_text_location = kwargs.get('license_text_location')
+
         if self.base_dir:
             self.base_dir = util.to_posix(self.base_dir)
 
@@ -380,8 +383,14 @@ class PathField(ListField):
             # path are always relative
             path = path.strip(posixpath.sep)
 
-            if self.base_dir:
-                location = posixpath.join(self.base_dir, path)
+            # the license files, if need to be copied, are located under the path
+            # set from the 'license-text-location' option, so the tool should check
+            # at the 'license-text-location' instead of the 'base_dir'
+            if self.base_dir or self.license_text_location:
+                if self.license_text_location:
+                    location = posixpath.join(self.license_text_location, path)
+                else:
+                    location = posixpath.join(self.base_dir, path)
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
                 location = util.to_posix(location)
@@ -449,25 +458,8 @@ class FileTextField(PathField):
         from a path.
         """
 
-        # FIXME
-        # The value in the 'license_file' field does not only represent there should
-        # be license side by side with the ABOUT file, but this can also be used for
-        # copying the license from the provided 'license_text_location'. In another
-        # word, the license file in the 'license_file' field may not always located
-        # side by side with the ABOUT file. However, our code will check the
-        # existence of the file by joining the 'base_dir' and the value in the
-        # 'license_file' field when the about object is created which will yield error.
-        # I am commenting out the errors for now.
-        # I am checking the existence of the 'license_file' in the dump()
-
-        # One solution is to extract out the fetch-license option to a subcommand.
-        # Users need to run the fetch-license command first to generate/copy all
-        # the licenses first and then generate the ABOUT files afterward so that
-        # this code can check the existense of the license_file.
-
-        # errors = super(FileTextField, self)._validate(*args, ** kwargs)
+        errors = super(FileTextField, self)._validate(*args, ** kwargs)
         super(FileTextField, self)._validate(*args, ** kwargs)
-        errors = []
 
         # a FileTextField is a PathField
         # self.value is a paths to location ordered mapping
@@ -587,14 +579,14 @@ class BooleanField(SingleLineField):
                 and self.value == other.value)
 
 
-def validate_fields(fields, base_dir):
+def validate_fields(fields, base_dir, license_text_location=None):
     """
     Validate a sequence of Field objects. Return a list of errors.
     Validation may update the Field objects as needed as a side effect.
     """
     errors = []
     for f in fields:
-        val_err = f.validate(base_dir=base_dir)
+        val_err = f.validate(base_dir=base_dir, license_text_location=license_text_location)
         errors.extend(val_err)
     return errors
 
@@ -873,19 +865,25 @@ class About(object):
                         errors.append(Error(INFO, msg % locals()))
         return errors
 
-    def process(self, fields, base_dir=None):
+    def process(self, fields, base_dir=None, license_text_location=None):
         """
         Hydrate and validate a sequence of field name/value tuples from an
         ABOUT file. Return a list of errors.
         """
         self.base_dir = base_dir
+        self.license_text_location = license_text_location
+        afp = self.about_file_path
         errors = []
         hydratation_errors = self.hydrate(fields)
         errors.extend(hydratation_errors)
 
+        # We want to copy the license_files before the validation
+        if license_text_location:
+            copy_license_files(fields, base_dir, license_text_location, afp)
+
         # we validate all fields, not only these hydrated
         all_fields = self.all_fields()
-        validation_errors = validate_fields(all_fields, self.base_dir)
+        validation_errors = validate_fields(all_fields, self.base_dir, self.license_text_location)
         errors.extend(validation_errors)
 
         # do not forget to resolve about resource paths
@@ -934,7 +932,7 @@ class About(object):
         self.errors = errors
         return errors
 
-    def load_dict(self, fields_dict, base_dir, with_empty=True):
+    def load_dict(self, fields_dict, base_dir, license_text_location=None, with_empty=True):
         """
         Load the ABOUT file from a fields name/value mapping.
         If with_empty, create fields with no value for empty fields.
@@ -944,7 +942,7 @@ class About(object):
         fields = fields_dict.items()
         if not with_empty:
             fields = [(n, v) for n, v in fields_dict.items() if v]
-        errors = self.process(fields, base_dir)
+        errors = self.process(fields, base_dir, license_text_location)
         self.errors = errors
         return errors
 
@@ -985,6 +983,7 @@ class About(object):
             for about_resource_value in self.about_resource.value:
                 path = posixpath.join(dirname(util.to_posix(about_file_path)), about_resource_value)
                 if not posixpath.exists(path):
+                    path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
                     msg = (u'The reference file : '
                            u'%(path)s '
                            u'does not exist' % locals())
@@ -1400,8 +1399,6 @@ def check_file_field_exist(about, location):
     parent = posixpath.dirname(loc)
 
     about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
-    if on_windows:
-        about_file_path = add_unc(about_file_path)
 
     # The model only has the following as FileTextField
     license_files = about.license_file.value

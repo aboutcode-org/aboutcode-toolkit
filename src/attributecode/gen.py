@@ -31,7 +31,7 @@ from attributecode import model
 from attributecode import util
 from attributecode.model import verify_license_files_in_location
 from attributecode.model import check_file_field_exist
-from attributecode.util import copy_files, add_unc
+from attributecode.util import add_unc
 from attributecode.util import to_posix
 
 
@@ -97,7 +97,7 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 
-def load_inventory(mapping, location, base_dir):
+def load_inventory(mapping, location, base_dir, license_text_location=None):
     """
     Load the inventory file at location. Return a list of errors and a list of About
     objects validated against the base_dir.
@@ -150,7 +150,7 @@ def load_inventory(mapping, location, base_dir):
             loc = posixpath.join(base_dir, afp)
         about = model.About(about_file_path=afp)
         about.location = loc
-        ld_errors = about.load_dict(fields, base_dir, with_empty=False)
+        ld_errors = about.load_dict(fields, base_dir, license_text_location, with_empty=False)
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
         for e in ld_errors:
@@ -182,7 +182,7 @@ def generate(location, base_dir, mapping, license_text_location, fetch_license, 
         gen_license = True
 
     bdir = to_posix(base_dir)
-    errors, abouts = load_inventory(mapping, location, bdir)
+    errors, abouts = load_inventory(mapping, location, bdir, license_text_location)
 
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)
@@ -224,14 +224,6 @@ def generate(location, base_dir, mapping, license_text_location, fetch_license, 
                     about.about_resource.value[posixpath.basename(about.about_file_path)] = None
                     about.about_resource.original_value = posixpath.basename(about.about_file_path)
                 about.about_resource.present = True
-
-            if license_text_location:
-                lic_loc_dict, lic_file_err = verify_license_files_in_location(about, license_text_location)
-                if lic_loc_dict:
-                    copy_files(lic_loc_dict, base_dir)
-                if lic_file_err:
-                    for file_err in lic_file_err:
-                        errors.append(file_err)
 
             if gen_license:
                 # Write generated LICENSE file
