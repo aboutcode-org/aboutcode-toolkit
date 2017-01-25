@@ -226,6 +226,7 @@ def generate(location, base_dir, mapping, license_text_location, fetch_license, 
                 about.about_resource.present = True
 
             if gen_license:
+                about.license_file.value = OrderedDict()
                 # Write generated LICENSE file
                 license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
