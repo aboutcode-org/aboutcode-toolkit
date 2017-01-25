@@ -1129,6 +1129,14 @@ class CollectorTest(unittest.TestCase):
         result = abouts[0].about_file_path
         assert expected == result
 
+    def test_collect_inventory_with_multi_line(self):
+        test_loc = get_test_loc('parse/multi_line.ABOUT')
+        errors, abouts = model.collect_inventory(test_loc)
+        assert [] == errors
+        expected_lic = [u'x11', u'mit', u'public-domain', u'bsd-simplified']
+        returned_lic = abouts[0].license.value
+        assert expected_lic == returned_lic
+
     def test_collect_inventory_works_with_relative_paths(self):
         # FIXME: This test need to be run under src/attributecode/
         # or otherwise it will fail as the test depends on the launching
