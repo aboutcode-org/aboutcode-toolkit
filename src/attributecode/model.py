@@ -46,8 +46,7 @@ from attributecode import WARNING
 from attributecode import api
 from attributecode import saneyaml
 from attributecode import util
-from attributecode.util import add_unc, UNC_PREFIX, on_windows, \
-    copy_license_files, UNC_PREFIX_POSIX
+from attributecode.util import add_unc, UNC_PREFIX, UNC_PREFIX_POSIX, on_windows, copy_license_files
 
 
 class Field(object):
