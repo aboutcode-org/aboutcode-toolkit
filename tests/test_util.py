@@ -232,14 +232,14 @@ class UtilsTest(unittest.TestCase):
         assert not util.is_about_file('no_about_ext.something')
 
     def test_get_relative_path(self):
-        test = [('/some/path', '/some/path/file', 'path/file'),
-                ('path', '/path/file', 'path/file'),
-                ('/path', '/path/file', 'path/file'),
-                ('/path/', '/path/file/', 'path/file'),
+        test = [('/some/path', '/some/path/file', 'file'),
+                ('path', '/path/file', 'file'),
+                ('/path', '/path/file', 'file'),
+                ('/path/', '/path/file/', 'file'),
                 ('/path/', 'path/', 'path'),
-                ('/p1/p2/p3', '/p1/p2//p3/file', 'p3/file'),
-                (r'c:\some/path', 'c:/some/path/file', 'path/file'),
-                (r'c:\\some\\path\\', 'c:/some/path/file', 'path/file'),
+                ('/p1/p2/p3', '/p1/p2//p3/file', 'file'),
+                (r'c:\some/path', 'c:/some/path/file', 'file'),
+                (r'c:\\some\\path\\', 'c:/some/path/file', 'file'),
                 ]
         for base_loc, full_loc, expected in test:
             result = util.get_relative_path(base_loc, full_loc)

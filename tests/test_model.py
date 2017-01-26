@@ -1063,8 +1063,8 @@ class CollectorTest(unittest.TestCase):
         _errors, abouts = model.collect_inventory(test_loc)
         assert 2 == len(abouts)
 
-        expected = ['collect-inventory-errors/non-supported_date_format.ABOUT',
-                    'collect-inventory-errors/supported_date_format.ABOUT']
+        expected = ['non-supported_date_format.ABOUT',
+                    'supported_date_format.ABOUT']
         result = [a.about_file_path for a in abouts]
         assert sorted(expected) == sorted(result)
 
@@ -1125,7 +1125,7 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('parse/complete')
         errors, abouts = model.collect_inventory(test_loc)
         assert [] == errors
-        expected = 'complete/about.ABOUT'
+        expected = 'about.ABOUT'
         result = abouts[0].about_file_path
         assert expected == result
 
@@ -1150,7 +1150,7 @@ class CollectorTest(unittest.TestCase):
         errors2, abouts2 = model.collect_inventory(test_loc2)
         assert [] == errors1
         assert [] == errors2
-        expected = 'complete/about.ABOUT'
+        expected = 'about.ABOUT'
         result1 = abouts1[0].about_file_path
         result2 = abouts2[0].about_file_path
         assert expected == result1
@@ -1169,7 +1169,7 @@ class CollectorTest(unittest.TestCase):
         assert expected == result
 
     def test_collect_inventory_basic_from_directory(self):
-        location = get_test_loc('inventory/basic/about')
+        location = get_test_loc('inventory/basic')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
@@ -1186,7 +1186,7 @@ class CollectorTest(unittest.TestCase):
     # and do the comparson, it may be best to apply the mapping to include theses keys
     @expectedFailure
     def test_collect_inventory_complex_from_directory(self):
-        location = get_test_loc('inventory/complex/about')
+        location = get_test_loc('inventory/complex')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 

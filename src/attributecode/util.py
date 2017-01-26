@@ -160,8 +160,8 @@ def get_about_locations(location):
 def get_relative_path(base_loc, full_loc):
     """
     Return a posix path for a given full location relative to a base location.
-    The last segment of the base_loc will become the first segment of the
-    returned path.
+    The first segment of the different between full_loc and base_loc will become
+    the first segment of the returned path.
     """
     def norm(p):
         if p.startswith(UNC_PREFIX) or p.startswith(to_posix(UNC_PREFIX)):
@@ -192,8 +192,9 @@ def get_relative_path(base_loc, full_loc):
             relative = posixpath.join(parent_dir, base_name)
     else:
         relative = path[len(base) + 1:]
-        relative = posixpath.join(base_name, relative)
-
+        # We don't want to keep the first segment of the root of the returned path.
+        # See https://github.com/nexB/attributecode/issues/276
+        #relative = posixpath.join(base_name, relative)
     return relative
 
 
