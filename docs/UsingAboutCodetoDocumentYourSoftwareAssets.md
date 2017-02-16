@@ -1,51 +1,51 @@
-#<a name="UsingAboutCodetoDocumentYourSoftwareAssets">**Using AboutCode to Document Your Software Assets**</a>
+#<a name="UsingAttributeCodetoDocumentYourSoftwareAssets">**Using AttributeCode to Document Your Software Assets**</a>
 
-[Using AboutCode to Document Your Software Assets](#UsingAboutCodetoDocumentYourSoftwareAssets)  
-[AboutCode Defined](#AboutCodeDefined)  
+[Using AttributeCode to Document Your Software Assets](#UsingAttributeCodetoDocumentYourSoftwareAssets)  
+[AttributeCode Defined](#AttributeCodeDefined)  
 [Key Terminology](#KeyTerminology)  
-[Using genabout.py to Generate AboutCode Files](#Usinggenabout.pytoGenerateAboutCodeFiles)
-* [Prepare Your Software Inventory for genabout.py Standard Column Names](#PrepareYourSoftwareInventoryforgenabout.pyStandardColumnNames)  
-* [Optionally Define Custom Fields for genabout.py with MAPPING.CONFIG](#OptionallyDefineCustomFieldsforgenabout.pywithMAPPING.CONFIG)  
-* [Run genabout.py to Generate AboutCode Files](#Rungenabout.pytoGenerateAboutCodeFiles)  
+[Using gen to Generate AttributeCode Files](#UsinggentoGenerateAttributeCodeFiles)
+* [Prepare Your Software Inventory for gen Standard Column Names](#PrepareYourSoftwareInventoryforgenStandardColumnNames)  
+* [Optionally Define Custom Fields for gen with MAPPING.CONFIG](#OptionallyDefineCustomFieldsforgenwithMAPPING.CONFIG)  
+* [Run gen to Generate AttributeCode Files](#RungentoGenerateAttributeCodeFiles)  
 
-[Using genattrib.py to Generate a Product Attribution Notice Package](#Usinggenattrib.pytoGenerateaProductAttributionNoticePackage)  
-* [Prepare a Filtered Product BOM to Use as Input to genattrib.py](#PrepareaFilteredProductBOMtoUseasInputtogenattrib.py)  
-* [Prepare an Attribution Template to Use as Input to genattrib.py](#PrepareanAttributionTemplatetoUseasInputtogenattrib.py)  
+[Using attrib to Generate a Product Attribution Notice Package](#UsingattribtoGenerateaProductAttributionNoticePackage)  
+* [Prepare a Filtered Product BOM to Use as Input to attrib](#PrepareaFilteredProductBOMtoUseasInputtoattrib)  
+* [Prepare an Attribution Template to Use as Input to attrib](#PrepareanAttributionTemplatetoUseasInputtoattrib)  
     - [Use jinja2 Features to Customize Your Attribution Template](#Usejinja2FeaturestoCustomizeYourAttributionTemplate)  
-* [Run genattrib.py to Generate a Product Attribution Notice Package](#Rungenattrib.pytoGenerateaProductAttributionNoticePackage)  
+* [Run attrib to Generate a Product Attribution Notice Package](#RunattribtoGenerateaProductAttributionNoticePackage)  
 
-[Using about.py to Generate a Software Inventory](#Usingabout.pytoGenerateaSoftwareInventory)  
-* [Generate a Software Inventory of Your Codebase from AboutCode Files](#GenerateaSoftwareInventoryofYourCodebasefromAboutCodeFiles)  
+[Using inventory to Generate a Software Inventory](#UsinginventorytoGenerateaSoftwareInventory)  
+* [Generate a Software Inventory of Your Codebase from AttributeCode Files](#GenerateaSoftwareInventoryofYourCodebasefromAttributeCodeFiles)  
 
-#<a name="AboutCodeDefined">AboutCode Defined</a>
+#<a name="AttributeCodeDefined">AttributeCode Defined</a>
 
-AboutCode is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. AboutCode files have a simple, standard format that identifies components and their associated licenses. The current AboutCode tools (Python programs) are: 
+AttributeCode is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. AttributeCode files have a simple, standard format that identifies components and their associated licenses. The current AttributeCode subcommands are: 
 
-* **genabout.py**: Create AboutCode files from a Software Inventory file (.csv format) which is typically created from a software audit, and insert these AboutCode files into your codebase.  You can regenerate the AboutCode files from a new Software Inventory file whenever you make changes. 
+* **gen**: Create AttributeCode files from a Software Inventory file (.csv or .json format) which is typically created from a software audit, and insert these AttributeCode files into your codebase.  You can regenerate the AttributeCode files from a new Software Inventory file whenever you make changes. 
 
-* **genattrib.py**: Generate a Product Attribution notice document (HTML format) from your AboutCode files. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your .html template. 
+* **attrib**: Generate a Product Attribution notice document (HTML format) from your AttributeCode files. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your .html template. 
 
-* **about.py**: Generate a Software Inventory list (.csv format) from your codebase based on your AboutCode files. Note that this Software Inventory will only include components that have AboutCode data.  So if you do not create AboutCode files for your own original software components, these components will not show up in the generated inventory.
+* **about**: Generate a Software Inventory list (.csv or .json format) from your codebase based on your AttributeCode files. Note that this Software Inventory will only include components that have AttributeCode data.  So if you do not create AttributeCode files for your own original software components, these components will not show up in the generated inventory.
 
-Additional AboutCode information is available at:  
+Additional AttributeCode information is available at:  
 
 * [http://www.aboutcode.org/](http://www.aboutcode.org/) for an overview and a link to the ABOUT File specification.
 
-* [https://github.com/dejacode/about-code-tool](https://github.com/dejacode/about-code-tool)  for the AboutCode tools.
+* [https://github.com/dejacode/about-code-tool](https://github.com/dejacode/about-code-tool)  for the AttributeCode tools.
 
 # <a name="KeyTerminology">Key Terminology</a>
 
-Some key terminology that applies to AboutCode tool usage:
+Some key terminology that applies to AttributeCode tool usage:
 
 * **Software Inventory or Inventory** - means a list of all of the components in a Development codebase and the associated data about those components with a focus on software pedigree/provenance- related data for open source and third-party components.
 
 * **Product BOM or BOM** - means a subset list of the components in a Development codebase (Software Inventory) that are Deployed on a particular Product Release (a Product Bill of Materials).
 
-# <a name="Usinggenabout.pytoGenerateAboutCodeFiles">Using genabout.py to Generate AboutCode Files</a>
+# <a name="UsinggentoGenerateAttributeCodeFiles">Using gen to Generate AttributeCode Files</a>
 
-## <a name="PrepareYourSoftwareInventoryforgenabout.pyStandardColumnNames">Prepare Your Software Inventory for genabout.py Standard Column Names</a>
+## <a name="PrepareYourSoftwareInventoryforgenStandardColumnNames">Prepare Your Software Inventory for gen Standard Column Names</a>
 
-You should start with a software inventory of your codebase in spreadsheet format. You need to prepare a version of it that will identify the column values that you want to appear in your .ABOUT files.  Note the following standard column names (defined in the ABOUT File Specification), which genabout.py will use to look for the values that it will store in your generated .ABOUT files, as well as any additional text files that you identify, which it will copy and store next to the .ABOUT files. 
+You should start with a software inventory of your codebase in spreadsheet format. You need to prepare a version of it that will identify the column values that you want to appear in your .ABOUT files.  Note the following standard column names (defined in the ABOUT File Specification), which gen will use to look for the values that it will store in your generated .ABOUT files, as well as any additional text files that you identify, which it will copy and store next to the .ABOUT files. 
 
 <table>
   <tr>
@@ -54,9 +54,9 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Notes</td>
   </tr>
   <tr>
-    <td>about_file</td>
+    <td>about_file_path</td>
     <td>File or directory name.  If this is a path name, use a "/" forward slash as path separators.</td>
-    <td>Mandatory.  Tells the tool where to generate the AboutFiles. Note that genabout.py will use this to construct the “about_resource” field in the generated .ABOUT file, setting it to a “.” if the about_file names a directory, otherwise using the file name.</td>
+    <td>Mandatory.  Tells the tool where to generate the AttributeCode Files. Note that 'gen' will use this to construct the “about_resource” field in the generated .ABOUT file, setting it to a “.” if the about_file names a directory, otherwise using the file name.</td>
   </tr>
   <tr>
     <td>name</td>
@@ -66,7 +66,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>version</td>
     <td>Component version</td>
-    <td>Mandatory (optional in future releases)</td>
+    <td>Optional</td>
   </tr>
   <tr>
     <td>spec_version</td>
@@ -81,7 +81,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>description_file</td>
     <td>Component description file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>download_url</td>
@@ -106,7 +106,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>readme_file</td>
     <td>readme text file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>changelog</td>
@@ -116,7 +116,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>changelog_file</td>
     <td>changelog text file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>news</td>
@@ -126,7 +126,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>news_file</td>
     <td>news text file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>news_url</td>
@@ -141,7 +141,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>notes_file</td>
     <td>notes text file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>owner</td>
@@ -161,7 +161,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>author_file</td>
     <td>author name(s) text file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>copyright</td>
@@ -171,17 +171,17 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>copyright_file</td>
     <td>copyright statement text file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>notice_file</td>
     <td>notice text file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>license_text_file</td>
     <td>license text file name</td>
-    <td>Optional. genabout will look for the file name (if a directory is specified in the --license_text_location option)  to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>license_url</td>
@@ -216,7 +216,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>dje_license</td>
     <td>A DejaCode Enterprise license URN, license name or license key for the component.</td>
-    <td>Optional. genabout will obtain license information from DejaCode Enterprise, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory. (Future versions may refer to this as dje_license_key.)</td>
+    <td>Optional. gen will obtain license information from DejaCode Enterprise, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory. (Future versions may refer to this as dje_license_key.)</td>
   </tr>
   <tr>
     <td>dje_owner</td>
@@ -246,11 +246,11 @@ You should start with a software inventory of your codebase in spreadsheet forma
 </table>
 
 
-## <a name="OptionallyDefineCustomFieldsforgenabout.pywithMAPPING.CONFIG">Optionally Define Custom Fields for genabout.py with MAPPING.CONFIG</a>
+## <a name="OptionallyDefineCustomFieldsforgenwithMAPPING.CONFIG">Optionally Define Custom Fields for gen with MAPPING.CONFIG</a>
 
-Optionally, you can control the generated label names and contents in your .ABOUT files using a MAPPING.CONFIG file. You can start with the default version provided at [https://github.com/dejacode/about-code-tool/blob/develop/about_code_tool/MAPPING.CONFIG](https://github.com/dejacode/about-code-tool/blob/develop/about_code_tool/MAPPING.CONFIG)  and you can customize a copy of that file to map the software provenance information that is important to you. When you are ready to run genabout.py, you will want to specify the --mapping option to tell it to look for the MAPPING.CONFIG file and use it.
+Optionally, you can control the generated label names and contents in your .ABOUT files using a MAPPING.CONFIG file. You can start with the default version provided at [https://github.com/dejacode/about-code-tool/blob/develop/about_code_tool/MAPPING.CONFIG](https://github.com/dejacode/about-code-tool/blob/develop/about_code_tool/MAPPING.CONFIG)  and you can customize a copy of that file to map the software provenance information that is important to you. When you are ready to run gen, you will want to specify the --mapping option to tell it to look for the MAPPING.CONFIG file and use it.
 
-You can customize your copy of MAPPING.CONFIG to recognize your own software inventory column names in order to map them to ABOUT File contents. This is especially useful if you prefer not to change some of the actual column names in your software inventory before running genabout.py.  Note that the name on the right side (for example "Directory/Filename") is the name of the field in your software inventory spreadsheet, and the name on the left, followed by a colon, is the field label to go into the .ABOUT file.  Here is an example:
+You can customize your copy of MAPPING.CONFIG to recognize your own software inventory column names in order to map them to ABOUT File contents. This is especially useful if you prefer not to change some of the actual column names in your software inventory before running gen.  Note that the name on the right side (for example "Directory/Filename") is the name of the field in your software inventory spreadsheet, and the name on the left, followed by a colon, is the field label to go into the .ABOUT file.  Here is an example:
 
         # Essential Fields
         about_file: Directory/Filename
@@ -266,29 +266,29 @@ You can customize your copy of MAPPING.CONFIG to recognize your own software inv
         audit_ref_nbr: audit_ref_nbr
         confirmed_license: Confirmed License
 
-## <a name="Rungenabout.pytoGenerateAboutCodeFiles">Run genabout.py to Generate AboutCode Files</a>
+## <a name="RungentoGenerateAttributeCodeFiles">Run gen to Generate AttributeCode Files</a>
 
-When your software inventory is ready, you can save it as a .csv file, and use it as input to run genabout.py to generate your AboutCode files. The official genabout.py parameters are defined here:
+When your software inventory is ready, you can save it as a .csv file, and use it as input to run gen to generate your AttributeCode files. The official gen parameters are defined here:
 
 * [https://github.com/dejacode/about-code-tool/blob/develop/USAGE.rst](https://github.com/dejacode/about-code-tool/blob/develop/USAGE.rst) 
 
-Here is an example of a genabout.py command: 
+Here is an example of a gen command: 
 
-python genabout.py --extract_license --api_url='{{your license library api}}' --api_username='{{api-user}}' --api_key='{{your license library api key}}'  --mapping --license_text_location=/Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+about gen --extract_license --api_url='{{your license library api}}' --api_username='{{api-user}}' --api_key='{{your license library api key}}'  --mapping --license-text-location=/Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
 
-Note that this example genabout.py command does the following: 
+Note that this example gen command does the following: 
 
 * Activates the --extract_license option to get license text.
 
 * Activates the --mapping option to use a custom MAPPING.CONFIG file.
 
-* Activates the --license_text_location option to get any text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
+* Activates the --license-text-location option to get any text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
 
 * Specifies the path of the software inventory to control the processing.
 
 * Specifies a target output directory. 
 
-Review your generated AboutCode files to determine if they meet your requirements. Here is a simple example of a linux-redhat-7.2.ABOUT file that documents the directory /linux-redhat-7.2/ :
+Review your generated AttributeCode files to determine if they meet your requirements. Here is a simple example of a linux-redhat-7.2.ABOUT file that documents the directory /linux-redhat-7.2/ :
 
         about_resource: .
         name: Linux RedHat
@@ -301,33 +301,33 @@ Review your generated AboutCode files to determine if they meet your requirement
         owner: Red Hat
         redistribute: Y
 
-You can make the appropriate changes to your input software inventory and/or your MAPPING.CONFIG file and then run genabout.py as often as necessary to replace the generated AboutCode files with the improved output. (Note that you will want to delete or move your previously generated output before running genabout.py again.)
+You can make the appropriate changes to your input software inventory and/or your MAPPING.CONFIG file and then run gen as often as necessary to replace the generated AttributeCode files with the improved output. (Note that you will want to delete or move your previously generated output before running gen again.)
 
-# <a name="Usinggenattrib.pytoGenerateaProductAttributionNoticePackage">Using genattrib.py to Generate a Product Attribution Notice Package</a>
+# <a name="UsingattribtoGenerateaProductAttributionNoticePackage">Using attrib to Generate a Product Attribution Notice Package</a>
 
-## <a name="PrepareaFilteredProductBOMtoUseasInputtogenattrib.py">Prepare a Filtered Product BOM to Use as Input to genattrib.py</a>
+## <a name="PrepareaFilteredProductBOMtoUseasInputtoattrib">Prepare a Filtered Product BOM to Use as Input to attrib</a>
 
-The Software Inventory that you prepared for genabout.py most likely includes components that do not need to appear in a product attribution notice package; for example:   
+The Software Inventory that you prepared for gen most likely includes components that do not need to appear in a product attribution notice package; for example:   
 
 * Components in your codebase that are not Deployed on the final product (e.g. build tools, testing tools, internal documentation). 
 
 * Components in your codebase under licenses that do not require attribution (e.g. proprietary packages, commercial products). 
 
-You should prepare a filtered version of your software inventory (the one that you used for genabout.py) by removing the rows that identify components which should not be included in a product attribution notice package, and saving that filtered version as your Product BOM.  You should also order the rows in this Product BOM in the sequence that you would like them to appear in the product attribution notice package. 
+You should prepare a filtered version of your software inventory (the one that you used for gen) by removing the rows that identify components which should not be included in a product attribution notice package, and saving that filtered version as your Product BOM.  You should also order the rows in this Product BOM in the sequence that you would like them to appear in the product attribution notice package. 
 
-## <a name="PrepareanAttributionTemplatetoUseasInputtogenattrib.py">Prepare an Attribution Template to Use as Input to genattrib.py</a>
+## <a name="PrepareanAttributionTemplatetoUseasInputtoattrib">Prepare an Attribution Template to Use as Input to attrib</a>
 
-You can run genattrib.py using the default.html template provided with the AboutCode tools:   
+You can run attrib using the default.html template provided with the AttributeCode tools:   
 
 [https://github.com/dejacode/about-code-tool/blob/develop/about_code_tool/templates/default.html](https://github.com/dejacode/about-code-tool/blob/develop/about_code_tool/templates/default.html) 
 
 If you choose to do that, you will most likely want to edit the generated .html file to provide header information about your own organization and product. 
 
-Running genattrib.py with the default.html file is probably your best choice when you are still testing your AboutCode process. Once you have a good understanding of the generated output, you can customize the template to provide the standard text that you want to see whenever you generate product attribution for your organization.  You can also create alternative versions of the template to use genattrib.py to generate other kinds of documents, such as a License Reference.
+Running attrib with the default.html file is probably your best choice when you are still testing your AttributeCode process. Once you have a good understanding of the generated output, you can customize the template to provide the standard text that you want to see whenever you generate product attribution for your organization.  You can also create alternative versions of the template to use attrib to generate other kinds of documents, such as a License Reference.
 
 ### <a name="Usejinja2FeaturestoCustomizeYourAttributionTemplate">Use jinja2 Features to Customize Your Attribution Template</a>
 
-The genattrib.py tool makes use of the open source python library **jinja2** ([http://jinja.pocoo.org/docs/dev/templates/](http://jinja.pocoo.org/docs/dev/templates/)) in order to extend .html capabilities and transform AboutCode input data into the final format of the generated attribution file. The **default.html **file contains text that complies with jinja2 syntax specifications in order to support grouping, ordering, formatting and presentation of your AboutCode data. If your attribution requirements are complex, you may wish to study the jinja2 documentation to modify the default.html logic; alternatively, here are a few relatively simple concepts that relate to the attribution document domain. 
+The attrib tool makes use of the open source python library **jinja2** ([http://jinja.pocoo.org/docs/dev/templates/](http://jinja.pocoo.org/docs/dev/templates/)) in order to extend .html capabilities and transform AttributeCode input data into the final format of the generated attribution file. The **default.html **file contains text that complies with jinja2 syntax specifications in order to support grouping, ordering, formatting and presentation of your AttributeCode data. If your attribution requirements are complex, you may wish to study the jinja2 documentation to modify the default.html logic; alternatively, here are a few relatively simple concepts that relate to the attribution document domain. 
 
 The simplest modifications to the default.html file involve the labels and standard text.  For example, here is the default template text for the Table of Contents: 
 
@@ -351,7 +351,7 @@ If you would prefer something other than a simple space between the component na
 
 The "if about_object.version" is checking for a component version, and if one exists it generates output text that is either a space followed by the actual version value, or, as in this customized template, it generates output text as “ - Version “, followed by the actual version value. You will, of course, want to test your output to get exactly the results that you need.
 
-Note that you can actually use genattrib.py to generate an AboutCode-sourced document of any kind for varying business purposes, and you may want to change the grouping/ordering of the data for different reporting purposes. (Here we get into somewhat more complex usage of jinja2 features, and you may wish to consult the jinja2 documentation to reach a more comprehensive understanding of the syntax and features.)  The default ordering is by component, but In the following example, which is intended to support a "license reference" rather than an attribution document, the customized template modifies the data grouping to use a custom field called “confirmed license”: 
+Note that you can actually use attrib to generate an AttributeCode-sourced document of any kind for varying business purposes, and you may want to change the grouping/ordering of the data for different reporting purposes. (Here we get into somewhat more complex usage of jinja2 features, and you may wish to consult the jinja2 documentation to reach a more comprehensive understanding of the syntax and features.)  The default ordering is by component, but In the following example, which is intended to support a "license reference" rather than an attribution document, the customized template modifies the data grouping to use a custom field called “confirmed license”: 
 
         <div class="oss-table-of-contents">
             {% for group in about_objects | groupby('confirmed_license') %}
@@ -400,40 +400,40 @@ After the table of contents, this example customized template continues with the
         <hr>
 
 
-In summary, you can start with simple, cosmetic customizations to the default.html template, and gradually introduce a more complex structure to the genattrib.py output to meet varying business requirements.
+In summary, you can start with simple, cosmetic customizations to the default.html template, and gradually introduce a more complex structure to the attrib output to meet varying business requirements.
 
-## <a name="Rungenattrib.pytoGenerateaProductAttributionNoticePackage">Run genattrib.py to Generate a Product Attribution Notice Package</a>
+## <a name="RunattribtoGenerateaProductAttributionNoticePackage">Run attrib to Generate a Product Attribution Notice Package</a>
 
-When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run genattrib.py to generate your product attribution notice package. Note that genattrib.py will use the "about_file" column in your software inventory to get all the fields that it needs from your previously generated AboutCode files. The official genattrib.py parameters are defined here:
+When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run attrib to generate your product attribution notice package. Note that attrib will use the "about_file" column in your software inventory to get all the fields that it needs from your previously generated AttributeCode files. The official attrib parameters are defined here:
 
 * [https://github.com/dejacode/about-code-tool/blob/develop/USAGE.rst](https://github.com/dejacode/about-code-tool/blob/develop/USAGE.rst) 
 
-Here is an example of a genattrib.py command: 
+Here is an example of a attrib command: 
 
-python genattrib.py --template_location=/Users/harrypotter/myAboutFiles/my_attribution_template_v1.html --mapping /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-attribution-document.html /Users/dclark1330/cipher/myProject-attribution-input.csv
+about attrib --template_location=/Users/harrypotter/myAboutFiles/my_attribution_template_v1.html --mapping /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-attribution-document.html /Users/dclark1330/cipher/myProject-attribution-input.csv
 
-Note that this example genattrib.py command does the following: 
+Note that this example attrib command does the following: 
 
 * Activates the --template_location option to specify a custom output template.
 
 * Activates the --mapping option to use a custom MAPPING.CONFIG file.
 
-* Specifies the path of the AboutCode files needed to generate the output document.
+* Specifies the path of the AttributeCode files needed to generate the output document.
 
 * Specifies the full path (include file name) of the output document to be generated.
 
 * Specifies the path of the filtered software inventory to control the processing.
 
-A successful execution of genattrib.py will create a .html file that is ready to use to meet your attribution requirements.
+A successful execution of attrib will create a .html file that is ready to use to meet your attribution requirements.
 
-# <a name="Usingabout.pytoGenerateaSoftwareInventory">Using about.py to Generate a Software Inventory</a>
+# <a name="UsinginventorytoGenerateaSoftwareInventory">Using inventory to Generate a Software Inventory</a>
 
-##<a name="GenerateaSoftwareInventoryofYourCodebasefromAboutCodeFiles"> Generate a Software Inventory of Your Codebase from AboutCode Files</a>
+##<a name="GenerateaSoftwareInventoryofYourCodebasefromAttributeCodeFiles"> Generate a Software Inventory of Your Codebase from AttributeCode Files</a>
 
-One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually.  For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode files manually.  
+One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually.  For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AttributeCode files manually.  
 
-If your organization adopts the practice of manually creating and maintaining AboutCode files, you can easily re-create your software inventory from your codebase using about.py. The official about.py parameters are defined here:
+If your organization adopts the practice of manually creating and maintaining AttributeCode files, you can easily re-create your software inventory from your codebase using inventory. The official inventory parameters are defined here:
 
 * [https://github.com/dejacode/about-code-tool/blob/develop/USAGE.rst](https://github.com/dejacode/about-code-tool/blob/develop/USAGE.rst) 
 
-A successful execution of about.py will create a complete software inventory in .csv format.
+A successful execution of inventory will create a complete software inventory in .csv format or .json format based on defined format.
