@@ -56,7 +56,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>about_file_path</td>
     <td>File or directory name.  If this is a path name, use a "/" forward slash as path separators.</td>
-    <td>Mandatory.  Tells the tool where to generate the AttributeCode Files. Note that 'gen' will use this to construct the “about_resource” field in the generated .ABOUT file, setting it to a “.” if the about_file names a directory, otherwise using the file name.</td>
+    <td>Mandatory.  Tells the tool where to generate the .ABOUT Files. Note that 'gen' will use this to construct the “about_resource” field in the generated .ABOUT file, setting it to a “.” if the about_file names a directory, otherwise using the file name.</td>
   </tr>
   <tr>
     <td>name</td>
@@ -79,11 +79,6 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
-    <td>description_file</td>
-    <td>Component description file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
-  </tr>
-  <tr>
     <td>download_url</td>
     <td>Direct URL to download the original file or archive documented by this ABOUT file</td>
     <td>Optional</td>
@@ -94,43 +89,8 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
-    <td>date</td>
-    <td>The date ('YYYY-MM-DD') when this ABOUT file was created or last validated.      </td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>readme</td>
-    <td>readme text</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>readme_file</td>
-    <td>readme text file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
-  </tr>
-  <tr>
-    <td>changelog</td>
-    <td>changelog text</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
     <td>changelog_file</td>
     <td>changelog text file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
-  </tr>
-  <tr>
-    <td>news</td>
-    <td>news text</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>news_file</td>
-    <td>news text file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
-  </tr>
-  <tr>
-    <td>news_url</td>
-    <td>URL to a news feed for the component</td>
     <td>Optional</td>
   </tr>
   <tr>
@@ -139,58 +99,48 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
-    <td>notes_file</td>
-    <td>notes text file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
-  </tr>
-  <tr>
     <td>owner</td>
     <td>name of the organization or person that owns or provides the component</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>contact</td>
-    <td>contact information for the component owner</td>
+    <td>owner_url</td>
+    <td>URL to the owner for the component</td>
     <td>Optional</td>
-  </tr>
+  </tr>  
   <tr>
-    <td>author</td>
-    <td>author name(s)</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>author_file</td>
-    <td>author name(s) text file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
-  </tr>
-  <tr>
-    <td>copyright</td>
+<td>copyright</td>
     <td>copyright statement for the component</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>copyright_file</td>
-    <td>copyright statement text file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
-  </tr>
-  <tr>
     <td>notice_file</td>
-    <td>notice text file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
+    <td>URL to the notice text for the component</td>
+    <td>Optional</td>
   </tr>
   <tr>
-    <td>license_text_file</td>
-    <td>license text file name</td>
+    <td>notice_url</td>
+    <td>notice text file name</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>license</td>
+    <td>DejaCode Enterprise license key for the component.</td>
+    <td>Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.</td>
+  </tr>
+  <tr>
+    <td>license_name</td>
+    <td>License name for the component.</td>
+    <td>Optional. This field will be generated if the --fetch-license option is set.</td>
+  </tr>  
+  <tr>
+    <td>license file</td>
+    <td>license file name</td>
     <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>license_url</td>
     <td>URL to the license text for the component</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>license_spdx</td>
-    <td>The SPDX license short form identifier for the license of this component. See http://spdx.org/licenses/ for details.      </td>
     <td>Optional</td>
   </tr>
   <tr>
@@ -204,45 +154,49 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
+    <td>modified</td>
+    <td>Yes/No.  Have the component been modified.</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
     <td>track_changes</td>
     <td>Yes/No.  Does the component license require tracking changes made to the component.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>dje_component</td>
-    <td>A DejaCode Enterprise component URN or component name.</td>
+    <td>checksum</td>
+    <td>Checksum value for the file</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>dje_license</td>
-    <td>A DejaCode Enterprise license URN, license name or license key for the component.</td>
-    <td>Optional. gen will obtain license information from DejaCode Enterprise, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory. (Future versions may refer to this as dje_license_key.)</td>
-  </tr>
-  <tr>
-    <td>dje_owner</td>
-    <td>A DejaCode Enterprise owner URN for the component.</td>
+    <td>vcs_tool</td>
+    <td>Name of the version control tool.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>checksum_sha1</td>
-    <td>Checksum sha1 value for the file</td>
+    <td>vcs_repository</td>
+    <td>Name of the version control repository.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>checksum_sha1_file</td>
-    <td>File containing checksum data </td>
+    <td>vcs_path</td>
+    <td>Name of the version control path.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>checksum_md5</td>
-    <td>Checksum md5 value for the file</td>
+    <td>vcs_tag</td>
+    <td>Name of the version control tag.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>checksum_md5_file</td>
-    <td>File containing checksum data </td>
+    <td>vcs_branch</td>
+    <td>Name of the version control branch.</td>
     <td>Optional</td>
   </tr>
+  <tr>
+    <td>vcs_revision</td>
+    <td>Name of the version control revision.</td>
+    <td>Optional</td>
 </table>
 
 
@@ -253,13 +207,13 @@ Optionally, you can control the generated label names and contents in your .ABOU
 You can customize your copy of MAPPING.CONFIG to recognize your own software inventory column names in order to map them to ABOUT File contents. This is especially useful if you prefer not to change some of the actual column names in your software inventory before running gen.  Note that the name on the right side (for example "Directory/Filename") is the name of the field in your software inventory spreadsheet, and the name on the left, followed by a colon, is the field label to go into the .ABOUT file.  Here is an example:
 
         # Essential Fields
-        about_file: Directory/Filename
+        about_file_path: Directory/Filename
         
         # Mandatory Fields
         name: Component
-        version: Confirmed Version
         
-        # Optional Fields</pre>
+        # Optional Fields
+        version: Confirmed Version
         copyright: Confirmed Copyright
         
         # Custom Fields
@@ -274,15 +228,15 @@ When your software inventory is ready, you can save it as a .csv file, and use i
 
 Here is an example of a gen command: 
 
-about gen --extract_license --api_url='{{your license library api}}' --api_username='{{api-user}}' --api_key='{{your license library api key}}'  --mapping --license-text-location=/Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+about gen --fetch-license {{your license library api}} {{your license library api key}} --mapping --license-text-location /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
 
 Note that this example gen command does the following: 
 
-* Activates the --extract_license option to get license text.
+* Activates the --fetch-license option to get license text.
 
 * Activates the --mapping option to use a custom MAPPING.CONFIG file.
 
-* Activates the --license-text-location option to get any text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
+* Activates the --license-text-location option to get license text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
 
 * Specifies the path of the software inventory to control the processing.
 
@@ -295,8 +249,8 @@ Review your generated AttributeCode files to determine if they meet your require
         version: v 7.2
         attribute: Y
         copyright: Copyright (c) RedHat, Inc.
-        dje_license_key: gpl-2.0
-        dje_license_name: GNU General Public License 2.0
+        license: gpl-2.0
+        license_name: GNU General Public License 2.0
         license_text_file: gpl-2.0.LICENSE
         owner: Red Hat
         redistribute: Y
@@ -332,9 +286,9 @@ The attrib tool makes use of the open source python library **jinja2** ([http://
 The simplest modifications to the default.html file involve the labels and standard text.  For example, here is the default template text for the Table of Contents: 
 
         <div class="oss-table-of-contents">
-            {% for about_object in about_objects %}
-                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}
-                {% if about_object.version %} {{ about_object.version }}
+            {% for about_object in abouts %}
+                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name.value }}
+                {% if about_object.version.value %} {{ about_object.version.value }}
                 {% endif %}</a></p>
             {% endfor %}
         </div>
@@ -342,60 +296,64 @@ The simplest modifications to the default.html file involve the labels and stand
 If you would prefer something other than a simple space between the component name and the component version, you can modify it to something like this: 
 
         <div class="oss-table-of-contents">
-            {% for about_object in about_objects %}
-                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name }}
-                {% if about_object.version %}  - Version  {{ about_object.version }}
+            {% for about_object in abouts %}
+                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name.value }}
+                {% if about_object.version.value %}  - Version  {{ about_object.version.value }}
                 {% endif %}</a></p>
             {% endfor %}
         </div>
 
-The "if about_object.version" is checking for a component version, and if one exists it generates output text that is either a space followed by the actual version value, or, as in this customized template, it generates output text as “ - Version “, followed by the actual version value. You will, of course, want to test your output to get exactly the results that you need.
+The "if about_object.version.value" is checking for a component version, and if one exists it generates output text that is either a space followed by the actual version value, or, as in this customized template, it generates output text as " - Version ", followed by the actual version value. You will, of course, want to test your output to get exactly the results that you need.
 
-Note that you can actually use attrib to generate an AttributeCode-sourced document of any kind for varying business purposes, and you may want to change the grouping/ordering of the data for different reporting purposes. (Here we get into somewhat more complex usage of jinja2 features, and you may wish to consult the jinja2 documentation to reach a more comprehensive understanding of the syntax and features.)  The default ordering is by component, but In the following example, which is intended to support a "license reference" rather than an attribution document, the customized template modifies the data grouping to use a custom field called “confirmed license”: 
+Note that you can actually use attrib to generate an AttributeCode-sourced document of any kind for varying business purposes, and you may want to change the grouping/ordering of the data for different reporting purposes. (Here we get into somewhat more complex usage of jinja2 features, and you may wish to consult the jinja2 documentation to reach a more comprehensive understanding of the syntax and features.)  The default ordering is by component, but In the following example, which is intended to support a "license reference" rather than an attribution document, the customized template modifies the data grouping to use a custom field called "confirmed license": 
 
         <div class="oss-table-of-contents">
-            {% for group in about_objects | groupby('confirmed_license') %}
+            {% for group in abouts | groupby('confirmed_license') %}
             <p>
-                <a href="#group_{{ loop.index0 }}">{{ group.grouper }}
+                {% for license in group.grouper.value %}
+                <a href="#group_{{ loop.index0 }}">{{ license }}
                 </a>
+                {% endfor %}
             </p>
             {% endfor %}
         </div>
 
-After the table of contents, this example customized template continues with the license details using the jinja2 for-loop capabilities. Notice that the variable "group.grouper" is actually the license name here, and that “License URL” can be any URL that you have chosen to store in your .ABOUT files: 
+After the table of contents, this example customized template continues with the license details using the jinja2 for-loop capabilities. Notice that the variable "group.grouper.value" is actually the license name here, and that “License URL” can be any URL that you have chosen to store in your .ABOUT files: 
 
-        {% for group in about_objects | groupby('confirmed_license') %}
+        {% for group in abouts | groupby('confirmed_license') %}
+            {% for confirmed_license in group.grouper.value %}
+            
             <div id="group_{{ loop.index0 }}">
-            <h3>{{ group.grouper }}</h3>
-            <p>This product contains the following open source software packages licensed under the terms of the license: {{group.grouper}}</p>
+            <h3>{{ confirmed_license }}</h3>
+            <p>This product contains the following open source software packages licensed under the terms of the license: {{confirmed_license}}</p>
             
             <div class="oss-component" id="component_{{ loop.index0 }}">
                 {%for about_object in group.list %}         
                     {% if loop.first %}
-                        {% if about_object.license_url %}
-                        <p>License URL: <a href="{{about_object.license_url}}
-                                ">{{about_object.license_url }}</a> </p>
+                        {% if about_object.license_url.value %}
+                            {% for lic_url in about_object.license_url.value %}
+                            <p>License URL: <a href="{{lic_url}}
+                                    ">{{lic_url }}</a> </p>
+                            {% endfor %}
                         {% endif %}
                     {% endif %}
                     <li>
-                    {{ about_object.name }}{% if about_object.version %}  - Version  
-                    {{ about_object.version }}{% endif %}
+                    {{ about_object.name.value }}{% if about_object.version.value %}  - Version  
+                    {{ about_object.version.value }}{% endif %}
                     </li>
-                    {% if about_object.copyright %}<pre>{{about_object.copyright}}</pre>{% endif %}
-                    {% if about_object.notice %}
-                        <pre>{{ about_object.notice }}</pre>
-                    {% elif about_object.notice_file %} <pre class="component-notice">
-                        {{ about_object.notice_text }}</pre>
-                    {% endif %}
+                    {% if about_object.copyright.value %}<pre>{{about_object.copyright.value}}</pre>{% endif %}
                     {% if loop.last %}
                     <pre>
-                    {{about_object.license_text}}
+                    {% for lic_key in about_object.license_file.value %}
+                        {{about_object.license_file.value[lic_key]}}
+                    {% endfor %}
                     </pre>
                     {% endif %}
                 {% endfor %}
             </div>
             <hr>
             </div>
+            {% endfor %}
         {% endfor %}
         <hr>
 
@@ -404,17 +362,17 @@ In summary, you can start with simple, cosmetic customizations to the default.ht
 
 ## <a name="RunattribtoGenerateaProductAttributionNoticePackage">Run attrib to Generate a Product Attribution Notice Package</a>
 
-When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run attrib to generate your product attribution notice package. Note that attrib will use the "about_file" column in your software inventory to get all the fields that it needs from your previously generated AttributeCode files. The official attrib parameters are defined here:
+When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run attrib to generate your product attribution notice package. Note that attrib will use the "about_file_path" column in your software inventory to get all the fields that it needs from your previously generated AttributeCode files. The official attrib parameters are defined here:
 
 * [https://github.com/dejacode/about-code-tool/blob/develop/USAGE.rst](https://github.com/dejacode/about-code-tool/blob/develop/USAGE.rst) 
 
 Here is an example of a attrib command: 
 
-about attrib --template_location=/Users/harrypotter/myAboutFiles/my_attribution_template_v1.html --mapping /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-attribution-document.html /Users/dclark1330/cipher/myProject-attribution-input.csv
+about attrib --template /Users/harrypotter/myAboutFiles/my_attribution_template_v1.html --mapping /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-attribution-document.html /Users/dclark1330/cipher/myProject-attribution-input.csv
 
 Note that this example attrib command does the following: 
 
-* Activates the --template_location option to specify a custom output template.
+* Activates the --templaten option to specify a custom output template.
 
 * Activates the --mapping option to use a custom MAPPING.CONFIG file.
 
