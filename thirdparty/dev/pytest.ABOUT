@@ -3,7 +3,7 @@ about_resource: pytest-2.9.0-py2.py3-none-any.whl
 version: 2.9.0
 
 name: pytest
-description: pytest: simple powerful testing with Python
+description: pytest:simple powerful testing with Python
 homepage: http://pytest.org
 owner: Holger Krekel, Benjamin Peterson, Ronny Pfannschmidt, Floris Bruynooghe and others
 contact: holger at merlinux.eu
