@@ -328,6 +328,7 @@ class UrlField(ListField):
         for url in self.value:
             if not self.is_valid_url(url):
                 name = self.name
+                val = self.value
                 msg = (u'Field %(name)s: Invalid URL: %(val)s' % locals())
                 errors.append(Error(WARNING, msg))
         return errors
