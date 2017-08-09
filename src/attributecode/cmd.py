@@ -44,7 +44,7 @@ from attributecode.util import to_posix
 
 
 __copyright__ = """
-    Copyright (c) 2013-2016 nexB Inc. All rights reserved.
+    Copyright (c) 2013-2017 nexB Inc. All rights reserved.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -63,6 +63,7 @@ ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
 %(__copyright__)s
 ''' % locals()
 
+important_errors = [u'CRITICAL', u'ERROR', u'WARNING']
 
 class AboutCommand(click.Command):
     def main(self, args=None, prog_name=None, complete_var=None,
@@ -208,6 +209,26 @@ OUTPUT: Path to output file to write the attribution to.
         errors.append(no_match_error)
     log_errors(errors, quiet, os.path.dirname(output))
     click.echo('Finished.')
+
+
+@cli.command(cls=AboutCommand, short_help='LOCATION: directory')
+@click.argument('location', nargs=1, required=True, type=click.Path(exists=True, readable=True, resolve_path=True))
+def check(location):
+    """
+Validating ABOUT files at LOCATION.
+
+LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
+    """
+    click.echo('Running attributecode version ' + __version__)
+    click.echo('Checking ABOUT files...')
+
+    errors, abouts = attributecode.model.collect_inventory(location)
+
+    msg_format = '%(sever)s: %(message)s'
+    for severity, message in errors:
+        sever = severities[severity]
+        if sever in important_errors:
+            print(msg_format % locals())
 
 
 def log_errors(errors, quiet, base_dir=False):
