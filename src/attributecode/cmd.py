@@ -64,7 +64,7 @@ ABOUT spec version: %(__about_spec_version__)s http://dejacode.org
 %(__copyright__)s
 ''' % locals()
 
-important_errors = [u'CRITICAL', u'ERROR', u'WARNING']
+problematic_errors = [u'CRITICAL', u'ERROR', u'WARNING']
 
 class AboutCommand(click.Command):
     def main(self, args=None, prog_name=None, complete_var=None,
@@ -229,16 +229,16 @@ LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
     print_errors = []
     for severity, message in errors:
         sever = severities[severity]
-        if sever in important_errors:
+        if sever in problematic_errors:
             print_errors.append((msg_format % locals()))
 
-    number_of_important_errors = len(print_errors)
+    number_of_problematic_errors = len(print_errors)
 
     for err in print_errors:
         print(err)
 
     if print_errors:
-        click.echo('Found %(number_of_important_errors)d errors' % locals())
+        click.echo('Found %(number_of_problematic_errors)d errors' % locals())
         sys.exit(1)
     else:
         click.echo('No error is found.')
