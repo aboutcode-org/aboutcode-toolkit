@@ -905,7 +905,7 @@ class About(object):
             errs = self.load_dict(saneyaml.load(input_text), base_dir)
             errors.extend(errs)
         except Exception, e:
-            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'
+            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
             errors.append(Error(CRITICAL, msg % locals()))
 
         self.errors = errors
