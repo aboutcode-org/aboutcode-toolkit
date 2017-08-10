@@ -24,6 +24,7 @@ from os.path import exists, join
 
 import click
 import unicodecsv
+import sys
 
 import attributecode
 from attributecode import CRITICAL
@@ -225,10 +226,16 @@ LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
     errors, abouts = attributecode.model.collect_inventory(location)
 
     msg_format = '%(sever)s: %(message)s'
+    print_errors = []
     for severity, message in errors:
         sever = severities[severity]
         if sever in important_errors:
-            print(msg_format % locals())
+            print_errors.append((msg_format % locals()))
+
+    if print_errors:
+        for err in print_errors:
+            print(err)
+        sys.exit(1)
 
 
 def log_errors(errors, quiet, base_dir=False):
