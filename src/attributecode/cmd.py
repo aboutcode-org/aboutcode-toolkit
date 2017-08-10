@@ -232,11 +232,16 @@ LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
         if sever in important_errors:
             print_errors.append((msg_format % locals()))
 
-    if print_errors:
-        for err in print_errors:
-            print(err)
-        sys.exit(1)
+    number_of_important_errors = len(print_errors)
 
+    for err in print_errors:
+        print(err)
+
+    if print_errors:
+        click.echo('Found %(number_of_important_errors)d errors' % locals())
+        sys.exit(1)
+    else:
+        click.echo('No error is found.')
 
 def log_errors(errors, quiet, base_dir=False):
     """
