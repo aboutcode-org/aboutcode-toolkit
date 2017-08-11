@@ -1098,10 +1098,11 @@ class CollectorTest(unittest.TestCase):
         file_path1 = posixpath.join(test_loc, 'distribute_setup.py')
         file_path2 = posixpath.join(test_loc, 'date_test.py')
 
-        err_msg1 = u'Field about_resource: Path %s not found' % file_path1
-        err_msg2 = u'Field about_resource: Path %s not found' % file_path2
+        err_msg1 = u'non-supported_date_format.ABOUT: Field about_resource: Path %s not found' % file_path1
+        err_msg2 = u'supported_date_format.ABOUT: Field about_resource: Path %s not found' % file_path2
         expected_errors = [
-            Error(INFO, u'Field date is not a supported field and is ignored.'),
+            Error(INFO, u'non-supported_date_format.ABOUT: Field date is not a supported field and is ignored.'),
+            Error(INFO, u'supported_date_format.ABOUT: Field date is not a supported field and is ignored.'),
             Error(CRITICAL, err_msg1),
             Error(CRITICAL, err_msg2)]
         assert sorted(expected_errors) == sorted(errors)

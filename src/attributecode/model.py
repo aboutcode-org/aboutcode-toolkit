@@ -1113,6 +1113,7 @@ def collect_inventory(location):
     About objects.
     """
     errors = []
+    dedup_errors = []
     input_location = util.get_absolute(location)
     about_locations = list(util.get_about_locations(input_location))
 
@@ -1122,12 +1123,18 @@ def collect_inventory(location):
     for about_loc in about_locations:
         about_file_path = util.get_relative_path(input_location, about_loc)
         about = About(about_loc, about_file_path)
-        # Avoid logging duplicated/same errors multiple times
-        for about_error in about.errors:
-            if not about_error in errors:
-                errors.append(about_error)
+        # Insert about_file_path reference to the error
+        for severity, message in about.errors:
+            msg = (about_file_path + ": " + message)
+            errors.append(Error(severity, msg))
         abouts.append(about)
-    return errors, abouts
+
+    # Avoid logging duplicated/same errors multiple times
+    for about_error in errors:
+        if not about_error in dedup_errors:
+            dedup_errors.append(about_error)
+
+    return dedup_errors, abouts
 
 
 def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
