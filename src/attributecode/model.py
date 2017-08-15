@@ -399,9 +399,13 @@ class PathField(ListField):
                 if not os.path.exists(location):
                     # We don't want to show the UNC_PREFIX in the error message
                     location = util.to_posix(location.strip(UNC_PREFIX))
-                    msg = (u'Field %(name)s: Path %(location)s not found'
-                           % locals())
-                    errors.append(Error(CRITICAL, msg))
+                    # FIXME: This is a temp fix for #286
+                    # The field in ignore_checking_list is validated in the check_file_field_exist function 
+                    ignore_checking_list = [u'license_file', u'notice_file', u'changelog_file']
+                    if not name in ignore_checking_list:
+                        msg = (u'Field %(name)s: Path %(location)s not found'
+                               % locals())
+                        errors.append(Error(CRITICAL, msg))
                     location = None
             else:
                 msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
