@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -47,6 +47,7 @@ from attributecode import api
 from attributecode import saneyaml
 from attributecode import util
 from attributecode.util import add_unc, UNC_PREFIX, UNC_PREFIX_POSIX, on_windows, copy_license_files
+from license_expression import Licensing
 
 
 class Field(object):
@@ -628,7 +629,7 @@ class About(object):
             ('home_url', UrlField()),
             ('notes', StringField()),
 
-            ('license', ListField()),
+            ('license', StringField()),
             ('license_name', StringField()),
             ('license_file', FileTextField()),
             ('license_url', UrlField()),
@@ -1009,7 +1010,7 @@ class About(object):
             os.makedirs(add_unc(parent))
 
         if self.license.present and not self.license_file.present:
-            for lic_key in self.license.value:
+            for lic_key in parse_license_expression(self.license.value):
                 try:
                     if license_dict[lic_key]:
                         license_path = posixpath.join(parent, lic_key)
@@ -1247,7 +1248,7 @@ def by_license(abouts):
     no_license = grouped['']
     for about in abouts:
         if about.license.value:
-            for lic in about.license.value:
+            for lic in parse_license_expression(about.license.value):
                 if lic in grouped:
                     grouped[lic].append(about)
                 else:
@@ -1299,7 +1300,7 @@ def by_license_content(abouts):
     no_license = grouped['']
     for about in abouts:
         if about.license.value:
-            for lic in about.license.value:
+            for lic in parse_license_expression(about.license.value):
                 if lic in grouped:
                     grouped[lic].append(about)
                 else:
@@ -1341,7 +1342,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
         if auth_error in errors:
             break
         if about.license.present:
-            for lic_key in about.license.value:
+            for lic_key in parse_license_expression(about.license.value):
                 if not lic_key in captured_license:
                     detail_list = []
                     license_name, license_key, license_text, errs = api.get_license_details_from_api(api_url, api_key, lic_key)
@@ -1357,6 +1358,11 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
                         key_text_dict[license_key] = detail_list
     return key_text_dict, errors
 
+def parse_license_expression(lic_expression):
+    licensing = Licensing()
+    # Parse the license expression and save it into a list
+    lic_list = licensing.license_keys(lic_expression)
+    return lic_list
 
 def valid_api_url(api_url):
     try:

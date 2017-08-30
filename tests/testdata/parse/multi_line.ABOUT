@@ -1,7 +1,0 @@
-about_resource: .
-name: test
-license: |
-    x11
-    mit
-    public-domain
-    bsd-simplified

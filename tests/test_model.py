@@ -1131,11 +1131,24 @@ class CollectorTest(unittest.TestCase):
         assert expected == result
 
     def test_collect_inventory_with_multi_line(self):
-        test_loc = get_test_loc('parse/multi_line.ABOUT')
+        test_loc = get_test_loc('parse/multi_line_license_expresion.ABOUT')
         errors, abouts = model.collect_inventory(test_loc)
         assert [] == errors
-        expected_lic = [u'x11', u'mit', u'public-domain', u'bsd-simplified']
+        expected_lic_url = [u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:apache-2.0']
+        returned_lic_url = abouts[0].license_url.value
+        assert expected_lic_url == returned_lic_url
+
+    def test_collect_inventory_with_license_expression(self):
+        test_loc = get_test_loc('parse/multi_line_license_expresion.ABOUT')
+        errors, abouts = model.collect_inventory(test_loc)
+        assert [] == errors
+        expected_lic = u'mit or apache-2.0'
         returned_lic = abouts[0].license.value
+        assert expected_lic == returned_lic
+
+    def test_parse_license_expression(self):
+        returned_lic = model.parse_license_expression(u'mit or apache-2.0')
+        expected_lic = [u'mit', u'apache-2.0']
         assert expected_lic == returned_lic
 
     def test_collect_inventory_works_with_relative_paths(self):
@@ -1224,7 +1237,7 @@ class GroupingsTest(unittest.TestCase):
     def test_by_license(self):
         base_dir = 'some_dir'
         a = model.About()
-        a.load_dict({'license': u'apache-2.0\n cddl-1.0', }, base_dir)
+        a.load_dict({'license': u'apache-2.0 and cddl-1.0', }, base_dir)
         b = model.About()
         b.load_dict({'license': u'apache-2.0', }, base_dir)
         c = model.About()
