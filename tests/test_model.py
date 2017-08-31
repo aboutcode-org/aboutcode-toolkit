@@ -1147,9 +1147,18 @@ class CollectorTest(unittest.TestCase):
         assert expected_lic == returned_lic
 
     def test_parse_license_expression(self):
-        returned_lic = model.parse_license_expression(u'mit or apache-2.0')
+        spec_char, returned_lic = model.parse_license_expression(u'mit or apache-2.0')
         expected_lic = [u'mit', u'apache-2.0']
+        expected_spec_char = []
         assert expected_lic == returned_lic
+        assert expected_spec_char == spec_char
+
+    def test_parse_license_expression_with_special_chara(self):
+        spec_char, returned_lic = model.parse_license_expression(u'mit, apache-2.0')
+        expected_lic = []
+        expected_spec_char = [',']
+        assert expected_lic == returned_lic
+        assert expected_spec_char == spec_char
 
     def test_collect_inventory_works_with_relative_paths(self):
         # FIXME: This test need to be run under src/attributecode/
