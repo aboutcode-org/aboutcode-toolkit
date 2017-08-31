@@ -9,7 +9,7 @@
                 "version": "{{ about_object.version.value }}"{% if about_object.license.value -%},{%- endif %}
                 {%- endif %}
                 {% if about_object.license.value -%}
-                "license": "{% for license_key in about_object.license.value %}{{ license_key }}{% if not loop.last %}, {% endif %}{% endfor %}"{% if about_object.copyright.value -%},{%- endif %}
+                "license": "{{ about_object.license.value }}"
                 {%- endif %}
                 {% if about_object.copyright.value -%}
                 "copyrigth": "{{ about_object.copyright.value }}"
