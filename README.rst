@@ -1,5 +1,5 @@
-ABOUT tool
-==========
+AboutCode toolkit
+=================
 
 .. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop
    :target: https://travis-ci.org/nexB/aboutcode-toolkit
