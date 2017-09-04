@@ -1,14 +1,14 @@
 ABOUT tool
 ==========
 
-.. image:: https://api.travis-ci.org/dejacode/about-code-tool.png?branch=develop
-   :target: https://travis-ci.org/dejacode/about-code-tool
+.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop
+   :target: https://travis-ci.org/nexB/aboutcode-toolkit
 
-.. image:: https://coveralls.io/repos/dejacode/about-code-tool/badge.png?branch=develop
-  :target: https://coveralls.io/r/dejacode/about-code-tool?branch=develop
+.. image:: https://coveralls.io/repos/nexB/aboutcode-toolkit/badge.png?branch=develop
+  :target: https://coveralls.io/r/nexB/aboutcode-toolkit?branch=develop
 
 
-The ABOUT tool and ABOUT files provide a simple way to document the
+The AboutCode toolkit and ABOUT files provide a simple way to document the
 (origin and license) and other important or interesting information about
 third-party software components that you use in your project.
 
@@ -19,7 +19,7 @@ For more information on the ABOUT file format, visit http://www.dejacode.org
 There are many examples of ABOUT files (valid or invalid) in the testdata/
 directory of the whole repository.
 
-The current version of the ABOUT tool can read these ABOUT files so that you
+The current version of the AboutCode toolkit can read these ABOUT files so that you
 can collect and validate the inventory of third-party components that you use.
 
 In future versions, this tool will be able to generate attribution notices and
@@ -32,7 +32,7 @@ http://www.dejacode.org/about_spec_v0.8.1.html
 
 REQUIREMENTS
 ------------
-The ABOUT tool is tested with Python 2.6 or 2.7 on Linux, Mac and Windows.
+The AboutCode toolkit is tested with Python 2.6 or 2.7 on Linux, Mac and Windows.
 You will need to install a Python interpreter if you do not have one already
 installed.
 
@@ -51,8 +51,8 @@ Open and run the installer using all the default options.
 
 INSTALLATION
 ------------
-Checkout or download and extract the AboutCode tool from:
-    https://github.com/dejacode/about-code-tool/
+Checkout or download and extract the AboutCode toolkit from:
+    https://github.com/nexB/aboutcode-toolkit/
 
 To install all the needed dependencies in a virtualenv, run (on posix)::
     source configure 
@@ -62,7 +62,7 @@ or on windows::
 
 USAGE
 -----
-See https://github.com/dejacode/about-code-tool/blob/master/USAGE.rst for USAGE.
+See https://github.com/nexB/aboutcode-toolkit/blob/master/USAGE.rst for USAGE.
 
 
 TESTS and DEVLOPMENT
@@ -81,17 +81,17 @@ HELP and SUPPORT
 ----------------
 If you have a question or find a bug, enter a ticket at:
 
-    https://github.com/dejacode/about-code-tool
+    https://github.com/nexB/aboutcode-toolkit
 
 For issues, you can use:
 
-    https://github.com/dejacode/about-code-tool/issues
+    https://github.com/nexB/aboutcode-toolkit/issues
 
 
 SOURCE CODE
 -----------
-AboutCode is available through GitHub. For the latest version visit:
-    https://github.com/dejacode/about-code-tool
+The AboutCode toolkit is available through GitHub. For the latest version visit:
+    https://github.com/nexB/aboutcode-toolkit
 
 
 HACKING
@@ -102,5 +102,5 @@ You agree to the http://developercertificate.org/
 
 LICENSE
 -------
-AboutCode is released under the Apache 2.0 license.
+The AboutCode toolkit is released under the Apache 2.0 license.
 See (of course) the about.ABOUT file for details.
