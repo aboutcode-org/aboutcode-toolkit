@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -136,12 +136,12 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
                 '\nExample syntax:\n\n'
                 "about gen --fetch-license 'api_url' 'api_key'")
               )
-@click.option('--license-text-location', nargs=1,
+@click.option('--license-notice-text-location', nargs=1,
               type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
               help="Copy the 'license_file' from the directory to the generated location")
 @click.option('--mapping', is_flag=True, help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
-def gen(location, output, mapping, license_text_location, fetch_license, quiet):
+def gen(location, output, mapping, license_notice_text_location, fetch_license, quiet):
     """
 Given an inventory of ABOUT files at location, generate ABOUT files in base
 directory.
@@ -156,7 +156,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         return
     click.echo('Generating ABOUT files...')
 
-    errors, abouts = attributecode.gen.generate(location, output, mapping, license_text_location, fetch_license)
+    errors, abouts = attributecode.gen.generate(location, output, mapping, license_notice_text_location, fetch_license)
 
     number_of_about_file = len(abouts)
     number_of_error = 0

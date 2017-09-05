@@ -97,7 +97,7 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 
-def load_inventory(mapping, location, base_dir, license_text_location=None):
+def load_inventory(mapping, location, base_dir, license_notice_text_location=None):
     """
     Load the inventory file at location. Return a list of errors and a list of About
     objects validated against the base_dir.
@@ -150,7 +150,7 @@ def load_inventory(mapping, location, base_dir, license_text_location=None):
             loc = posixpath.join(base_dir, afp)
         about = model.About(about_file_path=afp)
         about.location = loc
-        ld_errors = about.load_dict(fields, base_dir, license_text_location, with_empty=False)
+        ld_errors = about.load_dict(fields, base_dir, license_notice_text_location, with_empty=False)
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
         for e in ld_errors:
@@ -163,7 +163,7 @@ def load_inventory(mapping, location, base_dir, license_text_location=None):
     return errors, abouts
 
 
-def generate(location, base_dir, mapping, license_text_location, fetch_license, policy=None, conf_location=None,
+def generate(location, base_dir, mapping, license_notice_text_location, fetch_license, policy=None, conf_location=None,
              with_empty=False, with_absent=False):
     """
     Load ABOUT data from an inventory at csv_location. Write ABOUT files to
@@ -182,7 +182,7 @@ def generate(location, base_dir, mapping, license_text_location, fetch_license, 
         gen_license = True
 
     bdir = to_posix(base_dir)
-    errors, abouts = load_inventory(mapping, location, bdir, license_text_location)
+    errors, abouts = load_inventory(mapping, location, bdir, license_notice_text_location)
 
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)

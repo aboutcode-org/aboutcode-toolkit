@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
+import collections
 import jinja2
 import os
 from posixpath import basename
@@ -29,6 +30,7 @@ import attributecode
 from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
+from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
 
 
@@ -61,9 +63,10 @@ def generate(abouts, template_string=None):
                         else:
                             license_key = license_text_name
                         license_key_and_context[license_key] = about.license_file.value[license_text_name]
+                        sorted_license_key_and_context = collections.OrderedDict(sorted(license_key_and_context.items()))
                         license_text_name_and_key[license_text_name] = license_key
 
-        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=license_key_and_context,
+        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=sorted_license_key_and_context,
                                    license_text_name_and_key=license_text_name_and_key)
     except Exception, e:
         line = getattr(e, 'lineno', None)
@@ -166,6 +169,17 @@ def generate_and_save(abouts, output_location, mapping, template_loc=None,
             for fp in about_files_list:
                 if about.about_file_path == fp:
                     updated_abouts.append(about)
+
+    # Parse license_expression and save to the license list
+    for about in updated_abouts:
+        if about.license_expression.value:
+            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+            if special_char_in_expression:
+                msg = (u"The following character(s) cannot be in the licesne_expression: " +
+                       str(special_char_in_expression))
+                errors.append(Error(ERROR, msg))
+            else:
+                about.license.value = lic_list
 
     rendered = generate_from_file(updated_abouts, template_loc=template_loc)
 
