@@ -1251,8 +1251,8 @@ def by_license(abouts):
     grouped[''] = []
     no_license = grouped['']
     for about in abouts:
-        if about.license.value:
-            special_char_in_expression, lic_list = parse_license_expression(about.license.value)
+        if about.license_expression.value:
+            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
             if not special_char_in_expression:
                 for lic in lic_list:
                     if lic in grouped:

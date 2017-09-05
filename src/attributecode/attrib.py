@@ -48,6 +48,7 @@ def generate(abouts, template_string=None):
     try:
         captured_license = []
         license_key_and_context = {}
+        sorted_license_key_and_context = {}
         license_text_name_and_key = {}
         for about in abouts:
             # about.license_file.value is a OrderDict with license_text_name as

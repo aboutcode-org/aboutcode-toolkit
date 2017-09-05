@@ -584,6 +584,7 @@ description: AboutCode is a tool to process ABOUT files. An ABOUT file is a file
 home_url: http://dejacode.org
 notes:
 license: apache-2.0 public-domain
+license_expression:
 license_name:
 license_file: apache-2.0.LICENSE
 license_url:
@@ -656,6 +657,7 @@ spec_version:
             'home_url',
             'notes',
             'license',
+            'license_expression',
             'license_name',
             'license_file',
             'license_url',
@@ -754,6 +756,7 @@ description:
 home_url:
 notes:
 license:
+license_expression:
 license_name:
 license_file:
 license_url:
@@ -864,6 +867,7 @@ version: 0.11.0
                     'download_url': u'',
                     'home_url': u'',
                     'license': u'apache-2.0',
+                    'license_expression': u'',
                     'license_file': u'',
                     'license_name': u'',
                     'license_url': u'',
@@ -1143,7 +1147,7 @@ class CollectorTest(unittest.TestCase):
         errors, abouts = model.collect_inventory(test_loc)
         assert [] == errors
         expected_lic = u'mit or apache-2.0'
-        returned_lic = abouts[0].license.value
+        returned_lic = abouts[0].license_expression.value
         assert expected_lic == returned_lic
 
     def test_parse_license_expression(self):
@@ -1246,13 +1250,13 @@ class GroupingsTest(unittest.TestCase):
     def test_by_license(self):
         base_dir = 'some_dir'
         a = model.About()
-        a.load_dict({'license': u'apache-2.0 and cddl-1.0', }, base_dir)
+        a.load_dict({'license_expression': u'apache-2.0 and cddl-1.0', }, base_dir)
         b = model.About()
-        b.load_dict({'license': u'apache-2.0', }, base_dir)
+        b.load_dict({'license_expression': u'apache-2.0', }, base_dir)
         c = model.About()
         c.load_dict({}, base_dir)
         d = model.About()
-        d.load_dict({'license': u'bsd', }, base_dir)
+        d.load_dict({'license_expression': u'bsd', }, base_dir)
 
         abouts = [a, b, c, d]
         results = model.by_license(abouts)
