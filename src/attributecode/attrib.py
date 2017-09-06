@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
+import collections
 import jinja2
 import os
 from posixpath import basename
@@ -29,6 +30,7 @@ import attributecode
 from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
+from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
 
 
@@ -46,7 +48,10 @@ def generate(abouts, template_string=None):
     try:
         captured_license = []
         license_key_and_context = {}
+        sorted_license_key_and_context = {}
         license_text_name_and_key = {}
+        license_key_to_license_name = {}
+        # FIXME: This need to be simplified
         for about in abouts:
             # about.license_file.value is a OrderDict with license_text_name as
             # the key and the license text as the value
@@ -61,10 +66,40 @@ def generate(abouts, template_string=None):
                         else:
                             license_key = license_text_name
                         license_key_and_context[license_key] = about.license_file.value[license_text_name]
+                        sorted_license_key_and_context = collections.OrderedDict(sorted(license_key_and_context.items()))
                         license_text_name_and_key[license_text_name] = license_key
 
-        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=license_key_and_context,
-                                   license_text_name_and_key=license_text_name_and_key)
+            # Convert/map the key in license expression to license name
+            if about.license_expression.value and about.license_name.value:
+                # Split the license expression into list with license key and condition keyword
+                lic_expression_list = about.license_expression.value.split()
+                
+
+                lic_name_list = about.license_name.value
+                lic_name_expression_list = []
+
+                # The order of the license_name and key should be the same
+                # The length for both list should be the same excluding the condition keyword
+                # such as 'and' and 'or'
+                assert len(lic_name_list) <= len(lic_expression_list)
+
+                # Map the licence key to license name
+                index_for_license_name_list = 0
+                for key in lic_expression_list:
+                    if key.lower() == 'and' or key.lower() == 'or':
+                        lic_name_expression_list.append(key)
+                    else:
+                        lic_name_expression_list.append(lic_name_list[index_for_license_name_list])
+                        license_key_to_license_name[key] = lic_name_list[index_for_license_name_list]
+                        index_for_license_name_list = index_for_license_name_list + 1
+                # Join the license name expression into a single string
+                lic_name_expression = ' '.join(lic_name_expression_list)
+
+                # Add the license name expression string into the about object
+                about.license_name_expression = lic_name_expression 
+
+        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=sorted_license_key_and_context,
+                                   license_text_name_and_key=license_text_name_and_key, license_key_to_license_name=license_key_to_license_name)
     except Exception, e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
@@ -166,6 +201,17 @@ def generate_and_save(abouts, output_location, mapping, template_loc=None,
             for fp in about_files_list:
                 if about.about_file_path == fp:
                     updated_abouts.append(about)
+
+    # Parse license_expression and save to the license list
+    for about in updated_abouts:
+        if about.license_expression.value:
+            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+            if special_char_in_expression:
+                msg = (u"The following character(s) cannot be in the licesne_expression: " +
+                       str(special_char_in_expression))
+                errors.append(Error(ERROR, msg))
+            else:
+                about.license.value = lic_list
 
     rendered = generate_from_file(updated_abouts, template_loc=template_loc)
 

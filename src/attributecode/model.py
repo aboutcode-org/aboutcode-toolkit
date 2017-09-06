@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -46,7 +46,8 @@ from attributecode import WARNING
 from attributecode import api
 from attributecode import saneyaml
 from attributecode import util
-from attributecode.util import add_unc, UNC_PREFIX, UNC_PREFIX_POSIX, on_windows, copy_license_files
+from attributecode.util import add_unc, UNC_PREFIX, UNC_PREFIX_POSIX, on_windows, copy_license_notice_files
+from license_expression import Licensing
 
 
 class Field(object):
@@ -362,7 +363,7 @@ class PathField(ListField):
         """
         errors = super(PathField, self)._validate(*args, ** kwargs)
         self.base_dir = kwargs.get('base_dir')
-        self.license_text_location = kwargs.get('license_text_location')
+        self.license_notice_text_location = kwargs.get('license_notice_text_location')
 
         if self.base_dir:
             self.base_dir = util.to_posix(self.base_dir)
@@ -386,9 +387,9 @@ class PathField(ListField):
             # the license files, if need to be copied, are located under the path
             # set from the 'license-text-location' option, so the tool should check
             # at the 'license-text-location' instead of the 'base_dir'
-            if self.base_dir or self.license_text_location:
-                if self.license_text_location:
-                    location = posixpath.join(self.license_text_location, path)
+            if self.base_dir or self.license_notice_text_location:
+                if self.license_notice_text_location:
+                    location = posixpath.join(self.license_notice_text_location, path)
                 else:
                     location = posixpath.join(self.base_dir, path)
                 location = util.to_native(location)
@@ -478,7 +479,7 @@ class FileTextField(PathField):
             try:
                 # TODO: we have lots the location by replacing it with a text
                 location = add_unc(location)
-                text = codecs.open(location, encoding='utf-8').read()
+                text = codecs.open(location, encoding='utf-8', errors='ignore').read()
                 self.value[path] = text
             except Exception, e:
                 # only keep the first 100 char of the exception
@@ -583,14 +584,14 @@ class BooleanField(SingleLineField):
                 and self.value == other.value)
 
 
-def validate_fields(fields, base_dir, license_text_location=None):
+def validate_fields(fields, base_dir, license_notice_text_location=None):
     """
     Validate a sequence of Field objects. Return a list of errors.
     Validation may update the Field objects as needed as a side effect.
     """
     errors = []
     for f in fields:
-        val_err = f.validate(base_dir=base_dir, license_text_location=license_text_location)
+        val_err = f.validate(base_dir=base_dir, license_notice_text_location=license_notice_text_location)
         errors.extend(val_err)
     return errors
 
@@ -629,7 +630,8 @@ class About(object):
             ('notes', StringField()),
 
             ('license', ListField()),
-            ('license_name', StringField()),
+            ('license_expression', StringField()),
+            ('license_name', ListField()),
             ('license_file', FileTextField()),
             ('license_url', UrlField()),
             ('copyright', StringField()),
@@ -869,25 +871,25 @@ class About(object):
                         errors.append(Error(INFO, msg % locals()))
         return errors
 
-    def process(self, fields, base_dir=None, license_text_location=None):
+    def process(self, fields, base_dir=None, license_notice_text_location=None):
         """
         Hydrate and validate a sequence of field name/value tuples from an
         ABOUT file. Return a list of errors.
         """
         self.base_dir = base_dir
-        self.license_text_location = license_text_location
+        self.license_notice_text_location = license_notice_text_location
         afp = self.about_file_path
         errors = []
         hydratation_errors = self.hydrate(fields)
         errors.extend(hydratation_errors)
 
         # We want to copy the license_files before the validation
-        if license_text_location:
-            copy_license_files(fields, base_dir, license_text_location, afp)
+        if license_notice_text_location:
+            copy_license_notice_files(fields, base_dir, license_notice_text_location, afp)
 
         # we validate all fields, not only these hydrated
         all_fields = self.all_fields()
-        validation_errors = validate_fields(all_fields, self.base_dir, self.license_text_location)
+        validation_errors = validate_fields(all_fields, self.base_dir, self.license_notice_text_location)
         errors.extend(validation_errors)
 
         # do not forget to resolve about resource paths
@@ -936,7 +938,7 @@ class About(object):
         self.errors = errors
         return errors
 
-    def load_dict(self, fields_dict, base_dir, license_text_location=None, with_empty=True):
+    def load_dict(self, fields_dict, base_dir, license_notice_text_location=None, with_empty=True):
         """
         Load the ABOUT file from a fields name/value mapping.
         If with_empty, create fields with no value for empty fields.
@@ -946,7 +948,7 @@ class About(object):
         fields = fields_dict.items()
         if not with_empty:
             fields = [(n, v) for n, v in fields_dict.items() if v]
-        errors = self.process(fields, base_dir, license_text_location)
+        errors = self.process(fields, base_dir, license_notice_text_location)
         self.errors = errors
         return errors
 
@@ -1008,20 +1010,23 @@ class About(object):
         if not posixpath.exists(parent):
             os.makedirs(add_unc(parent))
 
-        if self.license.present and not self.license_file.present:
-            for lic_key in self.license.value:
-                try:
-                    if license_dict[lic_key]:
-                        license_path = posixpath.join(parent, lic_key)
-                        license_path += u'.LICENSE'
-                        license_path = add_unc(license_path)
-                        license_name, license_context, license_url = license_dict[lic_key]
-                        license_info = (lic_key, license_name, license_context, license_url)
-                        license_key_name_context_url.append(license_info)
-                        with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
-                            lic.write(license_context)
-                except:
-                    pass
+        if self.license_expression.present and not self.license_file.present:
+            special_char_in_expression, lic_list = parse_license_expression(self.license_expression.value)
+            self.license = lic_list
+            if not special_char_in_expression:
+                for lic_key in lic_list:
+                    try:
+                        if license_dict[lic_key]:
+                            license_path = posixpath.join(parent, lic_key)
+                            license_path += u'.LICENSE'
+                            license_path = add_unc(license_path)
+                            license_name, license_context, license_url = license_dict[lic_key]
+                            license_info = (lic_key, license_name, license_context, license_url)
+                            license_key_name_context_url.append(license_info)
+                            with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
+                                lic.write(license_context)
+                    except:
+                        pass
         return license_key_name_context_url
 
 # valid field name
@@ -1246,12 +1251,14 @@ def by_license(abouts):
     grouped[''] = []
     no_license = grouped['']
     for about in abouts:
-        if about.license.value:
-            for lic in about.license.value:
-                if lic in grouped:
-                    grouped[lic].append(about)
-                else:
-                    grouped[lic] = [about]
+        if about.license_expression.value:
+            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+            if not special_char_in_expression:
+                for lic in lic_list:
+                    if lic in grouped:
+                        grouped[lic].append(about)
+                    else:
+                        grouped[lic] = [about]
         else:
             no_license.append(about)
     return OrderedDict(sorted(grouped.items()))
@@ -1299,11 +1306,13 @@ def by_license_content(abouts):
     no_license = grouped['']
     for about in abouts:
         if about.license.value:
-            for lic in about.license.value:
-                if lic in grouped:
-                    grouped[lic].append(about)
-                else:
-                    grouped[lic] = [about]
+            special_char_in_expression, lic_list = parse_license_expression(about.license.value)
+            if not special_char_in_expression:
+                for lic in lic_list:
+                    if lic in grouped:
+                        grouped[lic].append(about)
+                    else:
+                        grouped[lic] = [about]
         else:
             no_license.append(about)
     return OrderedDict(sorted(grouped.items()))
@@ -1340,23 +1349,47 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
-        if about.license.present:
-            for lic_key in about.license.value:
-                if not lic_key in captured_license:
-                    detail_list = []
-                    license_name, license_key, license_text, errs = api.get_license_details_from_api(api_url, api_key, lic_key)
-                    for e in errs:
-                        if e not in errors:
-                            errors.append(e)
-                    if license_key:
-                        captured_license.append(lic_key)
-                        dje_lic_url = dje_lic_urn + license_key
-                        detail_list.append(license_name)
-                        detail_list.append(license_text)
-                        detail_list.append(dje_lic_url)
-                        key_text_dict[license_key] = detail_list
+        if about.license_expression.present:
+            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+            if special_char_in_expression:
+                msg = (u"The following character(s) cannot be in the licesne_expression: " +
+                       str(special_char_in_expression))
+                errors.append(Error(ERROR, msg))
+            else:
+                for lic_key in lic_list:
+                    if not lic_key in captured_license:
+                        detail_list = []
+                        license_name, license_key, license_text, errs = api.get_license_details_from_api(api_url, api_key, lic_key)
+                        for e in errs:
+                            if e not in errors:
+                                errors.append(e)
+                        if license_key:
+                            captured_license.append(lic_key)
+                            dje_lic_url = dje_lic_urn + license_key
+                            detail_list.append(license_name)
+                            detail_list.append(license_text)
+                            detail_list.append(dje_lic_url)
+                            key_text_dict[license_key] = detail_list
     return key_text_dict, errors
 
+def parse_license_expression(lic_expression):
+    licensing = Licensing()
+    lic_list = []
+    special_char = special_char_in_license_expresion(lic_expression)
+    if not special_char:
+        # Parse the license expression and save it into a list
+        lic_list = licensing.license_keys(lic_expression)
+    return special_char, lic_list
+
+def special_char_in_license_expresion(lic_expression):
+    not_support_char = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+                    '+', '=', '{', '}', '|', '[', ']', '\\',
+                    ':', ';', '<', '>', '?', ',', '/']
+    special_character = []
+    for char in not_support_char:
+        if char in lic_expression:
+            special_character.append(char)
+    return special_character
 
 def valid_api_url(api_url):
     try:

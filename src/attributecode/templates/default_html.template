@@ -32,7 +32,7 @@
             </h3>
             {% if about_object.license.value %}
                 <p>This component is licensed under 
-                {% for license_key in about_object.license.value %} {{ license_key }}{% if not loop.last %},{% endif %}{% endfor %}
+                {{ about_object.license.value }}
             {% endif %}
             {% if about_object.copyright.value %}
                 <pre>{{about_object.copyright.value}}</pre>
@@ -43,7 +43,7 @@
                 {% endfor %}
             {% endif %}
             {% if about_object.license.value %}
-                {% for license_key in about_object.license.value %}
+                {% for license_key in about_object.license.value.split() %}
                     {% if license_key in common_licenses %}
                         <p>Full text of
                             <a class="{{ license_key }}" href="#component-license-{{ license_key }}">

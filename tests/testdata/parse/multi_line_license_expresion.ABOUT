@@ -1,0 +1,6 @@
+about_resource: .
+name: test
+license_expression: mit or apache-2.0
+license_url: |
+    https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit
+    https://enterprise.dejacode.com/urn/?urn=urn:dje:license:apache-2.0

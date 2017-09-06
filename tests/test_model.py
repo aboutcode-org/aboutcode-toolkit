@@ -584,6 +584,7 @@ description: AboutCode is a tool to process ABOUT files. An ABOUT file is a file
 home_url: http://dejacode.org
 notes:
 license: apache-2.0 public-domain
+license_expression:
 license_name:
 license_file: apache-2.0.LICENSE
 license_url:
@@ -656,6 +657,7 @@ spec_version:
             'home_url',
             'notes',
             'license',
+            'license_expression',
             'license_name',
             'license_file',
             'license_url',
@@ -754,6 +756,7 @@ description:
 home_url:
 notes:
 license:
+license_expression:
 license_name:
 license_file:
 license_url:
@@ -864,6 +867,7 @@ version: 0.11.0
                     'download_url': u'',
                     'home_url': u'',
                     'license': u'apache-2.0',
+                    'license_expression': u'',
                     'license_file': u'',
                     'license_name': u'',
                     'license_url': u'',
@@ -1131,12 +1135,34 @@ class CollectorTest(unittest.TestCase):
         assert expected == result
 
     def test_collect_inventory_with_multi_line(self):
-        test_loc = get_test_loc('parse/multi_line.ABOUT')
+        test_loc = get_test_loc('parse/multi_line_license_expresion.ABOUT')
         errors, abouts = model.collect_inventory(test_loc)
         assert [] == errors
-        expected_lic = [u'x11', u'mit', u'public-domain', u'bsd-simplified']
-        returned_lic = abouts[0].license.value
+        expected_lic_url = [u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:apache-2.0']
+        returned_lic_url = abouts[0].license_url.value
+        assert expected_lic_url == returned_lic_url
+
+    def test_collect_inventory_with_license_expression(self):
+        test_loc = get_test_loc('parse/multi_line_license_expresion.ABOUT')
+        errors, abouts = model.collect_inventory(test_loc)
+        assert [] == errors
+        expected_lic = u'mit or apache-2.0'
+        returned_lic = abouts[0].license_expression.value
         assert expected_lic == returned_lic
+
+    def test_parse_license_expression(self):
+        spec_char, returned_lic = model.parse_license_expression(u'mit or apache-2.0')
+        expected_lic = [u'mit', u'apache-2.0']
+        expected_spec_char = []
+        assert expected_lic == returned_lic
+        assert expected_spec_char == spec_char
+
+    def test_parse_license_expression_with_special_chara(self):
+        spec_char, returned_lic = model.parse_license_expression(u'mit, apache-2.0')
+        expected_lic = []
+        expected_spec_char = [',']
+        assert expected_lic == returned_lic
+        assert expected_spec_char == spec_char
 
     def test_collect_inventory_works_with_relative_paths(self):
         # FIXME: This test need to be run under src/attributecode/
@@ -1224,13 +1250,13 @@ class GroupingsTest(unittest.TestCase):
     def test_by_license(self):
         base_dir = 'some_dir'
         a = model.About()
-        a.load_dict({'license': u'apache-2.0\n cddl-1.0', }, base_dir)
+        a.load_dict({'license_expression': u'apache-2.0 and cddl-1.0', }, base_dir)
         b = model.About()
-        b.load_dict({'license': u'apache-2.0', }, base_dir)
+        b.load_dict({'license_expression': u'apache-2.0', }, base_dir)
         c = model.About()
         c.load_dict({}, base_dir)
         d = model.About()
-        d.load_dict({'license': u'bsd', }, base_dir)
+        d.load_dict({'license_expression': u'bsd', }, base_dir)
 
         abouts = [a, b, c, d]
         results = model.by_license(abouts)
