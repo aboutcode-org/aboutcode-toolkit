@@ -239,10 +239,14 @@ def generate(location, base_dir, mapping, license_notice_text_location, fetch_li
                             gen_license_name = lic_key + u'.LICENSE'
                             about.license_file.value[gen_license_name] = lic_context
                             about.license_file.present = True
+                            if not about.license_name.present:
+                                about.license_name.value.append(lic_name)
                             if not about.license_url.present:
                                 about.license_url.value.append(lic_url)
                         if about.license_url.value:
                             about.license_url.present = True
+                        if about.license_name.value:
+                            about.license_name.present = True
 
             # Write the ABOUT file and check does the referenced file exist
             # This function is not purposed to throw error. However, since I've commented

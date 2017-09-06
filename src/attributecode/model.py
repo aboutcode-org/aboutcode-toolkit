@@ -631,7 +631,7 @@ class About(object):
 
             ('license', ListField()),
             ('license_expression', StringField()),
-            ('license_name', StringField()),
+            ('license_name', ListField()),
             ('license_file', FileTextField()),
             ('license_url', UrlField()),
             ('copyright', StringField()),
