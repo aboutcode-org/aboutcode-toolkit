@@ -362,6 +362,8 @@ class PathField(ListField):
         relative paths to actual file locations.
         """
         errors = super(PathField, self)._validate(*args, ** kwargs)
+        self.about_file_path = kwargs.get('about_file_path')
+        self.running_inventory = kwargs.get('running_inventory')
         self.base_dir = kwargs.get('base_dir')
         self.license_notice_text_location = kwargs.get('license_notice_text_location')
 
@@ -391,7 +393,20 @@ class PathField(ListField):
                 if self.license_notice_text_location:
                     location = posixpath.join(self.license_notice_text_location, path)
                 else:
-                    location = posixpath.join(self.base_dir, path)
+                    # The 'about_resource_path' should be a joined path with
+                    # the 'about_file_path' and the 'base_dir
+                    if not self.running_inventory and name == 'about_resource_path':
+                        # Get the parent directory of the 'about_file_path'
+                        afp_parent = posixpath.dirname(self.about_file_path)
+
+                        # Create a relative 'about_resource_path' by joining the
+                        # parent of the 'about_file_path' with the value of the
+                        # 'about_resource_path'
+                        arp = posixpath.join(afp_parent, path)
+                        normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
+                        location = posixpath.join(self.base_dir, normalized_arp)
+                    else:
+                        location = posixpath.join(self.base_dir, path)
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
                 location = util.to_posix(location)
@@ -584,14 +599,14 @@ class BooleanField(SingleLineField):
                 and self.value == other.value)
 
 
-def validate_fields(fields, base_dir, license_notice_text_location=None):
+def validate_fields(fields, about_file_path, running_inventory, base_dir, license_notice_text_location=None):
     """
     Validate a sequence of Field objects. Return a list of errors.
     Validation may update the Field objects as needed as a side effect.
     """
     errors = []
     for f in fields:
-        val_err = f.validate(base_dir=base_dir, license_notice_text_location=license_notice_text_location)
+        val_err = f.validate(base_dir=base_dir, about_file_path=about_file_path, running_inventory=running_inventory, license_notice_text_location=license_notice_text_location)
         errors.extend(val_err)
     return errors
 
@@ -622,6 +637,7 @@ class About(object):
         self.fields = OrderedDict([
             ('about_resource', AboutResourceField(required=True)),
             ('name', SingleLineField(required=True)),
+            ('about_resource_path', PathField()),
 
             ('version', SingleLineField()),
             ('download_url', UrlField()),
@@ -871,7 +887,7 @@ class About(object):
                         errors.append(Error(INFO, msg % locals()))
         return errors
 
-    def process(self, fields, base_dir=None, license_notice_text_location=None):
+    def process(self, fields, about_file_path, running_inventory=False, base_dir=None, license_notice_text_location=None):
         """
         Hydrate and validate a sequence of field name/value tuples from an
         ABOUT file. Return a list of errors.
@@ -889,7 +905,7 @@ class About(object):
 
         # we validate all fields, not only these hydrated
         all_fields = self.all_fields()
-        validation_errors = validate_fields(all_fields, self.base_dir, self.license_notice_text_location)
+        validation_errors = validate_fields(all_fields, about_file_path, running_inventory, self.base_dir, self.license_notice_text_location)
         errors.extend(validation_errors)
 
         # do not forget to resolve about resource paths
@@ -908,7 +924,17 @@ class About(object):
         try:
             loc = add_unc(loc)
             input_text = codecs.open(loc, encoding='utf-8').read()
-            errs = self.load_dict(saneyaml.load(input_text), base_dir)
+            """
+            The running_inventory defines if the current process is 'inventory' or not.
+            This is used for the validation of the about_resource_path.
+            In the 'inventory' command, the code will use the parent of the about_file_path
+            location and join with the 'about_resource_path' for the validation.
+            On the other hand, in the 'gen' command, the code will use the
+            generated location (aka base_dir) along with the parent of the about_file_path
+            and then join with the 'about_resource_path'
+            """
+            running_inventory = True
+            errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory)
             errors.extend(errs)
         except Exception, e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
@@ -938,7 +964,7 @@ class About(object):
         self.errors = errors
         return errors
 
-    def load_dict(self, fields_dict, base_dir, license_notice_text_location=None, with_empty=True):
+    def load_dict(self, fields_dict, base_dir, running_inventory=False, license_notice_text_location=None, with_empty=True):
         """
         Load the ABOUT file from a fields name/value mapping.
         If with_empty, create fields with no value for empty fields.
@@ -946,9 +972,10 @@ class About(object):
         errors.
         """
         fields = fields_dict.items()
+        about_file_path = self.about_file_path
         if not with_empty:
             fields = [(n, v) for n, v in fields_dict.items() if v]
-        errors = self.process(fields, base_dir, license_notice_text_location)
+        errors = self.process(fields, about_file_path, running_inventory, base_dir, license_notice_text_location)
         self.errors = errors
         return errors
 
@@ -1154,7 +1181,7 @@ def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
     fields = []
     if with_paths:
         fields.append(About.about_file_path_attr)
-        fields.append(About.about_resource_path_attr)
+        #fields.append(About.about_resource_path_attr)
 
     standard_fields = About().fields.keys()
     if with_absent:
@@ -1206,10 +1233,10 @@ def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=Tru
             afp = ad['about_file_path']
             afp = '/' + afp if not afp.startswith('/') else afp
             ad['about_file_path'] = afp
-        if 'about_resource_path' in ad.keys():
+        """if 'about_resource_path' in ad.keys():
             arp = ad['about_resource_path']
             arp = '/' + arp if not arp.startswith('/') else arp
-            ad['about_resource_path'] = arp
+            ad['about_resource_path'] = arp"""
         # Make the 'about_resource_path' endswith '/' if the 'about_resource'
         # reference the current directory
         if 'about_resource' in ad.keys() and ad['about_resource'] == '.':

@@ -578,6 +578,7 @@ this software and releases the component to Public Domain.
         a = model.About(test_file, about_file_path='complete2/about.ABOUT')
         expected = u'''about_resource: .
 name: AboutCode
+about_resource_path:
 version: 0.11.0
 download_url:
 description: AboutCode is a tool to process ABOUT files. An ABOUT file is a file.
@@ -648,9 +649,10 @@ spec_version:
         # and that all fields are in the correct order
         expected = [
             model.About.about_file_path_attr,
-            model.About.about_resource_path_attr,
+            #model.About.about_resource_path_attr,
             'about_resource',
             'name',
+            'about_resource_path',
             'version',
             'download_url',
             'description',
@@ -857,6 +859,7 @@ version: 0.11.0
             Error(WARNING, u'Field author is present but empty')]
         assert expected_errors == a.errors
         expected = {'about_resource': u'.',
+                    'about_resource_path': u'',
                     'author': u'',
                     'attribute': u'',
                     'changelog_file': u'',
