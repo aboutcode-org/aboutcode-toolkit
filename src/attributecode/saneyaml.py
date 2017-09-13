@@ -29,6 +29,11 @@ except ImportError:
     from yaml import SafeLoader
     from yaml import SafeDumper
 
+try:
+    unicode  # Python 2
+except NameError:
+    unicode = str  # Python 3
+
 
 """
 Wrapper around PyYAML to provide sane defaults ensuring that dump/load does

@@ -31,12 +31,24 @@ import json
 import os
 import posixpath
 import re
-import urllib2
 import unicodecsv
-
 from collections import OrderedDict
 from posixpath import dirname
-from urlparse import urljoin, urlparse
+
+try:
+    import urllib2  # Python 2
+except ImportError:
+    import urllib as urllib2  # Python 3
+
+try:
+    from urlparse import urljoin, urlparse  # Python 2
+except ImportError:
+    from urllib.parse import urljoin, urlparse  # Python 3
+
+try:
+    basestring  # Python 2
+except NameError:
+    basestring = str  # Python 3
 
 from attributecode import CRITICAL
 from attributecode import ERROR
@@ -757,7 +769,7 @@ class About(object):
         If with_empty, include empty fields.
         """
         all_fields = []
-        for field in self.fields.values() + self.custom_fields.values():
+        for field in list(self.fields.values()) + list(self.custom_fields.values()):
             if field.required:
                 all_fields.append(field)
             # TODO: The following code need refactor

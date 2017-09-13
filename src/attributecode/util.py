@@ -18,7 +18,6 @@ from __future__ import print_function
 
 import codecs
 import errno
-import httplib
 import json
 import ntpath
 import os
@@ -28,11 +27,15 @@ import socket
 import string
 import sys
 import unicodecsv
-
 from collections import OrderedDict
 from os.path import abspath
 from os.path import dirname
 from os.path import join
+
+try:
+    import httplib  # Python 2
+except ImportError:
+    import http.client as httplib  # Python 3
 
 from attributecode import CRITICAL, Error
 

@@ -17,12 +17,19 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import httplib
 import json
 import urllib
-import urllib2
-
 from collections import namedtuple
+
+try:
+    import httplib  # Python 2
+except ImportError:
+    import http.client as httplib  # Python 3
+
+try:
+    import urllib2  # Python 2
+except ImportError:
+    import urllib as urllib2  # Python 3
 
 from attributecode import ERROR
 from attributecode import Error
