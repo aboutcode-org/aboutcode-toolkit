@@ -793,9 +793,22 @@ class About(object):
         as_dict = OrderedDict()
         if with_paths:
             afpa = self.about_file_path_attr
-            arpa = self.about_resource_path_attr
             as_dict[afpa] = self.about_file_path
-            as_dict[arpa] = self.resolved_resources_paths()
+            arpa = self.about_resource_path_attr
+            if self.about_resource_path.present:
+                as_dict[arpa] = self.resolved_resources_paths()
+            else:
+                # Create a relative 'about_resource_path' if user has not defined
+                if self.about_resource.present:
+                    for resource_name in self.about_resource.value:
+                        if resource_name == '.':
+                            as_dict[arpa] = '.'
+                        else:
+                            as_dict[arpa] = './' + resource_name
+                # Return an empty 'about_resource_path' if the 'about_resource'
+                # key is not found
+                else:
+                    as_dict[arpa] = '' 
 
         for field in self.all_fields(with_absent=with_absent,
                                      with_empty=with_empty):
@@ -1233,15 +1246,8 @@ def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=Tru
             afp = ad['about_file_path']
             afp = '/' + afp if not afp.startswith('/') else afp
             ad['about_file_path'] = afp
-        """if 'about_resource_path' in ad.keys():
+        if not 'about_resource_path' in ad.keys():
             arp = ad['about_resource_path']
-            arp = '/' + arp if not arp.startswith('/') else arp
-            ad['about_resource_path'] = arp"""
-        # Make the 'about_resource_path' endswith '/' if the 'about_resource'
-        # reference the current directory
-        if 'about_resource' in ad.keys() and ad['about_resource'] == '.':
-            if not ad['about_resource_path'].endswith('/'):
-                ad['about_resource_path'] += '/'
         abouts_dictionary_list.append(ad)
     return abouts_dictionary_list
 
