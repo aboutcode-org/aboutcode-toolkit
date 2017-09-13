@@ -826,10 +826,6 @@ version: 0.11.0
         result = as_dict[model.About.about_file_path_attr]
         assert expected == result
 
-        expected = 'complete'
-        result = as_dict[model.About.about_resource_path_attr]
-        assert expected == result
-
     def test_About_as_dict_with_empty(self):
         test_file = get_test_loc('as_dict/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
@@ -1211,9 +1207,35 @@ class CollectorTest(unittest.TestCase):
         expected = get_test_loc('inventory/basic/expected.csv')
         self.check_csv(expected, result)
 
-    # FIXME: The self.chec_csv is failing because there are many keys in the ABOUT files that are
+    def test_collect_inventory_with_about_resource_path_from_directory(self):
+        location = get_test_loc('inventory/basic_with_about_resource_path')
+        result = get_temp_file()
+        errors, abouts = model.collect_inventory(location)
+
+        model.write_output(abouts, result, format = 'csv')
+
+        expected_errors = []
+        assert expected_errors == errors
+
+        expected = get_test_loc('inventory/basic_with_about_resource_path/expected.csv')
+        self.check_csv(expected, result)
+
+    def test_collect_inventory_with_no_about_resource_from_directory(self):
+        location = get_test_loc('inventory/no_about_resource_key')
+        result = get_temp_file()
+        errors, abouts = model.collect_inventory(location)
+
+        model.write_output(abouts, result, format = 'csv')
+
+        expected_errors = [Error(CRITICAL, u'about/about.ABOUT: Field about_resource is required')]
+        assert expected_errors == errors
+
+        expected = get_test_loc('inventory/no_about_resource_key/expected.csv')
+        self.check_csv(expected, result)
+
+    # FIXME: The self.check_csv is failing because there are many keys in the ABOUT files that are
     # not supported. Instead of removing all the non-supported keys in the output
-    # and do the comparson, it may be best to apply the mapping to include theses keys
+    # and do the comparison, it may be best to apply the mapping to include theses keys
     @expectedFailure
     def test_collect_inventory_complex_from_directory(self):
         location = get_test_loc('inventory/complex')

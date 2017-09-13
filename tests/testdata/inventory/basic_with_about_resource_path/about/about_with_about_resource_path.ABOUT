@@ -1,0 +1,6 @@
+about_resource: apache-2.0.LICENSE
+name: Apache License 2.0
+
+about_resource_path: |
+    ./apache-2.0.LICENSE
+    ../../complex/about/apache-2.0.LICENSE

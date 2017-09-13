@@ -275,8 +275,8 @@ class UtilsTest(unittest.TestCase):
         test_file = get_test_loc('load/expected.json')
         expected = [OrderedDict(
                     [('about_file_path', '/load/this.ABOUT'),
+                     ('about_resource_path', '.'),
                      ('about_resource', '.'),
-                     ('about_resource_path', '/load/'),
                      ('name', 'AboutCode'),
                      ('version', '0.11.0')])
                     ]
