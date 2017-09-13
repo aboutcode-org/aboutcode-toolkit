@@ -263,7 +263,7 @@ def generate(location, base_dir, mapping, license_notice_text_location, fetch_li
             for e in file_field_not_exist_errors:
                 errors.append(Error(ERROR, e))
 
-        except Exception, e:
+        except Exception as e:
             # only keep the first 100 char of the exception
             emsg = repr(e)[:100]
             msg = (u'Failed to write ABOUT file at : '

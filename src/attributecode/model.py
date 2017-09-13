@@ -122,7 +122,7 @@ class Field(object):
                 try:
                     validation_errors = self._validate(*args, **kwargs)
                     errors.extend(validation_errors)
-                except Exception, e:
+                except Exception as e:
                     emsg = repr(e)
                     msg = u'Error validating field %(name)s: %(value)r: %(emsg)r'
                     errors.append(Error(CRITICAL, msg % locals()))
@@ -496,7 +496,7 @@ class FileTextField(PathField):
                 location = add_unc(location)
                 text = codecs.open(location, encoding='utf-8', errors='ignore').read()
                 self.value[path] = text
-            except Exception, e:
+            except Exception as e:
                 # only keep the first 100 char of the exception
                 emsg = repr(e)[:100]
                 msg = (u'Field %(name)s: Failed to load text at path: '
@@ -949,7 +949,7 @@ class About(object):
             running_inventory = True
             errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory)
             errors.extend(errs)
-        except Exception, e:
+        except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
             errors.append(Error(CRITICAL, msg % locals()))
 
@@ -1430,7 +1430,7 @@ def valid_api_url(api_url):
         # This will always goes to exception as no key are provided.
         # The purpose of this code is to validate the provided api_url is correct
         response = urllib2.urlopen(request)
-    except urllib2.HTTPError, http_e:
+    except urllib2.HTTPError as http_e:
         # The 403 error code is refer to "Authentication credentials were not provided.".
         # This is correct as no key are provided.
         if http_e.code == 403:

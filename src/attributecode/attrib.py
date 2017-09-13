@@ -100,7 +100,7 @@ def generate(abouts, template_string=None):
 
         rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=sorted_license_key_and_context,
                                    license_text_name_and_key=license_text_name_and_key, license_key_to_license_name=license_key_to_license_name)
-    except Exception, e:
+    except Exception as e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
         err = getattr(e, 'message', '')
@@ -115,7 +115,7 @@ def check_template(template_string):
     """
     try:
         jinja2.Template(template_string)
-    except (jinja2.TemplateSyntaxError, jinja2.TemplateAssertionError,), e:
+    except (jinja2.TemplateSyntaxError, jinja2.TemplateAssertionError) as e:
         return e.lineno, e.message
 
 

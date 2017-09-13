@@ -135,7 +135,7 @@ def request_license_data(url, api_key, license_key):
         if not license_data['results']:
             msg = (u"Invalid 'license': " + license_key)
             errors.append(Error(ERROR, msg))
-    except urllib2.HTTPError, http_e:
+    except urllib2.HTTPError as http_e:
         # some auth problem
         if http_e.code == 403:
             msg = (u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
