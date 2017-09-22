@@ -73,7 +73,7 @@ For instance on Linux the whole installation would be like this::
 
    $ wget https://github.com/dejacode/about-code-tool/archive/v2.3.2.zip
    $ unzip  v2.3.2.zip
-   $ cd attributecode-2.3.2/
+   $ cd aboutcode-toolkit-2.3.2/
    $ source configure
 
 On Windows, the whole installation would be like this:
