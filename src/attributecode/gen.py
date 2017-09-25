@@ -150,7 +150,8 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
             loc = posixpath.join(base_dir, afp)
         about = model.About(about_file_path=afp)
         about.location = loc
-        ld_errors = about.load_dict(fields, base_dir, license_notice_text_location, with_empty=False)
+        running_inventory = False
+        ld_errors = about.load_dict(fields, base_dir, running_inventory, license_notice_text_location, with_empty=False)
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
         for e in ld_errors:
