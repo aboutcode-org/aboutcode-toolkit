@@ -1,6 +1,6 @@
-ABOUT File Specification v1.0
+ABOUT File Specification v2.0
 Purpose
-An ABOUT file provides a simple way to document the provenance (origin and license) and other important or interesting information about a software component. An ABOUT file is a small text file stored in the codebase side-by-side with the software component file or archive that it documents. No modification of the documented software is needed.
+An ABOUT file provides a simple way to document the provenance (origin and license) and other important or interesting information about a software component. An ABOUT file is a small YAML formatted text file stored in the codebase side-by-side with the software component file or archive that it documents. No modification of the documented software is needed.
 
 The ABOUT format is plain text with field name/value pairs separated by a colon. It is easy to read and create by hand and is designed first for humans, rather than machines. The format is well-defined and structured just enough to make it easy to process with software as well. It contains enough information to fulfill key license requirements such as creating credits or attribution notices, collecting redistributable source code, or providing information about new versions of a software component.
 
@@ -15,10 +15,10 @@ A simple and valid ABOUT file named httpd.ABOUT may look like this:
 
       download_url: http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
       
-      license_text_file: httpd.LICENSE
+      license_file: httpd.LICENSE
       notice_file: httpd.NOTICE
       copyright: Copyright (c) 2012 The Apache Software Foundation.
-      license_spdx: Apache-2.0
+      license_expression: apache-2.0
     
 The meaning of this ABOUT file is:
 
@@ -27,7 +27,7 @@ The name of this component is "Apache HTTP Server" with version "2.4.3".
 The home URL for this component is http://httpd.apache.org
 The file "httpd-2.4.3.tar.gz" was originally downloaded from http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
 In the same directory, "httpd.LICENSE" and "httpd.NOTICE" are files that contain respectively the license text and the notice text for this component.
-This component SPDX license identifier is "Apache-2.0"
+This component is licensed under "apache-2.0"
 Specification
 An ABOUT file is an ASCII text file with lines of colon-separated "field name":"value" pairs. This format is loosely based on the Email header field format as specified in RFC5322/RFC822 at http://tools.ietf.org/html/rfc5322 . By reusing this specification, several available tools and libraries can parse and interpret ABOUT files. Note that while Unicode characters are not supported in an ABOUT file proper, external files can contain UTF-8 Unicode.
 
@@ -96,11 +96,11 @@ When an ABOUT file contains both a field name and a _file-suffixed field for the
 
 For example, the full license text for a component is often stored in a separate file named COPYING:
 
-      license_text_file: linux.COPYING
+      license_file: linux.COPYING
     
 In this example, the README file is stored in a doc directory, one directory above the ABOUT file directory, using a relative POSIX path:
 
-      license_text_file: ../docs/ruby.README
+      license_file: ../docs/ruby.README
     
 Field referencing a URL
 
@@ -140,38 +140,39 @@ Other Mandatory fields
 
 When a tool processes an ABOUT file, it must issue an error if these mandatory field are missing.
 
+about_resource: The resource this file referencing to.
 name: Component name.
-version: Component version. A component usually has a version, such as a revision number or hash from a version control system (for a snapshot checked out from VCS such as Subversion or Git). If not available, the version should be the date the component was provisioned, in an ISO date format such as 'YYYY-MM-DD'.
 Optional Information fields
 
+version: Component version. A component usually has a version, such as a revision number or hash from a version control system (for a snapshot checked out from VCS such as Subversion or Git). If not available, the version should be the date the component was provisioned, in an ISO date format such as 'YYYY-MM-DD'.
+about_resource_path: Path the the reference component
 spec_version: The version of the ABOUT file format specification used for this file. This is provided as a hint to readers and tools in order to support future versions of this specification.
-description and description_file: Component description, as a short text or an external file.
+description: Component description, as a short text.
 download_url: A direct URL to download the original file or archive documented by this ABOUT file.
 home_url: URL to the homepage for this component.
-date: The date ('YYYY-MM-DD') when this ABOUT file was created or last validated (such as the date when the URLs were verified). ISO date format such as 'YYYY-MM-DD'.
-readme and readme_file: Readme information for the component, as a short text or an external file.
-changelog and changelog_file: Changelog text for the component, as a short text or an external file.
-news and news_file: News text for the component, as a short text or an external file.
-news_url: URL to a news feed for the component.
-notes and notes_file: Notes and comments about the component, as a short text or an external file.
+changelog_file: Changelog file for the component.
+notes: Notes and comments about the component.
 Optional Owner and Author fields
 
 owner: The name of the primary organization or person(s) that owns or provides the component.
+owner_url: URL to the homepage for the owner.
 contact: Contact information (such as an email address or physical address) for the component owner.
-author and author_file: Name of the organization(s) or person(s) that authored the component, as a short text or an external file.
+author: Name of the organization(s) or person(s) that authored the component.
 Optional Licensing fields
 
-copyright and copyright_file: Copyright statement for the component, as a short text or an external file.
-notice and notice_file: Legal notice or credits for the component, as a short text or an external file.
+copyright: Copyright statement for the component.
+notice_file: Legal notice or credits for the component.
 notice_url: URL to a legal notice for the component.
-license_text and license_text_file: License text that applies to the component, as a short text or an external file. For example, the name of a license file such as LICENSE or COPYING file extracted from a downloaded archive.
+license_file: License file that applies to the component. For example, the name of a license file such as LICENSE or COPYING file extracted from a downloaded archive.
 license_url: URL to the license text for the component.
-license_spdx: The SPDX license short form identifiers for the license of this component. See http://spdx.org/licenses/ for details. You can separate each identifier using " or " and " and " as defined in the SPDX specification 1.1 to document the relationship between multiple license identifiers, such as a choice among multiple licenses. The case of the SPDX ID is not significant, such that APACHE-1.1 and apache-1.1 are the same field value. Tools should normalize the case of the ID to be the official case sensitive SPDX ID.
+license_expression: The license expression for the license of this component. You can separate each identifier using " or " and " and " to document the relationship between multiple license identifiers, such as a choice among multiple licenses.
+license_name: The license short name for the license.
 Optional Licensing flag fields
 
 redistribute: Set this flag to yes if the component license requires source code redistribution. Defaults to no when absent.
 attribute: Set this flag to yes if the component license requires publishing an attribution or credit notice. Defaults to no when absent.
 track_changes: Set this flag to yes if the component license requires tracking changes made to a the component. Defaults to no when absent.
+modified: Set this flag to yes if the component has been modified. Defaults to no when absent.
 Optional Extension fields
 
 You can create extension fields by prefixing them with a short prefix to distinguish these from the standard fields. You should provide documentation for these extensions and create or extend existing tools to support these extensions. Other tools must ignore these extensions.
@@ -204,17 +205,7 @@ Optional Extension fields for checksums and digital signatures
 
 These fields support checksums (such as SHA1 and MD5) and signatures (such as GPG) commonly provided with downloaded archives to verify their integrity. A tool can optionally use these to verify the integrity of a file documented by an ABOUT file. This extension defines the "checksum_" and "signature_" field extension prefixes with suffix identifiers of the type of signature or checksum such as in "checksum_sha1".
 
-checksum_sha1, checksum_md5, checksum_sha256, checksum_sha512: Checksum for the file documented by this ABOUT file in the "about_resource" field. The suffix defines the checksum algorithm such as "_md5", "_sha1", "_sha256". The checksum algorithms and formats are as defined in the GNU Coreutils tools md5sum, sha1sum and sha256sum commands ( http://www.gnu.org/software/coreutils/ ) that follow the specifications defined in the FIPS-180-2 standard ( http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf ). Files can be referenced with the "_file" suffix such as with "checksum_sha1_file" to reference checksums files commonly provided such as here: http://mirrors.ibiblio.org/maven2/org/jdom/jdom/1.1.2/jdom-1.1.2-javadoc.jar.md5
-signature_gpg, signature_gpg_file, signature_pgp, signature_pgp_file: Signature or external signature file for the file documented by this ABOUT file in the "about_resource" field. Signature files for GPG and PGP are commonly provided to verify code archives integrity and provenance such as here: http://www.kernel.org/pub/linux/kernel/v3.0/linux-3.1.7.tar.sign or here: http://archive.apache.org/dist/maven/plugins/maven-acr-plugin-1.0-source-release.zip.asc or here:
+checksum: Checksum for the file documented by this ABOUT file in the "about_resource" field.
 Some examples:
 
-      signature_gpg_file: signature/linux-3.1.7.tar.sign
       checksum_md5: f30b9c173b1f19cf42ffa44f78e4b96c
-    
-Optional Extension fields for DejaCode Enterprise
-
-These fields provide a reference to DejaCode Enterprise objects via a URN, key or name.
-
-dje_component: The DejaCode Enterprise component URN or component name for the component.
-dje_license: The DejaCode Enterprise license key for the component.
-dje_owner: The DejaCode Enterprise owner URN for the component.

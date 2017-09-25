@@ -12,9 +12,9 @@ The AboutCode toolkit and ABOUT files provide a simple way to document the
 (origin and license) and other important or interesting information about
 third-party software components that you use in your project.
 
-You start by storing ABOUT files (a small text file with field/value pairs)
+You start by storing ABOUT files (a small YAML formatted text file with field/value pairs)
 side-by-side with each of the third-party software components you use.
-Each ABOUT file documents one software component origin and license.
+Each ABOUT file documents one software component origin and license(s).
 For more information on the ABOUT file format, visit http://www.dejacode.org
 There are many examples of ABOUT files (valid or invalid) in the testdata/
 directory of the whole repository.
@@ -22,17 +22,17 @@ directory of the whole repository.
 The current version of the AboutCode toolkit can read these ABOUT files so that you
 can collect and validate the inventory of third-party components that you use.
 
-In future versions, this tool will be able to generate attribution notices and
+In addition, this tool is able to generate attribution notices and
 collect redistributable source code used in your project to help you comply
 with open source licenses requirements.
 
-This version of the ABOUT tool follows the ABOUT specification version 0.8.1 at:
-http://www.dejacode.org/about_spec_v0.8.1.html
+This version of the ABOUT tool follows the ABOUT specification version 2.0 at:
+https://github.com/nexB/aboutcode-toolkit/blob/master/SPEC
 
 
 REQUIREMENTS
 ------------
-The AboutCode toolkit is tested with Python 2.6 or 2.7 on Linux, Mac and Windows.
+The AboutCode toolkit is tested with 2.7 on Linux, Mac and Windows.
 You will need to install a Python interpreter if you do not have one already
 installed.
 
