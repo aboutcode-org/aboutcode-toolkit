@@ -398,7 +398,7 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('parser_tests/about_resource_field.ABOUT')
         a = model.About(test_file)
         assert [] == a.errors
-        result = a.about_resource.value['about_resource.c']
+        result = a.about_resource_path.value['./about_resource.c']
         # this means we have a location
         self.assertNotEqual([], result)
 
@@ -415,7 +415,7 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('parser_tests/missing_about_ref.ABOUT')
         file_path = posixpath.join(posixpath.dirname(test_file), 'about_file_missing.c')
         a = model.About(test_file)
-        err_msg = u'Field about_resource: Path %s not found' % file_path
+        err_msg = u'Field about_resource_path: Path %s not found' % file_path
         expected = [
             Error(CRITICAL, err_msg)]
         result = a.errors
@@ -955,7 +955,7 @@ copyright: >
         a = model.About()
         a.load(test_file)
         file_path = posixpath.join(posixpath.dirname(test_file), 'nose-selecttests-0.3.zip')
-        err_msg = u'Field about_resource: Path %s not found' % file_path
+        err_msg = u'Field about_resource_path: Path %s not found' % file_path
         errors = [
             Error(INFO, u'Field dje_license is not a supported field and is ignored.'),
             Error(INFO, u'Field license_text_file is not a supported field and is ignored.'),
@@ -1004,6 +1004,7 @@ copyright: >
     def test_load_dict_handles_field_validation_correctly(self):
         self.maxDiff = None
         test = {u'about_resource': u'.',
+                u'about_resource_path': u'.',
                 u'attribute': u'yes',
                 u'author': u'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez',
                 u'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
@@ -1101,8 +1102,8 @@ class CollectorTest(unittest.TestCase):
         file_path1 = posixpath.join(test_loc, 'distribute_setup.py')
         file_path2 = posixpath.join(test_loc, 'date_test.py')
 
-        err_msg1 = u'non-supported_date_format.ABOUT: Field about_resource: Path %s not found' % file_path1
-        err_msg2 = u'supported_date_format.ABOUT: Field about_resource: Path %s not found' % file_path2
+        err_msg1 = u'non-supported_date_format.ABOUT: Field about_resource_path: Path %s not found' % file_path1
+        err_msg2 = u'supported_date_format.ABOUT: Field about_resource_path: Path %s not found' % file_path2
         expected_errors = [
             Error(INFO, u'non-supported_date_format.ABOUT: Field date is not a supported field and is ignored.'),
             Error(INFO, u'supported_date_format.ABOUT: Field date is not a supported field and is ignored.'),

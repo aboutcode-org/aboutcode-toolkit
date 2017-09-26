@@ -61,11 +61,9 @@ class GenTest(unittest.TestCase):
         errors, abouts = gen.load_inventory(mapping, location, base_dir)
 
         file_path = posixpath.normpath(posixpath.join(base_dir, '.'))
-        err_msg = u'Field about_resource: Path %s not found' % file_path
 
         expected_errors = [
-            Error(INFO, u'Field custom1 is not a supported field and is ignored.'),
-            Error(CRITICAL, err_msg)]
+            Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
         assert expected_errors == errors
 
         expected = [u'about_resource: .\n'
@@ -136,6 +134,7 @@ class GenTest(unittest.TestCase):
                         for a in abouts][0]
         expected = (u'about_resource: .\n'
                     u'name: AboutCode\n'
+                    u'about_resource_path: .\n'
                     u'version: 0.11.0\n'
                     u'description: |\n'
                     u'    multi\n'
