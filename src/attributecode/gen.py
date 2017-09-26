@@ -226,6 +226,13 @@ def generate(location, base_dir, mapping, license_notice_text_location, fetch_li
                     about.about_resource.original_value = posixpath.basename(about.about_file_path)
                 about.about_resource.present = True
 
+            # Generate value for 'about_resource_path' if it does not exist
+            # Basically, this should be the same as the 'about_resource'
+            if not about.about_resource_path.value:
+                about.about_resource_path.value = OrderedDict()
+                about.about_resource_path.value = about.about_resource.value
+                about.about_resource_path.present = True
+
             if gen_license:
                 about.license_file.value = OrderedDict()
                 # Write generated LICENSE file
