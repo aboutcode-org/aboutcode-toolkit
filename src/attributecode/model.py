@@ -383,6 +383,9 @@ class PathField(ListField):
             self.base_dir = util.to_posix(self.base_dir)
 
         name = self.name
+        # FIXME: This is a temp fix for #286
+        # The field in ignore_checking_list is validated in the check_file_field_exist function 
+        ignore_checking_list = [u'license_file', u'notice_file', u'changelog_file']
         # mapping of normalized paths to a location or None
         paths = OrderedDict()
         for path in self.value:
@@ -402,12 +405,12 @@ class PathField(ListField):
             # set from the 'license-text-location' option, so the tool should check
             # at the 'license-text-location' instead of the 'base_dir'
             if self.base_dir or self.license_notice_text_location:
-                if self.license_notice_text_location:
+                if self.license_notice_text_location and name in ignore_checking_list:
                     location = posixpath.join(self.license_notice_text_location, path)
                 else:
                     # The 'about_resource_path' should be a joined path with
                     # the 'about_file_path' and the 'base_dir
-                    if not self.running_inventory and name == 'about_resource_path':
+                    if not self.running_inventory and self.about_file_path:
                         # Get the parent directory of the 'about_file_path'
                         afp_parent = posixpath.dirname(self.about_file_path)
 
@@ -427,9 +430,6 @@ class PathField(ListField):
                 if not os.path.exists(location):
                     # We don't want to show the UNC_PREFIX in the error message
                     location = util.to_posix(location.strip(UNC_PREFIX))
-                    # FIXME: This is a temp fix for #286
-                    # The field in ignore_checking_list is validated in the check_file_field_exist function 
-                    ignore_checking_list = [u'license_file', u'notice_file', u'changelog_file']
                     if not name in ignore_checking_list:
                         msg = (u'Field %(name)s: Path %(location)s not found'
                                % locals())
@@ -647,9 +647,10 @@ class About(object):
 
         """
         self.fields = OrderedDict([
-            ('about_resource', AboutResourceField(required=True)),
+            ('about_resource', ListField(required=True)),
+            #('about_resource', AboutResourceField(required=True)),
             ('name', SingleLineField(required=True)),
-            ('about_resource_path', PathField()),
+            ('about_resource_path', AboutResourceField()),
 
             ('version', SingleLineField()),
             ('download_url', UrlField()),
@@ -758,7 +759,7 @@ class About(object):
         """
         Return a serialized string of resolved resource paths, one per line.
         """
-        abrf = self.about_resource
+        abrf = self.about_resource_path
         abrf.resolve(self.about_file_path)
         return u'\n'.join(abrf.resolved_paths)
 
@@ -934,7 +935,8 @@ class About(object):
         errors.extend(validation_errors)
 
         # do not forget to resolve about resource paths
-        self.about_resource.resolve(self.about_file_path)
+        # The 'about_resource' field is now a ListField and those do not need to resolve
+        # self.about_resource.resolve(self.about_file_path)
         return errors
 
     def load(self, location):
@@ -1038,10 +1040,12 @@ class About(object):
             about_file_path = add_unc(about_file_path)
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
             dumped.write(self.dumps(with_absent, with_empty))
-            for about_resource_value in self.about_resource.value:
+            # FIXME: Why do I have to check here? Shouldn't it be checked during validation?
+            for about_resource_value in self.about_resource_path.value:
                 path = posixpath.join(dirname(util.to_posix(about_file_path)), about_resource_value)
                 if not posixpath.exists(path):
                     path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
+                    path = os.path.normpath(path)
                     msg = (u'The reference file : '
                            u'%(path)s '
                            u'does not exist' % locals())
