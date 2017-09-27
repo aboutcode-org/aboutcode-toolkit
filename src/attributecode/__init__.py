@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -21,7 +21,7 @@ from __future__ import print_function
 from collections import namedtuple
 import logging
 
-__version__ = '3.0.0.dev4'
+__version__ = '3.0.0.dev5'
 
 __about_spec_version__ = '2.0.0.dev2'
 
