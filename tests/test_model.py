@@ -584,8 +584,8 @@ download_url:
 description: AboutCode is a tool to process ABOUT files. An ABOUT file is a file.
 home_url: http://dejacode.org
 notes:
-license: apache-2.0 public-domain
-license_expression:
+license: apache-2.0
+license_expression: apache-2.0
 license_name:
 license_file: apache-2.0.LICENSE
 license_url:
@@ -731,6 +731,7 @@ description: |
     An ABOUT file is a file.
 home_url: http://dejacode.org
 license: apache-2.0
+license_expression: apache-2.0
 license_file: apache-2.0.LICENSE
 copyright: Copyright (c) 2013-2014 nexB Inc.
 notice_file: NOTICE
@@ -839,6 +840,7 @@ version: 0.11.0
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     'description': u'AboutCode is a tool\nfor files.',
                     'license': u'apache-2.0',
+                    'license_expression': u'apache-2.0',
                     'name': u'AboutCode',
                     'owner': u'nexB Inc.'}
         result = a.as_dict(with_paths=False,
@@ -866,7 +868,7 @@ version: 0.11.0
                     'download_url': u'',
                     'home_url': u'',
                     'license': u'apache-2.0',
-                    'license_expression': u'',
+                    'license_expression': u'apache-2.0',
                     'license_file': u'',
                     'license_name': u'',
                     'license_url': u'',
@@ -904,6 +906,7 @@ version: 0.11.0
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     'description': u'AboutCode is a tool\nfor files.',
                     'license': u'apache-2.0',
+                    'license_expression': u'apache-2.0',
                     'name': u'AboutCode',
                     'owner': u'nexB Inc.'}
         result = a.as_dict(with_paths=False,
@@ -982,7 +985,7 @@ copyright: >
                 u'custom1': u'some custom',
                 u'custom_empty': u'',
                  'description': u'AboutCode is a tool\nfor files.',
-                 'license': u'apache-2.0',
+                 'license_expression': u'apache-2.0',
                  'name': u'AboutCode',
                  'owner': u'nexB Inc.'}
 
@@ -990,7 +993,7 @@ copyright: >
                  'author': u'',
                  'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                  'description': u'AboutCode is a tool\nfor files.',
-                 'license': u'apache-2.0',
+                 'license_expression': u'apache-2.0',
                  'name': u'AboutCode',
                  'owner': u'nexB Inc.'}
 
@@ -1010,7 +1013,7 @@ copyright: >
                 u'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                 u'description': u'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
                 u'home_url': u'http://dejacode.org',
-                u'license': u'apache-2.0 public-domain',
+                u'license_expression': u'apache-2.0',
                 u'license_file': u'apache-2.0.LICENSE',
                 u'name': u'AboutCode',
                 u'notice_file': u'NOTICE',

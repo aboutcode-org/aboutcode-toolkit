@@ -17,6 +17,7 @@ description: |
     An ABOUT file is a file.
 
 license: apache-2.0
+license_expression: apache-2.0
 license_file: apache-2.0.LICENSE
 copyright: Copyright (c) 2013-2014 nexB Inc.
 
