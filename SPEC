@@ -165,8 +165,9 @@ notice_file: Legal notice or credits for the component.
 notice_url: URL to a legal notice for the component.
 license_file: License file that applies to the component. For example, the name of a license file such as LICENSE or COPYING file extracted from a downloaded archive.
 license_url: URL to the license text for the component.
-license_expression: The license expression for the license of this component. You can separate each identifier using " or " and " and " to document the relationship between multiple license identifiers, such as a choice among multiple licenses.
+license_expression: The license expression that apply to the component. You can separate each identifier using " or " and " and " to document the relationship between multiple license identifiers, such as a choice among multiple licenses.
 license_name: The license short name for the license.
+license: The license key(s) for the component.
 Optional Licensing flag fields
 
 redistribute: Set this flag to yes if the component license requires source code redistribution. Defaults to no when absent.
