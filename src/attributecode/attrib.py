@@ -49,7 +49,7 @@ def generate(abouts, template_string=None):
         captured_license = []
         license_key_and_context = {}
         sorted_license_key_and_context = {}
-        license_text_name_and_key = {}
+        license_file_name_and_key = {}
         license_key_to_license_name = {}
         # FIXME: This need to be simplified
         for about in abouts:
@@ -67,7 +67,7 @@ def generate(abouts, template_string=None):
                             license_key = license_text_name
                         license_key_and_context[license_key] = about.license_file.value[license_text_name]
                         sorted_license_key_and_context = collections.OrderedDict(sorted(license_key_and_context.items()))
-                        license_text_name_and_key[license_text_name] = license_key
+                        license_file_name_and_key[license_text_name] = license_key
 
             # Convert/map the key in license expression to license name
             if about.license_expression.value and about.license_name.value:
@@ -99,7 +99,7 @@ def generate(abouts, template_string=None):
                 about.license_name_expression = lic_name_expression 
 
         rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=sorted_license_key_and_context,
-                                   license_text_name_and_key=license_text_name_and_key, license_key_to_license_name=license_key_to_license_name)
+                                   license_file_name_and_key=license_file_name_and_key, license_key_to_license_name=license_key_to_license_name)
     except Exception as e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
