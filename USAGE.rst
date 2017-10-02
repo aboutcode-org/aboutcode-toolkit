@@ -90,7 +90,6 @@ Options
     $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT
 
 
-
 The following information are passed to the jinja2 and, therefore, can be used for your custom template:
  * about object: the about objects
  * common_licenses: a common license keys list in licenses.py
