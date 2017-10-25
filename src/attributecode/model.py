@@ -686,7 +686,8 @@ class About(object):
             ('vcs_branch', SingleLineField()),
             ('vcs_revision', SingleLineField()),
 
-            ('checksum', ListField()),
+            ('checksum_md5', ListField()),
+            ('checksum_sha1', ListField()),
             ('spec_version', SingleLineField()),
         ])
 

@@ -202,11 +202,12 @@ or
       vcs_path: tools/lib/traceevent
       vcs_revision: b59958d90b3e75a3b66cd311661535f94f5be4d1
     
-Optional Extension fields for checksums and digital signatures
+Optional Extension fields for checksums
 
-These fields support checksums (such as SHA1 and MD5) and signatures (such as GPG) commonly provided with downloaded archives to verify their integrity. A tool can optionally use these to verify the integrity of a file documented by an ABOUT file. This extension defines the "checksum_" and "signature_" field extension prefixes with suffix identifiers of the type of signature or checksum such as in "checksum_sha1".
+These fields support checksums (such as SHA1 and MD5)commonly provided with downloaded archives to verify their integrity. A tool can optionally use these to verify the integrity of a file documented by an ABOUT file.
 
-checksum: Checksum for the file documented by this ABOUT file in the "about_resource" field.
+checksum_md5: MD5 for the file documented by this ABOUT file in the "about_resource" field.
+checksum_sha1: SHA1 for the file documented by this ABOUT file in the "about_resource" field.
 Some examples:
 
       checksum_md5: f30b9c173b1f19cf42ffa44f78e4b96c

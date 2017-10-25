@@ -182,8 +182,13 @@ among multiple licenses.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>checksum</td>
-    <td>Checksum value for the file</td>
+    <td>checksum_md5</td>
+    <td>MD5 value for the file</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>checksum_sha1</td>
+    <td>SHA1 value for the file</td>
     <td>Optional</td>
   </tr>
   <tr>

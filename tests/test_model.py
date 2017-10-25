@@ -607,7 +607,8 @@ vcs_path:
 vcs_tag:
 vcs_branch:
 vcs_revision:
-checksum:
+checksum_md5:
+checksum_sha1:
 spec_version:
 '''
         assert expected == a.dumps(with_absent=True)
@@ -681,7 +682,8 @@ spec_version:
             'vcs_tag',
             'vcs_branch',
             'vcs_revision',
-            'checksum',
+            'checksum_md5',
+            'checksum_sha1',
             'spec_version',
             'f',
             'g']
@@ -781,7 +783,8 @@ vcs_path:
 vcs_tag:
 vcs_branch:
 vcs_revision:
-checksum:
+checksum_md5:
+checksum_sha1:
 spec_version:
 '''
         result = a.dumps(with_absent=True)
@@ -861,7 +864,8 @@ version: 0.11.0
                     'author': u'',
                     'attribute': u'',
                     'changelog_file': u'',
-                    'checksum': u'',
+                    'checksum_md5': u'',
+                    'checksum_sha1': u'',
                     'contact': u'',
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     'description': u'AboutCode is a tool\nfor files.',
