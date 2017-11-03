@@ -16,21 +16,21 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import codecs
 from collections import OrderedDict
 import logging
 import posixpath
-import unicodecsv
 
+import unicodecsv
 
 from attributecode import ERROR
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import model
-from attributecode import util
-from attributecode.model import verify_license_files_in_location
 from attributecode.model import check_file_field_exist
+from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import to_posix
 

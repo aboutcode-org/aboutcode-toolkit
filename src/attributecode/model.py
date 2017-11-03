@@ -14,26 +14,30 @@
 # ============================================================================
 
 """
-AboutCode is a tool to process ABOUT files. ABOUT files are small text files
-that document the provenance (aka. the origin and license) of software
-components as well as the essential obligation such as attribution/credits and
-source code redistribution. See the ABOUT spec at http://dejacode.org.
+AboutCode toolkit is a tool to process ABOUT files. ABOUT files are
+small text files that document the provenance (aka. the origin and
+license) of software components as well as the essential obligation
+such as attribution/credits and source code redistribution. See the
+ABOUT spec at http://dejacode.org.
 
-AbouCode reads and validates ABOUT files and collect software components
-inventories.
+AboutCode toolkit reads and validates ABOUT files and collect software
+components inventories.
 """
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
+from collections import OrderedDict
 import codecs
 import json
 import os
 import posixpath
-import re
-import unicodecsv
-from collections import OrderedDict
 from posixpath import dirname
+import re
+
+from license_expression import Licensing
+import unicodecsv
 
 try:
     import urllib2  # Python 2
@@ -52,14 +56,17 @@ except NameError:
 
 from attributecode import CRITICAL
 from attributecode import ERROR
-from attributecode import Error
 from attributecode import INFO
 from attributecode import WARNING
 from attributecode import api
+from attributecode import Error
 from attributecode import saneyaml
 from attributecode import util
-from attributecode.util import add_unc, UNC_PREFIX, UNC_PREFIX_POSIX, on_windows, copy_license_notice_files
-from license_expression import Licensing
+from attributecode.util import add_unc
+from attributecode.util import copy_license_notice_files
+from attributecode.util import on_windows
+from attributecode.util import UNC_PREFIX
+from attributecode.util import UNC_PREFIX_POSIX
 
 
 class Field(object):
@@ -384,7 +391,7 @@ class PathField(ListField):
 
         name = self.name
         # FIXME: This is a temp fix for #286
-        # The field in ignore_checking_list is validated in the check_file_field_exist function 
+        # The field in ignore_checking_list is validated in the check_file_field_exist function
         ignore_checking_list = [u'license_file', u'notice_file', u'changelog_file']
         # mapping of normalized paths to a location or None
         paths = OrderedDict()
@@ -648,7 +655,7 @@ class About(object):
         """
         self.fields = OrderedDict([
             ('about_resource', ListField(required=True)),
-            #('about_resource', AboutResourceField(required=True)),
+            # ('about_resource', AboutResourceField(required=True)),
             ('name', SingleLineField(required=True)),
             ('about_resource_path', AboutResourceField()),
 
@@ -822,7 +829,7 @@ class About(object):
                 # Return an empty 'about_resource_path' if the 'about_resource'
                 # key is not found
                 else:
-                    as_dict[arpa] = '' 
+                    as_dict[arpa] = ''
 
         for field in self.all_fields(with_absent=with_absent,
                                      with_empty=with_empty):
@@ -1211,7 +1218,7 @@ def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
     fields = []
     if with_paths:
         fields.append(About.about_file_path_attr)
-        #fields.append(About.about_resource_path_attr)
+        # fields.append(About.about_resource_path_attr)
 
     standard_fields = About().fields.keys()
     if with_absent:

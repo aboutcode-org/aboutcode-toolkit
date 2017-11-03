@@ -16,15 +16,17 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import codecs
 import collections
-import jinja2
 import os
 from posixpath import basename
 from posixpath import dirname
 from posixpath import exists
 from posixpath import join
+
+import jinja2
 
 import attributecode
 from attributecode import ERROR
@@ -73,7 +75,7 @@ def generate(abouts, template_string=None):
             if about.license_expression.value and about.license_name.value:
                 # Split the license expression into list with license key and condition keyword
                 lic_expression_list = about.license_expression.value.split()
-                
+
 
                 lic_name_list = about.license_name.value
                 lic_name_expression_list = []
@@ -96,7 +98,7 @@ def generate(abouts, template_string=None):
                 lic_name_expression = ' '.join(lic_name_expression_list)
 
                 # Add the license name expression string into the about object
-                about.license_name_expression = lic_name_expression 
+                about.license_name_expression = lic_name_expression
 
         rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=sorted_license_key_and_context,
                                    license_file_name_and_key=license_file_name_and_key, license_key_to_license_name=license_key_to_license_name)

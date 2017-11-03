@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -15,29 +15,32 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
+from collections import OrderedDict
 import codecs
 import errno
 import json
 import ntpath
 import os
+from os.path import abspath
+from os.path import dirname
+from os.path import join
 import posixpath
 import shutil
 import socket
 import string
 import sys
+
 import unicodecsv
-from collections import OrderedDict
-from os.path import abspath
-from os.path import dirname
-from os.path import join
 
 try:
     import httplib  # Python 2
 except ImportError:
     import http.client as httplib  # Python 3
 
-from attributecode import CRITICAL, Error
+from attributecode import CRITICAL
+from attributecode import Error
 
 
 on_windows = 'win32' in sys.platform
@@ -197,7 +200,7 @@ def get_relative_path(base_loc, full_loc):
         relative = path[len(base) + 1:]
         # We don't want to keep the first segment of the root of the returned path.
         # See https://github.com/nexB/attributecode/issues/276
-        #relative = posixpath.join(base_name, relative)
+        # relative = posixpath.join(base_name, relative)
     return relative
 
 

@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -16,25 +16,29 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from collections import OrderedDict
 import posixpath
 import unittest
-
 from unittest.case import expectedFailure
+
+from testing_utils import extract_test_loc
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
 from testing_utils import get_test_lines
 from testing_utils import get_unicode_content
 
 import attributecode
+from attributecode import CRITICAL
+from attributecode import ERROR
+from attributecode import INFO
+from attributecode import WARNING
 from attributecode import Error
-from attributecode import CRITICAL, INFO, WARNING
 from attributecode import model
 from attributecode import util
-from attributecode import ERROR
-from attributecode.util import load_csv, add_unc
-from testing_utils import extract_test_loc
+from attributecode.util import add_unc
+from attributecode.util import load_csv
 
 
 class FieldTest(unittest.TestCase):
@@ -450,7 +454,7 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     @expectedFailure
-    # This test need to be updated as the custom field will be ignore if no 
+    # This test need to be updated as the custom field will be ignore if no
     # mapping is set
     def test_About_custom_fields_are_collected_correctly(self):
         test_file = get_test_loc('parse/custom_fields.about')
@@ -463,7 +467,7 @@ class AboutTest(unittest.TestCase):
         assert sorted(expected) == sorted(result)
 
     @expectedFailure
-    # This test need to be updated as the custom field will be ignore if no 
+    # This test need to be updated as the custom field will be ignore if no
     # mapping is set
     def test_About_custom_fields_are_collected_correctly_as_multiline_scalar(self):
         test_file = get_test_loc('parse/custom_fields.about')
@@ -593,7 +597,7 @@ copyright: Copyright (c) 2013-2014 nexB Inc.
 notice_file: NOTICE
 notice_url:
 redistribute:
-attribute: 
+attribute:
 track_change:
 modified:
 changelog_file:
@@ -650,7 +654,7 @@ spec_version:
         # and that all fields are in the correct order
         expected = [
             model.About.about_file_path_attr,
-            #model.About.about_resource_path_attr,
+            # model.About.about_resource_path_attr,
             'about_resource',
             'name',
             'about_resource_path',
@@ -1051,7 +1055,7 @@ copyright: >
         a = model.About(location=test_file, about_file_path=path)
 
         tmp_file = get_temp_file()
-        model.write_output([a], tmp_file, format = 'csv')
+        model.write_output([a], tmp_file, format='csv')
 
         expected = get_test_loc('load/expected.csv')
         self.check_csvs(expected, tmp_file)
@@ -1062,7 +1066,7 @@ copyright: >
         a = model.About(location=test_file, about_file_path=path)
 
         tmp_file = get_temp_file()
-        model.write_output([a], tmp_file, format = 'json')
+        model.write_output([a], tmp_file, format='json')
 
         expected = get_test_loc('load/expected.json')
         self.check_csvs(expected, tmp_file)
@@ -1195,7 +1199,7 @@ class CollectorTest(unittest.TestCase):
         Compare two CSV files at locations as lists of ordered items.
         """
         def as_items(csvfile):
-            mapping= None
+            mapping = None
             return sorted([i.items() for i in util.load_csv(mapping, csvfile)])
 
         expected = as_items(expected)
@@ -1207,7 +1211,7 @@ class CollectorTest(unittest.TestCase):
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.write_output(abouts, result, format = 'csv')
+        model.write_output(abouts, result, format='csv')
 
         expected_errors = []
         assert expected_errors == errors
@@ -1220,7 +1224,7 @@ class CollectorTest(unittest.TestCase):
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.write_output(abouts, result, format = 'csv')
+        model.write_output(abouts, result, format='csv')
 
         expected_errors = []
         assert expected_errors == errors
@@ -1233,7 +1237,7 @@ class CollectorTest(unittest.TestCase):
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.write_output(abouts, result, format = 'csv')
+        model.write_output(abouts, result, format='csv')
 
         expected_errors = [Error(CRITICAL, u'about/about.ABOUT: Field about_resource is required')]
         assert expected_errors == errors
@@ -1250,7 +1254,7 @@ class CollectorTest(unittest.TestCase):
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.write_output(abouts, result, format = 'csv')
+        model.write_output(abouts, result, format='csv')
 
         assert all(e.severity == INFO for e in errors)
 

@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -16,11 +16,13 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from collections import OrderedDict
 import string
 import unittest
 
+from testing_utils import extract_test_loc
 from testing_utils import get_test_loc
 from testing_utils import on_posix
 from testing_utils import on_windows
@@ -28,7 +30,6 @@ from testing_utils import on_windows
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import util
-from testing_utils import extract_test_loc
 
 
 class UtilsTest(unittest.TestCase):

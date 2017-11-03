@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -16,19 +16,19 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
+from collections import OrderedDict
 import posixpath
 import unittest
-from collections import OrderedDict
 
-from testing_utils import get_test_loc
 from testing_utils import get_temp_dir
+from testing_utils import get_test_loc
 
-from attributecode import Error
 from attributecode import ERROR
 from attributecode import INFO
 from attributecode import CRITICAL
-
+from attributecode import Error
 from attributecode import gen
 
 

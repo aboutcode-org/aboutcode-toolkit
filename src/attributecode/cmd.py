@@ -16,15 +16,16 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import codecs
 import logging
 import os
 from os.path import exists, join
+import sys
 
 import click
 import unicodecsv
-import sys
 
 import attributecode
 from attributecode import CRITICAL
@@ -32,14 +33,14 @@ from attributecode import ERROR
 from attributecode import INFO
 from attributecode import NOTSET
 from attributecode import WARNING
-from attributecode import Error
 from attributecode import __about_spec_version__
 from attributecode import __version__
 from attributecode import attrib
+from attributecode import Error
 from attributecode import gen
 from attributecode import model
-from attributecode import severities
 from attributecode.model import About
+from attributecode import severities
 from attributecode.util import extract_zip
 from attributecode.util import to_posix
 
