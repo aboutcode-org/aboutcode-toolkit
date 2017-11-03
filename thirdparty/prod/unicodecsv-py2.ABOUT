@@ -1,0 +1,13 @@
+about_resource: unicodecsv-0.14.1-py2-none-any.whl
+version: 0.14.1
+download_url: https://pypi.python.org/packages/6f/a4/691ab63b17505a26096608cc309960b5a6bdf39e4ba1a793d5f9b1a53270/unicodecsv-0.14.1.tar.gz#md5=c18ffe8ded29a4f429224877b2b34252
+
+name: unicodecsv
+homepage: https://github.com/jdunck/python-unicodecsv
+owner: Jeremy Dunck
+
+license: bsd-new
+license_file: unicodecsv.LICENSE
+
+vcs_tool: git
+vcs_repository: https://github.com/jdunck/python-unicodecsv.git
