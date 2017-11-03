@@ -514,7 +514,8 @@ class FileTextField(PathField):
             try:
                 # TODO: we have lots the location by replacing it with a text
                 location = add_unc(location)
-                text = codecs.open(location, encoding='utf-8', errors='ignore').read()
+                with codecs.open(location, encoding='utf-8', errors='ignore') as txt:
+                    text = txt.read()
                 self.value[path] = text
             except Exception as e:
                 # only keep the first 100 char of the exception
@@ -964,7 +965,8 @@ class About(object):
         errors = []
         try:
             loc = add_unc(loc)
-            input_text = codecs.open(loc, encoding='utf-8').read()
+            with codecs.open(loc, encoding='utf-8') as txt:
+                input_text = txt.read()
             """
             The running_inventory defines if the current process is 'inventory' or not.
             This is used for the validation of the about_resource_path.

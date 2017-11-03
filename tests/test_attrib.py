@@ -32,18 +32,21 @@ class AttribTest(unittest.TestCase):
         assert attrib.check_template('template_string') == None
         assert attrib.check_template('{{template_string') == (1,
           "unexpected end of template, expected 'end of print statement'.",)
-        template = open(get_test_loc('attrib_gen/test.template')).read()
+        with open(get_test_loc('attrib_gen/test.template')) as tmpl:
+            template = tmpl.read()
         assert attrib.check_template(template) == None
 
     def test_check_template_default_is_valid(self):
-        template = open(attrib.default_template).read()
+        with open(attrib.default_template) as tmpl:
+            template = tmpl.read()
         assert attrib.check_template(template) == None
 
     def test_generate(self):
         expected = (u'Apache HTTP Server: 2.4.3\n'
                     u'resource: httpd-2.4.3.tar.gz\n')
         test_file = get_test_loc('attrib_gen/attrib.ABOUT')
-        template = open(get_test_loc('attrib_gen/test.template')).read()
+        with open(get_test_loc('attrib_gen/test.template')) as tmpl:
+            template = tmpl.read()
         _errors, abouts = model.collect_inventory(test_file)
         result = attrib.generate(abouts, template)
         self.assertEqual(expected, result)
@@ -52,6 +55,7 @@ class AttribTest(unittest.TestCase):
         test_file = get_test_loc('attrib_gen/attrib.ABOUT')
         _errors, abouts = model.collect_inventory(test_file)
         result = attrib.generate_from_file(abouts)
-        expected = unicode(open(get_test_loc('attrib_gen/expected_default_attrib.html')).read())
+        with open(get_test_loc('attrib_gen/expected_default_attrib.html')) as exp:
+            expected = unicode(exp.read())
         self.assertEqual([x.rstrip() for x in expected.splitlines()],
                          [x.rstrip() for x in  result.splitlines()])
