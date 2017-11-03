@@ -22,8 +22,12 @@ import codecs
 from collections import OrderedDict
 import logging
 import posixpath
+import sys
 
-import unicodecsv
+if sys.version_info >= (3, 0):
+    from unicodecsv.py3 import UnicodeReader
+else:
+    from unicodecsv.py2 import UnicodeReader
 
 from attributecode import ERROR
 from attributecode import CRITICAL
@@ -51,7 +55,7 @@ def check_duplicated_columns(location):
     """
     location = add_unc(location)
     with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
-        reader = unicodecsv.UnicodeReader(csvfile)
+        reader = UnicodeReader(csvfile)
         columns = reader.next()
         columns = [col for col in columns]
 
@@ -120,7 +124,7 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
             errors.extend(dup_about_paths_err)
             return errors, abouts
     except:
-        msg = ("The essential field 'about_file_path' is not found.")
+        msg = "The essential field 'about_file_path' is not found."
         errors.append(Error(CRITICAL, msg))
         return errors, abouts
 

@@ -181,9 +181,10 @@ class Field(object):
                     value = u'    '.join(value)
             else:
                 value = u''.join(value)
-            serialized = u'%(name)s: %(value)s' % locals()
-        else:
-            serialized = u'%(name)s:' % locals()
+
+        serialized = u'%(name)s:' % locals()
+        if value:
+            serialized += ' ' + '%(value)s' % locals()
         return serialized
 
     def serialized_value(self):
@@ -600,7 +601,7 @@ class BooleanField(SingleLineField):
 
     def _serialized_value(self):
         # default normalized values for serialization
-        if self.value is True:
+        if self.value:
             return u'yes'
         elif self.value is False:
             return u'no'
@@ -921,7 +922,8 @@ class About(object):
                         errors.append(Error(INFO, msg % locals()))
         return errors
 
-    def process(self, fields, about_file_path, running_inventory=False, base_dir=None, license_notice_text_location=None):
+    def process(self, fields, about_file_path, running_inventory=False,
+                base_dir=None, license_notice_text_location=None):
         """
         Hydrate and validate a sequence of field name/value tuples from an
         ABOUT file. Return a list of errors.
@@ -935,15 +937,19 @@ class About(object):
 
         # We want to copy the license_files before the validation
         if license_notice_text_location:
-            copy_license_notice_files(fields, base_dir, license_notice_text_location, afp)
+            copy_license_notice_files(
+                fields, base_dir, license_notice_text_location, afp)
 
         # we validate all fields, not only these hydrated
         all_fields = self.all_fields()
-        validation_errors = validate_fields(all_fields, about_file_path, running_inventory, self.base_dir, self.license_notice_text_location)
+        validation_errors = validate_fields(
+            all_fields, about_file_path, running_inventory,
+            self.base_dir, self.license_notice_text_location)
         errors.extend(validation_errors)
 
-        # do not forget to resolve about resource paths
-        # The 'about_resource' field is now a ListField and those do not need to resolve
+        # do not forget to resolve about resource paths The
+        # 'about_resource' field is now a ListField and those do not
+        # need to resolve
         # self.about_resource.resolve(self.about_file_path)
         return errors
 
