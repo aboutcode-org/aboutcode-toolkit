@@ -14,13 +14,17 @@
 #  limitations under the License.
 # ============================================================================
 
-
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import namedtuple
 import logging
+
+try:
+    basestring  # Python 2
+except NameError:
+    basestring = str  # Python 3
 
 
 __version__ = '3.0.0.dev5'
@@ -68,16 +72,16 @@ def clean_string(s):
     if not s:
         return s
     if s.startswith(('u"', "u'")):
-        msg = s.lstrip('u')
-    msg = s.replace('[u"', '["')
-    msg = s.replace("[u'", "['")
-    msg = s.replace("(u'", "('")
-    msg = s.replace("(u'", "('")
-    msg = s.replace("{u'", "{'")
-    msg = s.replace("{u'", "{'")
-    msg = s.replace(" u'", " '")
-    msg = s.replace(" u'", " '")
-    return msg
+        s = s.lstrip('u')
+    s = s.replace('[u"', '["')
+    s = s.replace("[u'", "['")
+    s = s.replace("(u'", "('")
+    s = s.replace("(u'", "('")
+    s = s.replace("{u'", "{'")
+    s = s.replace("{u'", "{'")
+    s = s.replace(" u'", " '")
+    s = s.replace(" u'", " '")
+    return s
 
 # modeled after the logging levels
 CRITICAL = 50

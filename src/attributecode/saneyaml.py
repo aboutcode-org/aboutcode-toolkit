@@ -35,6 +35,11 @@ try:
 except NameError:
     unicode = str  # Python 3
 
+try:
+    basestring  # Python 2
+except NameError:
+    basestring = str  # Python 3
+
 
 """
 Wrapper around PyYAML to provide sane defaults ensuring that dump/load does

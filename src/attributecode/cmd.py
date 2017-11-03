@@ -200,15 +200,13 @@ OUTPUT: Path to output file to write the attribution to.
     if mapping:
         attributecode.util.have_mapping = True
 
-    err, abouts = model.collect_inventory(location)
-    no_match_errors = attributecode.attrib.generate_and_save(abouts, output, mapping,
-                                                          template_loc=template,
-                                                          inventory_location=inventory)
-    errors = []
-    for e in err:
-        errors.append(e)
+    errors, abouts = model.collect_inventory(location)
+    no_match_errors = attributecode.attrib.generate_and_save(
+        abouts, output, mapping, template_loc=template, inventory_location=inventory)
+
     for no_match_error in no_match_errors:
         errors.append(no_match_error)
+
     log_errors(errors, quiet, os.path.dirname(output))
     click.echo('Finished.')
 

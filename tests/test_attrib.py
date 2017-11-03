@@ -56,6 +56,6 @@ class AttribTest(unittest.TestCase):
         _errors, abouts = model.collect_inventory(test_file)
         result = attrib.generate_from_file(abouts)
         with open(get_test_loc('attrib_gen/expected_default_attrib.html')) as exp:
-            expected = unicode(exp.read())
+            expected = exp.read()
         self.assertEqual([x.rstrip() for x in expected.splitlines()],
                          [x.rstrip() for x in  result.splitlines()])

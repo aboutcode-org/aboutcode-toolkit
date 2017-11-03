@@ -89,17 +89,16 @@ class FieldTest(unittest.TestCase):
         assert None == result
 
     def test_TextField_loads_file(self):
-        field = model.FileTextField(name='f', value='license.LICENSE',
-                                present=True)
+        field = model.FileTextField(
+            name='f', value='license.LICENSE', present=True)
 
 
         base_dir = get_test_loc('fields')
         errors = field.validate(base_dir=base_dir)
         assert [] == errors
 
-        expected = [('license.LICENSE', u'some license text')]
-        result = field.value.items()
-        assert expected == result
+        expected = {'license.LICENSE': u'some license text'}
+        assert expected == field.value
 
     def test_UrlField_is_valid_url(self):
         assert model.UrlField.is_valid_url('http://www.google.com')
@@ -262,11 +261,11 @@ class ParseTest(unittest.TestCase):
         assert expected == result
 
         expected_errors = [
-            Error(CRITICAL, "Invalid line: 0: u'invalid space:value\\n'"),
-            Error(CRITICAL, "Invalid line: 1: u'other-field: value\\n'"),
-            Error(CRITICAL, "Invalid line: 4: u'_invalid_dash: value\\n'"),
-            Error(CRITICAL, "Invalid line: 5: u'3invalid_number: value\\n'"),
-            Error(CRITICAL, "Invalid line: 6: u'invalid.dot: value'")
+            Error(CRITICAL, "Invalid line: 0: 'invalid space:value\\n'"),
+            Error(CRITICAL, "Invalid line: 1: 'other-field: value\\n'"),
+            Error(CRITICAL, "Invalid line: 4: '_invalid_dash: value\\n'"),
+            Error(CRITICAL, "Invalid line: 5: '3invalid_number: value\\n'"),
+            Error(CRITICAL, "Invalid line: 6: 'invalid.dot: value'")
             ]
         assert expected_errors == errors
 
@@ -289,11 +288,11 @@ class ParseTest(unittest.TestCase):
         errors, result = model.parse(test)
         expected = [(u'name', u'name'),
                     (u'about_resource', u'.'),
-                    (u'owner', u'Mat\xedas Aguirre')]
+                    (u'owner', 'Matías Aguirre')]
         assert expected == result
 
         expected_errors = [
-            Error(CRITICAL, "Invalid line: 3: u'Mat\\xedas: unicode field name\\n'")]
+            Error(CRITICAL, "Invalid line: 3: 'Matías: unicode field name\\n'")]
         assert expected_errors == errors
 
     def test_parse_handles_blank_lines_and_spaces_in_field_names(self):
@@ -481,10 +480,8 @@ class AboutTest(unittest.TestCase):
     def test_About_has_errors_for_illegal_custom_field_name(self):
         test_file = get_test_loc('parse/illegal_custom_field.about')
         a = model.About(test_file)
-        result = a.custom_fields.items()
-        expected = [
-            ]
-        assert expected == result
+        result = a.custom_fields
+        assert {} == result
 
     def test_About_file_fields_are_empty_if_present_and_path_missing(self):
         test_file = get_test_loc('parse/missing_notice_license_files.ABOUT')
@@ -496,19 +493,12 @@ class AboutTest(unittest.TestCase):
         err_msg1 = u'Field license_file: Path %s not found' % file_path1
         err_msg2 = u'Field notice_file: Path %s not found' % file_path2
 
-        expected_errors = [
-            err_msg1, err_msg2
-            ]
-
+        expected_errors = [err_msg1, err_msg2]
         errors = model.check_file_field_exist(a, test_file)
         assert expected_errors == errors
-        expected = [(u'test.LICENSE', None)]
-        result = a.license_file.value.items()
-        assert expected == result
 
-        expected = [(u'test.NOTICE', None)]
-        result = a.notice_file.value.items()
-        assert expected == result
+        assert {'test.LICENSE': None} == a.license_file.value
+        assert {'test.NOTICE': None} == a.notice_file.value
 
     def test_About_notice_and_license_text_are_loaded_from_file(self):
         test_file = get_test_loc('parse/license_file_notice_file.ABOUT')

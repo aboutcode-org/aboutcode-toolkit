@@ -136,9 +136,6 @@ def get_locations(location):
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
-    # See https://bugs.python.org/issue4071
-    if on_windows:
-        location = unicode(location)
     location = add_unc(location)
     location = get_absolute(location)
     assert os.path.exists(location)

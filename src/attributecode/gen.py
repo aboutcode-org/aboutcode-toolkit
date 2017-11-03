@@ -182,8 +182,8 @@ def generate(location, base_dir, mapping, license_notice_text_location, fetch_li
     # Check if the fetch_license contains valid argument
     if fetch_license:
         # Strip the ' and " for api_url, and api_key from input
-        api_url = fetch_license[0].strip("'").strip("\"")
-        api_key = fetch_license[1].strip("'").strip("\"")
+        api_url = fetch_license[0].strip("'").strip('"')
+        api_key = fetch_license[1].strip("'").strip('"')
         gen_license = True
 
     bdir = to_posix(base_dir)
