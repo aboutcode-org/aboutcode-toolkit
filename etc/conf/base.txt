@@ -14,8 +14,7 @@ click==6.7
 # used by schematics
 six
 
-pyyaml==3.11
-
+pyyaml==3.12
 
 unicodecsv==0.14.1
 
