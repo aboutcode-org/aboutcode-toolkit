@@ -19,7 +19,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
-import posixpath
 import unittest
 
 from testing_utils import get_temp_dir
@@ -54,13 +53,10 @@ class GenTest(unittest.TestCase):
         assert expected == result
 
     def test_load_inventory(self):
-        self.maxDiff = None
         mapping = None
         location = get_test_loc('gen/inv.csv')
         base_dir = get_test_loc('inv')
         errors, abouts = gen.load_inventory(mapping, location, base_dir)
-
-        file_path = posixpath.normpath(posixpath.join(base_dir, '.'))
 
         expected_errors = [
             Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
@@ -86,7 +82,8 @@ class GenTest(unittest.TestCase):
         errors, _abouts = gen.generate(location, gen_dir, mapping, license_text_location, extract_license, with_empty=False, with_absent=False)
 
         expected_errors_msg = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
-        assert (len(errors) == 1, 'Should return 1 error.')
+        assert errors
+        assert len(errors) == 1
         assert expected_errors_msg in errors[0].message
 
     def test_generation_with_no_about_resource(self):

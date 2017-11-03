@@ -383,7 +383,6 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     def test_About_hydrate_normalize_field_names_to_lowercase(self):
-        self.maxDiff = None
         test_file = get_test_lines('parser_tests/upper_field_names.ABOUT')
         errors, fields = model.parse(test_file)
         assert [] == errors
@@ -567,13 +566,6 @@ this software and releases the component to Public Domain.
         a = model.About(test_file, about_file_path='complete2/about.ABOUT')
         test_file2 = get_test_loc('equal/complete/about.ABOUT')
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
-        self.maxDiff = None
-        # print()
-        # print('a')
-        # print(a.dumps(True))
-        # print()
-        # print('b')
-        # print(b.dumps(True))
         assert a.dumps(True) == b.dumps(True)
         assert a == b
 
@@ -723,7 +715,6 @@ spec_version:
 
 class SerializationTest(unittest.TestCase):
     def test_About_dumps(self):
-        self.maxDiff = None
         test_file = get_test_loc('parse/complete/about.ABOUT')
         a = model.About(test_file)
         assert [] == a.errors
@@ -1013,7 +1004,6 @@ copyright: >
         assert expected == dict(as_dict)
 
     def test_load_dict_handles_field_validation_correctly(self):
-        self.maxDiff = None
         test = {u'about_resource': u'.',
                 u'about_resource_path': u'.',
                 u'attribute': u'yes',
