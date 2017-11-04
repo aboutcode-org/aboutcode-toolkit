@@ -1,0 +1,13 @@
+about_resource: backports.csv-1.0.5-py2.py3-none-any.whl
+version: 1.0.5
+download_url: https://pypi.python.org/packages/23/01/0b1fce3fd8199fe32338dc66747baad52c7183b7f587128bc77cefde0620/backports.csv-1.0.5-py2.py3-none-any.whl#md5=2b3dc8b5ca0a6f50ed50595a074ed870
+
+name: backports.csv
+homepage: https://github.com/ryanhiebert/backports.csv
+owner: Ryan Hiebert
+
+license: python
+license_file: PSF.LICENSE
+
+vcs_tool: git
+vcs_repository: https://github.com/ryanhiebert/backports.csv.git

@@ -32,7 +32,7 @@ import socket
 import string
 import sys
 
-import unicodecsv
+import backports.csv as csv
 
 try:
     import httplib  # Python 2
@@ -230,12 +230,12 @@ def resource_name(path):
     return right.strip()
 
 
-class OrderedDictReader(unicodecsv.DictReader):
+class OrderedDictReader(csv.DictReader):
     """
     A DictReader that return OrderedDicts
     """
     def next(self):
-        row_dict = unicodecsv.DictReader.next(self)
+        row_dict = csv.DictReader.next(self)
         result = OrderedDict()
         # reorder based on fieldnames order
         for name in self.fieldnames:
@@ -253,7 +253,7 @@ def get_mappings(location=None):
         location = abspath(dirname(__file__))
     mappings = {}
     try:
-        with open(join(location, 'mapping.config'), 'rU') as mapping_file:
+        with open(join(location, 'mapping.config')) as mapping_file:
             for line in mapping_file:
                 if not line or not line.strip() or line.strip().startswith('#'):
                     continue
@@ -282,7 +282,7 @@ def apply_mappings(abouts, mappings=None):
     mappings = mappings or get_mappings()
     mapped_abouts = []
     for about in abouts:
-        mapped_about = {}
+        mapped_about = OrderedDict()
         for key in about:
             mapped = []
             for mapping_keys, input_keys in mappings.items():
@@ -321,12 +321,12 @@ def load_csv(mapping, location):
     results = []
     with codecs.open(location, mode='rb', encoding='utf-8', errors='ignore') as csvfile:
         for row in OrderedDictReader(csvfile):
-            input_row = {}
-            # convert all the column keys to lower case as the same behavior as
-            # when user use the --mapping
-            for key in row.keys():
-                input_row[key.lower()] = row[key]
-            results.append(input_row)
+            # convert all the column keys to lower case as the same
+            # behavior as when user use the --mapping
+            updated_row = OrderedDict(
+                [(key.lower(), value) for key, value in row.items()]
+            )
+            results.append(updated_row)
     # user has the mapping option set
     if mapping:
         results = apply_mappings(results)

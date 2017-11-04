@@ -19,6 +19,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
+import json
 import posixpath
 import unittest
 from unittest.case import expectedFailure
@@ -39,6 +40,27 @@ from attributecode import model
 from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import load_csv
+
+
+def check_csvs(expected, result):
+    """
+    Assert that the contents of two CSV files are equal.
+    """
+    mapping = None
+    expected = sorted([d.items() for d in load_csv(mapping, expected)])
+    result = sorted([d.items() for d in load_csv(mapping, result)])
+    assert expected == result
+
+
+def check_json(expected, result):
+    """
+    Assert that the contents of two JSON files are equal.
+    """
+    with open(expected) as e:
+        expected = json.load(e, object_pairs_hook=OrderedDict)
+    with open(result) as r:
+        result = json.load(r, object_pairs_hook=OrderedDict)
+    assert expected == result
 
 
 class FieldTest(unittest.TestCase):
@@ -1016,19 +1038,6 @@ copyright: >
                             with_empty=True)
         assert test == dict(as_dict)
 
-    def check_csvs(self, expected, result):
-        """
-        Assert that the content of two CSV file locations are equal.
-        """
-        mapping = None
-        expected = [d.items() for d in load_csv(mapping, expected)]
-        result = [d.items() for d in load_csv(mapping, result)]
-        for ie, expect in enumerate(expected):
-            res = result[ie]
-            for ii, exp in enumerate(expect):
-                r = res[ii]
-                assert exp == r
-
     def test_write_output_csv(self):
         path = 'load/this.ABOUT'
         test_file = get_test_loc(path)
@@ -1038,7 +1047,7 @@ copyright: >
         model.write_output([a], tmp_file, format='csv')
 
         expected = get_test_loc('load/expected.csv')
-        self.check_csvs(expected, tmp_file)
+        check_csvs(expected, tmp_file)
 
     def test_write_output_json(self):
         path = 'load/this.ABOUT'
@@ -1049,7 +1058,8 @@ copyright: >
         model.write_output([a], tmp_file, format='json')
 
         expected = get_test_loc('load/expected.json')
-        self.check_csvs(expected, tmp_file)
+        check_json(expected, tmp_file)
+
 
 class CollectorTest(unittest.TestCase):
 

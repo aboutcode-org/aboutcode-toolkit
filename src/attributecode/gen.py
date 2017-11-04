@@ -22,12 +22,8 @@ import codecs
 from collections import OrderedDict
 import logging
 import posixpath
-import sys
 
-if sys.version_info >= (3, 0):
-    from unicodecsv.py3 import UnicodeReader
-else:
-    from unicodecsv.py2 import UnicodeReader
+import backports.csv as csv
 
 from attributecode import ERROR
 from attributecode import CRITICAL
@@ -55,7 +51,7 @@ def check_duplicated_columns(location):
     """
     location = add_unc(location)
     with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
-        reader = UnicodeReader(csvfile)
+        reader = csv.reader(csvfile)
         columns = reader.next()
         columns = [col for col in columns]
 

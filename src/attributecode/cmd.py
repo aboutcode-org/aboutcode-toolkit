@@ -25,7 +25,6 @@ from os.path import exists, join
 import sys
 
 import click
-import unicodecsv
 
 import attributecode
 from attributecode import CRITICAL

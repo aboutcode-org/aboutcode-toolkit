@@ -36,8 +36,8 @@ import posixpath
 from posixpath import dirname
 import re
 
+import backports.csv as csv
 from license_expression import Licensing
-import unicodecsv
 
 try:
     import urllib2  # Python 2
@@ -1294,7 +1294,7 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True):
     with codecs.open(location, mode='wb', encoding='utf-8') as output_file:
         if format == 'csv':
             fieldnames = field_names(abouts)
-            writer = unicodecsv.DictWriter(output_file, fieldnames)
+            writer = csv.DictWriter(output_file, fieldnames)
             writer.writeheader()
             for row in about_dictionary_list:
                 # See https://github.com/dejacode/about-code-tool/issues/167

@@ -21,6 +21,7 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 import string
 import unittest
+from unittest.case import expectedFailure
 
 from testing_utils import extract_test_loc
 from testing_utils import get_test_loc
@@ -304,7 +305,8 @@ class UtilsTest(unittest.TestCase):
 
     # The column names should be converted to lowercase as the same behavior as
     # when user use the mapping.config
-    """def test_load_csv_does_not_convert_column_names_to_lowercase(self):
+    @expectedFailure
+    def test_load_csv_does_not_convert_column_names_to_lowercase(self):
         mapping = None
         test_file = get_test_loc('util/about_key_with_upper_case.csv')
         expected = [OrderedDict(
@@ -314,7 +316,7 @@ class UtilsTest(unittest.TestCase):
                      ('Version', '0.8.1')])
                     ]
         result = util.load_csv(mapping, test_file)
-        assert expected == result"""
+        assert expected == result
 
     def test_get_locations_with_very_long_path(self):
         longpath = (
