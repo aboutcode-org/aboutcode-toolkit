@@ -139,7 +139,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.option('--license-notice-text-location', nargs=1,
               type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
               help="Copy the 'license_file' from the directory to the generated location")
-@click.option('--mapping', is_flag=True, help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
+@click.option('--mapping', is_flag=True, help='Use file mapping.config with mapping between input keys and ABOUT field names')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
 def gen(location, output, mapping, license_notice_text_location, fetch_license, quiet):
     """
@@ -150,13 +150,16 @@ LOCATION: Path to a JSON or CSV inventory file.
 
 OUTPUT: Path to a directory where ABOUT files are generated.
     """
-    click.echo('Running attributecode version ' + __version__)
+    click.echo('Running aboutcode-toolkit version ' + __version__)
     if not location.endswith('.csv') and not location.endswith('.json'):
         click.echo('ERROR: Input file. Only .csv and .json files are supported.')
         return
     click.echo('Generating ABOUT files...')
 
-    errors, abouts = attributecode.gen.generate(location, output, mapping, license_notice_text_location, fetch_license)
+    errors, abouts = attributecode.gen.generate(
+        location=location, base_dir=output, mapping=mapping, 
+        license_notice_text_location=license_notice_text_location, 
+        fetch_license=fetch_license)
 
     number_of_about_file = len(abouts)
     number_of_error = 0
@@ -174,7 +177,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.argument('output', nargs=1, required=True, type=click.Path(exists=False, writable=True, resolve_path=True))
 @click.option('--inventory', required=False, type=click.Path(exists=True, file_okay=True, resolve_path=True),
               help='Path to an inventory file')
-@click.option('--mapping', is_flag=True, help='Use for mapping between the input keys and the ABOUT field names - mapping.config')
+@click.option('--mapping', is_flag=True, help='Use file mapping.config with mapping between input keys and ABOUT field names')
 @click.option('--template', type=click.Path(exists=True), nargs=1,
               help='Path to a custom attribution template')
 @click.option('-q', '--quiet', is_flag=True, help='Do not print any error/warning.')
@@ -196,12 +199,11 @@ OUTPUT: Path to output file to write the attribution to.
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    if mapping:
-        attributecode.util.have_mapping = True
-
     errors, abouts = model.collect_inventory(location)
     no_match_errors = attributecode.attrib.generate_and_save(
-        abouts, output, mapping, template_loc=template, inventory_location=inventory)
+        abouts=abouts, output_location=output, 
+        use_mapping=mapping, template_loc=template, 
+        inventory_location=inventory)
 
     for no_match_error in no_match_errors:
         errors.append(no_match_error)
@@ -218,7 +220,7 @@ Validating ABOUT files at LOCATION.
 
 LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
     """
-    click.echo('Running attributecode version ' + __version__)
+    click.echo('Running aboutcode-toolkit version ' + __version__)
     click.echo('Checking ABOUT files...')
 
     errors, abouts = attributecode.model.collect_inventory(location)
@@ -240,6 +242,7 @@ LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
         sys.exit(1)
     else:
         click.echo('No error is found.')
+
 
 def log_errors(errors, quiet, base_dir=False):
     """

@@ -38,8 +38,7 @@ class CmdTest(unittest.TestCase):
         Compare two CSV files at locations as lists of ordered items.
         """
         def as_items(csvfile):
-            mapping = None
-            return sorted([i.items() for i in util.load_csv(mapping, csvfile)])
+            return sorted([i.items() for i in util.load_csv(csvfile)])
 
         expected = as_items(expected)
         result = as_items(result)

@@ -138,8 +138,8 @@ def generate_from_file(abouts, template_loc=None):
     return generate(abouts, template_string=tpls)
 
 
-def generate_and_save(abouts, output_location, mapping, template_loc=None,
-                      inventory_location=None):
+def generate_and_save(abouts, output_location, use_mapping=False, 
+                      template_loc=None, inventory_location=None):
     """
     Generate attribution using template and save at output_location.
     Filter the list of about object based on the inventory CSV at
@@ -163,7 +163,8 @@ def generate_and_save(abouts, output_location, mapping, template_loc=None,
         if inventory_location.endswith('.csv') or inventory_location.endswith('.json'):
             try:
                 # Return a list which contains only the about file path
-                about_list = attributecode.util.get_about_file_path(mapping, inventory_location)
+                about_list = attributecode.util.get_about_file_path(
+                    inventory_location, use_mapping=use_mapping)
             except Exception:
                 # 'about_file_path' key/column doesn't exist
                 msg = u"The required key: 'about_file_path' does not exist. Generation halted."

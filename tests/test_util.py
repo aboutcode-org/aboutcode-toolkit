@@ -264,8 +264,7 @@ class UtilsTest(unittest.TestCase):
             result = util.get_relative_path(loc, loc)
             assert expected == result
 
-    def test_load_csv(self):
-        mapping = None
+    def test_load_csv_without_mapping(self):
         test_file = get_test_loc('util/about.csv')
         expected = [OrderedDict(
                     [('about_file', 'about.ABOUT'),
@@ -273,11 +272,10 @@ class UtilsTest(unittest.TestCase):
                      ('name', 'ABOUT tool'),
                      ('version', '0.8.1')])
                     ]
-        result = util.load_csv(mapping, test_file)
+        result = util.load_csv(test_file)
         assert expected == result
 
-    def test_load_json(self):
-        mapping = None
+    def test_load_json_without_mapping(self):
         test_file = get_test_loc('load/expected.json')
         expected = [OrderedDict(
                     [('about_file_path', '/load/this.ABOUT'),
@@ -286,28 +284,25 @@ class UtilsTest(unittest.TestCase):
                      ('name', 'AboutCode'),
                      ('version', '0.11.0')])
                     ]
-        result = util.load_json(mapping, test_file)
+        result = util.load_json(test_file)
         assert expected == result
 
-    def test_get_about_file_path_from_csv(self):
-        mapping = True
+    def test_get_about_file_path_from_csv_using_mapping(self):
         test_file = get_test_loc('util/about.csv')
         expected = ['about.ABOUT']
-        result = util.get_about_file_path(mapping, test_file)
+        result = util.get_about_file_path(test_file, use_mapping=True)
         assert expected == result
 
-    def test_get_about_file_path_from_json(self):
-        mapping = True
+    def test_get_about_file_path_from_json_using_mapping(self):
         test_file = get_test_loc('load/expected.json')
         expected = ['/load/this.ABOUT']
-        result = util.get_about_file_path(mapping, test_file)
+        result = util.get_about_file_path(test_file, use_mapping=True)
         assert expected == result
 
     # The column names should be converted to lowercase as the same behavior as
     # when user use the mapping.config
     @expectedFailure
     def test_load_csv_does_not_convert_column_names_to_lowercase(self):
-        mapping = None
         test_file = get_test_loc('util/about_key_with_upper_case.csv')
         expected = [OrderedDict(
                     [('about_file', 'about.ABOUT'),
@@ -315,7 +310,7 @@ class UtilsTest(unittest.TestCase):
                      ('nAme', 'ABOUT tool'),
                      ('Version', '0.8.1')])
                     ]
-        result = util.load_csv(mapping, test_file)
+        result = util.load_csv(test_file)
         assert expected == result
 
     def test_get_locations_with_very_long_path(self):

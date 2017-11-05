@@ -394,8 +394,10 @@ class PathField(ListField):
         # FIXME: This is a temp fix for #286
         # The field in ignore_checking_list is validated in the check_file_field_exist function
         ignore_checking_list = [u'license_file', u'notice_file', u'changelog_file']
+
         # mapping of normalized paths to a location or None
         paths = OrderedDict()
+
         for path in self.value:
             path = path.strip()
             path = util.to_posix(path)
@@ -412,41 +414,44 @@ class PathField(ListField):
             # the license files, if need to be copied, are located under the path
             # set from the 'license-text-location' option, so the tool should check
             # at the 'license-text-location' instead of the 'base_dir'
-            if self.base_dir or self.license_notice_text_location:
-                if self.license_notice_text_location and name in ignore_checking_list:
-                    location = posixpath.join(self.license_notice_text_location, path)
-                else:
-                    # The 'about_resource_path' should be a joined path with
-                    # the 'about_file_path' and the 'base_dir
-                    if not self.running_inventory and self.about_file_path:
-                        # Get the parent directory of the 'about_file_path'
-                        afp_parent = posixpath.dirname(self.about_file_path)
-
-                        # Create a relative 'about_resource_path' by joining the
-                        # parent of the 'about_file_path' with the value of the
-                        # 'about_resource_path'
-                        arp = posixpath.join(afp_parent, path)
-                        normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
-                        location = posixpath.join(self.base_dir, normalized_arp)
-                    else:
-                        location = posixpath.join(self.base_dir, path)
-                location = util.to_native(location)
-                location = os.path.abspath(os.path.normpath(location))
-                location = util.to_posix(location)
-                location = add_unc(location)
-
-                if not os.path.exists(location):
-                    # We don't want to show the UNC_PREFIX in the error message
-                    location = util.to_posix(location.strip(UNC_PREFIX))
-                    if not name in ignore_checking_list:
-                        msg = (u'Field %(name)s: Path %(location)s not found'
-                               % locals())
-                        errors.append(Error(CRITICAL, msg))
-                    location = None
-            else:
+            if not (self.base_dir or self.license_notice_text_location):
                 msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
                        u' No base directory provided' % locals())
                 errors.append(Error(ERROR, msg))
+                location = None
+                paths[path] = location
+                continue
+
+            if self.license_notice_text_location and name in ignore_checking_list:
+                location = posixpath.join(self.license_notice_text_location, path)
+            else:
+                # The 'about_resource_path' should be a joined path with
+                # the 'about_file_path' and the 'base_dir
+                if not self.running_inventory and self.about_file_path:
+                    # Get the parent directory of the 'about_file_path'
+                    afp_parent = posixpath.dirname(self.about_file_path)
+
+                    # Create a relative 'about_resource_path' by joining the
+                    # parent of the 'about_file_path' with the value of the
+                    # 'about_resource_path'
+                    arp = posixpath.join(afp_parent, path)
+                    normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
+                    location = posixpath.join(self.base_dir, normalized_arp)
+                else:
+                    location = posixpath.join(self.base_dir, path)
+
+            location = util.to_native(location)
+            location = os.path.abspath(os.path.normpath(location))
+            location = util.to_posix(location)
+            location = add_unc(location)
+
+            if not os.path.exists(location):
+                # We don't want to show the UNC_PREFIX in the error message
+                location = util.to_posix(location.strip(UNC_PREFIX))
+                if not name in ignore_checking_list:
+                    msg = (u'Field %(name)s: Path %(location)s not found'
+                           % locals())
+                    errors.append(Error(CRITICAL, msg))
                 location = None
 
             paths[path] = location
@@ -620,7 +625,8 @@ class BooleanField(SingleLineField):
                 and self.value == other.value)
 
 
-def validate_fields(fields, about_file_path, running_inventory, base_dir, license_notice_text_location=None):
+def validate_fields(fields, about_file_path, running_inventory, base_dir, 
+                    license_notice_text_location=None):
     """
     Validate a sequence of Field objects. Return a list of errors.
     Validation may update the Field objects as needed as a side effect.
@@ -838,7 +844,7 @@ class About(object):
             as_dict[field.name] = field.serialized_value()
         return as_dict
 
-    def hydrate(self, fields):
+    def hydrate(self, fields, use_mapping=False):
         """
         Process an iterable of field (name, value) tuples. Update or create
         Fields attributes and the fields and custom fields dictionaries.
@@ -846,10 +852,12 @@ class About(object):
         """
         errors = []
         seen_fields = OrderedDict()
-        if util.have_mapping:
-            mapping = util.get_mappings(None)
+
+        mapping = {}
+        if use_mapping:
+            mapping = util.get_mapping()
+
         for name, value in fields:
-            # normalize to lower case
             orig_name = name
             name = name.lower()
             previous_value = seen_fields.get(name)
@@ -871,60 +879,65 @@ class About(object):
                 standard_field.original_value = value
                 standard_field.value = value
                 standard_field.present = True
-            else:
-                if util.have_mapping:
-                    if name in mapping.keys():
-                        # this is a special attribute
-                        if name == self.about_file_path_attr:
-                            setattr(self, self.about_file_path_attr, value)
-                            continue
+                continue
 
-                        # this is a special attribute, skip entirely
-                        if name == self.about_resource_path_attr:
-                            continue
+            if not use_mapping:
+                if not name == self.about_file_path_attr:
+                    msg = (u'Field %(orig_name)s is not a supported field and is ignored.')
+                    errors.append(Error(INFO, msg % locals()))
+                continue
 
-                        msg = (u'Field %(orig_name)s is a custom field')
-                        errors.append(Error(INFO, msg % locals()))
-                        custom_field = self.custom_fields.get(name)
-                        if custom_field:
-                            custom_field.original_value = value
-                            custom_field.value = value
-                            custom_field.present = True
-                        else:
-                            if name in dir(self):
-                                msg = (u'Field %(orig_name)s has an '
-                                       u'illegal reserved name')
-                                errors.append(Error(ERROR, msg % locals()))
-                            else:
-                                # custom fields are always handled as StringFields
-                                custom_field = StringField(name=name,
-                                                           value=value,
-                                                           present=True)
-                                self.custom_fields[name] = custom_field
-                                try:
-                                    setattr(self, name, custom_field)
-                                except:
-                                    # The intended captured error message should display
-                                    # the line number of where the invalid line is,
-                                    # but I am not able to get the line number from
-                                    # the original code. By-passing the line number
-                                    # for now.
-                                    # msg = u'Invalid line: %(line)d: %(orig_name)r'
-                                    msg = u'Invalid line: %(orig_name)r: ' % locals()
-                                    msg += u'%s' % custom_field.value
-                                    errors.append(Error(CRITICAL, msg))
-                    else:
-                        msg = (u'Field %(orig_name)s is not a supported field and is not ' +
-                               u'defined in the mapping file. This field is ignored.')
-                        errors.append(Error(INFO, msg % locals()))
-                else:
-                    if not name == self.about_file_path_attr:
-                        msg = (u'Field %(orig_name)s is not a supported field and is ignored.')
-                        errors.append(Error(INFO, msg % locals()))
+            if name not in mapping.keys():
+                msg = (u'Field %(orig_name)s is not a supported field and is not ' +
+                       u'defined in the mapping file. This field is ignored.')
+                errors.append(Error(INFO, msg % locals()))
+                continue
+
+            # this is a special attribute
+            if name == self.about_file_path_attr:
+                setattr(self, self.about_file_path_attr, value)
+                continue
+
+            # this is a special attribute, skip entirely
+            if name == self.about_resource_path_attr:
+                continue
+
+            msg = (u'Field %(orig_name)s is a custom field')
+            errors.append(Error(INFO, msg % locals()))
+            custom_field = self.custom_fields.get(name)
+            if custom_field:
+                custom_field.original_value = value
+                custom_field.value = value
+                custom_field.present = True
+                continue
+
+            if name in dir(self):
+                msg = (u'Field %(orig_name)s has an '
+                       u'illegal reserved name')
+                errors.append(Error(ERROR, msg % locals()))
+                continue
+
+            # custom fields are always handled as StringFields
+            custom_field = StringField(name=name,
+                                       value=value,
+                                       present=True)
+            self.custom_fields[name] = custom_field
+            try:
+                setattr(self, name, custom_field)
+            except:
+                # The intended captured error message should display
+                # the line number of where the invalid line is,
+                # but I am not able to get the line number from
+                # the original code. By-passing the line number
+                # for now.
+                # msg = u'Invalid line: %(line)d: %(orig_name)r'
+                msg = u'Invalid line: %(orig_name)r: ' % locals()
+                msg += u'%s' % custom_field.value
+                errors.append(Error(CRITICAL, msg))
         return errors
 
     def process(self, fields, about_file_path, running_inventory=False,
-                base_dir=None, license_notice_text_location=None):
+                base_dir=None, license_notice_text_location=None, use_mapping=False):
         """
         Hydrate and validate a sequence of field name/value tuples from an
         ABOUT file. Return a list of errors.
@@ -933,7 +946,7 @@ class About(object):
         self.license_notice_text_location = license_notice_text_location
         afp = self.about_file_path
         errors = []
-        hydratation_errors = self.hydrate(fields)
+        hydratation_errors = self.hydrate(fields, use_mapping=use_mapping)
         errors.extend(hydratation_errors)
 
         # We want to copy the license_files before the validation
@@ -1007,7 +1020,8 @@ class About(object):
         self.errors = errors
         return errors
 
-    def load_dict(self, fields_dict, base_dir, running_inventory=False, license_notice_text_location=None, with_empty=True):
+    def load_dict(self, fields_dict, base_dir, running_inventory=False, 
+                  license_notice_text_location=None, with_empty=True):
         """
         Load the ABOUT file from a fields name/value mapping.
         If with_empty, create fields with no value for empty fields.
@@ -1018,7 +1032,9 @@ class About(object):
         about_file_path = self.about_file_path
         if not with_empty:
             fields = [(n, v) for n, v in fields_dict.items() if v]
-        errors = self.process(fields, about_file_path, running_inventory, base_dir, license_notice_text_location)
+        errors = self.process(
+            fields, about_file_path, running_inventory, base_dir, 
+            license_notice_text_location)
         self.errors = errors
         return errors
 

@@ -97,7 +97,8 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 
-def load_inventory(mapping, location, base_dir, license_notice_text_location=None):
+def load_inventory(location, base_dir, 
+                   license_notice_text_location=None, use_mapping=False):
     """
     Load the inventory file at location. Return a list of errors and a list of About
     objects validated against the base_dir.
@@ -110,9 +111,9 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
         if dup_cols_err:
             errors.extend(dup_cols_err)
             return errors, abouts
-        inventory = util.load_csv(mapping, location)
+        inventory = util.load_csv(location, use_mapping)
     else:
-        inventory = util.load_json(mapping, location)
+        inventory = util.load_json(location, use_mapping)
 
     try:
         dup_about_paths_err = check_duplicated_about_file_path(inventory)
@@ -126,9 +127,9 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
 
     for i, fields in enumerate(inventory):
         # check does the input contains the required fields
-        requied_fileds = model.About.required_fields
+        required_fields = model.About.required_fields
 
-        for f in requied_fileds:
+        for f in required_fields:
             if f not in fields:
                 msg = (
                     "Required column: %(f)r not found.\n"
@@ -164,8 +165,8 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
     return errors, abouts
 
 
-def generate(location, base_dir, mapping, license_notice_text_location, fetch_license, policy=None, conf_location=None,
-             with_empty=False, with_absent=False):
+def generate(location, base_dir, license_notice_text_location=None, fetch_license=False, policy=None, conf_location=None,
+             with_empty=False, with_absent=False, use_mapping=False):
     """
     Load ABOUT data from an inventory at csv_location. Write ABOUT files to
     base_dir using policy flags and configuration file at conf_location.
@@ -183,7 +184,11 @@ def generate(location, base_dir, mapping, license_notice_text_location, fetch_li
         gen_license = True
 
     bdir = to_posix(base_dir)
-    errors, abouts = load_inventory(mapping, location, bdir, license_notice_text_location)
+    errors, abouts = load_inventory(
+        location=location,
+        base_dir=bdir,
+        license_notice_text_location=license_notice_text_location,
+        use_mapping=use_mapping)
 
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)

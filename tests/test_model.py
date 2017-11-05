@@ -46,9 +46,8 @@ def check_csvs(expected, result):
     """
     Assert that the contents of two CSV files are equal.
     """
-    mapping = None
-    expected = sorted([d.items() for d in load_csv(mapping, expected)])
-    result = sorted([d.items() for d in load_csv(mapping, result)])
+    expected = sorted([d.items() for d in load_csv(expected)])
+    result = sorted([d.items() for d in load_csv(result)])
     assert expected == result
 
 
@@ -1189,8 +1188,7 @@ class CollectorTest(unittest.TestCase):
         Compare two CSV files at locations as lists of ordered items.
         """
         def as_items(csvfile):
-            mapping = None
-            return sorted([i.items() for i in util.load_csv(mapping, csvfile)])
+            return sorted([i.items() for i in util.load_csv(csvfile)])
 
         expected = as_items(expected)
         result = as_items(result)
@@ -1250,6 +1248,7 @@ class CollectorTest(unittest.TestCase):
 
         expected = get_test_loc('inventory/complex/expected.csv')
         self.check_csv(expected, result)
+
 
 class GroupingsTest(unittest.TestCase):
 
