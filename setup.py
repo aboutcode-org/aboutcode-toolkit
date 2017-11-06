@@ -80,12 +80,12 @@ setup(
         about-code=attributecode.cmd:cli
     ''',
     install_requires=[
-        'jinja2 >= 2.7.3, < 2.8',
-        'click >= 3.2, < 4',
-        'unicodecsv >= 0.9.4,  < 1.0',
+        'jinja2 >= 2.9, < 3.0',
+        'click >= 6.7, < 7.0',
+        'backports.csv >= 1.0.5,  < 2.0.0',
         'pyyaml >= 3.11, < 3.13',
-        'boolean.py',
-        'license_expression',
+        'boolean.py >= 3.5, < 4.0',
+        'license_expression >= 0.94, < 1.0',
      ],
 
     extras_require={
