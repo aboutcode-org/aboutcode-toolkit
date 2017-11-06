@@ -1,11 +1,21 @@
 AboutCode toolkit
 =================
 
-.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop
-   :target: https://travis-ci.org/nexB/aboutcode-toolkit
+Build and tests status
+----------------------
 
-.. image:: https://coveralls.io/repos/nexB/aboutcode-toolkit/badge.png?branch=develop
-  :target: https://coveralls.io/r/nexB/aboutcode-toolkit?branch=develop
++-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
+|Branch |                         **Linux (Travis)**                                    |                         **MacOSX (Travis)**                                   |                         **Windows (AppVeyor)**                                                       |
++=======+===============================================================================+===============================================================================+======================================================================================================+
+|       |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=master  |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=master  |.. image:: https://ci.appveyor.com/api/projects/status/nexB/aboutcode-toolkit/branch/master?png=true  |
+|Master |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit                                    |
+|       |   :alt: Linux Master branch tests status                                      |   :alt: MacOSX Master branch tests status                                     |   :alt: Windows Master branch tests status                                                           |
++-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
+|       |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop |.. image:: https://ci.appveyor.com/api/projects/status/nexB/aboutcode-toolkit/branch/develop?png=true |
+|Develop|   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit                                    |
+|       |   :alt: Linux Develop branch tests status                                     |   :alt: MacOSX Develop branch tests status                                    |   :alt: Windows Develop branch tests status                                                          |
++-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
+
 
 
 The AboutCode toolkit and ABOUT files provide a simple way to document the
