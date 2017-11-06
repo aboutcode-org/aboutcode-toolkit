@@ -16,8 +16,6 @@ six
 
 pyyaml==3.12
 
-backports.csv==1.0.5
-
 # license expression support
 license_expression
 boolean.py

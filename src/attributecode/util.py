@@ -235,17 +235,40 @@ def resource_name(path):
     return right.strip()
 
 
-class OrderedDictReader(csv.DictReader):
-    """
-    A DictReader that return OrderedDicts
-    """
-    def next(self):
-        row_dict = next(self)
-        result = OrderedDict()
-        # reorder based on fieldnames order
-        for name in self.fieldnames:
-            result[name] = row_dict[name]
-        return result
+# Python 3
+OrderedDictReader = csv.DictReader
+
+if sys.version_info[0] < 3:
+    # Python 2
+    class OrderedDictReader(csv.DictReader):
+        """
+        A DictReader that return OrderedDicts
+        Copied from csv.DictReader itself backported from Python 3
+        license: python
+        """
+        def __next__(self):
+            if self.line_num == 0:
+                # Used only for its side effect.
+                self.fieldnames
+            row = next(self.reader)
+            self.line_num = self.reader.line_num
+    
+            # unlike the basic reader, we prefer not to return blanks,
+            # because we will typically wind up with a dict full of None
+            # values
+            while row == []:
+                row = next(self.reader)
+            d = OrderedDict(zip(self.fieldnames, row))
+            lf = len(self.fieldnames)
+            lr = len(row)
+            if lf < lr:
+                d[self.restkey] = row[lf:]
+            elif lf > lr:
+                for key in self.fieldnames[lr:]:
+                    d[key] = self.restval
+            return d
+
+        next = __next__
 
 
 def get_mapping(location=None):

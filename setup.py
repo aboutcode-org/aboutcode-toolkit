@@ -84,11 +84,14 @@ setup(
     install_requires=[
         'jinja2 >= 2.9, < 3.0',
         'click >= 6.7, < 7.0',
-        'backports.csv;python_version<"3.6"',
+        "backports.csv ; python_version<'3.6'",
         'pyyaml >= 3.11, < 3.13',
         'boolean.py >= 3.5, < 4.0',
         'license_expression >= 0.94, < 1.0',
     ],
+    extras_require={
+    ":python_version < '3.6'": ['backports.csv'],
+    },
     entry_points={
         'console_scripts': [
             'about-code=attributecode.cmd:cli',
