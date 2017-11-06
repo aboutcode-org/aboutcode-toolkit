@@ -21,6 +21,7 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 import json
 import posixpath
+import sys
 import unittest
 from unittest.case import expectedFailure
 
@@ -42,12 +43,13 @@ from attributecode.util import add_unc
 from attributecode.util import load_csv
 
 
-def check_csvs(expected, result):
+def check_csv(expected, result):
     """
-    Assert that the contents of two CSV files are equal.
+    Assert that the contents of two CSV files locations `expected` and
+    `result` are equal.
     """
-    expected = sorted([d.items() for d in load_csv(expected)])
-    result = sorted([d.items() for d in load_csv(result)])
+    expected = sorted([sorted(d.items()) for d in load_csv(expected)])
+    result = sorted([sorted(d.items()) for d in load_csv(result)])
     assert expected == result
 
 
@@ -312,8 +314,12 @@ class ParseTest(unittest.TestCase):
                     (u'owner', 'Matías Aguirre')]
         assert expected == result
 
+        expected_msg = "Invalid line: 3: 'Matías: unicode field name\\n'"
+        if sys.version_info[0] < 3:  # Python 2
+            expected_msg = "Invalid line: 3: 'Mat\\xedas: unicode field name\\n'"
+        
         expected_errors = [
-            Error(CRITICAL, "Invalid line: 3: 'Matías: unicode field name\\n'")]
+            Error(CRITICAL, expected_msg)]
         assert expected_errors == errors
 
     def test_parse_handles_blank_lines_and_spaces_in_field_names(self):
@@ -1046,7 +1052,7 @@ copyright: >
         model.write_output([a], tmp_file, format='csv')
 
         expected = get_test_loc('load/expected.csv')
-        check_csvs(expected, tmp_file)
+        check_csv(expected, tmp_file)
 
     def test_write_output_json(self):
         path = 'load/this.ABOUT'
@@ -1183,17 +1189,6 @@ class CollectorTest(unittest.TestCase):
         assert expected == result1
         assert expected == result2
 
-    def check_csv(self, expected, result):
-        """
-        Compare two CSV files at locations as lists of ordered items.
-        """
-        def as_items(csvfile):
-            return sorted([i.items() for i in util.load_csv(csvfile)])
-
-        expected = as_items(expected)
-        result = as_items(result)
-        assert expected == result
-
     def test_collect_inventory_basic_from_directory(self):
         location = get_test_loc('inventory/basic')
         result = get_temp_file()
@@ -1205,7 +1200,7 @@ class CollectorTest(unittest.TestCase):
         assert expected_errors == errors
 
         expected = get_test_loc('inventory/basic/expected.csv')
-        self.check_csv(expected, result)
+        check_csv(expected, result)
 
     def test_collect_inventory_with_about_resource_path_from_directory(self):
         location = get_test_loc('inventory/basic_with_about_resource_path')
@@ -1218,7 +1213,7 @@ class CollectorTest(unittest.TestCase):
         assert expected_errors == errors
 
         expected = get_test_loc('inventory/basic_with_about_resource_path/expected.csv')
-        self.check_csv(expected, result)
+        check_csv(expected, result)
 
     def test_collect_inventory_with_no_about_resource_from_directory(self):
         location = get_test_loc('inventory/no_about_resource_key')
@@ -1231,13 +1226,15 @@ class CollectorTest(unittest.TestCase):
         assert expected_errors == errors
 
         expected = get_test_loc('inventory/no_about_resource_key/expected.csv')
-        self.check_csv(expected, result)
+        check_csv(expected, result)
 
-    # FIXME: The self.check_csv is failing because there are many keys in the ABOUT files that are
-    # not supported. Instead of removing all the non-supported keys in the output
-    # and do the comparison, it may be best to apply the mapping to include theses keys
     @expectedFailure
     def test_collect_inventory_complex_from_directory(self):
+        # FIXME: check_csv is failing because there are many keys in
+        # the ABOUT files that are not supported. Instead of removing
+        # all the non-supported keys in the output and do the
+        # comparison, it may be best to apply the mapping to include
+        # theses keys
         location = get_test_loc('inventory/complex')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
@@ -1247,7 +1244,7 @@ class CollectorTest(unittest.TestCase):
         assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('inventory/complex/expected.csv')
-        self.check_csv(expected, result)
+        check_csv(expected, result)
 
 
 class GroupingsTest(unittest.TestCase):

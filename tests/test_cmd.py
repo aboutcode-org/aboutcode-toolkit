@@ -18,8 +18,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import unittest
-
 from attributecode import CRITICAL
 from attributecode import DEBUG
 from attributecode import ERROR
@@ -28,23 +26,9 @@ from attributecode import NOTSET
 from attributecode import WARNING
 from attributecode import cmd
 from attributecode import Error
-from attributecode import util
 
 
-class CmdTest(unittest.TestCase):
-
-    def check_csv(self, expected, result):
-        """
-        Compare two CSV files at locations as lists of ordered items.
-        """
-        def as_items(csvfile):
-            return sorted([i.items() for i in util.load_csv(csvfile)])
-
-        expected = as_items(expected)
-        result = as_items(result)
-        assert expected == result
-
-# NB: this test depends on py.test stdout/err capture capabilities
+# NB: these tests depends on py.test stdout/err capture capabilities
 def test_log_errors(capsys):
     quiet = False
     errors = [Error(CRITICAL, 'msg1'),
@@ -65,6 +49,7 @@ NOTSET: msg4
 '''
     assert '' == err
     assert expected_out == out
+
 
 def test_log_errors_with_quiet(capsys):
     quiet = True
