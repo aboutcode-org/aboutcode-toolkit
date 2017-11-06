@@ -97,7 +97,7 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 
-def load_inventory(location, base_dir, 
+def load_inventory(location, base_dir,
                    license_notice_text_location=None, use_mapping=False):
     """
     Load the inventory file at location. Return a list of errors and a list of About
