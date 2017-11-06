@@ -25,6 +25,8 @@ from os.path import exists, join
 import sys
 
 import click
+# silence unicode literals warnings
+click.disable_unicode_literals_warning = True
 
 import attributecode
 from attributecode import CRITICAL
