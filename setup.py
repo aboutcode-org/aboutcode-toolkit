@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
 from __future__ import absolute_import
 from __future__ import print_function
@@ -10,6 +10,9 @@ from os.path import basename
 from os.path import dirname
 from os.path import join
 from os.path import splitext
+import re
+import sys
+
 from setuptools import find_packages
 from setuptools import setup
 
@@ -22,10 +25,10 @@ def read(*names, **kwargs):
 
 
 setup(
-    name='attributecode',
-    version='3.0.0.dev4',
+    name='aboutcode-toolkit',
+    version='3.0.0.dev6',
     license='Apache-2.0',
-    description=('Document the provenance (origin and license) of '
+    description=('AboutCode-toolkit is a tool to d_ocument the provenance (origin and license) of '
                  'third-party software using small text files. '
                  'Collect inventories, generate attribution documentation.'),
     long_description=('AttributeCode provides a simple way to document the'
@@ -46,9 +49,11 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
-        'Intended Audience :: Developers',
         'Topic :: Software Development',
         'Topic :: Software Development :: Documentation',
         'Topic :: Software Development :: Quality Assurance',
@@ -56,9 +61,11 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=[
-        'license', 'about', 'metadata', 'package', 'copyright', 
+        'license', 'about', 'metadata', 'package', 'copyright',
         'attribution', 'software', 'inventory',
     ],
+    # FIXME: we SHOULD NOT use datafiles!!!! whcih is a mine field but
+    # only package data or use a MANIFEST.in instead for a sdist
     data_files=[('about',
         [
             'about.ABOUT',
@@ -74,31 +81,17 @@ setup(
             'USAGE.rst',
         ]),
     ],
-
-    entry_points='''
-        [console_scripts]
-        about-code=attributecode.cmd:cli
-    ''',
     install_requires=[
         'jinja2 >= 2.9, < 3.0',
         'click >= 6.7, < 7.0',
-        'backports.csv >= 1.0.5,  < 2.0.0',
+        'backports.csv;python_version<"3.6"',
         'pyyaml >= 3.11, < 3.13',
         'boolean.py >= 3.5, < 4.0',
         'license_expression >= 0.94, < 1.0',
-     ],
-
-    extras_require={
-        'base': [
-            'certifi',
-            'setuptools',
-            'wheel',
-            'pip',
-            'wincertstore',
-        ],
-        'dev': [
-            'pytest',
-            'py',
-        ],
-    }
+    ],
+    entry_points={
+        'console_scripts': [
+            'about-code=attributecode.cmd:cli',
+        ]
+    },
 )

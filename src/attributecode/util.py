@@ -32,12 +32,19 @@ import socket
 import string
 import sys
 
-import backports.csv as csv
+if sys.version_info[0] < 3:
+    # Python 2
+    import backports.csv as csv
+else:
+    # Python 3
+    import csv
 
 try:
-    import httplib  # Python 2
+    # Python 2
+    import httplib
 except ImportError:
-    import http.client as httplib  # Python 3
+    # Python 3
+    import http.client as httplib
 
 from attributecode import CRITICAL
 from attributecode import Error
@@ -233,7 +240,7 @@ class OrderedDictReader(csv.DictReader):
     A DictReader that return OrderedDicts
     """
     def next(self):
-        row_dict = csv.DictReader.next(self)
+        row_dict = next(self)
         result = OrderedDict()
         # reorder based on fieldnames order
         for name in self.fieldnames:
@@ -327,6 +334,7 @@ def load_csv(location, use_mapping=False):
     for each row.
     """
     results = []
+    # FIXME: why ignore encoding errors here?
     with codecs.open(location, mode='rb', encoding='utf-8',
                      errors='ignore') as csvfile:
         for row in OrderedDictReader(csvfile):

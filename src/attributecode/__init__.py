@@ -27,7 +27,8 @@ except NameError:
     basestring = str  # Python 3
 
 
-__version__ = '3.0.0.dev5'
+__version__ = '3.0.0.dev6'
+
 
 __about_spec_version__ = '2.0.0.dev2'
 
@@ -43,6 +44,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 
 class Error(namedtuple('Error', ['severity', 'message'])):
     """

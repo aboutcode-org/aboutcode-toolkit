@@ -317,7 +317,7 @@ class ParseTest(unittest.TestCase):
         expected_msg = "Invalid line: 3: 'Matías: unicode field name\\n'"
         if sys.version_info[0] < 3:  # Python 2
             expected_msg = "Invalid line: 3: 'Mat\\xedas: unicode field name\\n'"
-        
+
         expected_errors = [
             Error(CRITICAL, expected_msg)]
         assert expected_errors == errors
@@ -861,6 +861,7 @@ version: 0.11.0
         result = a.as_dict(with_paths=False,
                            with_empty=True,
                            with_absent=False)
+        # FIXME: why converting back to dict?
         assert expected == dict(result)
 
     def test_About_as_dict_with_present(self):
@@ -908,6 +909,7 @@ version: 0.11.0
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=True)
+        # FIXME: why converting back to dict?
         assert expected == dict(result)
 
     def test_About_as_dict_with_nothing(self):
@@ -928,6 +930,7 @@ version: 0.11.0
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=False)
+        # FIXME: why converting back to dict?
         assert expected == dict(result)
 
     def test_loads_dumps_is_idempotent(self):
@@ -1016,8 +1019,8 @@ copyright: >
         a = model.About()
         base_dir = 'some_dir'
         a.load_dict(test, base_dir)
-        as_dict = a.as_dict(with_paths=False, with_absent=False,
-                           with_empty=True)
+        as_dict = a.as_dict(with_paths=False, with_absent=False, with_empty=True)
+        # FIXME: why converting back to dict?
         assert expected == dict(as_dict)
 
     def test_load_dict_handles_field_validation_correctly(self):
@@ -1039,31 +1042,31 @@ copyright: >
         a = model.About()
         base_dir = 'some_dir'
         a.load_dict(test, base_dir)
-        as_dict = a.as_dict(with_paths=False, with_absent=False,
-                            with_empty=True)
+        as_dict = a.as_dict(with_paths=False, with_absent=False, with_empty=True)
+        # FIXME: why converting back to dict?
         assert test == dict(as_dict)
 
     def test_write_output_csv(self):
         path = 'load/this.ABOUT'
         test_file = get_test_loc(path)
-        a = model.About(location=test_file, about_file_path=path)
+        abouts = model.About(location=test_file, about_file_path=path)
 
-        tmp_file = get_temp_file()
-        model.write_output([a], tmp_file, format='csv')
+        result = get_temp_file()
+        model.write_output([abouts], result, format='csv')
 
         expected = get_test_loc('load/expected.csv')
-        check_csv(expected, tmp_file)
+        check_csv(expected, result)
 
     def test_write_output_json(self):
         path = 'load/this.ABOUT'
         test_file = get_test_loc(path)
-        a = model.About(location=test_file, about_file_path=path)
+        abouts = model.About(location=test_file, about_file_path=path)
 
-        tmp_file = get_temp_file()
-        model.write_output([a], tmp_file, format='json')
+        result = get_temp_file()
+        model.write_output([abouts], result, format='json')
 
         expected = get_test_loc('load/expected.json')
-        check_json(expected, tmp_file)
+        check_json(expected, result)
 
 
 class CollectorTest(unittest.TestCase):

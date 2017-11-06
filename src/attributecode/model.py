@@ -35,8 +35,15 @@ import os
 import posixpath
 from posixpath import dirname
 import re
+import sys
 
-import backports.csv as csv
+if sys.version_info[0] < 3:
+    # Python 2
+    import backports.csv as csv
+else:
+    # Python 3
+    import csv
+
 from license_expression import Licensing
 
 try:
