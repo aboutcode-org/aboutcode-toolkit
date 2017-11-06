@@ -81,6 +81,7 @@ def clean_string(s):
     s = s.replace("{u'", "{'")
     s = s.replace(" u'", " '")
     s = s.replace(" u'", " '")
+    s = s.replace("\\\\", "\\")
     return s
 
 # modeled after the logging levels
