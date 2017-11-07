@@ -113,11 +113,24 @@ check
 
 ::
 
+    --show-all               Show all the errors and warning
     --help                   Show this message and exit.
 
 Purpose
 -------
 Validating ABOUT files at LOCATION.
+
+Options
+-------
+
+::
+
+    --show-all
+
+        This option ask the tool to show all kind of errors found.
+        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
+
+    $ about check --show-all /home/project/about_files/
 
 
 gen

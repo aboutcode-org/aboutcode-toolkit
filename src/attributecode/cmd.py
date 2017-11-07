@@ -214,9 +214,12 @@ OUTPUT: Path to output file to write the attribution to.
 
 @cli.command(cls=AboutCommand, short_help='LOCATION: directory')
 @click.argument('location', nargs=1, required=True, type=click.Path(exists=True, readable=True, resolve_path=True))
-def check(location):
+@click.option('--show-all', is_flag=True, help='Show all the errors and warning')
+def check(location, show_all):
     """
-Validating ABOUT files at LOCATION.
+Validating ABOUT files at LOCATION. [Default: it will only shows the following
+level of errors: 'CRITICAL', 'ERROR', and 'WARNING'.
+Use the `--show-all` option to show all kind of errors.
 
 LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
     """
@@ -229,16 +232,19 @@ LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
     print_errors = []
     for severity, message in errors:
         sever = severities[severity]
-        if sever in problematic_errors:
+        if show_all:
             print_errors.append((msg_format % locals()))
+        else:
+            if sever in problematic_errors:
+                print_errors.append((msg_format % locals()))
 
-    number_of_problematic_errors = len(print_errors)
+    number_of_errors = len(print_errors)
 
     for err in print_errors:
         print(err)
 
     if print_errors:
-        click.echo('Found %(number_of_problematic_errors)d errors' % locals())
+        click.echo('Found %(number_of_errors)d errors' % locals())
         sys.exit(1)
     else:
         click.echo('No error is found.')
