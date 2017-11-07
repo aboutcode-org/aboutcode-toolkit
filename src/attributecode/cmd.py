@@ -152,8 +152,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
         errors.append(err)
-    log_errors(errors, quiet, os.path.dirname(output))
-    # FIXME: return error code?
+        log_errors(errors, quiet, os.path.dirname(output))
 
 
 ######################################################################
