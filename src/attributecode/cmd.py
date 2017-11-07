@@ -117,7 +117,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
         errors.append(err)
-    log_errors(errors, quiet, os.path.dirname(output))
+        log_errors(errors, quiet, os.path.dirname(output))
 
 
 @cli.command(cls=AboutCommand, short_help='LOCATION: input file, OUTPUT: directory',)
