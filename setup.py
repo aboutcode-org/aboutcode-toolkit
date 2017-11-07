@@ -10,8 +10,6 @@ from os.path import basename
 from os.path import dirname
 from os.path import join
 from os.path import splitext
-import re
-import sys
 
 from setuptools import find_packages
 from setuptools import setup
@@ -28,13 +26,17 @@ setup(
     name='aboutcode-toolkit',
     version='3.0.0.dev6',
     license='Apache-2.0',
-    description=('AboutCode-toolkit is a tool to d_ocument the provenance (origin and license) of '
-                 'third-party software using small text files. '
-                 'Collect inventories, generate attribution documentation.'),
-    long_description=('AttributeCode provides a simple way to document the'
+    description=(
+        'AboutCode-toolkit is a tool to document the provenance (origin and license) of '
+        'third-party software using small text files. '
+        'Collect inventories, generate attribution documentation.'
+    ),
+    long_description=(
+        'AttributeCode provides a simple way to document the'
         'provenance (i.e. origin and license) of software components that'
         'you use in your project. This documentation is stored in *.ABOUT'
-        'files, side-by-side with the documented code.'),
+        'files, side-by-side with the documented code.'
+    ),
     author='Chin-Yeung Li, Jillian Daguil, Thomas Druez, Philippe Ombredanne and others.',
     author_email='info@nexb.com',
     url='http://aboutcode.org',
@@ -64,7 +66,7 @@ setup(
         'license', 'about', 'metadata', 'package', 'copyright',
         'attribution', 'software', 'inventory',
     ],
-    # FIXME: we SHOULD NOT use datafiles!!!! whcih is a mine field but
+    # FIXME: we SHOULD NOT use datafiles!!!! which is a mine field but
     # only package data or use a MANIFEST.in instead for a sdist
     data_files=[('about',
         [
@@ -90,7 +92,7 @@ setup(
         'license_expression >= 0.94, < 1.0',
     ],
     extras_require={
-    ":python_version < '3.6'": ['backports.csv'],
+        ":python_version < '3.6'": ['backports.csv'],
     },
     entry_points={
         'console_scripts': [
