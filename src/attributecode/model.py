@@ -14,26 +14,37 @@
 # ============================================================================
 
 """
-AboutCode is a tool to process ABOUT files. ABOUT files are small text files
-that document the provenance (aka. the origin and license) of software
-components as well as the essential obligation such as attribution/credits and
-source code redistribution. See the ABOUT spec at http://dejacode.org.
+AboutCode toolkit is a tool to process ABOUT files. ABOUT files are
+small text files that document the provenance (aka. the origin and
+license) of software components as well as the essential obligation
+such as attribution/credits and source code redistribution. See the
+ABOUT spec at http://dejacode.org.
 
-AbouCode reads and validates ABOUT files and collect software components
-inventories.
+AboutCode toolkit reads and validates ABOUT files and collect software
+components inventories.
 """
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
+from collections import OrderedDict
 import codecs
 import json
 import os
 import posixpath
-import re
-import unicodecsv
-from collections import OrderedDict
 from posixpath import dirname
+import re
+import sys
+
+if sys.version_info[0] < 3:
+    # Python 2
+    import backports.csv as csv
+else:
+    # Python 3
+    import csv
+
+from license_expression import Licensing
 
 try:
     import urllib2  # Python 2
@@ -52,14 +63,17 @@ except NameError:
 
 from attributecode import CRITICAL
 from attributecode import ERROR
-from attributecode import Error
 from attributecode import INFO
 from attributecode import WARNING
 from attributecode import api
+from attributecode import Error
 from attributecode import saneyaml
 from attributecode import util
-from attributecode.util import add_unc, UNC_PREFIX, UNC_PREFIX_POSIX, on_windows, copy_license_notice_files
-from license_expression import Licensing
+from attributecode.util import add_unc
+from attributecode.util import copy_license_notice_files
+from attributecode.util import on_windows
+from attributecode.util import UNC_PREFIX
+from attributecode.util import UNC_PREFIX_POSIX
 
 
 class Field(object):
@@ -174,9 +188,10 @@ class Field(object):
                     value = u'    '.join(value)
             else:
                 value = u''.join(value)
-            serialized = u'%(name)s: %(value)s' % locals()
-        else:
-            serialized = u'%(name)s:' % locals()
+
+        serialized = u'%(name)s:' % locals()
+        if value:
+            serialized += ' ' + '%(value)s' % locals()
         return serialized
 
     def serialized_value(self):
@@ -384,10 +399,12 @@ class PathField(ListField):
 
         name = self.name
         # FIXME: This is a temp fix for #286
-        # The field in ignore_checking_list is validated in the check_file_field_exist function 
+        # The field in ignore_checking_list is validated in the check_file_field_exist function
         ignore_checking_list = [u'license_file', u'notice_file', u'changelog_file']
+
         # mapping of normalized paths to a location or None
         paths = OrderedDict()
+
         for path in self.value:
             path = path.strip()
             path = util.to_posix(path)
@@ -404,41 +421,44 @@ class PathField(ListField):
             # the license files, if need to be copied, are located under the path
             # set from the 'license-text-location' option, so the tool should check
             # at the 'license-text-location' instead of the 'base_dir'
-            if self.base_dir or self.license_notice_text_location:
-                if self.license_notice_text_location and name in ignore_checking_list:
-                    location = posixpath.join(self.license_notice_text_location, path)
-                else:
-                    # The 'about_resource_path' should be a joined path with
-                    # the 'about_file_path' and the 'base_dir
-                    if not self.running_inventory and self.about_file_path:
-                        # Get the parent directory of the 'about_file_path'
-                        afp_parent = posixpath.dirname(self.about_file_path)
-
-                        # Create a relative 'about_resource_path' by joining the
-                        # parent of the 'about_file_path' with the value of the
-                        # 'about_resource_path'
-                        arp = posixpath.join(afp_parent, path)
-                        normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
-                        location = posixpath.join(self.base_dir, normalized_arp)
-                    else:
-                        location = posixpath.join(self.base_dir, path)
-                location = util.to_native(location)
-                location = os.path.abspath(os.path.normpath(location))
-                location = util.to_posix(location)
-                location = add_unc(location)
-
-                if not os.path.exists(location):
-                    # We don't want to show the UNC_PREFIX in the error message
-                    location = util.to_posix(location.strip(UNC_PREFIX))
-                    if not name in ignore_checking_list:
-                        msg = (u'Field %(name)s: Path %(location)s not found'
-                               % locals())
-                        errors.append(Error(CRITICAL, msg))
-                    location = None
-            else:
+            if not (self.base_dir or self.license_notice_text_location):
                 msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
                        u' No base directory provided' % locals())
                 errors.append(Error(ERROR, msg))
+                location = None
+                paths[path] = location
+                continue
+
+            if self.license_notice_text_location and name in ignore_checking_list:
+                location = posixpath.join(self.license_notice_text_location, path)
+            else:
+                # The 'about_resource_path' should be a joined path with
+                # the 'about_file_path' and the 'base_dir
+                if not self.running_inventory and self.about_file_path:
+                    # Get the parent directory of the 'about_file_path'
+                    afp_parent = posixpath.dirname(self.about_file_path)
+
+                    # Create a relative 'about_resource_path' by joining the
+                    # parent of the 'about_file_path' with the value of the
+                    # 'about_resource_path'
+                    arp = posixpath.join(afp_parent, path)
+                    normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
+                    location = posixpath.join(self.base_dir, normalized_arp)
+                else:
+                    location = posixpath.join(self.base_dir, path)
+
+            location = util.to_native(location)
+            location = os.path.abspath(os.path.normpath(location))
+            location = util.to_posix(location)
+            location = add_unc(location)
+
+            if not os.path.exists(location):
+                # We don't want to show the UNC_PREFIX in the error message
+                location = util.to_posix(location.strip(UNC_PREFIX))
+                if not name in ignore_checking_list:
+                    msg = (u'Field %(name)s: Path %(location)s not found'
+                           % locals())
+                    errors.append(Error(CRITICAL, msg))
                 location = None
 
             paths[path] = location
@@ -506,7 +526,8 @@ class FileTextField(PathField):
             try:
                 # TODO: we have lots the location by replacing it with a text
                 location = add_unc(location)
-                text = codecs.open(location, encoding='utf-8', errors='ignore').read()
+                with codecs.open(location, encoding='utf-8', errors='ignore') as txt:
+                    text = txt.read()
                 self.value[path] = text
             except Exception as e:
                 # only keep the first 100 char of the exception
@@ -593,7 +614,7 @@ class BooleanField(SingleLineField):
 
     def _serialized_value(self):
         # default normalized values for serialization
-        if self.value is True:
+        if self.value:
             return u'yes'
         elif self.value is False:
             return u'no'
@@ -611,7 +632,8 @@ class BooleanField(SingleLineField):
                 and self.value == other.value)
 
 
-def validate_fields(fields, about_file_path, running_inventory, base_dir, license_notice_text_location=None):
+def validate_fields(fields, about_file_path, running_inventory, base_dir, 
+                    license_notice_text_location=None):
     """
     Validate a sequence of Field objects. Return a list of errors.
     Validation may update the Field objects as needed as a side effect.
@@ -648,7 +670,7 @@ class About(object):
         """
         self.fields = OrderedDict([
             ('about_resource', ListField(required=True)),
-            #('about_resource', AboutResourceField(required=True)),
+            # ('about_resource', AboutResourceField(required=True)),
             ('name', SingleLineField(required=True)),
             ('about_resource_path', AboutResourceField()),
 
@@ -822,14 +844,14 @@ class About(object):
                 # Return an empty 'about_resource_path' if the 'about_resource'
                 # key is not found
                 else:
-                    as_dict[arpa] = '' 
+                    as_dict[arpa] = ''
 
         for field in self.all_fields(with_absent=with_absent,
                                      with_empty=with_empty):
             as_dict[field.name] = field.serialized_value()
         return as_dict
 
-    def hydrate(self, fields):
+    def hydrate(self, fields, use_mapping=False):
         """
         Process an iterable of field (name, value) tuples. Update or create
         Fields attributes and the fields and custom fields dictionaries.
@@ -837,10 +859,12 @@ class About(object):
         """
         errors = []
         seen_fields = OrderedDict()
-        if util.have_mapping:
-            mapping = util.get_mappings(None)
+
+        mapping = {}
+        if use_mapping:
+            mapping = util.get_mapping()
+
         for name, value in fields:
-            # normalize to lower case
             orig_name = name
             name = name.lower()
             previous_value = seen_fields.get(name)
@@ -862,59 +886,65 @@ class About(object):
                 standard_field.original_value = value
                 standard_field.value = value
                 standard_field.present = True
-            else:
-                if util.have_mapping:
-                    if name in mapping.keys():
-                        # this is a special attribute
-                        if name == self.about_file_path_attr:
-                            setattr(self, self.about_file_path_attr, value)
-                            continue
+                continue
 
-                        # this is a special attribute, skip entirely
-                        if name == self.about_resource_path_attr:
-                            continue
+            if not use_mapping:
+                if not name == self.about_file_path_attr:
+                    msg = (u'Field %(orig_name)s is not a supported field and is ignored.')
+                    errors.append(Error(INFO, msg % locals()))
+                continue
 
-                        msg = (u'Field %(orig_name)s is a custom field')
-                        errors.append(Error(INFO, msg % locals()))
-                        custom_field = self.custom_fields.get(name)
-                        if custom_field:
-                            custom_field.original_value = value
-                            custom_field.value = value
-                            custom_field.present = True
-                        else:
-                            if name in dir(self):
-                                msg = (u'Field %(orig_name)s has an '
-                                       u'illegal reserved name')
-                                errors.append(Error(ERROR, msg % locals()))
-                            else:
-                                # custom fields are always handled as StringFields
-                                custom_field = StringField(name=name,
-                                                           value=value,
-                                                           present=True)
-                                self.custom_fields[name] = custom_field
-                                try:
-                                    setattr(self, name, custom_field)
-                                except:
-                                    # The intended captured error message should display
-                                    # the line number of where the invalid line is,
-                                    # but I am not able to get the line number from
-                                    # the original code. By-passing the line number
-                                    # for now.
-                                    # msg = u'Invalid line: %(line)d: %(orig_name)r'
-                                    msg = u'Invalid line: %(orig_name)r: ' % locals()
-                                    msg += u'%s' % custom_field.value
-                                    errors.append(Error(CRITICAL, msg))
-                    else:
-                        msg = (u'Field %(orig_name)s is not a supported field and is not ' +
-                               u'defined in the mapping file. This field is ignored.')
-                        errors.append(Error(INFO, msg % locals()))
-                else:
-                    if not name == self.about_file_path_attr:
-                        msg = (u'Field %(orig_name)s is not a supported field and is ignored.')
-                        errors.append(Error(INFO, msg % locals()))
+            if name not in mapping.keys():
+                msg = (u'Field %(orig_name)s is not a supported field and is not ' +
+                       u'defined in the mapping file. This field is ignored.')
+                errors.append(Error(INFO, msg % locals()))
+                continue
+
+            # this is a special attribute
+            if name == self.about_file_path_attr:
+                setattr(self, self.about_file_path_attr, value)
+                continue
+
+            # this is a special attribute, skip entirely
+            if name == self.about_resource_path_attr:
+                continue
+
+            msg = (u'Field %(orig_name)s is a custom field')
+            errors.append(Error(INFO, msg % locals()))
+            custom_field = self.custom_fields.get(name)
+            if custom_field:
+                custom_field.original_value = value
+                custom_field.value = value
+                custom_field.present = True
+                continue
+
+            if name in dir(self):
+                msg = (u'Field %(orig_name)s has an '
+                       u'illegal reserved name')
+                errors.append(Error(ERROR, msg % locals()))
+                continue
+
+            # custom fields are always handled as StringFields
+            custom_field = StringField(name=name,
+                                       value=value,
+                                       present=True)
+            self.custom_fields[name] = custom_field
+            try:
+                setattr(self, name, custom_field)
+            except:
+                # The intended captured error message should display
+                # the line number of where the invalid line is,
+                # but I am not able to get the line number from
+                # the original code. By-passing the line number
+                # for now.
+                # msg = u'Invalid line: %(line)d: %(orig_name)r'
+                msg = u'Invalid line: %(orig_name)r: ' % locals()
+                msg += u'%s' % custom_field.value
+                errors.append(Error(CRITICAL, msg))
         return errors
 
-    def process(self, fields, about_file_path, running_inventory=False, base_dir=None, license_notice_text_location=None):
+    def process(self, fields, about_file_path, running_inventory=False,
+                base_dir=None, license_notice_text_location=None, use_mapping=False):
         """
         Hydrate and validate a sequence of field name/value tuples from an
         ABOUT file. Return a list of errors.
@@ -923,20 +953,24 @@ class About(object):
         self.license_notice_text_location = license_notice_text_location
         afp = self.about_file_path
         errors = []
-        hydratation_errors = self.hydrate(fields)
+        hydratation_errors = self.hydrate(fields, use_mapping=use_mapping)
         errors.extend(hydratation_errors)
 
         # We want to copy the license_files before the validation
         if license_notice_text_location:
-            copy_license_notice_files(fields, base_dir, license_notice_text_location, afp)
+            copy_license_notice_files(
+                fields, base_dir, license_notice_text_location, afp)
 
         # we validate all fields, not only these hydrated
         all_fields = self.all_fields()
-        validation_errors = validate_fields(all_fields, about_file_path, running_inventory, self.base_dir, self.license_notice_text_location)
+        validation_errors = validate_fields(
+            all_fields, about_file_path, running_inventory,
+            self.base_dir, self.license_notice_text_location)
         errors.extend(validation_errors)
 
-        # do not forget to resolve about resource paths
-        # The 'about_resource' field is now a ListField and those do not need to resolve
+        # do not forget to resolve about resource paths The
+        # 'about_resource' field is now a ListField and those do not
+        # need to resolve
         # self.about_resource.resolve(self.about_file_path)
         return errors
 
@@ -951,7 +985,8 @@ class About(object):
         errors = []
         try:
             loc = add_unc(loc)
-            input_text = codecs.open(loc, encoding='utf-8').read()
+            with codecs.open(loc, encoding='utf-8') as txt:
+                input_text = txt.read()
             """
             The running_inventory defines if the current process is 'inventory' or not.
             This is used for the validation of the about_resource_path.
@@ -992,7 +1027,8 @@ class About(object):
         self.errors = errors
         return errors
 
-    def load_dict(self, fields_dict, base_dir, running_inventory=False, license_notice_text_location=None, with_empty=True):
+    def load_dict(self, fields_dict, base_dir, running_inventory=False, 
+                  license_notice_text_location=None, with_empty=True):
         """
         Load the ABOUT file from a fields name/value mapping.
         If with_empty, create fields with no value for empty fields.
@@ -1003,7 +1039,9 @@ class About(object):
         about_file_path = self.about_file_path
         if not with_empty:
             fields = [(n, v) for n, v in fields_dict.items() if v]
-        errors = self.process(fields, about_file_path, running_inventory, base_dir, license_notice_text_location)
+        errors = self.process(
+            fields, about_file_path, running_inventory, base_dir, 
+            license_notice_text_location)
         self.errors = errors
         return errors
 
@@ -1211,7 +1249,7 @@ def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
     fields = []
     if with_paths:
         fields.append(About.about_file_path_attr)
-        #fields.append(About.about_resource_path_attr)
+        # fields.append(About.about_resource_path_attr)
 
     standard_fields = About().fields.keys()
     if with_absent:
@@ -1279,7 +1317,7 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True):
     with codecs.open(location, mode='wb', encoding='utf-8') as output_file:
         if format == 'csv':
             fieldnames = field_names(abouts)
-            writer = unicodecsv.DictWriter(output_file, fieldnames)
+            writer = csv.DictWriter(output_file, fieldnames)
             writer.writeheader()
             for row in about_dictionary_list:
                 # See https://github.com/dejacode/about-code-tool/issues/167
@@ -1432,9 +1470,10 @@ def parse_license_expression(lic_expression):
     return special_char, lic_list
 
 def special_char_in_license_expresion(lic_expression):
-    not_support_char = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
-                    '+', '=', '{', '}', '|', '[', ']', '\\',
-                    ':', ';', '<', '>', '?', ',', '/']
+    not_support_char = [
+        '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+        '+', '=', '{', '}', '|', '[', ']', '\\',
+        ':', ';', '<', '>', '?', ',', '/']
     special_character = []
     for char in not_support_char:
         if char in lic_expression:

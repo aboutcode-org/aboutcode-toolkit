@@ -14,19 +14,26 @@
 #  limitations under the License.
 # ============================================================================
 
-
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from collections import namedtuple
 import logging
 
-__version__ = '3.0.0.dev5'
+try:
+    basestring  # Python 2
+except NameError:
+    basestring = str  # Python 3
+
+
+__version__ = '3.0.0.dev6'
+
 
 __about_spec_version__ = '2.0.0.dev2'
 
 __copyright__ = """
-Copyright (c) 2013-2016 nexB Inc. All rights reserved. http://dejacode.org
+Copyright (c) 2013-2017 nexB Inc. All rights reserved. http://dejacode.org
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -38,15 +45,46 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-Error = namedtuple('Error', ['severity', 'message'])
 
-def error_repr(self):
-    sev = severities[self.severity]
-    msg = self.message
-    return 'Error(%(sev)s, %(msg)r)' % locals()
+class Error(namedtuple('Error', ['severity', 'message'])):
+    """
+    An Error data with a severity and message.
+    """
+    def __new__(self, severity, message):
+        if message:
+            if isinstance(message, basestring):
+                message = clean_string(message)
+            else:
+                message = clean_string(repr(message))
 
-Error.__repr__ = error_repr
+        return super(Error, self).__new__(
+            Error, severity, message)
 
+    def __repr__(self, *args, **kwargs):
+        sev = severities[self.severity]
+        msg = clean_string(repr(self.message))
+        return 'Error(%(sev)s, %(msg)s)' % locals()
+
+
+def clean_string(s):
+    """
+    Return a cleaned string for `s`, stripping eventual "u" prefixes
+    from unicode representations.
+    """
+    if not s:
+        return s
+    if s.startswith(('u"', "u'")):
+        s = s.lstrip('u')
+    s = s.replace('[u"', '["')
+    s = s.replace("[u'", "['")
+    s = s.replace("(u'", "('")
+    s = s.replace("(u'", "('")
+    s = s.replace("{u'", "{'")
+    s = s.replace("{u'", "{'")
+    s = s.replace(" u'", " '")
+    s = s.replace(" u'", " '")
+    s = s.replace("\\\\", "\\")
+    return s
 
 # modeled after the logging levels
 CRITICAL = 50

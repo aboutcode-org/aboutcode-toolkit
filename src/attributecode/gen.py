@@ -16,21 +16,27 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import codecs
 from collections import OrderedDict
 import logging
 import posixpath
-import unicodecsv
+import sys
 
+if sys.version_info[0] < 3:
+    # Python 2
+    import backports.csv as csv
+else:
+    # Python 3
+    import csv
 
 from attributecode import ERROR
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import model
-from attributecode import util
-from attributecode.model import verify_license_files_in_location
 from attributecode.model import check_file_field_exist
+from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import to_posix
 
@@ -47,12 +53,14 @@ file_logger = logging.getLogger(__name__ + '_file')
 
 def check_duplicated_columns(location):
     """
-    Return a list of errors for duplicated column names in a CSV file at location.
+    Return a list of errors for duplicated column names in a CSV file
+    at location.
     """
     location = add_unc(location)
+    # FIXME: why ignore errors?
     with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
-        reader = unicodecsv.UnicodeReader(csvfile)
-        columns = reader.next()
+        reader = csv.reader(csvfile)
+        columns = next(reader)
         columns = [col for col in columns]
 
     seen = set()
@@ -97,10 +105,15 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 
-def load_inventory(mapping, location, base_dir, license_notice_text_location=None):
+def load_inventory(location, base_dir, license_notice_text_location=None,
+                   use_mapping=False):
     """
-    Load the inventory file at location. Return a list of errors and a list of About
-    objects validated against the base_dir.
+    Load the inventory file at `location` for ABOUT and LICENSE files
+    stored in the `base_dir`. Return a list of errors and a list of
+    About objects validated against the base_dir.
+    Optionally use `license_notice_text_location` as the location of
+    license and notice texts.
+    Optionally use mappings for field names if `use_mapping` is True.
     """
     errors = []
     abouts = []
@@ -110,9 +123,9 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
         if dup_cols_err:
             errors.extend(dup_cols_err)
             return errors, abouts
-        inventory = util.load_csv(mapping, location)
+        inventory = util.load_csv(location, use_mapping)
     else:
-        inventory = util.load_json(mapping, location)
+        inventory = util.load_json(location, use_mapping)
 
     try:
         dup_about_paths_err = check_duplicated_about_file_path(inventory)
@@ -120,15 +133,15 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
             errors.extend(dup_about_paths_err)
             return errors, abouts
     except:
-        msg = ("The essential field 'about_file_path' is not found.")
+        msg = "The essential field 'about_file_path' is not found."
         errors.append(Error(CRITICAL, msg))
         return errors, abouts
 
     for i, fields in enumerate(inventory):
         # check does the input contains the required fields
-        requied_fileds = model.About.required_fields
+        required_fields = model.About.required_fields
 
-        for f in requied_fileds:
+        for f in required_fields:
             if f not in fields:
                 msg = (
                     "Required column: %(f)r not found.\n"
@@ -142,7 +155,7 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
         afp = fields.get(model.About.about_file_path_attr)
 
         if not afp or not afp.strip():
-            msg = 'Empty column: %(afp)r. Cannot generate ABOUT file.' % locals()
+            msg = 'Empty column: %(afp)r. Cannot generate .ABOUT file.' % locals()
             errors.append(Error(ERROR, msg))
             continue
         else:
@@ -164,10 +177,11 @@ def load_inventory(mapping, location, base_dir, license_notice_text_location=Non
     return errors, abouts
 
 
-def generate(location, base_dir, mapping, license_notice_text_location, fetch_license, policy=None, conf_location=None,
-             with_empty=False, with_absent=False):
+def generate(location, base_dir, license_notice_text_location=None,
+             fetch_license=False, policy=None, conf_location=None,
+             with_empty=False, with_absent=False, use_mapping=False):
     """
-    Load ABOUT data from an inventory at csv_location. Write ABOUT files to
+    Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir using policy flags and configuration file at conf_location.
     Policy defines which action to take for merging or overwriting fields and
     files. Return errors and about objects.
@@ -178,12 +192,16 @@ def generate(location, base_dir, mapping, license_notice_text_location, fetch_li
     # Check if the fetch_license contains valid argument
     if fetch_license:
         # Strip the ' and " for api_url, and api_key from input
-        api_url = fetch_license[0].strip("'").strip("\"")
-        api_key = fetch_license[1].strip("'").strip("\"")
+        api_url = fetch_license[0].strip("'").strip('"')
+        api_key = fetch_license[1].strip("'").strip('"')
         gen_license = True
 
     bdir = to_posix(base_dir)
-    errors, abouts = load_inventory(mapping, location, bdir, license_notice_text_location)
+    errors, abouts = load_inventory(
+        location=location,
+        base_dir=bdir,
+        license_notice_text_location=license_notice_text_location,
+        use_mapping=use_mapping)
 
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)
@@ -274,7 +292,7 @@ def generate(location, base_dir, mapping, license_notice_text_location, fetch_li
         except Exception as e:
             # only keep the first 100 char of the exception
             emsg = repr(e)[:100]
-            msg = (u'Failed to write ABOUT file at : '
+            msg = (u'Failed to write .ABOUT file at : '
                    u'%(dump_loc)s '
                    u'with error: %(emsg)s' % locals())
             errors.append(Error(ERROR, msg))

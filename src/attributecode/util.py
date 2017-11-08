@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -15,29 +15,39 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
+from collections import OrderedDict
 import codecs
 import errno
 import json
 import ntpath
 import os
+from os.path import abspath
+from os.path import dirname
+from os.path import join
 import posixpath
 import shutil
 import socket
 import string
 import sys
-import unicodecsv
-from collections import OrderedDict
-from os.path import abspath
-from os.path import dirname
-from os.path import join
+
+if sys.version_info[0] < 3:
+    # Python 2
+    import backports.csv as csv
+else:
+    # Python 3
+    import csv
 
 try:
-    import httplib  # Python 2
+    # Python 2
+    import httplib
 except ImportError:
-    import http.client as httplib  # Python 3
+    # Python 3
+    import http.client as httplib
 
-from attributecode import CRITICAL, Error
+from attributecode import CRITICAL
+from attributecode import Error
 
 
 on_windows = 'win32' in sys.platform
@@ -59,8 +69,6 @@ UNC_PREFIX_POSIX = to_posix(UNC_PREFIX)
 UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.'
-
-have_mapping = False
 
 
 def invalid_chars(path):
@@ -133,9 +141,6 @@ def get_locations(location):
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
-    # See https://bugs.python.org/issue4071
-    if on_windows:
-        location = unicode(location)
     location = add_unc(location)
     location = get_absolute(location)
     assert os.path.exists(location)
@@ -197,7 +202,7 @@ def get_relative_path(base_loc, full_loc):
         relative = path[len(base) + 1:]
         # We don't want to keep the first segment of the root of the returned path.
         # See https://github.com/nexB/attributecode/issues/276
-        #relative = posixpath.join(base_name, relative)
+        # relative = posixpath.join(base_name, relative)
     return relative
 
 
@@ -230,30 +235,56 @@ def resource_name(path):
     return right.strip()
 
 
-class OrderedDictReader(unicodecsv.DictReader):
-    """
-    A DictReader that return OrderedDicts
-    """
-    def next(self):
-        row_dict = unicodecsv.DictReader.next(self)
-        result = OrderedDict()
-        # reorder based on fieldnames order
-        for name in self.fieldnames:
-            result[name] = row_dict[name]
-        return result
+# Python 3
+OrderedDictReader = csv.DictReader
+
+if sys.version_info[0] < 3:
+    # Python 2
+    class OrderedDictReader(csv.DictReader):
+        """
+        A DictReader that return OrderedDicts
+        Copied from csv.DictReader itself backported from Python 3
+        license: python
+        """
+        def __next__(self):
+            if self.line_num == 0:
+                # Used only for its side effect.
+                self.fieldnames
+            row = next(self.reader)
+            self.line_num = self.reader.line_num
+    
+            # unlike the basic reader, we prefer not to return blanks,
+            # because we will typically wind up with a dict full of None
+            # values
+            while row == []:
+                row = next(self.reader)
+            d = OrderedDict(zip(self.fieldnames, row))
+            lf = len(self.fieldnames)
+            lr = len(row)
+            if lf < lr:
+                d[self.restkey] = row[lf:]
+            elif lf > lr:
+                for key in self.fieldnames[lr:]:
+                    d[key] = self.restval
+            return d
+
+        next = __next__
 
 
-def get_mappings(location=None):
+def get_mapping(location=None):
     """
     Return a mapping of user key names to About key names by reading the
     mapping.config file from location or the directory of this source file if
     location was not provided.
     """
     if not location:
-        location = abspath(dirname(__file__))
-    mappings = {}
+        location = join(abspath(dirname(__file__)), 'mapping.config')
+    if not os.path.exists(location):
+        return {}
+
+    mapping = {}
     try:
-        with open(join(location, 'mapping.config'), 'rU') as mapping_file:
+        with open(location) as mapping_file:
             for line in mapping_file:
                 if not line or not line.strip() or line.strip().startswith('#'):
                     continue
@@ -263,29 +294,38 @@ def get_mappings(location=None):
                     key, sep, value = line.partition(':')
                     about_key = key.strip().replace(' ', '_')
                     user_key = value.strip()
-                    mappings[about_key] = user_key
+                    mapping[about_key] = user_key
 
     except Exception as e:
         print(repr(e))
         print('Cannot open or process mapping.config file at %(location)r.' % locals())
-        # this is rather brutal
+        # FIXME: this is rather brutal
         sys.exit(errno.EACCES)
-    return mappings
+    return mapping
 
 
-def apply_mappings(abouts, mappings=None):
+def apply_mapping(abouts, alternate_mapping=None):
     """
-    Given a list of About data dictionaries and a dictionary of mappings,
-    return a new About data dictionaries list where the keys have been
-    replaced by the About mapped_abouts key if present.
+    Given a list of About data dictionaries and a dictionary of
+    mapping, return a new About data dictionaries list where the keys
+    have been replaced by the About mapped_abouts key if present. Load
+    the mapping from the default mnapping.config if an alternate
+    mapping dict is not provided.
     """
-    mappings = mappings or get_mappings()
+    if alternate_mapping:
+        mapping = alternate_mapping
+    else:
+        mapping = get_mapping()
+
+    if not mapping:
+        return abouts
+
     mapped_abouts = []
     for about in abouts:
-        mapped_about = {}
+        mapped_about = OrderedDict()
         for key in about:
             mapped = []
-            for mapping_keys, input_keys in mappings.items():
+            for mapping_keys, input_keys in mapping.items():
                 if key == input_keys:
                     mapped.append(mapping_keys)
             if not mapped:
@@ -296,54 +336,50 @@ def apply_mappings(abouts, mappings=None):
     return mapped_abouts
 
 
-def get_about_file_path(mapping, location):
+def get_about_file_path(location, use_mapping=False):
     """
     Read file at location, return a list of about_file_path.
     """
     afp_list = []
     if location.endswith('.csv'):
-        about_data = load_csv(mapping, location)
+        about_data = load_csv(location, use_mapping=use_mapping)
     else:
-        about_data = load_json(mapping, location)
+        about_data = load_json(location, use_mapping=use_mapping)
 
     for about in about_data:
         afp_list.append(about['about_file_path'])
     return afp_list
 
 
-def load_csv(mapping, location):
+def load_csv(location, use_mapping=False):
     """
-    Read CSV at location, return a list of ordered mappings, one for each row.
+    Read CSV at location, return a list of ordered dictionaries, one
+    for each row.
     """
-    global have_mapping
-    have_mapping = mapping
-
     results = []
-    with codecs.open(location, mode='rb', encoding='utf-8', errors='ignore') as csvfile:
+    # FIXME: why ignore encoding errors here?
+    with codecs.open(location, mode='rb', encoding='utf-8',
+                     errors='ignore') as csvfile:
         for row in OrderedDictReader(csvfile):
-            input_row = {}
-            # convert all the column keys to lower case as the same behavior as
-            # when user use the --mapping
-            for key in row.keys():
-                input_row[key.lower()] = row[key]
-            results.append(input_row)
-    # user has the mapping option set
-    if mapping:
-        results = apply_mappings(results)
+            # convert all the column keys to lower case as the same
+            # behavior as when user use the --mapping
+            updated_row = OrderedDict(
+                [(key.lower(), value) for key, value in row.items()]
+            )
+            results.append(updated_row)
+    if use_mapping:
+        results = apply_mapping(results)
     return results
 
 
-def load_json(mapping, location):
+def load_json(location, use_mapping=False):
     """
     Read JSON at location, return a list of ordered mappings, one for each entry.
     """
-    global have_mapping
-    have_mapping = mapping
-
     with open(location) as json_file:
         results = json.load(json_file)
-    if mapping:
-        results = apply_mappings(results)
+    if use_mapping:
+        results = apply_mapping(results)
     return results
 
 

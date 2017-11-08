@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -16,11 +16,14 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from collections import OrderedDict
 import string
 import unittest
+from unittest.case import expectedFailure
 
+from testing_utils import extract_test_loc
 from testing_utils import get_test_loc
 from testing_utils import on_posix
 from testing_utils import on_windows
@@ -28,7 +31,6 @@ from testing_utils import on_windows
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import util
-from testing_utils import extract_test_loc
 
 
 class UtilsTest(unittest.TestCase):
@@ -211,13 +213,17 @@ class UtilsTest(unittest.TestCase):
         assert expected == result
 
     def test_check_file_names_with_invalid_chars_return_errors(self):
-        paths = ['locations/file',
-                 'locations/file with space',
-                 'locations/dir1/dir2/file1',
-                 'locations/dir2/file1']
+        paths = [
+            'locations/file',
+            'locations/file with space',
+            'locations/dir1/dir2/file1',
+            'locations/dir2/file1'
+        ]
 
         expected = [Error(CRITICAL, "Invalid characters '  ' in file name at: 'locations/file with space'")]
         result = util.check_file_names(paths)
+
+        assert expected[0].message == result[0].message
         assert expected == result
 
     def test_get_about_locations(self):
@@ -258,8 +264,7 @@ class UtilsTest(unittest.TestCase):
             result = util.get_relative_path(loc, loc)
             assert expected == result
 
-    def test_load_csv(self):
-        mapping = None
+    def test_load_csv_without_mapping(self):
         test_file = get_test_loc('util/about.csv')
         expected = [OrderedDict(
                     [('about_file', 'about.ABOUT'),
@@ -267,11 +272,10 @@ class UtilsTest(unittest.TestCase):
                      ('name', 'ABOUT tool'),
                      ('version', '0.8.1')])
                     ]
-        result = util.load_csv(mapping, test_file)
+        result = util.load_csv(test_file)
         assert expected == result
 
-    def test_load_json(self):
-        mapping = None
+    def test_load_json_without_mapping(self):
         test_file = get_test_loc('load/expected.json')
         expected = [OrderedDict(
                     [('about_file_path', '/load/this.ABOUT'),
@@ -280,27 +284,25 @@ class UtilsTest(unittest.TestCase):
                      ('name', 'AboutCode'),
                      ('version', '0.11.0')])
                     ]
-        result = util.load_json(mapping, test_file)
+        result = util.load_json(test_file)
         assert expected == result
 
-    def test_get_about_file_path_from_csv(self):
-        mapping = True
+    def test_get_about_file_path_from_csv_using_mapping(self):
         test_file = get_test_loc('util/about.csv')
         expected = ['about.ABOUT']
-        result = util.get_about_file_path(mapping, test_file)
+        result = util.get_about_file_path(test_file, use_mapping=True)
         assert expected == result
 
-    def test_get_about_file_path_from_json(self):
-        mapping = True
+    def test_get_about_file_path_from_json_using_mapping(self):
         test_file = get_test_loc('load/expected.json')
         expected = ['/load/this.ABOUT']
-        result = util.get_about_file_path(mapping, test_file)
+        result = util.get_about_file_path(test_file, use_mapping=True)
         assert expected == result
 
     # The column names should be converted to lowercase as the same behavior as
     # when user use the mapping.config
-    """def test_load_csv_does_not_convert_column_names_to_lowercase(self):
-        mapping = None
+    @expectedFailure
+    def test_load_csv_does_not_convert_column_names_to_lowercase(self):
         test_file = get_test_loc('util/about_key_with_upper_case.csv')
         expected = [OrderedDict(
                     [('about_file', 'about.ABOUT'),
@@ -308,8 +310,8 @@ class UtilsTest(unittest.TestCase):
                      ('nAme', 'ABOUT tool'),
                      ('Version', '0.8.1')])
                     ]
-        result = util.load_csv(mapping, test_file)
-        assert expected == result"""
+        result = util.load_csv(test_file)
+        assert expected == result
 
     def test_get_locations_with_very_long_path(self):
         longpath = (

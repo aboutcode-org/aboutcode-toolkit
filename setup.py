@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
 from __future__ import absolute_import
 from __future__ import print_function
@@ -10,6 +10,7 @@ from os.path import basename
 from os.path import dirname
 from os.path import join
 from os.path import splitext
+
 from setuptools import find_packages
 from setuptools import setup
 
@@ -22,16 +23,20 @@ def read(*names, **kwargs):
 
 
 setup(
-    name='attributecode',
-    version='3.0.0.dev4',
+    name='aboutcode-toolkit',
+    version='3.0.0.dev6',
     license='Apache-2.0',
-    description=('Document the provenance (origin and license) of '
-                 'third-party software using small text files. '
-                 'Collect inventories, generate attribution documentation.'),
-    long_description=('AttributeCode provides a simple way to document the'
+    description=(
+        'AboutCode-toolkit is a tool to document the provenance (origin and license) of '
+        'third-party software using small text files. '
+        'Collect inventories, generate attribution documentation.'
+    ),
+    long_description=(
+        'AttributeCode provides a simple way to document the'
         'provenance (i.e. origin and license) of software components that'
         'you use in your project. This documentation is stored in *.ABOUT'
-        'files, side-by-side with the documented code.'),
+        'files, side-by-side with the documented code.'
+    ),
     author='Chin-Yeung Li, Jillian Daguil, Thomas Druez, Philippe Ombredanne and others.',
     author_email='info@nexb.com',
     url='http://aboutcode.org',
@@ -46,9 +51,11 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
-        'Intended Audience :: Developers',
         'Topic :: Software Development',
         'Topic :: Software Development :: Documentation',
         'Topic :: Software Development :: Quality Assurance',
@@ -56,49 +63,23 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=[
-        'license', 'about', 'metadata', 'package', 'copyright', 
+        'license', 'about', 'metadata', 'package', 'copyright',
         'attribution', 'software', 'inventory',
     ],
-    data_files=[('about',
-        [
-            'about.ABOUT',
-            'about.bat',
-            'about',
-            'configure.bat',
-            'configure',
-            'about.cfg',
-            'README.rst',
-            'apache-2.0.LICENSE',
-            'NOTICE',
-            'SPEC',
-            'USAGE.rst',
-        ]),
-    ],
-
-    entry_points='''
-        [console_scripts]
-        about-code=attributecode.cmd:cli
-    ''',
     install_requires=[
-        'jinja2 >= 2.7.3, < 2.8',
-        'click >= 3.2, < 4',
-        'unicodecsv >= 0.9.4,  < 1.0',
+        'jinja2 >= 2.9, < 3.0',
+        'click >= 6.7, < 7.0',
+        "backports.csv ; python_version<'3.6'",
         'pyyaml >= 3.11, < 3.13',
-        'boolean.py',
-        'license_expression',
-     ],
-
+        'boolean.py >= 3.5, < 4.0',
+        'license_expression >= 0.94, < 1.0',
+    ],
     extras_require={
-        'base': [
-            'certifi',
-            'setuptools',
-            'wheel',
-            'pip',
-            'wincertstore',
-        ],
-        'dev': [
-            'pytest',
-            'py',
-        ],
-    }
+        ":python_version < '3.6'": ['backports.csv'],
+    },
+    entry_points={
+        'console_scripts': [
+            'about-code=attributecode.cmd:cli',
+        ]
+    },
 )

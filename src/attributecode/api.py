@@ -16,10 +16,17 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
-import json
-import urllib
 from collections import namedtuple
+import json
+
+try:
+    from urllib import urlencode
+    from urllib import quote
+except ImportError:
+    from urllib.parse import urlencode
+    from urllib.parse import quote
 
 try:
     import httplib  # Python 2
@@ -48,12 +55,12 @@ def build_api_url(url, api_username, api_key, license_key):
     payload = {'username': api_username,
                'api_key': api_key,
                'format': 'json'}
-    encoded_payload = urllib.urlencode(payload)
+    encoded_payload = urlencode(payload)
 
     api_url = '%(url)s/%(license_key)s/?%(encoded_payload)s' % locals()
 
     # handle special characters in URL such as space etc.
-    api_url = urllib.quote(api_url, safe="%/:=&?~#+!$,;'@()*[]")
+    api_url = quote(api_url, safe="%/:=&?~#+!$,;'@()*[]")
     return api_url
 
 
@@ -127,10 +134,10 @@ def request_license_data(url, api_key, license_key):
     }
 
     url = url.rstrip('/')
-    encoded_payload = urllib.urlencode(payload)
+    encoded_payload = urlencode(payload)
     full_url = '%(url)s/?%(encoded_payload)s' % locals()
     # handle special characters in URL such as space etc.
-    full_url = urllib.quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
+    full_url = quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
     headers = {'Authorization': 'Token %s' % api_key}
     license_data = {}
     errors = []

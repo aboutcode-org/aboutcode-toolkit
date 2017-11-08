@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -16,36 +16,19 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-
-import unittest
+from __future__ import unicode_literals
 
 from attributecode import CRITICAL
 from attributecode import DEBUG
 from attributecode import ERROR
-from attributecode import Error
 from attributecode import INFO
 from attributecode import NOTSET
 from attributecode import WARNING
 from attributecode import cmd
-from attributecode import util
+from attributecode import Error
 
 
-
-class CmdTest(unittest.TestCase):
-
-    def check_csv(self, expected, result):
-        """
-        Compare two CSV files at locations as lists of ordered items.
-        """
-        def as_items(csvfile):
-            mapping = None
-            return sorted([i.items() for i in util.load_csv(mapping, csvfile)])
-
-        expected = as_items(expected)
-        result = as_items(result)
-        assert expected == result
-
-# NB: this test depends on py.test stdout/err capture capabilities
+# NB: these tests depends on py.test stdout/err capture capabilities
 def test_log_errors(capsys):
     quiet = False
     errors = [Error(CRITICAL, 'msg1'),
@@ -66,6 +49,7 @@ NOTSET: msg4
 '''
     assert '' == err
     assert expected_out == out
+
 
 def test_log_errors_with_quiet(capsys):
     quiet = True

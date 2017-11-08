@@ -1,12 +1,12 @@
 about_resource: .
 
-name: AboutCode
-version: 3.0.0.dev4
+name: AboutCode-toolkit
+version: 3.0.0.dev6
 
 owner: nexB Inc.
 author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
 
-home_url: http://dejacode.org
+home_url: https://aboutcode.org
 
 vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git

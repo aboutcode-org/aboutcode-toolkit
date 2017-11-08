@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -16,25 +16,52 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from collections import OrderedDict
+import json
 import posixpath
+import sys
 import unittest
-
 from unittest.case import expectedFailure
+
+from testing_utils import extract_test_loc
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
 from testing_utils import get_test_lines
 from testing_utils import get_unicode_content
 
 import attributecode
+from attributecode import CRITICAL
+from attributecode import ERROR
+from attributecode import INFO
+from attributecode import WARNING
 from attributecode import Error
-from attributecode import CRITICAL, INFO, WARNING
 from attributecode import model
 from attributecode import util
-from attributecode import ERROR
-from attributecode.util import load_csv, add_unc
-from testing_utils import extract_test_loc
+from attributecode.util import add_unc
+from attributecode.util import load_csv
+
+
+def check_csv(expected, result):
+    """
+    Assert that the contents of two CSV files locations `expected` and
+    `result` are equal.
+    """
+    expected = sorted([sorted(d.items()) for d in load_csv(expected)])
+    result = sorted([sorted(d.items()) for d in load_csv(result)])
+    assert expected == result
+
+
+def check_json(expected, result):
+    """
+    Assert that the contents of two JSON files are equal.
+    """
+    with open(expected) as e:
+        expected = json.load(e, object_pairs_hook=OrderedDict)
+    with open(result) as r:
+        result = json.load(r, object_pairs_hook=OrderedDict)
+    assert expected == result
 
 
 class FieldTest(unittest.TestCase):
@@ -85,17 +112,16 @@ class FieldTest(unittest.TestCase):
         assert None == result
 
     def test_TextField_loads_file(self):
-        field = model.FileTextField(name='f', value='license.LICENSE',
-                                present=True)
+        field = model.FileTextField(
+            name='f', value='license.LICENSE', present=True)
 
 
         base_dir = get_test_loc('fields')
         errors = field.validate(base_dir=base_dir)
         assert [] == errors
 
-        expected = [('license.LICENSE', u'some license text')]
-        result = field.value.items()
-        assert expected == result
+        expected = {'license.LICENSE': u'some license text'}
+        assert expected == field.value
 
     def test_UrlField_is_valid_url(self):
         assert model.UrlField.is_valid_url('http://www.google.com')
@@ -258,11 +284,11 @@ class ParseTest(unittest.TestCase):
         assert expected == result
 
         expected_errors = [
-            Error(CRITICAL, "Invalid line: 0: u'invalid space:value\\n'"),
-            Error(CRITICAL, "Invalid line: 1: u'other-field: value\\n'"),
-            Error(CRITICAL, "Invalid line: 4: u'_invalid_dash: value\\n'"),
-            Error(CRITICAL, "Invalid line: 5: u'3invalid_number: value\\n'"),
-            Error(CRITICAL, "Invalid line: 6: u'invalid.dot: value'")
+            Error(CRITICAL, "Invalid line: 0: 'invalid space:value\\n'"),
+            Error(CRITICAL, "Invalid line: 1: 'other-field: value\\n'"),
+            Error(CRITICAL, "Invalid line: 4: '_invalid_dash: value\\n'"),
+            Error(CRITICAL, "Invalid line: 5: '3invalid_number: value\\n'"),
+            Error(CRITICAL, "Invalid line: 6: 'invalid.dot: value'")
             ]
         assert expected_errors == errors
 
@@ -285,11 +311,15 @@ class ParseTest(unittest.TestCase):
         errors, result = model.parse(test)
         expected = [(u'name', u'name'),
                     (u'about_resource', u'.'),
-                    (u'owner', u'Mat\xedas Aguirre')]
+                    (u'owner', 'Matías Aguirre')]
         assert expected == result
 
+        expected_msg = "Invalid line: 3: 'Matías: unicode field name\\n'"
+        if sys.version_info[0] < 3:  # Python 2
+            expected_msg = "Invalid line: 3: 'Mat\\xedas: unicode field name\\n'"
+
         expected_errors = [
-            Error(CRITICAL, "Invalid line: 3: u'Mat\\xedas: unicode field name\\n'")]
+            Error(CRITICAL, expected_msg)]
         assert expected_errors == errors
 
     def test_parse_handles_blank_lines_and_spaces_in_field_names(self):
@@ -379,7 +409,6 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     def test_About_hydrate_normalize_field_names_to_lowercase(self):
-        self.maxDiff = None
         test_file = get_test_lines('parser_tests/upper_field_names.ABOUT')
         errors, fields = model.parse(test_file)
         assert [] == errors
@@ -450,7 +479,7 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     @expectedFailure
-    # This test need to be updated as the custom field will be ignore if no 
+    # This test need to be updated as the custom field will be ignore if no
     # mapping is set
     def test_About_custom_fields_are_collected_correctly(self):
         test_file = get_test_loc('parse/custom_fields.about')
@@ -463,7 +492,7 @@ class AboutTest(unittest.TestCase):
         assert sorted(expected) == sorted(result)
 
     @expectedFailure
-    # This test need to be updated as the custom field will be ignore if no 
+    # This test need to be updated as the custom field will be ignore if no
     # mapping is set
     def test_About_custom_fields_are_collected_correctly_as_multiline_scalar(self):
         test_file = get_test_loc('parse/custom_fields.about')
@@ -478,10 +507,8 @@ class AboutTest(unittest.TestCase):
     def test_About_has_errors_for_illegal_custom_field_name(self):
         test_file = get_test_loc('parse/illegal_custom_field.about')
         a = model.About(test_file)
-        result = a.custom_fields.items()
-        expected = [
-            ]
-        assert expected == result
+        result = a.custom_fields
+        assert {} == result
 
     def test_About_file_fields_are_empty_if_present_and_path_missing(self):
         test_file = get_test_loc('parse/missing_notice_license_files.ABOUT')
@@ -493,19 +520,12 @@ class AboutTest(unittest.TestCase):
         err_msg1 = u'Field license_file: Path %s not found' % file_path1
         err_msg2 = u'Field notice_file: Path %s not found' % file_path2
 
-        expected_errors = [
-            err_msg1, err_msg2
-            ]
-
+        expected_errors = [err_msg1, err_msg2]
         errors = model.check_file_field_exist(a, test_file)
         assert expected_errors == errors
-        expected = [(u'test.LICENSE', None)]
-        result = a.license_file.value.items()
-        assert expected == result
 
-        expected = [(u'test.NOTICE', None)]
-        result = a.notice_file.value.items()
-        assert expected == result
+        assert {'test.LICENSE': None} == a.license_file.value
+        assert {'test.NOTICE': None} == a.notice_file.value
 
     def test_About_notice_and_license_text_are_loaded_from_file(self):
         test_file = get_test_loc('parse/license_file_notice_file.ABOUT')
@@ -563,13 +583,6 @@ this software and releases the component to Public Domain.
         a = model.About(test_file, about_file_path='complete2/about.ABOUT')
         test_file2 = get_test_loc('equal/complete/about.ABOUT')
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
-        self.maxDiff = None
-        # print()
-        # print('a')
-        # print(a.dumps(True))
-        # print()
-        # print('b')
-        # print(b.dumps(True))
         assert a.dumps(True) == b.dumps(True)
         assert a == b
 
@@ -593,7 +606,7 @@ copyright: Copyright (c) 2013-2014 nexB Inc.
 notice_file: NOTICE
 notice_url:
 redistribute:
-attribute: 
+attribute:
 track_change:
 modified:
 changelog_file:
@@ -650,7 +663,7 @@ spec_version:
         # and that all fields are in the correct order
         expected = [
             model.About.about_file_path_attr,
-            #model.About.about_resource_path_attr,
+            # model.About.about_resource_path_attr,
             'about_resource',
             'name',
             'about_resource_path',
@@ -719,7 +732,6 @@ spec_version:
 
 class SerializationTest(unittest.TestCase):
     def test_About_dumps(self):
-        self.maxDiff = None
         test_file = get_test_loc('parse/complete/about.ABOUT')
         a = model.About(test_file)
         assert [] == a.errors
@@ -849,6 +861,7 @@ version: 0.11.0
         result = a.as_dict(with_paths=False,
                            with_empty=True,
                            with_absent=False)
+        # FIXME: why converting back to dict?
         assert expected == dict(result)
 
     def test_About_as_dict_with_present(self):
@@ -896,6 +909,7 @@ version: 0.11.0
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=True)
+        # FIXME: why converting back to dict?
         assert expected == dict(result)
 
     def test_About_as_dict_with_nothing(self):
@@ -916,6 +930,7 @@ version: 0.11.0
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=False)
+        # FIXME: why converting back to dict?
         assert expected == dict(result)
 
     def test_loads_dumps_is_idempotent(self):
@@ -1004,12 +1019,11 @@ copyright: >
         a = model.About()
         base_dir = 'some_dir'
         a.load_dict(test, base_dir)
-        as_dict = a.as_dict(with_paths=False, with_absent=False,
-                           with_empty=True)
+        as_dict = a.as_dict(with_paths=False, with_absent=False, with_empty=True)
+        # FIXME: why converting back to dict?
         assert expected == dict(as_dict)
 
     def test_load_dict_handles_field_validation_correctly(self):
-        self.maxDiff = None
         test = {u'about_resource': u'.',
                 u'about_resource_path': u'.',
                 u'attribute': u'yes',
@@ -1028,44 +1042,32 @@ copyright: >
         a = model.About()
         base_dir = 'some_dir'
         a.load_dict(test, base_dir)
-        as_dict = a.as_dict(with_paths=False, with_absent=False,
-                            with_empty=True)
+        as_dict = a.as_dict(with_paths=False, with_absent=False, with_empty=True)
+        # FIXME: why converting back to dict?
         assert test == dict(as_dict)
-
-    def check_csvs(self, expected, result):
-        """
-        Assert that the content of two CSV file locations are equal.
-        """
-        mapping = None
-        expected = [d.items() for d in load_csv(mapping, expected)]
-        result = [d.items() for d in load_csv(mapping, result)]
-        for ie, expect in enumerate(expected):
-            res = result[ie]
-            for ii, exp in enumerate(expect):
-                r = res[ii]
-                assert exp == r
 
     def test_write_output_csv(self):
         path = 'load/this.ABOUT'
         test_file = get_test_loc(path)
-        a = model.About(location=test_file, about_file_path=path)
+        abouts = model.About(location=test_file, about_file_path=path)
 
-        tmp_file = get_temp_file()
-        model.write_output([a], tmp_file, format = 'csv')
+        result = get_temp_file()
+        model.write_output([abouts], result, format='csv')
 
         expected = get_test_loc('load/expected.csv')
-        self.check_csvs(expected, tmp_file)
+        check_csv(expected, result)
 
     def test_write_output_json(self):
         path = 'load/this.ABOUT'
         test_file = get_test_loc(path)
-        a = model.About(location=test_file, about_file_path=path)
+        abouts = model.About(location=test_file, about_file_path=path)
 
-        tmp_file = get_temp_file()
-        model.write_output([a], tmp_file, format = 'json')
+        result = get_temp_file()
+        model.write_output([abouts], result, format='json')
 
         expected = get_test_loc('load/expected.json')
-        self.check_csvs(expected, tmp_file)
+        check_json(expected, result)
+
 
 class CollectorTest(unittest.TestCase):
 
@@ -1190,72 +1192,63 @@ class CollectorTest(unittest.TestCase):
         assert expected == result1
         assert expected == result2
 
-    def check_csv(self, expected, result):
-        """
-        Compare two CSV files at locations as lists of ordered items.
-        """
-        def as_items(csvfile):
-            mapping= None
-            return sorted([i.items() for i in util.load_csv(mapping, csvfile)])
-
-        expected = as_items(expected)
-        result = as_items(result)
-        assert expected == result
-
     def test_collect_inventory_basic_from_directory(self):
         location = get_test_loc('inventory/basic')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.write_output(abouts, result, format = 'csv')
+        model.write_output(abouts, result, format='csv')
 
         expected_errors = []
         assert expected_errors == errors
 
         expected = get_test_loc('inventory/basic/expected.csv')
-        self.check_csv(expected, result)
+        check_csv(expected, result)
 
     def test_collect_inventory_with_about_resource_path_from_directory(self):
         location = get_test_loc('inventory/basic_with_about_resource_path')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.write_output(abouts, result, format = 'csv')
+        model.write_output(abouts, result, format='csv')
 
         expected_errors = []
         assert expected_errors == errors
 
         expected = get_test_loc('inventory/basic_with_about_resource_path/expected.csv')
-        self.check_csv(expected, result)
+        check_csv(expected, result)
 
     def test_collect_inventory_with_no_about_resource_from_directory(self):
         location = get_test_loc('inventory/no_about_resource_key')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.write_output(abouts, result, format = 'csv')
+        model.write_output(abouts, result, format='csv')
 
         expected_errors = [Error(CRITICAL, u'about/about.ABOUT: Field about_resource is required')]
         assert expected_errors == errors
 
         expected = get_test_loc('inventory/no_about_resource_key/expected.csv')
-        self.check_csv(expected, result)
+        check_csv(expected, result)
 
-    # FIXME: The self.check_csv is failing because there are many keys in the ABOUT files that are
-    # not supported. Instead of removing all the non-supported keys in the output
-    # and do the comparison, it may be best to apply the mapping to include theses keys
     @expectedFailure
     def test_collect_inventory_complex_from_directory(self):
+        # FIXME: check_csv is failing because there are many keys in
+        # the ABOUT files that are not supported. Instead of removing
+        # all the non-supported keys in the output and do the
+        # comparison, it may be best to apply the mapping to include
+        # theses keys
         location = get_test_loc('inventory/complex')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
-        model.write_output(abouts, result, format = 'csv')
+        model.write_output(abouts, result, format='csv')
 
         assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('inventory/complex/expected.csv')
-        self.check_csv(expected, result)
+        check_csv(expected, result)
+
 
 class GroupingsTest(unittest.TestCase):
 

@@ -1,11 +1,20 @@
 AboutCode toolkit
 =================
 
-.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop
-   :target: https://travis-ci.org/nexB/aboutcode-toolkit
+Build and tests status
+----------------------
 
-.. image:: https://coveralls.io/repos/nexB/aboutcode-toolkit/badge.png?branch=develop
-  :target: https://coveralls.io/r/nexB/aboutcode-toolkit?branch=develop
++-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
+|Branch |                         **Linux (Travis)**                                    |                         **MacOSX (Travis)**                                   |                         **Windows (AppVeyor)**                                                       |
++=======+===============================================================================+===============================================================================+======================================================================================================+
+|       |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=master  |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=master  |.. image:: https://ci.appveyor.com/api/projects/status/nexB/aboutcode-toolkit/branch/master?png=true  |
+|Master |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit                                    |
+|       |   :alt: Linux Master branch tests status                                      |   :alt: MacOSX Master branch tests status                                     |   :alt: Windows Master branch tests status                                                           |
++-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
+|       |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop |.. image:: https://ci.appveyor.com/api/projects/status/nexB/aboutcode-toolkit/branch/develop?png=true |
+|Develop|   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit                                    |
+|       |   :alt: Linux Develop branch tests status                                     |   :alt: MacOSX Develop branch tests status                                    |   :alt: Windows Develop branch tests status                                                          |
++-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
 
 
 The AboutCode toolkit and ABOUT files provide a simple way to document the
@@ -32,7 +41,7 @@ https://github.com/nexB/aboutcode-toolkit/blob/master/SPEC
 
 REQUIREMENTS
 ------------
-The AboutCode toolkit is tested with 2.7 on Linux, Mac and Windows.
+The AboutCode toolkit is tested with Python 2.7 and 3.6 on Linux, Mac and Windows.
 You will need to install a Python interpreter if you do not have one already
 installed.
 
@@ -40,9 +49,8 @@ On Linux and Mac, Python is typically pre-installed. To verify which
 version may be pre-installed, open a terminal and type::
 
     python --version
-    python2.7 --version
 
-On Windows or Mac, you can download the latest Python 2.7.x here:
+On Windows or Mac, you can download the latest Python here:
     https://www.python.org/downloads/
 
 Download the .msi installer for Windows or the .dmg archive for Mac.
@@ -55,7 +63,7 @@ Checkout or download and extract the AboutCode toolkit from:
     https://github.com/nexB/aboutcode-toolkit/
 
 To install all the needed dependencies in a virtualenv, run (on posix)::
-    source configure 
+    source configure
 or on windows::
     configure
 
@@ -65,8 +73,8 @@ USAGE
 See https://github.com/nexB/aboutcode-toolkit/blob/master/USAGE.rst for USAGE.
 
 
-TESTS and DEVLOPMENT
---------------------
+TESTS and DEVELOPMENT
+---------------------
 To install all the needed development dependencies, run (on posix)::
     source configure etc/conf/dev
 or on windows::
@@ -74,7 +82,6 @@ or on windows::
 
 To verify that everything works fine you can run the test suite with::
     py.test
-
 
 
 HELP and SUPPORT

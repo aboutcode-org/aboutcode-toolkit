@@ -1,8 +1,8 @@
-about_resource: certifi-2015.04.28-py2.py3-none-any.whl
-version: 2015.04.28
+about_resource: certifi-2017.4.17-py2.py3-none-any.whl
+version: 2017.4.17
 description: Python package for providing Mozilla's CA Bundle.
 
-download_url: https://pypi.python.org/packages/2.7/c/certifi/certifi-2015.04.28-py2.py3-none-any.whl#md5=4b0d6599c8297becffeb369c0b3ef47b
+download_url: https://pypi.python.org/packages/eb/01/c1f58987b777d6c4ec535b4e004a4a07bfc9db06f0c7533367ca6da8f2a6/certifi-2017.4.17-py2.py3-none-any.whl
 
 owner: Kenneth Reitz
 contact: me@kennethreitz.com

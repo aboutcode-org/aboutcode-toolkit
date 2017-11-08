@@ -16,15 +16,17 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import codecs
 import collections
-import jinja2
 import os
 from posixpath import basename
 from posixpath import dirname
 from posixpath import exists
 from posixpath import join
+
+import jinja2
 
 import attributecode
 from attributecode import ERROR
@@ -36,7 +38,7 @@ from attributecode.util import add_unc
 
 def generate(abouts, template_string=None):
     """
-    Generate and return attribution text from a list of ABOUT objects and a
+    Generate and return attribution text from a list of About objects and a
     template string.
     The returned rendered text may contain template processing error messages.
     """
@@ -73,7 +75,7 @@ def generate(abouts, template_string=None):
             if about.license_expression.value and about.license_name.value:
                 # Split the license expression into list with license key and condition keyword
                 lic_expression_list = about.license_expression.value.split()
-                
+
 
                 lic_name_list = about.license_name.value
                 lic_name_expression_list = []
@@ -96,7 +98,7 @@ def generate(abouts, template_string=None):
                 lic_name_expression = ' '.join(lic_name_expression_list)
 
                 # Add the license name expression string into the about object
-                about.license_name_expression = lic_name_expression 
+                about.license_name_expression = lic_name_expression
 
         rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=sorted_license_key_and_context,
                                    license_file_name_and_key=license_file_name_and_key, license_key_to_license_name=license_key_to_license_name)
@@ -125,7 +127,7 @@ default_template = join(os.path.dirname(os.path.realpath(__file__)),
 
 def generate_from_file(abouts, template_loc=None):
     """
-    Generate and return attribution string from a list of ABOUT objects and a
+    Generate and return attribution string from a list of About objects and a
     template location.
     """
     if not template_loc:
@@ -136,12 +138,18 @@ def generate_from_file(abouts, template_loc=None):
     return generate(abouts, template_string=tpls)
 
 
-def generate_and_save(abouts, output_location, mapping, template_loc=None,
-                      inventory_location=None):
+def generate_and_save(abouts, output_location, use_mapping=False,
+                      template_loc=None, inventory_location=None):
     """
-    Generate attribution using template and save at output_location.
-    Filter the list of about object based on the inventory CSV at
-    inventory_location.
+    Generate attribution file using the `abouts` list of About object
+    at `output_location`.
+
+    Use the optional `template_loc` custom temaplte or a default template.
+
+    Optionally filter `abouts` object based on the inventory JSON or
+    CSV at `inventory_location`.
+
+    Optionally use the mapping.config file is `use_mapping` is True
     """
     updated_abouts = []
     lstrip_afp = []
@@ -154,21 +162,28 @@ def generate_and_save(abouts, output_location, mapping, template_loc=None,
     # Do the following if an filter list (inventory_location) is provided
     else:
         if not exists(inventory_location):
-            msg = (u'"INVENTORY_LOCATOIN" does not exist. Generation halted.')
+            # FIXME: this message does not make sense
+            msg = (u'"INVENTORY_LOCATION" does not exist. Generation halted.')
             errors.append(Error(ERROR, msg))
             return errors
 
         if inventory_location.endswith('.csv') or inventory_location.endswith('.json'):
+            # FIXME: we should use the same inventory lodaing that we use everywhere!!!!
+
             try:
                 # Return a list which contains only the about file path
-                about_list = attributecode.util.get_about_file_path(mapping, inventory_location)
+                about_list = attributecode.util.get_about_file_path(
+                    inventory_location, use_mapping=use_mapping)
+            # FIXME: why catching all exceptions?
             except Exception:
                 # 'about_file_path' key/column doesn't exist
-                msg = (u"The required key: 'about_file_path' does not exist. Generation halted.")
+
+                msg = u"The required key: 'about_file_path' does not exist. Generation halted."
                 errors.append(Error(ERROR, msg))
                 return errors
         else:
-            msg = (u'Only .csv and .json are supported for the "INVENTORY_LOCATOIN". Generation halted.')
+            # FIXME: this message does not make sense
+            msg = u'Only .csv and .json are supported for the "INVENTORY_LOCATION". Generation halted.'
             errors.append(Error(ERROR, msg))
             return errors
 
@@ -189,12 +204,12 @@ def generate_and_save(abouts, output_location, mapping, template_loc=None,
 
         if not_match_path:
             if len(not_match_path) == len(about_files_list):
-                msg = ("None of the paths in the provided 'inventory_location' match with the 'LOCATION'.")
+                msg = "None of the paths in the provided 'inventory_location' match with the 'LOCATION'."
                 errors.append(Error(ERROR, msg))
                 return errors
             else:
                 for path in not_match_path:
-                    msg = ('Path: ' + path + ' cannot be found.')
+                    msg = 'Path: ' + path + ' cannot be found.'
                     errors.append(Error(ERROR, msg))
 
         for about in abouts:
@@ -222,16 +237,19 @@ def generate_and_save(abouts, output_location, mapping, template_loc=None,
 
     return errors
 
+
 def as_about_paths(paths):
     """
-    Given a list of paths, return a list of paths that point all to .ABOUT files.
+    Return a list of paths to .ABOUT files from a list of `paths`
+    strings.
     """
-    normalized_paths = []
+    about_paths = []
     for path in paths:
         if path.endswith('.ABOUT'):
-            normalized_paths.append(path)
+            about_paths.append(path)
         else:
+            # FIXME: this is not the way to check that a path is a directory, too weak
             if path.endswith('/'):
                 path += basename(dirname(path))
-            normalized_paths.append(path + '.ABOUT')
-    return normalized_paths
+            about_paths.append(path + '.ABOUT')
+    return about_paths

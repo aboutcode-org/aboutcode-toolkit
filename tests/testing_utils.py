@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2016 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import codecs
 import logging
@@ -27,7 +28,9 @@ import sys
 import tempfile
 import zipfile
 
-from attributecode.util import to_posix, add_unc
+from attributecode.util import add_unc
+from attributecode.util import to_posix
+
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -35,8 +38,7 @@ handler.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 
-TESTDATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                            'testdata')
+TESTDATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'testdata')
 
 on_windows = 'win32' in sys.platform
 on_posix = not on_windows
