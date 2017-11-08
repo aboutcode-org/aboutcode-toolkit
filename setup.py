@@ -66,23 +66,6 @@ setup(
         'license', 'about', 'metadata', 'package', 'copyright',
         'attribution', 'software', 'inventory',
     ],
-    # FIXME: we SHOULD NOT use datafiles!!!! which is a mine field but
-    # only package data or use a MANIFEST.in instead for a sdist
-    data_files=[('about',
-        [
-            'about.ABOUT',
-            'about.bat',
-            'about',
-            'configure.bat',
-            'configure',
-            'about.cfg',
-            'README.rst',
-            'apache-2.0.LICENSE',
-            'NOTICE',
-            'SPEC',
-            'USAGE.rst',
-        ]),
-    ],
     install_requires=[
         'jinja2 >= 2.9, < 3.0',
         'click >= 6.7, < 7.0',
