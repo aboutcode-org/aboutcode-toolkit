@@ -296,13 +296,22 @@ OUTPUT: Path to output file to write the attribution to.
 @click.argument('location', nargs=1, required=True,
     type=click.Path(exists=True, readable=True, resolve_path=True))
 
+@click.option('--show-all', is_flag=True, default=False,
+    help='Show all errors and warnings. '
+        'By default, running a check only reports these '
+        'error levels: CRITICAL, ERROR, and WARNING. '
+        'Use this option to report all errors and warning '
+        'for any level.'
+)
+
 @click.help_option('-h', '--help')
 
-def check(location):
+def check(location, show_all):
     """
-Validate .ABOUT file(s) at LOCATION.
+Check and validate .ABOUT file(s) at LOCATION for errors and
+print error messages on the terminal.
 
-LOCATION: Path to a .ABOUT file or a directory tree containing .ABOUT files.
+LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
     """
     click.echo('Running aboutcode-toolkit version ' + __version__)
     click.echo('Checking ABOUT files...')
@@ -313,19 +322,22 @@ LOCATION: Path to a .ABOUT file or a directory tree containing .ABOUT files.
     print_errors = []
     for severity, message in errors:
         sever = severities[severity]
-        if sever in problematic_errors:
-            print_errors.append((msg_format % locals()))
+        if show_all:
+            print_errors.append(msg_format % locals())
+        elif sever in problematic_errors:
+            print_errors.append(msg_format % locals())
 
-    number_of_problematic_errors = len(print_errors)
+    number_of_errors = len(print_errors)
 
     for err in print_errors:
         print(err)
 
     if print_errors:
-        click.echo('Found %(number_of_problematic_errors)d errors' % locals())
+        click.echo('Found {} errors.'.format(number_of_errors))
+        # FIXME: not sure this is the right way to exit with a retrun code
         sys.exit(1)
     else:
-        click.echo('No error is found.')
+        click.echo('No error found.')
     # FIXME: return error code?
 
 
