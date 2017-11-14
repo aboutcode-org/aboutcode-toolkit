@@ -27,10 +27,10 @@ except NameError:
     basestring = str  # Python 3
 
 
-__version__ = '3.0.0.dev6'
+__version__ = '3.0.0'
 
 
-__about_spec_version__ = '2.0.0.dev2'
+__about_spec_version__ = '3.0.0'
 
 __copyright__ = """
 Copyright (c) 2013-2017 nexB Inc. All rights reserved. http://dejacode.org
