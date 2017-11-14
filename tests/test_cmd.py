@@ -63,4 +63,4 @@ def test_log_errors_with_quiet(capsys):
     cmd.log_errors(errors, quiet, base_dir='')
     out, err = capsys.readouterr()
     assert '' == out
-    assert '' == err    
+    assert '' == err

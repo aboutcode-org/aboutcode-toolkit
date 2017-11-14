@@ -210,7 +210,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     click.echo('Generating .ABOUT files...')
 
     errors, abouts = attributecode.gen.generate(
-        location=location, base_dir=output, mapping=mapping,
+        location=location, base_dir=output, use_mapping=mapping,
         license_notice_text_location=license_notice_text_location,
         fetch_license=fetch_license)
 
