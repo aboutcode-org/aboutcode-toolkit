@@ -29,8 +29,8 @@ click.disable_unicode_literals_warning = True
 
 from attributecode import __about_spec_version__
 from attributecode import __version__
-from attributecode import attrib
-from attributecode import gen
+from attributecode.attrib import generate_and_save as attrib_generate_and_save
+from attributecode.gen import generate as gen_generate
 from attributecode import model
 from attributecode import severities
 from attributecode.util import extract_zip
@@ -115,7 +115,7 @@ Use about-code <command> --help for help on a command.
 
 @click.help_option('-h', '--help')
 
-def inventory_cmd(location, output, quiet, format):
+def inventory(location, output, quiet, format):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -183,7 +183,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.help_option('-h', '--help')
 
-def gen_cmd(location, output, mapping, license_notice_text_location, fetch_license, quiet):
+def gen(location, output, mapping, license_notice_text_location, fetch_license, quiet):
     """
 Generate .ABOUT files in OUTPUT directory from a JSON or CSV inventory of .ABOUT files at LOCATION.
 
@@ -200,7 +200,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     click.echo('Generating .ABOUT files...')
 
-    errors, abouts = gen.generate(
+    errors, abouts = gen_generate(
         location=location, base_dir=output, use_mapping=mapping,
         license_notice_text_location=license_notice_text_location,
         fetch_license=fetch_license)
@@ -249,7 +249,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
 @click.help_option('-h', '--help')
 
-def attrib_cmd(location, output, template, mapping, inventory, quiet):
+def attrib(location, output, template, mapping, inventory, quiet):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -265,7 +265,7 @@ OUTPUT: Path to output file to write the attribution to.
         location = extract_zip(location)
 
     inv_errors, abouts = model.collect_inventory(location)
-    no_match_errors = attrib.generate_and_save(
+    no_match_errors = attrib_generate_and_save(
         abouts=abouts, output_location=output,
         use_mapping=mapping, template_loc=template,
         inventory_location=inventory)
@@ -297,7 +297,7 @@ OUTPUT: Path to output file to write the attribution to.
 
 @click.help_option('-h', '--help')
 
-def check_cmd(location, show_all):
+def check(location, show_all):
     """
 Check and validate .ABOUT file(s) at LOCATION for errors and
 print error messages on the terminal.
