@@ -37,29 +37,18 @@ from posixpath import dirname
 import re
 import sys
 
-if sys.version_info[0] < 3:
-    # Python 2
+if sys.version_info[0] < 3:  # Python 2
     import backports.csv as csv
-else:
-    # Python 3
+    from urlparse import urljoin, urlparse
+    from urllib2 import urlopen, Request, HTTPError
+else:  # Python 3
+    basestring = str
     import csv
+    from urllib.parse import urljoin, urlparse
+    from urllib.request import urlopen, Request
+    from urllib.error import HTTPError
 
 from license_expression import Licensing
-
-try:
-    import urllib2  # Python 2
-except ImportError:
-    import urllib as urllib2  # Python 3
-
-try:
-    from urlparse import urljoin, urlparse  # Python 2
-except ImportError:
-    from urllib.parse import urljoin, urlparse  # Python 3
-
-try:
-    basestring  # Python 2
-except NameError:
-    basestring = str  # Python 3
 
 from attributecode import CRITICAL
 from attributecode import ERROR
@@ -81,7 +70,6 @@ class Field(object):
     An ABOUT file field. The initial value is a string. Subclasses can and
     will alter the value type as needed.
     """
-
     def __init__(self, name=None, value=None, required=False, present=False):
         # normalized names are lowercased per specification
         self.name = name
@@ -228,7 +216,6 @@ class StringField(Field):
     A field containing a string value possibly on multiple lines.
     The validated value is a string.
     """
-
     def _validate(self, *args, **kwargs):
         errors = super(StringField, self)._validate(*args, ** kwargs)
         return errors
@@ -640,7 +627,12 @@ def validate_fields(fields, about_file_path, running_inventory, base_dir,
     """
     errors = []
     for f in fields:
-        val_err = f.validate(base_dir=base_dir, about_file_path=about_file_path, running_inventory=running_inventory, license_notice_text_location=license_notice_text_location)
+        val_err = f.validate(
+            base_dir=base_dir,
+            about_file_path=about_file_path,
+            running_inventory=running_inventory,
+            license_notice_text_location=license_notice_text_location,
+        )
         errors.extend(val_err)
     return errors
 
@@ -666,7 +658,6 @@ class About(object):
         Create fields in an ordered mapping to keep a standard ordering. We
         could use a metaclass to track ordering django-like but this approach
         is simpler.
-
         """
         self.fields = OrderedDict([
             ('about_resource', ListField(required=True)),
@@ -746,7 +737,8 @@ class About(object):
                 and self.fields == other.fields
                 and self.custom_fields == other.custom_fields)
 
-    def attribution_fields(self, fields):
+    @staticmethod
+    def attribution_fields(fields):
         """
         Return attrib-only fields
         """
@@ -767,16 +759,15 @@ class About(object):
                          'owner',
                          'author']
 
-        return OrderedDict([(n, o,) for n, o in fields.items()
-                                if n in attrib_fields])
+        return OrderedDict([(n, o) for n, o in fields.items()
+                            if n in attrib_fields])
 
     def same_attribution(self, other):
         """
         Equality based on attribution-related fields.
         """
         return (isinstance(other, self.__class__)
-                and self.attribution_fields(self.fields)
-                    == self.attribution_fields(other.fields))
+                and self.attribution_fields(self.fields) == self.attribution_fields(other.fields))
 
     def resolved_resources_paths(self):
         """
@@ -1091,7 +1082,6 @@ class About(object):
                     errors.append(msg)
         return errors
 
-
     def dump_lic(self, location, license_dict):
         """
         Write LICENSE files and return the a list of key, name, context and the url
@@ -1123,6 +1113,7 @@ class About(object):
                     except:
                         pass
         return license_key_name_context_url
+
 
 # valid field name
 field_name = r'(?P<name>[a-z][0-9a-z_]*)'
@@ -1406,13 +1397,6 @@ def by_license_content(abouts):
     return OrderedDict(sorted(grouped.items()))
 
 
-def common_licenses(abouts):
-    """
-    Return a ordered dictionary of repeated licenses sorted by key and update
-    the list of about objects with license references for repeated licenses.
-    """
-    pass
-
 def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
     """
     Modify a list of About data dictionaries by adding license information
@@ -1460,6 +1444,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
                             key_text_dict[license_key] = detail_list
     return key_text_dict, errors
 
+
 def parse_license_expression(lic_expression):
     licensing = Licensing()
     lic_list = []
@@ -1468,6 +1453,7 @@ def parse_license_expression(lic_expression):
         # Parse the license expression and save it into a list
         lic_list = licensing.license_keys(lic_expression)
     return special_char, lic_list
+
 
 def special_char_in_license_expresion(lic_expression):
     not_support_char = [
@@ -1480,13 +1466,14 @@ def special_char_in_license_expresion(lic_expression):
             special_character.append(char)
     return special_character
 
+
 def valid_api_url(api_url):
     try:
-        request = urllib2.Request(api_url)
+        request = Request(api_url)
         # This will always goes to exception as no key are provided.
         # The purpose of this code is to validate the provided api_url is correct
-        response = urllib2.urlopen(request)
-    except urllib2.HTTPError as http_e:
+        response = urlopen(request)
+    except HTTPError as http_e:
         # The 403 error code is refer to "Authentication credentials were not provided.".
         # This is correct as no key are provided.
         if http_e.code == 403:
