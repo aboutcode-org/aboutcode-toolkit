@@ -18,7 +18,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import codecs
 import logging
 import os
 from os.path import exists, join
@@ -28,19 +27,11 @@ import click
 # silence unicode literals warnings
 click.disable_unicode_literals_warning = True
 
-import attributecode
-from attributecode import CRITICAL
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import NOTSET
-from attributecode import WARNING
 from attributecode import __about_spec_version__
 from attributecode import __version__
 from attributecode import attrib
-from attributecode import Error
 from attributecode import gen
 from attributecode import model
-from attributecode.model import About
 from attributecode import severities
 from attributecode.util import extract_zip
 from attributecode.util import to_posix
@@ -147,7 +138,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    errors, abouts = attributecode.model.collect_inventory(location)
+    errors, abouts = model.collect_inventory(location)
 
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
@@ -209,7 +200,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     click.echo('Generating .ABOUT files...')
 
-    errors, abouts = attributecode.gen.generate(
+    errors, abouts = gen.generate(
         location=location, base_dir=output, use_mapping=mapping,
         license_notice_text_location=license_notice_text_location,
         fetch_license=fetch_license)
@@ -274,7 +265,7 @@ OUTPUT: Path to output file to write the attribution to.
         location = extract_zip(location)
 
     inv_errors, abouts = model.collect_inventory(location)
-    no_match_errors = attributecode.attrib.generate_and_save(
+    no_match_errors = attrib.generate_and_save(
         abouts=abouts, output_location=output,
         use_mapping=mapping, template_loc=template,
         inventory_location=inventory)
@@ -316,7 +307,7 @@ LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
     click.echo('Running aboutcode-toolkit version ' + __version__)
     click.echo('Checking ABOUT files...')
 
-    errors, abouts = attributecode.model.collect_inventory(location)
+    errors, abouts = model.collect_inventory(location)
 
     msg_format = '%(sever)s: %(message)s'
     print_errors = []
