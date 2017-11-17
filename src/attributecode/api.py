@@ -63,7 +63,7 @@ def request_license_data(url, api_key, license_key):
     try:
         request = Request(quoted_url, headers=headers)
         response = urlopen(request)
-        response_content = response.read()
+        response_content = response.read().decode('utf-8')
         license_data = json.loads(response_content)
         if not license_data['results']:
             msg = u"Invalid 'license': %s" % license_key
