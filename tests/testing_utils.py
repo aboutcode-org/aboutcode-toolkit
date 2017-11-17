@@ -156,3 +156,13 @@ def extract_test_loc(path, extract_func=extract_zip):
         target_dir = get_temp_dir()
     extract_func(archive, target_dir)
     return target_dir
+
+
+class FakeResponse(object):
+    response_content = None
+
+    def __init__(self, response_content):
+        self.response_content = response_content
+
+    def read(self):
+        return self.response_content

@@ -20,32 +20,41 @@ from __future__ import unicode_literals
 
 import unittest
 
-from mock import patch
+import mock
 
-import attributecode
 from attributecode import api
-from attributecode.api import LicenseInfo
+from attributecode import ERROR
+from attributecode import Error
+from testing_utils import FakeResponse
 
 
 class ApiTest(unittest.TestCase):
+    @mock.patch.object(api, 'request_license_data')
+    def test_api_get_license_details_from_api(self, request_license_data):
+        license_data = {
+            'name': 'Apache License 2.0',
+            'full_text': 'Apache License Version 2.0 ...',
+            'key': 'apache-2.0',
+        }
+        errors = []
+        request_license_data.return_value = license_data, errors
 
-    def test_build_api_url(self):
-        url = 'http:/dejacode.org/'
-        api_username = 'phi'
-        api_key = 'ABCD'
-        license_key = 'apache'
-        expected = 'http:/dejacode.org/apache/?username=phi&api_key=ABCD&format=json'
-        result = api.build_api_url(url, api_username, api_key, license_key)
+        expected = ('Apache License 2.0', 'apache-2.0', 'Apache License Version 2.0 ...', [])
+        result = api.get_license_details_from_api('url', 'api_key', 'license_key')
         assert expected == result
 
-    @patch.object(attributecode.api, 'get_license_data')
-    def test_get_license_info(self, mock_data):
-        mock_data.return_value = [], {'key': 'test', 'name': 'test_name', 'full_text': 'test_full_text' }
-        result = api.get_license_info(self, '', '', '', '')
-        assert result == ([], LicenseInfo(key='test', name='test_name', text='test_full_text'))
+    @mock.patch.object(api, 'urlopen')
+    def test_api_request_license_data(self, mock_data):
+        response_content = (
+            b'{"count":1,"results":[{"name":"Apache 2.0","key":"apache-2.0","text":"Text"}]}'
+        )
+        mock_data.return_value = FakeResponse(response_content)
+        license_data = api.request_license_data('http://fake.url/', 'api_key', 'apache-2.0')
+        expected = ({'name': 'Apache 2.0', 'key': 'apache-2.0', 'text': 'Text'}, [])
+        assert expected == license_data
 
-    @patch.object(attributecode.api, 'request_license_data')
-    def test_get_license_details_from_api(self, mock_data):
-        mock_data.return_value = {'name': 'test_name', 'full_text': 'test_full_text', 'key': 'test'}, []
-        result = api.get_license_details_from_api('', '', '')
-        assert result == ('test_name', 'test', 'test_full_text', [])
+        response_content = b'{"count":0,"results":[]}'
+        mock_data.return_value = FakeResponse(response_content)
+        license_data = api.request_license_data('http://fake.url/', 'api_key', 'apache-2.0')
+        expected = ({}, [Error(ERROR, "Invalid 'license': apache-2.0")])
+        assert expected == license_data
