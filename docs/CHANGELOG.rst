@@ -15,6 +15,7 @@
     `about_file` is replaced by `about_file_path`
     `dje_license_key` is replaced by `license_expression`
     `version` is no longer a required field
+    `home_url` is now `homepage_url`
 
     API Updated:
     ============
