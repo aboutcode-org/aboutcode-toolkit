@@ -1018,7 +1018,7 @@ class About(object):
         self.errors = errors
         return errors
 
-    def load_dict(self, fields_dict, base_dir, running_inventory=False, 
+    def load_dict(self, fields_dict, base_dir, running_inventory=False, use_mapping=False,
                   license_notice_text_location=None, with_empty=True):
         """
         Load the ABOUT file from a fields name/value mapping.
@@ -1032,7 +1032,7 @@ class About(object):
             fields = [(n, v) for n, v in fields_dict.items() if v]
         errors = self.process(
             fields, about_file_path, running_inventory, base_dir, 
-            license_notice_text_location)
+            license_notice_text_location, use_mapping)
         self.errors = errors
         return errors
 

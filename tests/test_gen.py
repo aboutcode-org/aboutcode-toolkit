@@ -71,6 +71,33 @@ class GenTest(unittest.TestCase):
                         for a in abouts]
         assert expected == result
 
+    def test_load_inventory_with_mapping(self):
+        location = get_test_loc('gen/inv4.csv')
+        base_dir = get_test_loc('inv')
+        license_notice_text_location = None
+        use_mapping = True
+        errors, abouts = gen.load_inventory(location,
+                                            base_dir,
+                                            license_notice_text_location,
+                                            use_mapping)
+        expected_errors = [
+            Error(INFO, 'Field test is not a supported field and is not defined in the mapping file. This field is ignored.'),
+            Error(INFO, 'Field resource is a custom field')]
+        assert sorted(expected_errors) == sorted(errors)
+
+        expected = [u'about_resource: .\n'
+                    u'name: AboutCode\n'
+                    u'version: 0.11.0\n'
+                    u'description: |\n'
+                    u'    multi\n'
+                    u'    line\n'
+                    u'copyright: Copyright (c) nexB, Inc.\n'
+                    u'resource: this.ABOUT\n'
+                    ]
+        result = [a.dumps(with_absent=False, with_empty=False)
+                        for a in abouts]
+        assert expected == result
+
     def test_generation_dir_endswith_space(self):
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
         base_dir = get_temp_dir()

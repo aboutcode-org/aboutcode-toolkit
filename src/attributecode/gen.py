@@ -164,7 +164,7 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
         about = model.About(about_file_path=afp)
         about.location = loc
         running_inventory = False
-        ld_errors = about.load_dict(fields, base_dir, running_inventory, license_notice_text_location, with_empty=False)
+        ld_errors = about.load_dict(fields, base_dir, running_inventory, use_mapping, license_notice_text_location, with_empty=False)
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
         for e in ld_errors:
