@@ -20,39 +20,30 @@ from __future__ import unicode_literals
 
 import unittest
 
-from mock import patch
+import mock
 
 from attributecode import api
 from attributecode import ERROR
 from attributecode import Error
-
-
-class FakeResponse(object):
-    response_content = None
-
-    def __init__(self, response_content):
-        self.response_content = response_content
-
-    def read(self):
-        return self.response_content
+from testing_utils import FakeResponse
 
 
 class ApiTest(unittest.TestCase):
-    @patch.object(api, 'request_license_data')
-    def test_api_get_license_details_from_api(self, mock_data):
+    @mock.patch.object(api, 'request_license_data')
+    def test_api_get_license_details_from_api(self, request_license_data):
         license_data = {
             'name': 'Apache License 2.0',
             'full_text': 'Apache License Version 2.0 ...',
             'key': 'apache-2.0',
         }
         errors = []
-        mock_data.return_value = license_data, errors
+        request_license_data.return_value = license_data, errors
 
         expected = ('Apache License 2.0', 'apache-2.0', 'Apache License Version 2.0 ...', [])
         result = api.get_license_details_from_api('url', 'api_key', 'license_key')
         assert expected == result
 
-    @patch.object(api, 'urlopen')
+    @mock.patch.object(api, 'urlopen')
     def test_api_request_license_data(self, mock_data):
         response_content = (
             b'{"count":1,"results":[{"name":"Apache 2.0","key":"apache-2.0","text":"Text"}]}'

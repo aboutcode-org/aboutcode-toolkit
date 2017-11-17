@@ -1416,7 +1416,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
         msg = u'Network problem. Please check your Internet connection. License generation is skipped.'
         errors.append(Error(ERROR, msg))
     for about in abouts:
-        # No need to go thru all the about objects for license extraction if we detected
+        # No need to go through all the about objects for license extraction if we detected
         # invalid '--api_key'
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
@@ -1472,7 +1472,7 @@ def valid_api_url(api_url):
         request = Request(api_url)
         # This will always goes to exception as no key are provided.
         # The purpose of this code is to validate the provided api_url is correct
-        response = urlopen(request)
+        urlopen(request)
     except HTTPError as http_e:
         # The 403 error code is refer to "Authentication credentials were not provided.".
         # This is correct as no key are provided.

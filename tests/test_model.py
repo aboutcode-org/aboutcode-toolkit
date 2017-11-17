@@ -25,11 +25,7 @@ import sys
 import unittest
 from unittest.case import expectedFailure
 
-from testing_utils import extract_test_loc
-from testing_utils import get_temp_file
-from testing_utils import get_test_loc
-from testing_utils import get_test_lines
-from testing_utils import get_unicode_content
+import mock
 
 import attributecode
 from attributecode import CRITICAL
@@ -41,6 +37,11 @@ from attributecode import model
 from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import load_csv
+from testing_utils import extract_test_loc
+from testing_utils import get_temp_file
+from testing_utils import get_test_loc
+from testing_utils import get_test_lines
+from testing_utils import get_unicode_content
 
 
 def check_csv(expected, result):
@@ -1313,3 +1314,25 @@ class GroupingsTest(unittest.TestCase):
                                 ('eclipse', [d]),
                                 ])
         assert expected == results
+
+
+class FetchLicenseTest(unittest.TestCase):
+    @mock.patch.object(model, 'urlopen')
+    def test_valid_api_url(self, mock_data):
+        mock_data.return_value = ''
+        assert model.valid_api_url('non_valid_url') is False
+
+    @mock.patch('attributecode.util.have_network_connection')
+    @mock.patch('attributecode.model.valid_api_url')
+    def test_pre_process_and_fetch_license_dict(self, have_network_connection, valid_api_url):
+        have_network_connection.return_value = True
+
+        valid_api_url.return_value = False
+        error_msg = ('Network problem. Please check your Internet connection. '
+                     'License generation is skipped.')
+        expected = ({}, [Error(ERROR, error_msg)])
+        assert model.pre_process_and_fetch_license_dict([], '', '') == expected
+
+        valid_api_url.return_value = True
+        expected = ({}, [])
+        assert model.pre_process_and_fetch_license_dict([], '', '') == expected
