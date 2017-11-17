@@ -30,7 +30,6 @@ from testing_utils import on_windows
 
 from attributecode import CRITICAL
 from attributecode import Error
-from attributecode import model
 from attributecode import util
 
 
