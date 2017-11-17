@@ -390,7 +390,7 @@ class AboutTest(unittest.TestCase):
     def check_About_hydrate(self, about, fields, errors):
         expected = set([
             'name',
-            'home_url',
+            'homepage_url',
             'download_url',
             'version',
             'copyright',
@@ -596,7 +596,7 @@ about_resource_path:
 version: 0.11.0
 download_url:
 description: AboutCode is a tool to process ABOUT files. An ABOUT file is a file.
-home_url: http://dejacode.org
+homepage_url: http://dejacode.org
 notes:
 license: apache-2.0
 license_expression: apache-2.0
@@ -671,7 +671,7 @@ spec_version:
             'version',
             'download_url',
             'description',
-            'home_url',
+            'homepage_url',
             'notes',
             'license',
             'license_expression',
@@ -744,7 +744,7 @@ description: |
     AboutCode is a tool
     to process ABOUT files.
     An ABOUT file is a file.
-home_url: http://dejacode.org
+homepage_url: http://dejacode.org
 license: apache-2.0
 license_expression: apache-2.0
 license_file: apache-2.0.LICENSE
@@ -771,7 +771,7 @@ name: AboutCode
 version: 0.11.0
 download_url:
 description:
-home_url:
+homepage_url:
 notes:
 license:
 license_expression:
@@ -884,7 +884,7 @@ version: 0.11.0
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     'description': u'AboutCode is a tool\nfor files.',
                     'download_url': u'',
-                    'home_url': u'',
+                    'homepage_url': u'',
                     'license': u'apache-2.0',
                     'license_expression': u'apache-2.0',
                     'license_file': u'',
@@ -1031,7 +1031,7 @@ copyright: >
                 u'author': u'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez',
                 u'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                 u'description': u'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
-                u'home_url': u'http://dejacode.org',
+                u'homepage_url': u'http://dejacode.org',
                 u'license_expression': u'apache-2.0',
                 u'license_file': u'apache-2.0.LICENSE',
                 u'name': u'AboutCode',

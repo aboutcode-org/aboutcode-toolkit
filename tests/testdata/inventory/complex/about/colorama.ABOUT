@@ -2,7 +2,7 @@ about_resource: colorama-0.3.1-py2-none-any.whl
 name: colorama
 version: 0.3.1
 description: Cross-platform colored terminal text.
-home_url: https://pypi.python.org/pypi/colorama
+homepage_url: https://pypi.python.org/pypi/colorama
 owner: Jonathan Hartley
 contact: tartley@tartley.com
 dje_license: bds-new

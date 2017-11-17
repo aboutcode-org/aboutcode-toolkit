@@ -3,7 +3,7 @@ version: 0.23
 download_url: https://pypi.python.org/packages/source/m/MarkupSafe/MarkupSafe-0.23.tar.gz
 
 name: MarkupSafe
-home_url: https://github.com/mitsuhiko/markupsafe
+homepage_url: https://github.com/mitsuhiko/markupsafe
 
 dje_license: bsd-new
 

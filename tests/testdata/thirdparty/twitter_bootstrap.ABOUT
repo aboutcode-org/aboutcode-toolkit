@@ -3,7 +3,7 @@ download_url:https://github.com/twitter/bootstrap/archive/v2.0.3.zip
 version:2.0.3
 
 name: bootstrap
-home_url:http://twitter.github.com/bootstrap/
+homepage_url:http://twitter.github.com/bootstrap/
 
 dje_license:apache 2.0
 license_text_file: twitter_bootstrap.LICENSE

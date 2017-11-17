@@ -1,7 +1,7 @@
 download_url: http://djangosnippets.org/snippets/2240/download/
 name: csv_serialize
 version: 2013-01-16
-home_url: http://djangosnippets.org/snippets/2240/
+homepage_url: http://djangosnippets.org/snippets/2240/
 license_url: http://djangosnippets.org/about/tos/
 license_text_file: django_snippets.LICENSE
 

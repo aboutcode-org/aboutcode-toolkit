@@ -6,7 +6,7 @@ version: 3.0.0.dev6
 owner: nexB Inc.
 author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
 
-home_url: https://aboutcode.org
+homepage_url: https://aboutcode.org
 
 vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git

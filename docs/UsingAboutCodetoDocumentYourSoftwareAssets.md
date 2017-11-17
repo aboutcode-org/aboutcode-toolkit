@@ -96,7 +96,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
-    <td>home_url</td>
+    <td>homepage_url</td>
     <td>URL to the homepage for this component</td>
     <td>Optional</td>
   </tr>

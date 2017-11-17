@@ -9,5 +9,5 @@ license_text_file: wincertstore.LICENSE
 
 contact: christian@python.org
 owner: Christian Heimes
-home_url: https://bitbucket.org/tiran/wincertstore
+homepage_url: https://bitbucket.org/tiran/wincertstore
 description: Python module to extract CA and CRL certs from Windows' cert store (ctypes based).

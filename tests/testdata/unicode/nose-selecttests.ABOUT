@@ -4,7 +4,7 @@ version: 0.3
 download_url: http://pypi.python.org/packages/source/n/nose-selecttests/nose-selecttests-0.3.zip
 
 name: nose-selecttests
-home_url: https://github.com/iElectric/nose-selecttests
+homepage_url: https://github.com/iElectric/nose-selecttests
 
 dje_license: bsd-new
 license_url: https://github.com/iElectric/nose-selecttests/blob/master/LICENSE

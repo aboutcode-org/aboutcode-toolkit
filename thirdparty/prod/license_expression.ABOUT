@@ -9,4 +9,4 @@ owner: nexB Inc.
 dje_license: apache-2.0
 license_text_file: apache-2.0.LICENSE
 notice_file: license-expression.NOTICE
-home_url: https://github.com/nexB/license-expression
+homepage_url: https://github.com/nexB/license-expression

@@ -4,7 +4,7 @@ version: 3.1.0
 
 name: pytest
 description: pytest: simple powerful testing with Python
-home_url: http://pytest.org
+homepage_url: http://pytest.org
 owner: Holger Krekel, Benjamin Peterson, Ronny Pfannschmidt, Floris Bruynooghe and others
 contact: holger at merlinux.eu
 dje_license: mit

@@ -668,7 +668,7 @@ class About(object):
             ('version', SingleLineField()),
             ('download_url', UrlField()),
             ('description', StringField()),
-            ('home_url', UrlField()),
+            ('homepage_url', UrlField()),
             ('notes', StringField()),
 
             ('license', ListField()),

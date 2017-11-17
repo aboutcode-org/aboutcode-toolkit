@@ -6,7 +6,7 @@ scm_rev: badcdee74acec84da3de6c6ea55c692aee4a6f9
 organization: ElasticSearch and Shay Banon
 name: ElasticSearch
 
-home_url: http://www.elasticsearch.org/
+homepage_url: http://www.elasticsearch.org/
 
 scm_tool: git
 scm_repository: https://github.com/elasticsearch/elasticsearch.git

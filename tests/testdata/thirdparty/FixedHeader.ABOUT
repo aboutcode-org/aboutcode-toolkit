@@ -4,7 +4,7 @@ version:2.0.6
 
 name: data tables fixed header
 organization: Allan Jardine
-home_url: http://datatables.net
+homepage_url: http://datatables.net
 description: "Fix" a header at the top of the table, so it scrolls with the table
 author: Allan Jardine (www.sprymedia.co.uk)
 

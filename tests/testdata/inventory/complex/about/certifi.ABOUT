@@ -4,7 +4,7 @@ description: Python package for providing Mozilla's CA Bundle.
 
 owner: Kenneth Reitz
 contact: me@kennethreitz.com
-home_url: http://python-requests.org
+homepage_url: http://python-requests.org
 name: certifi
 
 dje_license: mpl-2.0

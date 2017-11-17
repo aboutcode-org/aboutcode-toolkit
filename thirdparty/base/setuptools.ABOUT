@@ -4,7 +4,7 @@ download_url: https://pypi.python.org/packages/bd/4c/b06ab3abfc8bc93b87b70f4cab2
 
 name: setuptools
 
-home_url: https://pypi.python.org/pypi/setuptools
+homepage_url: https://pypi.python.org/pypi/setuptools
 owner: Python Packaging Authority
 
 dje_license: psf

@@ -6,4 +6,4 @@ name: Jinja2
 dje_license: bsd-new
 copyright: Copyright (c) 2009 by the Jinja Team
 license_text_file: Jinja2.LICENSE
-home_url: http://jinja.pocoo.org/
+homepage_url: http://jinja.pocoo.org/

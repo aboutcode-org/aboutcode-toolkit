@@ -9,7 +9,7 @@ author: Jillian Daguil,
  Philippe Ombredanne, 
  Thomas Druez
 
-home_url: http://dejacode.org
+homepage_url: http://dejacode.org
 
 vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git

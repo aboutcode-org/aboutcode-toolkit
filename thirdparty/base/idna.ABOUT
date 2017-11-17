@@ -4,7 +4,7 @@ version: 2.5
 download_url: https://pypi.python.org/packages/11/7d/9bbbd7bb35f34b0169542487d2a8859e44306bb2e6a4455d491800a5621f/idna-2.5-py2.py3-none-any.whl
 
 owner: Kim Davies
-home_url: https://github.com/kjd/idna
+homepage_url: https://github.com/kjd/idna
 name: idna
 
 copyright: 

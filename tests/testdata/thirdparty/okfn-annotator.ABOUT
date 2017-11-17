@@ -2,7 +2,7 @@ about_resource: okfn-annotator-549159b.zip
 download_url:https://github.com/okfn/annotator/zipball/549159b554411eba18c34ffffe91ba44f7558be6
 version: 549159b554411eba18c34ffffe91ba44f7558be6
 
-home_url:http://okfn.org/projects/annotator/
+homepage_url:http://okfn.org/projects/annotator/
 name: OKFN Annotator
 organization: OKFN
 

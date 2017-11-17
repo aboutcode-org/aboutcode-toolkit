@@ -6,4 +6,4 @@ name: MarkupSafe
 dje_license: bsd-new
 copyright: Copyright (c) 2010 by Armin Ronacher and contributors
 license_text_file: MarkupSafe.LICENSE
-home_url: https://github.com/pallets/markupsafe
+homepage_url: https://github.com/pallets/markupsafe

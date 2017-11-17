@@ -2,7 +2,7 @@ name: optional
 about_format: 2.0
 date: 2013-1-1
 description: A description for this component.
-home_url: http://msn.com
+homepage_url: http://msn.com
 download_url: http://msn.com/download
 readme: README STUFF
 install: HOW TO INSTALLInstallation information for this component. You may use install_file when this is a long text or a pre-existing file as INSTALL files are commonly found in code archives.

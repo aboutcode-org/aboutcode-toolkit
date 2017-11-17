@@ -27,7 +27,7 @@ A simple and valid ABOUT file named httpd.ABOUT may look like this::
       about_resource: httpd-2.4.3.tar.gz
       name: Apache HTTP Server
       version: 2.4.3
-      home_url: http://httpd.apache.org
+      homepage_url: http://httpd.apache.org
       download_url: http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
       license_file: httpd.LICENSE
       notice_file: httpd.NOTICE
@@ -102,7 +102,7 @@ A field name can contain only these US-ASCII characters:
 - uppercase and lowercase letters from A to Z
 - the "_" underscore sign.
 
-- Field names are not case sensitive. For example, "HOME_URL" and "Home_url"
+- Field names are not case sensitive. For example, "HOMEPAGE_URL" and "HomePage_url"
   represent the same field name.
 
 - A field name must start at the beginning of a new line. It can be followed by
@@ -281,7 +281,7 @@ Optional Information fields
 - download_url: A direct URL to download the original file or archive documented
   by this ABOUT file.
 
-- home_url: URL to the homepage for this component.
+- homepage_url: URL to the homepage for this component.
 
 - changelog_file: Changelog file for the component.
 

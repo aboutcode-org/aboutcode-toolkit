@@ -6,7 +6,7 @@ vcs_tool: git
 vcs_repository: https://github.com/pypa/virtualenv.git
 
 name: virtualenv
-home_url: http://virtualenv.org/
+homepage_url: http://virtualenv.org/
 owner: The virtualenv developers
 
 license_url: https://raw.github.com/pypa/virtualenv/develop/LICENSE.txt
