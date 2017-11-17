@@ -30,6 +30,7 @@ from testing_utils import on_windows
 
 from attributecode import CRITICAL
 from attributecode import Error
+from attributecode import model
 from attributecode import util
 
 
@@ -324,3 +325,17 @@ class UtilsTest(unittest.TestCase):
         test_loc = extract_test_loc('longpath.zip')
         result = list(util.get_locations(test_loc))
         assert any(longpath in r for r in result)
+
+    def test_apply_mapping(self):
+        input = [OrderedDict([('about_resource', '.'),
+                         ('name', 'test'),
+                         ('confirmed version', '1'),
+                         ('confirmed copyright', 'Copyright (c) 2013-2017 nexB Inc.')
+                         ])]
+        expected = [OrderedDict([('about_resource', '.'),
+                         ('name', 'test'),
+                         ('version', '1'),
+                         ('copyright', 'Copyright (c) 2013-2017 nexB Inc.')
+                         ])]
+        assert util.apply_mapping(input) == expected
+
