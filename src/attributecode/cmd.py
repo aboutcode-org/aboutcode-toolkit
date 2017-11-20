@@ -110,12 +110,20 @@ Use about-code <command> --help for help on a command.
     type=click.Choice(['json', 'csv']),
     help='Set OUTPUT inventory file format.')
 
+@click.option('--show-all', is_flag=True, default=False,
+    help='Show all errors and warnings. '
+        'By default, the tool only prints these '
+        'error levels: CRITICAL, ERROR, and WARNING. '
+        'Use this option to print all errors and warning '
+        'for any level.'
+)
+
 @click.option('-q', '--quiet', is_flag=True,
     help='Do not print error or warning messages.')
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, quiet, format):
+def inventory(location, output, quiet, format, show_all):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -143,7 +151,8 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
         errors.append(err)
-        log_errors(errors, quiet, os.path.dirname(output))
+        log_errors(errors, quiet, show_all, os.path.dirname(output))
+    sys.exit(0)
 
 
 ######################################################################
@@ -178,12 +187,20 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.option('--mapping', is_flag=True,
     help='Use file mapping.config with mapping between input keys and ABOUT field names')
 
+@click.option('--show-all', is_flag=True, default=False,
+    help='Show all errors and warnings. '
+        'By default, the tool only prints these '
+        'error levels: CRITICAL, ERROR, and WARNING. '
+        'Use this option to print all errors and warning '
+        'for any level.'
+)
+
 @click.option('-q', '--quiet', is_flag=True,
     help='Do not print error or warning messages.')
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, mapping, license_notice_text_location, fetch_license, quiet):
+def gen(location, output, mapping, license_notice_text_location, fetch_license, quiet, show_all):
     """
 Generate .ABOUT files in OUTPUT directory from a JSON or CSV inventory of .ABOUT files at LOCATION.
 
@@ -214,8 +231,8 @@ OUTPUT: Path to a directory where ABOUT files are generated.
             error_count = error_count + 1
     click.echo(
         'Generated %(about_count)d .ABOUT files with %(error_count)d errors or warnings' % locals())
-    log_errors(errors, quiet, output)
-    # FIXME: return error code?
+    log_errors(errors, quiet, show_all, output)
+    sys.exit(0)
 
 
 ######################################################################
@@ -241,6 +258,14 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     help='Use the file "mapping.config" with mappings between the CSV '
         'inventory columns names and .ABOUT field names')
 
+@click.option('--show-all', is_flag=True, default=False,
+    help='Show all errors and warnings. '
+        'By default, the tool only prints these '
+        'error levels: CRITICAL, ERROR, and WARNING. '
+        'Use this option to print all errors and warning '
+        'for any level.'
+)
+
 @click.option('--template', type=click.Path(exists=True), nargs=1,
     help='Path to an optional custom attribution template used for generation.')
 
@@ -249,7 +274,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, mapping, inventory, quiet):
+def attrib(location, output, template, mapping, inventory, quiet, show_all):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -273,9 +298,9 @@ OUTPUT: Path to output file to write the attribution to.
     for no_match_error in no_match_errors:
         inv_errors.append(no_match_error)
 
-    log_errors(inv_errors, quiet, os.path.dirname(output))
+    log_errors(inv_errors, quiet, show_all, os.path.dirname(output))
     click.echo('Finished.')
-    # FIXME: return error code?
+    sys.exit(0)
 
 
 ######################################################################
@@ -289,9 +314,9 @@ OUTPUT: Path to output file to write the attribution to.
 
 @click.option('--show-all', is_flag=True, default=False,
     help='Show all errors and warnings. '
-        'By default, running a check only reports these '
+        'By default, the tool only prints these '
         'error levels: CRITICAL, ERROR, and WARNING. '
-        'Use this option to report all errors and warning '
+        'Use this option to print all errors and warning '
         'for any level.'
 )
 
@@ -329,10 +354,10 @@ LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
         sys.exit(1)
     else:
         click.echo('No error found.')
-    # FIXME: return error code?
+    sys.exit(0)
 
 
-def log_errors(errors, quiet, base_dir=False):
+def log_errors(errors, quiet, show_all, base_dir=False):
     """
     Iterate of sequence of Error objects and print and log errors with
     a severity superior or equal to level.
@@ -361,7 +386,10 @@ def log_errors(errors, quiet, base_dir=False):
     for severity, message in errors:
         sever = severities[severity]
         if not quiet:
-            print(msg_format % locals())
+            if show_all:
+                print(msg_format % locals())
+            elif sever in problematic_errors:
+                print(msg_format % locals())
         if base_dir:
             file_logger.log(severity, msg_format % locals())
 
