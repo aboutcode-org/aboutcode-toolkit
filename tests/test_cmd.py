@@ -31,6 +31,7 @@ from attributecode import Error
 # NB: these tests depends on py.test stdout/err capture capabilities
 def test_log_errors(capsys):
     quiet = False
+    show_all = True
     errors = [Error(CRITICAL, 'msg1'),
               Error(ERROR, 'msg2'),
               Error(INFO, 'msg3'),
@@ -38,7 +39,7 @@ def test_log_errors(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors, quiet, base_dir='')
+    cmd.log_errors(errors, quiet, show_all, base_dir='')
     out, err = capsys.readouterr()
     expected_out = '''CRITICAL: msg1
 ERROR: msg2
@@ -51,8 +52,9 @@ NOTSET: msg4
     assert expected_out == out
 
 
-def test_log_errors_with_quiet(capsys):
-    quiet = True
+def test_log_errors_without_show_all(capsys):
+    quiet = False
+    show_all = False
     errors = [Error(CRITICAL, 'msg1'),
               Error(ERROR, 'msg2'),
               Error(INFO, 'msg3'),
@@ -60,7 +62,27 @@ def test_log_errors_with_quiet(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors, quiet, base_dir='')
+    cmd.log_errors(errors, quiet, show_all, base_dir='')
+    out, err = capsys.readouterr()
+    expected_out = '''CRITICAL: msg1
+ERROR: msg2
+WARNING: msg4
+'''
+    assert '' == err
+    assert expected_out == out
+
+
+def test_log_errors_with_quiet(capsys):
+    quiet = True
+    show_all = True
+    errors = [Error(CRITICAL, 'msg1'),
+              Error(ERROR, 'msg2'),
+              Error(INFO, 'msg3'),
+              Error(WARNING, 'msg4'),
+              Error(DEBUG, 'msg4'),
+              Error(NOTSET, 'msg4'),
+              ]
+    cmd.log_errors(errors, quiet, show_all, base_dir='')
     out, err = capsys.readouterr()
     assert '' == out
     assert '' == err
