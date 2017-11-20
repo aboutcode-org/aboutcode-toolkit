@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import errno
 import logging
 import os
 from os.path import exists, join
@@ -212,8 +213,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     if not location.endswith('.csv') and not location.endswith('.json'):
         click.echo('ERROR: Invalid input file format:  must be .csv or .json.')
-        # FIXME: return error code?
-        return
+        sys.exit(errno.EIO)
 
     click.echo('Generating .ABOUT files...')
 
