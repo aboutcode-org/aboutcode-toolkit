@@ -111,8 +111,9 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
-        expected = [u'.']
-        assert abouts[0].about_resource.value == expected
+        expected_dict = OrderedDict()
+        expected_dict[u'.'] = None
+        assert abouts[0].about_resource.value == expected_dict
         assert len(errors) == 0
 
     def test_generation_with_no_about_resource_reference(self):
@@ -120,9 +121,10 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        expected = [u'test.tar.gz']
+        expected_dict = OrderedDict()
+        expected_dict[u'test.tar.gz'] = None
 
-        assert abouts[0].about_resource.value == expected
+        assert abouts[0].about_resource.value == expected_dict
         assert len(errors) == 1
         msg = u'The reference file'
         assert msg in errors[0].message

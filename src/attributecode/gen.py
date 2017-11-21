@@ -234,18 +234,22 @@ def generate(location, base_dir, license_notice_text_location=None,
 
         try:
             # Generate value for 'about_resource' if it does not exist
+            # Note: The `about_resource` and `about_resource_path` have
+            # OrderDict as the value type from PathField
             if not about.about_resource.value:
+                about.about_resource.value = OrderedDict()
                 if about.about_file_path.endswith('/'):
-                    about.about_resource.value.append(u'.')
+                    about.about_resource.value[u'.'] = None
                     about.about_resource.original_value = u'.'
                 else:
-                    about.about_resource.value.append(posixpath.basename(about.about_file_path))
+                    about.about_resource.value[posixpath.basename(about.about_file_path)] = None
                     about.about_resource.original_value = posixpath.basename(about.about_file_path)
                 about.about_resource.present = True
 
             # Generate value for 'about_resource_path' if it does not exist
             # Basically, this should be the same as the 'about_resource'
             if not about.about_resource_path.value:
+                about.about_resource_path.value = OrderedDict()
                 about.about_resource_path.value = about.about_resource.value
                 about.about_resource_path.present = True
 
