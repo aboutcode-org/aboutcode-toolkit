@@ -21,7 +21,7 @@ from __future__ import unicode_literals
 import codecs
 from collections import OrderedDict
 import logging
-import posixpath
+from posixpath import basename, dirname, exists, join, normpath
 import sys
 
 if sys.version_info[0] < 3:
@@ -39,6 +39,7 @@ from attributecode.model import check_file_field_exist
 from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import to_posix
+from attributecode.util import UNC_PREFIX_POSIX
 
 
 LOG_FILENAME = 'error.log'
@@ -160,7 +161,7 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
             continue
         else:
             afp = util.to_posix(afp)
-            loc = posixpath.join(base_dir, afp)
+            loc = join(base_dir, afp)
         about = model.About(about_file_path=afp)
         about.location = loc
         running_inventory = False
@@ -177,15 +178,17 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
     return errors, abouts
 
 
-def generate(location, base_dir, license_notice_text_location=None,
-             fetch_license=False, policy=None, conf_location=None,
-             with_empty=False, with_absent=False, use_mapping=False):
+def generate(location, base_dir, validate_about_resource=False,
+             license_notice_text_location=None, fetch_license=False, policy=None,
+             conf_location=None, with_empty=False, with_absent=False,
+             use_mapping=False):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir using policy flags and configuration file at conf_location.
     Policy defines which action to take for merging or overwriting fields and
     files. Return errors and about objects.
     """
+    not_exist_errors = []
     api_url = ''
     api_key = ''
     gen_license = False
@@ -214,7 +217,7 @@ def generate(location, base_dir, license_notice_text_location=None,
     for about in abouts:
         if about.about_file_path.startswith('/'):
             about.about_file_path = about.about_file_path.lstrip('/')
-        dump_loc = posixpath.join(bdir, about.about_file_path.lstrip('/'))
+        dump_loc = join(bdir, about.about_file_path.lstrip('/'))
 
         # The following code is to check if there is any directory ends with spaces
         split_path = about.about_file_path.split('/')
@@ -234,25 +237,41 @@ def generate(location, base_dir, license_notice_text_location=None,
 
         try:
             # Generate value for 'about_resource' if it does not exist
-            # Note: The `about_resource` and `about_resource_path` have
-            # OrderDict as the value type from PathField
+            # Note: The `about_resource` is in ListField class
+            # and `about_resource_path` is in AboutResourceField class
             if not about.about_resource.value:
-                about.about_resource.value = OrderedDict()
+                #about.about_resource.value = OrderedDict()
                 if about.about_file_path.endswith('/'):
-                    about.about_resource.value[u'.'] = None
+                    about.about_resource.value.append(u'.')
                     about.about_resource.original_value = u'.'
                 else:
-                    about.about_resource.value[posixpath.basename(about.about_file_path)] = None
-                    about.about_resource.original_value = posixpath.basename(about.about_file_path)
+                    about.about_resource.value.append(basename(about.about_file_path))
+                    about.about_resource.original_value = basename(about.about_file_path)
                 about.about_resource.present = True
 
             # Generate value for 'about_resource_path' if it does not exist
             # Basically, this should be the same as the 'about_resource'
             if not about.about_resource_path.value:
                 about.about_resource_path.value = OrderedDict()
-                about.about_resource_path.value = about.about_resource.value
+                for about_resource_value in about.about_resource.value:
+                    about.about_resource_path.value[about_resource_value] = None
                 about.about_resource_path.present = True
-
+                if validate_about_resource:
+                    # Check for the existence of the about_resource
+                    # If the input already have the about_resource_path field, it will
+                    # be validated when creating the about object
+                    loc = util.to_posix(dump_loc)
+                    about_file_loc = loc
+                    for about_resource_value in about.about_resource_path.value:
+                        path = join(dirname(util.to_posix(about_file_loc)),
+                                              about_resource_value)
+                        if not exists(path):
+                            path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
+                            path = normpath(path)
+                            msg = (u'The reference file: '
+                                   u'%(path)s '
+                                   u'does not exist' % locals())
+                            not_exist_errors.append(msg)
             if gen_license:
                 about.license_file.value = OrderedDict()
                 # Write generated LICENSE file
@@ -276,21 +295,15 @@ def generate(location, base_dir, license_notice_text_location=None,
                         if about.license_name.value:
                             about.license_name.present = True
 
-            # Write the ABOUT file and check does the referenced file exist
-            # This function is not purposed to throw error. However, since I've commented
-            # out the error throwing in FileTextField (See model.py), I have add error handling
-            # in this function. This error handling should be removed once the fetch-license option
-            # is treated as a subcommand.
-            not_exist_errors = about.dump(dump_loc,
-                                   with_empty=with_empty,
-                                   with_absent=with_absent)
+            # Write the ABOUT files
+            about.dump(dump_loc, with_empty=with_empty, with_absent=with_absent)
+
             file_field_not_exist_errors = check_file_field_exist(about, dump_loc)
 
             for e in not_exist_errors:
                 errors.append(Error(ERROR, e))
             for e in file_field_not_exist_errors:
                 errors.append(Error(ERROR, e))
-
         except Exception as e:
             # only keep the first 100 char of the exception
             emsg = repr(e)[:100]

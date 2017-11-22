@@ -196,12 +196,17 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         'for any level.'
 )
 
+@click.option('--validate-about-resource', is_flag=True, default=False,
+    help='Validate the existence of the about resource.'
+)
+
 @click.option('-q', '--quiet', is_flag=True,
     help='Do not print error or warning messages.')
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, mapping, license_notice_text_location, fetch_license, quiet, show_all):
+def gen(location, output, mapping, license_notice_text_location, fetch_license,
+        quiet, show_all, validate_about_resource):
     """
 Generate .ABOUT files in OUTPUT directory from a JSON or CSV inventory of .ABOUT files at LOCATION.
 
@@ -218,9 +223,9 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     click.echo('Generating .ABOUT files...')
 
     errors, abouts = gen_generate(
-        location=location, base_dir=output, use_mapping=mapping,
+        location=location, base_dir=output, validate_about_resource=validate_about_resource,
         license_notice_text_location=license_notice_text_location,
-        fetch_license=fetch_license)
+        fetch_license=fetch_license, use_mapping=mapping)
 
     about_count = len(abouts)
     error_count = 0

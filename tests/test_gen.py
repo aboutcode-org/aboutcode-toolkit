@@ -111,31 +111,45 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
-        expected_dict = OrderedDict()
-        expected_dict[u'.'] = None
-        assert abouts[0].about_resource.value == expected_dict
+        expected = [u'.']
+        assert abouts[0].about_resource.value == expected
         assert len(errors) == 0
 
     def test_generation_with_no_about_resource_reference(self):
         location = get_test_loc('gen/inv3.csv')
         base_dir = get_temp_dir()
+        validate_about_resource = True
 
-        errors, abouts = gen.generate(location, base_dir)
-        expected_dict = OrderedDict()
-        expected_dict[u'test.tar.gz'] = None
+        errors, abouts = gen.generate(location, base_dir, validate_about_resource)
+        expected = [u'test.tar.gz']
 
-        assert abouts[0].about_resource.value == expected_dict
+        assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
         msg = u'The reference file'
         assert msg in errors[0].message
 
+    def test_generation_with_no_about_resource_reference_no_resource_validation(self):
+        location = get_test_loc('gen/inv3.csv')
+        base_dir = get_temp_dir()
+        validate_about_resource = False
+
+        errors, abouts = gen.generate(location, base_dir, validate_about_resource)
+        expected = [u'test.tar.gz']
+
+        assert abouts[0].about_resource.value == expected
+        assert len(errors) == 0
+
     def test_generate(self):
         location = get_test_loc('gen/inv.csv')
         base_dir = get_temp_dir()
+        validate_about_resource = True
 
-        errors, abouts = gen.generate(location, base_dir)
-        expected_errors = [Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
-        assert expected_errors == errors
+        errors, abouts = gen.generate(location, base_dir, validate_about_resource)
+        msg1 = u'Field custom1 is not a supported field and is ignored.'
+        msg2 = u'The reference file'
+
+        assert msg1 in errors[0].message
+        assert msg2 in errors[1].message
 
         in_mem_result = [a.dumps(with_absent=False, with_empty=False)
                         for a in abouts][0]

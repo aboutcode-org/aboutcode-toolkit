@@ -1054,7 +1054,6 @@ class About(object):
         If with_absent, include absent (not present) fields.
         If with_empty, include empty fields.
         """
-        errors = []
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
 
@@ -1070,17 +1069,6 @@ class About(object):
             about_file_path = add_unc(about_file_path)
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
             dumped.write(self.dumps(with_absent, with_empty))
-            # FIXME: Why do I have to check here? Shouldn't it be checked during validation?
-            for about_resource_value in self.about_resource_path.value:
-                path = posixpath.join(dirname(util.to_posix(about_file_path)), about_resource_value)
-                if not posixpath.exists(path):
-                    path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
-                    path = os.path.normpath(path)
-                    msg = (u'The reference file : '
-                           u'%(path)s '
-                           u'does not exist' % locals())
-                    errors.append(msg)
-        return errors
 
     def dump_lic(self, location, license_dict):
         """
