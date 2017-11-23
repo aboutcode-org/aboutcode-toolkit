@@ -471,3 +471,14 @@ def copy_license_notice_files(fields, base_dir, license_notice_text_location, af
             if not posixpath.exists(to_lic_path):
                 os.makedirs(to_lic_path)
             shutil.copy2(from_lic_path, to_lic_path)
+
+
+def ignore_about_resource_path_error(errors):
+    ignore_resource_path_check_message = u'Field about_resource_path:'
+    updated_errors = []
+    for err in errors:
+        if ignore_resource_path_check_message in err.message:
+            continue
+        else:
+            updated_errors.append(err)
+    return updated_errors

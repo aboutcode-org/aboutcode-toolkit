@@ -40,12 +40,14 @@ attrib
 
 ::
 
-    --inventory PATH  Path to an inventory file
-    --mapping         Use for mapping between the input keys and the ABOUT field
-                      names - mapping.config
-    --template PATH   Path to a custom attribution template
-    -q, --quiet       Do not print any error/warning.
-    --help            Show this message and exit.
+    --inventory PATH            Path to an inventory file.
+    --mapping                   Use for mapping between the input keys and the ABOUT field.
+                                names - mapping.config
+    --show-all                  Show all the errors and warning
+    --template PATH             Path to a custom attribution template.
+    --validate-about-resource   Validate the existence of the about resource.
+    -q, --quiet                 Do not print any error/warning.
+    --help                      Show this message and exit.
 
 Purpose
 -------
@@ -81,11 +83,20 @@ Options
 
         See mapping.config for details
 
+    --show-all
+
+        This option ask the tool to show all kind of errors found.
+        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
+
     --template
 
         This option allows users to use their own template for attribution generation.
         For instance, if user has a custom template located at:
         /home/custom_template/template.html
+
+    --validate-about-resource
+
+        The option ask the tool to validate the existence of the referencing file.
 
     $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT
 
@@ -166,6 +177,8 @@ gen
                                         the generated location
     --mapping                           Use for mapping between the input keys and
                                         the ABOUT field names - mapping.config
+    --show-all                          Show all the errors and warning
+    --validate-about-resource           Validate the existence of the about resource.
     -q, --quiet                         Do not print any error/warning.
     --help                              Show this message and exit.
 
@@ -206,6 +219,14 @@ Options
 
         See mapping.config for details
 
+    --show-all
+
+        This option ask the tool to show all kind of errors found.
+        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
+
+    --validate-about-resource
+
+        The option ask the tool to validate the existence of the referencing file.
 
 inventory
 =========
@@ -223,9 +244,11 @@ inventory
 
 ::
 
-    -f, --format [json|csv]  Set OUTPUT file format.  [default: csv]
-    -q, --quiet              Do not print any error/warning.
-    --help                   Show this message and exit.
+    -f, --format [json|csv]     Set OUTPUT file format.  [default: csv]
+    --show-all                  Show all the errors and warning
+    --validate-about-resource   Validate the existence of the about resource.
+    -q, --quiet                 Do not print any error/warning.
+    --help                      Show this message and exit.
 
 Purpose
 -------
@@ -239,5 +262,14 @@ Options
     -f, --format [json|csv]
  
         Set OUTPUT file format.  [default: csv]
+
+    --show-all
+
+        This option ask the tool to show all kind of errors found.
+        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
+
+    --validate-about-resource
+
+        The option ask the tool to validate the existence of the referencing file.
 
     $ about inventory -f json [OPTIONS] LOCATION OUTPUT

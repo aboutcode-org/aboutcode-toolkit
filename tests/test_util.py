@@ -29,6 +29,7 @@ from testing_utils import on_posix
 from testing_utils import on_windows
 
 from attributecode import CRITICAL
+from attributecode import ERROR
 from attributecode import Error
 from attributecode import util
 
@@ -338,3 +339,8 @@ class UtilsTest(unittest.TestCase):
                          ])]
         assert util.apply_mapping(input) == expected
 
+    def test_ignore_about_resource_path_error(self):
+        input_err = [Error(ERROR, 'Field about_resource_path: test.tar.gz does not exist'),
+                     Error(ERROR, 'Field about_resource_path: test.tar.gz does not exist')]
+        expected_err = []
+        assert util.ignore_about_resource_path_error(input_err) == expected_err

@@ -35,6 +35,7 @@ from attributecode.gen import generate as gen_generate
 from attributecode import model
 from attributecode import severities
 from attributecode.util import extract_zip
+from attributecode.util import ignore_about_resource_path_error
 from attributecode.util import to_posix
 
 
@@ -119,12 +120,16 @@ Use about-code <command> --help for help on a command.
         'for any level.'
 )
 
+@click.option('--validate-about-resource', is_flag=True, default=False,
+    help='Validate the existence of the about resource.'
+)
+
 @click.option('-q', '--quiet', is_flag=True,
     help='Do not print error or warning messages.')
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, quiet, format, show_all):
+def inventory(location, output, quiet, format, show_all, validate_about_resource):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -152,7 +157,15 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
         errors.append(err)
-        log_errors(errors, quiet, show_all, os.path.dirname(output))
+
+    finalized_errors = []
+
+    if not validate_about_resource:
+        finalized_errors = ignore_about_resource_path_error(errors)
+    else:
+        finalized_errors = errors
+    
+    log_errors(finalized_errors, quiet, show_all, os.path.dirname(output))
     sys.exit(0)
 
 
@@ -183,10 +196,10 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 # TODO: this option help and long name is obscure and would need to be refactored
 @click.option('--license-notice-text-location', nargs=1,
     type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help="Copy the 'license_file' from the directory to the generated location")
+    help="Copy the 'license_file' from the directory to the generated location.")
 
 @click.option('--mapping', is_flag=True,
-    help='Use file mapping.config with mapping between input keys and ABOUT field names')
+    help='Use file mapping.config with mapping between input keys and ABOUT field names.')
 
 @click.option('--show-all', is_flag=True, default=False,
     help='Show all errors and warnings. '
@@ -223,20 +236,25 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     click.echo('Generating .ABOUT files...')
 
     errors, abouts = gen_generate(
-        location=location, base_dir=output, validate_about_resource=validate_about_resource,
-        license_notice_text_location=license_notice_text_location,
+        location=location, base_dir=output, license_notice_text_location=license_notice_text_location,
         fetch_license=fetch_license, use_mapping=mapping)
 
     about_count = len(abouts)
     error_count = 0
+    finalized_errors = []
 
-    for e in errors:
+    if not validate_about_resource:
+        finalized_errors = ignore_about_resource_path_error(errors)
+    else:
+        finalized_errors = errors
+
+    for e in finalized_errors:
         # Only count as warning/error if CRITICAL, ERROR and WARNING
         if e.severity > 20:
             error_count = error_count + 1
     click.echo(
         'Generated %(about_count)d .ABOUT files with %(error_count)d errors or warnings' % locals())
-    log_errors(errors, quiet, show_all, output)
+    log_errors(finalized_errors, quiet, show_all, output)
     sys.exit(0)
 
 
@@ -256,12 +274,12 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.option('--inventory', required=False,
     type=click.Path(exists=True, file_okay=True, resolve_path=True),
     help='Path to an optional JSON or CSV inventory file listing the '
-        'subset of .ABOUT files path to consider when generating attribution '
+        'subset of .ABOUT files path to consider when generating attribution.'
     )
 
 @click.option('--mapping', is_flag=True,
     help='Use the file "mapping.config" with mappings between the CSV '
-        'inventory columns names and .ABOUT field names')
+        'inventory columns names and .ABOUT field names.')
 
 @click.option('--show-all', is_flag=True, default=False,
     help='Show all errors and warnings. '
@@ -274,12 +292,17 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.option('--template', type=click.Path(exists=True), nargs=1,
     help='Path to an optional custom attribution template used for generation.')
 
+@click.option('--validate-about-resource', is_flag=True, default=False,
+    help='Validate the existence of the about resource.'
+)
+
 @click.option('-q', '--quiet', is_flag=True,
     help='Do not print error or warning messages.')
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, mapping, inventory, quiet, show_all):
+def attrib(location, output, template, mapping, inventory, quiet, show_all,
+           validate_about_resource):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -303,7 +326,14 @@ OUTPUT: Path to output file to write the attribution to.
     for no_match_error in no_match_errors:
         inv_errors.append(no_match_error)
 
-    log_errors(inv_errors, quiet, show_all, os.path.dirname(output))
+    finalized_errors = []
+
+    if not validate_about_resource:
+        finalized_errors = ignore_about_resource_path_error(inv_errors)
+    else:
+        finalized_errors = inv_errors
+
+    log_errors(finalized_errors, quiet, show_all, os.path.dirname(output))
     click.echo('Finished.')
     sys.exit(0)
 

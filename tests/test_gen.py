@@ -113,40 +113,37 @@ class GenTest(unittest.TestCase):
         errors, abouts = gen.generate(location, base_dir)
         expected = [u'.']
         assert abouts[0].about_resource.value == expected
-        assert len(errors) == 0
+        assert len(errors) == 1
 
     def test_generation_with_no_about_resource_reference(self):
         location = get_test_loc('gen/inv3.csv')
         base_dir = get_temp_dir()
-        validate_about_resource = True
 
-        errors, abouts = gen.generate(location, base_dir, validate_about_resource)
+        errors, abouts = gen.generate(location, base_dir)
         expected = [u'test.tar.gz']
 
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
-        msg = u'The reference file'
+        msg = u'Field about_resource_path'
         assert msg in errors[0].message
 
     def test_generation_with_no_about_resource_reference_no_resource_validation(self):
         location = get_test_loc('gen/inv3.csv')
         base_dir = get_temp_dir()
-        validate_about_resource = False
 
-        errors, abouts = gen.generate(location, base_dir, validate_about_resource)
+        errors, abouts = gen.generate(location, base_dir)
         expected = [u'test.tar.gz']
 
         assert abouts[0].about_resource.value == expected
-        assert len(errors) == 0
+        assert len(errors) == 1
 
     def test_generate(self):
         location = get_test_loc('gen/inv.csv')
         base_dir = get_temp_dir()
-        validate_about_resource = True
 
-        errors, abouts = gen.generate(location, base_dir, validate_about_resource)
+        errors, abouts = gen.generate(location, base_dir)
         msg1 = u'Field custom1 is not a supported field and is ignored.'
-        msg2 = u'The reference file'
+        msg2 = u'Field about_resource_path'
 
         assert msg1 in errors[0].message
         assert msg2 in errors[1].message

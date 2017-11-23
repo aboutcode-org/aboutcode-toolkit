@@ -178,10 +178,9 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
     return errors, abouts
 
 
-def generate(location, base_dir, validate_about_resource=False,
-             license_notice_text_location=None, fetch_license=False, policy=None,
-             conf_location=None, with_empty=False, with_absent=False,
-             use_mapping=False):
+def generate(location, base_dir, license_notice_text_location=None,
+             fetch_license=False, policy=None, conf_location=None,
+             with_empty=False, with_absent=False, use_mapping=False):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir using policy flags and configuration file at conf_location.
@@ -256,22 +255,21 @@ def generate(location, base_dir, validate_about_resource=False,
                 for about_resource_value in about.about_resource.value:
                     about.about_resource_path.value[about_resource_value] = None
                 about.about_resource_path.present = True
-                if validate_about_resource:
-                    # Check for the existence of the about_resource
-                    # If the input already have the about_resource_path field, it will
-                    # be validated when creating the about object
-                    loc = util.to_posix(dump_loc)
-                    about_file_loc = loc
-                    for about_resource_value in about.about_resource_path.value:
-                        path = join(dirname(util.to_posix(about_file_loc)),
-                                              about_resource_value)
-                        if not exists(path):
-                            path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
-                            path = normpath(path)
-                            msg = (u'The reference file: '
-                                   u'%(path)s '
-                                   u'does not exist' % locals())
-                            not_exist_errors.append(msg)
+                # Check for the existence of the about_resource
+                # If the input already have the about_resource_path field, it will
+                # be validated when creating the about object
+                loc = util.to_posix(dump_loc)
+                about_file_loc = loc
+                for about_resource_value in about.about_resource_path.value:
+                    path = join(dirname(util.to_posix(about_file_loc)),
+                                          about_resource_value)
+                    if not exists(path):
+                        path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
+                        path = normpath(path)
+                        msg = (u'Field about_resource_path: '
+                               u'%(path)s '
+                               u'does not exist' % locals())
+                        not_exist_errors.append(msg)
             if gen_license:
                 about.license_file.value = OrderedDict()
                 # Write generated LICENSE file
