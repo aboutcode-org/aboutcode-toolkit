@@ -86,3 +86,19 @@ def test_log_errors_with_quiet(capsys):
     out, err = capsys.readouterr()
     assert '' == out
     assert '' == err
+
+
+def test_have_problematic_error():
+    have_problematic_errors = [Error(CRITICAL, 'msg1'),
+                               Error(ERROR, 'msg2'),
+                               Error(INFO, 'msg3'),
+                               Error(WARNING, 'msg4'),
+                               Error(DEBUG, 'msg4'),
+                               Error(NOTSET, 'msg4'),
+                               ]
+    no_problematic_errors = [Error(INFO, 'msg3'),
+                             Error(DEBUG, 'msg4'),
+                             Error(NOTSET, 'msg4'),
+                             ]
+    assert cmd.have_problematic_error(have_problematic_errors)
+    assert cmd.have_problematic_error(no_problematic_errors) == False

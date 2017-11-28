@@ -406,9 +406,8 @@ def log_errors(errors, quiet, show_all, base_dir=False):
 
     msg_format = '%(sever)s: %(message)s'
 
-    # FIXME: do not create log file if there are NO errors
-    # Create error.log
-    if base_dir:
+    # Create error.log if problematic_error detected
+    if base_dir and have_problematic_error(errors):
         bdir = to_posix(base_dir)
         LOG_FILENAME = 'error.log'
         log_path = join(bdir, LOG_FILENAME)
@@ -426,8 +425,16 @@ def log_errors(errors, quiet, show_all, base_dir=False):
             elif sever in problematic_errors:
                 print(msg_format % locals())
         if base_dir:
+            # The logger will only log error if severity >= 30
             file_logger.log(severity, msg_format % locals())
 
+
+def have_problematic_error(errors):
+    for severity, message in errors:
+        sever = severities[severity]
+        if sever in problematic_errors:
+            return True
+    return False
 
 if __name__ == '__main__':
     cli()
