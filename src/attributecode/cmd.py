@@ -323,12 +323,13 @@ OUTPUT: Path to output file to write the attribution to.
         use_mapping=mapping, template_loc=template,
         inventory_location=inventory)
 
-    # Check for template error
-    with open(output, 'r') as output_file:
-        first_line = output_file.readline()
-        if first_line.startswith('Template processing error'):
-            click.echo(first_line)
-            sys.exit(errno.ENOEXEC)
+    if not no_match_errors:
+        # Check for template error
+        with open(output, 'r') as output_file:
+            first_line = output_file.readline()
+            if first_line.startswith('Template processing error'):
+                click.echo(first_line)
+                sys.exit(errno.ENOEXEC)
 
     for no_match_error in no_match_errors:
         inv_errors.append(no_match_error)
