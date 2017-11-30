@@ -53,6 +53,7 @@ def generate(abouts, template_string=None):
         sorted_license_key_and_context = {}
         license_file_name_and_key = {}
         license_key_to_license_name = {}
+        license_name_to_license_key = {}
         # FIXME: This need to be simplified
         for about in abouts:
             # about.license_file.value is a OrderDict with license_text_name as
@@ -93,6 +94,7 @@ def generate(abouts, template_string=None):
                     else:
                         lic_name_expression_list.append(lic_name_list[index_for_license_name_list])
                         license_key_to_license_name[key] = lic_name_list[index_for_license_name_list]
+                        license_name_to_license_key[lic_name_list[index_for_license_name_list]] = key
                         index_for_license_name_list = index_for_license_name_list + 1
                 # Join the license name expression into a single string
                 lic_name_expression = ' '.join(lic_name_expression_list)
@@ -100,8 +102,11 @@ def generate(abouts, template_string=None):
                 # Add the license name expression string into the about object
                 about.license_name_expression = lic_name_expression
 
-        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES, license_key_and_context=sorted_license_key_and_context,
-                                   license_file_name_and_key=license_file_name_and_key, license_key_to_license_name=license_key_to_license_name)
+        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES,
+                                   license_key_and_context=sorted_license_key_and_context,
+                                   license_file_name_and_key=license_file_name_and_key,
+                                   license_key_to_license_name=license_key_to_license_name,
+                                   license_name_to_license_key=license_name_to_license_key)
     except Exception as e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
