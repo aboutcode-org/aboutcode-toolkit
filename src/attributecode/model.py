@@ -710,7 +710,7 @@ class About(object):
             field.name = name
             setattr(self, name, field)
 
-    def __init__(self, location=None, about_file_path=None):
+    def __init__(self, location=None, about_file_path=None, use_mapping=False):
         self.create_fields()
         self.custom_fields = OrderedDict()
 
@@ -724,7 +724,7 @@ class About(object):
         self.base_dir = None
         if self.location:
             self.base_dir = os.path.dirname(location)
-            self.load(location)
+            self.load(location, use_mapping)
 
     def __repr__(self):
         return repr(self.all_fields())
@@ -965,7 +965,7 @@ class About(object):
         # self.about_resource.resolve(self.about_file_path)
         return errors
 
-    def load(self, location):
+    def load(self, location, use_mapping=False):
         """
         Read, parse and process the ABOUT file at location.
         Return a list of errors and update self with errors.
@@ -988,7 +988,7 @@ class About(object):
             and then join with the 'about_resource_path'
             """
             running_inventory = True
-            errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory)
+            errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory, use_mapping)
             errors.extend(errs)
         except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
@@ -1190,7 +1190,7 @@ def parse(lines):
     return errors, fields
 
 
-def collect_inventory(location):
+def collect_inventory(location, use_mapping=False):
     """
     Collect ABOUT files at location and return a list of errors and a list of
     About objects.
@@ -1205,7 +1205,7 @@ def collect_inventory(location):
     abouts = []
     for about_loc in about_locations:
         about_file_path = util.get_relative_path(input_location, about_loc)
-        about = About(about_loc, about_file_path)
+        about = About(about_loc, about_file_path, use_mapping)
         # Insert about_file_path reference to the error
         for severity, message in about.errors:
             msg = (about_file_path + ": " + message)

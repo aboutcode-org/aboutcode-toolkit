@@ -112,6 +112,9 @@ Use about-code <command> --help for help on a command.
     type=click.Choice(['json', 'csv']),
     help='Set OUTPUT inventory file format.')
 
+@click.option('--mapping', is_flag=True,
+    help='Use file mapping.config to collect the defined not supported fields in ABOUT files.')
+
 @click.option('--show-all', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
@@ -129,7 +132,7 @@ Use about-code <command> --help for help on a command.
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, quiet, format, show_all, validate_about_resource):
+def inventory(location, output, mapping, quiet, format, show_all, validate_about_resource):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -152,7 +155,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    errors, abouts = model.collect_inventory(location)
+    errors, abouts = model.collect_inventory(location, use_mapping=mapping)
 
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
@@ -317,7 +320,7 @@ OUTPUT: Path to output file to write the attribution to.
     if location.lower().endswith('.zip'):
         location = extract_zip(location)
 
-    inv_errors, abouts = model.collect_inventory(location)
+    inv_errors, abouts = model.collect_inventory(location, use_mapping=mapping)
     no_match_errors = attrib_generate_and_save(
         abouts=abouts, output_location=output,
         use_mapping=mapping, template_loc=template,
@@ -327,7 +330,7 @@ OUTPUT: Path to output file to write the attribution to.
         # Check for template error
         with open(output, 'r') as output_file:
             first_line = output_file.readline()
-            if first_line.startswith('Template processing error'):
+            if first_line.startswith('Template'):
                 click.echo(first_line)
                 sys.exit(errno.ENOEXEC)
 

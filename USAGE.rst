@@ -245,6 +245,7 @@ inventory
 ::
 
     -f, --format [json|csv]     Set OUTPUT file format.  [default: csv]
+    --mapping                   Use file mapping.config to collect the defined not supported fields in ABOUT files.
     --show-all                  Show all the errors and warning
     --validate-about-resource   Validate the existence of the about resource.
     -q, --quiet                 Do not print any error/warning.
@@ -262,6 +263,10 @@ Options
     -f, --format [json|csv]
  
         Set OUTPUT file format.  [default: csv]
+
+    --mapping
+
+        See mapping.config for details
 
     --show-all
 

@@ -1160,6 +1160,23 @@ class CollectorTest(unittest.TestCase):
         returned_lic = abouts[0].license_expression.value
         assert expected_lic == returned_lic
 
+    def test_collect_inventory_with_mapping(self):
+        test_loc = get_test_loc('parse/name_mapping_test.ABOUT')
+        mapping = True
+        errors, abouts = model.collect_inventory(test_loc, mapping)
+        expected_msg = 'Field resource is a custom field'
+        assert len(errors) == 1
+        assert expected_msg in errors[0].message
+        # The not supported 'resource' value is collected
+        assert abouts[0].resource.value
+
+    def test_collect_inventory_without_mapping(self):
+        test_loc = get_test_loc('parse/name_mapping_test.ABOUT')
+        errors, abouts = model.collect_inventory(test_loc)
+        expected_msg = 'Field resource is not a supported field and is ignored.'
+        assert len(errors) == 1
+        assert expected_msg in errors[0].message
+
     def test_parse_license_expression(self):
         spec_char, returned_lic = model.parse_license_expression(u'mit or apache-2.0')
         expected_lic = [u'mit', u'apache-2.0']
