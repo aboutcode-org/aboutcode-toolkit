@@ -324,29 +324,25 @@ OUTPUT: Path to output file to write the attribution to.
         inventory_location=inventory)
 
     # Check for template error
-    template_error = False
     with open(output, 'r') as output_file:
         first_line = output_file.readline()
         if first_line.startswith('Template processing error'):
-            template_error = True
+            click.echo(first_line)
+            sys.exit(errno.ENOEXEC)
 
-    if template_error:
-        click.echo('Template processing error. Please check the template.')
-        sys.exit(errno.ENOEXEC)
+    for no_match_error in no_match_errors:
+        inv_errors.append(no_match_error)
+
+    finalized_errors = []
+
+    if not validate_about_resource:
+        finalized_errors = ignore_about_resource_path_error(inv_errors)
     else:
-        for no_match_error in no_match_errors:
-            inv_errors.append(no_match_error)
-    
-        finalized_errors = []
-    
-        if not validate_about_resource:
-            finalized_errors = ignore_about_resource_path_error(inv_errors)
-        else:
-            finalized_errors = inv_errors
+        finalized_errors = inv_errors
 
-        log_errors(finalized_errors, quiet, show_all, os.path.dirname(output))
-        click.echo('Finished.')
-        sys.exit(0)
+    log_errors(finalized_errors, quiet, show_all, os.path.dirname(output))
+    click.echo('Finished.')
+    sys.exit(0)
 
 
 ######################################################################
