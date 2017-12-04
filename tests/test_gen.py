@@ -159,6 +159,23 @@ class GenTest(unittest.TestCase):
                     u'    line\n')
         assert expected == in_mem_result
 
+    def test_generate_not_overwrite_original_license_file(self):
+        location = get_test_loc('gen/inv5.csv')
+        base_dir = get_temp_dir()
+        license_notice_text_location = None
+        fetch_license = ['url', 'lic_key']
+
+        errors, abouts = gen.generate(location, base_dir, license_notice_text_location, fetch_license)
+
+        in_mem_result = [a.dumps(with_absent=False, with_empty=False)
+                        for a in abouts][0]
+        expected = (u'about_resource: .\n'
+                    u'name: AboutCode\n'
+                    u'about_resource_path: .\n'
+                    u'version: 0.11.0\n'
+                    u'license_file: this.LICENSE\n')
+        assert expected == in_mem_result
+
     def test_deduplicate(self):
         items = ['a', 'b', 'd', 'b', 'c', 'a']
         expected = ['a', 'b', 'd', 'c']
