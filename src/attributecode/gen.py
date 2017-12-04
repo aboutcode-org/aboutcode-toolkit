@@ -271,7 +271,6 @@ def generate(location, base_dir, license_notice_text_location=None,
                                u'does not exist' % locals())
                         not_exist_errors.append(msg)
             if gen_license:
-                about.license_file.value = OrderedDict()
                 # Write generated LICENSE file
                 license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
@@ -280,6 +279,7 @@ def generate(location, base_dir, license_notice_text_location=None,
                     #    about.license_name.value = lic_name
                     #    about.license_name.present = True
                     if not about.license_file.present:
+                        about.license_file.value = OrderedDict()
                         for lic_key, lic_name, lic_context, lic_url in license_key_name_context_url_list:
                             gen_license_name = lic_key + u'.LICENSE'
                             about.license_file.value[gen_license_name] = lic_context
