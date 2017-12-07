@@ -5,7 +5,7 @@ name: click
 
 owner: Armin Ronacher
 contact: armin.ronacher@active-4.com
-homepage:http://click.pocoo.org/
+homepage_url: http://click.pocoo.org/
 vcs_tool: git
 vcs_repository: https://github.com/pallets/click.git
 description: A simple wrapper around optparse for

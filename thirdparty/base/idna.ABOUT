@@ -7,14 +7,14 @@ owner: Kim Davies
 homepage_url: https://github.com/kjd/idna
 name: idna
 
-copyright: 
-    - Copyright (c) 2013-2017, Kim Davies
-    - Copyright (c) 2001-2014 Python Software Foundation
-    - Copyright (c) 1991-2014 Unicode, Inc.
+copyright: |
+        Copyright (c) 2013-2017, Kim Davies
+        Copyright (c) 2001-2014 Python Software Foundation
+        Copyright (c) 1991-2014 Unicode, Inc.
 
-dje_license: bsd-new and python and unicode-data-software
+license_expression: bsd-new and python and unicode-data-software
 
-license_text_file: 
+license_file: 
     - idna.LICENSE
     - PSF.LICENSE
     - unicode-data-software.LICENSE

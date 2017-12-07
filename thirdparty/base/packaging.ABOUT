@@ -9,10 +9,9 @@ owner: Python Packaging Authority
 
 copyright: Copyright (c) Donald Stufft and individual contributors.
 
-dje_license: bsd-simplified or apache-2.0
-license_text_file: 
+license_expression: bsd-simplified or apache-2.0
+license_file: 
     - apache-2.0.LICENSE
     - packaging.LICENSE
 
-notice_text_file: 
-    - packaging.NOTICE
+notice_file: packaging.NOTICE

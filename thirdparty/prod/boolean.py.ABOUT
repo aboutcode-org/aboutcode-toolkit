@@ -5,7 +5,7 @@ download_url: https://pypi.python.org/packages/80/f3/0508ae7ba76b02f7fd666b70576
 name: boolean.py
 
 copyright: Copyright (c) 2009-2016 Sebastian Kraemer, basti.kr@gmail.com and others
-dje_license: bsd-simplified
-license_text_file: boolean.py.LICENSE
+license_expression: bsd-simplified
+license_file: boolean.py.LICENSE
 
 homepage_url: https://github.com/bastikr/boolean.py

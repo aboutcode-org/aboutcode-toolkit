@@ -11,8 +11,5 @@ vcs_repository: https://github.com/ActiveState/appdirs.git
 
 copyright: Copyright (c) 2010 ActiveState Software Inc.
 
-dje_license: mit
-license_text_file: 
-    - appdirs.LICENSE
-    
-    
+license_expression: mit
+license_file: appdirs.LICENSE

@@ -8,7 +8,7 @@ description: |
     It started off life as the chunks of code that were copied between all of the OpenStack projects.
     Around the time that OpenStack hit 18 different projects each with at least 3 active branches, it seemed like a good time to make that code into a proper reusable library.
 
-homepage: http://git.openstack.org/cgit/openstack-dev/pbr
+homepage_url: http://git.openstack.org/cgit/openstack-dev/pbr
 owner: OpenStack
 license: apache-2.0
 license_file: pbr.LICENSE

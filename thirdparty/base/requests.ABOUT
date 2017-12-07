@@ -5,9 +5,9 @@ download_url: https://pypi.python.org/packages/29/b9/d26a6ab2ee178415ab8c0c591d2
 name: requests
 homepage_url: http://python-requests.org
 owner: Kenneth Reitz
-dje_license: apache-2.0
+license_expression: apache-2.0
 notice_file: requests.NOTICE
-license_text_file: apache-2.0.LICENSE
+license_file: apache-2.0.LICENSE
 
 vcs_tool: git
 vcs_repository: https://github.com/kennethreitz/requests.git

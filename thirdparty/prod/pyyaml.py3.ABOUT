@@ -9,7 +9,7 @@ copyright: Copyright (c) 2006 Kirill Simonov
 owner: Kirill Simonov
 contact: xi@resolvent.net
 
-dje_license: mit
-license_text_file: pyyaml.LICENSE
+license_expression: mit
+license_file: pyyaml.LICENSE
 
 description: YAML parser and emitter for Python

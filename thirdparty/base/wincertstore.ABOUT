@@ -4,8 +4,8 @@ download_url: https://pypi.python.org/packages/2.7/w/wincertstore/wincertstore-0
 
 name: wincertstore
 
-dje_license: psf
-license_text_file: wincertstore.LICENSE
+license_expression: psf
+license_file: wincertstore.LICENSE
 
 contact: christian@python.org
 owner: Christian Heimes

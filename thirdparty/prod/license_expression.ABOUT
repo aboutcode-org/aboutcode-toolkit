@@ -6,7 +6,7 @@ download_url: https://pypi.python.org/packages/d8/a5/24528298829a430d4ace4de39d7
 copyright: Copyright (c) 2017 nexB Inc. and others.
 
 owner: nexB Inc.
-dje_license: apache-2.0
-license_text_file: apache-2.0.LICENSE
+license_expression: apache-2.0
+license_file: apache-2.0.LICENSE
 notice_file: license-expression.NOTICE
 homepage_url: https://github.com/nexB/license-expression

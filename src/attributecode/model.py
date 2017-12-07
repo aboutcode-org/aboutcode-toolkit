@@ -191,7 +191,7 @@ class Field(object):
 
     @property
     def has_content(self):
-        return self.original_value and self.original_value.strip()
+        return self.original_value
 
     def __repr__(self):
         name = self.name

@@ -9,6 +9,6 @@ contact: me@kennethreitz.com
 homepage_url: http://certifi.io/
 name: certifi
 
-dje_license: mpl-2.0
-license_text_file: mpl-2.0.LICENSE
+license_expression: mpl-2.0
+license_file: mpl-2.0.LICENSE
 notice_file: certifi.NOTICE
