@@ -7,6 +7,5 @@ description: Cross-platform colored terminal text
 homepage_url: https://pypi.python.org/pypi/colorama
 owner: Jonathan Hartley
 license_expression: bds-new
-keywords: color colour terminal text ansi windows crossplatform xplatform
 license_file: colorama.LICENSE
 copyright: Copyright (c) 2010 Jonathan Hartley

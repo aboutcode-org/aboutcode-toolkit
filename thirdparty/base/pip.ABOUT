@@ -7,7 +7,6 @@ owner: The pip developers
 contact: python-virtualenv@groups.google.com
 homepage_url: http://www.pip-installer.org
 
-author_file: pip.AUTHORS
 license_expression: mit, OTHER TODO
 license_file: pip.LICENSE
 
