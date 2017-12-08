@@ -35,7 +35,7 @@ from attributecode.gen import generate as gen_generate
 from attributecode import model
 from attributecode import severities
 from attributecode.util import extract_zip
-from attributecode.util import ignore_about_resource_path_error
+from attributecode.util import ignore_about_resource_path_not_exist_error
 from attributecode.util import to_posix
 
 
@@ -123,16 +123,12 @@ Use about-code <command> --help for help on a command.
         'for any level.'
 )
 
-@click.option('--validate-about-resource', is_flag=True, default=False,
-    help='Validate the existence of the about resource.'
-)
-
 @click.option('-q', '--quiet', is_flag=True,
     help='Do not print error or warning messages.')
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, mapping, quiet, format, show_all, validate_about_resource):
+def inventory(location, output, mapping, quiet, format, show_all):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -161,13 +157,8 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     for err in write_errors:
         errors.append(err)
 
-    finalized_errors = []
+    finalized_errors = ignore_about_resource_path_not_exist_error(errors)
 
-    if not validate_about_resource:
-        finalized_errors = ignore_about_resource_path_error(errors)
-    else:
-        finalized_errors = errors
-    
     log_errors(finalized_errors, quiet, show_all, os.path.dirname(output))
     sys.exit(0)
 
@@ -212,17 +203,13 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         'for any level.'
 )
 
-@click.option('--validate-about-resource', is_flag=True, default=False,
-    help='Validate the existence of the about resource.'
-)
-
 @click.option('-q', '--quiet', is_flag=True,
     help='Do not print error or warning messages.')
 
 @click.help_option('-h', '--help')
 
 def gen(location, output, mapping, license_notice_text_location, fetch_license,
-        quiet, show_all, validate_about_resource):
+        quiet, show_all):
     """
 Generate .ABOUT files in OUTPUT directory from a JSON or CSV inventory of .ABOUT files at LOCATION.
 
@@ -244,12 +231,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     about_count = len(abouts)
     error_count = 0
-    finalized_errors = []
-
-    if not validate_about_resource:
-        finalized_errors = ignore_about_resource_path_error(errors)
-    else:
-        finalized_errors = errors
+    finalized_errors = ignore_about_resource_path_not_exist_error(errors)
 
     for e in finalized_errors:
         # Only count as warning/error if CRITICAL, ERROR and WARNING
@@ -295,17 +277,12 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.option('--template', type=click.Path(exists=True), nargs=1,
     help='Path to an optional custom attribution template used for generation.')
 
-@click.option('--validate-about-resource', is_flag=True, default=False,
-    help='Validate the existence of the about resource.'
-)
-
 @click.option('-q', '--quiet', is_flag=True,
     help='Do not print error or warning messages.')
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, mapping, inventory, quiet, show_all,
-           validate_about_resource):
+def attrib(location, output, template, mapping, inventory, quiet, show_all):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -337,12 +314,7 @@ OUTPUT: Path to output file to write the attribution to.
     for no_match_error in no_match_errors:
         inv_errors.append(no_match_error)
 
-    finalized_errors = []
-
-    if not validate_about_resource:
-        finalized_errors = ignore_about_resource_path_error(inv_errors)
-    else:
-        finalized_errors = inv_errors
+    finalized_errors = ignore_about_resource_path_not_exist_error(inv_errors)
 
     log_errors(finalized_errors, quiet, show_all, os.path.dirname(output))
     click.echo('Finished.')

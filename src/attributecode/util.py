@@ -473,7 +473,7 @@ def copy_license_notice_files(fields, base_dir, license_notice_text_location, af
             shutil.copy2(from_lic_path, to_lic_path)
 
 
-def ignore_about_resource_path_error(errors):
+def ignore_about_resource_path_not_exist_error(errors):
     ignore_resource_path_check_message = u'Field about_resource_path:'
     updated_errors = []
     for err in errors:
