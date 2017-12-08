@@ -339,8 +339,8 @@ class UtilsTest(unittest.TestCase):
                          ])]
         assert util.apply_mapping(input) == expected
 
-    def test_ignore_about_resource_path_error(self):
+    def test_ignore_about_resource_path_not_exist_error(self):
         input_err = [Error(ERROR, 'Field about_resource_path: test.tar.gz does not exist'),
                      Error(ERROR, 'Field about_resource_path: test.tar.gz does not exist')]
         expected_err = []
-        assert util.ignore_about_resource_path_error(input_err) == expected_err
+        assert util.ignore_about_resource_path_not_exist_error(input_err) == expected_err
