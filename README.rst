@@ -1,4 +1,4 @@
-AboutCode toolkit
+AboutCode Toolkit
 =================
 
 Build and tests status
@@ -17,31 +17,31 @@ Build and tests status
 +-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
 
 
-The AboutCode toolkit and ABOUT files provide a simple way to document the
-(origin and license) and other important or interesting information about
+The AboutCode Toolkit and ABOUT files provide a simple way to document the
+origin, license, usage and other important or interesting information about
 third-party software components that you use in your project.
 
 You start by storing ABOUT files (a small YAML formatted text file with field/value pairs)
 side-by-side with each of the third-party software components you use.
-Each ABOUT file documents one software component origin and license(s).
+Each ABOUT file documents origin and license for one software.
 For more information on the ABOUT file format, visit http://www.dejacode.org
 There are many examples of ABOUT files (valid or invalid) in the testdata/
 directory of the whole repository.
 
-The current version of the AboutCode toolkit can read these ABOUT files so that you
+The current version of the AboutCode Toolkit can read these ABOUT files so that you
 can collect and validate the inventory of third-party components that you use.
 
 In addition, this tool is able to generate attribution notices and
-collect redistributable source code used in your project to help you comply
-with open source licenses requirements.
+identify redistributable source code used in your project to help you comply
+with open source licenses conditions.
 
-This version of the ABOUT tool follows the ABOUT specification version 2.0 at:
+This version of the AboutCode Toolkit follows the ABOUT specification version 2.0 at:
 https://github.com/nexB/aboutcode-toolkit/blob/master/SPEC
 
 
 REQUIREMENTS
 ------------
-The AboutCode toolkit is tested with Python 2.7 and 3.6 on Linux, Mac and Windows.
+The AboutCode Toolkit is tested with Python 2.7 and 3.6 on Linux, Mac and Windows.
 You will need to install a Python interpreter if you do not have one already
 installed.
 
@@ -59,7 +59,7 @@ Open and run the installer using all the default options.
 
 INSTALLATION
 ------------
-Checkout or download and extract the AboutCode toolkit from:
+Checkout or download and extract the AboutCode Toolkit from:
     https://github.com/nexB/aboutcode-toolkit/
 
 To install all the needed dependencies in a virtualenv, run (on posix)::
@@ -97,7 +97,7 @@ For issues, you can use:
 
 SOURCE CODE
 -----------
-The AboutCode toolkit is available through GitHub. For the latest version visit:
+The AboutCode Toolkit is available through GitHub. For the latest version visit:
     https://github.com/nexB/aboutcode-toolkit
 
 
@@ -109,5 +109,5 @@ You agree to the http://developercertificate.org/
 
 LICENSE
 -------
-The AboutCode toolkit is released under the Apache 2.0 license.
+The AboutCode Toolkit is released under the Apache 2.0 license.
 See (of course) the about.ABOUT file for details.
