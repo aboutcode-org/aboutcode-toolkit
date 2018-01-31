@@ -176,7 +176,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.argument('output', nargs=1, required=True,
     type=click.Path(exists=True, writable=True, dir_okay=True, resolve_path=True))
 
-@click.option('--fetch-license', type=str, nargs=2,
+@click.option('--fetch-license', type=str, nargs=2, metavar='<key>',
     help=('Fetch licenses text from a DejaCode API. and create <license>.LICENSE side-by-side '
         'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
         'The "license" key is needed in the input. '
