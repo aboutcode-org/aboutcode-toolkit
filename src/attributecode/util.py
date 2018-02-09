@@ -313,7 +313,7 @@ def apply_mapping(abouts, alternate_mapping=None):
     mapping dict is not provided.
     """
     if alternate_mapping:
-        mapping = alternate_mapping
+        mapping = get_mapping(alternate_mapping)
     else:
         mapping = get_mapping()
 
@@ -336,22 +336,22 @@ def apply_mapping(abouts, alternate_mapping=None):
     return mapped_abouts
 
 
-def get_about_file_path(location, use_mapping=False):
+def get_about_file_path(location, use_mapping=False, mapping_file=None):
     """
     Read file at location, return a list of about_file_path.
     """
     afp_list = []
     if location.endswith('.csv'):
-        about_data = load_csv(location, use_mapping=use_mapping)
+        about_data = load_csv(location, use_mapping=use_mapping, mapping_file=mapping_file)
     else:
-        about_data = load_json(location, use_mapping=use_mapping)
+        about_data = load_json(location, use_mapping=use_mapping, mapping_file=mapping_file)
 
     for about in about_data:
         afp_list.append(about['about_file_path'])
     return afp_list
 
 
-def load_csv(location, use_mapping=False):
+def load_csv(location, use_mapping=False, mapping_file=None):
     """
     Read CSV at location, return a list of ordered dictionaries, one
     for each row.
@@ -367,19 +367,19 @@ def load_csv(location, use_mapping=False):
                 [(key.lower(), value) for key, value in row.items()]
             )
             results.append(updated_row)
-    if use_mapping:
-        results = apply_mapping(results)
+    if use_mapping or mapping_file:
+        results = apply_mapping(results, mapping_file)
     return results
 
 
-def load_json(location, use_mapping=False):
+def load_json(location, use_mapping=False, mapping_file=None):
     """
     Read JSON at location, return a list of ordered mappings, one for each entry.
     """
     with open(location) as json_file:
         results = json.load(json_file)
-    if use_mapping:
-        results = apply_mapping(results)
+    if use_mapping or mapping_file:
+        results = apply_mapping(results, mapping_file)
     return results
 
 

@@ -115,6 +115,10 @@ Use about-code <command> --help for help on a command.
 @click.option('--mapping', is_flag=True,
     help='Use file mapping.config to collect the defined not supported fields in ABOUT files.')
 
+@click.option('--mapping-file', metavar='FILE', nargs=1,
+    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
+    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
+
 @click.option('--show-all', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
@@ -128,7 +132,7 @@ Use about-code <command> --help for help on a command.
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, mapping, quiet, format, show_all):
+def inventory(location, output, mapping, mapping_file, quiet, format, show_all):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -151,7 +155,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    errors, abouts = model.collect_inventory(location, use_mapping=mapping)
+    errors, abouts = model.collect_inventory(location, use_mapping=mapping, mapping_file=mapping_file)
 
     write_errors = model.write_output(abouts, output, format)
     for err in write_errors:
@@ -176,7 +180,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.argument('output', nargs=1, required=True,
     type=click.Path(exists=True, writable=True, dir_okay=True, resolve_path=True))
 
-@click.option('--fetch-license', type=str, nargs=2, metavar='<key>',
+@click.option('--fetch-license', type=str, nargs=2, metavar='KEY',
     help=('Fetch licenses text from a DejaCode API. and create <license>.LICENSE side-by-side '
         'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
         'The "license" key is needed in the input. '
@@ -193,7 +197,11 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     help="Copy the 'license_file' from the directory to the generated location.")
 
 @click.option('--mapping', is_flag=True,
-    help='Use file mapping.config with mapping between input keys and ABOUT field names.')
+    help='Use the default file mapping.config with mapping between input keys and ABOUT field names.')
+
+@click.option('--mapping-file', metavar='FILE', nargs=1,
+    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
+    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
 
 @click.option('--show-all', is_flag=True, default=False,
     help='Show all errors and warnings. '
@@ -208,7 +216,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, mapping, license_notice_text_location, fetch_license,
+def gen(location, output, mapping, mapping_file, license_notice_text_location, fetch_license,
         quiet, show_all):
     """
 Generate .ABOUT files in OUTPUT directory from a JSON or CSV inventory of .ABOUT files at LOCATION.
@@ -227,7 +235,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     errors, abouts = gen_generate(
         location=location, base_dir=output, license_notice_text_location=license_notice_text_location,
-        fetch_license=fetch_license, use_mapping=mapping)
+        fetch_license=fetch_license, use_mapping=mapping, mapping_file=mapping_file)
 
     about_count = len(abouts)
     error_count = 0
@@ -266,6 +274,10 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     help='Use the file "mapping.config" with mappings between the CSV '
         'inventory columns names and .ABOUT field names.')
 
+@click.option('--mapping-file', metavar='FILE', nargs=1,
+    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
+    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
+
 @click.option('--show-all', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
@@ -282,7 +294,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, mapping, inventory, quiet, show_all):
+def attrib(location, output, template, mapping, mapping_file, inventory, quiet, show_all):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -297,10 +309,10 @@ OUTPUT: Path to output file to write the attribution to.
     if location.lower().endswith('.zip'):
         location = extract_zip(location)
 
-    inv_errors, abouts = model.collect_inventory(location, use_mapping=mapping)
+    inv_errors, abouts = model.collect_inventory(location, use_mapping=mapping, mapping_file=mapping_file)
     no_match_errors = attrib_generate_and_save(
         abouts=abouts, output_location=output,
-        use_mapping=mapping, template_loc=template,
+        use_mapping=mapping, mapping_file=mapping_file, template_loc=template,
         inventory_location=inventory)
 
     if not no_match_errors:

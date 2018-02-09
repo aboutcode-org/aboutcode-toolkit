@@ -107,14 +107,15 @@ def check_duplicated_about_file_path(inventory_dict):
 
 
 def load_inventory(location, base_dir, license_notice_text_location=None,
-                   use_mapping=False):
+                   use_mapping=False, mapping_file=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files
     stored in the `base_dir`. Return a list of errors and a list of
     About objects validated against the base_dir.
     Optionally use `license_notice_text_location` as the location of
     license and notice texts.
-    Optionally use mappings for field names if `use_mapping` is True.
+    Optionally use mappings for field names if `use_mapping` is True
+    or a custom mapping_file if provided.
     """
     errors = []
     abouts = []
@@ -124,9 +125,9 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
         if dup_cols_err:
             errors.extend(dup_cols_err)
             return errors, abouts
-        inventory = util.load_csv(location, use_mapping)
+        inventory = util.load_csv(location, use_mapping, mapping_file)
     else:
-        inventory = util.load_json(location, use_mapping)
+        inventory = util.load_json(location, use_mapping, mapping_file)
 
     try:
         dup_about_paths_err = check_duplicated_about_file_path(inventory)
@@ -165,7 +166,9 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
         about = model.About(about_file_path=afp)
         about.location = loc
         running_inventory = False
-        ld_errors = about.load_dict(fields, base_dir, running_inventory, use_mapping, license_notice_text_location, with_empty=False)
+        ld_errors = about.load_dict(fields, base_dir, running_inventory,
+                                    use_mapping, mapping_file, license_notice_text_location,
+                                    with_empty=False)
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
         for e in ld_errors:
@@ -180,7 +183,7 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
 
 def generate(location, base_dir, license_notice_text_location=None,
              fetch_license=False, policy=None, conf_location=None,
-             with_empty=False, with_absent=False, use_mapping=False):
+             with_empty=False, with_absent=False, use_mapping=False, mapping_file=None):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir using policy flags and configuration file at conf_location.
@@ -203,7 +206,8 @@ def generate(location, base_dir, license_notice_text_location=None,
         location=location,
         base_dir=bdir,
         license_notice_text_location=license_notice_text_location,
-        use_mapping=use_mapping)
+        use_mapping=use_mapping,
+        mapping_file=mapping_file)
 
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)

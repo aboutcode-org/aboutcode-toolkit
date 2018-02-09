@@ -143,18 +143,20 @@ def generate_from_file(abouts, template_loc=None):
     return generate(abouts, template_string=tpls)
 
 
-def generate_and_save(abouts, output_location, use_mapping=False,
+def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=None,
                       template_loc=None, inventory_location=None):
     """
     Generate attribution file using the `abouts` list of About object
     at `output_location`.
 
+    Optionally use the mapping.config file if `use_mapping` is True.
+
+    Optionally use the custom mapping file if mapping_file is set.
+
     Use the optional `template_loc` custom temaplte or a default template.
 
     Optionally filter `abouts` object based on the inventory JSON or
     CSV at `inventory_location`.
-
-    Optionally use the mapping.config file is `use_mapping` is True
     """
     updated_abouts = []
     lstrip_afp = []
@@ -178,7 +180,7 @@ def generate_and_save(abouts, output_location, use_mapping=False,
             try:
                 # Return a list which contains only the about file path
                 about_list = attributecode.util.get_about_file_path(
-                    inventory_location, use_mapping=use_mapping)
+                    inventory_location, use_mapping=use_mapping, mapping_file=mapping_file)
             # FIXME: why catching all exceptions?
             except Exception:
                 # 'about_file_path' key/column doesn't exist
