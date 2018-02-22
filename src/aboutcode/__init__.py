@@ -27,7 +27,7 @@ except NameError:
     basestring = str  # Python 3
 
 
-__version__ = '3.0.2'
+__version__ = '3.1.0'
 
 
 __about_spec_version__ = '3.0.0'

@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name='aboutcode-toolkit',
-    version='3.0.2',
+    version='3.1.0',
     license='Apache-2.0',
     description=(
         'AboutCode-toolkit is a tool to document the provenance (origin and license) of '
@@ -32,7 +32,7 @@ setup(
         'Collect inventories, generate attribution documentation.'
     ),
     long_description=(
-        'AttributeCode provides a simple way to document the'
+        'AboutCode-toolkit provides a simple way to document the'
         'provenance (i.e. origin and license) of software components that'
         'you use in your project. This documentation is stored in *.ABOUT'
         'files, side-by-side with the documented code.'
@@ -79,7 +79,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'about-code=attributecode.cmd:cli',
+            'aboutcode=aboutcode.cmd:cli',
+            # TODO deprecate me: this is kept for compatibility
+            'about-code=aboutcode.cmd:cli',
         ]
     },
 )

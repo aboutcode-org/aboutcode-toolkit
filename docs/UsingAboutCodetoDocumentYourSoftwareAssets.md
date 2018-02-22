@@ -225,7 +225,7 @@ among multiple licenses.</td>
 
 ## <a name="OptionallyDefineCustomFieldsforgenwithMAPPING.CONFIG">Optionally Define Custom Fields for gen with MAPPING.CONFIG</a>
 
-Optionally, you can control the generated label names and contents in your .ABOUT files using a MAPPING.CONFIG file. You can start with the default version provided at [https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/mapping.config](https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/mapping.config)  and you can customize a copy of that file to map the software provenance information that is important to you. When you are ready to run gen, you will want to specify the --mapping option to tell it to look for the MAPPING.CONFIG file and use it.
+Optionally, you can control the generated label names and contents in your .ABOUT files using a MAPPING.CONFIG file. You can start with the default version provided at [https://github.com/nexB/aboutcode-toolkit/blob/develop/src/aboutcode/mapping.config](https://github.com/nexB/aboutcode-toolkit/blob/develop/src/aboutcode/mapping.config)  and you can customize a copy of that file to map the software provenance information that is important to you. When you are ready to run gen, you will want to specify the --mapping option to tell it to look for the MAPPING.CONFIG file and use it.
 
 You can customize your copy of MAPPING.CONFIG to recognize your own software inventory column names in order to map them to ABOUT File contents. This is especially useful if you prefer not to change some of the actual column names in your software inventory before running gen.  Note that the name on the right side (for example "Directory/Filename") is the name of the field in your software inventory spreadsheet, and the name on the left, followed by a colon, is the field label to go into the .ABOUT file.  Here is an example:
 
@@ -297,7 +297,7 @@ You should prepare a filtered version of your software inventory (the one that y
 
 You can run attrib using the default_html.template (or default_json.template if want JSON output) provided with the AboutCode Toolkit tools:   
 
-[https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/templates/default_html.template](https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/templates/default_html.template) 
+[https://github.com/nexB/aboutcode-toolkit/blob/develop/src/aboutcode/templates/default_html.template](https://github.com/nexB/aboutcode-toolkit/blob/develop/src/aboutcode/templates/default_html.template) 
 
 If you choose to do that, you will most likely want to edit the generated .html file to provide header information about your own organization and product. 
 

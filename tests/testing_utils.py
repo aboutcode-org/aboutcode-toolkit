@@ -28,8 +28,8 @@ import sys
 import tempfile
 import zipfile
 
-from attributecode.util import add_unc
-from attributecode.util import to_posix
+from aboutcode.util import add_unc
+from aboutcode.util import to_posix
 
 
 logger = logging.getLogger(__name__)
@@ -83,7 +83,7 @@ def create_dir(location):
                  | stat.S_IROTH | stat.S_IXOTH)
 
 
-def build_temp_dir(prefix='test-attributecode-'):
+def build_temp_dir(prefix='test-aboutcode-'):
     """
     Create and return a new unique empty directory created in base_dir.
     """
@@ -92,7 +92,7 @@ def build_temp_dir(prefix='test-attributecode-'):
     return location
 
 
-def get_temp_file(file_name='test-attributecode-tempfile'):
+def get_temp_file(file_name='test-aboutcode-tempfile'):
     """
     Return a unique new temporary file location to a non-existing
     temporary file that can safely be created without a risk of name

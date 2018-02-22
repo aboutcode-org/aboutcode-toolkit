@@ -27,16 +27,16 @@ from unittest.case import expectedFailure
 
 import mock
 
-import attributecode
-from attributecode import CRITICAL
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import WARNING
-from attributecode import Error
-from attributecode import model
-from attributecode import util
-from attributecode.util import add_unc
-from attributecode.util import load_csv
+import aboutcode
+from aboutcode import CRITICAL
+from aboutcode import ERROR
+from aboutcode import INFO
+from aboutcode import WARNING
+from aboutcode import Error
+from aboutcode import model
+from aboutcode import util
+from aboutcode.util import add_unc
+from aboutcode.util import load_csv
 from testing_utils import extract_test_loc
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
@@ -1133,7 +1133,7 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('allAboutInOneDir')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = []
-        result = [(level, e) for level, e in errors if level > attributecode.INFO]
+        result = [(level, e) for level, e in errors if level > aboutcode.INFO]
         assert expected_errors == result
 
     def test_collect_inventory_populate_about_file_path(self):
@@ -1192,7 +1192,7 @@ class CollectorTest(unittest.TestCase):
         assert expected_spec_char == spec_char
 
     def test_collect_inventory_works_with_relative_paths(self):
-        # FIXME: This test need to be run under src/attributecode/
+        # FIXME: This test need to be run under src/aboutcode/
         # or otherwise it will fail as the test depends on the launching
         # location
         test_loc = get_test_loc('parse/complete')
@@ -1339,8 +1339,8 @@ class FetchLicenseTest(unittest.TestCase):
         mock_data.return_value = ''
         assert model.valid_api_url('non_valid_url') is False
 
-    @mock.patch('attributecode.util.have_network_connection')
-    @mock.patch('attributecode.model.valid_api_url')
+    @mock.patch('aboutcode.util.have_network_connection')
+    @mock.patch('aboutcode.model.valid_api_url')
     def test_pre_process_and_fetch_license_dict(self, have_network_connection, valid_api_url):
         have_network_connection.return_value = True
 

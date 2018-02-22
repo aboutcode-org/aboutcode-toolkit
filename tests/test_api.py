@@ -22,9 +22,9 @@ import unittest
 
 import mock
 
-from attributecode import api
-from attributecode import ERROR
-from attributecode import Error
+from aboutcode import api
+from aboutcode import ERROR
+from aboutcode import Error
 from testing_utils import FakeResponse
 
 

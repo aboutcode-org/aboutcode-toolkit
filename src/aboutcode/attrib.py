@@ -28,12 +28,12 @@ from posixpath import join
 
 import jinja2
 
-import attributecode
-from attributecode import ERROR
-from attributecode import Error
-from attributecode.licenses import COMMON_LICENSES
-from attributecode.model import parse_license_expression
-from attributecode.util import add_unc
+import aboutcode
+from aboutcode import ERROR
+from aboutcode import Error
+from aboutcode.licenses import COMMON_LICENSES
+from aboutcode.model import parse_license_expression
+from aboutcode.util import add_unc
 
 
 def generate(abouts, template_string=None):
@@ -177,7 +177,7 @@ def generate_and_save(abouts, output_location, use_mapping=False,
 
             try:
                 # Return a list which contains only the about file path
-                about_list = attributecode.util.get_about_file_path(
+                about_list = aboutcode.util.get_about_file_path(
                     inventory_location, use_mapping=use_mapping)
             # FIXME: why catching all exceptions?
             except Exception:

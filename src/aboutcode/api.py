@@ -28,8 +28,8 @@ except ImportError:  # Python 3
     from urllib.request import urlopen, Request
     from urllib.error import HTTPError, URLError
 
-from attributecode import ERROR
-from attributecode import Error
+from aboutcode import ERROR
+from aboutcode import Error
 
 
 """

@@ -18,14 +18,14 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from attributecode import CRITICAL
-from attributecode import DEBUG
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import NOTSET
-from attributecode import WARNING
-from attributecode import cmd
-from attributecode import Error
+from aboutcode import CRITICAL
+from aboutcode import DEBUG
+from aboutcode import ERROR
+from aboutcode import INFO
+from aboutcode import NOTSET
+from aboutcode import WARNING
+from aboutcode import cmd
+from aboutcode import Error
 
 
 # NB: these tests depends on py.test stdout/err capture capabilities

@@ -28,10 +28,10 @@ from testing_utils import get_test_loc
 from testing_utils import on_posix
 from testing_utils import on_windows
 
-from attributecode import CRITICAL
-from attributecode import ERROR
-from attributecode import Error
-from attributecode import util
+from aboutcode import CRITICAL
+from aboutcode import ERROR
+from aboutcode import Error
+from aboutcode import util
 
 
 class UtilsTest(unittest.TestCase):

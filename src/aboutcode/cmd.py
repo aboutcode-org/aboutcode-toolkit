@@ -28,15 +28,15 @@ import click
 # silence unicode literals warnings
 click.disable_unicode_literals_warning = True
 
-from attributecode import __about_spec_version__
-from attributecode import __version__
-from attributecode.attrib import generate_and_save as attrib_generate_and_save
-from attributecode.gen import generate as gen_generate
-from attributecode import model
-from attributecode import severities
-from attributecode.util import extract_zip
-from attributecode.util import ignore_about_resource_path_not_exist_error
-from attributecode.util import to_posix
+from aboutcode import __about_spec_version__
+from aboutcode import __version__
+from aboutcode.attrib import generate_and_save as attrib_generate_and_save
+from aboutcode.gen import generate as gen_generate
+from aboutcode import model
+from aboutcode import severities
+from aboutcode.util import extract_zip
+from aboutcode.util import ignore_about_resource_path_not_exist_error
+from aboutcode.util import to_posix
 
 
 __copyright__ = """

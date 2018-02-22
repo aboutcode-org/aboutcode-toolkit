@@ -24,11 +24,11 @@ import unittest
 from testing_utils import get_temp_dir
 from testing_utils import get_test_loc
 
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import gen
+from aboutcode import ERROR
+from aboutcode import INFO
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import gen
 
 
 class GenTest(unittest.TestCase):

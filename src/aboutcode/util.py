@@ -46,8 +46,8 @@ except ImportError:
     # Python 3
     import http.client as httplib
 
-from attributecode import CRITICAL
-from attributecode import Error
+from aboutcode import CRITICAL
+from aboutcode import Error
 
 
 on_windows = 'win32' in sys.platform
@@ -201,7 +201,7 @@ def get_relative_path(base_loc, full_loc):
     else:
         relative = path[len(base) + 1:]
         # We don't want to keep the first segment of the root of the returned path.
-        # See https://github.com/nexB/attributecode/issues/276
+        # See https://github.com/nexB/aboutcode/issues/276
         # relative = posixpath.join(base_name, relative)
     return relative
 

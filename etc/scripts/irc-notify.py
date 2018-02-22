@@ -32,7 +32,7 @@ value. se commas to delineate multiple messages.
 
 Example:
 export APPVEYOR_URL=https://ci.appveyor.com
-export APPVEYOR_PROJECT_NAME=attributecode
+export APPVEYOR_PROJECT_NAME=aboutcode-toolkit
 export APPVEYOR_REPO_COMMIT_AUTHOR=pombredanne
 export APPVEYOR_REPO_COMMIT_TIMESTAMP=2016-10-31
 export APPVEYOR_REPO_PROVIDER=gihub
@@ -43,7 +43,7 @@ export APPVEYOR_REPO_COMMIT=22c95b72e29248dc4de9b85e590ee18f6f587de8
 export APPVEYOR_REPO_COMMIT_MESSAGE="some IRC test"
 export APPVEYOR_ACCOUNT_NAME=nexB
 export APPVEYOR_PULL_REQUEST_NUMBER=pull_request_number
-export APPVEYOR_REPO_NAME=nexB/attributecode
+export APPVEYOR_REPO_NAME=nexB/aboutcode-toolkit
 python etc/scripts/irc-notify.py aboutcode '[{project_name}:{branch}] {short_commit}: "{message}" ({author}) {color_red}Succeeded','Details: {build_url} | Commit: {commit_url}'
 
 See also https://github.com/gridsync/gridsync/blob/master/appveyor.yml for examples

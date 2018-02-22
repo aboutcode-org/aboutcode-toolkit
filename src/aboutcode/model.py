@@ -50,19 +50,19 @@ else:  # Python 3
 
 from license_expression import Licensing
 
-from attributecode import CRITICAL
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import WARNING
-from attributecode import api
-from attributecode import Error
-from attributecode import saneyaml
-from attributecode import util
-from attributecode.util import add_unc
-from attributecode.util import copy_license_notice_files
-from attributecode.util import on_windows
-from attributecode.util import UNC_PREFIX
-from attributecode.util import UNC_PREFIX_POSIX
+from aboutcode import CRITICAL
+from aboutcode import ERROR
+from aboutcode import INFO
+from aboutcode import WARNING
+from aboutcode import api
+from aboutcode import Error
+from aboutcode import saneyaml
+from aboutcode import util
+from aboutcode.util import add_unc
+from aboutcode.util import copy_license_notice_files
+from aboutcode.util import on_windows
+from aboutcode.util import UNC_PREFIX
+from aboutcode.util import UNC_PREFIX_POSIX
 
 
 class Field(object):

@@ -31,15 +31,15 @@ else:
     # Python 3
     import csv
 
-from attributecode import ERROR
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import model
-from attributecode.model import check_file_field_exist
-from attributecode import util
-from attributecode.util import add_unc
-from attributecode.util import to_posix
-from attributecode.util import UNC_PREFIX_POSIX
+from aboutcode import ERROR
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import model
+from aboutcode.model import check_file_field_exist
+from aboutcode import util
+from aboutcode.util import add_unc
+from aboutcode.util import to_posix
+from aboutcode.util import UNC_PREFIX_POSIX
 
 
 LOG_FILENAME = 'error.log'

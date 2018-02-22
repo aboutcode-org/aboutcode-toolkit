@@ -29,7 +29,7 @@ goto about
 
 :about
 call %ABOUT_ROOT_DIR%\Scripts\activate
-echo %ABOUT_ROOT_DIR%\bin\about-code %CMD_LINE_ARGS%
-%ABOUT_ROOT_DIR%\bin\about-code %CMD_LINE_ARGS%
+echo %ABOUT_ROOT_DIR%\bin\aboutcode %CMD_LINE_ARGS%
+%ABOUT_ROOT_DIR%\bin\aboutcode %CMD_LINE_ARGS%
 
 :EOS

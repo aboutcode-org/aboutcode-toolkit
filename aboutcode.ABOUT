@@ -1,15 +1,15 @@
 about_resource: .
 
 name: AboutCode-toolkit
-version: 3.0.0.dev6
+version: 3.1.0
 
 owner: nexB Inc.
-author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
+author: Chin Yeung Li, Philippe Ombredanne, Thomas Druez, Jillian Daguil and others
 
 homepage_url: https://aboutcode.org
 
 vcs_tool: git
-vcs_repository: https://github.com/dejacode/about-code-tool.git
+vcs_repository: https://github.com/nexB/aboutcode-toolkit.git
 
 description: AboutCode Toolkit is a tool to process ABOUT files. An ABOUT file
  provides a simple way to document the provenance (origin and license)
@@ -20,6 +20,6 @@ description: AboutCode Toolkit is a tool to process ABOUT files. An ABOUT file
 license: apache-2.0
 license_name: Apache 2.0
 license_file: apache-2.0.LICENSE
-copyright: Copyright (c) 2013-2017 nexB Inc.
+copyright: Copyright (c) 2013-2018 nexB Inc. and others
 
 notice_file: NOTICE
