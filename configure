@@ -16,11 +16,11 @@ CONF_DEFAULT="etc/conf"
 
 CFG_CMD_LINE_ARGS="$@"
 
-if [ "$1" == "--init" ]; then
+if [[ "$1" == "--init" ]]; then
     CFG_CMD_LINE_ARGS=$CONF_INIT
 fi
 
-if [ "$1" == "" ]; then
+if [[ "$1" == "" ]]; then
     # default conf if not argument is provided
     CFG_CMD_LINE_ARGS=$CONF_DEFAULT
 fi
