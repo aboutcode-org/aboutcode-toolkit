@@ -1,0 +1,9 @@
+[
+  {
+    "about_file": "/load/this.ABOUT", 
+    "about_resource_path": ".", 
+    "about_resource": ".", 
+    "name": "AboutCode", 
+    "version": "0.11.0"
+  }
+]

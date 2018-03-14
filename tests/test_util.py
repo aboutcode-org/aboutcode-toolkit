@@ -288,6 +288,19 @@ class UtilsTest(unittest.TestCase):
         result = util.load_json(test_file)
         assert expected == result
 
+    def test_load_json_with_mapping(self):
+        test_file = get_test_loc('load/expected_need_mapping.json')
+        expected = [OrderedDict(
+                    [('about_file_path', '/load/this.ABOUT'),
+                     ('version', '0.11.0'),
+                     ('about_resource', '.'),
+                     ('name', 'AboutCode'),
+                     ('about_resource_path', '.'),
+                     ])
+                    ]
+        result = util.load_json(test_file, use_mapping=True)
+        assert expected == result
+
     def test_get_about_file_path_from_csv_using_mapping(self):
         test_file = get_test_loc('util/about.csv')
         expected = ['about.ABOUT']

@@ -1,0 +1,29 @@
+{
+"aboutcode_manager_notice":"Exported from AboutCode Manager and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\\nAboutCode Manager should be considered or used as legal advice. Consult an Attorney\\nfor any legal advice.\\nAboutCode Manager is a free software analysis application from nexB Inc. and others.\\nVisit https://github.com/nexB/aboutcode-manager/ for support and download.\"",
+"aboutcode_manager_version":"2.4.0",
+
+"components":
+[{"license_expression":"apache-2.0",
+"copyright":"Copyright (c) 2017 nexB Inc.",
+"licenses":[{"key":"apache-2.0"}],
+"copyrights":[{"statements":["Copyright (c) 2017 nexB Inc."]}],
+"path":"ScanCode",
+"review_status":"Analyzed",
+"name":"ScanCode",
+"version":"2.2.1",
+"owner":"nexB Inc.",
+"code_type":"Source",
+"is_modified":false,
+"is_deployed":false,
+"feature":"",
+"purpose":"",
+"homepage_url":null,
+"download_url":null,
+"license_url":null,
+"notice_url":null,
+"programming_language":"Python",
+"notes":"",
+"fileId":8458
+}]
+
+}

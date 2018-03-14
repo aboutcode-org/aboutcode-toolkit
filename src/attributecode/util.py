@@ -378,8 +378,58 @@ def load_json(location, use_mapping=False):
     """
     with open(location) as json_file:
         results = json.load(json_file)
+    # If the loaded JSON is not a list,
+    # - JSON output from AboutCode Manager:
+    # look for the "components" field as it is the field
+    # that contain everything the tool needs and ignore other fields.
+    # For instance,
+    # {
+    #    "aboutcode_manager_notice":"xyz",
+    #    "aboutcode_manager_version":"xxx",
+    #    "components":
+    #    [{
+    #        "license_expression":"apache-2.0",
+    #        "copyright":"Copyright (c) 2017 nexB Inc.",
+    #        "path":"ScanCode",
+    #        ...
+    #    }]
+    # }
+    #
+    # - JSON output from ScanCode:
+    # look for the "files" field as it is the field
+    # that contain everything the tool needs and ignore other fields:
+    # For instance,
+    # {
+    #    "scancode_notice":"xyz",
+    #    "scancode_version":"xxx",
+    #    "files":
+    #    [{
+    #        "path": "test",
+    #        "type": "directory",
+    #        "name": "test",
+    #        ...
+    #    }]
+    # }
+    #
+    # - JSON file that is not produced by scancode or aboutcode toolkit
+    # For instance,
+    # {
+    #    "path": "test",
+    #    "type": "directory",
+    #    "name": "test",
+    #    ...
+    # }
+    if not isinstance(results, list):
+        if u'aboutcode_manager_notice' in results:
+            updated_results = results['components']
+        elif u'scancode_notice' in results:
+            updated_results = results['files']
+        else:
+            updated_results = [results]
+    else:
+        updated_results = results
     if use_mapping:
-        results = apply_mapping(results)
+        results = apply_mapping(updated_results)
     return results
 
 
