@@ -1164,18 +1164,36 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('parse/name_mapping_test.ABOUT')
         mapping = True
         errors, abouts = model.collect_inventory(test_loc, mapping)
-        expected_msg = 'Field resource is a custom field'
-        assert len(errors) == 1
-        assert expected_msg in errors[0].message
+        expected_msg1 = 'Field resource is a custom field'
+        expected_msg2 = 'Field custom_mapping is not a supported field and is not defined in the mapping file. This field is ignored.'
+        assert len(errors) == 2
+        assert expected_msg1 in errors[0].message
+        assert expected_msg2 in errors[1].message
         # The not supported 'resource' value is collected
         assert abouts[0].resource.value
+
+    def test_collect_inventory_with_custom_mapping(self):
+        test_loc = get_test_loc('parse/name_mapping_test.ABOUT')
+        mapping = False
+        mapping_file = get_test_loc('custom-mapping-file/mapping.config')
+        errors, abouts = model.collect_inventory(test_loc, mapping, mapping_file)
+        expected_msg1 = 'Field resource is a custom field'
+        expected_msg2 = 'Field custom_mapping is a custom field'
+        assert len(errors) == 2
+        assert expected_msg1 in errors[0].message
+        assert expected_msg2 in errors[1].message
+        # The not supported 'resource' value is collected
+        assert abouts[0].resource.value
+        assert abouts[0].custom_mapping.value
 
     def test_collect_inventory_without_mapping(self):
         test_loc = get_test_loc('parse/name_mapping_test.ABOUT')
         errors, abouts = model.collect_inventory(test_loc)
-        expected_msg = 'Field resource is not a supported field and is ignored.'
-        assert len(errors) == 1
-        assert expected_msg in errors[0].message
+        expected_msg1 = 'Field resource is not a supported field and is ignored.'
+        expected_msg2 = 'Field custom_mapping is not a supported field and is ignored.'
+        assert len(errors) == 2
+        assert expected_msg1 in errors[0].message
+        assert expected_msg2 in errors[1].message
 
     def test_parse_license_expression(self):
         spec_char, returned_lic = model.parse_license_expression(u'mit or apache-2.0')
