@@ -290,28 +290,28 @@ class UtilsTest(unittest.TestCase):
 
     def test_load_json_with_mapping(self):
         test_file = get_test_loc('load/expected_need_mapping.json')
-        expected = [OrderedDict(
+        expected = [dict(OrderedDict(
                     [('about_file_path', '/load/this.ABOUT'),
-                     ('version', '0.11.0'),
-                     ('about_resource', '.'),
-                     ('name', 'AboutCode'),
                      ('about_resource_path', '.'),
+                     ('about_resource', '.'),
+                     ('version', '0.11.0'),
+                     ('name', 'AboutCode'),
                      ])
-                    ]
+                    )]
         result = util.load_json(test_file, use_mapping=True)
         assert expected == result
 
     def test_load_non_list_json_with_mapping(self):
         test_file = get_test_loc('load/not_a_list_need_mapping.json')
         mapping_file = get_test_loc('custom-mapping-file/mapping.config')
-        expected = [OrderedDict(
+        expected = [dict(OrderedDict(
                     [('about_file_path', '/load/this.ABOUT'),
-                     ('version', '0.11.0'),
+                     ('about_resource_path', '.'),
                      ('about_resource', '.'),
                      ('name', 'AboutCode'),
-                     ('about_resource_path', '.'),
+                     ('version', '0.11.0'),
                      ])
-                    ]
+                    )]
         result = util.load_json(test_file, use_mapping=False, mapping_file=mapping_file)
         assert expected == result
 
