@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -427,10 +427,13 @@ def load_json(location, use_mapping=False, mapping_file=None):
         else:
             updated_results = [results]
     else:
-        updated_results = results
-    if use_mapping:
-        results = apply_mapping(updated_results, mapping_file)
-    return results
+        updated_results = sorted(results)
+
+    if use_mapping or mapping_file:
+        about_ordered_list = apply_mapping(updated_results, mapping_file)
+    else:
+        about_ordered_list = updated_results
+    return about_ordered_list
 
 
 def have_network_connection():

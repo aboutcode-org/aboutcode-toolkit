@@ -1,5 +1,5 @@
 {
-    "about_file_path": "/load/this.ABOUT", 
+    "path": "/load/this.ABOUT", 
     "about_resource_path": ".", 
     "about_resource": ".", 
     "name": "AboutCode", 
