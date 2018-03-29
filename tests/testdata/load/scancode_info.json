@@ -1,0 +1,36 @@
+{
+  "scancode_notice": "Generated with ScanCode and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\nScanCode should be considered or used as legal advice. Consult an Attorney\nfor any legal advice.\nScanCode is a free software code scanning tool from nexB Inc. and others.\nVisit https://github.com/nexB/scancode-toolkit/ for support and download.",
+  "scancode_version": "2.9.0b1.post32.fea65d3",
+  "scancode_options": {
+    "input": "C:\\Users\\CYL\\Downloads\\io\\swagger\\annotations\\Api.java",
+    "--info": true,
+    "--json-pp": "C:\\Users\\CYL\\Desktop\\test\\scancode-info.json"
+  },
+  "files_count": 1,
+  "files": [
+    {
+      "path": "Api.java",
+      "type": "file",
+      "name": "Api.java",
+      "base_name": "Api",
+      "extension": ".java",
+      "size": 5074,
+      "date": "2017-07-15",
+      "sha1": "c3a48ec7e684a35417241dd59507ec61702c508c",
+      "md5": "326fb262bbb9c2ce32179f0450e24601",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": "Java",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": false,
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    }
+  ]
+}

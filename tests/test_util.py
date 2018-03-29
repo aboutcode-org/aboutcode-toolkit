@@ -328,6 +328,67 @@ class UtilsTest(unittest.TestCase):
         result = util.load_json(test_file)
         assert expected == result
 
+    def test_load_json_from_abc_mgr(self):
+        test_file = get_test_loc('load/aboutcode_manager_exported.json')
+        mapping_file = get_test_loc('custom-mapping-file/mapping.config')
+        expected = [dict(OrderedDict(
+                    [('license_expression', 'apache-2.0'),
+                     ('copyright', 'Copyright (c) 2017 nexB Inc.'),
+                     ('licenses',[{'key':'apache-2.0'}]),
+                     ('copyrights',[{'statements':['Copyright (c) 2017 nexB Inc.']}]),
+                     ('about_file_path', 'ScanCode'),
+                     ('review_status', 'Analyzed'),
+                     ('name', 'ScanCode'),
+                     ('version', '2.2.1'),
+                     ('owner', 'nexB Inc.'),
+                     ('code_type', 'Source'),
+                     ('is_modified', False),
+                     ('is_deployed', False),
+                     ('feature', ''),
+                     ('purpose', ''),
+                     ('homepage_url', None),
+                     ('download_url',None),
+                     ('license_url',None),
+                     ('notice_url',None),
+                     ('programming_language','Python'),
+                     ('notes',''),
+                     ('fileId',8458),
+                    ]
+                    ))]
+        result = util.load_json(test_file, use_mapping=False, mapping_file=mapping_file)
+        assert expected == result
+
+    def test_load_json_from_scancode(self):
+        test_file = get_test_loc('load/scancode_info.json')
+        mapping_file = get_test_loc('custom-mapping-file/mapping.config')
+        expected = [dict(OrderedDict(
+                    [('about_file_path', 'Api.java'),
+                     ('type', 'file'),
+                     ('name', 'Api.java'),
+                     ('base_name', 'Api'),
+                     ('extension', '.java'),
+                     ('size', 5074),
+                     ('date', '2017-07-15'),
+                     ('sha1', 'c3a48ec7e684a35417241dd59507ec61702c508c'),
+                     ('md5', '326fb262bbb9c2ce32179f0450e24601'),
+                     ('mime_type', 'text/plain'),
+                     ('file_type', 'ASCII text'),
+                     ('programming_language', 'Java'),
+                     ('is_binary', False),
+                     ('is_text', True),
+                     ('is_archive', False),
+                     ('is_media', False),
+                     ('is_source', True),
+                     ('is_script', False),
+                     ('files_count', 0),
+                     ('dirs_count', 0),
+                     ('size_count', 0),
+                     ('scan_errors', []),
+                    ]
+                    ))]
+        result = util.load_json(test_file, use_mapping=False, mapping_file=mapping_file)
+        assert expected == result
+
     def test_get_about_file_path_from_csv_using_mapping(self):
         test_file = get_test_loc('util/about.csv')
         expected = ['about.ABOUT']
