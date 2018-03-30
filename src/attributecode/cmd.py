@@ -119,7 +119,7 @@ Use about-code <command> --help for help on a command.
     type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
     help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
 
-@click.option('--show-all', is_flag=True, default=False,
+@click.option('--verbose', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
         'error levels: CRITICAL, ERROR, and WARNING. '
@@ -132,7 +132,7 @@ Use about-code <command> --help for help on a command.
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, mapping, mapping_file, quiet, format, show_all):
+def inventory(location, output, mapping, mapping_file, quiet, format, verbose):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -163,7 +163,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
     finalized_errors = ignore_about_resource_path_not_exist_error(errors)
 
-    log_errors(finalized_errors, quiet, show_all, os.path.dirname(output))
+    log_errors(finalized_errors, quiet, verbose, os.path.dirname(output))
     sys.exit(0)
 
 
@@ -203,7 +203,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
     help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
 
-@click.option('--show-all', is_flag=True, default=False,
+@click.option('--verbose', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
         'error levels: CRITICAL, ERROR, and WARNING. '
@@ -217,7 +217,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.help_option('-h', '--help')
 
 def gen(location, output, mapping, mapping_file, license_notice_text_location, fetch_license,
-        quiet, show_all):
+        quiet, verbose):
     """
 Generate .ABOUT files in OUTPUT directory from a JSON or CSV inventory of .ABOUT files at LOCATION.
 
@@ -247,7 +247,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
             error_count = error_count + 1
     click.echo(
         'Generated %(about_count)d .ABOUT files with %(error_count)d errors or warnings' % locals())
-    log_errors(finalized_errors, quiet, show_all, output)
+    log_errors(finalized_errors, quiet, verbose, output)
     sys.exit(0)
 
 
@@ -277,7 +277,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
     help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
 
-@click.option('--show-all', is_flag=True, default=False,
+@click.option('--verbose', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
         'error levels: CRITICAL, ERROR, and WARNING. '
@@ -293,7 +293,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, mapping, mapping_file, inventory, quiet, show_all):
+def attrib(location, output, template, mapping, mapping_file, inventory, quiet, verbose):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -327,7 +327,7 @@ OUTPUT: Path to output file to write the attribution to.
 
     finalized_errors = ignore_about_resource_path_not_exist_error(inv_errors)
 
-    log_errors(finalized_errors, quiet, show_all, os.path.dirname(output))
+    log_errors(finalized_errors, quiet, verbose, os.path.dirname(output))
     click.echo('Finished.')
     sys.exit(0)
 
@@ -341,7 +341,7 @@ OUTPUT: Path to output file to write the attribution to.
 @click.argument('location', nargs=1, required=True,
     type=click.Path(exists=True, readable=True, resolve_path=True))
 
-@click.option('--show-all', is_flag=True, default=False,
+@click.option('--verbose', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
         'error levels: CRITICAL, ERROR, and WARNING. '
@@ -351,7 +351,7 @@ OUTPUT: Path to output file to write the attribution to.
 
 @click.help_option('-h', '--help')
 
-def check(location, show_all):
+def check(location, verbose):
     """
 Check and validate .ABOUT file(s) at LOCATION for errors and
 print error messages on the terminal.
@@ -367,7 +367,7 @@ LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
     print_errors = []
     for severity, message in errors:
         sever = severities[severity]
-        if show_all:
+        if verbose:
             print_errors.append(msg_format % locals())
         elif sever in problematic_errors:
             print_errors.append(msg_format % locals())
@@ -386,7 +386,7 @@ LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
     sys.exit(0)
 
 
-def log_errors(errors, quiet, show_all, base_dir=False):
+def log_errors(errors, quiet, verbose, base_dir=False):
     """
     Iterate of sequence of Error objects and print and log errors with
     a severity superior or equal to level.
@@ -414,7 +414,7 @@ def log_errors(errors, quiet, show_all, base_dir=False):
     for severity, message in errors:
         sever = severities[severity]
         if not quiet:
-            if show_all:
+            if verbose:
                 print(msg_format % locals())
             elif sever in problematic_errors:
                 print(msg_format % locals())
