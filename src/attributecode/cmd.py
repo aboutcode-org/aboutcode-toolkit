@@ -113,7 +113,7 @@ Use about-code <command> --help for help on a command.
     help='Set OUTPUT inventory file format.')
 
 @click.option('--mapping', is_flag=True,
-    help='Use file mapping.config to collect the defined not supported fields in ABOUT files.')
+    help='Use the default file mapping.config (./attributecode/mapping.config) with mapping between input keys and ABOUT field names.')
 
 @click.option('--mapping-file', metavar='FILE', nargs=1,
     type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
@@ -197,7 +197,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     help="Copy the 'license_file' from the directory to the generated location.")
 
 @click.option('--mapping', is_flag=True,
-    help='Use the default file mapping.config with mapping between input keys and ABOUT field names.')
+    help='Use the default file mapping.config (./attributecode/mapping.config) with mapping between input keys and ABOUT field names.')
 
 @click.option('--mapping-file', metavar='FILE', nargs=1,
     type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
@@ -271,8 +271,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     )
 
 @click.option('--mapping', is_flag=True,
-    help='Use the file "mapping.config" with mappings between the CSV '
-        'inventory columns names and .ABOUT field names.')
+    help='Use the default file mapping.config (./attributecode/mapping.config) with mapping between input keys and ABOUT field names.')
 
 @click.option('--mapping-file', metavar='FILE', nargs=1,
     type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),

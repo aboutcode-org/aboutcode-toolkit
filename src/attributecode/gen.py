@@ -135,7 +135,12 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
             errors.extend(dup_about_paths_err)
             return errors, abouts
     except:
-        msg = "The essential field 'about_file_path' is not found."
+        msg = (
+               "The essential field 'about_file_path' is not found.\n"
+               "Use the --mapping or --mapping-file option to map the "
+               "input keys and verify the mapping information are correct.\n"
+               "OR correct the column names in the <input>"
+               )
         errors.append(Error(CRITICAL, msg))
         return errors, abouts
 
@@ -147,8 +152,8 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
             if f not in fields:
                 msg = (
                     "Required column: %(f)r not found.\n"
-                    "Use the --mapping option to map the input keys and verify the "
-                    "mapping information are correct.\n"
+                    "Use the --mapping or --mapping-file option to map the "
+                    "input keys and verify the mapping information are correct.\n"
                     "OR correct the column names in the <input>"
                 ) % locals()
 
