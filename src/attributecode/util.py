@@ -517,6 +517,10 @@ def copy_license_notice_files(fields, base_dir, license_notice_text_location, af
                 from_lic_path = add_unc(from_lic_path)
                 to_lic_path = add_unc(to_lic_path)
 
+            # Strip the white spaces
+            from_lic_path = from_lic_path.strip()
+            to_lic_path = to_lic_path.strip()
+
             # Errors will be captured when doing the validation
             if not posixpath.exists(from_lic_path):
                 continue
