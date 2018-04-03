@@ -523,7 +523,11 @@ def copy_license_notice_files(fields, base_dir, license_notice_text_location, af
 
             if not posixpath.exists(to_lic_path):
                 os.makedirs(to_lic_path)
-            shutil.copy2(from_lic_path, to_lic_path)
+            try:
+                shutil.copy2(from_lic_path, to_lic_path)
+            except Exception as e:
+                print(repr(e))
+                print('Cannot copy file at %(from_lic_path)r.' % locals())
 
 
 def ignore_about_resource_path_not_exist_error(errors):
