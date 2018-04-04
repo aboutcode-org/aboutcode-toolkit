@@ -419,7 +419,7 @@ def log_errors(errors, quiet, verbose, base_dir=False):
             elif sever in problematic_errors:
                 print(msg_format % locals())
         if base_dir:
-            # The logger will only log error if severity >= 30
+            # The logger will only log error for severity >= 30
             file_logger.log(severity, msg_format % locals())
 
 

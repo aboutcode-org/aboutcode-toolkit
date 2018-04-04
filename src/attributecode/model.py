@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -385,9 +385,6 @@ class PathField(ListField):
             self.base_dir = util.to_posix(self.base_dir)
 
         name = self.name
-        # FIXME: This is a temp fix for #286
-        # The field in ignore_checking_list is validated in the check_file_field_exist function
-        ignore_checking_list = [u'license_file', u'notice_file', u'changelog_file']
 
         # mapping of normalized paths to a location or None
         paths = OrderedDict()
@@ -416,7 +413,7 @@ class PathField(ListField):
                 paths[path] = location
                 continue
 
-            if self.license_notice_text_location and name in ignore_checking_list:
+            if self.license_notice_text_location:
                 location = posixpath.join(self.license_notice_text_location, path)
             else:
                 # The 'about_resource_path' should be a joined path with
@@ -442,10 +439,9 @@ class PathField(ListField):
             if not os.path.exists(location):
                 # We don't want to show the UNC_PREFIX in the error message
                 location = util.to_posix(location.strip(UNC_PREFIX))
-                if not name in ignore_checking_list:
-                    msg = (u'Field %(name)s: Path %(location)s not found'
-                           % locals())
-                    errors.append(Error(CRITICAL, msg))
+                msg = (u'Field %(name)s: Path %(location)s not found'
+                       % locals())
+                errors.append(Error(CRITICAL, msg))
                 location = None
 
             paths[path] = location
@@ -1499,45 +1495,3 @@ def verify_license_files_in_location(about, lic_location):
     return license_location_dict, errors
 
 
-def check_file_field_exist(about, location):
-    """
-    Return a list of errors for non-existence file in file fields
-    """
-    errors = []
-    loc = util.to_posix(location)
-    parent = posixpath.dirname(loc)
-
-    about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
-
-    # The model only has the following as FileTextField
-    license_files = about.license_file.value
-    notice_files = about.notice_file.value
-    changelog_files = about.changelog_file.value
-
-    if license_files:
-        for lic in license_files:
-            lic_path = posixpath.join(dirname(util.to_posix(about_file_path)), lic)
-            if not posixpath.exists(lic_path):
-                msg = (u'Field license_file: Path '
-                   u'%(lic_path)s '
-                   u'not found' % locals())
-                errors.append(msg)
-
-    if notice_files:
-        for notice in notice_files:
-            notice_path = posixpath.join(dirname(util.to_posix(about_file_path)), notice)
-            if not posixpath.exists(notice_path):
-                msg = (u'Field notice_file: Path '
-                   u'%(notice_path)s '
-                   u'not found' % locals())
-                errors.append(msg)
-
-    if changelog_files:
-        for changelog in changelog_files:
-            changelog_path = posixpath.join(dirname(util.to_posix(about_file_path)), changelog)
-            if not posixpath.exists(changelog_path):
-                msg = (u'Field changelog_file: Path '
-                   u'%(changelog_path)s '
-                   u'not found' % locals())
-                errors.append(msg)
-    return errors

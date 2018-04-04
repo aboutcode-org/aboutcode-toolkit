@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -518,12 +518,11 @@ class AboutTest(unittest.TestCase):
         file_path1 = posixpath.join(posixpath.dirname(test_file), 'test.LICENSE')
         file_path2 = posixpath.join(posixpath.dirname(test_file), 'test.NOTICE')
 
-        err_msg1 = u'Field license_file: Path %s not found' % file_path1
-        err_msg2 = u'Field notice_file: Path %s not found' % file_path2
+        err_msg1 = Error(CRITICAL, 'Field license_file: Path %s not found' % file_path1)
+        err_msg2 = Error(CRITICAL, 'Field notice_file: Path %s not found' % file_path2)
 
         expected_errors = [err_msg1, err_msg2]
-        errors = model.check_file_field_exist(a, test_file)
-        assert expected_errors == errors
+        assert expected_errors == a.errors
 
         assert {'test.LICENSE': None} == a.license_file.value
         assert {'test.NOTICE': None} == a.notice_file.value

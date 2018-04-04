@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -35,7 +35,6 @@ from attributecode import ERROR
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import model
-from attributecode.model import check_file_field_exist
 from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import to_posix
@@ -304,12 +303,7 @@ def generate(location, base_dir, license_notice_text_location=None,
 
             # Write the ABOUT files
             about.dump(dump_loc, with_empty=with_empty, with_absent=with_absent)
-
-            file_field_not_exist_errors = check_file_field_exist(about, dump_loc)
-
             for e in not_exist_errors:
-                errors.append(Error(ERROR, e))
-            for e in file_field_not_exist_errors:
                 errors.append(Error(ERROR, e))
         except Exception as e:
             # only keep the first 100 char of the exception
