@@ -46,7 +46,7 @@ except ImportError:
     # Python 3
     import http.client as httplib
 
-from attributecode import CRITICAL
+from attributecode import CRITICAL, INFO
 from attributecode import Error
 
 
@@ -534,12 +534,13 @@ def copy_license_notice_files(fields, base_dir, license_notice_text_location, af
                 print('Cannot copy file at %(from_lic_path)r.' % locals())
 
 
-def ignore_about_resource_path_not_exist_error(errors):
+def update_severity_level_about_resource_path_not_exist_error(errors):
     ignore_resource_path_check_message = u'Field about_resource_path:'
     updated_errors = []
     for err in errors:
         if ignore_resource_path_check_message in err.message:
-            continue
+            updated_errors.append(Error(INFO, err.message))
+            #continue
         else:
             updated_errors.append(err)
     return updated_errors

@@ -35,7 +35,7 @@ from attributecode.gen import generate as gen_generate
 from attributecode import model
 from attributecode import severities
 from attributecode.util import extract_zip
-from attributecode.util import ignore_about_resource_path_not_exist_error
+from attributecode.util import update_severity_level_about_resource_path_not_exist_error
 from attributecode.util import to_posix
 
 
@@ -161,7 +161,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     for err in write_errors:
         errors.append(err)
 
-    finalized_errors = ignore_about_resource_path_not_exist_error(errors)
+    finalized_errors = update_severity_level_about_resource_path_not_exist_error(errors)
 
     log_errors(finalized_errors, quiet, verbose, os.path.dirname(output))
     sys.exit(0)
@@ -239,7 +239,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     about_count = len(abouts)
     error_count = 0
-    finalized_errors = ignore_about_resource_path_not_exist_error(errors)
+    finalized_errors = update_severity_level_about_resource_path_not_exist_error(errors)
 
     for e in finalized_errors:
         # Only count as warning/error if CRITICAL, ERROR and WARNING
@@ -325,7 +325,7 @@ OUTPUT: Path to output file to write the attribution to.
     for no_match_error in no_match_errors:
         inv_errors.append(no_match_error)
 
-    finalized_errors = ignore_about_resource_path_not_exist_error(inv_errors)
+    finalized_errors = update_severity_level_about_resource_path_not_exist_error(inv_errors)
 
     log_errors(finalized_errors, quiet, verbose, os.path.dirname(output))
     click.echo('Finished.')
