@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -148,7 +148,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # FIXME: return error code?
         return
 
-    click.echo('Collecting inventory from: %(location)r and writing output to: %(output)r' % locals())
+    click.echo('Collecting inventory from: %(location)s and writing output to: %(output)s' % locals()) #(location, output))
 
     # FIXME: do we really want to continue support zip as an input?
     if location.lower().endswith('.zip'):
