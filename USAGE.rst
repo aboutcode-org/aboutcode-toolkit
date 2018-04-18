@@ -72,7 +72,7 @@ Options
 
     --inventory
 
-        This option allows user to define which ABOUT files should be used for attribution generation.
+        This option allows you to define which ABOUT files should be used for attribution generation.
         For instance,
         '/home/project/component_list.csv' is the inventory that user want to be generated
 
@@ -84,19 +84,19 @@ Options
 
     --show-all
 
-        This option ask the tool to show all kind of errors found.
+        This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
     --template
 
-        This option allows users to use their own template for attribution generation.
-        For instance, if user has a custom template located at:
+        This option allows you to use your own template for attribution generation.
+        For instance, if you have a custom template located at:
         /home/custom_template/template.html
 
     $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT
 
 
-The following information are passed to the jinja2 and, therefore, can be used for your custom template:
+The following data are passed to jinja2 and, therefore, can be used for a custom template:
  * about object: the about objects
  * common_licenses: a common license keys list in licenses.py
  * license_key_and_context: a dictionary list with license_key as a key and license text as the value
@@ -133,7 +133,7 @@ Options
 
     --show-all
 
-        This option ask the tool to show all kind of errors found.
+        This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
     $ about check --show-all /home/project/about_files/
@@ -193,7 +193,7 @@ Options
         This option requires 2 parameters:
             api_url - URL to the DJE License Library
             api_key - Hash key to authenticate yourself in the API.
-        (Please contact us to get the api_* value to use this feature)
+        (Please contact nexB to get the api_* value to use for this feature)
 
     $ about gen --fetch-license 'api_url' 'api_key' LOCATION OUTPUT
 
@@ -203,7 +203,7 @@ Options
         'license_file' and 'notice_file' value in the input from the directory
 
         For instance,
-        the directory, /home/licenses_notices/, contains all the licenses and notices that users want:
+        the directory, /home/licenses_notices/, contains all the licenses and notices that you want:
         /home/license/apache2.LICENSE
         /home/license/jquery.js.NOTICE
 
@@ -215,7 +215,7 @@ Options
 
     --show-all
 
-        This option ask the tool to show all kind of errors found.
+        This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
 
@@ -260,7 +260,7 @@ Options
 
     --show-all
 
-        This option ask the tool to show all kind of errors found.
+        This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
     $ about inventory -f json [OPTIONS] LOCATION OUTPUT
