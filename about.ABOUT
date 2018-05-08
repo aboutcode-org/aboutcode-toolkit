@@ -10,7 +10,7 @@ description: |
     'about' a software component. This is a small text file stored in the
     codebase side-by-side with the documented software component.
 
-homepage_url: https://aboutcode.org
+homepage_url: http://www.nexb.com/community.html
 
 license: apache-2.0
 license_name: Apache 2.0
