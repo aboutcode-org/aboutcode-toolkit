@@ -43,10 +43,12 @@ attrib
     --inventory PATH            Path to an inventory file.
     --mapping                   Use for mapping between the input keys and the ABOUT field.
                                 names - mapping.config
-    --show-all                  Show all the errors and warning
+    --mapping-file              Use a custom mapping file with mapping between input
+                                keys and ABOUT field names.
+    --verbose                   Show all the errors and warning.
     --template PATH             Path to a custom attribution template.
     -q, --quiet                 Do not print any error/warning.
-    --help                      Show this message and exit.
+    -h, --help                  Show this message and exit.
 
 Purpose
 -------
@@ -82,7 +84,13 @@ Options
 
         See mapping.config for details
 
-    --show-all
+    --mapping-file
+
+        Same behavior as `--mapping` but with custom mapping file
+
+    $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
+
+    --verbose
 
         This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
@@ -119,8 +127,8 @@ check
 
 ::
 
-    --show-all               Show all the errors and warning
-    --help                   Show this message and exit.
+    --verbose                Show all the errors and warning
+    -h, --help               Show this message and exit.
 
 Purpose
 -------
@@ -131,12 +139,12 @@ Options
 
 ::
 
-    --show-all
+    --verbose
 
         This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
-    $ about check --show-all /home/project/about_files/
+    $ about check --verbose /home/project/about_files/
 
 
 gen
@@ -155,7 +163,7 @@ gen
 
 ::
 
-    --fetch-license TEXT...             Fetch licenses text from a DejaCode API. and
+    --fetch-license KEY                 Fetch licenses text from a DejaCode API. and
                                         create <license>.LICENSE side-by-side
                                         with the generated .ABOUT file using data
                                         fetched from a DejaCode License Library. The
@@ -169,12 +177,14 @@ gen
 
                                         about gen --fetch-license 'api_url' 'api_key'
     --license-notice-text-location PATH Copy the 'license_file' from the directory to
-                                        the generated location
+                                        the generated location.
     --mapping                           Use for mapping between the input keys and
                                         the ABOUT field names - mapping.config
-    --show-all                          Show all the errors and warning
+    --mapping-file                      Use a custom mapping file with mapping between input
+                                        keys and ABOUT field names.
+    --verbose                           Show all the errors and warning.
     -q, --quiet                         Do not print any error/warning.
-    --help                              Show this message and exit.
+    -h, --help                          Show this message and exit.
 
 Purpose
 -------
@@ -213,7 +223,13 @@ Options
 
         See mapping.config for details
 
-    --show-all
+    --mapping-file
+
+        Same behavior as `--mapping` but with custom mapping file
+
+    $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
+
+    --verbose
 
         This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
@@ -237,9 +253,11 @@ inventory
 
     -f, --format [json|csv]     Set OUTPUT file format.  [default: csv]
     --mapping                   Use file mapping.config to collect the defined not supported fields in ABOUT files.
-    --show-all                  Show all the errors and warning
+    --mapping-file              Use a custom mapping file with mapping between input
+                                keys and ABOUT field names.
+    --verbose                   Show all the errors and warning.
     -q, --quiet                 Do not print any error/warning.
-    --help                      Show this message and exit.
+    -h, --help                  Show this message and exit.
 
 Purpose
 -------
@@ -254,13 +272,20 @@ Options
  
         Set OUTPUT file format.  [default: csv]
 
+    $ about inventory -f json LOCATION OUTPUT
+
     --mapping
 
         See mapping.config for details
 
-    --show-all
+    --mapping-file
+
+        Same behavior as `--mapping` but with custom mapping file
+
+    $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
+
+    --verbose
 
         This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
-    $ about inventory -f json [OPTIONS] LOCATION OUTPUT
