@@ -1033,6 +1033,50 @@ class About(object):
         self.errors = errors
         return errors
 
+    def is_equals_with_small_text_differences(self, verus_about_object):
+        """
+        Compare 2 ABOUT objects.
+        Return True if only small text difference such as extra space or 
+        lists have the same value but different order. False otherwise.
+        """
+        for field in self.all_fields():
+            not_exist_in_verus_about_object = True
+            for verus_field in verus_about_object.all_fields():
+                if verus_field.name == field.name:
+                    print(type(field.value))
+                    not_exist_in_verus_about_object = False
+                    if type(field.value).__name__ == 'unicode':
+                        # Strip all spaces
+                        field_stripped_value = "".join(field.value.split())
+                        verus_field_stripped_value = "".join(verus_field.value.split())
+                        if not verus_field_stripped_value == field_stripped_value:
+                            return False
+                    elif type(field.value).__name__ == 'list':
+                        # Compare the list value and ignore the order
+                        field_stripped_value = []
+                        verus_field_stripped_value = []
+                        for f in field.value:
+                            # Strip all spaces
+                            field_stripped_value.append("".join(f.split()))
+                        for verus_f in verus_field.value:
+                            verus_field_stripped_value.append("".join(verus_f.split()))
+                        if not sorted(field_stripped_value) == sorted(verus_field_stripped_value):
+                            return False
+                    elif type(field.value).__name__ == 'dict':
+                        field_stripped_value = {}
+                        verus_field_stripped_value = {}
+                        # TODO...
+
+                    else:
+                        if not verus_field.value == field.value:
+                            print("NON-Defined Type")
+                            print(field.value)
+                            print(verus_field.value)
+                            return False
+            if not_exist_in_verus_about_object:
+                return False
+        return True
+
     def dumps(self, with_absent=False, with_empty=True):
         """
         Return self as a formatted ABOUT string.
