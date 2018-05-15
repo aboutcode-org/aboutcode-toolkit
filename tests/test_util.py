@@ -444,3 +444,9 @@ class UtilsTest(unittest.TestCase):
         input_err = [Error(ERROR, 'Field about_resource_path: test.tar.gz does not exist')]
         expected_err = [Error(INFO, 'Field about_resource_path: test.tar.gz does not exist')]
         assert util.update_severity_level_about_resource_path_not_exist_error(input_err) == expected_err
+
+    def test_strip_all_whitespaces_to_lowercase(self):
+        input = 'This is a test'
+        expected = 'thisisatest'
+        result = util.strip_all_whitespaces_to_lowercase(input)
+        assert expected == result

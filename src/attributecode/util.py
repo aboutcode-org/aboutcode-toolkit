@@ -544,3 +544,7 @@ def update_severity_level_about_resource_path_not_exist_error(errors):
         else:
             updated_errors.append(err)
     return updated_errors
+
+
+def strip_all_whitespaces_to_lowercase(value):
+    return "".join(value.lower().split())

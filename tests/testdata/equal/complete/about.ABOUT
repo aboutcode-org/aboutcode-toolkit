@@ -24,4 +24,4 @@ license_file: apache-2.0.LICENSE
 copyright: Copyright (c) 2013-2014   nexB Inc.
 
 notice_file: NOTICE
-attribute: y
+attribute: yes
