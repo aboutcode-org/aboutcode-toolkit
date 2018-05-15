@@ -35,6 +35,7 @@ import os
 import posixpath
 from posixpath import dirname
 import re
+import six
 import sys
 
 if sys.version_info[0] < 3:  # Python 2
@@ -1037,41 +1038,45 @@ class About(object):
         """
         Compare 2 ABOUT objects.
         Return True if only small text difference such as extra space or 
-        lists have the same value but different order. False otherwise.
+        lists have the same value but in different order. False otherwise.
         """
         for field in self.all_fields():
             not_exist_in_verus_about_object = True
             for verus_field in verus_about_object.all_fields():
                 if verus_field.name == field.name:
-                    print(type(field.value))
                     not_exist_in_verus_about_object = False
-                    if type(field.value).__name__ == 'unicode':
-                        # Strip all spaces
-                        field_stripped_value = "".join(field.value.split())
-                        verus_field_stripped_value = "".join(verus_field.value.split())
+                    # Check the type of the value and stripped all the
+                    # whitespaces in the value
+                    # Use the six package to catch string type for both python2.x and python3.x
+                    if isinstance(field.value, six.string_types):
+                        field_stripped_value = util.strip_all_whitespaces_to_lowercase(field.value)
+                        verus_field_stripped_value = util.strip_all_whitespaces_to_lowercase(verus_field.value)
                         if not verus_field_stripped_value == field_stripped_value:
                             return False
-                    elif type(field.value).__name__ == 'list':
-                        # Compare the list value and ignore the order
+                    elif isinstance(field.value, list):
                         field_stripped_value = []
                         verus_field_stripped_value = []
-                        for f in field.value:
-                            # Strip all spaces
-                            field_stripped_value.append("".join(f.split()))
-                        for verus_f in verus_field.value:
-                            verus_field_stripped_value.append("".join(verus_f.split()))
+                        for value in field.value:
+                            field_stripped_value.append(util.strip_all_whitespaces_to_lowercase(value))
+                        for verus_value in verus_field.value:
+                            verus_field_stripped_value.append(util.strip_all_whitespaces_to_lowercase(verus_value))
+                        # Compare the lists value and ignore the order
                         if not sorted(field_stripped_value) == sorted(verus_field_stripped_value):
                             return False
-                    elif type(field.value).__name__ == 'dict':
-                        field_stripped_value = {}
-                        verus_field_stripped_value = {}
-                        # TODO...
-
+                    elif isinstance(field.value, dict):
+                        field_stripped_value_dict = {}
+                        verus_field_stripped_value_dict = {}
+                        if field.value:
+                            for field_dict_name in field.value:
+                                field_stripped_value_dict[field.name] = util.strip_all_whitespaces_to_lowercase(field.value[field_dict_name])
+                            for verus_field_dict_name in verus_field.value:
+                                verus_field_stripped_value_dict[verus_field.name] = util.strip_all_whitespaces_to_lowercase(verus_field.value[verus_field_dict_name])
+                        # Compare the value of the 2 dictionary after stripped all
+                        # whitespaces in value
+                        if not field_stripped_value_dict == verus_field_stripped_value_dict:
+                            return False
                     else:
                         if not verus_field.value == field.value:
-                            print("NON-Defined Type")
-                            print(field.value)
-                            print(verus_field.value)
                             return False
             if not_exist_in_verus_about_object:
                 return False
