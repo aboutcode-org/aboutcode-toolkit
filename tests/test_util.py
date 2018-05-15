@@ -171,6 +171,11 @@ class UtilsTest(unittest.TestCase):
         expected = []
         assert expected == result
 
+    def test_space_is_valid_chars(self):
+        result = util.invalid_chars(' ')
+        expected = []
+        assert expected == result
+
     def test_invalid_chars_with_invalid_in_name_and_dir(self):
         result = util.invalid_chars('_$as/afg:')
         expected = [':']
