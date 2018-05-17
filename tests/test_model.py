@@ -1068,6 +1068,21 @@ copyright: >
         expected = get_test_loc('load/expected.json')
         check_json(expected, result)
 
+    def test_colon_in_value(self):
+        test = u'''about_resource: .
+name: AboutCode
+version: v: 0.11.0
+'''
+        expected = u'''about_resource: .
+name: AboutCode
+version: |
+    v: 0.11.0
+'''
+        a = model.About()
+        base_dir = 'some_dir'
+        a.loads(test, base_dir)
+        dumped = a.dumps(with_absent=False, with_empty=False)
+        assert dumped == expected
 
 class CollectorTest(unittest.TestCase):
 
