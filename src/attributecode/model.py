@@ -163,7 +163,7 @@ class Field(object):
             value = value.splitlines(True)
             # multi-line
             if len(value) > 1:
-                # This code is used to read the YAML's multi-line format saneyaml.loadin
+                # This code is used to read the YAML's multi-line format in
                 # ABOUT files
                 # (Test: test_loads_dumps_is_idempotent)
                 if value[0].strip() == u'|' or value[0].strip() == u'>':
