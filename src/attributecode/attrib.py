@@ -20,6 +20,7 @@ from __future__ import unicode_literals
 
 import codecs
 import collections
+import datetime
 import os
 from posixpath import basename
 from posixpath import dirname
@@ -102,11 +103,14 @@ def generate(abouts, template_string=None):
                 # Add the license name expression string into the about object
                 about.license_name_expression = lic_name_expression
 
+        # Get the current UTC time
+        utcnow = datetime.datetime.utcnow()
         rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES,
                                    license_key_and_context=sorted_license_key_and_context,
                                    license_file_name_and_key=license_file_name_and_key,
                                    license_key_to_license_name=license_key_to_license_name,
-                                   license_name_to_license_key=license_name_to_license_key)
+                                   license_name_to_license_key=license_name_to_license_key,
+                                   utcnow=utcnow)
     except Exception as e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
