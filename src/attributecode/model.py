@@ -918,13 +918,9 @@ class About(object):
             try:
                 setattr(self, name, custom_field)
             except:
-                # The intended captured error message should display
-                # the line number of where the invalid line is,
-                # but I am not able to get the line number from
-                # the original code. By-passing the line number
-                # for now.
-                # msg = u'Invalid line: %(line)d: %(orig_name)r'
-                msg = u'Invalid line: %(orig_name)r: ' % locals()
+                # According to https://stackoverflow.com/questions/533048/how-to-log-source-file-name-and-line-number-in-python/44401529 ,
+                # we use `lineno` instead of `line` to get the line number
+                msg = u'Invalid line: %(lineno)d: %(orig_name)r' % locals()
                 msg += u'%s' % custom_field.value
                 errors.append(Error(CRITICAL, msg))
         return errors
