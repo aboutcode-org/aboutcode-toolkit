@@ -175,7 +175,16 @@ class Field(object):
                     # insert 4 spaces for newline values
                     value = u'    '.join(value)
             else:
-                value = u''.join(value)
+                # See https://github.com/nexB/aboutcode-toolkit/issues/323
+                # The yaml.load() will throw error if the parsed value
+                # contains ': ' character. A work around is to put a pipe, '|'
+                # to indicate the whole value as a string
+                if value and ': ' in value[0]:
+                    value.insert(0, u'|\n')
+                    # insert 4 spaces for newline values
+                    value = u'    '.join(value)
+                else:
+                    value = u''.join(value)
 
         serialized = u'%(name)s:' % locals()
         if value:
