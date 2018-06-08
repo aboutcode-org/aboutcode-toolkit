@@ -50,16 +50,15 @@
                             {{ license_key }}
                             </a>
                             is available at the end of this document.</p>
-                    {% else %}
-                        {% if about_object.license_file.value %}
-                            {% for lic_file_name in about_object.license_file.value %}
-                                {% if not license_file_name_and_key[lic_file_name] in common_licenses %}
-                                    <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
                     {% endif %}
                  {% endfor %}
+                {% if about_object.license_file.value %}
+                    {% for lic_file_name in about_object.license_file.value %}
+                        {% if not license_file_name_and_key[lic_file_name] in common_licenses %}
+                            <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             {% else %}
                 {% if about_object.license_file.value %}
                     {% for lic_file_name in about_object.license_file.value %}
