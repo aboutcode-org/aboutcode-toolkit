@@ -1,6 +1,19 @@
-2017-xx-xx  xxxxx
+2018-6-8  Chin-Yeung Li  <tli@nexb.com>
 
-    Release 3.0.0
+    Release 3.1.0
+
+    * Fixed JSON input from AboutCode manger export and ScanCode output
+    * Added a new option `mapping-file` to support using a custom file for mapping 
+    * Change the name of the option `--show-all` to `--verbose`
+    * Better error handling for copying file with permission issue
+    * Support timestamp in attribution output
+
+    etc...
+
+
+2017-11-17  Chin-Yeung Li  <tli@nexb.com>
+
+    Release 3.0.*
 
     ABOUT files is now YAML formatted.
     Supported license expression.
