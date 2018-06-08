@@ -57,5 +57,6 @@ class AttribTest(unittest.TestCase):
         result = attrib.generate_from_file(abouts)
         with open(get_test_loc('attrib_gen/expected_default_attrib.html')) as exp:
             expected = exp.read()
+        # strip the timestamp: the timestamp is wrapped in italic block
         self.assertEqual([x.rstrip() for x in expected.splitlines()],
-                         [x.rstrip() for x in  result.splitlines()])
+                         [x.rstrip() for x in result.splitlines() if not '<i>' in x])
