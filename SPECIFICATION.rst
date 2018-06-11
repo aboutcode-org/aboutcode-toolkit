@@ -129,6 +129,19 @@ In this example the value of the description field spans multiple lines::
     description: This is a long description for a software component that spans
      multiple lines with arbitrary line breaks.
 
+Alternatively, multiple-line strings can be written either as a 'literal block'
+(using |), or a 'folded block' (using '>').
+
+    description: >
+        This is a long description for a software component that spans
+        multiple lines with arbitrary line breaks.
+
+or
+
+    description: |
+        This is a long description for a software component that spans
+        multiple lines with arbitrary line breaks.
+
 
 Fields are mandatory or optional
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -183,11 +196,6 @@ value of the field. This path must be a POSIX path relative to the path of the
 ABOUT file. The file content must be UTF-8-encoded text. This is in contrast
 with field values contained directly in an ABOUT file that must be US-ASCII-
 encoded text and allows to support non-ASCII text content.
-
-When an ABOUT file contains both a field name and a _file-suffixed field for the
-same field name, both fields must be treated as multiple occurrences of the same
-field name. This must be interpreted such that only the last occurrence is
-considered as the value for this field name.
 
 For example, the full license text for a component is often stored in a separate
 file named COPYING::
