@@ -173,16 +173,14 @@ URL validation, path resolution and verification, and so forth. Tools should
 report a warning for ignored fields.
 
 
-Fields order and precedence
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fields order and multiple occurrences
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The field order does not matter with the following exception: multiple
-occurrences of a field name are possible and must be interpreted such that only
-the last occurrence is considered as the value for this field name. Previous
-occurrences of the same field name must be treated as ignored fields.
+The field order does not matter. Multiple occurrences of a field name is not
+supported.
 
-A tool processing an ABOUT file must issue a warning when a field name occurs
-more than once in an ABOUT file (as for any other ignored field).
+The tool processing an ABOUT file or CSV/JSON input will issue an error when a
+field name occurs more than once in the input file (as for any other ignored field).
 
 
 Field referencing a file

@@ -1,3 +1,13 @@
+2018-x-x
+
+    Release 3.1.1
+
+    * No support of multiple occurrence keys in the input
+    * Updated the specification document
+
+    etc...
+
+
 2018-6-8  Chin-Yeung Li  <tli@nexb.com>
 
     Release 3.1.0
