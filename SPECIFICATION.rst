@@ -130,13 +130,13 @@ In this example the value of the description field spans multiple lines::
      multiple lines with arbitrary line breaks.
 
 Alternatively, multiple-line strings can be written either as a 'literal block'
-(using |), or a 'folded block' (using '>').
+(using |), or a 'folded block' (using '>')::
 
     description: >
         This is a long description for a software component that spans
         multiple lines with arbitrary line breaks.
 
-or
+or::
 
     description: |
         This is a long description for a software component that spans
