@@ -444,3 +444,30 @@ class UtilsTest(unittest.TestCase):
         input_err = [Error(ERROR, 'Field about_resource_path: test.tar.gz does not exist')]
         expected_err = [Error(INFO, 'Field about_resource_path: test.tar.gz does not exist')]
         assert util.update_severity_level_about_resource_path_not_exist_error(input_err) == expected_err
+
+    def test_check_duplicate_keys_about_file(self):
+        test = '''
+name: test
+notes: some notes
+
+license_expression: mit
+notes: dup key here
+            '''
+        expected = ['notes']
+        assert expected == util.check_duplicate_keys_about_file(test)
+
+    def test_check_duplicate_keys_about_file_with_multiline(self):
+        test = '''
+name: test
+owner: test
+notes: |
+    String block here
+license_expression: mit
+owner: test1
+notes: continuation
+ line
+description: sample
+            '''
+        expected = ['owner', 'notes']
+        assert expected == util.check_duplicate_keys_about_file(test)
+

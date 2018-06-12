@@ -60,6 +60,7 @@ from attributecode import saneyaml
 from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import copy_license_notice_files
+from attributecode.util import check_duplicate_keys_about_file
 from attributecode.util import on_windows
 from attributecode.util import UNC_PREFIX
 from attributecode.util import UNC_PREFIX_POSIX
@@ -983,18 +984,23 @@ class About(object):
             loc = add_unc(loc)
             with codecs.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
-            """
-            The running_inventory defines if the current process is 'inventory' or not.
-            This is used for the validation of the about_resource_path.
-            In the 'inventory' command, the code will use the parent of the about_file_path
-            location and join with the 'about_resource_path' for the validation.
-            On the other hand, in the 'gen' command, the code will use the
-            generated location (aka base_dir) along with the parent of the about_file_path
-            and then join with the 'about_resource_path'
-            """
-            running_inventory = True
-            errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory, use_mapping, mapping_file)
-            errors.extend(errs)
+            dup_keys = check_duplicate_keys_about_file(input_text)
+            if dup_keys:
+                msg = ('Duplicated key name(s): %(dup_keys)s' % locals())
+                errors.append(Error(ERROR, msg % locals()))
+            else:
+                """
+                The running_inventory defines if the current process is 'inventory' or not.
+                This is used for the validation of the about_resource_path.
+                In the 'inventory' command, the code will use the parent of the about_file_path
+                location and join with the 'about_resource_path' for the validation.
+                On the other hand, in the 'gen' command, the code will use the
+                generated location (aka base_dir) along with the parent of the about_file_path
+                and then join with the 'about_resource_path'
+                """
+                running_inventory = True
+                errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory, use_mapping, mapping_file)
+                errors.extend(errs)
         except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
             errors.append(Error(CRITICAL, msg % locals()))

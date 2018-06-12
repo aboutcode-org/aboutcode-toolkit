@@ -157,9 +157,22 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
     errors, abouts = model.collect_inventory(location, use_mapping=mapping, mapping_file=mapping_file)
 
-    write_errors = model.write_output(abouts, output, format)
-    for err in write_errors:
-        errors.append(err)
+    # Do not write the output if one of the ABOUT files has duplicated key names
+    dup_error_msg = u'Duplicated key name(s)'
+    halt_output = False
+    for err in errors:
+        if dup_error_msg in err.message:
+            halt_output = True
+            break
+
+    if not halt_output:
+        write_errors = model.write_output(abouts, output, format)
+        for err in write_errors:
+            errors.append(err)
+    else:
+        msg = u'Duplicated key names are not supported.\n' + \
+                        'Please correct and re-run.'
+        print(msg)
 
     finalized_errors = update_severity_level_about_resource_path_not_exist_error(errors)
 

@@ -124,6 +124,23 @@ def check_file_names(paths):
     return errors
 
 
+def check_duplicate_keys_about_file(context):
+    keys = []
+    dup_keys = []
+    for line in context.splitlines():
+        """
+        Ignore all the continuation string, string block and empty line
+        """
+        if not line.startswith(' ') and not len(line.strip()) == 0 :
+            # Get the key name
+            key = line.partition(':')[0]
+            if key in keys:
+                dup_keys.append(key)
+            else:
+                keys.append(key)
+    return dup_keys
+
+
 def get_absolute(location):
     """
     Return an absolute normalized location.
