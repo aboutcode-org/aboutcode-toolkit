@@ -75,28 +75,28 @@ def generate(abouts, template_string=None):
 
             # Convert/map the key in license expression to license name
             if about.license_expression.value and about.license_name.value:
-                # Split the license expression into list with license key and condition keyword
-                lic_expression_list = about.license_expression.value.split()
-
-
+                special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
                 lic_name_list = about.license_name.value
                 lic_name_expression_list = []
 
                 # The order of the license_name and key should be the same
-                # The length for both list should be the same excluding the condition keyword
-                # such as 'and' and 'or'
-                assert len(lic_name_list) <= len(lic_expression_list)
+                # The length for both list should be the same
+                assert len(lic_name_list) == len(lic_list)
 
-                # Map the licence key to license name
+                # Map the license key to license name
                 index_for_license_name_list = 0
-                for key in lic_expression_list:
-                    if key.lower() == 'and' or key.lower() == 'or':
-                        lic_name_expression_list.append(key)
+                for key in lic_list:
+                    license_key_to_license_name[key] = lic_name_list[index_for_license_name_list]
+                    license_name_to_license_key[lic_name_list[index_for_license_name_list]] = key
+                    index_for_license_name_list = index_for_license_name_list + 1
+
+                # Create a license expression with license name instead of key
+                for segment in about.license_expression.value.split():
+                    if segment in license_key_to_license_name:
+                        lic_name_expression_list.append(license_key_to_license_name[segment])
                     else:
-                        lic_name_expression_list.append(lic_name_list[index_for_license_name_list])
-                        license_key_to_license_name[key] = lic_name_list[index_for_license_name_list]
-                        license_name_to_license_key[lic_name_list[index_for_license_name_list]] = key
-                        index_for_license_name_list = index_for_license_name_list + 1
+                        lic_name_expression_list.append(segment)
+
                 # Join the license name expression into a single string
                 lic_name_expression = ' '.join(lic_name_expression_list)
 
