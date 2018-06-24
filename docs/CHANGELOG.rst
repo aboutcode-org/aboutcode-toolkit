@@ -4,6 +4,7 @@
 
     * No support of multiple occurrence keys in the input
     * Updated the specification document
+    * Fixed bug that cause template processing error in attrib
 
     etc...
 
