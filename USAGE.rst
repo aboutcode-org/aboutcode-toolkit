@@ -45,8 +45,9 @@ attrib
                                 names - mapping.config
     --mapping-file              Use a custom mapping file with mapping between input
                                 keys and ABOUT field names.
-    --verbose                   Show all the errors and warning.
     --template PATH             Path to a custom attribution template.
+    --vartext TEXT              Variable texts to the attribution template
+    --verbose                   Show all the errors and warning.
     -q, --quiet                 Do not print any error/warning.
     -h, --help                  Show this message and exit.
 
@@ -90,11 +91,6 @@ Options
 
     $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
 
-    --verbose
-
-        This option tells the tool to show all errors found.
-        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
-
     --template
 
         This option allows you to use your own template for attribution generation.
@@ -102,6 +98,21 @@ Options
         /home/custom_template/template.html
 
     $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT
+
+    --vartext
+
+        This option allow you to pass variable texts to the attribution template
+
+    $ about attrib --vartext "title=Attribution Notice" --vartext "header="Product 101" LOCATION OUTPUT
+
+        Users can use the following in the template to get the vartext:
+        {{ vartext_dict['title'] }}
+        {{ vartext_dict['header'] }} 
+
+    --verbose
+
+        This option tells the tool to show all errors found.
+        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
 
 The following data are passed to jinja2 and, therefore, can be used for a custom template:
@@ -282,7 +293,7 @@ Options
 
         Same behavior as `--mapping` but with custom mapping file
 
-    $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
+    $ about inventory --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
 
     --verbose
 

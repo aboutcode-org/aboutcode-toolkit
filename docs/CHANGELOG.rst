@@ -1,3 +1,9 @@
+2018-x-x
+
+    Release 3.1.2
+
+    * New `--vartext` option
+
 2018-6-25
 
     Release 3.1.1

@@ -293,7 +293,8 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.option('--template', type=click.Path(exists=True), nargs=1,
     help='Path to an optional custom attribution template used for generation.')
 
-@click.option('--title', nargs=1, help='Title for the attribution output.')
+@click.option('--vartext', nargs=1, multiple=True, 
+    help='Variable texts to the attribution template.')
 
 @click.option('--verbose', is_flag=True, default=False,
     help='Show all errors and warnings. '
@@ -308,7 +309,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, mapping, mapping_file, inventory, title, quiet, verbose):
+def attrib(location, output, template, mapping, mapping_file, inventory, vartext, quiet, verbose):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -327,7 +328,7 @@ OUTPUT: Path to output file to write the attribution to.
     no_match_errors = attrib_generate_and_save(
         abouts=abouts, output_location=output,
         use_mapping=mapping, mapping_file=mapping_file, template_loc=template,
-        inventory_location=inventory, title=title)
+        inventory_location=inventory, vartext=vartext)
 
     if not no_match_errors:
         # Check for template error
