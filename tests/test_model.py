@@ -606,7 +606,7 @@ copyright: Copyright (c) 2013-2014 nexB Inc.
 notice_file: NOTICE
 notice_url:
 redistribute:
-attribute:
+attribute: yes
 track_change:
 modified:
 changelog_file:

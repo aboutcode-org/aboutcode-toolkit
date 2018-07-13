@@ -181,3 +181,20 @@ class GenTest(unittest.TestCase):
         expected = ['a', 'b', 'd', 'c']
         results = gen.deduplicate(items)
         assert expected == results
+
+    def test_boolean_value_not_lost(self):
+        location = get_test_loc('gen/inv6.csv')
+        base_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location, base_dir)
+
+        in_mem_result = [a.dumps(with_absent=False, with_empty=False)
+                        for a in abouts][0]
+        expected = (u'about_resource: .\n'
+                    u'name: AboutCode\n'
+                    u'about_resource_path: .\n'
+                    u'version: 0.11.0\n'
+                    u'redistribute: yes\n'
+                    u'attribute: yes\n'
+                    u'modified: no\n')
+        assert expected == in_mem_result

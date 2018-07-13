@@ -59,9 +59,11 @@ from attributecode import Error
 from attributecode import saneyaml
 from attributecode import util
 from attributecode.util import add_unc
+from attributecode.util import boolean_fields
 from attributecode.util import copy_license_notice_files
 from attributecode.util import check_duplicate_keys_about_file
 from attributecode.util import on_windows
+from attributecode.util import wrap_boolean_value
 from attributecode.util import UNC_PREFIX
 from attributecode.util import UNC_PREFIX_POSIX
 
@@ -114,7 +116,8 @@ class Field(object):
                 pass"""
         else:
             # present fields should have content ...
-            if not self.has_content:
+            # Note that 'False' can be a value for boolean field
+            if not name in boolean_fields and not self.has_content:
                 # ... especially if required
                 if self.required:
                     msg = u'Field %(name)s is required and empty'
@@ -563,9 +566,8 @@ class BooleanField(SingleLineField):
             self.value = None
         elif flag is None:
             name = self.name
-            msg = (u'Field %(name)s: field is empty. '
-                   u'Defaulting flag to no.' % locals())
-            errors.append(Error(INFO, msg))
+            msg = (u'Field %(name)s: field is present but empty. ' % locals())
+            errors.append(Error(WARNING, msg))
             self.value = None
         else:
             self.value = self.flags.get(flag)
@@ -790,6 +792,7 @@ class About(object):
         If with_empty, include empty fields.
         """
         all_fields = []
+
         for field in list(self.fields.values()) + list(self.custom_fields.values()):
             if field.required:
                 all_fields.append(field)
@@ -800,8 +803,11 @@ class About(object):
                 elif field.present:
                     if with_empty:
                         all_fields.append(field)
-                    elif field.present and field.value:
-                        all_fields.append(field)
+                    elif field.present:
+                        if field.value:
+                            all_fields.append(field)
+                        elif field.name in boolean_fields and not field.value == None:
+                            all_fields.append(field)
 
                 else:
                     if field.present:
@@ -985,6 +991,10 @@ class About(object):
             with codecs.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
             dup_keys = check_duplicate_keys_about_file(input_text)
+            # The 'Yes' and 'No' will be converted to 'True' and 'False' in the yaml.load()
+            # Therefore, we need to wrap the original value in quote to prevent
+            # the conversion
+            input = wrap_boolean_value(input_text)
             if dup_keys:
                 msg = ('Duplicated key name(s): %(dup_keys)s' % locals())
                 errors.append(Error(ERROR, msg % locals()))
@@ -999,7 +1009,7 @@ class About(object):
                 and then join with the 'about_resource_path'
                 """
                 running_inventory = True
-                errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory, use_mapping, mapping_file)
+                errs = self.load_dict(saneyaml.load(input), base_dir, running_inventory, use_mapping, mapping_file)
                 errors.extend(errs)
         except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
