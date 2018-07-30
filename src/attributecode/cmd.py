@@ -378,21 +378,24 @@ LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
 
     msg_format = '%(sever)s: %(message)s'
     print_errors = []
+    number_of_errors = 0
     for severity, message in errors:
         sever = severities[severity]
+        # Only problematic_errors should be counted.
+        # Others such as INFO should not be counted as error.
+        if sever in problematic_errors:
+            number_of_errors = number_of_errors + 1
         if verbose:
             print_errors.append(msg_format % locals())
         elif sever in problematic_errors:
             print_errors.append(msg_format % locals())
-
-    number_of_errors = len(print_errors)
 
     for err in print_errors:
         print(err)
 
     if print_errors:
         click.echo('Found {} errors.'.format(number_of_errors))
-        # FIXME: not sure this is the right way to exit with a retrun code
+        # FIXME: not sure this is the right way to exit with a return code
         sys.exit(1)
     else:
         click.echo('No error found.')
