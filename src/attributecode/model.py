@@ -707,6 +707,7 @@ class About(object):
 
             ('checksum_md5', SingleLineField()),
             ('checksum_sha1', SingleLineField()),
+            ('checksum_sha256', SingleLineField()),
             ('spec_version', SingleLineField()),
         ])
 

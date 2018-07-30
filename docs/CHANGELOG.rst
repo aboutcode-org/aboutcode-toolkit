@@ -3,6 +3,7 @@
     Release 3.1.2
 
     * New `--vartext` option
+    * Add support for `checksum_sha256`
     * `check` command will not counted INFO message as error when `--verbose` is set
 
 2018-6-25
