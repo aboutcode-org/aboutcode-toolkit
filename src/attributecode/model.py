@@ -688,7 +688,7 @@ class About(object):
 
             ('redistribute', BooleanField()),
             ('attribute', BooleanField()),
-            ('track_change', BooleanField()),
+            ('track_changes', BooleanField()),
             ('modified', BooleanField()),
 
             ('changelog_file', FileTextField()),
@@ -760,7 +760,7 @@ class About(object):
                          'notice_url',
                          'redistribute',
                          'attribute',
-                         'track_change',
+                         'track_changes',
                          'modified',
                          'changelog_file',
                          'owner',

@@ -607,7 +607,7 @@ notice_file: NOTICE
 notice_url:
 redistribute:
 attribute:
-track_change:
+track_changes:
 modified:
 changelog_file:
 owner: nexB Inc.
@@ -683,7 +683,7 @@ spec_version:
             'notice_url',
             'redistribute',
             'attribute',
-            'track_change',
+            'track_changes',
             'modified',
             'changelog_file',
             'owner',
@@ -784,7 +784,7 @@ notice_file:
 notice_url:
 redistribute:
 attribute:
-track_change:
+track_changes:
 modified:
 changelog_file:
 owner:
@@ -902,7 +902,7 @@ version: 0.11.0
                     'owner_url': u'',
                     'redistribute': u'',
                     'spec_version': u'',
-                    'track_change': u'',
+                    'track_changes': u'',
                     'vcs_branch': u'',
                     'vcs_path': u'',
                     'vcs_repository': u'',

@@ -5,6 +5,7 @@
     * New `--vartext` option
     * Add support for `checksum_sha256`
     * `check` command will not counted INFO message as error when `--verbose` is set
+    * Update `track_change` to `track_changes`
 
 2018-6-25
 
