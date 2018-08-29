@@ -697,6 +697,7 @@ class About(object):
             ('owner_url', UrlField()),
             ('contact', ListField()),
             ('author', ListField()),
+            ('author_file', FileTextField()),
 
             ('vcs_tool', SingleLineField()),
             ('vcs_repository', SingleLineField()),

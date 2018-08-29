@@ -614,6 +614,7 @@ owner: nexB Inc.
 owner_url:
 contact:
 author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
+author_file:
 vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 vcs_path:
@@ -690,6 +691,7 @@ spec_version:
             'owner_url',
             'contact',
             'author',
+            'author_file',
             'vcs_tool',
             'vcs_repository',
             'vcs_path',
@@ -878,6 +880,7 @@ version: 0.11.0
         expected = {'about_resource': u'.',
                     'about_resource_path': u'',
                     'author': u'',
+                    'author_file': u'',
                     'attribute': u'',
                     'changelog_file': u'',
                     'checksum_md5': u'',

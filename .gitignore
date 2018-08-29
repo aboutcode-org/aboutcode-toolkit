@@ -45,3 +45,4 @@ docs/_build
 *.bak
 /.cache/
 /.settings/
+/tcl/
