@@ -1410,9 +1410,11 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
     key_text_dict = {}
     captured_license = []
     errors = []
+    url_not_reachable = False
     if util.have_network_connection():
         if not valid_api_url(api_url):
             msg = u"URL not reachable. Invalid '--api_url'. License generation is skipped."
+            url_not_reachable = True
             errors.append(Error(ERROR, msg))
     else:
         msg = u'Network problem. Please check your Internet connection. License generation is skipped.'
@@ -1424,26 +1426,38 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
         if auth_error in errors:
             break
         if about.license_expression.present:
-            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+            try:
+                special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+            except:
+                # The license_expression cannot be parsed and is incorrectly formatted
+                msg = (u'The license expression cannot be parsed. Please make sure it is correctly formatted: ' +
+                       about.about_file_path)
+                errors.append(Error(ERROR, msg))
+                continue
             if special_char_in_expression:
                 msg = (u"The following character(s) cannot be in the licesne_expression: " +
                        str(special_char_in_expression))
                 errors.append(Error(ERROR, msg))
             else:
-                for lic_key in lic_list:
-                    if not lic_key in captured_license:
-                        detail_list = []
-                        license_name, license_key, license_text, errs = api.get_license_details_from_api(api_url, api_key, lic_key)
-                        for e in errs:
-                            if e not in errors:
-                                errors.append(e)
-                        if license_key:
-                            captured_license.append(lic_key)
-                            dje_lic_url = dje_lic_urn + license_key
-                            detail_list.append(license_name)
-                            detail_list.append(license_text)
-                            detail_list.append(dje_lic_url)
-                            key_text_dict[license_key] = detail_list
+                if not url_not_reachable:
+                    for lic_key in lic_list:
+                        if not lic_key in captured_license:
+                            detail_list = []
+                            license_name, license_key, license_text, errs = api.get_license_details_from_api(api_url, api_key, lic_key)
+                            for e in errs:
+                                if e not in errors:
+                                    if "Invalid 'license'" in e.message:
+                                        msg = u"Invalid 'license': %s: %s" % (lic_key, about.about_file_path)
+                                        errors.append(Error(ERROR, msg))
+                                    else:
+                                        errors.append(e)
+                            if license_key:
+                                captured_license.append(lic_key)
+                                dje_lic_url = dje_lic_urn + license_key
+                                detail_list.append(license_name)
+                                detail_list.append(license_text)
+                                detail_list.append(dje_lic_url)
+                                key_text_dict[license_key] = detail_list
     return key_text_dict, errors
 
 

@@ -196,7 +196,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.option('--fetch-license', type=str, nargs=2, metavar='KEY',
     help=('Fetch licenses text from a DejaCode API. and create <license>.LICENSE side-by-side '
         'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
-        'The "license" key is needed in the input. '
+        'The "license_expression" key is needed in the input. '
         'The following additional options are required:\n\n'
         'api_url - URL to the DejaCode License Library API endpoint\n\n'
         'api_key - DejaCode API key'
@@ -357,6 +357,16 @@ OUTPUT: Path to output file to write the attribution to.
 @click.argument('location', nargs=1, required=True,
     type=click.Path(exists=True, readable=True, resolve_path=True))
 
+@click.option('--check-licenses', type=str, nargs=2, metavar='KEY',
+    help=('Validate the correctness of the license_expression along with the '
+          'license key.'
+          'The following additional options are required:\n\n'
+          'api_url - URL to the DejaCode License Library API endpoint\n\n'
+          'api_key - DejaCode API key'
+          '\nExample syntax:\n\n'
+          "about check --check-licenses 'api_url' 'api_key'")
+)
+
 @click.option('--verbose', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
@@ -367,7 +377,7 @@ OUTPUT: Path to output file to write the attribution to.
 
 @click.help_option('-h', '--help')
 
-def check(location, verbose):
+def check(location, check_licenses, verbose):
     """
 Check and validate .ABOUT file(s) at LOCATION for errors and
 print error messages on the terminal.
@@ -378,6 +388,16 @@ LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
     click.echo('Checking ABOUT files...')
 
     errors, abouts = model.collect_inventory(location)
+
+    if check_licenses:
+        # Strip the ' and " for api_url, and api_key from input
+        api_url = check_licenses[0].strip("'").strip('"')
+        api_key = check_licenses[1].strip("'").strip('"')
+
+        license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)
+        if err:
+            for e in err:
+                errors.append(e)
 
     msg_format = '%(sever)s: %(message)s'
     print_errors = []

@@ -7,6 +7,7 @@
     * `check` command will not counted INFO message as error when `--verbose` is set
     * Update `track_change` to `track_changes`
     * Support `author_file`
+    * Add `--check-licenses` option to the `check` command
 
 2018-6-25
 
