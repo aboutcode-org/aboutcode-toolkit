@@ -90,7 +90,7 @@ Generate licensing attribution and credit notices from .ABOUT files and inventor
 
 Read, write and collect provenance and license inventories from .ABOUT files to and from JSON or CSV files.
 
-Use about-code <command> --help for help on a command.
+Use about <command> --help for help on a command.
     """
 
 
