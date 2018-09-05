@@ -262,6 +262,7 @@ inventory
 
 ::
 
+    --filter TEXT               Filter for the output inventory.
     -f, --format [json|csv]     Set OUTPUT file format.  [default: csv]
     --mapping                   Use file mapping.config to collect the defined not supported fields in ABOUT files.
     --mapping-file              Use a custom mapping file with mapping between input
@@ -278,6 +279,14 @@ Options
 -------
 
 ::
+
+    -filter TEXT
+ 
+        Filter for the output inventory.
+
+    $ about inventory --filter "license_expression=gpl-2.0" LOCATION OUTPUT
+
+    The above command will only inventory the ABOUT files which have the "license_expression: gpl-2.0"
 
     -f, --format [json|csv]
  

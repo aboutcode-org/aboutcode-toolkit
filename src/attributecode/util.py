@@ -561,3 +561,20 @@ def update_severity_level_about_resource_path_not_exist_error(errors):
         else:
             updated_errors.append(err)
     return updated_errors
+
+
+def inventory_filter(abouts, filter_dict):
+    updated_abouts = []
+    for key in filter_dict:
+        for about in abouts:
+            try:
+                # Check if the about object has the filtered attribute and if the
+                # attributed value is the same as the defined in the filter
+                for value in filter_dict[key]:
+                    if vars(about)[key].value == value:
+                        if not about in updated_abouts:
+                            updated_abouts.append(about)
+            except:
+                # The current about object does not have the defined attribute
+                continue
+    return updated_abouts

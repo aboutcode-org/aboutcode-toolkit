@@ -31,6 +31,7 @@ from testing_utils import on_windows
 from attributecode import CRITICAL
 from attributecode import ERROR, INFO
 from attributecode import Error
+from attributecode import model
 from attributecode import util
 
 
@@ -471,3 +472,13 @@ description: sample
         expected = ['owner', 'notes']
         assert expected == util.check_duplicate_keys_about_file(test)
 
+    def test_inventory_filter(self):
+        test_loc = get_test_loc('basic')
+        _errors, abouts = model.collect_inventory(test_loc)
+
+        filter_dict = {'name': ['simple']}
+        # The test loc has 2 .about files, only the simple.about is taken after
+        # the filtering
+        updated_abouts = util.inventory_filter(abouts, filter_dict)
+        for about in updated_abouts:
+            assert about.name.value == 'simple'

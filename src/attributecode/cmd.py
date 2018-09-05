@@ -37,6 +37,7 @@ from attributecode import severities
 from attributecode.util import extract_zip
 from attributecode.util import update_severity_level_about_resource_path_not_exist_error
 from attributecode.util import to_posix
+from attributecode.util import inventory_filter
 
 
 __copyright__ = """
@@ -108,6 +109,9 @@ Use about <command> --help for help on a command.
 @click.argument('output', nargs=1, required=True,
     type=click.Path(exists=False, dir_okay=False, resolve_path=True))
 
+@click.option('--filter', nargs=1, multiple=True, 
+    help='Filter for the output inventory.')
+
 @click.option('-f', '--format', is_flag=False, default='csv', show_default=True,
     type=click.Choice(['json', 'csv']),
     help='Set OUTPUT inventory file format.')
@@ -132,7 +136,7 @@ Use about <command> --help for help on a command.
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, mapping, mapping_file, quiet, format, verbose):
+def inventory(location, output, mapping, mapping_file, filter, quiet, format, verbose):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -157,6 +161,22 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
     errors, abouts = model.collect_inventory(location, use_mapping=mapping, mapping_file=mapping_file)
 
+    updated_abouts = []
+    if filter:
+        filter_dict = {}
+        # Parse the filter and save to the filter dictionary with a list of value
+        for element in filter:
+            key = element.partition('=')[0]
+            value = element.partition('=')[2]
+            if key in filter_dict:
+                filter_dict[key].append(value)
+            else:
+                value_list = [value]
+                filter_dict[key] = value_list
+        updated_abouts = inventory_filter(abouts, filter_dict)
+    else:
+        updated_abouts = abouts
+
     # Do not write the output if one of the ABOUT files has duplicated key names
     dup_error_msg = u'Duplicated key name(s)'
     halt_output = False
@@ -166,7 +186,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
             break
 
     if not halt_output:
-        write_errors = model.write_output(abouts, output, format)
+        write_errors = model.write_output(updated_abouts, output, format)
         for err in write_errors:
             errors.append(err)
     else:
