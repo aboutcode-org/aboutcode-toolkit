@@ -267,6 +267,8 @@ inventory
     --mapping                   Use file mapping.config to collect the defined not supported fields in ABOUT files.
     --mapping-file              Use a custom mapping file with mapping between input
                                 keys and ABOUT field names.
+    --mapping-output FILE       Use a custom mapping file with mapping between
+                                ABOUT field names and output keys
     --verbose                   Show all the errors and warning.
     -q, --quiet                 Do not print any error/warning.
     -h, --help                  Show this message and exit.
@@ -303,6 +305,18 @@ Options
         Same behavior as `--mapping` but with custom mapping file
 
     $ about inventory --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
+
+    --mapping-output
+
+        Same behavior as `--mapping-file` but with custom mapping file
+        In the custom mapping file, the left side is the custom key name where
+        the right side is the ABOUT field name. For instance,
+        Component: name
+        
+        The "Component" is a custom field name for the output
+        The "name" is one of the defaul ABOUT field name that user want to convert
+
+    $ about inventory --mapping-output CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
 
     --verbose
 

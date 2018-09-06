@@ -123,6 +123,10 @@ Use about <command> --help for help on a command.
     type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
     help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
 
+@click.option('--mapping-output', metavar='FILE', nargs=1,
+    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
+    help='Use a custom mapping file with mapping between ABOUT field names and output keys')
+
 @click.option('--verbose', is_flag=True, default=False,
     help='Show all errors and warnings. '
         'By default, the tool only prints these '
@@ -136,7 +140,7 @@ Use about <command> --help for help on a command.
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, mapping, mapping_file, filter, quiet, format, verbose):
+def inventory(location, output, mapping, mapping_file, mapping_output, filter, quiet, format, verbose):
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -186,7 +190,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
             break
 
     if not halt_output:
-        write_errors = model.write_output(updated_abouts, output, format)
+        write_errors = model.write_output(updated_abouts, output, format, mapping_output)
         for err in write_errors:
             errors.append(err)
     else:

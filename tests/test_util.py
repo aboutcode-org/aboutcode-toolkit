@@ -482,3 +482,23 @@ description: sample
         updated_abouts = util.inventory_filter(abouts, filter_dict)
         for about in updated_abouts:
             assert about.name.value == 'simple'
+
+    def test_update_fieldnames(self):
+        mapping_output = get_test_loc('util/mapping_output')
+        fieldnames = ['about_file_path', 'name', 'version']
+        expexted_fieldnames = ['about_file_path', 'Component', 'version']
+        result = util.update_fieldnames(fieldnames, mapping_output)
+        assert expexted_fieldnames == result
+
+    def test_update_about_dictionary_keys(self):
+        mapping_output = get_test_loc('util/mapping_output')
+        about_ordered_dict = OrderedDict()
+        about_ordered_dict['about_resource_path'] = '.'
+        about_ordered_dict['name'] = 'test.c'
+        about_dict_list = [about_ordered_dict]
+        expected_output_dict = OrderedDict()
+        expected_output_dict['about_resource_path'] = '.'
+        expected_output_dict['Component'] = 'test.c'
+        expected_dict_list = [expected_output_dict]
+        result = util.update_about_dictionary_keys(about_dict_list, mapping_output)
+        assert expected_dict_list == result

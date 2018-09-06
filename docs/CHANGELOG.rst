@@ -7,7 +7,7 @@
     * `check` command will not counted INFO message as error when `--verbose` is set
     * Update `track_change` to `track_changes`
     * Add support for `author_file`
-    * New `--filter` option for `inventory`
+    * New `--filter` and `--mapping-output` options for `inventory`
 
 2018-6-25
 
