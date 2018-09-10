@@ -56,7 +56,7 @@ Purpose
 Generate an attribution file which contains the all license information
 from the LOCATION along with the license text.
 
-Assuming the follow:
+Assume the following:
 
 ::
 
