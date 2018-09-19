@@ -1,5 +1,11 @@
 2018-09-19
 
+    Release 3.1.3
+
+    * Minor update
+
+2018-09-19
+
     Release 3.1.2
 
     * New `--vartext` option for `attrib`
