@@ -1,3 +1,13 @@
+2018-09-19
+
+    Release 3.1.2
+
+    * New `--vartext` option for `attrib`
+    * Add support for `checksum_sha256` and `author_file`
+    * `check` command will not count INFO message as error when `--verbose` is set
+    * Update `track_change` to `track_changes`
+    * New `--filter` and `--mapping-output` options for `inventory`
+
 2018-6-25
 
     Release 3.1.1

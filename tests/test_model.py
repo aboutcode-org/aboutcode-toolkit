@@ -607,13 +607,14 @@ notice_file: NOTICE
 notice_url:
 redistribute:
 attribute:
-track_change:
+track_changes:
 modified:
 changelog_file:
 owner: nexB Inc.
 owner_url:
 contact:
 author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
+author_file:
 vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 vcs_path:
@@ -622,6 +623,7 @@ vcs_branch:
 vcs_revision:
 checksum_md5:
 checksum_sha1:
+checksum_sha256:
 spec_version:
 '''
         assert expected == a.dumps(with_absent=True)
@@ -682,13 +684,14 @@ spec_version:
             'notice_url',
             'redistribute',
             'attribute',
-            'track_change',
+            'track_changes',
             'modified',
             'changelog_file',
             'owner',
             'owner_url',
             'contact',
             'author',
+            'author_file',
             'vcs_tool',
             'vcs_repository',
             'vcs_path',
@@ -697,6 +700,7 @@ spec_version:
             'vcs_revision',
             'checksum_md5',
             'checksum_sha1',
+            'checksum_sha256',
             'spec_version',
             'f',
             'g']
@@ -782,7 +786,7 @@ notice_file:
 notice_url:
 redistribute:
 attribute:
-track_change:
+track_changes:
 modified:
 changelog_file:
 owner:
@@ -797,6 +801,7 @@ vcs_branch:
 vcs_revision:
 checksum_md5:
 checksum_sha1:
+checksum_sha256:
 spec_version:
 '''
         result = a.dumps(with_absent=True)
@@ -875,10 +880,12 @@ version: 0.11.0
         expected = {'about_resource': u'.',
                     'about_resource_path': u'',
                     'author': u'',
+                    'author_file': u'',
                     'attribute': u'',
                     'changelog_file': u'',
                     'checksum_md5': u'',
                     'checksum_sha1': u'',
+                    'checksum_sha256': u'',
                     'contact': u'',
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     'description': u'AboutCode is a tool\nfor files.',
@@ -898,7 +905,7 @@ version: 0.11.0
                     'owner_url': u'',
                     'redistribute': u'',
                     'spec_version': u'',
-                    'track_change': u'',
+                    'track_changes': u'',
                     'vcs_branch': u'',
                     'vcs_path': u'',
                     'vcs_repository': u'',

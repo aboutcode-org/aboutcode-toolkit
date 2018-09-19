@@ -45,8 +45,9 @@ attrib
                                 names - mapping.config
     --mapping-file              Use a custom mapping file with mapping between input
                                 keys and ABOUT field names.
-    --verbose                   Show all the errors and warning.
     --template PATH             Path to a custom attribution template.
+    --vartext TEXT              Variable texts to the attribution template
+    --verbose                   Show all the errors and warning.
     -q, --quiet                 Do not print any error/warning.
     -h, --help                  Show this message and exit.
 
@@ -55,7 +56,7 @@ Purpose
 Generate an attribution file which contains the all license information
 from the LOCATION along with the license text.
 
-Assuming the follow:
+Assume the following:
 
 ::
 
@@ -90,11 +91,6 @@ Options
 
     $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
 
-    --verbose
-
-        This option tells the tool to show all errors found.
-        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
-
     --template
 
         This option allows you to use your own template for attribution generation.
@@ -102,6 +98,21 @@ Options
         /home/custom_template/template.html
 
     $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT
+
+    --vartext
+
+        This option allow you to pass variable texts to the attribution template
+
+    $ about attrib --vartext title="Attribution Notice" --vartext header="Product 101" LOCATION OUTPUT
+
+        Users can use the following in the template to get the vartext:
+        {{ vartext_dict['title'] }}
+        {{ vartext_dict['header'] }} 
+
+    --verbose
+
+        This option tells the tool to show all errors found.
+        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
 
 The following data are passed to jinja2 and, therefore, can be used for a custom template:
@@ -251,10 +262,13 @@ inventory
 
 ::
 
+    --filter TEXT               Filter for the output inventory.
     -f, --format [json|csv]     Set OUTPUT file format.  [default: csv]
     --mapping                   Use file mapping.config to collect the defined not supported fields in ABOUT files.
     --mapping-file              Use a custom mapping file with mapping between input
                                 keys and ABOUT field names.
+    --mapping-output FILE       Use a custom mapping file with mapping between
+                                ABOUT field names and output keys
     --verbose                   Show all the errors and warning.
     -q, --quiet                 Do not print any error/warning.
     -h, --help                  Show this message and exit.
@@ -267,6 +281,14 @@ Options
 -------
 
 ::
+
+    -filter TEXT
+ 
+        Filter for the output inventory.
+
+    $ about inventory --filter "license_expression=gpl-2.0" LOCATION OUTPUT
+
+    The above command will only inventory the ABOUT files which have the "license_expression: gpl-2.0"
 
     -f, --format [json|csv]
  
@@ -282,7 +304,19 @@ Options
 
         Same behavior as `--mapping` but with custom mapping file
 
-    $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
+    $ about inventory --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
+
+    --mapping-output
+
+        Same behavior as `--mapping-file` but with custom mapping file
+        In the custom mapping file, the left side is the custom key name where
+        the right side is the ABOUT field name. For instance,
+        Component: name
+        
+        The "Component" is a custom field name for the output
+        The "name" is one of the defaul ABOUT field name that user want to convert
+
+    $ about inventory --mapping-output CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
 
     --verbose
 

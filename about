@@ -16,4 +16,4 @@ fi
 
 source $ABOUT_ROOT_DIR/bin/activate
 
-$ABOUT_ROOT_DIR/bin/about-code "$@"
+$ABOUT_ROOT_DIR/bin/about "$@"

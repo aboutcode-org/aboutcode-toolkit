@@ -31,6 +31,7 @@ from testing_utils import on_windows
 from attributecode import CRITICAL
 from attributecode import ERROR, INFO
 from attributecode import Error
+from attributecode import model
 from attributecode import util
 
 
@@ -471,3 +472,33 @@ description: sample
         expected = ['owner', 'notes']
         assert expected == util.check_duplicate_keys_about_file(test)
 
+    def test_inventory_filter(self):
+        test_loc = get_test_loc('basic')
+        _errors, abouts = model.collect_inventory(test_loc)
+
+        filter_dict = {'name': ['simple']}
+        # The test loc has 2 .about files, only the simple.about is taken after
+        # the filtering
+        updated_abouts = util.inventory_filter(abouts, filter_dict)
+        for about in updated_abouts:
+            assert about.name.value == 'simple'
+
+    def test_update_fieldnames(self):
+        mapping_output = get_test_loc('util/mapping_output')
+        fieldnames = ['about_file_path', 'name', 'version']
+        expexted_fieldnames = ['about_file_path', 'Component', 'version']
+        result = util.update_fieldnames(fieldnames, mapping_output)
+        assert expexted_fieldnames == result
+
+    def test_update_about_dictionary_keys(self):
+        mapping_output = get_test_loc('util/mapping_output')
+        about_ordered_dict = OrderedDict()
+        about_ordered_dict['about_resource_path'] = '.'
+        about_ordered_dict['name'] = 'test.c'
+        about_dict_list = [about_ordered_dict]
+        expected_output_dict = OrderedDict()
+        expected_output_dict['about_resource_path'] = '.'
+        expected_output_dict['Component'] = 'test.c'
+        expected_dict_list = [expected_output_dict]
+        result = util.update_about_dictionary_keys(about_dict_list, mapping_output)
+        assert expected_dict_list == result

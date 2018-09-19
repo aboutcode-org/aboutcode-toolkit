@@ -37,7 +37,7 @@ from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
 
 
-def generate(abouts, template_string=None):
+def generate(abouts, template_string=None, vartext_dict=None):
     """
     Generate and return attribution text from a list of About objects and a
     template string.
@@ -110,7 +110,7 @@ def generate(abouts, template_string=None):
                                    license_file_name_and_key=license_file_name_and_key,
                                    license_key_to_license_name=license_key_to_license_name,
                                    license_name_to_license_key=license_name_to_license_key,
-                                   utcnow=utcnow)
+                                   utcnow=utcnow, vartext_dict=vartext_dict)
     except Exception as e:
         line = getattr(e, 'lineno', None)
         ln_msg = ' at line: %r' % line if line else ''
@@ -134,7 +134,7 @@ def check_template(template_string):
 default_template = join(os.path.dirname(os.path.realpath(__file__)),
                                 'templates', 'default_html.template')
 
-def generate_from_file(abouts, template_loc=None):
+def generate_from_file(abouts, template_loc=None, vartext_dict=None):
     """
     Generate and return attribution string from a list of About objects and a
     template location.
@@ -144,11 +144,11 @@ def generate_from_file(abouts, template_loc=None):
     template_loc = add_unc(template_loc)
     with codecs.open(template_loc, 'rb', encoding='utf-8') as tplf:
         tpls = tplf.read()
-    return generate(abouts, template_string=tpls)
+    return generate(abouts, template_string=tpls, vartext_dict=vartext_dict)
 
 
 def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=None,
-                      template_loc=None, inventory_location=None):
+                      template_loc=None, inventory_location=None, vartext=None):
     """
     Generate attribution file using the `abouts` list of About object
     at `output_location`.
@@ -167,6 +167,7 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
     afp_list = []
     not_match_path = []
     errors = []
+    vartext_dict = {}
 
     if not inventory_location:
         updated_abouts = abouts
@@ -239,7 +240,14 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
             else:
                 about.license.value = lic_list
 
-    rendered = generate_from_file(updated_abouts, template_loc=template_loc)
+    # Parse the vartext and save to the vartext dictionary
+    if vartext:
+        for var in vartext:
+            key = var.partition('=')[0]
+            value = var.partition('=')[2]
+            vartext_dict[key] = value
+
+    rendered = generate_from_file(updated_abouts, template_loc=template_loc, vartext_dict=vartext_dict)
 
     if rendered:
         output_location = add_unc(output_location)

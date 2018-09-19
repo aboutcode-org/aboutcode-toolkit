@@ -321,6 +321,35 @@ def get_mapping(location=None):
     return mapping
 
 
+def get_output_mapping(location):
+    """
+    Return a mapping of About key names to user key names by reading the
+    user's input file from location. The format of the user key names will
+    NOT be formatted (i.e. keys will NOT be forced to convert to lower case)
+    """
+    if not os.path.exists(location):
+        return {}
+
+    mapping = {}
+    try:
+        with open(location) as mapping_file:
+            for line in mapping_file:
+                if not line or not line.strip() or line.strip().startswith('#'):
+                    continue
+
+                if ':' in line:
+                    key, sep, value = line.partition(':')
+                    user_key = key.strip()
+                    about_key = value.strip()
+                    mapping[about_key] = user_key
+
+    except Exception as e:
+        print(repr(e))
+        print('Cannot open or process file at %(location)r.' % locals())
+        # FIXME: this is rather brutal
+        sys.exit(errno.EACCES)
+    return mapping
+
 def apply_mapping(abouts, alternate_mapping=None):
     """
     Given a list of About data dictionaries and a dictionary of
@@ -561,3 +590,49 @@ def update_severity_level_about_resource_path_not_exist_error(errors):
         else:
             updated_errors.append(err)
     return updated_errors
+
+
+def inventory_filter(abouts, filter_dict):
+    updated_abouts = []
+    for key in filter_dict:
+        for about in abouts:
+            try:
+                # Check if the about object has the filtered attribute and if the
+                # attributed value is the same as the defined in the filter
+                for value in filter_dict[key]:
+                    if vars(about)[key].value == value:
+                        if not about in updated_abouts:
+                            updated_abouts.append(about)
+            except:
+                # The current about object does not have the defined attribute
+                continue
+    return updated_abouts
+
+
+def update_fieldnames(fieldnames, mapping_output):
+    map = get_output_mapping(mapping_output)
+    updated_header = []
+    for name in fieldnames:
+        try:
+            updated_header.append(map[name])
+        except:
+            updated_header.append(name)
+    return updated_header
+
+
+def update_about_dictionary_keys(about_dictionary_list, mapping_output):
+    output_map = get_output_mapping(mapping_output)
+    updated_dict_list = []
+    for element in about_dictionary_list:
+        updated_ordered_dict = OrderedDict()
+        for about_key, value in element.items():
+            update_key = False
+            for custom_key in output_map:
+                if about_key == custom_key:
+                    update_key = True
+                    updated_ordered_dict[output_map[custom_key]] = value
+                    break
+            if not update_key:
+                updated_ordered_dict[about_key] = value
+        updated_dict_list.append(updated_ordered_dict)
+    return updated_dict_list

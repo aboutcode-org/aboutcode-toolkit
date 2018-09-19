@@ -688,7 +688,7 @@ class About(object):
 
             ('redistribute', BooleanField()),
             ('attribute', BooleanField()),
-            ('track_change', BooleanField()),
+            ('track_changes', BooleanField()),
             ('modified', BooleanField()),
 
             ('changelog_file', FileTextField()),
@@ -697,6 +697,7 @@ class About(object):
             ('owner_url', UrlField()),
             ('contact', ListField()),
             ('author', ListField()),
+            ('author_file', FileTextField()),
 
             ('vcs_tool', SingleLineField()),
             ('vcs_repository', SingleLineField()),
@@ -707,6 +708,7 @@ class About(object):
 
             ('checksum_md5', SingleLineField()),
             ('checksum_sha1', SingleLineField()),
+            ('checksum_sha256', SingleLineField()),
             ('spec_version', SingleLineField()),
         ])
 
@@ -759,7 +761,7 @@ class About(object):
                          'notice_url',
                          'redistribute',
                          'attribute',
-                         'track_change',
+                         'track_changes',
                          'modified',
                          'changelog_file',
                          'owner',
@@ -1298,19 +1300,27 @@ def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=Tru
     return abouts_dictionary_list
 
 
-def write_output(abouts, location, format, with_absent=False, with_empty=True):
+def write_output(abouts, location, format, mapping_output=None, with_absent=False, with_empty=True):
     """
     Write a CSV/JSON file at location given a list of About objects
     """
     errors = []
     about_dictionary_list = about_object_to_list_of_dictionary(abouts, with_absent, with_empty)
+    if mapping_output:
+        updated_dictionary_list = util.update_about_dictionary_keys(about_dictionary_list, mapping_output)
+    else:
+        updated_dictionary_list = about_dictionary_list
     location = add_unc(location)
     with codecs.open(location, mode='wb', encoding='utf-8') as output_file:
         if format == 'csv':
             fieldnames = field_names(abouts)
-            writer = csv.DictWriter(output_file, fieldnames)
+            if mapping_output:
+                updated_fieldnames = util.update_fieldnames(fieldnames, mapping_output)
+            else:
+                updated_fieldnames = fieldnames
+            writer = csv.DictWriter(output_file, updated_fieldnames)
             writer.writeheader()
-            for row in about_dictionary_list:
+            for row in updated_dictionary_list:
                 # See https://github.com/dejacode/about-code-tool/issues/167
                 try:
                     writer.writerow(row)
@@ -1318,7 +1328,7 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True):
                     msg = u'Generation skipped for ' + row['about_file_path'] + u' : ' + str(e)
                     errors.append(Error(CRITICAL, msg))
         else:
-            output_file.write(json.dumps(about_dictionary_list, indent=2))
+            output_file.write(json.dumps(updated_dictionary_list, indent=2))
     return errors
 
 
