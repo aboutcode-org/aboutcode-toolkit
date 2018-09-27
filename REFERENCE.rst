@@ -103,7 +103,7 @@ Options
 
         This option allow you to pass variable texts to the attribution template
 
-    $ about attrib --vartext title="Attribution Notice" --vartext header="Product 101" LOCATION OUTPUT
+    $ about attrib --vartext "title=Attribution Notice" --vartext "header=Product 101" LOCATION OUTPUT
 
         Users can use the following in the template to get the vartext:
         {{ vartext_dict['title'] }}
