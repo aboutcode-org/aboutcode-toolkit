@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import collections
 from collections import OrderedDict
 import codecs
 import errno
@@ -31,6 +32,15 @@ import shutil
 import socket
 import string
 import sys
+
+import yaml
+from yaml.reader import Reader
+from yaml.scanner import Scanner
+from yaml.parser import Parser
+from yaml.composer import Composer
+from yaml.constructor import Constructor, ConstructorError
+from yaml.resolver import Resolver
+from yaml.nodes import MappingNode
 
 if sys.version_info[0] < 3:
     # Python 2
@@ -636,3 +646,52 @@ def update_about_dictionary_keys(about_dictionary_list, mapping_output):
                 updated_ordered_dict[about_key] = value
         updated_dict_list.append(updated_ordered_dict)
     return updated_dict_list
+
+class NoDuplicateConstructor(Constructor):
+    def construct_mapping(self, node, deep=False):
+        if not isinstance(node, MappingNode):
+            raise ConstructorError(
+                None, None,
+                "expected a mapping node, but found %s" % node.id,
+                node.start_mark)
+        mapping = {}
+        for key_node, value_node in node.value:
+            # keys can be list -> deep
+            key = self.construct_object(key_node, deep=True)
+            # lists are not hashable, but tuples are
+            if not isinstance(key, collections.Hashable):
+                if isinstance(key, list):
+                    key = tuple(key)
+
+            if sys.version_info.major == 2:
+                try:
+                    hash(key)
+                except TypeError as exc:
+                    raise ConstructorError(
+                        "while constructing a mapping", node.start_mark,
+                        "found unacceptable key (%s)" %
+                        exc, key_node.start_mark)
+            else:
+                if not isinstance(key, collections.Hashable):
+                    raise ConstructorError(
+                        "while constructing a mapping", node.start_mark,
+                        "found unhashable key", key_node.start_mark)
+
+            value = self.construct_object(value_node, deep=deep)
+
+            # Actually do the check.
+            if key in mapping:
+                raise KeyError("Got duplicate key: {!r}".format(key))
+
+            mapping[key] = value
+        return mapping
+
+
+class NoDuplicateLoader(Reader, Scanner, Parser, Composer, NoDuplicateConstructor, Resolver):
+    def __init__(self, stream):
+        Reader.__init__(self, stream)
+        Scanner.__init__(self)
+        Parser.__init__(self)
+        Composer.__init__(self)
+        NoDuplicateConstructor.__init__(self)
+        Resolver.__init__(self)

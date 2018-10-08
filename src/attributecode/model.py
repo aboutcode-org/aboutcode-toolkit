@@ -34,16 +34,20 @@ import json
 import os
 import posixpath
 from posixpath import dirname
+
+import yaml
 import re
 import sys
 
 if sys.version_info[0] < 3:  # Python 2
     import backports.csv as csv
+    from itertools import izip_longest as zip_longest
     from urlparse import urljoin, urlparse
     from urllib2 import urlopen, Request, HTTPError
 else:  # Python 3
     basestring = str
     import csv
+    from itertools import zip_longest
     from urllib.parse import urljoin, urlparse
     from urllib.request import urlopen, Request
     from urllib.error import HTTPError
@@ -60,7 +64,6 @@ from attributecode import saneyaml
 from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import copy_license_notice_files
-from attributecode.util import check_duplicate_keys_about_file
 from attributecode.util import on_windows
 from attributecode.util import UNC_PREFIX
 from attributecode.util import UNC_PREFIX_POSIX
@@ -107,11 +110,6 @@ class Field(object):
                 msg = u'Field %(name)s is required'
                 errors.append(Error(CRITICAL, msg % locals()))
                 return errors
-            """else:
-                # no error for not present non required fields
-                # FIXME: should we add an info?
-                # CY: I don't think so.
-                pass"""
         else:
             # present fields should have content ...
             if not self.has_content:
@@ -986,48 +984,31 @@ class About(object):
             loc = add_unc(loc)
             with codecs.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
+            # Check for duplicated key
+            yaml.load(input_text, Loader=util.NoDuplicateLoader)
+            '''
             dup_keys = check_duplicate_keys_about_file(input_text)
             if dup_keys:
                 msg = ('Duplicated key name(s): %(dup_keys)s' % locals())
                 errors.append(Error(ERROR, msg % locals()))
             else:
-                """
-                The running_inventory defines if the current process is 'inventory' or not.
-                This is used for the validation of the about_resource_path.
-                In the 'inventory' command, the code will use the parent of the about_file_path
-                location and join with the 'about_resource_path' for the validation.
-                On the other hand, in the 'gen' command, the code will use the
-                generated location (aka base_dir) along with the parent of the about_file_path
-                and then join with the 'about_resource_path'
-                """
-                running_inventory = True
-                errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory, use_mapping, mapping_file)
-                errors.extend(errs)
+            '''
+            """
+            The running_inventory defines if the current process is 'inventory' or not.
+            This is used for the validation of the about_resource_path.
+            In the 'inventory' command, the code will use the parent of the about_file_path
+            location and join with the 'about_resource_path' for the validation.
+            On the other hand, in the 'gen' command, the code will use the
+            generated location (aka base_dir) along with the parent of the about_file_path
+            and then join with the 'about_resource_path'
+            """
+            running_inventory = True
+            errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory, use_mapping, mapping_file)
+            errors.extend(errs)
         except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
             errors.append(Error(CRITICAL, msg % locals()))
 
-        self.errors = errors
-        return errors
-
-    def loads(self, string, base_dir):
-        """
-        Load the ABOUT file from string. Return a list of errors.
-        """
-        lines = string.splitlines(True)
-        errors = self.load_lines(lines, base_dir)
-        self.errors = errors
-        return errors
-
-    def load_lines(self, lines, base_dir):
-        """
-        Load the ABOUT file from a lines list. Return a list of errors.
-        """
-        errors = []
-        parse_errors, fields = parse(lines)
-        errors.extend(parse_errors)
-        process_errors = self.process(fields, base_dir)
-        errors.extend(process_errors)
         self.errors = errors
         return errors
 
@@ -1050,17 +1031,52 @@ class About(object):
         self.errors = errors
         return errors
 
+
     def dumps(self, with_absent=False, with_empty=True):
         """
         Return self as a formatted ABOUT string.
         If with_absent, include absent (not present) fields.
         If with_empty, include empty fields.
         """
-        serialized = []
+        about_data = {}
+        # Group the same license information (name, url, file) together
+        license_key = []
+        license_name = []
+        license_file = []
+        license_url = []
+
         for field in self.all_fields(with_absent, with_empty):
-            serialized.append(field.serialize())
-        # always end with a new line
-        return u'\n'.join(serialized) + u'\n'
+            if field.name == 'license_key':
+                license_key = field.value
+            elif field.name == 'license_name':
+                license_name = field.value
+            elif field.name == 'license_file':
+                license_file = field.value.keys()
+            elif field.name == 'license_url':
+                license_url = field.value
+            # No multiple 'about_resource' and 'about_resource_path' reference supported.
+            # Take the first element (should only be one) in the list for the
+            # value of 'about_resource' and 'about_resource_path'
+            elif field.name == 'about_resource':
+                about_data[field.name] = field.value[0]
+            elif field.name == 'about_resource_path':
+                about_data[field.name] = field.value.keys()[0]
+            else:
+                about_data[field.name] = field.value
+        # Group the same license information in a list
+        license_group = list(zip_longest(license_key, license_name, license_file, license_url))
+        for lic_group in license_group:
+            lic_dict = {}
+            if lic_group[0] or with_empty:
+                lic_dict['key'] = lic_group[0]
+            if lic_group[1] or with_empty:
+                lic_dict['name'] = lic_group[1]
+            if lic_group[2] or with_empty:
+                lic_dict['file'] = lic_group[2]
+            if lic_group[3] or with_empty:
+                lic_dict['url'] = lic_group[3] 
+            about_data.setdefault('licenses', []).append(lic_dict)
+        return saneyaml.dump(about_data)
 
     def dump(self, location, with_absent=False, with_empty=True):
         """

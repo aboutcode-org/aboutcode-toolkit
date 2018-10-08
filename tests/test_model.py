@@ -940,34 +940,6 @@ version: 0.11.0
         # FIXME: why converting back to dict?
         assert expected == dict(result)
 
-    def test_loads_dumps_is_idempotent(self):
-        test1 = u'''about_resource: .
-name: AboutCode
-version: 0.11.0
-copyright: |
-    multi
-    line
-'''
-
-        test2 = u'''about_resource: .
-name: AboutCode
-version: 0.11.0
-copyright: >
-    multi
-    line
-'''
-        a = model.About()
-        base_dir = 'some_dir'
-        a.loads(test1, base_dir)
-        dumped = a.dumps(with_absent=False, with_empty=False)
-        assert test1 == dumped
-
-        b = model.About()
-        base_dir = 'some_dir'
-        b.loads(test2, base_dir)
-        dumped = b.dumps(with_absent=False, with_empty=False)
-        assert test2 == dumped
-
     def test_load_dump_is_idempotent(self):
         test_file = get_test_loc('load/this.ABOUT')
         a = model.About()
@@ -1074,22 +1046,6 @@ copyright: >
 
         expected = get_test_loc('load/expected.json')
         check_json(expected, result)
-
-    def test_colon_in_value(self):
-        test = u'''about_resource: .
-name: AboutCode
-version: v: 0.11.0
-'''
-        expected = u'''about_resource: .
-name: AboutCode
-version: |
-    v: 0.11.0
-'''
-        a = model.About()
-        base_dir = 'some_dir'
-        a.loads(test, base_dir)
-        dumped = a.dumps(with_absent=False, with_empty=False)
-        assert dumped == expected
 
 class CollectorTest(unittest.TestCase):
 
