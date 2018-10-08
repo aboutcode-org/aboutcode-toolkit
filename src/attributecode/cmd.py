@@ -110,7 +110,7 @@ Use about <command> --help for help on a command.
     type=click.Path(exists=False, dir_okay=False, resolve_path=True))
 
 @click.option('--filter', nargs=1, multiple=True, 
-    help='Filter for the output inventory.' e.g. "license_expression=gpl-2.0')
+    help='Filter for the output inventory. e.g. "license_expression=gpl-2.0')
 
 @click.option('-f', '--format', is_flag=False, default='csv', show_default=True,
     type=click.Choice(['json', 'csv']),
