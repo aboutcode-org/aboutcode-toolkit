@@ -677,8 +677,8 @@ class About(object):
             ('homepage_url', UrlField()),
             ('notes', StringField()),
 
-            ('license', ListField()),
             ('license_expression', StringField()),
+            ('license_key', ListField()),
             ('license_name', ListField()),
             ('license_file', FileTextField()),
             ('license_url', UrlField()),
@@ -752,7 +752,7 @@ class About(object):
         """
         attrib_fields = ['name',
                          'version',
-                         'license',
+                         'license_key',
                          'license_name',
                          'license_file',
                          'license_url',
@@ -1099,7 +1099,8 @@ class About(object):
 
         if self.license_expression.present and not self.license_file.present:
             special_char_in_expression, lic_list = parse_license_expression(self.license_expression.value)
-            self.license = lic_list
+            self.license_key.value = lic_list
+            self.license_key.present = True
             if not special_char_in_expression:
                 for lic_key in lic_list:
                     try:
@@ -1394,8 +1395,8 @@ def by_license_content(abouts):
     grouped[''] = []
     no_license = grouped['']
     for about in abouts:
-        if about.license.value:
-            special_char_in_expression, lic_list = parse_license_expression(about.license.value)
+        if about.license_key.value:
+            special_char_in_expression, lic_list = parse_license_expression(about.license_key.value)
             if not special_char_in_expression:
                 for lic in lic_list:
                     if lic in grouped:

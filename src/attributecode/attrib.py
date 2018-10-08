@@ -238,7 +238,7 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
                        str(special_char_in_expression))
                 errors.append(Error(ERROR, msg))
             else:
-                about.license.value = lic_list
+                about.license_key.value = lic_list
 
     # Parse the vartext and save to the vartext dictionary
     if vartext:

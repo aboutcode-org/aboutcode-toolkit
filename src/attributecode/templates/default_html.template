@@ -42,8 +42,8 @@
                     <pre class="component-notice">{{ about_object.notice_file.value[notice] }}</pre>
                 {% endfor %}
             {% endif %}
-            {% if about_object.license.value %}
-                {% for license_key in about_object.license.value %}
+            {% if about_object.license_key.value %}
+                {% for license_key in about_object.license_key.value %}
                     {% if license_key in common_licenses %}
                         <p>Full text of
                             <a class="{{ license_key }}" href="#component-license-{{ license_key }}">

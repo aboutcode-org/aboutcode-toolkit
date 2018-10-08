@@ -597,8 +597,8 @@ download_url:
 description: AboutCode is a tool to process ABOUT files. An ABOUT file is a file.
 homepage_url: http://dejacode.org
 notes:
-license: apache-2.0
 license_expression: apache-2.0
+license_key: apache-2.0
 license_name:
 license_file: apache-2.0.LICENSE
 license_url:
@@ -674,8 +674,8 @@ spec_version:
             'description',
             'homepage_url',
             'notes',
-            'license',
             'license_expression',
+            'license_key',
             'license_name',
             'license_file',
             'license_url',
@@ -748,8 +748,8 @@ description: |
     to process ABOUT files.
     An ABOUT file is a file.
 homepage_url: http://dejacode.org
-license: apache-2.0
 license_expression: apache-2.0
+license_key: apache-2.0
 license_file: apache-2.0.LICENSE
 copyright: Copyright (c) 2013-2014 nexB Inc.
 notice_file: NOTICE
@@ -859,7 +859,7 @@ version: 0.11.0
                     'author': u'',
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     'description': u'AboutCode is a tool\nfor files.',
-                    'license': u'apache-2.0',
+                    'license_key': u'apache-2.0',
                     'license_expression': u'apache-2.0',
                     'name': u'AboutCode',
                     'owner': u'nexB Inc.'}
@@ -891,7 +891,7 @@ version: 0.11.0
                     'description': u'AboutCode is a tool\nfor files.',
                     'download_url': u'',
                     'homepage_url': u'',
-                    'license': u'apache-2.0',
+                    'license_key': u'apache-2.0',
                     'license_expression': u'apache-2.0',
                     'license_file': u'',
                     'license_name': u'',
@@ -930,7 +930,7 @@ version: 0.11.0
         expected = {'about_resource': u'.',
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     'description': u'AboutCode is a tool\nfor files.',
-                    'license': u'apache-2.0',
+                    'license_key': u'apache-2.0',
                     'license_expression': u'apache-2.0',
                     'name': u'AboutCode',
                     'owner': u'nexB Inc.'}

@@ -6,7 +6,7 @@ author:
 description: |
     AboutCode is a tool 
     for files.
-license: apache-2.0
+license_key: apache-2.0
 license_expression: apache-2.0
 copyright: Copyright (c) 2013-2014 nexB Inc.
 custom1: some custom
