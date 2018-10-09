@@ -22,6 +22,7 @@ from collections import OrderedDict
 from functools import partial
 
 import yaml
+import sys
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -171,7 +172,8 @@ def string_dumper(dumper, value, _tag=u'tag:yaml.org,2002:str'):
         value = repr(value)
 
     if isinstance(value, str):
-        value = value.decode('utf-8')
+        if sys.version_info[0] < 3:  # Python 2
+            value = value.decode('utf-8')
 
     folded_style = '>'
     verbatim_style = '|'
