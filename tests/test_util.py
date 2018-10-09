@@ -502,3 +502,23 @@ description: sample
         expected_dict_list = [expected_output_dict]
         result = util.update_about_dictionary_keys(about_dict_list, mapping_output)
         assert expected_dict_list == result
+
+    def test_ungroup_licenses(self):
+        input = [OrderedDict([(u'key', u'mit'),
+                              (u'name', u'MIT License'),
+                              (u'file', u'mit.LICENSE'),
+                              (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit')]),
+                 OrderedDict([(u'key', u'bsd-new'),
+                              (u'name', u'BSD-3-Clause'),
+                              (u'file', u'bsd-new.LICENSE'),
+                              (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new')])]
+        expected_lic_key = [u'mit', u'bsd-new']
+        expected_lic_name = [u'MIT License', u'BSD-3-Clause']
+        expected_lic_file = [u'mit.LICENSE', u'bsd-new.LICENSE']
+        expected_lic_url = [u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit', 
+                    u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new']
+        lic_key, lic_name, lic_file, lic_url = util.ungroup_licenses(input)
+        assert expected_lic_key == lic_key
+        assert expected_lic_name == lic_name
+        assert expected_lic_file == lic_file
+        assert expected_lic_url == lic_url
