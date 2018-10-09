@@ -586,47 +586,6 @@ this software and releases the component to Public Domain.
         assert a.dumps(True) == b.dumps(True)
         assert a == b
 
-    def test_About_dumps_does_not_transform_strings_in_lists(self):
-        test_file = get_test_loc('dumps/complete2/about.ABOUT')
-        a = model.About(test_file, about_file_path='complete2/about.ABOUT')
-        expected = u'''about_resource: .
-name: AboutCode
-about_resource_path:
-version: 0.11.0
-download_url:
-description: AboutCode is a tool to process ABOUT files. An ABOUT file is a file.
-homepage_url: http://dejacode.org
-notes:
-license_expression: apache-2.0
-license_key: apache-2.0
-license_name:
-license_file: apache-2.0.LICENSE
-license_url:
-copyright: Copyright (c) 2013-2014 nexB Inc.
-notice_file: NOTICE
-notice_url:
-redistribute:
-attribute:
-track_changes:
-modified:
-changelog_file:
-owner: nexB Inc.
-owner_url:
-contact:
-author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
-author_file:
-vcs_tool: git
-vcs_repository: https://github.com/dejacode/about-code-tool.git
-vcs_path:
-vcs_tag:
-vcs_branch:
-vcs_revision:
-checksum_md5:
-checksum_sha1:
-checksum_sha256:
-spec_version:
-'''
-        assert expected == a.dumps(with_absent=True)
 
     def test_About_same_attribution(self):
         base_dir = 'some_dir'
@@ -740,28 +699,37 @@ class SerializationTest(unittest.TestCase):
         a = model.About(test_file)
         assert [] == a.errors
 
+# Since the licenses group was not processed, 
         expected = u'''about_resource: .
-name: AboutCode
-version: 0.11.0
-description: |
+author:
+    - Jillian Daguil
+    - Chin Yeung Li
+    - Philippe Ombredanne
+    - Thomas Druez
+copyright: Copyright (c) 2013-2014 nexB Inc.
+description: |-
     AboutCode is a tool
     to process ABOUT files.
     An ABOUT file is a file.
-homepage_url: http://dejacode.org
+homepage_url:
+    - http://dejacode.org
 license_expression: apache-2.0
-license_key: apache-2.0
-license_file: apache-2.0.LICENSE
-copyright: Copyright (c) 2013-2014 nexB Inc.
+licenses:
+    -   file: apache-2.0.LICENSE
+        key: apache-2.0
+name: AboutCode
 notice_file: NOTICE
-owner: nexB Inc.
-author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
-vcs_tool: git
+owner:
+    - nexB Inc.
 vcs_repository: https://github.com/dejacode/about-code-tool.git
+vcs_tool: git
+version: 0.11.0
 '''
         result = a.dumps()
         assert expected == result
 
-    def test_About_dumps_all_fields_if_not_present_with_absent_True(self):
+    # We do not support with_absent and with_empty staring in version 3.2.0.
+    def FAILING_test_About_dumps_all_fields_if_not_present_with_absent_True(self):
         test_file = get_test_loc('parse/complete2/about.ABOUT')
         a = model.About(test_file)
         expected_error = [

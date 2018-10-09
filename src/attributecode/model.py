@@ -65,6 +65,7 @@ from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import copy_license_notice_files
 from attributecode.util import on_windows
+from attributecode.util import ungroup_licenses
 from attributecode.util import UNC_PREFIX
 from attributecode.util import UNC_PREFIX_POSIX
 
@@ -289,6 +290,8 @@ class ListField(StringField):
 
         if isinstance(self.original_value, basestring):
             values = self.original_value.splitlines(False)
+        elif isinstance(self.original_value, list):
+            values = self.original_value
         else:
             values = [repr(self.original_value)]
 
@@ -957,7 +960,6 @@ class About(object):
         if license_notice_text_location:
             copy_license_notice_files(
                 fields, base_dir, license_notice_text_location, afp)
-
         # we validate all fields, not only these hydrated
         all_fields = self.all_fields()
         validation_errors = validate_fields(
@@ -1025,6 +1027,38 @@ class About(object):
         about_file_path = self.about_file_path
         if not with_empty:
             fields = [(n, v) for n, v in fields_dict.items() if v]
+        for key, value in fields:
+            if key == u'licenses':
+                lic_key, lic_name, lic_file, lic_url = ungroup_licenses(value)
+                if lic_key:
+                    fields.append(('license_key', lic_key))
+                if lic_name:
+                    fields.append(('license_name', lic_name))
+                if lic_file:
+                    fields.append(('license_file', lic_file))
+                if lic_url:
+                    fields.append(('license_url', lic_url))
+                # The licenses field has been ungrouped and can be removed.
+                # Otherwise, it will gives the following INFO level error
+                # 'Field licenses is not a supported field and is ignored.'
+                licenses_field = (key, value)
+                fields.remove(licenses_field)
+        """
+        # Generate about_resource_path if not present so that it can be validate
+        # the existence of the about_resource
+        arp_present = False 
+        about_resource_value = u''
+        about_parent = u''
+        for n, v in fields:
+            about_parent = dirname(self.about_file_path)
+            if n == u'about_resource_path':
+                arp_present = True
+            elif n == u'about_resource':
+                about_resource_value = v
+        if not arp_present:
+            #about_parent = dirname(self.about_file_path)
+            fields.append((u'about_resource_path', u'.' + posixpath.join(about_parent, about_resource_value)))
+        """
         errors = self.process(
             fields, about_file_path, running_inventory, base_dir, 
             license_notice_text_location, use_mapping, mapping_file)
@@ -1044,22 +1078,23 @@ class About(object):
         license_name = []
         license_file = []
         license_url = []
+        file_fields = ['about_resource_path', 'notice_file', 'changelog_file', 'author_file']
 
         for field in self.all_fields(with_absent, with_empty):
-            if field.name == 'license_key':
+            if field.name == 'license_key' and field.value:
                 license_key = field.value
-            elif field.name == 'license_name':
+            elif field.name == 'license_name' and field.value:
                 license_name = field.value
-            elif field.name == 'license_file':
+            elif field.name == 'license_file' and field.value:
                 license_file = field.value.keys()
-            elif field.name == 'license_url':
+            elif field.name == 'license_url' and field.value:
                 license_url = field.value
             # No multiple 'about_resource' and 'about_resource_path' reference supported.
             # Take the first element (should only be one) in the list for the
             # value of 'about_resource' and 'about_resource_path'
-            elif field.name == 'about_resource':
+            elif field.name == 'about_resource' and field.value:
                 about_data[field.name] = field.value[0]
-            elif field.name == 'about_resource_path':
+            elif field.name in file_fields and field.value:
                 about_data[field.name] = field.value.keys()[0]
             else:
                 about_data[field.name] = field.value
@@ -1067,13 +1102,13 @@ class About(object):
         license_group = list(zip_longest(license_key, license_name, license_file, license_url))
         for lic_group in license_group:
             lic_dict = {}
-            if lic_group[0] or with_empty:
+            if lic_group[0]:
                 lic_dict['key'] = lic_group[0]
-            if lic_group[1] or with_empty:
+            if lic_group[1]:
                 lic_dict['name'] = lic_group[1]
-            if lic_group[2] or with_empty:
+            if lic_group[2]:
                 lic_dict['file'] = lic_group[2]
-            if lic_group[3] or with_empty:
+            if lic_group[3]:
                 lic_dict['url'] = lic_group[3] 
             about_data.setdefault('licenses', []).append(lic_dict)
         return saneyaml.dump(about_data)

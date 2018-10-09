@@ -647,6 +647,25 @@ def update_about_dictionary_keys(about_dictionary_list, mapping_output):
         updated_dict_list.append(updated_ordered_dict)
     return updated_dict_list
 
+def ungroup_licenses(licenses):
+    """
+    Ungroup multiple licenses information
+    """
+    lic_key = []
+    lic_name = []
+    lic_file = []
+    lic_url = []
+    for lic in licenses:
+        if 'key' in lic:
+            lic_key.append(lic['key'])
+        if 'name' in lic:
+            lic_name.append(lic['name'])
+        if 'file' in lic:
+            lic_file.append(lic['file'])
+        if 'url' in lic:
+            lic_url.append(lic['url'])
+    return lic_key, lic_name, lic_file, lic_url
+
 class NoDuplicateConstructor(Constructor):
     def construct_mapping(self, node, deep=False):
         if not isinstance(node, MappingNode):

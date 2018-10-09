@@ -62,11 +62,11 @@ class GenTest(unittest.TestCase):
         assert expected_errors == errors
 
         expected = [u'about_resource: .\n'
-                    u'name: AboutCode\n'
-                    u'version: 0.11.0\n'
-                    u'description: |\n'
+                    u'description: |-\n'
                     u'    multi\n'
-                    u'    line\n']
+                    u'    line\n'
+                    u'name: AboutCode\n'
+                    u'version: 0.11.0\n']
         result = [a.dumps(with_absent=False, with_empty=False)
                         for a in abouts]
         assert expected == result
@@ -86,13 +86,13 @@ class GenTest(unittest.TestCase):
         assert sorted(expected_errors) == sorted(errors)
 
         expected = [u'about_resource: .\n'
-                    u'name: AboutCode\n'
-                    u'version: 0.11.0\n'
-                    u'description: |\n'
+                    u'copyright: Copyright (c) nexB, Inc.\n'
+                    u'description: |-\n'
                     u'    multi\n'
                     u'    line\n'
-                    u'copyright: Copyright (c) nexB, Inc.\n'
+                    u'name: AboutCode\n'
                     u'resource: this.ABOUT\n'
+                    u'version: 0.11.0\n'
                     ]
         result = [a.dumps(with_absent=False, with_empty=False)
                         for a in abouts]
@@ -151,12 +151,12 @@ class GenTest(unittest.TestCase):
         in_mem_result = [a.dumps(with_absent=False, with_empty=False)
                         for a in abouts][0]
         expected = (u'about_resource: .\n'
-                    u'name: AboutCode\n'
                     u'about_resource_path: .\n'
-                    u'version: 0.11.0\n'
-                    u'description: |\n'
+                    u'description: |-\n'
                     u'    multi\n'
-                    u'    line\n')
+                    u'    line\n'
+                    u'name: AboutCode\n'
+                    u'version: 0.11.0\n')
         assert expected == in_mem_result
 
     def test_generate_not_overwrite_original_license_file(self):
@@ -170,10 +170,11 @@ class GenTest(unittest.TestCase):
         in_mem_result = [a.dumps(with_absent=False, with_empty=False)
                         for a in abouts][0]
         expected = (u'about_resource: .\n'
-                    u'name: AboutCode\n'
                     u'about_resource_path: .\n'
-                    u'version: 0.11.0\n'
-                    u'license_file: this.LICENSE\n')
+                    u'licenses:\n'
+                    u'    -   file: this.LICENSE\n'
+                    u'name: AboutCode\n'
+                    u'version: 0.11.0\n')
         assert expected == in_mem_result
 
     def test_deduplicate(self):
