@@ -1095,7 +1095,7 @@ class About(object):
             elif field.name == 'about_resource' and field.value:
                 about_data[field.name] = field.value[0]
             elif field.name in file_fields and field.value:
-                about_data[field.name] = field.value.keys()[0]
+                about_data[field.name] = list(field.value.keys())[0]
             else:
                 about_data[field.name] = field.value
         # Group the same license information in a list
