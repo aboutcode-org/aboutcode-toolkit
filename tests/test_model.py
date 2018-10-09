@@ -564,6 +564,14 @@ this software and releases the component to Public Domain.
             Error(INFO, u'Field Mat\xedas is not a supported field and is ignored.')]
         assert expected == result
 
+    def test_About_invalid_boolean_value(self):
+        test_file = get_test_loc('parse/invalid_boolean.about')
+        a = model.About(test_file)
+        result = a.errors
+        expected = [
+            Error(ERROR, "Field modified: Invalid flag value: 'blah' is not one of: false, no, n, y, yes, true")]
+        assert expected == result
+
     def test_About_contains_about_file_path(self):
         test_file = get_test_loc('parse/complete/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')

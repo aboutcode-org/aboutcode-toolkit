@@ -542,7 +542,7 @@ class BooleanField(SingleLineField):
     def default_value(self):
         return None
 
-    flags = {'yes': True, 'y': True, 'no': False, 'n': False, }
+    flags = {'yes': True, 'y': True, 'no': False, 'n': False, 'true' : True, 'false': False, }
 
     flag_values = ', '.join(flags)
 
@@ -552,7 +552,6 @@ class BooleanField(SingleLineField):
         False. Return a list of errors.
         """
         errors = super(BooleanField, self)._validate(*args, ** kwargs)
-
         flag = self.get_flag(self.original_value)
         if flag is False:
             name = self.name
@@ -575,7 +574,8 @@ class BooleanField(SingleLineField):
     def get_flag(self, value):
         """
         Return a normalized existing flag value if found in the list of
-        possible values or None if empty or False if not found.
+        possible values or None if empty or False if not found or original value
+        if it is not a boolean value
         """
         if value is None or value == '':
             return None
@@ -599,12 +599,12 @@ class BooleanField(SingleLineField):
 
     @property
     def has_content(self):
-        # Special for flags: None means False AND content not defined
-        flag = self.get_flag(self.original_value)
-        if flag:
+        """
+        Return true if it has content regardless of what value, False otherwise
+        """
+        if self.original_value:
             return True
-        else:
-            return flag
+        return False
 
     def _serialized_value(self):
         # default normalized values for serialization
