@@ -1,3 +1,11 @@
+2018-xx-xx
+
+    Release 3.2.0
+
+    * Multiple licenses support
+    * No support for referenceing multuiple resources
+    * Fix the incorrect boolean field behavior
+
 2018-09-19
 
     Release 3.1.3
