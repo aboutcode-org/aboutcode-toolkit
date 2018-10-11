@@ -706,7 +706,6 @@ class SerializationTest(unittest.TestCase):
         a = model.About(test_file)
         assert [] == a.errors
 
-# Since the licenses group was not processed, 
         expected = u'''about_resource: .
 author:
     - Jillian Daguil
@@ -796,6 +795,27 @@ version: 0.11.0
 '''
         result = a.dumps(with_absent=False)
         assert set(expected) == set(result)
+
+    def test_About_dumps_with_different_boolean_value(self):
+        test_file = get_test_loc('parse/complete2/about2.ABOUT')
+        a = model.About(test_file)
+        expected_error_msg = "Field track_changes: Invalid flag value: 'blah' is not one of"
+        assert len(a.errors) == 1
+        assert expected_error_msg in a.errors[0].message
+
+        expected = u'''about_resource: .
+
+name: AboutCode
+version: 0.11.0
+
+redistribute: no
+attribute: yes
+modified: yes
+'''
+
+        result = a.dumps()
+        assert set(expected) == set(result)
+
 
     def test_About_dumps_does_not_dump_present__empty_with_absent_False(self):
         test_file = get_test_loc('parse/complete2/about.ABOUT')

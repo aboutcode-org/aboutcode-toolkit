@@ -151,6 +151,21 @@ def check_duplicate_keys_about_file(context):
     return dup_keys
 
 
+def wrap_boolean_value(context):
+    bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
+    input = []
+    for line in context.splitlines():
+        key = line.partition(':')[0]
+        if key in bool_fields:
+            value = "'" + line.partition(':')[2].strip() + "'"
+            updated_line = key + ': ' + value
+            input.append(updated_line)
+        else:
+            input.append(line)
+    updated_context = '\n'.join(input)
+    return updated_context
+
+
 def get_absolute(location):
     """
     Return an absolute normalized location.

@@ -457,6 +457,25 @@ notes: dup key here
         expected = ['notes']
         assert expected == util.check_duplicate_keys_about_file(test)
 
+    def test_wrap_boolean_value(self):
+        test = '''
+name: test
+notes: some notes
+
+license_expression: mit
+modified: yes
+track_changes: no
+            '''
+        expected = '''
+name: test
+notes: some notes
+
+license_expression: mit
+modified: 'yes'
+track_changes: 'no'
+            '''
+        assert expected == util.wrap_boolean_value(test)
+
     def test_check_duplicate_keys_about_file_with_multiline(self):
         test = '''
 name: test

@@ -1,0 +1,9 @@
+about_resource: .
+
+name: AboutCode
+version: 0.11.1
+
+redistribute: n
+attribute: yes
+track_changes: blah
+modified: True

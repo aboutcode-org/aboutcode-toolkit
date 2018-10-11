@@ -75,6 +75,7 @@ class Field(object):
     An ABOUT file field. The initial value is a string. Subclasses can and
     will alter the value type as needed.
     """
+
     def __init__(self, name=None, value=None, required=False, present=False):
         # normalized names are lowercased per specification
         self.name = name
@@ -113,6 +114,8 @@ class Field(object):
                 return errors
         else:
             # present fields should have content ...
+            # The boolean value can be True, False and None
+            # The value True or False is the content of boolean fields
             if not self.has_content:
                 # ... especially if required
                 if self.required:
@@ -542,9 +545,9 @@ class BooleanField(SingleLineField):
     def default_value(self):
         return None
 
-    flags = {'yes': True, 'y': True, 'no': False, 'n': False, 'true' : True, 'false': False, }
-
-    flag_values = ', '.join(flags)
+    true_flags = ('yes', 'y', 'true', 'x')
+    false_flags = ('no', 'n', 'false')
+    flag_values = true_flags + false_flags
 
     def _validate(self, *args, **kwargs):
         """
@@ -568,7 +571,10 @@ class BooleanField(SingleLineField):
             errors.append(Error(INFO, msg))
             self.value = None
         else:
-            self.value = self.flags.get(flag)
+            if flag == u'yes' or flag is True:
+                self.value = True
+            else:
+                self.value = False
         return errors
 
     def get_flag(self, value):
@@ -590,8 +596,10 @@ class BooleanField(SingleLineField):
 
                 value = value.lower()
                 if value in self.flag_values:
-                    # of of yes, no, true, etc.
-                    return value
+                    if value in self.true_flags:
+                        return u'yes'
+                    else:
+                        return u'no'
                 else:
                     return False
             else:
@@ -793,6 +801,7 @@ class About(object):
         If with_empty, include empty fields.
         """
         all_fields = []
+        bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
         for field in list(self.fields.values()) + list(self.custom_fields.values()):
             if field.required:
                 all_fields.append(field)
@@ -805,7 +814,10 @@ class About(object):
                         all_fields.append(field)
                     elif field.present and field.value:
                         all_fields.append(field)
-
+                    elif field.name in bool_fields:
+                        # Check is the value valid
+                        if not field.value == None:
+                            all_fields.append(field)
                 else:
                     if field.present:
                         if not field.value:
@@ -1005,7 +1017,10 @@ class About(object):
             and then join with the 'about_resource_path'
             """
             running_inventory = True
-            errs = self.load_dict(saneyaml.load(input_text), base_dir, running_inventory, use_mapping, mapping_file)
+            # wrap the value of the boolean field in quote to avoid 
+            # automatically convertion from yaml.load
+            input = util.wrap_boolean_value(input_text)
+            errs = self.load_dict(saneyaml.load(input), base_dir, running_inventory, use_mapping, mapping_file)
             errors.extend(errs)
         except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
@@ -1043,22 +1058,6 @@ class About(object):
                 # 'Field licenses is not a supported field and is ignored.'
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
-        """
-        # Generate about_resource_path if not present so that it can be validate
-        # the existence of the about_resource
-        arp_present = False 
-        about_resource_value = u''
-        about_parent = u''
-        for n, v in fields:
-            about_parent = dirname(self.about_file_path)
-            if n == u'about_resource_path':
-                arp_present = True
-            elif n == u'about_resource':
-                about_resource_value = v
-        if not arp_present:
-            #about_parent = dirname(self.about_file_path)
-            fields.append((u'about_resource_path', u'.' + posixpath.join(about_parent, about_resource_value)))
-        """
         errors = self.process(
             fields, about_file_path, running_inventory, base_dir, 
             license_notice_text_location, use_mapping, mapping_file)
@@ -1079,7 +1078,7 @@ class About(object):
         license_file = []
         license_url = []
         file_fields = ['about_resource_path', 'notice_file', 'changelog_file', 'author_file']
-
+        bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
         for field in self.all_fields(with_absent, with_empty):
             if field.name == 'license_key' and field.value:
                 license_key = field.value
@@ -1097,7 +1096,9 @@ class About(object):
             elif field.name in file_fields and field.value:
                 about_data[field.name] = list(field.value.keys())[0]
             else:
-                about_data[field.name] = field.value
+                if field.value or (field.name in bool_fields and not field.value == None):
+                    about_data[field.name] = field.value
+
         # Group the same license information in a list
         license_group = list(zip_longest(license_key, license_name, license_file, license_url))
         for lic_group in license_group:
