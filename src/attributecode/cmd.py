@@ -198,9 +198,16 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
                         'Please correct and re-run.'
         print(msg)
 
+    error_count = 0
     finalized_errors = update_severity_level_about_resource_path_not_exist_error(errors)
 
-    log_errors(finalized_errors, quiet, verbose, os.path.dirname(output))
+    for e in finalized_errors:
+        # Only count as warning/error if CRITICAL, ERROR and WARNING
+        if e.severity > 20:
+            error_count = error_count + 1
+
+    log_errors(finalized_errors, error_count, quiet, verbose, os.path.dirname(output))
+    click.echo(' %(error_count)d errors or warnings detected.' % locals())
     sys.exit(0)
 
 
@@ -282,9 +289,8 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         # Only count as warning/error if CRITICAL, ERROR and WARNING
         if e.severity > 20:
             error_count = error_count + 1
-    click.echo(
-        'Generated %(about_count)d .ABOUT files with %(error_count)d errors or warnings' % locals())
-    log_errors(finalized_errors, quiet, verbose, output)
+    log_errors(finalized_errors, error_count, quiet, verbose, output)
+    click.echo('Generated %(about_count)d .ABOUT files with %(error_count)d errors or warnings' % locals())
     sys.exit(0)
 
 
@@ -365,9 +371,16 @@ OUTPUT: Path to output file to write the attribution to.
     for no_match_error in no_match_errors:
         inv_errors.append(no_match_error)
 
+    error_count = 0
     finalized_errors = update_severity_level_about_resource_path_not_exist_error(inv_errors)
 
-    log_errors(finalized_errors, quiet, verbose, os.path.dirname(output))
+    for e in finalized_errors:
+        # Only count as warning/error if CRITICAL, ERROR and WARNING
+        if e.severity > 20:
+            error_count = error_count + 1
+
+    log_errors(finalized_errors, error_count, quiet, verbose, os.path.dirname(output))
+    click.echo(' %(error_count)d errors or warnings detected.' % locals())
     click.echo('Finished.')
     sys.exit(0)
 
@@ -429,7 +442,7 @@ LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
     sys.exit(0)
 
 
-def log_errors(errors, quiet, verbose, base_dir=False):
+def log_errors(errors, err_count, quiet, verbose, base_dir=False):
     """
     Iterate of sequence of Error objects and print and log errors with
     a severity superior or equal to level.
@@ -450,7 +463,9 @@ def log_errors(errors, quiet, verbose, base_dir=False):
         log_path = join(bdir, LOG_FILENAME)
         if exists(log_path):
             os.remove(log_path)
-
+        f = open(log_path, "a")
+        error_msg = str(err_count) + u" errors or warnings detected."
+        f.write(error_msg)
         file_handler = logging.FileHandler(log_path)
         file_logger.addHandler(file_handler)
 

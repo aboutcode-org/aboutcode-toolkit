@@ -5,6 +5,7 @@
     * Multiple licenses support
     * No support for referenceing multuiple resources
     * Fix the incorrect boolean field behavior
+    * Display number of errors/warnings in the error log
 
 2018-09-19
 

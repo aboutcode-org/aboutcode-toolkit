@@ -39,7 +39,8 @@ def test_log_errors(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors, quiet, show_all, base_dir='')
+    error_count = len(errors)
+    cmd.log_errors(errors, error_count, quiet, show_all, base_dir='')
     out, err = capsys.readouterr()
     expected_out = '''CRITICAL: msg1
 ERROR: msg2
@@ -62,7 +63,8 @@ def test_log_errors_without_show_all(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors, quiet, show_all, base_dir='')
+    error_count = len(errors)
+    cmd.log_errors(errors, error_count, quiet, show_all, base_dir='')
     out, err = capsys.readouterr()
     expected_out = '''CRITICAL: msg1
 ERROR: msg2
@@ -82,7 +84,8 @@ def test_log_errors_with_quiet(capsys):
               Error(DEBUG, 'msg4'),
               Error(NOTSET, 'msg4'),
               ]
-    cmd.log_errors(errors, quiet, show_all, base_dir='')
+    error_count = len(errors)
+    cmd.log_errors(errors, error_count, quiet, show_all, base_dir='')
     out, err = capsys.readouterr()
     assert '' == out
     assert '' == err

@@ -555,12 +555,14 @@ class BooleanField(SingleLineField):
         False. Return a list of errors.
         """
         errors = super(BooleanField, self)._validate(*args, ** kwargs)
+        self.about_file_path = kwargs.get('about_file_path')
         flag = self.get_flag(self.original_value)
         if flag is False:
             name = self.name
             val = self.original_value
+            about_file_path = self.about_file_path
             flag_values = self.flag_values
-            msg = (u'Field %(name)s: Invalid flag value: %(val)r is not '
+            msg = (u'Path: %(about_file_path)s - Field %(name)s: Invalid flag value: %(val)r is not '
                    u'one of: %(flag_values)s' % locals())
             errors.append(Error(ERROR, msg))
             self.value = None
