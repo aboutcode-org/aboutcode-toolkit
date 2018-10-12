@@ -24,15 +24,17 @@ Getting Started
 
 A simple and valid ABOUT file named httpd.ABOUT may look like this::
 
-      about_resource: httpd-2.4.3.tar.gz
-      name: Apache HTTP Server
-      version: 2.4.3
-      homepage_url: http://httpd.apache.org
-      download_url: http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
-      license_file: httpd.LICENSE
-      notice_file: httpd.NOTICE
-      copyright: Copyright (c) 2012 The Apache Software Foundation.
-      license_expression: apache-2.0
+        about_resource: httpd-2.4.3.tar.gz
+        about_resource_path: httpd-2.4.3.tar.gz
+        name: Apache HTTP Server
+        version: 2.4.3
+        homepage_url: http://httpd.apache.org
+        download_url: http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
+        license_expression: apache-2.0
+        licenses:
+            -   license_file: httpd.LICENSE
+        notice_file: httpd.NOTICE
+        copyright: Copyright (c) 2012 The Apache Software Foundation.
 
 The meaning of this ABOUT file is:
 
@@ -55,11 +57,8 @@ The meaning of this ABOUT file is:
 Specification
 ~~~~~~~~~~~~~
 
-An ABOUT file is an ASCII text file with lines of colon-separated "field
-name":"value" pairs. This format is loosely based on the Email header field
-format as specified in RFC5322/RFC822 at http://tools.ietf.org/html/rfc5322 . By
-reusing this specification, several available tools and libraries can parse and
-interpret ABOUT files. Note that while Unicode characters are not supported in
+An ABOUT file is an ASCII YAML formatted text file.
+Note that while Unicode characters are not supported in
 an ABOUT file proper, external files can contain UTF-8 Unicode.
 
 
@@ -119,18 +118,10 @@ trailing white spaces: they must be ignored.
 
 The field value is composed of one or more lines of plain US-ASCII printable text.
 
-When a field value contains more than one line of text, additional continuation
-lines must start with at least one space. In this case, the first space of an
-additional continuation line is ignored and should be removed from the field
-value by tools.
+When a field value contains more than one line of text,  a 'literal block'
+(using |), or a 'folded block' (using '>') is need.
 
-In this example the value of the description field spans multiple lines::
-
-    description: This is a long description for a software component that spans
-     multiple lines with arbitrary line breaks.
-
-Alternatively, multiple-line strings can be written either as a 'literal block'
-(using |), or a 'folded block' (using '>')::
+For instance::
 
     description: >
         This is a long description for a software component that spans
@@ -220,17 +211,20 @@ download URL is referenced this way::
 Flag fields
 ~~~~~~~~~~~
 
-Flag fields have a "true" or "false" value. True, T, Yes or Y must be
+Flag fields have a "true" or "false" value. True, T, Yes or Y , x must be
 interpreted as "true" in any case combination. False, F, No or N must be
 interpreted as "false" in any case combination.
 
 Referencing the file or directory documented by an ABOUT file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An ABOUT file documents one file or directory. The mandatory "about_resource"
-field points to the documented file or directory. The value of the
-"about_resource" field can be a name stored in the same directory as the ABOUT
-file or a POSIX path relative to the path of the ABOUT file. POSIX paths use a
-"/" forward slash sign as path separators.
+field reference the documented file or directory. The value of the
+"about_resource" field is the name of the referenced file or directory. 
+
+On the other hand, there is anther field "about_resource_path" can be a name stored
+in the same directory as the ABOUT file or a POSIX path relative to the path of
+the ABOUT file. POSIX paths use a "/" forward slash sign as path separators.
 
 A tool processing an ABOUT file must report an error if this field is missing.
 
