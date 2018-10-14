@@ -222,7 +222,7 @@ An ABOUT file documents one file or directory. The mandatory "about_resource"
 field reference the documented file or directory. The value of the
 "about_resource" field is the name of the referenced file or directory. 
 
-On the other hand, there is anther field "about_resource_path" can be a name stored
+On the other hand, there is another field "about_resource_path" can be a name stored
 in the same directory as the ABOUT file or a POSIX path relative to the path of
 the ABOUT file. POSIX paths use a "/" forward slash sign as path separators.
 
@@ -235,20 +235,18 @@ For example, a file named django.ABOUT contains the following field to document
 the django-1.2.3.tar.gz archive stored in the same directory::
 
       about_resource: django-1.2.3.tar.gz
+      about_resource_path: django-1.2.3.tar.gz
 
 In this example, the ABOUT file documents a whole sub-directory::
 
-      about_resource: downloads/linux-kernel-2.6.23/
+      about_resource: linux-kernel-2.6.23
+      about_resource_path: downloads/linux-kernel-2.6.23/
 
 In this example, the ABOUT file documents the current directory, using a "."
 period to reference it::
 
       about_resource: .
-
-Since all paths are interpreted relative to the ABOUT file location, this would
-also reference the current directory::
-
-      about_resource: /
+      about_resource_path: .
 
 
 Other Mandatory fields
@@ -264,7 +262,7 @@ field are missing.
 Optional Information fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- version: Component version. A component usually has a version, such as a
+- version: Component or package version. A component or package usually has a version, such as a
   revision number or hash from a version control system (for a snapshot checked
   out from VCS such as Subversion or Git). If not available, the version should
   be the date the component was provisioned, in an ISO date format such as
@@ -301,6 +299,8 @@ Optional Owner and Author fields
 
 - author: Name of the organization(s) or person(s) that authored the component.
 
+- author_file: Author file for the component.
+
 
 Optional Licensing fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -324,7 +324,7 @@ Optional Licensing fields
 
 - license_name: The license short name for the license.
 
-- license: The license key(s) for the component.
+- license_key: The license key(s) for the component.
 
 
 Optional Licensing flag fields
