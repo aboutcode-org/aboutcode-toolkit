@@ -4,17 +4,13 @@ AboutCode Toolkit
 Build and tests status
 ----------------------
 
-+-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
-|Branch |                         **Linux (Travis)**                                    |                         **MacOSX (Travis)**                                   |                         **Windows (AppVeyor)**                                                       |
-+=======+===============================================================================+===============================================================================+======================================================================================================+
-|       |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=master  |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=master  |.. image:: https://ci.appveyor.com/api/projects/status/nexB/aboutcode-toolkit/branch/master?png=true  |
-|Master |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit                                    |
-|       |   :alt: Linux Master branch tests status                                      |   :alt: MacOSX Master branch tests status                                     |   :alt: Windows Master branch tests status                                                           |
-+-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
-|       |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop |.. image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop |.. image:: https://ci.appveyor.com/api/projects/status/nexB/aboutcode-toolkit/branch/develop?png=true |
-|Develop|   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://travis-ci.org/nexB/aboutcode-toolkit                       |   :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit                                    |
-|       |   :alt: Linux Develop branch tests status                                     |   :alt: MacOSX Develop branch tests status                                    |   :alt: Windows Develop branch tests status                                                          |
-+-------+-------------------------------------------------------------------------------+-------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
++-------+-----------------+--------------+
+|Branch | **Linux/macOS** | **Windows**  |
++=======+=================+==============+
+|Master | |master-posix|  | |master-win| |
++-------+-----------------+--------------+
+|Develop| |devel-posix|   | |devel-win|  |
++-------+-----------------+--------------+
 
 
 The AboutCode Toolkit and ABOUT files provide a simple way to document the
@@ -111,3 +107,18 @@ LICENSE
 -------
 The AboutCode Toolkit is released under the Apache 2.0 license.
 See (of course) the about.ABOUT file for details.
+
+
+.. |master-posix| image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=master
+    :target: https://travis-ci.org/nexB/aboutcode-toolkit
+    :alt: Linux Master branch tests status
+.. |devel-posix| image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop
+    :target: https://travis-ci.org/nexB/aboutcode-toolkit
+    :alt: Linux Develop branch tests status
+
+.. |master-win| image:: https://ci.appveyor.com/api/projects/status/2o8nnrxc21b4b3w5/branch/master?png=true
+    :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit
+    :alt: Windows Master branch tests status
+.. |devel-win| image:: https://ci.appveyor.com/api/projects/status/2o8nnrxc21b4b3w5/branch/develop?png=true
+    :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit
+    :alt: Windows Develop branch tests status
