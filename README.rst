@@ -116,9 +116,9 @@ See (of course) the about.ABOUT file for details.
     :target: https://travis-ci.org/nexB/aboutcode-toolkit
     :alt: Linux Develop branch tests status
 
-.. |master-win| image:: https://ci.appveyor.com/api/projects/status/2o8nnrxc21b4b3w5/branch/master?png=true
+.. |master-win| image:: https://ci.appveyor.com/api/projects/status/uwj2gh8i9ga1mqwn/branch/master?png=true
     :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit
     :alt: Windows Master branch tests status
-.. |devel-win| image:: https://ci.appveyor.com/api/projects/status/2o8nnrxc21b4b3w5/branch/develop?png=true
+.. |devel-win| image:: https://ci.appveyor.com/api/projects/status/uwj2gh8i9ga1mqwn/branch/develop?png=true
     :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit
     :alt: Windows Develop branch tests status
