@@ -721,7 +721,7 @@ def format_about_dict_for_json_output(about_dictionary_list):
                     row_list[key] = element[key][0]
                 # The 'about_resource_path' is an ordered dict
                 elif key == u'about_resource_path':
-                    row_list[key] = element[key].keys()[0]
+                    row_list[key] = list(element[key].keys())[0]
                 elif key in licenses:
                     if key == 'license_key':
                         license_key = element[key]
