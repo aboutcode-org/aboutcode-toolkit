@@ -842,7 +842,8 @@ version: 0.11.0
         result = as_dict[model.About.about_file_path_attr]
         assert expected == result
 
-    def test_About_as_dict_with_empty(self):
+    # The with_present and empty is no longer supported.
+    def FAILING_test_About_as_dict_with_empty(self):
         test_file = get_test_loc('as_dict/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         expected_errors = [
@@ -864,7 +865,8 @@ version: 0.11.0
         # FIXME: why converting back to dict?
         assert expected == dict(result)
 
-    def test_About_as_dict_with_present(self):
+    # The with_present and empty is no longer supported.
+    def FAILING_test_About_as_dict_with_present(self):
         test_file = get_test_loc('as_dict/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         expected_errors = [
@@ -922,13 +924,13 @@ version: 0.11.0
             Error(INFO, u'Field custom_empty is not a supported field and is ignored.'),
             Error(WARNING, u'Field author is present but empty')]
         assert expected_errors == a.errors
-        expected = {'about_resource': u'.',
+        expected = {'about_resource': [u'.'],
                     'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                     'description': u'AboutCode is a tool\nfor files.',
-                    'license_key': u'apache-2.0',
+                    'license_key': [u'apache-2.0'],
                     'license_expression': u'apache-2.0',
                     'name': u'AboutCode',
-                    'owner': u'nexB Inc.'}
+                    'owner': [u'nexB Inc.']}
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=False)
@@ -982,13 +984,13 @@ version: 0.11.0
                  'name': u'AboutCode',
                  'owner': u'nexB Inc.'}
 
-        expected = {'about_resource': u'.',
+        expected = {'about_resource': [u'.'],
                  'author': u'',
                  'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                  'description': u'AboutCode is a tool\nfor files.',
                  'license_expression': u'apache-2.0',
                  'name': u'AboutCode',
-                 'owner': u'nexB Inc.'}
+                 'owner': [u'nexB Inc.']}
 
         a = model.About()
         base_dir = 'some_dir'
@@ -998,18 +1000,15 @@ version: 0.11.0
         assert expected == dict(as_dict)
 
     def test_load_dict_handles_field_validation_correctly(self):
-        test = {u'about_resource': u'.',
-                u'about_resource_path': u'.',
+        test = {u'about_resource': [u'.'],
                 u'attribute': u'yes',
-                u'author': u'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez',
+                u'author': [u'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'],
                 u'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                 u'description': u'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
-                u'homepage_url': u'http://dejacode.org',
+                u'homepage_url': [u'http://dejacode.org'],
                 u'license_expression': u'apache-2.0',
-                u'license_file': u'apache-2.0.LICENSE',
                 u'name': u'AboutCode',
-                u'notice_file': u'NOTICE',
-                u'owner': u'nexB Inc.',
+                u'owner': [u'nexB Inc.'],
                 u'vcs_repository': u'https://github.com/dejacode/about-code-tool.git',
                 u'vcs_tool': u'git',
                 u'version': u'0.11.0'}

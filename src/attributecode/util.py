@@ -33,6 +33,12 @@ import socket
 import string
 import sys
 
+if sys.version_info[0] < 3:  # Python 2
+    from itertools import izip_longest as zip_longest
+else:  # Python 3
+    from itertools import zip_longest
+
+
 import yaml
 from yaml.reader import Reader
 from yaml.scanner import Scanner
@@ -680,6 +686,74 @@ def ungroup_licenses(licenses):
         if 'url' in lic:
             lic_url.append(lic['url'])
     return lic_key, lic_name, lic_file, lic_url
+
+
+def format_about_dict_for_csv_output(about_dictionary_list):
+    csv_formatted_list = []
+    file_fields = ['license_file', 'notice_file', 'changelog_file', 'author_file']
+    for element in about_dictionary_list:
+        row_list = OrderedDict()
+        for key in element:
+            if element[key]:
+                if isinstance(element[key], list):
+                    row_list[key] = u'\n'.join((element[key]))
+                elif key == u'about_resource_path' or key in file_fields:
+                    row_list[key] = u'\n'.join((element[key].keys()))
+                else:
+                    row_list[key] = element[key]
+        csv_formatted_list.append(row_list)
+    return csv_formatted_list
+
+
+def format_about_dict_for_json_output(about_dictionary_list):
+    licenses = ['license_key', 'license_name', 'license_file', 'license_url']
+    file_fields = ['notice_file', 'changelog_file', 'author_file']
+    json_formatted_list = []
+    for element in about_dictionary_list:
+        row_list = OrderedDict()
+        license_key = []
+        license_name = []
+        license_file = []
+        license_url = []
+        for key in element:
+            if element[key]:
+                if key == u'about_resource':
+                    row_list[key] = element[key][0]
+                # The 'about_resource_path' is an ordered dict
+                elif key == u'about_resource_path':
+                    row_list[key] = element[key].keys()[0]
+                elif key in licenses:
+                    if key == 'license_key':
+                        license_key = element[key]
+                    elif key == 'license_name':
+                        license_name = element[key]
+                    elif key == 'license_file':
+                        license_file = element[key].keys()
+                    elif key == 'license_url':
+                        license_url = element[key]
+                elif key in file_fields:
+                    row_list[key] = element[key].keys()
+                else:
+                    row_list[key] = element[key]
+
+        # Group the same license information in a list
+        license_group = list(zip_longest(license_key, license_name, license_file, license_url))
+        if license_group:
+            licenses_list = []
+            for lic_group in license_group:
+                lic_dict = OrderedDict()
+                if lic_group[0]:
+                    lic_dict['key'] = lic_group[0]
+                if lic_group[1]:
+                    lic_dict['name'] = lic_group[1]
+                if lic_group[2]:
+                    lic_dict['file'] = lic_group[2]
+                if lic_group[3]:
+                    lic_dict['url'] = lic_group[3]
+                licenses_list.append(lic_dict) 
+            row_list['licenses'] = licenses_list
+        json_formatted_list.append(row_list)
+    return json_formatted_list
 
 class NoDuplicateConstructor(Constructor):
     def construct_mapping(self, node, deep=False):

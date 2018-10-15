@@ -541,3 +541,32 @@ description: sample
         assert expected_lic_name == lic_name
         assert expected_lic_file == lic_file
         assert expected_lic_url == lic_url
+
+    def test_format_about_dict_for_csv_output(self):
+        input = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
+                              (u'about_resource', [u'test.c']),
+                              (u'name', u'AboutCode-toolkit'),
+                              (u'license_expression', u'mit AND bsd-new'), 
+                              (u'license_key', [u'mit', u'bsd-new'])])]
+
+        expected = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
+                                 (u'about_resource', u'test.c'),
+                                 (u'name', u'AboutCode-toolkit'),
+                                 (u'license_expression', u'mit AND bsd-new'),
+                                 (u'license_key', u'mit\nbsd-new')])]
+        output = util.format_about_dict_for_csv_output(input)
+        assert output == expected
+
+    def test_format_about_dict_for_json_output(self):
+        input = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
+                              (u'about_resource', [u'test.c']),
+                              (u'name', u'AboutCode-toolkit'),
+                              (u'license_key', [u'mit', u'bsd-new'])])]
+
+        expected = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
+                                 (u'about_resource', u'test.c'),
+                                 (u'name', u'AboutCode-toolkit'),
+                                 (u'licenses', [OrderedDict([(u'key', u'mit')]),
+                                                OrderedDict([(u'key', u'bsd-new')])])])]
+        output = util.format_about_dict_for_json_output(input)
+        assert output == expected

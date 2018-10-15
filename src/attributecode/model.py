@@ -318,7 +318,7 @@ class ListField(StringField):
         return errors
 
     def _serialized_value(self):
-        return u'\n'.join(self.value) if self.value else u''
+        return self.value if self.value else u''
 
     def __eq__(self, other):
         """
@@ -848,17 +848,23 @@ class About(object):
             if self.about_resource_path.present:
                 as_dict[arpa] = self.resolved_resources_paths()
             else:
+                arp = OrderedDict()
                 # Create a relative 'about_resource_path' if user has not defined
                 if self.about_resource.present:
                     for resource_name in self.about_resource.value:
+                        key = u''
                         if resource_name == '.':
-                            as_dict[arpa] = '.'
+                            key = resource_name
                         else:
-                            as_dict[arpa] = './' + resource_name
+                            key = './' + resource_name
+                        arp[key] = None
+                        as_dict[arpa] = arp
                 # Return an empty 'about_resource_path' if the 'about_resource'
                 # key is not found
                 else:
-                    as_dict[arpa] = ''
+                    key = u''
+                    arp[key] = None
+                    as_dict[arpa] = arp
 
         for field in self.all_fields(with_absent=with_absent,
                                      with_empty=with_empty):
@@ -1285,7 +1291,6 @@ def collect_inventory(location, use_mapping=False, mapping_file=None):
     for about_error in errors:
         if not about_error in dedup_errors:
             dedup_errors.append(about_error)
-
     return dedup_errors, abouts
 
 
@@ -1375,7 +1380,8 @@ def write_output(abouts, location, format, mapping_output=None, with_absent=Fals
                 updated_fieldnames = fieldnames
             writer = csv.DictWriter(output_file, updated_fieldnames)
             writer.writeheader()
-            for row in updated_dictionary_list:
+            csv_formatted_list = util.format_about_dict_for_csv_output(updated_dictionary_list)
+            for row in csv_formatted_list:
                 # See https://github.com/dejacode/about-code-tool/issues/167
                 try:
                     writer.writerow(row)
@@ -1383,7 +1389,8 @@ def write_output(abouts, location, format, mapping_output=None, with_absent=Fals
                     msg = u'Generation skipped for ' + row['about_file_path'] + u' : ' + str(e)
                     errors.append(Error(CRITICAL, msg))
         else:
-            output_file.write(json.dumps(updated_dictionary_list, indent=2))
+            json_fomatted_list = util.format_about_dict_for_json_output(updated_dictionary_list)
+            output_file.write(json.dumps(json_fomatted_list, indent=2))
     return errors
 
 
