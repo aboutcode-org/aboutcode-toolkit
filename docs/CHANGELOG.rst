@@ -1,10 +1,11 @@
-2018-xx-xx
+2018-10-16
 
     Release 3.2.0
 
+    * The 'license' field is now become 'license_key'
     * Multiple licenses support
     * No support for referenceing multuiple resources
-    * Fix the incorrect boolean field behavior
+    * Fix the incorrect boolean field behaviors
     * Display number of errors/warnings in the error log
 
 2018-09-19

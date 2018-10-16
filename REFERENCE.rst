@@ -214,6 +214,8 @@ Options
         This option requires 2 parameters:
             api_url - URL to the DJE License Library
             api_key - Hash key to authenticate yourself in the API.
+
+        In addition, the input needs to have the 'license_expression' field.
         (Please contact nexB to get the api_* value to use for this feature)
 
     $ about gen --fetch-license 'api_url' 'api_key' LOCATION OUTPUT

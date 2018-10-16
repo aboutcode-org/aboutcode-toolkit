@@ -136,7 +136,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
-    <td>license</td>
+    <td>license_key</td>
     <td>DejaCode Enterprise license key for the component.</td>
     <td>Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.</td>
   </tr>
@@ -272,10 +272,11 @@ Review your generated AboutCode Toolkit files to determine if they meet your req
         version: v 7.2
         attribute: Y
         copyright: Copyright (c) RedHat, Inc.
-        license: gpl-2.0
         license_expression: gpl-2.0
-        license_name: GNU General Public License 2.0
-        license_text_file: gpl-2.0.LICENSE
+        licenses:
+            -   key: gpl-2.0
+                name: GNU General Public License 2.0
+                file: gpl-2.0.LICENSE
         owner: Red Hat
         redistribute: Y
 
@@ -388,7 +389,7 @@ In summary, you can start with simple, cosmetic customizations to the default.ht
 
 When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run attrib to generate your product attribution notice package. Note that attrib will use the "about_file_path" column in your software inventory to get all the fields that it needs from your previously generated AboutCode Toolkit files. The official attrib parameters are defined here:
 
-* [https://github.com/nexB/aboutcode-toolkit/blob/develop/USAGE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/USAGE.rst) 
+* [https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst) 
 
 Here is an example of a attrib command: 
 
@@ -416,6 +417,6 @@ One of the major features of the ABOUT File specification is that the .ABOUT fil
 
 If your organization adopts the practice of manually creating and maintaining AboutCode Toolkit files, you can easily re-create your software inventory from your codebase using inventory. The official inventory parameters are defined here:
 
-* [https://github.com/nexB/aboutcode-toolkit/blob/develop/USAGE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/USAGE.rst) 
+* [https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst) 
 
 A successful execution of inventory will create a complete software inventory in .csv format or .json format based on defined format.
