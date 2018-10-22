@@ -1008,13 +1008,6 @@ class About(object):
                 input_text = txt.read()
             # Check for duplicated key
             yaml.load(input_text, Loader=util.NoDuplicateLoader)
-            '''
-            dup_keys = check_duplicate_keys_about_file(input_text)
-            if dup_keys:
-                msg = ('Duplicated key name(s): %(dup_keys)s' % locals())
-                errors.append(Error(ERROR, msg % locals()))
-            else:
-            '''
             """
             The running_inventory defines if the current process is 'inventory' or not.
             This is used for the validation of the about_resource_path.
@@ -1026,7 +1019,7 @@ class About(object):
             """
             running_inventory = True
             # wrap the value of the boolean field in quote to avoid 
-            # automatically convertion from yaml.load
+            # automatically conversion from yaml.load
             input = util.wrap_boolean_value(input_text)
             errs = self.load_dict(saneyaml.load(input), base_dir, running_inventory, use_mapping, mapping_file)
             errors.extend(errs)
