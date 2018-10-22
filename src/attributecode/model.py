@@ -1039,7 +1039,7 @@ class About(object):
         Return a list of
         errors.
         """
-        fields = fields_dict.items()
+        fields = list(fields_dict.items())
         about_file_path = self.about_file_path
         if not with_empty:
             fields = [(n, v) for n, v in fields_dict.items() if v]
