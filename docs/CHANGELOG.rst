@@ -1,6 +1,6 @@
 2018-10-22
 
-    Release 3.2.0
+    Release 3.2.1
 
     * The 'license' field is now become 'license_key'
     * Multiple licenses support
