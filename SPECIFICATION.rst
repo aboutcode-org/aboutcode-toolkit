@@ -32,7 +32,8 @@ A simple and valid ABOUT file named httpd.ABOUT may look like this::
         download_url: http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
         license_expression: apache-2.0
         licenses:
-            -   license_file: httpd.LICENSE
+            -   key: apache-2.0
+            -   file: apache-2.0.LICENSE
         notice_file: httpd.NOTICE
         copyright: Copyright (c) 2012 The Apache Software Foundation.
 
@@ -48,7 +49,7 @@ The meaning of this ABOUT file is:
 - The file "httpd-2.4.3.tar.gz" was originally downloaded from
   http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
 
-- In the same directory, "httpd.LICENSE" and "httpd.NOTICE" are files that
+- In the same directory, "apache-2.0.LICENSE" and "httpd.NOTICE" are files that
   contain respectively the license text and the notice text for this component.
 
 - This component is licensed under "apache-2.0"
@@ -189,12 +190,14 @@ encoded text and allows to support non-ASCII text content.
 For example, the full license text for a component is often stored in a separate
 file named COPYING::
 
-      license_file: linux.COPYING
+    licenses:
+        -   file: linux.COPYING
 
 In this example, the README file is stored in a doc directory, one directory
 above the ABOUT file directory, using a relative POSIX path::
 
-      license_file: ../docs/ruby.README
+    licenses:
+        -   file: ../docs/ruby.README
 
 Field referencing a URL
 ~~~~~~~~~~~~~~~~~~~~~~~

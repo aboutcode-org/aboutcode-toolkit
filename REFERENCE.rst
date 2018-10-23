@@ -325,3 +325,30 @@ Options
         This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
+
+Special Notes
+=============
+Multiple licenses support format
+--------------------------------
+The multiple licenses support format for a CSV file is separated by a line break
+
++----------------+------+-----------------+----------------------+
+| about_resource | name | license_key     | license_file         |
++----------------+------+-----------------+----------------------+
+| test.tar.xz    | test | | apache-2.0    | | apache-2.0.LICENSE |
+|                |      | | mit           | | mit.LICENSE        |
++----------------+------+-----------------+----------------------+
+
+
+The multiple licenses support format for a ABOUT file is by "grouping"
+
+::
+
+    about_resource: test.tar.xz
+    name: test
+    licenses:
+        -   key: apache 2.0
+            name: apache-2.0.LICENSE
+        -   key: mit
+            name: mit.LICENSE
+
