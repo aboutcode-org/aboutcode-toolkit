@@ -679,7 +679,7 @@ class About(object):
         self.fields = OrderedDict([
             ('about_resource', ListField(required=True)),
             # ('about_resource', AboutResourceField(required=True)),
-            ('name', SingleLineField(required=True)),
+            ('name', SingleLineField()),
             ('about_resource_path', AboutResourceField()),
 
             ('version', SingleLineField()),

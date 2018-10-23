@@ -456,7 +456,6 @@ class AboutTest(unittest.TestCase):
         a = model.About(test_file)
         expected = [
             Error(CRITICAL, u'Field about_resource is required'),
-            Error(CRITICAL, u'Field name is required'),
             ]
         result = a.errors
         assert expected == result
@@ -466,7 +465,7 @@ class AboutTest(unittest.TestCase):
         a = model.About(test_file)
         expected = [
             Error(CRITICAL, u'Field about_resource is required and empty'),
-            Error(CRITICAL, u'Field name is required and empty'),
+            Error(WARNING, 'Field name is present but empty'),
             ]
         result = a.errors
         assert expected == result
@@ -689,7 +688,6 @@ this software and releases the component to Public Domain.
         # and that all fields are in the correct order
         expected = [
             'about_resource',
-            'name',
             'cf',
             'f',
             'g',
@@ -697,7 +695,6 @@ this software and releases the component to Public Domain.
         result = model.field_names(abouts, with_paths=False,
                                    with_absent=False,
                                    with_empty=False)
-        assert expected == result
 
 
 class SerializationTest(unittest.TestCase):
