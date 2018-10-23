@@ -1,3 +1,10 @@
+2018-10-23
+
+    Release 3.2.2
+
+    * Fix the version number
+    * `name` field is no longer a required field
+
 2018-10-22
 
     Release 3.2.1

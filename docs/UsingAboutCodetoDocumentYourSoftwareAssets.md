@@ -63,7 +63,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>name</td>
     <td>Component name</td>
-    <td>Mandatory</td>
+    <td>Optional</td>
   </tr>
   <tr>
     <td>about_resource</td>
@@ -232,10 +232,8 @@ You can customize your copy of MAPPING.CONFIG to recognize your own software inv
         # Essential Fields
         about_file_path: Directory/Filename
         
-        # Mandatory Fields
-        name: Component
-        
         # Optional Fields
+        name: Component
         version: Confirmed Version
         copyright: Confirmed Copyright
         
@@ -247,7 +245,7 @@ You can customize your copy of MAPPING.CONFIG to recognize your own software inv
 
 When your software inventory is ready, you can save it as a .csv file, and use it as input to run gen to generate your AboutCode Toolkit files. The official gen parameters are defined here:
 
-* [https://github.com/nexB/aboutcode-toolkit/blob/develop/USAGE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/USAGE.rst) 
+* [https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst) 
 
 Here is an example of a gen command: 
 
