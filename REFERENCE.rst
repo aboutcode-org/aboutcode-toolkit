@@ -330,7 +330,7 @@ Special Notes
 =============
 Multiple licenses support format
 --------------------------------
-The multiple licenses support format for a CSV file is separated by a line break
+The multiple licenses support format for CSV files are separated by line break
 
 +----------------+------+-----------------+----------------------+
 | about_resource | name | license_key     | license_file         |
@@ -340,7 +340,7 @@ The multiple licenses support format for a CSV file is separated by a line break
 +----------------+------+-----------------+----------------------+
 
 
-The multiple licenses support format for a ABOUT file is by "grouping"
+The multiple licenses support format for ABOUT files are by "grouping" with the keyword "licenses"
 
 ::
 
