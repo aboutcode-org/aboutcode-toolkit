@@ -193,12 +193,15 @@ class FieldTest(unittest.TestCase):
                           ]
         self.check_validate(field_class, value, expected, expected_errors)
 
+    """
+    UrlField no longer become a list.
+    If a list is wanted, use UrlListField instead.
     def test_UrlField_contains_list_after_validate(self):
         value = 'http://some.com/url'
         field_class = model.UrlField
         expected = [value]
         self.check_validate(field_class, value, expected, expected_errors=[])
-
+    """
     def test_SingleLineField_has_errors_if_multiline(self):
         value = '''line1
         line2'''
@@ -714,8 +717,7 @@ description: |-
     AboutCode is a tool
     to process ABOUT files.
     An ABOUT file is a file.
-homepage_url:
-    - http://dejacode.org
+homepage_url: http://dejacode.org
 license_expression: apache-2.0
 licenses:
     -   file: apache-2.0.LICENSE
@@ -1002,7 +1004,7 @@ version: 0.11.0
                 u'author': [u'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'],
                 u'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                 u'description': u'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
-                u'homepage_url': [u'http://dejacode.org'],
+                u'homepage_url': u'http://dejacode.org',
                 u'license_expression': u'apache-2.0',
                 u'name': u'AboutCode',
                 u'owner': [u'nexB Inc.'],

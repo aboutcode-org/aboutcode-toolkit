@@ -344,8 +344,7 @@ class ListField(StringField):
         if sval == oval:
             return True
 
-
-class UrlField(ListField):
+class UrlListField(ListField):
     """
     A URL field. The validated value is a list of URLs.
     """
@@ -353,13 +352,39 @@ class UrlField(ListField):
         """
         Check that URLs are valid. Return a list of errors.
         """
-        errors = super(UrlField, self)._validate(*args, ** kwargs)
-        for url in self.value:
+        errors = super(UrlListField, self)._validate(*args, ** kwargs)
+        name = self.name
+        val = self.value
+        for url in val:
             if not self.is_valid_url(url):
-                name = self.name
-                val = self.value
                 msg = (u'Field %(name)s: Invalid URL: %(val)s' % locals())
                 errors.append(Error(WARNING, msg))
+        return errors
+
+    @staticmethod
+    def is_valid_url(url):
+        """
+        Return True if a URL is valid.
+        """
+        scheme, netloc, _path, _p, _q, _frg = urlparse(url)
+        valid = scheme in ('http', 'https', 'ftp') and netloc
+        return valid
+
+
+class UrlField(StringField):
+    """
+    A URL field. The validated value is a URL.
+    """
+    def _validate(self, *args, **kwargs):
+        """
+        Check that URL is valid. Return a list of errors.
+        """
+        errors = super(UrlField, self)._validate(*args, ** kwargs)
+        name = self.name
+        val = self.value
+        if not self.is_valid_url(val):
+            msg = (u'Field %(name)s: Invalid URL: %(val)s' % locals())
+            errors.append(Error(WARNING, msg))
         return errors
 
     @staticmethod
@@ -692,7 +717,7 @@ class About(object):
             ('license_key', ListField()),
             ('license_name', ListField()),
             ('license_file', FileTextField()),
-            ('license_url', UrlField()),
+            ('license_url', UrlListField()),
             ('copyright', StringField()),
             ('notice_file', FileTextField()),
             ('notice_url', UrlField()),

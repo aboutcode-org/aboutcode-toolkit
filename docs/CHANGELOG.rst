@@ -1,3 +1,11 @@
+2018-xx-xx
+
+    Release x.x.x
+
+    * New UrlListField introduced for list of urls
+    * The UrlField is now only taking single URL value
+
+
 2018-10-23
 
     Release 3.2.2
