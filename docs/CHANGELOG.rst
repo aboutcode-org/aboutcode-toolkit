@@ -1,3 +1,9 @@
+2018-xx-xx
+
+    Release x.x.x
+
+    * Update the list of common license keys
+
 2018-10-23
 
     Release 3.2.2
