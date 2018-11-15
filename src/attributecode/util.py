@@ -420,7 +420,10 @@ def get_mapping_key_order(mapping_file):
         mapping = get_mapping(mapping_file)
     else:
         mapping = get_mapping()
-    return mapping.keys()
+    key_order = []
+    for key in mapping:
+        key_order.append(key)
+    return key_order
 
 def format_output(about_data, use_mapping, mapping_file):
     """
