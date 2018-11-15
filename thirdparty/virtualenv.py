@@ -22,6 +22,7 @@ import logging
 import zlib
 import errno
 import glob
+import distutils.spawn
 import distutils.sysconfig
 import struct
 import subprocess
@@ -36,12 +37,12 @@ try:
 except ImportError:
     import configparser as ConfigParser
 
-__version__ = "15.1.0"
+__version__ = "16.0.0"
 virtualenv_version = __version__  # legacy
 
-if sys.version_info < (2, 6):
+if sys.version_info < (2, 7):
     print('ERROR: %s' % sys.exc_info()[1])
-    print('ERROR: this script requires Python 2.6 or greater.')
+    print('ERROR: this script requires Python 2.7 or greater.')
     sys.exit(101)
 
 try:
@@ -538,7 +539,7 @@ def main():
         '-p', '--python',
         dest='python',
         metavar='PYTHON_EXE',
-        help='The Python interpreter to use, e.g., --python=python2.5 will use the python2.5 '
+        help='The Python interpreter to use, e.g., --python=python3.5 will use the python3.5 '
         'interpreter to create the new environment.  The default is the interpreter that '
         'virtualenv was installed with (%s)' % sys.executable)
 
@@ -568,12 +569,6 @@ def main():
         action='store_false',
         default=True,
         help="Always copy files rather than symlinking.")
-
-    parser.add_option(
-        '--unzip-setuptools',
-        dest='unzip_setuptools',
-        action='store_true',
-        help="Unzip Setuptools when installing it.")
 
     parser.add_option(
         '--relocatable',
@@ -643,6 +638,11 @@ def main():
         action='store_true',
         help="DEPRECATED. Retained only for backward compatibility. This option has no effect.")
 
+    parser.add_option(
+        '--unzip-setuptools',
+        action='store_true',
+        help="DEPRECATED.  Retained only for backward compatibility. This option has no effect.")
+
     if 'extend_parser' in globals():
         extend_parser(parser)
 
@@ -703,7 +703,6 @@ def main():
     create_environment(home_dir,
                        site_packages=options.system_site_packages,
                        clear=options.clear,
-                       unzip_setuptools=options.unzip_setuptools,
                        prompt=options.prompt,
                        search_dirs=options.search_dirs,
                        download=options.download,
@@ -859,9 +858,13 @@ def install_wheel(project_names, py_executable, search_dirs=None,
         import tempfile
         import os
 
-        import pip
+        try:
+            from pip._internal import main as _main
+            cert_data = pkgutil.get_data("pip._vendor.certifi", "cacert.pem")
+        except ImportError:
+            from pip import main as _main
+            cert_data = pkgutil.get_data("pip._vendor.requests", "cacert.pem")
 
-        cert_data = pkgutil.get_data("pip._vendor.requests", "cacert.pem")
         if cert_data is not None:
             cert_file = tempfile.NamedTemporaryFile(delete=False)
             cert_file.write(cert_data)
@@ -875,7 +878,7 @@ def install_wheel(project_names, py_executable, search_dirs=None,
                 args += ["--cert", cert_file.name]
             args += sys.argv[1:]
 
-            sys.exit(pip.main(args))
+            sys.exit(_main(args))
         finally:
             if cert_file is not None:
                 os.remove(cert_file.name)
@@ -905,7 +908,6 @@ def install_wheel(project_names, py_executable, search_dirs=None,
 
 
 def create_environment(home_dir, site_packages=False, clear=False,
-                       unzip_setuptools=False,
                        prompt=None, search_dirs=None, download=False,
                        no_setuptools=False, no_pip=False, no_wheel=False,
                        symlink=True):
@@ -1243,24 +1245,41 @@ def install_python(home_dir, lib_dir, inc_dir, bin_dir, site_packages, clear, sy
             elif os.path.exists(python_d_dest):
                 logger.info('Removed python_d.exe as it is no longer at the source')
                 os.unlink(python_d_dest)
+
             # we need to copy the DLL to enforce that windows will load the correct one.
             # may not exist if we are cygwin.
-            py_executable_dll = 'python%s%s.dll' % (
-                sys.version_info[0], sys.version_info[1])
-            py_executable_dll_d = 'python%s%s_d.dll' % (
-                sys.version_info[0], sys.version_info[1])
-            pythondll = os.path.join(os.path.dirname(sys.executable), py_executable_dll)
-            pythondll_d = os.path.join(os.path.dirname(sys.executable), py_executable_dll_d)
-            pythondll_d_dest = os.path.join(os.path.dirname(py_executable), py_executable_dll_d)
-            if os.path.exists(pythondll):
-                logger.info('Also created %s' % py_executable_dll)
-                shutil.copyfile(pythondll, os.path.join(os.path.dirname(py_executable), py_executable_dll))
-            if os.path.exists(pythondll_d):
-                logger.info('Also created %s' % py_executable_dll_d)
-                shutil.copyfile(pythondll_d, pythondll_d_dest)
-            elif os.path.exists(pythondll_d_dest):
-                logger.info('Removed %s as the source does not exist' % pythondll_d_dest)
-                os.unlink(pythondll_d_dest)
+            if is_pypy:
+                py_executable_dlls = [
+                    (
+                        'libpypy-c.dll',
+                        'libpypy_d-c.dll',
+                    ),
+                ]
+            else:
+                py_executable_dlls = [
+                    (
+                        'python%s.dll' % (sys.version_info[0]),
+                        'python%s_d.dll' % (sys.version_info[0])
+                    ),
+                    (
+                        'python%s%s.dll' % (sys.version_info[0], sys.version_info[1]),
+                        'python%s%s_d.dll' % (sys.version_info[0], sys.version_info[1])
+                    )
+                ]
+
+            for py_executable_dll, py_executable_dll_d in py_executable_dlls:
+                pythondll = os.path.join(os.path.dirname(sys.executable), py_executable_dll)
+                pythondll_d = os.path.join(os.path.dirname(sys.executable), py_executable_dll_d)
+                pythondll_d_dest = os.path.join(os.path.dirname(py_executable), py_executable_dll_d)
+                if os.path.exists(pythondll):
+                    logger.info('Also created %s' % py_executable_dll)
+                    shutil.copyfile(pythondll, os.path.join(os.path.dirname(py_executable), py_executable_dll))
+                if os.path.exists(pythondll_d):
+                    logger.info('Also created %s' % py_executable_dll_d)
+                    shutil.copyfile(pythondll_d, pythondll_d_dest)
+                elif os.path.exists(pythondll_d_dest):
+                    logger.info('Removed %s as the source does not exist' % pythondll_d_dest)
+                    os.unlink(pythondll_d_dest)
         if is_pypy:
             # make a symlink python --> pypy-c
             python_executable = os.path.join(os.path.dirname(py_executable), 'python')
@@ -1270,7 +1289,7 @@ def install_python(home_dir, lib_dir, inc_dir, bin_dir, site_packages, clear, sy
             copyfile(py_executable, python_executable, symlink)
 
             if is_win:
-                for name in ['libexpat.dll', 'libpypy.dll', 'libpypy-c.dll',
+                for name in ['libexpat.dll',
                             'libeay32.dll', 'ssleay32.dll', 'sqlite3.dll',
                             'tcl85.dll', 'tk85.dll']:
                     src = join(prefix, name)
@@ -1554,11 +1573,7 @@ def resolve_interpreter(exe):
         exe = python_versions[exe]
 
     if os.path.abspath(exe) != exe:
-        paths = os.environ.get('PATH', '').split(os.pathsep)
-        for path in paths:
-            if os.path.exists(join(path, exe)):
-                exe = join(path, exe)
-                break
+        exe = distutils.spawn.find_executable(exe) or exe
     if not os.path.exists(exe):
         logger.fatal('The path %s (from --python=%s) does not exist' % (exe, orig_exe))
         raise SystemExit(3)
