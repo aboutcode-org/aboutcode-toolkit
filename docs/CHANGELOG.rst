@@ -4,6 +4,7 @@
 
     * New UrlListField introduced for list of urls
     * The UrlField is now only taking single URL value
+    * The owner is now a StringField instead of ListField
 
 
 2018-10-23

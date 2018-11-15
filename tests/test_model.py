@@ -724,8 +724,7 @@ licenses:
         key: apache-2.0
 name: AboutCode
 notice_file: NOTICE
-owner:
-    - nexB Inc.
+owner: nexB Inc.
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 vcs_tool: git
 version: 0.11.0
@@ -929,7 +928,7 @@ version: 0.11.0
                     'license_key': [u'apache-2.0'],
                     'license_expression': u'apache-2.0',
                     'name': u'AboutCode',
-                    'owner': [u'nexB Inc.']}
+                    'owner': u'nexB Inc.'}
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=False)
@@ -989,7 +988,7 @@ version: 0.11.0
                  'description': u'AboutCode is a tool\nfor files.',
                  'license_expression': u'apache-2.0',
                  'name': u'AboutCode',
-                 'owner': [u'nexB Inc.']}
+                 'owner': u'nexB Inc.'}
 
         a = model.About()
         base_dir = 'some_dir'
@@ -1007,7 +1006,7 @@ version: 0.11.0
                 u'homepage_url': u'http://dejacode.org',
                 u'license_expression': u'apache-2.0',
                 u'name': u'AboutCode',
-                u'owner': [u'nexB Inc.'],
+                u'owner': u'nexB Inc.',
                 u'vcs_repository': u'https://github.com/dejacode/about-code-tool.git',
                 u'vcs_tool': u'git',
                 u'version': u'0.11.0'}

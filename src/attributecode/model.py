@@ -729,7 +729,7 @@ class About(object):
 
             ('changelog_file', FileTextField()),
 
-            ('owner', ListField()),
+            ('owner', StringField()),
             ('owner_url', UrlField()),
             ('contact', ListField()),
             ('author', ListField()),
