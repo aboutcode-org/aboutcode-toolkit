@@ -1091,7 +1091,7 @@ class About(object):
         return errors
 
 
-    def dumps(self, with_absent=False, with_empty=True):
+    def dumps(self, use_mapping=False, mapping_file=False, with_absent=False, with_empty=True):
         """
         Return self as a formatted ABOUT string.
         If with_absent, include absent (not present) fields.
@@ -1138,9 +1138,10 @@ class About(object):
             if lic_group[3]:
                 lic_dict['url'] = lic_group[3] 
             about_data.setdefault('licenses', []).append(lic_dict)
-        return saneyaml.dump(about_data)
+        formatted_about_data = util.format_output(about_data, use_mapping, mapping_file)
+        return saneyaml.dump(formatted_about_data)
 
-    def dump(self, location, with_absent=False, with_empty=True):
+    def dump(self, location, use_mapping=False, mapping_file=False, with_absent=False, with_empty=True):
         """
         Write formatted ABOUT representation of self to location.
         If with_absent, include absent (not present) fields.
@@ -1160,7 +1161,7 @@ class About(object):
         if on_windows:
             about_file_path = add_unc(about_file_path)
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
-            dumped.write(self.dumps(with_absent, with_empty))
+            dumped.write(self.dumps(use_mapping, mapping_file, with_absent, with_empty))
 
     def dump_lic(self, location, license_dict):
         """

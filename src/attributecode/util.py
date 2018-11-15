@@ -330,7 +330,7 @@ def get_mapping(location=None):
     if not os.path.exists(location):
         return {}
 
-    mapping = {}
+    mapping = collections.OrderedDict()
     try:
         with open(location) as mapping_file:
             for line in mapping_file:
@@ -412,6 +412,52 @@ def apply_mapping(abouts, alternate_mapping=None):
         mapped_abouts.append(mapped_about)
     return mapped_abouts
 
+def get_mapping_key_order(mapping_file):
+    """
+    Get the mapping key order and return as a list
+    """
+    if mapping_file:
+        mapping = get_mapping(mapping_file)
+    else:
+        mapping = get_mapping()
+    return mapping.keys()
+
+def format_output(about_data, use_mapping, mapping_file):
+    """
+    Convert the about_data dictionary to an ordered dictionary for saneyaml.dump()
+    The ordering should be:
+
+    about_resource
+    name
+    version <-- if any
+    and the rest is the order from the mapping.config file (if any); otherwise alphabetical order.
+    """
+    mapping_key_order = []
+    if use_mapping or mapping_file:
+        mapping_key_order = get_mapping_key_order(mapping_file)
+    priority_keys = [u'about_resource', u'name', u'version']
+    about_data_keys = []
+    order_dict = collections.OrderedDict()
+    for key in about_data:
+        about_data_keys.append(key)
+    if u'about_resource' in about_data_keys:
+        order_dict['about_resource'] = about_data['about_resource']
+    if u'name' in about_data_keys:
+        order_dict['name'] = about_data['name']
+    if u'version' in about_data_keys:
+        order_dict['version'] = about_data['version']
+    if not mapping_key_order:
+        for other_key in sorted(about_data_keys):
+            if not other_key in priority_keys:
+                order_dict[other_key] = about_data[other_key]
+    else:
+        for key in mapping_key_order:
+            if not key in priority_keys and key in about_data_keys:
+                order_dict[key] = about_data[key]
+        for other_key in sorted(about_data_keys):
+            if not other_key in priority_keys and not other_key in mapping_key_order:
+                order_dict[other_key] = about_data[other_key]
+    return order_dict
 
 def get_about_file_path(location, use_mapping=False, mapping_file=None):
     """

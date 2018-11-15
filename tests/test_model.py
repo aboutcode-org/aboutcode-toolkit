@@ -707,29 +707,29 @@ class SerializationTest(unittest.TestCase):
         assert [] == a.errors
 
         expected = u'''about_resource: .
+name: AboutCode
+version: 0.11.0
+copyright: Copyright (c) 2013-2014 nexB Inc.
+license_expression: apache-2.0
 author:
     - Jillian Daguil
     - Chin Yeung Li
     - Philippe Ombredanne
     - Thomas Druez
-copyright: Copyright (c) 2013-2014 nexB Inc.
 description: |-
     AboutCode is a tool
     to process ABOUT files.
     An ABOUT file is a file.
 homepage_url: http://dejacode.org
-license_expression: apache-2.0
 licenses:
     -   file: apache-2.0.LICENSE
         key: apache-2.0
-name: AboutCode
 notice_file: NOTICE
 owner: nexB Inc.
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 vcs_tool: git
-version: 0.11.0
 '''
-        result = a.dumps()
+        result = a.dumps(use_mapping=True)
         assert expected == result
 
     # We do not support with_absent and with_empty staring in version 3.2.0.
@@ -811,7 +811,7 @@ attribute: yes
 modified: yes
 '''
 
-        result = a.dumps()
+        result = a.dumps(use_mapping=False, mapping_file=False)
         assert set(expected) == set(result)
 
 
@@ -827,7 +827,7 @@ modified: yes
 name: AboutCode
 version: 0.11.0
 '''
-        result = a.dumps(with_absent=False, with_empty=False)
+        result = a.dumps(use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
         assert expected == result
 
     def test_About_as_dict_contains_special_paths(self):
@@ -940,7 +940,7 @@ version: 0.11.0
         a = model.About()
         a.load(test_file)
         dumped_file = get_temp_file('that.ABOUT')
-        a.dump(dumped_file, with_absent=False, with_empty=False)
+        a.dump(dumped_file, use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
 
         expected = get_unicode_content(test_file).splitlines()
         result = get_unicode_content(dumped_file).splitlines()

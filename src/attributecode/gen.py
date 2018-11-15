@@ -302,7 +302,7 @@ def generate(location, base_dir, license_notice_text_location=None,
                             about.license_name.present = True
 
             # Write the ABOUT files
-            about.dump(dump_loc, with_empty=with_empty, with_absent=with_absent)
+            about.dump(dump_loc, use_mapping=use_mapping, mapping_file=mapping_file, with_empty=with_empty, with_absent=with_absent)
             for e in not_exist_errors:
                 errors.append(Error(ERROR, e))
         except Exception as e:
