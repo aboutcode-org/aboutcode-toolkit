@@ -425,6 +425,7 @@ class PathField(ListField):
 
         name = self.name
 
+        # FIXME: Why is the PathField an ordered dict?
         # mapping of normalized paths to a location or None
         paths = OrderedDict()
 
