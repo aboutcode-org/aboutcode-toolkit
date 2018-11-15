@@ -24,7 +24,7 @@ import logging
 try:
     basestring  # Python 2
 except NameError:
-    basestring = str  # Python 3
+    basestring = str  # Python 3 #NOQA
 
 
 __version__ = '3.2.2'

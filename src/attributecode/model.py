@@ -40,17 +40,17 @@ import re
 import sys
 
 if sys.version_info[0] < 3:  # Python 2
-    import backports.csv as csv
-    from itertools import izip_longest as zip_longest
-    from urlparse import urljoin, urlparse
-    from urllib2 import urlopen, Request, HTTPError
+    import backports.csv as csv  # NOQA
+    from itertools import izip_longest as zip_longest  # NOQA
+    from urlparse import urljoin, urlparse  # NOQA
+    from urllib2 import urlopen, Request, HTTPError  # NOQA
 else:  # Python 3
-    basestring = str
-    import csv
-    from itertools import zip_longest
-    from urllib.parse import urljoin, urlparse
-    from urllib.request import urlopen, Request
-    from urllib.error import HTTPError
+    basestring = str  # NOQA
+    import csv  # NOQA
+    from itertools import zip_longest  # NOQA
+    from urllib.parse import urljoin, urlparse  # NOQA
+    from urllib.request import urlopen, Request  # NOQA
+    from urllib.error import HTTPError  # NOQA
 
 from license_expression import Licensing
 
@@ -67,7 +67,6 @@ from attributecode.util import copy_license_notice_files
 from attributecode.util import on_windows
 from attributecode.util import ungroup_licenses
 from attributecode.util import UNC_PREFIX
-from attributecode.util import UNC_PREFIX_POSIX
 
 
 class Field(object):
@@ -666,7 +665,7 @@ class BooleanField(SingleLineField):
                 and self.value == other.value)
 
 
-def validate_fields(fields, about_file_path, running_inventory, base_dir, 
+def validate_fields(fields, about_file_path, running_inventory, base_dir,
                     license_notice_text_location=None):
     """
     Validate a sequence of Field objects. Return a list of errors.
@@ -707,7 +706,7 @@ class About(object):
         is simpler.
         """
         self.fields = OrderedDict([
-            #('about_resource', ListField(required=True)),
+            # ('about_resource', ListField(required=True)),
             # ('about_resource', AboutResourceField(required=True)),
             ('about_resource', AboutResourceField(required=True)),
             ('name', SingleLineField(required=True)),
@@ -874,29 +873,6 @@ class About(object):
         if with_paths:
             afpa = self.about_file_path_attr
             as_dict[afpa] = self.about_file_path
-            arpa = self.about_resource_path_attr
-            """
-            if self.about_resource_path.present:
-                as_dict[arpa] = self.resolved_resources_paths()
-            else:
-                arp = OrderedDict()
-                # Create a relative 'about_resource_path' if user has not defined
-                if self.about_resource.present:
-                    for resource_name in self.about_resource.value:
-                        key = u''
-                        if resource_name == '.':
-                            key = resource_name
-                        else:
-                            key = './' + resource_name
-                        arp[key] = None
-                        as_dict[arpa] = arp
-                # Return an empty 'about_resource_path' if the 'about_resource'
-                # key is not found
-                else:
-                    key = u''
-                    arp[key] = None
-                    as_dict[arpa] = arp
-            """
 
         for field in self.all_fields(with_absent=with_absent,
                                      with_empty=with_empty):
@@ -1050,9 +1026,9 @@ class About(object):
             and then join with the 'about_resource'
             """
             running_inventory = True
-            # wrap the value of the boolean field in quote to avoid 
+            # wrap the value of the boolean field in quote to avoid
             # automatically conversion from yaml.load
-            input = util.wrap_boolean_value(input_text)
+            input = util.wrap_boolean_value(input_text)  # NOQA
             errs = self.load_dict(saneyaml.load(input), base_dir, running_inventory, use_mapping, mapping_file)
             errors.extend(errs)
         except Exception as e:
@@ -1092,7 +1068,7 @@ class About(object):
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
         errors = self.process(
-            fields, about_file_path, running_inventory, base_dir, 
+            fields, about_file_path, running_inventory, base_dir,
             license_notice_text_location, use_mapping, mapping_file)
         self.errors = errors
         return errors
@@ -1141,7 +1117,7 @@ class About(object):
             if lic_group[2]:
                 lic_dict['file'] = lic_group[2]
             if lic_group[3]:
-                lic_dict['url'] = lic_group[3] 
+                lic_dict['url'] = lic_group[3]
             about_data.setdefault('licenses', []).append(lic_dict)
         formatted_about_data = util.format_output(about_data, use_mapping, mapping_file)
         return saneyaml.dump(formatted_about_data)
@@ -1210,7 +1186,7 @@ valid_field_name = re.compile(field_name, re.UNICODE | re.IGNORECASE).match
 # line in the form of "name: value"
 field_declaration = re.compile(
     r'^'
-    + field_name +
+    +field_name +
     r'\s*:\s*'
     r'(?P<value>.*)'
     r'\s*$'
@@ -1382,7 +1358,7 @@ def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=Tru
     return abouts_dictionary_list
 
 
-def write_output(abouts, location, format, mapping_output=None, with_absent=False, with_empty=True):
+def write_output(abouts, location, format, mapping_output=None, with_absent=False, with_empty=True):  # NOQA
     """
     Write a CSV/JSON file at location given a list of About objects
     """

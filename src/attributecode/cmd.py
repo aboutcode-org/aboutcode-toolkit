@@ -108,7 +108,7 @@ Use about <command> --help for help on a command.
 @click.argument('output', nargs=1, required=True,
     type=click.Path(exists=False, dir_okay=False, resolve_path=True))
 
-@click.option('--filter', nargs=1, multiple=True, 
+@click.option('--filter', nargs=1, multiple=True,
     help='Filter for the output inventory. e.g. "license_expression=gpl-2.0')
 
 @click.option('-f', '--format', is_flag=False, default='csv', show_default=True,
@@ -139,7 +139,7 @@ Use about <command> --help for help on a command.
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, mapping, mapping_file, mapping_output, filter, quiet, format, verbose):
+def inventory(location, output, mapping, mapping_file, mapping_output, filter, quiet, format, verbose):  # NOQA
     """
 Collect a JSON or CSV inventory of components from .ABOUT files.
 
@@ -155,7 +155,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # FIXME: return error code?
         return
 
-    click.echo('Collecting inventory from: %(location)s and writing output to: %(output)s' % locals()) #(location, output))
+    click.echo('Collecting inventory from: %(location)s and writing output to: %(output)s' % locals())
 
     # FIXME: do we really want to continue support zip as an input?
     if location.lower().endswith('.zip'):
@@ -320,7 +320,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.option('--template', type=click.Path(exists=True), nargs=1,
     help='Path to an optional custom attribution template used for generation.')
 
-@click.option('--vartext', nargs=1, multiple=True, 
+@click.option('--vartext', nargs=1, multiple=True,
     help='Variable texts to the attribution template.')
 
 @click.option('--verbose', is_flag=True, default=False,
@@ -478,7 +478,7 @@ def log_errors(errors, err_count, quiet, verbose, base_dir=False):
 
 
 def have_problematic_error(errors):
-    for severity, message in errors:
+    for severity, message in errors:  # NOQA
         sever = severities[severity]
         if sever in problematic_errors:
             return True

@@ -29,7 +29,6 @@ from testing_utils import on_posix
 from testing_utils import on_windows
 
 from attributecode import CRITICAL
-from attributecode import ERROR, INFO
 from attributecode import Error
 from attributecode import model
 from attributecode import util
@@ -189,8 +188,7 @@ class UtilsTest(unittest.TestCase):
         assert expected == result
 
     def test_check_file_names_with_dupes_return_errors(self):
-        paths = ['some/path',
-                 'some/PAth']
+        paths = ['some/path', 'some/PAth']
         result = util.check_file_names(paths)
         expected = [Error(CRITICAL, "Duplicate files: 'some/PAth' and 'some/path' have the same case-insensitive file name")]
         assert expected == result
@@ -203,12 +201,13 @@ class UtilsTest(unittest.TestCase):
         assert expected == result
 
     def test_check_file_names_with_no_invalid_char_return_no_error(self):
-        paths = ['locations/file',
-                 'locations/file1',
-                 'locations/file2',
-                 'locations/dir1/file2',
-                 'locations/dir1/dir2/file1',
-                 'locations/dir2/file1']
+        paths = [
+            'locations/file',
+            'locations/file1',
+            'locations/file2',
+            'locations/dir1/file2',
+            'locations/dir1/dir2/file1',
+            'locations/dir2/file1']
 
         expected = []
         result = util.check_file_names(paths)
@@ -295,60 +294,60 @@ class UtilsTest(unittest.TestCase):
 
     def test_load_csv_without_mapping(self):
         test_file = get_test_loc('util/about.csv')
-        expected = [OrderedDict(
-                    [('about_file', 'about.ABOUT'),
-                     ('about_resource', '.'),
-                     ('name', 'ABOUT tool'),
-                     ('version', '0.8.1')])
-                    ]
+        expected = [OrderedDict([
+            ('about_file', 'about.ABOUT'),
+            ('about_resource', '.'),
+            ('name', 'ABOUT tool'),
+            ('version', '0.8.1')])
+        ]
         result = util.load_csv(test_file)
         assert expected == result
 
     def test_load_json_without_mapping(self):
         test_file = get_test_loc('load/expected.json')
-        expected = [OrderedDict(
-                    [('about_file_path', '/load/this.ABOUT'),
-                     ('about_resource', '.'),
-                     ('name', 'AboutCode'),
-                     ('version', '0.11.0')])
-                    ]
+        expected = [OrderedDict([
+            ('about_file_path', '/load/this.ABOUT'),
+            ('about_resource', '.'),
+            ('name', 'AboutCode'),
+            ('version', '0.11.0')])
+        ]
         result = util.load_json(test_file)
         assert expected == result
 
     def test_load_json_with_mapping(self):
         test_file = get_test_loc('load/expected_need_mapping.json')
-        expected = [dict(OrderedDict(
-                    [('about_file_path', '/load/this.ABOUT'),
-                     ('about_resource', '.'),
-                     ('version', '0.11.0'),
-                     ('name', 'AboutCode'),
-                     ])
-                    )]
+        expected = [dict(OrderedDict([
+            ('about_file_path', '/load/this.ABOUT'),
+            ('about_resource', '.'),
+            ('version', '0.11.0'),
+            ('name', 'AboutCode'),
+        ])
+        )]
         result = util.load_json(test_file, use_mapping=True)
         assert expected == result
 
     def test_load_non_list_json_with_mapping(self):
         test_file = get_test_loc('load/not_a_list_need_mapping.json')
         mapping_file = get_test_loc('custom-mapping-file/mapping.config')
-        expected = [dict(OrderedDict(
-                    [('about_file_path', '/load/this.ABOUT'),
-                     ('about_resource', '.'),
-                     ('name', 'AboutCode'),
-                     ('version', '0.11.0'),
-                     ])
-                    )]
+        expected = [dict(OrderedDict([
+            ('about_file_path', '/load/this.ABOUT'),
+            ('about_resource', '.'),
+            ('name', 'AboutCode'),
+            ('version', '0.11.0'),
+        ])
+        )]
         result = util.load_json(test_file, use_mapping=False, mapping_file=mapping_file)
         assert expected == result
 
     def test_load_non_list_json(self):
         test_file = get_test_loc('load/not_a_list.json')
-        expected = [OrderedDict(
-                    [('about_file_path', '/load/this.ABOUT'),
-                     ('version', '0.11.0'),
-                     ('about_resource', '.'),
-                     ('name', 'AboutCode'),
-                     ])
-                    ]
+        expected = [OrderedDict([
+            ('about_file_path', '/load/this.ABOUT'),
+            ('version', '0.11.0'),
+            ('about_resource', '.'),
+            ('name', 'AboutCode'),
+        ])
+        ]
         result = util.load_json(test_file)
         assert expected == result
 
@@ -358,8 +357,8 @@ class UtilsTest(unittest.TestCase):
         expected = [dict(OrderedDict(
                     [('license_expression', 'apache-2.0'),
                      ('copyright', 'Copyright (c) 2017 nexB Inc.'),
-                     ('licenses',[{'key':'apache-2.0'}]),
-                     ('copyrights',[{'statements':['Copyright (c) 2017 nexB Inc.']}]),
+                     ('licenses', [{'key':'apache-2.0'}]),
+                     ('copyrights', [{'statements':['Copyright (c) 2017 nexB Inc.']}]),
                      ('about_file_path', 'ScanCode'),
                      ('review_status', 'Analyzed'),
                      ('name', 'ScanCode'),
@@ -371,12 +370,12 @@ class UtilsTest(unittest.TestCase):
                      ('feature', ''),
                      ('purpose', ''),
                      ('homepage_url', None),
-                     ('download_url',None),
-                     ('license_url',None),
-                     ('notice_url',None),
-                     ('programming_language','Python'),
-                     ('notes',''),
-                     ('fileId',8458),
+                     ('download_url', None),
+                     ('license_url', None),
+                     ('notice_url', None),
+                     ('programming_language', 'Python'),
+                     ('notes', ''),
+                     ('fileId', 8458),
                     ]
                     ))]
         result = util.load_json(test_file, use_mapping=False, mapping_file=mapping_file)
@@ -452,17 +451,19 @@ class UtilsTest(unittest.TestCase):
         assert any(longpath in r for r in result)
 
     def test_apply_mapping(self):
-        input = [OrderedDict([('about_resource', '.'),
-                         ('name', 'test'),
-                         ('confirmed version', '1'),
-                         ('confirmed copyright', 'Copyright (c) 2013-2017 nexB Inc.')
-                         ])]
-        expected = [OrderedDict([('about_resource', '.'),
-                         ('name', 'test'),
-                         ('version', '1'),
-                         ('copyright', 'Copyright (c) 2013-2017 nexB Inc.')
-                         ])]
-        assert util.apply_mapping(input) == expected
+        about = [OrderedDict([
+            ('about_resource', '.'),
+            ('name', 'test'),
+            ('confirmed version', '1'),
+            ('confirmed copyright', 'Copyright (c) 2013-2017 nexB Inc.')
+        ])]
+        expected = [OrderedDict([
+            ('about_resource', '.'),
+            ('name', 'test'),
+            ('version', '1'),
+            ('copyright', 'Copyright (c) 2013-2017 nexB Inc.')
+        ])]
+        assert util.apply_mapping(about) == expected
 
     def test_check_duplicate_keys_about_file(self):
         test = '''
@@ -539,7 +540,7 @@ description: sample
         assert expected_dict_list == result
 
     def test_ungroup_licenses(self):
-        input = [OrderedDict([(u'key', u'mit'),
+        about = [OrderedDict([(u'key', u'mit'),
                               (u'name', u'MIT License'),
                               (u'file', u'mit.LICENSE'),
                               (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit')]),
@@ -550,39 +551,46 @@ description: sample
         expected_lic_key = [u'mit', u'bsd-new']
         expected_lic_name = [u'MIT License', u'BSD-3-Clause']
         expected_lic_file = [u'mit.LICENSE', u'bsd-new.LICENSE']
-        expected_lic_url = [u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit', 
+        expected_lic_url = [u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
                     u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new']
-        lic_key, lic_name, lic_file, lic_url = util.ungroup_licenses(input)
+        lic_key, lic_name, lic_file, lic_url = util.ungroup_licenses(about)
         assert expected_lic_key == lic_key
         assert expected_lic_name == lic_name
         assert expected_lic_file == lic_file
         assert expected_lic_url == lic_url
 
     def test_format_about_dict_for_csv_output(self):
-        input = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
-                              (u'about_resource', [u'test.c']),
-                              (u'name', u'AboutCode-toolkit'),
-                              (u'license_expression', u'mit AND bsd-new'), 
-                              (u'license_key', [u'mit', u'bsd-new'])])]
+        about = [OrderedDict([
+            (u'about_file_path', u'/input/about1.ABOUT'),
+            (u'about_resource', [u'test.c']),
+            (u'name', u'AboutCode-toolkit'),
+            (u'license_expression', u'mit AND bsd-new'),
+            (u'license_key', [u'mit', u'bsd-new'])])]
 
-        expected = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
-                                 (u'about_resource', u'test.c'),
-                                 (u'name', u'AboutCode-toolkit'),
-                                 (u'license_expression', u'mit AND bsd-new'),
-                                 (u'license_key', u'mit\nbsd-new')])]
-        output = util.format_about_dict_for_csv_output(input)
+        expected = [OrderedDict([
+            (u'about_file_path', u'/input/about1.ABOUT'),
+            (u'about_resource', u'test.c'),
+            (u'name', u'AboutCode-toolkit'),
+            (u'license_expression', u'mit AND bsd-new'),
+            (u'license_key', u'mit\nbsd-new')])]
+
+        output = util.format_about_dict_for_csv_output(about)
         assert output == expected
 
     def test_format_about_dict_for_json_output(self):
-        input = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
-                              (u'about_resource', OrderedDict([(u'test.c', None)])),
-                              (u'name', u'AboutCode-toolkit'),
-                              (u'license_key', [u'mit', u'bsd-new'])])]
+        about = [OrderedDict([
+            (u'about_file_path', u'/input/about1.ABOUT'),
+            (u'about_resource', OrderedDict([(u'test.c', None)])),
+            (u'name', u'AboutCode-toolkit'),
+            (u'license_key', [u'mit', u'bsd-new'])])]
 
-        expected = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
-                                 (u'about_resource', u'test.c'),
-                                 (u'name', u'AboutCode-toolkit'),
-                                 (u'licenses', [OrderedDict([(u'key', u'mit')]),
-                                                OrderedDict([(u'key', u'bsd-new')])])])]
-        output = util.format_about_dict_for_json_output(input)
+        expected = [OrderedDict([
+            (u'about_file_path', u'/input/about1.ABOUT'),
+            (u'about_resource', u'test.c'),
+            (u'name', u'AboutCode-toolkit'),
+            (u'licenses', [
+                OrderedDict([(u'key', u'mit')]),
+                OrderedDict([(u'key', u'bsd-new')])])])]
+
+        output = util.format_about_dict_for_json_output(about)
         assert output == expected

@@ -59,6 +59,7 @@ class GenTest(unittest.TestCase):
 
         expected_error_messages = ['Field about_resource',
                                    'Field custom1 is not a supported field and is ignored.']
+        # FIXME: this is not used
         expected_errors = [
             Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
         assert len(errors) == 2
@@ -181,7 +182,7 @@ class GenTest(unittest.TestCase):
         license_notice_text_location = None
         fetch_license = ['url', 'lic_key']
 
-        errors, abouts = gen.generate(location, base_dir, license_notice_text_location, fetch_license)
+        _errors, abouts = gen.generate(location, base_dir, license_notice_text_location, fetch_license)
 
         in_mem_result = [a.dumps(use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
                         for a in abouts][0]

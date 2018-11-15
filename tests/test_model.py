@@ -570,7 +570,6 @@ this software and releases the component to Public Domain.
     def test_About_invalid_boolean_value(self):
         test_file = get_test_loc('parse/invalid_boolean.about')
         a = model.About(test_file)
-        result = a.errors
         expected_msg = "Field modified: Invalid flag value: 'blah'"
         assert expected_msg in a.errors[0].message
 
@@ -675,6 +674,7 @@ this software and releases the component to Public Domain.
         result = model.field_names(abouts)
         assert expected == result
 
+    @expectedFailure
     def test_field_names_does_not_return_duplicates_custom_fields(self):
         a = model.About()
         a.custom_fields['f'] = model.StringField(name='f', value='1',
@@ -695,9 +695,11 @@ this software and releases the component to Public Domain.
             'f',
             'g',
             ]
-        result = model.field_names(abouts, with_paths=False,
+        model.field_names(abouts, with_paths=False,
                                    with_absent=False,
                                    with_empty=False)
+        # FIXME: missing test!!!
+        assert True == False
 
 
 class SerializationTest(unittest.TestCase):
@@ -960,7 +962,7 @@ version: 0.11.0
             Error(INFO, u'Field scm_repository is not a supported field and is ignored.'),
             Error(INFO, u'Field test is not a supported field and is ignored.'),
             Error(INFO, err_msg)]
-        
+
         assert errors == a.errors
         assert u'Copyright (c) 2012, Domen Kožar' == a.copyright.value
 
@@ -1160,7 +1162,7 @@ class CollectorTest(unittest.TestCase):
 
     def test_collect_inventory_without_mapping(self):
         test_loc = get_test_loc('parse/name_mapping_test.ABOUT')
-        errors, abouts = model.collect_inventory(test_loc)
+        errors, _abouts = model.collect_inventory(test_loc)
         expected_msg1 = 'Field resource is not a supported field and is ignored.'
         expected_msg2 = 'Field custom_mapping is not a supported field and is ignored.'
         assert len(errors) == 2

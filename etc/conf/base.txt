@@ -6,8 +6,8 @@ pip
 wincertstore
 
 # used for templating
-jinja2==2.9.6
-MarkupSafe==1.0.0
+jinja2>=2.9.6
+MarkupSafe>=1.0.0
 
 click==6.7
 

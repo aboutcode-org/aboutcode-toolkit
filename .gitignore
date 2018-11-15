@@ -15,6 +15,7 @@
 /include
 /Include
 /local
+/man/
 
 # Installer logs
 pip-log.txt
