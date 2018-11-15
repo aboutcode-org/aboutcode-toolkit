@@ -267,15 +267,31 @@ class UtilsTest(unittest.TestCase):
             assert expected == result
 
     def test_get_mapping_key_order(self):
-        expected = ['about_file_path', 'name', 'version', 'copyright', 'license_expression', 'resource']
+        import collections
+        expected = collections.OrderedDict()
+        expected['about_file_path'] = ''
+        expected['name'] = ''
+        expected['version'] = ''
+        expected['copyright'] = ''
+        expected['license_expression'] = ''
+        expected['resource'] = ''
+        expected_keys = expected.keys()
         result = util.get_mapping_key_order(mapping_file=False)
-        assert expected == result
+        assert expected_keys == result
 
     def test_get_mapping_key_order_with_mapping_file(self):
-        expected = ['about_file_path', 'name', 'version', 'description', 'license_expression', 'copyright']
+        import collections
+        expected = collections.OrderedDict()
+        expected['about_file_path'] = ''
+        expected['name'] = ''
+        expected['version'] = ''
+        expected['description'] = ''
+        expected['license_expression'] = ''
+        expected['copyright'] = ''
+        expected_keys = expected.keys()
         test_mapping_file = get_test_loc('mapping_config/mapping.config')
         result = util.get_mapping_key_order(test_mapping_file)
-        assert expected == result
+        assert expected_keys == result
 
     def test_load_csv_without_mapping(self):
         test_file = get_test_loc('util/about.csv')
