@@ -193,12 +193,15 @@ class FieldTest(unittest.TestCase):
                           ]
         self.check_validate(field_class, value, expected, expected_errors)
 
+    """
+    UrlField no longer become a list.
+    If a list is wanted, use UrlListField instead.
     def test_UrlField_contains_list_after_validate(self):
         value = 'http://some.com/url'
         field_class = model.UrlField
         expected = [value]
         self.check_validate(field_class, value, expected, expected_errors=[])
-
+    """
     def test_SingleLineField_has_errors_if_multiline(self):
         value = '''line1
         line2'''
@@ -704,31 +707,29 @@ class SerializationTest(unittest.TestCase):
         assert [] == a.errors
 
         expected = u'''about_resource: .
+name: AboutCode
+version: 0.11.0
+copyright: Copyright (c) 2013-2014 nexB Inc.
+license_expression: apache-2.0
 author:
     - Jillian Daguil
     - Chin Yeung Li
     - Philippe Ombredanne
     - Thomas Druez
-copyright: Copyright (c) 2013-2014 nexB Inc.
 description: |-
     AboutCode is a tool
     to process ABOUT files.
     An ABOUT file is a file.
-homepage_url:
-    - http://dejacode.org
-license_expression: apache-2.0
+homepage_url: http://dejacode.org
 licenses:
     -   file: apache-2.0.LICENSE
         key: apache-2.0
-name: AboutCode
 notice_file: NOTICE
-owner:
-    - nexB Inc.
+owner: nexB Inc.
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 vcs_tool: git
-version: 0.11.0
 '''
-        result = a.dumps()
+        result = a.dumps(use_mapping=True)
         assert expected == result
 
     # We do not support with_absent and with_empty staring in version 3.2.0.
@@ -810,7 +811,7 @@ attribute: yes
 modified: yes
 '''
 
-        result = a.dumps()
+        result = a.dumps(use_mapping=False, mapping_file=False)
         assert set(expected) == set(result)
 
 
@@ -826,7 +827,7 @@ modified: yes
 name: AboutCode
 version: 0.11.0
 '''
-        result = a.dumps(with_absent=False, with_empty=False)
+        result = a.dumps(use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
         assert expected == result
 
     def test_About_as_dict_contains_special_paths(self):
@@ -927,7 +928,7 @@ version: 0.11.0
                     'license_key': [u'apache-2.0'],
                     'license_expression': u'apache-2.0',
                     'name': u'AboutCode',
-                    'owner': [u'nexB Inc.']}
+                    'owner': u'nexB Inc.'}
         result = a.as_dict(with_paths=False,
                            with_empty=False,
                            with_absent=False)
@@ -939,7 +940,7 @@ version: 0.11.0
         a = model.About()
         a.load(test_file)
         dumped_file = get_temp_file('that.ABOUT')
-        a.dump(dumped_file, with_absent=False, with_empty=False)
+        a.dump(dumped_file, use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
 
         expected = get_unicode_content(test_file).splitlines()
         result = get_unicode_content(dumped_file).splitlines()
@@ -987,7 +988,7 @@ version: 0.11.0
                  'description': u'AboutCode is a tool\nfor files.',
                  'license_expression': u'apache-2.0',
                  'name': u'AboutCode',
-                 'owner': [u'nexB Inc.']}
+                 'owner': u'nexB Inc.'}
 
         a = model.About()
         base_dir = 'some_dir'
@@ -1002,10 +1003,10 @@ version: 0.11.0
                 u'author': [u'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'],
                 u'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
                 u'description': u'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
-                u'homepage_url': [u'http://dejacode.org'],
+                u'homepage_url': u'http://dejacode.org',
                 u'license_expression': u'apache-2.0',
                 u'name': u'AboutCode',
-                u'owner': [u'nexB Inc.'],
+                u'owner': u'nexB Inc.',
                 u'vcs_repository': u'https://github.com/dejacode/about-code-tool.git',
                 u'vcs_tool': u'git',
                 u'version': u'0.11.0'}
