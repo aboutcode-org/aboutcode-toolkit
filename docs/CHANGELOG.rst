@@ -7,6 +7,7 @@
     * The UrlField is now only taking single URL value
     * The owner is now a StringField instead of ListField
     * Format the ordering of the genreated ABOUT file (See https://github.com/nexB/aboutcode-toolkit/issues/349#issuecomment-438871444)
+    * '+' and '(' and ')' is now supported in license_expression
 
 2018-10-23
 
