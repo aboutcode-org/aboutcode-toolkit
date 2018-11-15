@@ -730,6 +730,7 @@ class About(object):
             ('attribute', BooleanField()),
             ('track_changes', BooleanField()),
             ('modified', BooleanField()),
+            ('internal_use_only', BooleanField()),
 
             ('changelog_file', FileTextField()),
 

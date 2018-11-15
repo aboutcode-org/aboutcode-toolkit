@@ -653,6 +653,7 @@ this software and releases the component to Public Domain.
             'attribute',
             'track_changes',
             'modified',
+            'internal_use_only',
             'changelog_file',
             'owner',
             'owner_url',

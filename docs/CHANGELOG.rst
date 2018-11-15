@@ -10,6 +10,7 @@
     * '+' and '(' and ')' is now supported in license_expression
     * The key 'about_resource_path' is removed
     * The 2 required fields are 'about_resource' and 'name'
+    * Add a new supported 'internal_use_only' key
 
 2018-10-23
 
