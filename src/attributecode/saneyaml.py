@@ -34,12 +34,12 @@ except ImportError:
 try:
     unicode  # Python 2
 except NameError:
-    unicode = str  # Python 3
+    unicode = str  # Python 3 #NOQA
 
 try:
     basestring  # Python 2
 except NameError:
-    basestring = str  # Python 3
+    basestring = str  # Python 3 #NOQA
 
 
 """

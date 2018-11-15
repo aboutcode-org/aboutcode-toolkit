@@ -22,11 +22,11 @@ import json
 
 try:  # Python 2
     from urllib import urlencode, quote
-    from urllib2 import urlopen, Request, HTTPError, URLError
+    from urllib2 import urlopen, Request, HTTPError
 except ImportError:  # Python 3
     from urllib.parse import urlencode, quote
     from urllib.request import urlopen, Request
-    from urllib.error import HTTPError, URLError
+    from urllib.error import HTTPError
 
 from attributecode import ERROR
 from attributecode import Error

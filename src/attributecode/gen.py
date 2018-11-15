@@ -24,12 +24,12 @@ import logging
 from posixpath import basename, dirname, exists, join, normpath
 import sys
 
-if sys.version_info[0] < 3:
+if sys.version_info[0] < 3: 
     # Python 2
-    import backports.csv as csv
+    import backports.csv as csv #NOQA
 else:
     # Python 3
-    import csv
+    import csv #NOQA
 
 from attributecode import ERROR
 from attributecode import CRITICAL

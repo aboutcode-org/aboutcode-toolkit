@@ -34,12 +34,11 @@ import string
 import sys
 
 if sys.version_info[0] < 3:  # Python 2
-    from itertools import izip_longest as zip_longest
+    from itertools import izip_longest as zip_longest  # NOQA
 else:  # Python 3
-    from itertools import zip_longest
+    from itertools import zip_longest  # NOQA
 
 
-import yaml
 from yaml.reader import Reader
 from yaml.scanner import Scanner
 from yaml.parser import Parser
@@ -50,10 +49,10 @@ from yaml.nodes import MappingNode
 
 if sys.version_info[0] < 3:
     # Python 2
-    import backports.csv as csv
+    import backports.csv as csv  # NOQA
 else:
     # Python 3
-    import csv
+    import csv  # NOQA
 
 try:
     # Python 2
@@ -62,7 +61,7 @@ except ImportError:
     # Python 3
     import http.client as httplib
 
-from attributecode import CRITICAL, INFO
+from attributecode import CRITICAL
 from attributecode import Error
 
 
@@ -159,7 +158,7 @@ def check_duplicate_keys_about_file(context):
 
 def wrap_boolean_value(context):
     bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
-    input = []
+    input = []  # NOQA
     for line in context.splitlines():
         key = line.partition(':')[0]
         if key in bool_fields:
@@ -300,7 +299,7 @@ if sys.version_info[0] < 3:
                 self.fieldnames
             row = next(self.reader)
             self.line_num = self.reader.line_num
-    
+
             # unlike the basic reader, we prefer not to return blanks,
             # because we will typically wind up with a dict full of None
             # values
@@ -381,6 +380,7 @@ def get_output_mapping(location):
         sys.exit(errno.EACCES)
     return mapping
 
+
 def apply_mapping(abouts, alternate_mapping=None):
     """
     Given a list of About data dictionaries and a dictionary of
@@ -422,6 +422,7 @@ def get_mapping_key_order(mapping_file):
         mapping = get_mapping()
     return mapping.keys()
 
+
 def format_output(about_data, use_mapping, mapping_file):
     """
     Convert the about_data dictionary to an ordered dictionary for saneyaml.dump()
@@ -458,6 +459,7 @@ def format_output(about_data, use_mapping, mapping_file):
             if not other_key in priority_keys and not other_key in mapping_key_order:
                 order_dict[other_key] = about_data[other_key]
     return order_dict
+
 
 def get_about_file_path(location, use_mapping=False, mapping_file=None):
     """
@@ -497,10 +499,14 @@ def load_csv(location, use_mapping=False, mapping_file=None):
 
 def load_json(location, use_mapping=False, mapping_file=None):
     """
-    Read JSON at location, return a list of ordered mappings, one for each entry.
+    Read JSON file at `location` and return a list of ordered mappings, one for
+    each entry.
     """
+    # FIXME: IMHO we should know where the JSON is from and its shape
+    # TODO use: object_pairs_hook=OrderedDict
     with open(location) as json_file:
         results = json.load(json_file)
+
     # If the loaded JSON is not a list,
     # - JSON output from AboutCode Manager:
     # look for the "components" field as it is the field
@@ -542,20 +548,22 @@ def load_json(location, use_mapping=False, mapping_file=None):
     #    "name": "test",
     #    ...
     # }
-    if not isinstance(results, list):
+    if isinstance(results, list):
+        updated_results = sorted(results)
+    else:
         if u'aboutcode_manager_notice' in results:
             updated_results = results['components']
         elif u'scancode_notice' in results:
             updated_results = results['files']
         else:
             updated_results = [results]
-    else:
-        updated_results = sorted(results)
 
+    about_ordered_list = updated_results
+
+    # FIXME: why this double test? either have a mapping file and we use mapping or we do not.
+    # FIXME: IMHO only one argument is needed
     if use_mapping or mapping_file:
         about_ordered_list = apply_mapping(updated_results, mapping_file)
-    else:
-        about_ordered_list = updated_results
     return about_ordered_list
 
 
@@ -674,11 +682,11 @@ def inventory_filter(abouts, filter_dict):
 
 
 def update_fieldnames(fieldnames, mapping_output):
-    map = get_output_mapping(mapping_output)
+    mapping = get_output_mapping(mapping_output)
     updated_header = []
     for name in fieldnames:
         try:
-            updated_header.append(map[name])
+            updated_header.append(mapping[name])
         except:
             updated_header.append(name)
     return updated_header
@@ -700,6 +708,7 @@ def update_about_dictionary_keys(about_dictionary_list, mapping_output):
                 updated_ordered_dict[about_key] = value
         updated_dict_list.append(updated_ordered_dict)
     return updated_dict_list
+
 
 def ungroup_licenses(licenses):
     """
@@ -785,7 +794,7 @@ def format_about_dict_for_json_output(about_dictionary_list):
                     lic_dict['file'] = lic_group[2]
                 if lic_group[3]:
                     lic_dict['url'] = lic_group[3]
-                licenses_list.append(lic_dict) 
+                licenses_list.append(lic_dict)
             row_list['licenses'] = licenses_list
         json_formatted_list.append(row_list)
     return json_formatted_list
