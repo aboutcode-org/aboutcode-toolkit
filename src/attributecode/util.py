@@ -656,19 +656,6 @@ def copy_license_notice_files(fields, base_dir, license_notice_text_location, af
                 print(repr(e))
                 print('Cannot copy file at %(from_lic_path)r.' % locals())
 
-
-def update_severity_level_about_resource_path_not_exist_error(errors):
-    ignore_resource_path_check_message = u'Field about_resource_path:'
-    updated_errors = []
-    for err in errors:
-        if ignore_resource_path_check_message in err.message:
-            updated_errors.append(Error(INFO, err.message))
-            #continue
-        else:
-            updated_errors.append(err)
-    return updated_errors
-
-
 def inventory_filter(abouts, filter_dict):
     updated_abouts = []
     for key in filter_dict:
@@ -743,7 +730,7 @@ def format_about_dict_for_csv_output(about_dictionary_list):
             if element[key]:
                 if isinstance(element[key], list):
                     row_list[key] = u'\n'.join((element[key]))
-                elif key == u'about_resource_path' or key in file_fields:
+                elif key == u'about_resource' or key in file_fields:
                     row_list[key] = u'\n'.join((element[key].keys()))
                 else:
                     row_list[key] = element[key]
@@ -763,10 +750,12 @@ def format_about_dict_for_json_output(about_dictionary_list):
         license_url = []
         for key in element:
             if element[key]:
+                """
                 if key == u'about_resource':
                     row_list[key] = element[key][0]
-                # The 'about_resource_path' is an ordered dict
-                elif key == u'about_resource_path':
+                """
+                # The 'about_resource' is an ordered dict
+                if key == u'about_resource':
                     row_list[key] = list(element[key].keys())[0]
                 elif key in licenses:
                     if key == 'license_key':

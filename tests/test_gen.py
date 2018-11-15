@@ -57,9 +57,17 @@ class GenTest(unittest.TestCase):
         base_dir = get_test_loc('inv')
         errors, abouts = gen.load_inventory(location, base_dir)
 
+        expected_error_messages = ['Field about_resource',
+                                   'Field custom1 is not a supported field and is ignored.']
         expected_errors = [
             Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
-        assert expected_errors == errors
+        assert len(errors) == 2
+        for e in errors:
+            # we don't want to check the path value
+            if e.message.startswith('Field about_resource'):
+                continue
+            else:
+                assert e.message in expected_error_messages
 
         expected = [u'about_resource: .\n'
                     u'name: AboutCode\n'
@@ -80,10 +88,17 @@ class GenTest(unittest.TestCase):
                                             base_dir,
                                             license_notice_text_location,
                                             use_mapping)
-        expected_errors = [
-            Error(INFO, 'Field test is not a supported field and is not defined in the mapping file. This field is ignored.'),
-            Error(INFO, 'Field resource is a custom field')]
-        assert sorted(expected_errors) == sorted(errors)
+        expected_error_messages = ['Field about_resource',
+                                   'Field test is not a supported field and is not defined in the mapping file. This field is ignored.',
+                                   'Field resource is a custom field']
+
+        assert len(errors) == 3
+        for e in errors:
+            # we don't want to check the path value
+            if e.message.startswith('Field about_resource'):
+                continue
+            else:
+                assert e.message in expected_error_messages
 
         expected = [u'about_resource: .\n'
                     u'name: AboutCode\n'
@@ -102,16 +117,18 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
         base_dir = get_temp_dir()
         errors, _abouts = gen.generate(location, base_dir)
-        expected_errors_msg = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
+        expected_errors_msg1 = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
+        expected_errors_msg2 = 'Field about_resource'
         assert errors
-        assert len(errors) == 1
-        assert expected_errors_msg in errors[0].message
+        assert len(errors) == 2
+        assert expected_errors_msg1 in errors[0].message or expected_errors_msg1 in errors[1].message
+        assert expected_errors_msg2 in errors[0].message or expected_errors_msg2 in errors[1].message
 
     def test_generation_with_no_about_resource(self):
         location = get_test_loc('gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
-        expected = [u'.']
+        expected = OrderedDict([(u'.', None)])
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
 
@@ -120,11 +137,11 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        expected = [u'test.tar.gz']
+        expected = OrderedDict([(u'test.tar.gz', None)])
 
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
-        msg = u'Field about_resource_path'
+        msg = u'Field about_resource'
         assert msg in errors[0].message
 
     def test_generation_with_no_about_resource_reference_no_resource_validation(self):
@@ -132,7 +149,7 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        expected = [u'test.tar.gz']
+        expected = OrderedDict([(u'test.tar.gz', None)])
 
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
@@ -143,7 +160,7 @@ class GenTest(unittest.TestCase):
 
         errors, abouts = gen.generate(location, base_dir)
         msg1 = u'Field custom1 is not a supported field and is ignored.'
-        msg2 = u'Field about_resource_path'
+        msg2 = u'Field about_resource'
 
         assert msg1 in errors[0].message
         assert msg2 in errors[1].message
@@ -153,7 +170,6 @@ class GenTest(unittest.TestCase):
         expected = (u'about_resource: .\n'
                     u'name: AboutCode\n'
                     u'version: 0.11.0\n'
-                    u'about_resource_path: .\n'
                     u'description: |-\n'
                     u'    multi\n'
                     u'    line\n')
@@ -172,7 +188,6 @@ class GenTest(unittest.TestCase):
         expected = (u'about_resource: .\n'
                     u'name: AboutCode\n'
                     u'version: 0.11.0\n'
-                    u'about_resource_path: .\n'
                     u'licenses:\n'
                     u'    -   file: this.LICENSE\n')
         assert expected == in_mem_result

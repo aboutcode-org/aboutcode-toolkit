@@ -308,7 +308,6 @@ class UtilsTest(unittest.TestCase):
         test_file = get_test_loc('load/expected.json')
         expected = [OrderedDict(
                     [('about_file_path', '/load/this.ABOUT'),
-                     ('about_resource_path', '.'),
                      ('about_resource', '.'),
                      ('name', 'AboutCode'),
                      ('version', '0.11.0')])
@@ -320,7 +319,6 @@ class UtilsTest(unittest.TestCase):
         test_file = get_test_loc('load/expected_need_mapping.json')
         expected = [dict(OrderedDict(
                     [('about_file_path', '/load/this.ABOUT'),
-                     ('about_resource_path', '.'),
                      ('about_resource', '.'),
                      ('version', '0.11.0'),
                      ('name', 'AboutCode'),
@@ -334,7 +332,6 @@ class UtilsTest(unittest.TestCase):
         mapping_file = get_test_loc('custom-mapping-file/mapping.config')
         expected = [dict(OrderedDict(
                     [('about_file_path', '/load/this.ABOUT'),
-                     ('about_resource_path', '.'),
                      ('about_resource', '.'),
                      ('name', 'AboutCode'),
                      ('version', '0.11.0'),
@@ -350,7 +347,6 @@ class UtilsTest(unittest.TestCase):
                      ('version', '0.11.0'),
                      ('about_resource', '.'),
                      ('name', 'AboutCode'),
-                     ('about_resource_path', '.'),
                      ])
                     ]
         result = util.load_json(test_file)
@@ -468,11 +464,6 @@ class UtilsTest(unittest.TestCase):
                          ])]
         assert util.apply_mapping(input) == expected
 
-    def test_update_severity_level_about_resource_path_not_exist_error(self):
-        input_err = [Error(ERROR, 'Field about_resource_path: test.tar.gz does not exist')]
-        expected_err = [Error(INFO, 'Field about_resource_path: test.tar.gz does not exist')]
-        assert util.update_severity_level_about_resource_path_not_exist_error(input_err) == expected_err
-
     def test_check_duplicate_keys_about_file(self):
         test = '''
 name: test
@@ -539,11 +530,9 @@ description: sample
     def test_update_about_dictionary_keys(self):
         mapping_output = get_test_loc('util/mapping_output')
         about_ordered_dict = OrderedDict()
-        about_ordered_dict['about_resource_path'] = '.'
         about_ordered_dict['name'] = 'test.c'
         about_dict_list = [about_ordered_dict]
         expected_output_dict = OrderedDict()
-        expected_output_dict['about_resource_path'] = '.'
         expected_output_dict['Component'] = 'test.c'
         expected_dict_list = [expected_output_dict]
         result = util.update_about_dictionary_keys(about_dict_list, mapping_output)
@@ -586,7 +575,7 @@ description: sample
 
     def test_format_about_dict_for_json_output(self):
         input = [OrderedDict([(u'about_file_path', u'/input/about1.ABOUT'),
-                              (u'about_resource', [u'test.c']),
+                              (u'about_resource', OrderedDict([(u'test.c', None)])),
                               (u'name', u'AboutCode-toolkit'),
                               (u'license_key', [u'mit', u'bsd-new'])])]
 

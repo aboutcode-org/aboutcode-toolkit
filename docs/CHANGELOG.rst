@@ -8,6 +8,8 @@
     * The owner is now a StringField instead of ListField
     * Format the ordering of the genreated ABOUT file (See https://github.com/nexB/aboutcode-toolkit/issues/349#issuecomment-438871444)
     * '+' and '(' and ')' is now supported in license_expression
+    * The key 'about_resource_path' is removed
+    * The 2 required fields are 'about_resource' and 'name'
 
 2018-10-23
 

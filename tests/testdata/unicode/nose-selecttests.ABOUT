@@ -1,5 +1,4 @@
 about_resource: nose-selecttests-0.3.zip
-about_resource_path: ./nose-selecttests-0.3.zip
 version: 0.3
 download_url: http://pypi.python.org/packages/source/n/nose-selecttests/nose-selecttests-0.3.zip
 

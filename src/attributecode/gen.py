@@ -33,6 +33,7 @@ else:
 
 from attributecode import ERROR
 from attributecode import CRITICAL
+from attributecode import INFO
 from attributecode import Error
 from attributecode import model
 from attributecode import util
@@ -244,40 +245,29 @@ def generate(location, base_dir, license_notice_text_location=None,
 
         try:
             # Generate value for 'about_resource' if it does not exist
-            # Note: The `about_resource` is in ListField class
-            # and `about_resource_path` is in AboutResourceField class
             if not about.about_resource.value:
-                #about.about_resource.value = OrderedDict()
+                about.about_resource.value = OrderedDict()
+                about_resource_value = ''
                 if about.about_file_path.endswith('/'):
-                    about.about_resource.value.append(u'.')
-                    about.about_resource.original_value = u'.'
+                    about_resource_value = u'.'
                 else:
-                    about.about_resource.value.append(basename(about.about_file_path))
-                    about.about_resource.original_value = basename(about.about_file_path)
+                    about_resource_value = basename(about.about_file_path)
+                about.about_resource.value[about_resource_value] = None
                 about.about_resource.present = True
-
-            # Generate value for 'about_resource_path' if it does not exist
-            # Basically, this should be the same as the 'about_resource'
-            if not about.about_resource_path.value:
-                about.about_resource_path.value = OrderedDict()
-                for about_resource_value in about.about_resource.value:
-                    about.about_resource_path.value[about_resource_value] = None
-                about.about_resource_path.present = True
-                # Check for the existence of the about_resource
-                # If the input already have the about_resource_path field, it will
+                # Check for the existence of the 'about_resource'
+                # If the input already have the 'about_resource' field, it will
                 # be validated when creating the about object
                 loc = util.to_posix(dump_loc)
                 about_file_loc = loc
-                for about_resource_value in about.about_resource_path.value:
-                    path = join(dirname(util.to_posix(about_file_loc)),
-                                          about_resource_value)
-                    if not exists(path):
-                        path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
-                        path = normpath(path)
-                        msg = (u'Field about_resource_path: '
-                               u'%(path)s '
-                               u'does not exist' % locals())
-                        not_exist_errors.append(msg)
+                path = join(dirname(util.to_posix(about_file_loc)), about_resource_value)
+                if not exists(path):
+                    path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
+                    path = normpath(path)
+                    msg = (u'Field about_resource: '
+                           u'%(path)s '
+                           u'does not exist' % locals())
+                    not_exist_errors.append(msg)
+
             if gen_license:
                 # Write generated LICENSE file
                 license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
@@ -304,7 +294,7 @@ def generate(location, base_dir, license_notice_text_location=None,
             # Write the ABOUT files
             about.dump(dump_loc, use_mapping=use_mapping, mapping_file=mapping_file, with_empty=with_empty, with_absent=with_absent)
             for e in not_exist_errors:
-                errors.append(Error(ERROR, e))
+                errors.append(Error(INFO, e))
         except Exception as e:
             # only keep the first 100 char of the exception
             emsg = repr(e)[:100]

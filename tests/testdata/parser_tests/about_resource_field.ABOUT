@@ -1,3 +1,2 @@
 name: Apache HTTP Server
 about_resource: about_resource.c
-about_resource_path: ./about_resource.c

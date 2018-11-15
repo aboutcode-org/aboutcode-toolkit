@@ -455,15 +455,15 @@ class PathField(ListField):
             if self.license_notice_text_location:
                 location = posixpath.join(self.license_notice_text_location, path)
             else:
-                # The 'about_resource_path' should be a joined path with
+                # The 'about_resource' should be a joined path with
                 # the 'about_file_path' and the 'base_dir
                 if not self.running_inventory and self.about_file_path:
                     # Get the parent directory of the 'about_file_path'
                     afp_parent = posixpath.dirname(self.about_file_path)
 
-                    # Create a relative 'about_resource_path' by joining the
+                    # Create a relative 'about_resource' path by joining the
                     # parent of the 'about_file_path' with the value of the
-                    # 'about_resource_path'
+                    # 'about_resource'
                     arp = posixpath.join(afp_parent, path)
                     normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
                     location = posixpath.join(self.base_dir, normalized_arp)
@@ -480,7 +480,11 @@ class PathField(ListField):
                 location = util.to_posix(location.strip(UNC_PREFIX))
                 msg = (u'Field %(name)s: Path %(location)s not found'
                        % locals())
-                errors.append(Error(CRITICAL, msg))
+                # We want to show INFO error for 'about_resource'
+                if name == u'about_resource':
+                    errors.append(Error(INFO, msg))
+                else:
+                    errors.append(Error(CRITICAL, msg))
                 location = None
 
             paths[path] = location
@@ -702,10 +706,10 @@ class About(object):
         is simpler.
         """
         self.fields = OrderedDict([
-            ('about_resource', ListField(required=True)),
+            #('about_resource', ListField(required=True)),
             # ('about_resource', AboutResourceField(required=True)),
-            ('name', SingleLineField()),
-            ('about_resource_path', AboutResourceField()),
+            ('about_resource', AboutResourceField(required=True)),
+            ('name', SingleLineField(required=True)),
 
             ('version', SingleLineField()),
             ('download_url', UrlField()),
@@ -870,6 +874,7 @@ class About(object):
             afpa = self.about_file_path_attr
             as_dict[afpa] = self.about_file_path
             arpa = self.about_resource_path_attr
+            """
             if self.about_resource_path.present:
                 as_dict[arpa] = self.resolved_resources_paths()
             else:
@@ -890,6 +895,7 @@ class About(object):
                     key = u''
                     arp[key] = None
                     as_dict[arpa] = arp
+            """
 
         for field in self.all_fields(with_absent=with_absent,
                                      with_empty=with_empty):
@@ -1035,12 +1041,12 @@ class About(object):
             yaml.load(input_text, Loader=util.NoDuplicateLoader)
             """
             The running_inventory defines if the current process is 'inventory' or not.
-            This is used for the validation of the about_resource_path.
+            This is used for the validation of the path of the 'about_resource'.
             In the 'inventory' command, the code will use the parent of the about_file_path
-            location and join with the 'about_resource_path' for the validation.
+            location and join with the 'about_resource' for the validation.
             On the other hand, in the 'gen' command, the code will use the
             generated location (aka base_dir) along with the parent of the about_file_path
-            and then join with the 'about_resource_path'
+            and then join with the 'about_resource'
             """
             running_inventory = True
             # wrap the value of the boolean field in quote to avoid 
@@ -1103,7 +1109,7 @@ class About(object):
         license_name = []
         license_file = []
         license_url = []
-        file_fields = ['about_resource_path', 'notice_file', 'changelog_file', 'author_file']
+        file_fields = ['about_resource', 'notice_file', 'changelog_file', 'author_file']
         bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
         for field in self.all_fields(with_absent, with_empty):
             if field.name == 'license_key' and field.value:
@@ -1114,11 +1120,9 @@ class About(object):
                 license_file = field.value.keys()
             elif field.name == 'license_url' and field.value:
                 license_url = field.value
-            # No multiple 'about_resource' and 'about_resource_path' reference supported.
+            # No multiple 'about_resource' reference supported.
             # Take the first element (should only be one) in the list for the
-            # value of 'about_resource' and 'about_resource_path'
-            elif field.name == 'about_resource' and field.value:
-                about_data[field.name] = field.value[0]
+            # value of 'about_resource'
             elif field.name in file_fields and field.value:
                 about_data[field.name] = list(field.value.keys())[0]
             else:
@@ -1373,8 +1377,6 @@ def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=Tru
             afp = ad['about_file_path']
             afp = '/' + afp if not afp.startswith('/') else afp
             ad['about_file_path'] = afp
-        if not 'about_resource_path' in ad.keys():
-            arp = ad['about_resource_path']
         abouts_dictionary_list.append(ad)
     return abouts_dictionary_list
 

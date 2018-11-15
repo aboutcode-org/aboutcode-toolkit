@@ -35,7 +35,6 @@ from attributecode.gen import generate as gen_generate
 from attributecode import model
 from attributecode import severities
 from attributecode.util import extract_zip
-from attributecode.util import update_severity_level_about_resource_path_not_exist_error
 from attributecode.util import to_posix
 from attributecode.util import inventory_filter
 
@@ -199,14 +198,13 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         print(msg)
 
     error_count = 0
-    finalized_errors = update_severity_level_about_resource_path_not_exist_error(errors)
 
-    for e in finalized_errors:
+    for e in errors:
         # Only count as warning/error if CRITICAL, ERROR and WARNING
         if e.severity > 20:
             error_count = error_count + 1
 
-    log_errors(finalized_errors, error_count, quiet, verbose, os.path.dirname(output))
+    log_errors(errors, error_count, quiet, verbose, os.path.dirname(output))
     click.echo(' %(error_count)d errors or warnings detected.' % locals())
     sys.exit(0)
 
@@ -283,13 +281,12 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     about_count = len(abouts)
     error_count = 0
-    finalized_errors = update_severity_level_about_resource_path_not_exist_error(errors)
 
-    for e in finalized_errors:
+    for e in errors:
         # Only count as warning/error if CRITICAL, ERROR and WARNING
         if e.severity > 20:
             error_count = error_count + 1
-    log_errors(finalized_errors, error_count, quiet, verbose, output)
+    log_errors(errors, error_count, quiet, verbose, output)
     click.echo('Generated %(about_count)d .ABOUT files with %(error_count)d errors or warnings' % locals())
     sys.exit(0)
 
@@ -372,14 +369,13 @@ OUTPUT: Path to output file to write the attribution to.
         inv_errors.append(no_match_error)
 
     error_count = 0
-    finalized_errors = update_severity_level_about_resource_path_not_exist_error(inv_errors)
 
-    for e in finalized_errors:
+    for e in inv_errors:
         # Only count as warning/error if CRITICAL, ERROR and WARNING
         if e.severity > 20:
             error_count = error_count + 1
 
-    log_errors(finalized_errors, error_count, quiet, verbose, os.path.dirname(output))
+    log_errors(inv_errors, error_count, quiet, verbose, os.path.dirname(output))
     click.echo(' %(error_count)d errors or warnings detected.' % locals())
     click.echo('Finished.')
     sys.exit(0)
