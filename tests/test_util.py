@@ -582,15 +582,42 @@ class TestJson(unittest.TestCase):
 
 class TestMiscUtils(unittest.TestCase):
 
-    def test_check_duplicate_keys_about_file(self):
+    def test_check_duplicate_keys_about_file_with_no_dupe(self):
         test = '''
 name: test
-notes: some notes
 
 license_expression: mit
 notes: dup key here
             '''
+        expected = []
+        assert expected == util.check_duplicate_keys_about_file(test)
+
+
+    def test_check_duplicate_keys_about_file_returns_duplicate(self):
+        test = '''
+name: test
+notes: some notes
+notes: dup key here
+
+notes: dup key here
+license_expression: mit
+notes: dup key here
+            '''
         expected = ['notes']
+        assert expected == util.check_duplicate_keys_about_file(test)
+
+    def test_check_duplicate_keys_about_file_ignore_non_key_line(self):
+        test = '''
+ name: test
+- notes: some notes
+  - notes: dup key here
+# some
+    
+notes: dup key here
+license_expression: mit
+notes dup key here
+            '''
+        expected = []
         assert expected == util.check_duplicate_keys_about_file(test)
 
     def test_wrap_boolean_value(self):
@@ -624,7 +651,8 @@ notes: continuation
  line
 description: sample
             '''
-        expected = ['owner', 'notes']
+        # notes: the output IS sorted
+        expected = ['notes', 'owner', ]
         assert expected == util.check_duplicate_keys_about_file(test)
 
     def test_inventory_filter(self):

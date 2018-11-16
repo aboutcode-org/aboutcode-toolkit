@@ -116,24 +116,31 @@ def check_file_names(paths):
     return errors
 
 
-def check_duplicate_keys_about_file(context):
+def check_duplicate_keys_about_file(about_text):
     """
-    
+    Return a list of duplicated keys given a ABOUT text string.
     """
-    keys = []
-    dup_keys = []
-    for line in context.splitlines():
+    seen = set()
+    duplicates = set()
+    for line in about_text.splitlines():
         """
-        Ignore all the continuation string, string block and empty line
+        Ignore all the continuation string, mapping/list dahs, string block and empty line.
         """
-        if not line.startswith(' ') and not len(line.strip()) == 0 :
-            # Get the key name
-            key = line.partition(':')[0]
-            if key in keys:
-                dup_keys.append(key)
-            else:
-                keys.append(key)
-    return dup_keys
+        if not line.strip() :
+            continue
+        if line.startswith((' ', '\t')):
+            continue
+        if line.strip().startswith('-'):
+            continue
+        if ':' not in line:
+            continue
+        # Get the key name
+        key, _, _val = line.partition(':')
+        if key in seen:
+            duplicates.add(key)
+        else:
+            seen.add(key)
+    return sorted(duplicates)
 
 
 def wrap_boolean_value(context):
