@@ -1039,6 +1039,8 @@ class About(object):
         self.errors = errors
         return errors
 
+    # FIXME: should be a from_dict class factory instead
+    # FIXME: an About object should not know about mappings
     def load_dict(self, fields_dict, base_dir, running_inventory=False,
                   use_mapping=False, mapping_file=None,
                   license_notice_text_location=None, with_empty=True):
@@ -1054,6 +1056,7 @@ class About(object):
             fields = [(n, v) for n, v in fields_dict.items() if v]
         for key, value in fields:
             if key == u'licenses':
+                # FIXME: use a license object instead
                 lic_key, lic_name, lic_file, lic_url = ungroup_licenses(value)
                 if lic_key:
                     fields.append(('license_key', lic_key))
