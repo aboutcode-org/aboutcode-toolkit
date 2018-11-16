@@ -27,7 +27,7 @@ from attributecode import attrib
 from attributecode import model
 
 
-class AttribTest(unittest.TestCase):
+class TemplateTest(unittest.TestCase):
 
     def test_check_template_simple_valid_returns_None(self):
         expected = None
@@ -67,28 +67,45 @@ class AttribTest(unittest.TestCase):
                 template = tmpl.read()
             assert None == attrib.check_template(template)
 
-    def test_generate(self):
-        test_file = get_test_loc('attrib_gen/attrib.ABOUT')
+
+class GenerateTest(unittest.TestCase):
+
+    def test_generate_from_collected_inventory_wih_custom_temaplte(self):
+        test_file = get_test_loc('test_attrib/gen_simple/attrib.ABOUT')
         errors, abouts = model.collect_inventory(test_file)
-
-        with open(get_test_loc('attrib_gen/test.template')) as tmpl:
-            template = tmpl.read()
-
         assert not errors
 
-                expected = (
+        test_template = get_test_loc('test_attrib/gen_simple/test.template')
+        with open(test_template) as tmpl:
+            template = tmpl.read()
+
+        expected = (
             'Apache HTTP Server: 2.4.3\n'
             'resource: httpd-2.4.3.tar.gz\n')
 
         result = attrib.generate(abouts, template)
-        self.assertEqual(expected, result)
+        assert expected == result
 
-    def test_generate_from_file_with_default_template(self):
-        test_file = get_test_loc('attrib_gen/attrib.ABOUT')
-        _errors, abouts = model.collect_inventory(test_file)
+    def test_generate_with_default_template(self):
+        test_file = get_test_loc('test_attrib/gen_default_template/attrib.ABOUT')
+        errors, abouts = model.collect_inventory(test_file)
+        assert not errors
         result = attrib.generate_from_file(abouts)
-        with open(get_test_loc('attrib_gen/expected_default_attrib.html')) as exp:
+
+        expected_file = get_test_loc(
+            'test_attrib/gen_default_template/expected_default_attrib.html')
+        with open(expected_file) as exp:
             expected = exp.read()
+
         # strip the timestamp: the timestamp is wrapped in italic block
-        self.assertEqual([x.rstrip() for x in expected.splitlines()],
-                         [x.rstrip() for x in result.splitlines() if not '<i>' in x])
+        result = remove_timestamp(result)
+        expected = remove_timestamp(expected)
+        assert expected == result
+
+
+def remove_timestamp(html_text):
+    """
+    Return the `html_text` generated attribution stripped from timestamps: the
+    timestamp is wrapped in italic block in the default template.
+    """
+    return '\n'.join(x for x in html_text.splitlines() if not '<i>' in x)
