@@ -29,7 +29,6 @@ except NameError:
 
 __version__ = '3.3.0'
 
-
 __about_spec_version__ = '3.1'
 
 __copyright__ = """
@@ -66,6 +65,12 @@ class Error(namedtuple('Error', ['severity', 'message'])):
         msg = clean_string(repr(self.message))
         return 'Error(%(sev)s, %(msg)s)' % locals()
 
+    def to_dict(self, *args, **kwargs):
+        """
+        Return an ordered mapping of self.
+        """
+        return self._asdict()
+
 
 def clean_string(s):
     """
@@ -87,6 +92,7 @@ def clean_string(s):
     s = s.replace("\\\\", "\\")
     return s
 
+
 # modeled after the logging levels
 CRITICAL = 50
 ERROR = 40
@@ -103,4 +109,4 @@ severities = {
     INFO : u'INFO',
     DEBUG : u'DEBUG',
     NOTSET : u'NOTSET'
-    }
+}
