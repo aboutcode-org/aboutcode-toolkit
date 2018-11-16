@@ -1265,27 +1265,6 @@ class CollectorTest(unittest.TestCase):
 
 class GroupingsTest(unittest.TestCase):
 
-    def test_unique(self):
-        base_dir = 'some_dir'
-        test = {'about_resource': u'.',
-                 'author': u'',
-                 'copyright': u'Copyright (c) 2013-2014 nexB Inc.',
-                u'custom1': u'some custom',
-                u'custom_empty': u'',
-                 'description': u'AboutCode is a tool\nfor files.',
-                 'license': u'apache-2.0',
-                 'name': u'AboutCode',
-                 'owner': u'nexB Inc.'}
-
-        a = model.About()
-        a.load_dict(test, base_dir)
-
-        b = model.About()
-        b.load_dict(test, base_dir)
-        abouts = [a, b]
-        results = model.unique(abouts)
-        assert [a] == results
-
     def test_by_license(self):
         base_dir = 'some_dir'
         a = model.About()

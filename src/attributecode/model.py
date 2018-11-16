@@ -1434,18 +1434,6 @@ def by_name(abouts):
     return OrderedDict(sorted(grouped.items()))
 
 
-def unique(abouts):
-    """
-    Return a list of unique About objects.
-    """
-    uniques = []
-    for about in abouts:
-        if any(about == x for x in uniques):
-            continue
-        uniques.append(about)
-    return uniques
-
-
 def by_license_content(abouts):
     """
     Return an ordered dict sorted by key of About objects grouped by license

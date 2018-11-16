@@ -691,8 +691,37 @@ description: sample
         assert expected_lic_file == lic_file
         assert expected_lic_url == lic_url
 
-    def test_deduplicate(self):
+    def test_unique_does_deduplicate_and_keep_ordering(self):
         items = ['a', 'b', 'd', 'b', 'c', 'a']
         expected = ['a', 'b', 'd', 'c']
         results = util.unique(items)
         assert expected == results
+
+    def test_unique_can_handle_About_object(self):
+        base_dir = 'some_dir'
+        test = {
+            'about_resource': '.',
+            'author': '',
+            'copyright': 'Copyright (c) 2013-2014 nexB Inc.',
+            'custom1': 'some custom',
+            'custom_empty': '',
+            'description': 'AboutCode is a tool\nfor files.',
+            'license': 'apache-2.0',
+            'name': 'AboutCode',
+            'owner': 'nexB Inc.'
+        }
+
+        a = model.About()
+        a.load_dict(test, base_dir)
+
+        c = model.About()
+        c.load_dict(test, base_dir)
+
+        b = model.About()
+        test.update(dict(about_resource='asdasdasd'))
+        b.load_dict(test, base_dir)
+
+        abouts = [a, b]
+        results = util.unique(abouts)
+        assert [a] == results
+
