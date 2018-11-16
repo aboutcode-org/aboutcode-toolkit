@@ -21,15 +21,12 @@ from __future__ import unicode_literals
 import codecs
 from collections import OrderedDict
 import logging
-from posixpath import basename, dirname, exists, join, normpath
-import sys
-
-if sys.version_info[0] < 3: 
-    # Python 2
-    import backports.csv as csv #NOQA
-else:
-    # Python 3
-    import csv #NOQA
+# FIXME: why posipath???
+from posixpath import basename
+from posixpath import dirname
+from posixpath import exists
+from posixpath import join
+from posixpath import normpath
 
 from attributecode import ERROR
 from attributecode import CRITICAL
@@ -38,8 +35,16 @@ from attributecode import Error
 from attributecode import model
 from attributecode import util
 from attributecode.util import add_unc
+from attributecode.util import python2
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
+from attributecode.util import unique
+
+
+if python2: 
+    import backports.csv as csv #NOQA
+else:
+    import csv #NOQA
 
 
 LOG_FILENAME = 'error.log'
@@ -302,17 +307,7 @@ def generate(location, base_dir, license_notice_text_location=None,
                    u'%(dump_loc)s '
                    u'with error: %(emsg)s' % locals())
             errors.append(Error(ERROR, msg))
-    dedup_errors = deduplicate(errors)
-    return dedup_errors, abouts
+    unique_errors = unique(errors)
+    return unique_errors, abouts
 
 
-def deduplicate(sequence):
-    """
-    Return a list of unique items found in sequence. Preserve the original
-    sequence order.
-    """
-    deduped = []
-    for item in sequence:
-        if item not in deduped:
-            deduped.append(item)
-    return deduped

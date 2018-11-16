@@ -776,6 +776,21 @@ def format_about_dict_for_json_output(about_dictionary_list):
     return json_formatted_list
 
 
+def unique(sequence):
+    """
+    Return a list of unique items found in sequence. Preserve the original
+    sequence order.
+    For example:
+    >>> unique([1, 5, 3, 5])
+    [1, 5, 3]
+    """
+    deduped = []
+    for item in sequence:
+        if item not in deduped:
+            deduped.append(item)
+    return deduped
+
+
 # FIXME: remove and replace by saneyaml
 from collections import Hashable
 

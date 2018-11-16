@@ -691,5 +691,8 @@ description: sample
         assert expected_lic_file == lic_file
         assert expected_lic_url == lic_url
 
-    def test_about_files(self):
-        pass
+    def test_deduplicate(self):
+        items = ['a', 'b', 'd', 'b', 'c', 'a']
+        expected = ['a', 'b', 'd', 'c']
+        results = util.unique(items)
+        assert expected == results
