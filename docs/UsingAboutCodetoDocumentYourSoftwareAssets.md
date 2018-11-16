@@ -63,17 +63,12 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>name</td>
     <td>Component name</td>
-    <td>Optional</td>
+    <td>Mandatory</td>
   </tr>
   <tr>
     <td>about_resource</td>
     <td>Name of the component resource</td>
     <td>Optional</td>
-  </tr>
-  <tr>
-    <td>about_resource_path</td>
-    <td>Path to the component resource</td>
-    <td>Optional. Relative path to the component resource from where the .ABOUT file located.</td>
   </tr>
   <tr>
     <td>version</td>

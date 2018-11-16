@@ -1,4 +1,4 @@
-ABOUT File Specification v3.0
+ABOUT File Specification v3.1
 
 
 Purpose
@@ -25,7 +25,6 @@ Getting Started
 A simple and valid ABOUT file named httpd.ABOUT may look like this::
 
         about_resource: httpd-2.4.3.tar.gz
-        about_resource_path: httpd-2.4.3.tar.gz
         name: Apache HTTP Server
         version: 2.4.3
         homepage_url: http://httpd.apache.org
@@ -223,11 +222,7 @@ Referencing the file or directory documented by an ABOUT file
 
 An ABOUT file documents one file or directory. The mandatory "about_resource"
 field reference the documented file or directory. The value of the
-"about_resource" field is the name of the referenced file or directory. 
-
-On the other hand, there is another field "about_resource_path" can be a name stored
-in the same directory as the ABOUT file or a POSIX path relative to the path of
-the ABOUT file. POSIX paths use a "/" forward slash sign as path separators.
+"about_resource" field is the name or path of the referenced file or directory. 
 
 A tool processing an ABOUT file must report an error if this field is missing.
 
@@ -238,18 +233,15 @@ For example, a file named django.ABOUT contains the following field to document
 the django-1.2.3.tar.gz archive stored in the same directory::
 
       about_resource: django-1.2.3.tar.gz
-      about_resource_path: django-1.2.3.tar.gz
 
 In this example, the ABOUT file documents a whole sub-directory::
 
       about_resource: linux-kernel-2.6.23
-      about_resource_path: downloads/linux-kernel-2.6.23/
 
 In this example, the ABOUT file documents the current directory, using a "."
 period to reference it::
 
       about_resource: .
-      about_resource_path: .
 
 
 Other Mandatory fields
@@ -270,8 +262,6 @@ Optional Information fields
   out from VCS such as Subversion or Git). If not available, the version should
   be the date the component was provisioned, in an ISO date format such as
   'YYYY-MM-DD'.
-
-- about_resource_path: Path the the reference component
 
 - spec_version: The version of the ABOUT file format specification used for this
   file. This is provided as a hint to readers and tools in order to support
@@ -330,7 +320,7 @@ Optional Licensing fields
 - license_key: The license key(s) for the component.
 
 
-Optional Licensing flag fields
+Optional Boolean flag fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - redistribute: Set this flag to yes if the component license requires source
@@ -345,6 +335,8 @@ Optional Licensing flag fields
 - modified: Set this flag to yes if the component has been modified. Defaults to
   no when absent.
 
+- internal_use_only: Set this flag to yes if the component is used internal only.
+  Defaults to no when absent.
 
 Optional Extension fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~

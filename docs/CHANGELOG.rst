@@ -1,6 +1,6 @@
-2018-xx-xx
+2018-11-15
 
-    Release x.x.x
+    Release 3.3.0
 
     * Update the list of common license keys
     * New UrlListField introduced for list of urls
@@ -9,7 +9,7 @@
     * Format the ordering of the genreated ABOUT file (See https://github.com/nexB/aboutcode-toolkit/issues/349#issuecomment-438871444)
     * '+' and '(' and ')' is now supported in license_expression
     * The key 'about_resource_path' is removed
-    * The 2 required fields are 'about_resource' and 'name'
+    * Revert back the requirement of the 'name' field
     * Add a new supported 'internal_use_only' key
 
 2018-10-23
