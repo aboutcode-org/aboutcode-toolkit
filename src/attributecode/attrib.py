@@ -22,19 +22,20 @@ import codecs
 import collections
 import datetime
 import os
-from posixpath import basename
-from posixpath import dirname
-from posixpath import exists
-from posixpath import join
 
 import jinja2
 
-import attributecode
 from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
 from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
+from attributecode.util import get_about_file_path
+
+
+# FIXME: the template dir should be outside the code tree
+default_template = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), 'templates', 'default_html.template')
 
 
 def generate(abouts, template_string=None, vartext_dict=None):
@@ -130,17 +131,11 @@ def check_template(template_string):
         return e.lineno, e.message
 
 
-# FIXME: the template dir should be outside the code tree
-default_template = join(os.path.dirname(os.path.realpath(__file__)),
-                                'templates', 'default_html.template')
-
-def generate_from_file(abouts, template_loc=None, vartext_dict=None):
+def generate_from_file(abouts, template_loc=default_template, vartext_dict=None):
     """
     Generate and return attribution string from a list of About objects and a
     template location.
     """
-    if not template_loc:
-        template_loc = default_template
     template_loc = add_unc(template_loc)
     with codecs.open(template_loc, 'rb', encoding='utf-8') as tplf:
         tpls = tplf.read()
@@ -152,6 +147,7 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
     """
     Generate attribution file using the `abouts` list of About object
     at `output_location`.
+    Return a list of errors if any.
 
     Optionally use the mapping.config file if `use_mapping` is True.
 
@@ -173,7 +169,7 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
         updated_abouts = abouts
     # Do the following if an filter list (inventory_location) is provided
     else:
-        if not exists(inventory_location):
+        if not os.path.exists(inventory_location):
             # FIXME: this message does not make sense
             msg = (u'"INVENTORY_LOCATION" does not exist. Generation halted.')
             errors.append(Error(ERROR, msg))
@@ -184,7 +180,7 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
 
             try:
                 # Return a list which contains only the about file path
-                about_list = attributecode.util.get_about_file_path(
+                about_list = get_about_file_path(
                     inventory_location, use_mapping=use_mapping, mapping_file=mapping_file)
             # FIXME: why catching all exceptions?
             except Exception:
@@ -257,11 +253,15 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
     return errors
 
 
+# FIXME: this function purpose needs to be explained.
 def as_about_paths(paths):
     """
     Return a list of paths to .ABOUT files from a list of `paths`
     strings.
     """
+    from posixpath import basename
+    from posixpath import dirname
+
     about_paths = []
     for path in paths:
         if path.endswith('.ABOUT'):

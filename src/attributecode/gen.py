@@ -309,5 +309,3 @@ def generate(location, base_dir, license_notice_text_location=None,
             errors.append(Error(ERROR, msg))
     unique_errors = unique(errors)
     return unique_errors, abouts
-
-
