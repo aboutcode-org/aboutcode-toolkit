@@ -17,52 +17,28 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import collections
-from collections import OrderedDict
 import codecs
-import errno
+from collections import OrderedDict
 import json
 import ntpath
 import os
-from os.path import abspath
-from os.path import dirname
-from os.path import join
 import posixpath
 import shutil
-import socket
 import string
 import sys
 
-if sys.version_info[0] < 3:  # Python 2
-    from itertools import izip_longest as zip_longest  # NOQA
-else:  # Python 3
-    from itertools import zip_longest  # NOQA
-
-
-from yaml.reader import Reader
-from yaml.scanner import Scanner
-from yaml.parser import Parser
-from yaml.composer import Composer
-from yaml.constructor import Constructor, ConstructorError
-from yaml.resolver import Resolver
-from yaml.nodes import MappingNode
-
-if sys.version_info[0] < 3:
-    # Python 2
-    import backports.csv as csv  # NOQA
-else:
-    # Python 3
-    import csv  # NOQA
-
-try:
-    # Python 2
-    import httplib
-except ImportError:
-    # Python 3
-    import http.client as httplib
-
 from attributecode import CRITICAL
 from attributecode import Error
+
+
+python2 = sys.version_info[0] < 3
+
+if python2:
+    import backports.csv as csv  # NOQA
+    from itertools import izip_longest as zip_longest  # NOQA
+else:
+    import csv  # NOQA
+    from itertools import zip_longest  # NOQA
 
 
 on_windows = 'win32' in sys.platform
@@ -88,7 +64,7 @@ valid_file_chars = string.digits + string.ascii_letters + '_-.' + ' '
 
 def invalid_chars(path):
     """
-    Return a list of invalid characters in the file name of path
+    Return a list of invalid characters in the file name of `path`.
     """
     path = to_posix(path)
     rname = resource_name(path)
@@ -171,6 +147,7 @@ def wrap_boolean_value(context):
     return updated_context
 
 
+# TODO: rename to normalize_path
 def get_absolute(location):
     """
     Return an absolute normalized location.
@@ -184,7 +161,7 @@ def get_absolute(location):
 
 def get_locations(location):
     """
-    Return a list of locations of files given the location of a
+    Return a list of locations of files given the `location` of a
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
@@ -203,7 +180,7 @@ def get_locations(location):
 
 def get_about_locations(location):
     """
-    Return a list of locations of ABOUT files given the location of a
+    Return a list of locations of ABOUT files given the `location` of a
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
@@ -268,7 +245,9 @@ def is_about_file(path):
     """
     Return True if the path represents a valid ABOUT file name.
     """
-    return path and path.lower().endswith('.about')
+    if path:
+        path = path.lower()
+        return path.endswith('.about') and path != '.about'
 
 
 def resource_name(path):
@@ -282,11 +261,7 @@ def resource_name(path):
     return right.strip()
 
 
-# Python 3
-OrderedDictReader = csv.DictReader
-
-if sys.version_info[0] < 3:
-    # Python 2
+if python2:
     class OrderedDictReader(csv.DictReader):
         """
         A DictReader that return OrderedDicts
@@ -316,69 +291,49 @@ if sys.version_info[0] < 3:
             return d
 
         next = __next__
+else:
+    OrderedDictReader = csv.DictReader
 
 
-def get_mapping(location=None):
+# FIXME: we should use a proper YAML file for this instead
+def load_mapping(location, lowercase=True):
+    """
+    Return a mapping loaded from a mapping configuration file at `location`.
+    If `lowercase` is True, the keys are lowercased.
+    Raise Exception on errors including empty of non existing location.
+    Return an empty mapping if the location is empty or does not exists.
+    """
+    mapping = OrderedDict()
+    with open(location) as mapping_file:
+        for line in mapping_file:
+            line = line.strip()
+            if not line or ':' not in line or line.startswith('#'):
+                continue
+            if lowercase:
+                line = line.lower()
+
+            about_key, _, user_key = line.partition(':')
+            # FIXME: why do we allow spaces in ABOUT keys and converts these to _????
+            # FIXME: this should be an error instead
+            about_key = about_key.strip().replace(' ', '_')
+            user_key = user_key.strip()
+            mapping[about_key] = user_key
+    return mapping
+
+
+DEFAULT_MAPPING_CONFIG_FILE = os.path.join(
+    os.path.abspath(os.path.dirname(__file__)), 'mapping.config')
+
+
+def get_mapping(location=None, lowercase=True,
+                default_mapping_location=DEFAULT_MAPPING_CONFIG_FILE):
     """
     Return a mapping of user key names to About key names by reading the
-    mapping.config file from location or the directory of this source file if
+    mapping.config file from `location` or the directory of this source file if
     location was not provided.
     """
-    if not location:
-        location = join(abspath(dirname(__file__)), 'mapping.config')
-    if not os.path.exists(location):
-        return {}
-
-    mapping = collections.OrderedDict()
-    try:
-        with open(location) as mapping_file:
-            for line in mapping_file:
-                if not line or not line.strip() or line.strip().startswith('#'):
-                    continue
-
-                if ':' in line:
-                    line = line.lower()
-                    key, sep, value = line.partition(':')
-                    about_key = key.strip().replace(' ', '_')
-                    user_key = value.strip()
-                    mapping[about_key] = user_key
-
-    except Exception as e:
-        print(repr(e))
-        print('Cannot open or process mapping.config file at %(location)r.' % locals())
-        # FIXME: this is rather brutal
-        sys.exit(errno.EACCES)
-    return mapping
-
-
-def get_output_mapping(location):
-    """
-    Return a mapping of About key names to user key names by reading the
-    user's input file from location. The format of the user key names will
-    NOT be formatted (i.e. keys will NOT be forced to convert to lower case)
-    """
-    if not os.path.exists(location):
-        return {}
-
-    mapping = {}
-    try:
-        with open(location) as mapping_file:
-            for line in mapping_file:
-                if not line or not line.strip() or line.strip().startswith('#'):
-                    continue
-
-                if ':' in line:
-                    key, sep, value = line.partition(':')
-                    user_key = key.strip()
-                    about_key = value.strip()
-                    mapping[about_key] = user_key
-
-    except Exception as e:
-        print(repr(e))
-        print('Cannot open or process file at %(location)r.' % locals())
-        # FIXME: this is rather brutal
-        sys.exit(errno.EACCES)
-    return mapping
+    location = location or default_mapping_location
+    return load_mapping(location, lowercase)
 
 
 def apply_mapping(abouts, alternate_mapping=None):
@@ -389,10 +344,7 @@ def apply_mapping(abouts, alternate_mapping=None):
     the mapping from the default mnapping.config if an alternate
     mapping dict is not provided.
     """
-    if alternate_mapping:
-        mapping = get_mapping(alternate_mapping)
-    else:
-        mapping = get_mapping()
+    mapping = get_mapping(alternate_mapping)
 
     if not mapping:
         return abouts
@@ -412,18 +364,8 @@ def apply_mapping(abouts, alternate_mapping=None):
         mapped_abouts.append(mapped_about)
     return mapped_abouts
 
-def get_mapping_key_order(mapping_file):
-    """
-    Get the mapping key order and return as a list
-    """
-    if mapping_file:
-        mapping = get_mapping(mapping_file)
-    else:
-        mapping = get_mapping()
-    return mapping.keys()
 
-
-def format_output(about_data, use_mapping, mapping_file):
+def format_output(about_data, use_mapping, mapping_loc):
     """
     Convert the about_data dictionary to an ordered dictionary for saneyaml.dump()
     The ordering should be:
@@ -434,19 +376,24 @@ def format_output(about_data, use_mapping, mapping_file):
     and the rest is the order from the mapping.config file (if any); otherwise alphabetical order.
     """
     mapping_key_order = []
-    if use_mapping or mapping_file:
-        mapping_key_order = get_mapping_key_order(mapping_file)
-    priority_keys = [u'about_resource', u'name', u'version']
+    # FIXME: we should not
+    if use_mapping or mapping_loc:
+        mapping_key_order = get_mapping(mapping_loc).keys()
+
+    priority_keys = ['about_resource', 'name', 'version']
     about_data_keys = []
-    order_dict = collections.OrderedDict()
+    order_dict = OrderedDict()
     for key in about_data:
         about_data_keys.append(key)
-    if u'about_resource' in about_data_keys:
+    if 'about_resource' in about_data_keys:
         order_dict['about_resource'] = about_data['about_resource']
-    if u'name' in about_data_keys:
+
+    if 'name' in about_data_keys:
         order_dict['name'] = about_data['name']
-    if u'version' in about_data_keys:
+
+    if 'version' in about_data_keys:
         order_dict['version'] = about_data['version']
+
     if not mapping_key_order:
         for other_key in sorted(about_data_keys):
             if not other_key in priority_keys:
@@ -478,7 +425,7 @@ def get_about_file_path(location, use_mapping=False, mapping_file=None):
 
 def load_csv(location, use_mapping=False, mapping_file=None):
     """
-    Read CSV at location, return a list of ordered dictionaries, one
+    Read CSV at `location`, return a list of ordered dictionaries, one
     for each row.
     """
     results = []
@@ -567,10 +514,17 @@ def load_json(location, use_mapping=False, mapping_file=None):
     return about_ordered_list
 
 
+# FIXME: rename to is_online: BUT do we really need this at all????
 def have_network_connection():
     """
     Return True if an HTTP connection to some public web site is possible.
     """
+    import socket
+    if python2:
+        import httplib  # NOQA
+    else:
+        import http.client as httplib  # NOQA
+
     http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)
     try:
         http_connection.connect()
@@ -578,6 +532,7 @@ def have_network_connection():
         return False
     else:
         return True
+
 
 def extract_zip(location):
     """
@@ -623,7 +578,7 @@ def extract_zip(location):
 
 def add_unc(location):
     """
-    Convert a location to an absolute Window UNC path to support long paths on
+    Convert a `location` to an absolute Window UNC path to support long paths on
     Windows. Return the location unchanged if not on Windows. See
     https://msdn.microsoft.com/en-us/library/aa365247.aspx
     """
@@ -634,14 +589,15 @@ def add_unc(location):
     return location
 
 
+# FIXME: add docstring
 def copy_license_notice_files(fields, base_dir, license_notice_text_location, afp):
-    lic_name = u''
+    lic_name = ''
     for key, value in fields:
-        if key == u'license_file' or key == u'notice_file':
+        if key == 'license_file' or key == 'notice_file':
             lic_name = value
 
             from_lic_path = posixpath.join(to_posix(license_notice_text_location), lic_name)
-            about_file_dir = dirname(to_posix(afp)).lstrip('/')
+            about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
             to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
 
             if on_windows:
@@ -664,6 +620,8 @@ def copy_license_notice_files(fields, base_dir, license_notice_text_location, af
                 print(repr(e))
                 print('Cannot copy file at %(from_lic_path)r.' % locals())
 
+
+# FIXME: add docstring
 def inventory_filter(abouts, filter_dict):
     updated_abouts = []
     for key in filter_dict:
@@ -681,19 +639,26 @@ def inventory_filter(abouts, filter_dict):
     return updated_abouts
 
 
-def update_fieldnames(fieldnames, mapping_output):
-    mapping = get_output_mapping(mapping_output)
-    updated_header = []
-    for name in fieldnames:
-        try:
-            updated_header.append(mapping[name])
-        except:
-            updated_header.append(name)
-    return updated_header
+# FIXME: rename function: this is mapping field names. Also this is returning a list...
+# since the list should contain NO duplicate, it would be best to simply return an
+# ordered mapping {old name: new name}
+def update_fieldnames(field_names, mapping_location):
+    """
+    Given a `field_names` list of field names and a `mapping_location` mapping
+    configuration file location, return a list of updated field names
+    """
+    mapping = get_mapping(mapping_location, lowercase=False)
+    updated_names = []
+    for name in field_names:
+        if name in mapping:
+            name = mapping[name]
+        updated_names.append(name)
+    return updated_names
 
 
+# FIXME: add docstring
 def update_about_dictionary_keys(about_dictionary_list, mapping_output):
-    output_map = get_output_mapping(mapping_output)
+    output_map = get_mapping(mapping_output, lowercase=False)
     updated_dict_list = []
     for element in about_dictionary_list:
         updated_ordered_dict = OrderedDict()
@@ -730,6 +695,7 @@ def ungroup_licenses(licenses):
     return lic_key, lic_name, lic_file, lic_url
 
 
+# FIXME: add docstring
 def format_about_dict_for_csv_output(about_dictionary_list):
     csv_formatted_list = []
     file_fields = ['license_file', 'notice_file', 'changelog_file', 'author_file']
@@ -747,24 +713,23 @@ def format_about_dict_for_csv_output(about_dictionary_list):
     return csv_formatted_list
 
 
+# FIXME: add docstring
 def format_about_dict_for_json_output(about_dictionary_list):
     licenses = ['license_key', 'license_name', 'license_file', 'license_url']
     file_fields = ['notice_file', 'changelog_file', 'author_file']
     json_formatted_list = []
     for element in about_dictionary_list:
         row_list = OrderedDict()
+        # FIXME: aboid using parallel list... use an object instead
         license_key = []
         license_name = []
         license_file = []
         license_url = []
+
         for key in element:
             if element[key]:
-                """
-                if key == u'about_resource':
-                    row_list[key] = element[key][0]
-                """
                 # The 'about_resource' is an ordered dict
-                if key == u'about_resource':
+                if key == 'about_resource':
                     row_list[key] = list(element[key].keys())[0]
                 elif key in licenses:
                     if key == 'license_key':
@@ -799,6 +764,19 @@ def format_about_dict_for_json_output(about_dictionary_list):
         json_formatted_list.append(row_list)
     return json_formatted_list
 
+
+# FIXME: remove and replace by saneyaml
+from collections import Hashable
+
+from yaml.reader import Reader
+from yaml.scanner import Scanner
+from yaml.parser import Parser
+from yaml.composer import Composer
+from yaml.constructor import Constructor, ConstructorError
+from yaml.resolver import Resolver
+from yaml.nodes import MappingNode
+
+# FIXME: add docstring
 class NoDuplicateConstructor(Constructor):
     def construct_mapping(self, node, deep=False):
         if not isinstance(node, MappingNode):
@@ -811,7 +789,7 @@ class NoDuplicateConstructor(Constructor):
             # keys can be list -> deep
             key = self.construct_object(key_node, deep=True)
             # lists are not hashable, but tuples are
-            if not isinstance(key, collections.Hashable):
+            if not isinstance(key, Hashable):
                 if isinstance(key, list):
                     key = tuple(key)
 
@@ -824,7 +802,7 @@ class NoDuplicateConstructor(Constructor):
                         "found unacceptable key (%s)" %
                         exc, key_node.start_mark)
             else:
-                if not isinstance(key, collections.Hashable):
+                if not isinstance(key, Hashable):
                     raise ConstructorError(
                         "while constructing a mapping", node.start_mark,
                         "found unhashable key", key_node.start_mark)
@@ -839,6 +817,7 @@ class NoDuplicateConstructor(Constructor):
         return mapping
 
 
+# FIXME: add docstring
 class NoDuplicateLoader(Reader, Scanner, Parser, Composer, NoDuplicateConstructor, Resolver):
     def __init__(self, stream):
         Reader.__init__(self, stream)

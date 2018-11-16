@@ -690,6 +690,7 @@ this software and releases the component to Public Domain.
         abouts = [a, b]
         # ensure that custom fields and about file path are collected
         # and that all fields are in the correct order
+        # FIXME: this is not USED
         expected = [
             'about_resource',
             'cf',
@@ -940,7 +941,7 @@ version: 0.11.0
         assert expected == dict(result)
 
     def test_load_dump_is_idempotent(self):
-        test_file = get_test_loc('load/this.ABOUT')
+        test_file = get_test_loc('test_model/this.ABOUT')
         a = model.About()
         a.load(test_file)
         dumped_file = get_temp_file('that.ABOUT')
@@ -1024,25 +1025,25 @@ version: 0.11.0
         assert test == dict(as_dict)
 
     def test_write_output_csv(self):
-        path = 'load/this.ABOUT'
+        path = 'test_model/this.ABOUT'
         test_file = get_test_loc(path)
         abouts = model.About(location=test_file, about_file_path=path)
 
         result = get_temp_file()
         model.write_output([abouts], result, format='csv')
 
-        expected = get_test_loc('load/expected.csv')
+        expected = get_test_loc('test_model/expected.csv')
         check_csv(expected, result)
 
     def test_write_output_json(self):
-        path = 'load/this.ABOUT'
+        path = 'test_model/this.ABOUT'
         test_file = get_test_loc(path)
         abouts = model.About(location=test_file, about_file_path=path)
 
         result = get_temp_file()
         model.write_output([abouts], result, format='json')
 
-        expected = get_test_loc('load/expected.json')
+        expected = get_test_loc('test_model/expected.json')
         check_json(expected, result)
 
 class CollectorTest(unittest.TestCase):
@@ -1052,13 +1053,14 @@ class CollectorTest(unittest.TestCase):
         _errors, abouts = model.collect_inventory(test_loc)
         assert 2 == len(abouts)
 
-        expected = ['non-supported_date_format.ABOUT',
-                    'supported_date_format.ABOUT']
+        expected = [
+            'non-supported_date_format.ABOUT',
+            'supported_date_format.ABOUT']
         result = [a.about_file_path for a in abouts]
         assert sorted(expected) == sorted(result)
 
     def test_collect_inventory_with_long_path(self):
-        test_loc = extract_test_loc('longpath.zip')
+        test_loc = extract_test_loc('test_model/longpath.zip')
         _errors, abouts = model.collect_inventory(test_loc)
         assert 2 == len(abouts)
 
