@@ -88,6 +88,7 @@ def check_file_names(paths):
      systems (such as Linux), a tool must raise an error if two ABOUT files
      stored in the same directory have the same lowercase file name.
     """
+    # FIXME: this should be a defaultdicts that accumulates all duplicated paths
     seen = {}
     errors = []
     for orig_path in paths:
@@ -116,6 +117,9 @@ def check_file_names(paths):
 
 
 def check_duplicate_keys_about_file(context):
+    """
+    
+    """
     keys = []
     dup_keys = []
     for line in context.splitlines():
