@@ -25,8 +25,16 @@ import mock
 from attributecode import api
 from attributecode import ERROR
 from attributecode import Error
-from testing_utils import FakeResponse
 
+
+class FakeResponse(object):
+    response_content = None
+
+    def __init__(self, response_content):
+        self.response_content = response_content
+
+    def read(self):
+        return self.response_content
 
 class ApiTest(unittest.TestCase):
     @mock.patch.object(api, 'request_license_data')
