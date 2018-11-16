@@ -20,16 +20,23 @@ from __future__ import unicode_literals
 
 import json
 
-try:  # Python 2
-    from urllib import urlencode, quote
-    from urllib2 import urlopen, Request, HTTPError
-except ImportError:  # Python 3
-    from urllib.parse import urlencode, quote
-    from urllib.request import urlopen, Request
-    from urllib.error import HTTPError
-
 from attributecode import ERROR
 from attributecode import Error
+from attributecode.util import python2
+
+
+if python2:
+    from urllib import quote  # NOQA
+    from urllib import urlencode  # NOQA
+    from urllib2 import HTTPError  # NOQA
+    from urllib2 import Request  # NOQA
+    from urllib2 import urlopen  # NOQA
+else:
+    from urllib.parse import quote  # NOQA
+    from urllib.parse import urlencode  # NOQA
+    from urllib.request import Request  # NOQA
+    from urllib.request import urlopen  # NOQA
+    from urllib.error import HTTPError  # NOQA
 
 
 """
@@ -37,11 +44,11 @@ API call helpers
 """
 
 
-def request_license_data(url, api_key, license_key):
+# FIXME: args should start with license_key
+def request_license_data(api_url, api_key, license_key):
     """
-    Return a dictionary of license data.
-    Send a request to a given API URL to gather license data for
-    license_key, authenticating through an api_key.
+    Return a tuple of (dictionary of license data, list of errors) given a
+    `license_key`. Send a request to `api_url` authenticating with `api_key`.
     """
     headers = {
         'Authorization': 'Token %s' % api_key,
@@ -52,9 +59,10 @@ def request_license_data(url, api_key, license_key):
         'format': 'json'
     }
 
-    url = url.rstrip('/')
-    encoded_payload = urlencode(payload)
-    full_url = '%(url)s/?%(encoded_payload)s' % locals()
+    api_url = api_url.rstrip('/')
+    payload = urlencode(payload)
+
+    full_url = '%(api_url)s/?%(payload)s' % locals()
     # handle special characters in URL such as space etc.
     quoted_url = quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
 
@@ -64,10 +72,12 @@ def request_license_data(url, api_key, license_key):
         request = Request(quoted_url, headers=headers)
         response = urlopen(request)
         response_content = response.read().decode('utf-8')
+        # FIXME: this should be an ordered dict
         license_data = json.loads(response_content)
         if not license_data['results']:
             msg = u"Invalid 'license': %s" % license_key
             errors.append(Error(ERROR, msg))
+
     except HTTPError as http_e:
         # some auth problem
         if http_e.code == 403:
@@ -80,20 +90,29 @@ def request_license_data(url, api_key, license_key):
             # this exception.
             msg = u"Invalid 'license': %s" % license_key
             errors.append(Error(ERROR, msg))
+
     except Exception as e:
         errors.append(Error(ERROR, str(e)))
+
     finally:
-        license_data = license_data.get('results')[0] if license_data.get('count') == 1 else {}
+        if license_data.get('count') == 1:
+            license_data = license_data.get('results')[0]
+        else:
+            license_data = {}
 
     return license_data, errors
 
 
-def get_license_details_from_api(url, api_key, license_key):
+# FIXME: args should start with license_key
+def get_license_details_from_api(api_url, api_key, license_key):
     """
-    Return the license_text of a given license_key using an API request.
-    Return an empty string if the text is not available.
+    Return a tuple of license data given a `license_key` using the `api_url`
+    authenticating with `api_key`.
+    The details are a tuple of (license_name, license_key, license_text, errors)
+    where errors is a list of strings.
+    Missing values are provided as empty strings.
     """
-    license_data, errors = request_license_data(url, api_key, license_key)
+    license_data, errors = request_license_data(api_url, api_key, license_key)
     license_name = license_data.get('name', '')
     license_text = license_data.get('full_text', '')
     license_key = license_data.get('key', '')
