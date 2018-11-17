@@ -632,22 +632,30 @@ def copy_license_notice_files(fields, base_dir, license_notice_text_location, af
                 print('Cannot copy file at %(from_lic_path)r.' % locals())
 
 
-# FIXME: add docstring
-def inventory_filter(abouts, filter_dict):
-    updated_abouts = []
-    for key in filter_dict:
-        for about in abouts:
-            try:
-                # Check if the about object has the filtered attribute and if the
-                # attributed value is the same as the defined in the filter
-                for value in filter_dict[key]:
-                    if vars(about)[key].value == value:
-                        if not about in updated_abouts:
-                            updated_abouts.append(about)
-            except:
-                # The current about object does not have the defined attribute
-                continue
-    return updated_abouts
+# FIXME: this is NOT a util but something to move with inventories or a method
+# from About objects
+def inventory_filter(abouts, filters):
+    """
+    Return a list of filtered About objects from an `abouts` list of About
+    object using the `filters` mapping of:
+        {field_name: [acceptable_values, ....]}
+
+    ... such that only the About object that have a field_name with a value that
+    matches one of the acceptable values is returned. Other About object are
+    filtered out.
+    """
+    matching_abouts = []
+    for about in abouts:
+        for field_name, acceptable_values in filters.items():
+            # Check if the about object has the filtered attribute and if the
+            # attributed value is the same as the defined in the filter
+            actual_value = getattr(about, field_name, None)
+            if actual_value in acceptable_values and not about in matching_abouts:
+                matching_abouts.append(about)
+                # FIXME: if it matches once it matches always which is probably not right
+                break
+
+    return matching_abouts
 
 
 # FIXME: rename function: this is mapping field names. Also this is returning a list...
@@ -686,6 +694,7 @@ def update_about_dictionary_keys(about_dictionary_list, mapping_output):
     return updated_dict_list
 
 
+# FIXME: we should use a license object instead
 def ungroup_licenses(licenses):
     """
     Ungroup multiple licenses information
