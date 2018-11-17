@@ -257,8 +257,9 @@ def check_about_stdout(options, expected_loc, regen=False):
             ef.write(stdout)
 
     expected_file = get_test_loc(expected_loc, must_exists=True)
-    expected = open(expected_file).read()
-    assert expected == stdout
+    expected = open(expected_file, 'rb').read()
+    # we do not keep ends to ignore LF/CRF differences across OSes
+    assert expected.splitlines(False) == stdout.splitlines(False)
 
 
 def test_about_help_text(regen=False):
