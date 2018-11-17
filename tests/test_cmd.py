@@ -18,6 +18,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import unittest
+
 from attributecode import CRITICAL
 from attributecode import DEBUG
 from attributecode import ERROR
@@ -27,8 +29,11 @@ from attributecode import WARNING
 from attributecode import cmd
 from attributecode import Error
 
+from testing_utils import run_about_command_test
+from testing_utils import get_test_loc
 
-# NB: these tests depends on py.test stdout/err capture capabilities
+
+# NB: the test_report_errors* tests depend on py.test stdout/err capture capabilities
 
 def test_report_errors(capsys):
     errors = [
@@ -146,86 +151,138 @@ NOTSET: msg4
     assert expected_out == out
     assert '' == err
 
-def test_filter_errors_default():
-    errors = [
-        Error(CRITICAL, 'msg1'),
-        Error(ERROR, 'msg2'),
-        Error(INFO, 'msg3'),
-        Error(WARNING, 'msg4'),
-        Error(DEBUG, 'msg4'),
-        Error(NOTSET, 'msg4'),
-    ]
-    expected = [
-        Error(CRITICAL, 'msg1'),
-        Error(ERROR, 'msg2'),
-        Error(WARNING, 'msg4'),
-    ]
-    assert expected == cmd.filter_errors(errors)
+
+class TestFilterError(unittest.TestCase):
+    def test_filter_errors_default(self):
+        errors = [
+            Error(CRITICAL, 'msg1'),
+            Error(ERROR, 'msg2'),
+            Error(INFO, 'msg3'),
+            Error(WARNING, 'msg4'),
+            Error(DEBUG, 'msg4'),
+            Error(NOTSET, 'msg4'),
+        ]
+        expected = [
+            Error(CRITICAL, 'msg1'),
+            Error(ERROR, 'msg2'),
+            Error(WARNING, 'msg4'),
+        ]
+        assert expected == cmd.filter_errors(errors)
 
 
-def test_filter_errors_with_min():
-    errors = [
-        Error(CRITICAL, 'msg1'),
-        Error(ERROR, 'msg2'),
-        Error(INFO, 'msg3'),
-        Error(WARNING, 'msg4'),
-        Error(DEBUG, 'msg4'),
-        Error(NOTSET, 'msg4'),
-    ]
-    expected = [
-        Error(CRITICAL, 'msg1'),
-    ]
-    assert expected == cmd.filter_errors(errors, CRITICAL)
+    def test_filter_errors_with_min(self):
+        errors = [
+            Error(CRITICAL, 'msg1'),
+            Error(ERROR, 'msg2'),
+            Error(INFO, 'msg3'),
+            Error(WARNING, 'msg4'),
+            Error(DEBUG, 'msg4'),
+            Error(NOTSET, 'msg4'),
+        ]
+        expected = [
+            Error(CRITICAL, 'msg1'),
+        ]
+        assert expected == cmd.filter_errors(errors, CRITICAL)
 
 
-def test_filter_errors_no_errors():
-    errors = [
-        Error(INFO, 'msg3'),
-        Error(DEBUG, 'msg4'),
-        Error(NOTSET, 'msg4'),
-    ]
-    assert [] == cmd.filter_errors(errors)
+    def test_filter_errors_no_errors(self):
+        errors = [
+            Error(INFO, 'msg3'),
+            Error(DEBUG, 'msg4'),
+            Error(NOTSET, 'msg4'),
+        ]
+        assert [] == cmd.filter_errors(errors)
 
 
-def test_filter_errors_none():
-    assert [] == cmd.filter_errors([])
+    def test_filter_errors_none(self):
+        assert [] == cmd.filter_errors([])
 
 
-def test_parse_key_values_empty():
-    assert ({}, []) == cmd.parse_key_values([])
-    assert ({}, []) == cmd.parse_key_values(None)
+class TestParseKeyValues(unittest.TestCase):
+
+    def test_parse_key_values_empty(self):
+        assert ({}, []) == cmd.parse_key_values([])
+        assert ({}, []) == cmd.parse_key_values(None)
 
 
-def test_parse_key_values_simple():
-    test = [
-        'key=value',
-        'This=THat',
-        'keY=bar',
-    ]
-    expected = {
-        'key': ['value', 'bar'],
-        'this': ['THat']
+    def test_parse_key_values_simple(self):
+        test = [
+            'key=value',
+            'This=THat',
+            'keY=bar',
+        ]
+        expected = {
+            'key': ['value', 'bar'],
+            'this': ['THat']
+            }
+        keyvals, errors = cmd.parse_key_values(test)
+        assert expected == keyvals
+        assert not errors
+
+
+    def test_parse_key_values_with_errors(self):
+        test = [
+            'key',
+            '=THat',
+            'keY=',
+            'FOO=bar'
+        ]
+        expected = {
+            'foo': ['bar'],
         }
-    keyvals, errors = cmd.parse_key_values(test)
-    assert expected == keyvals
-    assert not errors
+        keyvals, errors = cmd.parse_key_values(test)
+        assert expected == keyvals
+        expected = [
+            'missing <key> in "=THat".',
+            'missing <value> in "keY=".',
+            'missing <value> in "key".'
+        ]
+        assert expected == errors
 
 
-def test_parse_key_values_with_errors():
-    test = [
-        'key',
-        '=THat',
-        'keY=',
-        'FOO=bar'
-    ]
-    expected = {
-        'foo': ['bar'],
-    }
-    keyvals, errors = cmd.parse_key_values(test)
-    assert expected == keyvals
-    expected = [
-        'missing <key> in "=THat".',
-        'missing <value> in "keY=".',
-        'missing <value> in "key".'
-    ]
-    assert expected == errors
+###############################################################################
+# Run full cli command
+###############################################################################
+
+def check_about_stdout(options, expected_loc, regen=False):
+    """
+    Run the about command with the `options` list of options. Assert that
+    command success and that the stdout is equal to the `expected_loc` test file
+    content.
+    """
+    stdout, _stderr = run_about_command_test(options)
+    if regen:
+        expected_file = get_test_loc(expected_loc, must_exists=False)
+        with open(expected_file, 'wb') as ef:
+            ef.write(stdout)
+
+    expected_file = get_test_loc(expected_loc, must_exists=True)
+    assert open(expected_file).read() == stdout
+
+
+def test_about_help_text(regen=False):
+    check_about_stdout(['--help'], 'test_cmd/help/about_help.txt')
+
+
+def test_about_inventory_help_text(regen=False):
+    check_about_stdout(
+        ['inventory', '--help'],
+        'test_cmd/help/about_inventory_help.txt')
+
+
+def test_about_gen_help_text(regen=False):
+    check_about_stdout(
+        ['gen', '--help'],
+        'test_cmd/help/about_gen_help.txt')
+
+
+def test_about_check_help_text(regen=False):
+    check_about_stdout(
+        ['check', '--help'],
+        'test_cmd/help/about_check_help.txt')
+
+
+def test_about_attrib_help_text(regen=False):
+    check_about_stdout(
+        ['attrib', '--help'],
+        'test_cmd/help/about_attrib_help.txt')

@@ -1,0 +1,9 @@
+Usage: about check [OPTIONS] LOCATION
+
+  Check .ABOUT file(s) at LOCATION for validity and print error messages.
+
+  LOCATION: Path to a file or directory containing .ABOUT files.
+
+Options:
+  --verbose   Show all error and warning messages.
+  -h, --help  Show this message and exit.

@@ -20,10 +20,11 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import subprocess
+
+from testing_utils import run_about_command_test
 
 """
-Common and global checks such as codestyle and related.
+Common and global checks such as codestyle and check own ABOUT files.
 """
 
 
@@ -31,7 +32,9 @@ root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 
 def disabled_test_codestyle():
+
     # TODO: enable me
+    import subprocess
     args = [
         os.path.join(root_dir, 'bin', 'pycodestyle'),
         '--ignore',
@@ -39,29 +42,25 @@ def disabled_test_codestyle():
         '--exclude=lib,lib64,tests,thirdparty,docs,bin,man,settings,local,tmp',
         '.',
     ]
+
     subprocess.check_output(args=args, cwd=root_dir)
 
 
 def check_about(path):
-    args = [os.path.join(root_dir, 'bin', 'about'), 'check', path]
-    try:
-        subprocess.check_output(args=args, cwd=root_dir)
-    except subprocess.CalledProcessError as cpe:
-        print('Failed to validate ABOUT files:\n' + cpe.output)
-        raise Exception(cpe.output)
+    run_about_command_test(['check', path])
 
 
 def test_about_thirdparty():
-    check_about('thirdparty')
+    run_about_command_test(['check', 'thirdparty'])
 
 
 def test_about_src():
-    check_about('src')
+    run_about_command_test(['check', 'src'])
 
 
 def test_about_etc():
-    check_about('etc')
+    run_about_command_test(['check', 'etc'])
 
 
 def test_about_myself():
-    check_about('about.ABOUT')
+    run_about_command_test(['check', 'about.ABOUT'])

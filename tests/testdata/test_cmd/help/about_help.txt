@@ -1,0 +1,19 @@
+Usage: about [OPTIONS] COMMAND [ARGS]...
+
+  Generate licensing attribution and credit notices from .ABOUT files and
+  inventories.
+
+  Read, write and collect provenance and license inventories from .ABOUT
+  files to and from JSON or CSV files.
+
+  Use about <command> --help for help on a command.
+
+Options:
+  --version   Show the version and exit.
+  -h, --help  Show this message and exit.
+
+Commands:
+  attrib     Generate an attribution document from .ABOUT files.
+  check      Validate that the format of .ABOUT files is correct.
+  gen        Generate .ABOUT files from an inventory as CSV or JSON.
+  inventory  Collect .ABOUT files and write an inventory as CSV or JSON.

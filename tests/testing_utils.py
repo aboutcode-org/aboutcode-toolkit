@@ -23,9 +23,11 @@ import ntpath
 import os
 import posixpath
 import stat
+import subprocess
 import sys
 import tempfile
 import zipfile
+
 
 from attributecode.util import add_unc
 from attributecode.util import to_posix
@@ -43,7 +45,7 @@ on_windows = 'win32' in sys.platform
 on_posix = not on_windows
 
 
-def get_test_loc(path):
+def get_test_loc(path, must_exists=True):
     """
     Return the location of a test file or directory given a path relative to
     the testdata directory.
@@ -51,7 +53,8 @@ def get_test_loc(path):
     base = to_posix(TESTDATA_DIR)
     path = to_posix(path)
     path = posixpath.join(base, path)
-    assert os.path.exists(path)
+    if must_exists:
+        assert os.path.exists(path)
     return path
 
 def create_dir(location):
@@ -138,3 +141,33 @@ def extract_test_loc(path, extract_func=extract_zip):
         target_dir = get_temp_dir()
     extract_func(archive, target_dir)
     return target_dir
+
+
+def run_about_command_test(options, expected_rc=0):
+    """
+    Run an "about" command as a plain subprocess with the `options` list of options.
+    Assert that rc equals `expected_rc`.
+    On success, return stdout and stderr.
+    """
+    root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    about_cmd = os.path.join(root_dir, 'about')
+    args = [about_cmd] + options
+    about = subprocess.Popen(
+        args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True if on_windows else False)
+    stdout, stderr = about.communicate()
+    rc = about.poll()
+    if rc != expected_rc:
+        opts = ' '.join(args)
+        error = (
+            'Failure to run command: %(opts)s\n'
+            'stdout:\n'
+            '{stdout}\n'
+            '\n'
+            'stderr:\n'
+            '{stderr)\n'
+        ).format(**locals())
+        assert rc == expected_rc, error
+    return stdout, stderr
