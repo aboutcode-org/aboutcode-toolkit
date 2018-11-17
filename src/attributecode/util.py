@@ -48,7 +48,7 @@ on_windows = 'win32' in sys.platform
 def to_posix(path):
     """
     Return a path using the posix path separator given a path that may contain
-    posix or windows separators, converting \ to /. NB: this path will still
+    posix or windows separators, converting \\ to /. NB: this path will still
     be valid in the windows explorer (except if UNC or share name). It will be
     a valid path everywhere in Python. It will not be valid for windows
     command line operations.
