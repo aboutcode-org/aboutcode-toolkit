@@ -34,13 +34,13 @@ from attributecode import DEFAULT_MAPPING
 
 class GenTest(unittest.TestCase):
     def test_check_duplicated_columns(self):
-        test_file = get_test_loc('gen/dup_keys.csv')
+        test_file = get_test_loc('test_gen/dup_keys.csv')
         expected = [Error(ERROR, u'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
     def test_check_duplicated_columns_handles_lower_upper_case(self):
-        test_file = get_test_loc('gen/dup_keys_with_diff_case.csv')
+        test_file = get_test_loc('test_gen/dup_keys_with_diff_case.csv')
         expected = [Error(ERROR, u'Duplicated column name(s): copyright with Copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
@@ -55,50 +55,44 @@ class GenTest(unittest.TestCase):
         assert expected == result
 
     def test_load_inventory(self):
-        location = get_test_loc('gen/inv.csv')
+        location = get_test_loc('test_gen/inv.csv')
         base_dir = get_test_loc('inv')
         errors, abouts = gen.load_inventory(location, base_dir)
 
-        expected_error_messages = ['Field about_resource',
-                                   'Field custom1 is not a supported field and is ignored.']
-        # FIXME: this is not used
         expected_errors = [
-            Error(INFO, u'Field custom1 is not a supported field and is ignored.')]
-        assert len(errors) == 2
-        for e in errors:
-            # we don't want to check the path value
-            if e.message.startswith('Field about_resource'):
-                continue
-            else:
-                assert e.message in expected_error_messages
+            Error(INFO, 'Field custom1 is not a supported field and is ignored.'),
+            Error(INFO, 'Field about_resource: Path')
+        ]
+        for exp, err in zip(expected_errors, errors):
+            assert exp.severity == err.severity
+            assert err.message.startswith(exp.message)
 
-        expected = [u'about_resource: .\n'
-                    u'name: AboutCode\n'
-                    u'version: 0.11.0\n'
-                    u'description: |-\n'
-                    u'    multi\n'
-                    u'    line\n']
+        expected = (
+            'about_resource: .\n'
+            'name: AboutCode\n'
+            'version: 0.11.0\n'
+            'description: |-\n'
+            '    multi\n'
+            '    line\n'
+        )
         result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
                         for a in abouts]
-        assert expected == result
+        assert expected == result[0]
 
     def test_load_inventory_with_mapping(self):
-        location = get_test_loc('gen/inv4.csv')
-        base_dir = get_test_loc('inv')
-        errors, abouts = gen.load_inventory(
-            location, base_dir, mapping_file=DEFAULT_MAPPING)
-        expected_error_messages = [
-            'Field about_resource',
-            'Field test is not a supported field and is not defined in the mapping file. This field is ignored.',
-            'Field resource is a custom field']
+        location = get_test_loc('test_gen/inv4.csv')
+        base_dir = get_test_loc('test_gen/inv')
+        errors, abouts = gen.load_inventory(location, base_dir, mapping_file=DEFAULT_MAPPING)
 
-        assert len(errors) == 3
-        for e in errors:
-            # we don't want to check the path value
-            if e.message.startswith('Field about_resource'):
-                continue
-            else:
-                assert e.message in expected_error_messages
+        expected_errors =[
+            Error(INFO, 'Field resource is a custom field'),
+            Error(INFO, 'Field test is not a supported field and is not defined in the mapping file. This field is ignored.'),
+            Error(INFO, 'Field about_resource: Path ')
+            ]
+
+        for exp, err in zip(expected_errors, errors):
+            assert exp.severity == err.severity
+            assert err.message.startswith(exp.message)
 
         expected = (
             'about_resource: .\n'
@@ -114,7 +108,7 @@ class GenTest(unittest.TestCase):
         assert expected == result[0]
 
     def test_generation_dir_endswith_space(self):
-        location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
+        location = get_test_loc('test_gen/inventory/complex/about_file_path_dir_endswith_space.csv')
         base_dir = get_temp_dir()
         errors, _abouts = gen.generate(location, base_dir)
         expected_errors_msg1 = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
@@ -125,7 +119,7 @@ class GenTest(unittest.TestCase):
         assert expected_errors_msg2 in errors[0].message or expected_errors_msg2 in errors[1].message
 
     def test_generation_with_no_about_resource(self):
-        location = get_test_loc('gen/inv2.csv')
+        location = get_test_loc('test_gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
         expected = OrderedDict([(u'.', None)])
@@ -133,7 +127,7 @@ class GenTest(unittest.TestCase):
         assert len(errors) == 1
 
     def test_generation_with_no_about_resource_reference(self):
-        location = get_test_loc('gen/inv3.csv')
+        location = get_test_loc('test_gen/inv3.csv')
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
@@ -145,7 +139,7 @@ class GenTest(unittest.TestCase):
         assert msg in errors[0].message
 
     def test_generation_with_no_about_resource_reference_no_resource_validation(self):
-        location = get_test_loc('gen/inv3.csv')
+        location = get_test_loc('test_gen/inv3.csv')
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
@@ -155,7 +149,7 @@ class GenTest(unittest.TestCase):
         assert len(errors) == 1
 
     def test_generate(self):
-        location = get_test_loc('gen/inv.csv')
+        location = get_test_loc('test_gen/inv.csv')
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
@@ -177,7 +171,7 @@ class GenTest(unittest.TestCase):
         assert expected == in_mem_result
 
     def test_generate_not_overwrite_original_license_file(self):
-        location = get_test_loc('gen/inv5.csv')
+        location = get_test_loc('test_gen/inv5.csv')
         base_dir = get_temp_dir()
         license_notice_text_location = None
         fetch_license = ['url', 'lic_key']
