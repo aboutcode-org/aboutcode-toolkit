@@ -34,10 +34,10 @@ from attributecode import DEFAULT_MAPPING
 
 python2 = sys.version_info[0] < 3
 
-if python2:
+if python2:  # pragma: nocover
     import backports.csv as csv  # NOQA
     from itertools import izip_longest as zip_longest  # NOQA
-else:
+else:  # pragma: nocover
     import csv  # NOQA
     from itertools import zip_longest  # NOQA
 

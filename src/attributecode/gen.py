@@ -41,9 +41,9 @@ from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import unique
 
 
-if python2:
+if python2:  # pragma: nocover
     import backports.csv as csv  # NOQA
-else:
+else:  # pragma: nocover
     import csv  # NOQA
 
 
@@ -100,7 +100,7 @@ def check_duplicated_about_file_path(inventory_dict):
                 afp_list.append(component['about_file_path'])
     return errors
 
-#TODO: this should be either the CSV or the ABOUT files but not both???
+# TODO: this should be either the CSV or the ABOUT files but not both???
 def load_inventory(location, base_dir, license_notice_text_location=None,
                     mapping_file=None):
     """

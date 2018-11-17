@@ -25,13 +25,13 @@ from attributecode import Error
 from attributecode.util import python2
 
 
-if python2:
+if python2:  # pragma: nocover
     from urllib import quote  # NOQA
     from urllib import urlencode  # NOQA
     from urllib2 import HTTPError  # NOQA
     from urllib2 import Request  # NOQA
     from urllib2 import urlopen  # NOQA
-else:
+else:  # pragma: nocover
     from urllib.parse import quote  # NOQA
     from urllib.parse import urlencode  # NOQA
     from urllib.request import Request  # NOQA

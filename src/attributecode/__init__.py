@@ -23,9 +23,11 @@ import logging
 import os
 
 try:
-    unicode  # Python 2
-except NameError:
-    unicode = str  # Python 3 #NOQA
+    # Python 2
+    unicode
+except NameError:  # pragma: nocover
+    # Python 3 
+    unicode = str  #NOQA
 
 
 __version__ = '3.3.0'
@@ -53,9 +55,9 @@ class Error(namedtuple('Error', ['severity', 'message'])):
     def __new__(self, severity, message):
         if message:
             if isinstance(message, unicode):
-                message = clean_string(message)
+                message = self._clean_string(message)
             else:
-                message = clean_string(unicode(repr(message), encoding='utf-8'))
+                message = self._clean_string(unicode(repr(message), encoding='utf-8'))
                 message = message.strip('"')
 
         return super(Error, self).__new__(
@@ -63,7 +65,7 @@ class Error(namedtuple('Error', ['severity', 'message'])):
 
     def __repr__(self, *args, **kwargs):
         sev = severities[self.severity]
-        msg = clean_string(repr(self.message))
+        msg = self._clean_string(repr(self.message))
         return 'Error(%(sev)s, %(msg)s)' % locals()
 
     def to_dict(self, *args, **kwargs):
@@ -72,26 +74,26 @@ class Error(namedtuple('Error', ['severity', 'message'])):
         """
         return self._asdict()
 
-
-def clean_string(s):
-    """
-    Return a cleaned string for `s`, stripping eventual "u" prefixes
-    from unicode representations.
-    """
-    if not s:
+    @staticmethod
+    def _clean_string(s):
+        """
+        Return a cleaned string for `s`, stripping eventual "u" prefixes
+        from unicode representations.
+        """
+        if not s:
+            return s
+        if s.startswith(('u"', "u'")):
+            s = s.lstrip('u')
+        s = s.replace('[u"', '["')
+        s = s.replace("[u'", "['")
+        s = s.replace("(u'", "('")
+        s = s.replace("(u'", "('")
+        s = s.replace("{u'", "{'")
+        s = s.replace("{u'", "{'")
+        s = s.replace(" u'", " '")
+        s = s.replace(" u'", " '")
+        s = s.replace("\\\\", "\\")
         return s
-    if s.startswith(('u"', "u'")):
-        s = s.lstrip('u')
-    s = s.replace('[u"', '["')
-    s = s.replace("[u'", "['")
-    s = s.replace("(u'", "('")
-    s = s.replace("(u'", "('")
-    s = s.replace("{u'", "{'")
-    s = s.replace("{u'", "{'")
-    s = s.replace(" u'", " '")
-    s = s.replace(" u'", " '")
-    s = s.replace("\\\\", "\\")
-    return s
 
 
 # modeled after the logging levels

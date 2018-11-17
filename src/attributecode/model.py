@@ -37,14 +37,16 @@ import posixpath
 
 import yaml
 import re
-import sys
 
-if sys.version_info[0] < 3:  # Python 2
+from attributecode.util import python2
+
+
+if python2:  # pragma: nocover
     import backports.csv as csv  # NOQA
     from itertools import izip_longest as zip_longest  # NOQA
     from urlparse import urljoin, urlparse  # NOQA
     from urllib2 import urlopen, Request, HTTPError  # NOQA
-else:  # Python 3
+else:  # pragma: nocover
     basestring = str  # NOQA
     import csv  # NOQA
     from itertools import zip_longest  # NOQA
