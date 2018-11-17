@@ -32,8 +32,8 @@ from collections import OrderedDict
 import codecs
 import json
 import os
+# FIXME: why posixpath???
 import posixpath
-from posixpath import dirname
 
 import yaml
 import re
@@ -65,8 +65,9 @@ from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import copy_license_notice_files
 from attributecode.util import on_windows
-from attributecode.util import ungroup_licenses
 from attributecode.util import UNC_PREFIX
+from attributecode.util import ungroup_licenses
+from attributecode.util import unique
 
 
 class Field(object):
@@ -1275,7 +1276,6 @@ def collect_inventory(location, use_mapping=False, mapping_file=None):
     About objects.
     """
     errors = []
-    dedup_errors = []
     input_location = util.get_absolute(location)
     about_locations = list(util.get_about_locations(input_location))
 
@@ -1291,11 +1291,7 @@ def collect_inventory(location, use_mapping=False, mapping_file=None):
             errors.append(Error(severity, msg))
         abouts.append(about)
 
-    # Avoid logging duplicated/same errors multiple times
-    for about_error in errors:
-        if not about_error in dedup_errors:
-            dedup_errors.append(about_error)
-    return dedup_errors, abouts
+    return unique(errors), abouts
 
 
 def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
@@ -1560,7 +1556,7 @@ def verify_license_files_in_location(about, lic_location):
         for lic in about.license_file.value:
             lic_path = util.to_posix(posixpath.join(lic_location, lic))
             if posixpath.exists(lic_path):
-                copy_to = dirname(about.about_file_path)
+                copy_to = os.path.dirname(about.about_file_path)
                 license_location_dict[copy_to] = lic_path
             else:
                 msg = (u'The license file : '
