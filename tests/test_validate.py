@@ -47,8 +47,8 @@ def check_about(path):
     try:
         subprocess.check_output(args=args, cwd=root_dir)
     except subprocess.CalledProcessError as cpe:
-        print('failed to validate ABOUT files:\n' + cpe.output)
-        raise Exception(repr(cpe.output))
+        print('Failed to validate ABOUT files:\n' + cpe.output)
+        raise Exception(cpe.output)
 
 
 def test_about_thirdparty():
