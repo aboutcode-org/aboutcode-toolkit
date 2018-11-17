@@ -21,7 +21,6 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 import string
 import unittest
-from unittest.case import expectedFailure
 
 from testing_utils import extract_test_loc
 from testing_utils import get_test_loc
@@ -403,16 +402,13 @@ class TestCsv(unittest.TestCase):
             test_file, mapping_file=DEFAULT_MAPPING)
         assert expected == result
 
-    # The column names should be converted to lowercase as the same behavior as
-    # when user use the mapping.config
-    @expectedFailure
-    def test_load_csv_does_not_convert_column_names_to_lowercase(self):
+    def test_load_csv_does_convert_column_names_to_lowercase(self):
         test_file = get_test_loc('test_util/csv/about_key_with_upper_case.csv')
         expected = [OrderedDict(
                     [('about_file', 'about.ABOUT'),
                      ('about_resource', '.'),
-                     ('nAme', 'ABOUT tool'),
-                     ('Version', '0.8.1')])
+                     ('name', 'ABOUT tool'),
+                     ('version', '0.8.1')])
                     ]
         result = util.load_csv(test_file)
         assert expected == result

@@ -18,7 +18,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import codecs
 import logging
 import ntpath
 import os
@@ -52,25 +51,8 @@ def get_test_loc(path):
     base = to_posix(TESTDATA_DIR)
     path = to_posix(path)
     path = posixpath.join(base, path)
-    # path = to_native(path)
+    assert os.path.exists(path)
     return path
-
-
-def get_unicode_content(location):
-    """
-    Read file at location and return a unicode.
-    """
-    with codecs.open(location, 'rb', encoding='utf-8') as doc:
-        return doc.read()
-
-
-def get_test_lines(path):
-    """
-    Return a list of text lines loaded from the location of a test file or
-    directory given a path relative to the testdata directory.
-    """
-    return get_unicode_content(get_test_loc(path)).splitlines(True)
-
 
 def create_dir(location):
     """

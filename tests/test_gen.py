@@ -30,6 +30,7 @@ from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import gen
 from attributecode import DEFAULT_MAPPING
+from unittest.case import skip
 
 
 class GenTest(unittest.TestCase):
@@ -56,7 +57,7 @@ class GenTest(unittest.TestCase):
 
     def test_load_inventory(self):
         location = get_test_loc('test_gen/inv.csv')
-        base_dir = get_test_loc('inv')
+        base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir)
 
         expected_errors = [
@@ -81,10 +82,10 @@ class GenTest(unittest.TestCase):
 
     def test_load_inventory_with_mapping(self):
         location = get_test_loc('test_gen/inv4.csv')
-        base_dir = get_test_loc('test_gen/inv')
+        base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir, mapping_file=DEFAULT_MAPPING)
 
-        expected_errors =[
+        expected_errors = [
             Error(INFO, 'Field resource is a custom field'),
             Error(INFO, 'Field test is not a supported field and is not defined in the mapping file. This field is ignored.'),
             Error(INFO, 'Field about_resource: Path ')
@@ -170,16 +171,17 @@ class GenTest(unittest.TestCase):
             '    line\n')
         assert expected == in_mem_result
 
+    @skip('FIXME: this test is making a failed, live API call')
     def test_generate_not_overwrite_original_license_file(self):
         location = get_test_loc('test_gen/inv5.csv')
         base_dir = get_temp_dir()
         license_notice_text_location = None
         fetch_license = ['url', 'lic_key']
 
-        _errors, abouts = gen.generate(location, base_dir, license_notice_text_location, fetch_license)
+        _errors, abouts = gen.generate(
+            location, base_dir, license_notice_text_location, fetch_license)
 
-        in_mem_result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
-                        for a in abouts][0]
+        in_mem_result = [a.dumps(with_empty=False)for a in abouts][0]
         expected = (
             'about_resource: .\n'
             'name: AboutCode\n'

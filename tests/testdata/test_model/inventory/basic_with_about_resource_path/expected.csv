@@ -1,2 +1,2 @@
 about_file_path,about_resource,name,version,download_url,description,homepage_url,notes,license_expression,license_key,license_name,license_file,license_url,copyright,notice_file,notice_url,redistribute,attribute,track_changes,modified,internal_use_only,changelog_file,owner,owner_url,contact,author,author_file,vcs_tool,vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,checksum_md5,checksum_sha1,checksum_sha256,spec_version
-/test_model/this.ABOUT,.,AboutCode,0.11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+/about/about_with_about_resource_path.ABOUT,apache-2.0.LICENSE,Apache License 2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
