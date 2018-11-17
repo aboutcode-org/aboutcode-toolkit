@@ -8,7 +8,7 @@ install:
     - ./configure etc/conf/dev
 
 script:
-    - bin/py.test -vvs tests
+    - bin/py.test -vvs
 
 notifications:
     irc:
