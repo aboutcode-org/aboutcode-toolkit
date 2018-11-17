@@ -707,8 +707,6 @@ class About(object):
         is simpler.
         """
         self.fields = OrderedDict([
-            # ('about_resource', ListField(required=True)),
-            # ('about_resource', AboutResourceField(required=True)),
             ('about_resource', AboutResourceField(required=True)),
             ('name', SingleLineField(required=True)),
 
@@ -1081,7 +1079,6 @@ class About(object):
         self.errors = errors
         return errors
 
-
     def dumps(self, mapping_file=False, with_absent=False, with_empty=True):
         """
         Return self as a formatted ABOUT string.
@@ -1127,7 +1124,9 @@ class About(object):
             if lic_group[3]:
                 lic_dict['url'] = lic_group[3]
             about_data.setdefault('licenses', []).append(lic_dict)
+
         formatted_about_data = util.format_output(about_data, mapping_file)
+
         return saneyaml.dump(formatted_about_data)
 
     def dump(self, location, mapping_file=False, with_absent=False, with_empty=True):
@@ -1144,11 +1143,14 @@ class About(object):
 
         about_file_path = loc
         if not about_file_path.endswith('.ABOUT'):
+            # FIXME: we should not infer some location.
             if about_file_path.endswith('/'):
                 about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
             about_file_path += '.ABOUT'
+        
         if on_windows:
             about_file_path = add_unc(about_file_path)
+
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
             dumped.write(self.dumps(mapping_file, with_absent, with_empty))
 
