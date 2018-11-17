@@ -385,6 +385,17 @@ class TestCsv(unittest.TestCase):
         result = util.load_csv(test_file)
         assert expected == result
 
+    def test_load_csv_with_mapping(self):
+        test_file = get_test_loc('test_util/csv/about.csv')
+        expected = [OrderedDict([
+            ('about_file_path', 'about.ABOUT'),
+            ('about_resource', '.'),
+            ('name', 'ABOUT tool'),
+            ('version', '0.8.1')])
+        ]
+        result = util.load_csv(test_file, mapping_file=DEFAULT_MAPPING)
+        assert expected == result
+
     def test_get_about_file_path_from_csv_using_mapping(self):
         test_file = get_test_loc('test_util/csv/about.csv')
         expected = ['about.ABOUT']
