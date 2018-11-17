@@ -18,9 +18,9 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import codecs
 import collections
 import datetime
+import io
 import os
 
 import jinja2
@@ -159,8 +159,9 @@ def generate_from_file(abouts, template_loc=DEFAULT_TEMPLATE_FILE, variables=Non
     Return a tuple of (error, attribution text) where error is an Error object
     or None and attribution text is the generated text or None.
     """
+    
     template_loc = add_unc(template_loc)
-    with codecs.open(template_loc, 'rb', encoding='utf-8') as tplf:
+    with io.open(template_loc, encoding='utf-8') as tplf:
         tpls = tplf.read()
     return generate(abouts, template=tpls, variables=variables)
 
@@ -267,9 +268,9 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
     if rendering_error:
         errors.append(rendering_error)
 
-    if rendered:
+    if rendered:    
         output_location = add_unc(output_location)
-        with codecs.open(output_location, 'wb', encoding='utf-8') as of:
+        with io.open(output_location, 'w', encoding='utf-8') as of:
             of.write(rendered)
 
     return errors

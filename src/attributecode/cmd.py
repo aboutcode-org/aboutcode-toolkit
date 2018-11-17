@@ -20,13 +20,12 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 import errno
+import io
 import logging
 import os
 import sys
 
 import click
-from attributecode.attrib import check_template
-import codecs
 # silence unicode literals warnings
 click.disable_unicode_literals_warning = True
 
@@ -37,6 +36,8 @@ from attributecode import __about_spec_version__
 from attributecode import __version__
 from attributecode import DEFAULT_MAPPING
 from attributecode import severities
+from attributecode.attrib import check_template
+from attributecode.attrib import DEFAULT_TEMPLATE_FILE
 from attributecode.attrib import generate_and_save as generate_attribution_doc
 from attributecode.gen import generate as generate_about_files
 from attributecode.model import collect_inventory
@@ -221,8 +222,8 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
-        msg = 'Inventory collected with {severe_error_count} errors or warnings detected.'
-        click.echo(msg.format(**locals()))
+        msg = 'Inventory collected in {output}.'.format(**locals())
+        click.echo(msg)
     sys.exit(errors_count)
 
 
@@ -235,11 +236,11 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.argument('location',
     required=True,
-    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True))
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
-    type=click.Path(exists=False, writable=True, dir_okay=False, resolve_path=True))
+    type=click.Path(exists=True, writable=True, file_okay=False, dir_okay=True, resolve_path=True))
 
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
 @click.option('--fetch-license',
@@ -312,12 +313,12 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         fetch_license=fetch_license,
         mapping_file=mapping_file
     )
-    abouts_count = len(abouts)
 
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
-        msg = '{abouts_count} .ABOUT files generated with {errors_count} errors/warnings.'
-        click.echo(msg.format(**locals()))
+        abouts_count = len(abouts)
+        msg = '{abouts_count} .ABOUT files generated in {output}.'.format(**locals())
+        click.echo(msg)
     sys.exit(errors_count)
 
 
@@ -350,7 +351,7 @@ def validate_variables(ctx, param, value):
 
 @click.argument('output',
     required=True,
-    type=click.Path(exists=False, writable=True, resolve_path=True))
+    type=click.Path(exists=False, writable=True, dir_okay=False, resolve_path=True))
 
 @click.option('--template',
     metavar='TEMPLATE_FILE_PATH',
@@ -364,7 +365,7 @@ def validate_variables(ctx, param, value):
     help='Add variable(s) as key=value for use in a custom attribution template.')
 
 @click.option('--inventory',
-    type=click.Path(exists=True, file_okay=True, resolve_path=True),
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
     help='Path to an optional JSON or CSV inventory file listing the '
          'subset of .ABOUT files paths to consider when generating the attribution document.')
 
@@ -407,13 +408,16 @@ OUTPUT: Path where to write the attribution document.
     if mapping:
         mapping_file = DEFAULT_MAPPING
 
-    # Check for template early
-    with codecs.open(template, 'rb', encoding='utf-8') as templatef:
-        template_error = check_template(templatef.read())
-    if template_error:
-        lineno, message = template_error
-        raise click.UsageError(
-            'Template validation error at line: {lineno}: "{message}"'.format(**locals()))
+    # Check template syntax early
+    if template:
+        with io.open(template, encoding='utf-8') as templatef:
+            template_error = check_template(templatef.read())
+        if template_error:
+            lineno, message = template_error
+            raise click.UsageError(
+                'Template validation error at line: {lineno}: "{message}"'.format(**locals()))
+    else:
+        template = DEFAULT_TEMPLATE_FILE
 
     # accept zipped ABOUT files as input
     if location.lower().endswith('.zip'):
@@ -434,8 +438,8 @@ OUTPUT: Path where to write the attribution document.
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
 
     if not quiet:
-        msg = 'Attribution generated with {errors_count} errors/warnings.'
-        click.echo(msg.format(**locals()))
+        msg = 'Attribution generated in: {output}'.format(**locals())
+        click.echo(msg)
     sys.exit(errors_count)
 
 
@@ -444,7 +448,8 @@ OUTPUT: Path where to write the attribution document.
 ######################################################################
 
 @cli.command(cls=AboutCommand,
-    short_help='Validate that the format of .ABOUT files is correct.')
+    short_help='Validate that the format of .ABOUT files is correct and report '
+               'errors and warnings.')
 
 @click.argument('location',
     required=True,
@@ -465,17 +470,7 @@ LOCATION: Path to a file or directory containing .ABOUT files.
     print_version()
     click.echo('Checking ABOUT files...')
     errors, _abouts = collect_inventory(location)
-    if verbose:
-        reportable = errors
-    else:
-        reportable = filter_errors(errors, minimum_severity=WARNING)
-
-    severe_errors_count = report_errors(reportable, quiet=False, verbose=True)
-
-    if severe_errors_count:
-        click.echo('Found {severe_error_count} errors or warnings.'.format(severe_errors_count))
-    else:
-        click.echo('No error found.')
+    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
     sys.exit(severe_errors_count)
 
 
@@ -485,56 +480,49 @@ LOCATION: Path to a file or directory containing .ABOUT files.
 
 def report_errors(errors, quiet, verbose, log_file_loc=None):
     """
-    Return a number of severe errors and display the `errors` list of Error
-    objects based on the `quiet` and `verbose` flags.
+    Report the `errors` list of Error objects to screen based on the `quiet` and
+    `verbose` flags.
 
-    If `log_file_loc` directory is provided also write the log to a
-     file  as this location if severe errors are detected.
+    If `log_file_loc` file location is provided also write a verbose log to this
+    file.
+    Return True if there were severe error reported.
     """
     errors = unique(errors)
+    messages, severe_errors_count = get_error_messages(errors, quiet, verbose)
+    for msg in messages:
+        click.echo(msg)
+    if log_file_loc:
+        log_msgs, _ = get_error_messages(errors, quiet=False, verbose=True)
+        with io.open(log_file_loc, 'w', encoding='utf-8') as lf:
+            lf.write('\n'.join(log_msgs))
+    return severe_errors_count
 
-    logger = logging.getLogger(__name__)
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.CRITICAL)
-    handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-    logger.addHandler(handler)
 
-    file_logger = logging.getLogger(__name__ + '_file')
-
+def get_error_messages(errors, quiet=False, verbose=False):
+    """
+    Return a tuple of (list of error message strings to report,
+    severe_errors_count) given an `errors` list of Error objects and using the
+    `quiet` and `verbose` flags.
+    """
+    errors = unique(errors)
     severe_errors = filter_errors(errors, WARNING)
     severe_errors_count = len(severe_errors)
 
-    log_file_obj = None
-    try:
-        # Create error.log if problematic_error detected
-        if severe_errors and log_file_loc:
-            # FIXME: this
-            log_file = open(log_file_loc, 'w')
-            error_msg = '{} errors or warnings detected.'.format(severe_errors_count)
-            log_file.write(error_msg)
-            file_handler = logging.FileHandler(log_file)
-            file_logger.addHandler(file_handler)
+    messages = []
 
+    if severe_errors and not quiet:
+        error_msg = 'Command completed with {} errors or warnings.'.format(severe_errors_count)
+        messages.append(error_msg)
 
-        for severity, message in errors:
-            sevcode = severities.get(severity) or 'UNKNOWN'
-            msg = '{sevcode}: {message}'.format(**locals())
-            if not quiet:
-                if verbose:
-                    click.echo(msg)
-                elif severity >= WARNING:
-                    click.echo(msg)
-            if log_file_loc:
-                # The logger will only log error for severity >= 30
-                file_logger.log(severity, msg)
-
-    finally:
-        if log_file_obj:
-            try:
-                log_file_obj.close()
-            except:
-                pass
-    return severe_errors_count
+    for severity, message in errors:
+        sevcode = severities.get(severity) or 'UNKNOWN'
+        msg = '{sevcode}: {message}'.format(**locals())
+        if not quiet:
+            if verbose:
+                messages .append(msg)
+            elif severity >= WARNING:
+                messages .append(msg)
+    return messages, severe_errors_count
 
 
 def filter_errors(errors, minimum_severity=WARNING):

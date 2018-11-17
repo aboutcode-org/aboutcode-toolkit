@@ -51,7 +51,9 @@ class GenTest(unittest.TestCase):
             {'about_file_path': '/test/test.c', 'version': '1.03', 'name': 'test.c'},
             {'about_file_path': '/test/abc/', 'version': '1.0', 'name': 'abc'},
             {'about_file_path': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
-        expected = [Error(CRITICAL, 'The input has duplicated values in \'about_file_path\' field: /test/test.c')]
+        expected = [
+            Error(CRITICAL, 
+                  "The input has duplicated values in 'about_file_path' field: /test/test.c")]
         result = gen.check_duplicated_about_file_path(test_dict)
         assert expected == result
 

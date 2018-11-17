@@ -1,0 +1,12 @@
+about_resource: xtrans-1.3.5.txz
+name: xtrans
+about_resource_path: xtrans-1.3.5.txz
+version: v 1.3.5
+license_expression: mit
+license_name: MIT License
+license_file: mit.LICENSE
+license_url: https://enterprise.dejacode.com/urn?urn=urn:dje:license:mit
+confirmed_license: MIT License
+attribution_type: 3
+resource: repository/packages/xtrans-1.3.5.txz
+audit_ref_nbr: INFO-23470
