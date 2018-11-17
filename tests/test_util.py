@@ -369,21 +369,6 @@ class TestMapping(unittest.TestCase):
         expected = OrderedDict([(u'descr', u'description3'), (u'other', u'bar')])
         assert expected == result
 
-    def test_update_fieldnames(self):
-        mapping_loc = get_test_loc('test_util/mapping/fieldnames_mapping.config')
-        field_names = ['about_file_path', 'name', 'version']
-        expected = ['about_file_path', 'Component', 'version']
-        result = util.update_fieldnames(field_names, mapping_loc)
-        assert expected == result
-
-    def test_update_about_dictionary_keys(self):
-        mapping_loc = get_test_loc('test_util/mapping/fieldnames_mapping.config')
-        abouts = [dict(name='test.c')]
-        expected = [dict(Component='test.c')]
-        result = util.update_about_dictionary_keys(abouts, mapping_loc)
-        assert expected == result
-
-
 
 class TestCsv(unittest.TestCase):
 

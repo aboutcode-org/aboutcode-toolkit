@@ -1358,25 +1358,19 @@ def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=Tru
     return abouts_dictionary_list
 
 
-def write_output(abouts, location, format, mapping_output=None, with_absent=False, with_empty=True):  # NOQA
+def write_output(abouts, location, format, with_absent=False, with_empty=True):  # NOQA
     """
-    Write a CSV/JSON file at location given a list of About objects
+    Write a CSV/JSON file at location given a list of About objects.
+    Return a list of Error objects.
     """
     errors = []
     about_dictionary_list = about_object_to_list_of_dictionary(abouts, with_absent, with_empty)
-    if mapping_output:
-        updated_dictionary_list = util.update_about_dictionary_keys(about_dictionary_list, mapping_output)
-    else:
-        updated_dictionary_list = about_dictionary_list
+    updated_dictionary_list = about_dictionary_list
     location = add_unc(location)
     with codecs.open(location, mode='wb', encoding='utf-8') as output_file:
         if format == 'csv':
             fieldnames = field_names(abouts)
-            if mapping_output:
-                updated_fieldnames = util.update_fieldnames(fieldnames, mapping_output)
-            else:
-                updated_fieldnames = fieldnames
-            writer = csv.DictWriter(output_file, updated_fieldnames)
+            writer = csv.DictWriter(output_file, fieldnames)
             writer.writeheader()
             csv_formatted_list = util.format_about_dict_for_csv_output(updated_dictionary_list)
             for row in csv_formatted_list:

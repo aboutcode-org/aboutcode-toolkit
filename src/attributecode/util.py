@@ -658,40 +658,6 @@ def inventory_filter(abouts, filters):
     return matching_abouts
 
 
-# FIXME: rename function: this is mapping field names. Also this is returning a list...
-# since the list should contain NO duplicate, it would be best to simply return an
-# ordered mapping {old name: new name}
-def update_fieldnames(field_names, mapping_location):
-    """
-    Given a `field_names` list of field names and a `mapping_location` mapping
-    configuration file location, return a list of updated field names
-    """
-    mapping = get_mapping(mapping_location, lowercase=False)
-    updated_names = []
-    for name in field_names:
-        if name in mapping:
-            name = mapping[name]
-        updated_names.append(name)
-    return updated_names
-
-
-# FIXME: add docstring
-def update_about_dictionary_keys(about_dictionary_list, mapping_output):
-    output_map = get_mapping(mapping_output, lowercase=False)
-    updated_dict_list = []
-    for element in about_dictionary_list:
-        updated_ordered_dict = OrderedDict()
-        for about_key, value in element.items():
-            update_key = False
-            for custom_key in output_map:
-                if about_key == custom_key:
-                    update_key = True
-                    updated_ordered_dict[output_map[custom_key]] = value
-                    break
-            if not update_key:
-                updated_ordered_dict[about_key] = value
-        updated_dict_list.append(updated_ordered_dict)
-    return updated_dict_list
 
 
 # FIXME: we should use a license object instead
