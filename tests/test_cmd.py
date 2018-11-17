@@ -257,7 +257,8 @@ def check_about_stdout(options, expected_loc, regen=False):
             ef.write(stdout)
 
     expected_file = get_test_loc(expected_loc, must_exists=True)
-    assert open(expected_file).read() == stdout
+    expected = open(expected_file).read()
+    assert expected == stdout
 
 
 def test_about_help_text(regen=False):
