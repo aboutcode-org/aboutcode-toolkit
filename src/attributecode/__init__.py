@@ -103,10 +103,10 @@ NOTSET = 0
 
 
 severities = {
-    CRITICAL : u'CRITICAL',
-    ERROR : u'ERROR',
-    WARNING : u'WARNING',
-    INFO : u'INFO',
-    DEBUG : u'DEBUG',
-    NOTSET : u'NOTSET'
+    CRITICAL : 'CRITICAL',
+    ERROR : 'ERROR',
+    WARNING : 'WARNING',
+    INFO : 'INFO',
+    DEBUG : 'DEBUG',
+    NOTSET : 'NOTSET'
 }
