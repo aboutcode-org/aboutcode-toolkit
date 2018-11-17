@@ -74,12 +74,15 @@ def print_version():
 
 
 class AboutCommand(click.Command):
+    """
+    An enhanced click Command working around some Click quirk.
+    """
     def main(self, args=None, prog_name=None, complete_var=None,
              standalone_mode=True, **extra):
         """
         Workaround click bug https://github.com/mitsuhiko/click/issues/365
         """
-        return AboutCommand.main(
+        return click.Command.main(
             self, args=args, prog_name=self.name,
             complete_var=complete_var, standalone_mode=standalone_mode, **extra)
 
