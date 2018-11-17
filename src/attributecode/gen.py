@@ -100,13 +100,13 @@ def check_duplicated_about_file_path(inventory_dict):
                 afp_list.append(component['about_file_path'])
     return errors
 
-
+#TODO: this should be either the CSV or the ABOUT files but not both???
 def load_inventory(location, base_dir, license_notice_text_location=None,
                     mapping_file=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files
     stored in the `base_dir`. Return a list of errors and a list of
-    About objects validated against the base_dir.
+    About objects validated against the `base_dir`.
     Optionally use `license_notice_text_location` as the location of
     license and notice texts.
 
