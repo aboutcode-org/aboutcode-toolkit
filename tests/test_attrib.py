@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import io
 import os
 import unittest
 
@@ -63,7 +64,7 @@ class TemplateTest(unittest.TestCase):
         builtin_templates_dir = os.path.dirname(attrib.DEFAULT_TEMPLATE_FILE)
         for template in os.listdir(builtin_templates_dir):
             template_loc = os.path.join(builtin_templates_dir, template)
-            with open(template_loc, 'rb') as tmpl:
+            with io.open(template_loc, 'r', encoding='utf-8') as tmpl:
                 template = tmpl.read()
             try:
                 assert None == attrib.check_template(template)
