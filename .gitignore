@@ -47,3 +47,4 @@ docs/_build
 /.cache/
 /.settings/
 /tcl/
+/.python-version
