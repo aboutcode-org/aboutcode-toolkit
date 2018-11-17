@@ -3,8 +3,8 @@ Usage: about [OPTIONS] COMMAND [ARGS]...
   Generate licensing attribution and credit notices from .ABOUT files and
   inventories.
 
-  Read, write and collect provenance and license inventories from .ABOUT
-  files to and from JSON or CSV files.
+  Read, write and collect provenance and license inventories from .ABOUT files
+  to and from JSON or CSV files.
 
   Use about <command> --help for help on a command.
 

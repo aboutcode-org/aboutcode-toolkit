@@ -2,26 +2,24 @@ Usage: about attrib [OPTIONS] LOCATION OUTPUT
 
   Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
-  LOCATION: Path to a file, directory or .zip archive containing .ABOUT
-  files.
+  LOCATION: Path to a file, directory or .zip archive containing .ABOUT files.
 
   OUTPUT: Path where to write the attribution document.
 
 Options:
-  --template TEMPLATE_FILE_PATH  Path to an optional custom attribution
-                                 template to generate the attribution
-                                 document.
+  --template TEMPLATE_FILE_PATH  Path to an optional custom attribution template
+                                 to generate the attribution document.
   --variable <key>=<value>       Add variable(s) as key=value for use in a
                                  custom attribution template.
-  --inventory PATH               Path to an optional JSON or CSV inventory
-                                 file listing the subset of .ABOUT files paths
-                                 to consider when generating the attribution
+  --inventory PATH               Path to an optional JSON or CSV inventory file
+                                 listing the subset of .ABOUT files paths to
+                                 consider when generating the attribution
                                  document.
   --mapping                      Use the default file mapping.config
                                  (./attributecode/mapping.config) with mapping
                                  between input keys and ABOUT field names.
-  --mapping-file FILE            Use a custom mapping file with mapping
-                                 between input keys and ABOUT field names.
+  --mapping-file FILE            Use a custom mapping file with mapping between
+                                 input keys and ABOUT field names.
   -q, --quiet                    Do not print error or warning messages.
   --verbose                      Show all error and warning messages.
   -h, --help                     Show this message and exit.

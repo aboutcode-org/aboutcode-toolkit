@@ -11,10 +11,10 @@ Options:
                            key=value e.g. "license_expression=gpl-2.0
   -f, --format [json|csv]  Set OUTPUT inventory file format.  [default: csv]
   --mapping                Use the default file mapping.config
-                           (./attributecode/mapping.config) with mapping
-                           between input keys and ABOUT field names.
-  --mapping-file FILE      Use a custom mapping file with mapping between
+                           (./attributecode/mapping.config) with mapping between
                            input keys and ABOUT field names.
+  --mapping-file FILE      Use a custom mapping file with mapping between input
+                           keys and ABOUT field names.
   -q, --quiet              Do not print error or warning messages.
   --verbose                Show all error and warning messages.
   -h, --help               Show this message and exit.

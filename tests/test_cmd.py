@@ -29,7 +29,7 @@ from attributecode import WARNING
 from attributecode import cmd
 from attributecode import Error
 
-from testing_utils import run_about_command_test
+from testing_utils import run_about_command_test_click
 from testing_utils import get_test_loc
 
 
@@ -250,16 +250,17 @@ def check_about_stdout(options, expected_loc, regen=False):
     command success and that the stdout is equal to the `expected_loc` test file
     content.
     """
-    stdout, _stderr = run_about_command_test(options)
+    result = run_about_command_test_click(options)
     if regen:
         expected_file = get_test_loc(expected_loc, must_exists=False)
         with open(expected_file, 'wb') as ef:
-            ef.write(stdout)
+            ef.write(result.output_bytes)
 
     expected_file = get_test_loc(expected_loc, must_exists=True)
-    expected = open(expected_file, 'rb').read()
-    # we do not keep ends to ignore LF/CRF differences across OSes
-    assert expected.splitlines(False) == stdout.splitlines(False)
+    with open(expected_file, 'rb') as ef:
+        expected = ef.read()
+
+    assert expected.splitlines(False) == result.output_bytes.splitlines(False)
 
 
 def test_about_help_text(regen=False):

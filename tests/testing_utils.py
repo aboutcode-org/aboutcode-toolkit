@@ -171,3 +171,42 @@ def run_about_command_test(options, expected_rc=0):
         ).format(**locals())
         assert rc == expected_rc, error
     return stdout, stderr
+
+
+def run_about_command_test_click(options, expected_rc=0, monkeypatch=None, ):
+    """
+    Run an "about" command as a Click-controlled subprocess with the `options`
+    list of options. Return a click.testing.Result object.
+
+    If monkeypatch is provided, a tty with a size (80, 43) is mocked.
+    """
+    import click
+    from click.testing import CliRunner
+    from attributecode import cmd
+    if monkeypatch:
+        monkeypatch.setattr(click._termui_impl, 'isatty', lambda _: True)
+        monkeypatch.setattr(click , 'get_terminal_size', lambda : (80, 43,))
+    runner = CliRunner()
+
+    result = runner.invoke(cmd.cli, options, catch_exceptions=False)
+
+    output = result.output
+    if result.exit_code != expected_rc:
+        opts = get_opts(options)
+        error = '''
+Failure to run: about %(opts)s
+output:
+%(output)s
+''' % locals()
+        assert result.exit_code == expected_rc, error
+    return result
+
+
+def get_opts(options):
+    try:
+        return ' '.join(options)
+    except:
+        try:
+            return b' '.join(options)
+        except:
+            return b' '.join(map(repr, options))
