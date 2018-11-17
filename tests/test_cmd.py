@@ -53,9 +53,9 @@ INFO: msg3
 WARNING: msg4
 DEBUG: msg4
 NOTSET: msg4
-'''
+'''.splitlines(False)
     assert '' == err
-    assert expected_out == out
+    assert expected_out == out.splitlines(False)
 
 
 def test_report_errors_without_verbose(capsys):
@@ -73,9 +73,9 @@ def test_report_errors_without_verbose(capsys):
     expected_out = '''CRITICAL: msg1
 ERROR: msg2
 WARNING: msg4
-'''
+'''.splitlines(False)
     assert '' == err
-    assert expected_out == out
+    assert expected_out == out.splitlines(False)
 
 
 def test_report_errors_does_not_report_duplicate_errors(capsys):
@@ -147,8 +147,8 @@ INFO: msg3
 WARNING: msg4
 DEBUG: msg4
 NOTSET: msg4
-''')
-    assert expected_out == out
+''').splitlines(False)
+    assert expected_out == out.splitlines(False)
     assert '' == err
 
 
