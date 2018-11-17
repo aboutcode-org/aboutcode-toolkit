@@ -60,12 +60,15 @@ class TemplateTest(unittest.TestCase):
         assert expected == attrib.check_template('{{template_string')
 
     def test_check_template_all_builtin_templates_are_valid(self):
-        builtin_templates_dir = os.path.dirname(attrib.default_template)
+        builtin_templates_dir = os.path.dirname(attrib.DEFAULT_TEMPLATE_FILE)
         for template in os.listdir(builtin_templates_dir):
-            template = os.path.join(builtin_templates_dir, template)
-            with open(template) as tmpl:
+            template_loc = os.path.join(builtin_templates_dir, template)
+            with open(template_loc, 'rb') as tmpl:
                 template = tmpl.read()
-            assert None == attrib.check_template(template)
+            try:
+                assert None == attrib.check_template(template)
+            except:
+                raise Exception(template_loc)
 
 
 class GenerateTest(unittest.TestCase):
@@ -83,14 +86,17 @@ class GenerateTest(unittest.TestCase):
             'Apache HTTP Server: 2.4.3\n'
             'resource: httpd-2.4.3.tar.gz\n')
 
-        result = attrib.generate(abouts, template)
+        error, result = attrib.generate(abouts, template)
         assert expected == result
+        assert not error
 
     def test_generate_with_default_template(self):
         test_file = get_test_loc('test_attrib/gen_default_template/attrib.ABOUT')
         errors, abouts = model.collect_inventory(test_file)
         assert not errors
-        result = attrib.generate_from_file(abouts)
+
+        error, result = attrib.generate_from_file(abouts)
+        assert not error
 
         expected_file = get_test_loc(
             'test_attrib/gen_default_template/expected_default_attrib.html')

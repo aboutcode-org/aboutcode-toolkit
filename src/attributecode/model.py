@@ -760,7 +760,7 @@ class About(object):
             field.name = name
             setattr(self, name, field)
 
-    def __init__(self, location=None, about_file_path=None, use_mapping=False, mapping_file=None):
+    def __init__(self, location=None, about_file_path=None, mapping_file=None):
         self.create_fields()
         self.custom_fields = OrderedDict()
 
@@ -774,7 +774,7 @@ class About(object):
         self.base_dir = None
         if self.location:
             self.base_dir = os.path.dirname(location)
-            self.load(location, use_mapping, mapping_file)
+            self.load(location, mapping_file)
 
     def __repr__(self):
         return repr(self.all_fields())
@@ -881,7 +881,7 @@ class About(object):
             as_dict[field.name] = field.serialized_value()
         return as_dict
 
-    def hydrate(self, fields, use_mapping=False, mapping_file=None):
+    def hydrate(self, fields, mapping_file=None):
         """
         Process an iterable of field (name, value) tuples. Update or create
         Fields attributes and the fields and custom fields dictionaries.
@@ -890,9 +890,8 @@ class About(object):
         errors = []
         seen_fields = OrderedDict()
 
-        mapping = {}
-        if use_mapping or mapping_file:
-            mapping = util.get_mapping(mapping_file)
+        mapping = util.get_mapping(mapping_file)
+
         for name, value in fields:
             orig_name = name
             name = name.lower()
@@ -917,7 +916,7 @@ class About(object):
                 standard_field.present = True
                 continue
 
-            if not use_mapping and not mapping_file:
+            if not mapping_file:
                 if not name == self.about_file_path_attr:
                     msg = (u'Field %(orig_name)s is not a supported field and is ignored.')
                     errors.append(Error(INFO, msg % locals()))
@@ -974,7 +973,7 @@ class About(object):
 
     def process(self, fields, about_file_path, running_inventory=False,
                 base_dir=None, license_notice_text_location=None,
-                use_mapping=False, mapping_file=None):
+                mapping_file=None):
         """
         Hydrate and validate a sequence of field name/value tuples from an
         ABOUT file. Return a list of errors.
@@ -983,7 +982,7 @@ class About(object):
         self.license_notice_text_location = license_notice_text_location
         afp = self.about_file_path
         errors = []
-        hydratation_errors = self.hydrate(fields, use_mapping=use_mapping, mapping_file=mapping_file)
+        hydratation_errors = self.hydrate(fields, mapping_file=mapping_file)
         errors.extend(hydratation_errors)
 
         # We want to copy the license_files before the validation
@@ -1003,7 +1002,7 @@ class About(object):
         # self.about_resource.resolve(self.about_file_path)
         return errors
 
-    def load(self, location, use_mapping=False, mapping_file=None):
+    def load(self, location, mapping_file=None):
         """
         Read, parse and process the ABOUT file at location.
         Return a list of errors and update self with errors.
@@ -1031,7 +1030,7 @@ class About(object):
             # wrap the value of the boolean field in quote to avoid
             # automatically conversion from yaml.load
             input = util.wrap_boolean_value(input_text)  # NOQA
-            errs = self.load_dict(saneyaml.load(input), base_dir, running_inventory, use_mapping, mapping_file)
+            errs = self.load_dict(saneyaml.load(input), base_dir, running_inventory, mapping_file)
             errors.extend(errs)
         except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
@@ -1043,7 +1042,7 @@ class About(object):
     # FIXME: should be a from_dict class factory instead
     # FIXME: an About object should not know about mappings
     def load_dict(self, fields_dict, base_dir, running_inventory=False,
-                  use_mapping=False, mapping_file=None,
+                  mapping_file=None,
                   license_notice_text_location=None, with_empty=True):
         """
         Load the ABOUT file from a fields name/value mapping.
@@ -1073,13 +1072,17 @@ class About(object):
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
         errors = self.process(
-            fields, about_file_path, running_inventory, base_dir,
-            license_notice_text_location, use_mapping, mapping_file)
+            fields=fields, 
+            about_file_path=about_file_path, 
+            running_inventory=running_inventory, 
+            base_dir=base_dir, 
+            license_notice_text_location=license_notice_text_location,
+            mapping_file=mapping_file)
         self.errors = errors
         return errors
 
 
-    def dumps(self, use_mapping=False, mapping_file=False, with_absent=False, with_empty=True):
+    def dumps(self, mapping_file=False, with_absent=False, with_empty=True):
         """
         Return self as a formatted ABOUT string.
         If with_absent, include absent (not present) fields.
@@ -1124,10 +1127,10 @@ class About(object):
             if lic_group[3]:
                 lic_dict['url'] = lic_group[3]
             about_data.setdefault('licenses', []).append(lic_dict)
-        formatted_about_data = util.format_output(about_data, use_mapping, mapping_file)
+        formatted_about_data = util.format_output(about_data, mapping_file)
         return saneyaml.dump(formatted_about_data)
 
-    def dump(self, location, use_mapping=False, mapping_file=False, with_absent=False, with_empty=True):
+    def dump(self, location, mapping_file=False, with_absent=False, with_empty=True):
         """
         Write formatted ABOUT representation of self to location.
         If with_absent, include absent (not present) fields.
@@ -1147,7 +1150,7 @@ class About(object):
         if on_windows:
             about_file_path = add_unc(about_file_path)
         with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
-            dumped.write(self.dumps(use_mapping, mapping_file, with_absent, with_empty))
+            dumped.write(self.dumps(mapping_file, with_absent, with_empty))
 
     def dump_lic(self, location, license_dict):
         """
@@ -1270,7 +1273,7 @@ def parse(lines):
     return errors, fields
 
 
-def collect_inventory(location, use_mapping=False, mapping_file=None):
+def collect_inventory(location, mapping_file=None):
     """
     Collect ABOUT files at location and return a list of errors and a list of
     About objects.
@@ -1284,7 +1287,7 @@ def collect_inventory(location, use_mapping=False, mapping_file=None):
     abouts = []
     for about_loc in about_locations:
         about_file_path = util.get_relative_path(input_location, about_loc)
-        about = About(about_loc, about_file_path, use_mapping, mapping_file)
+        about = About(about_loc, about_file_path, mapping_file)
         # Insert about_file_path reference to the error
         for severity, message in about.errors:
             msg = (about_file_path + ": " + message)

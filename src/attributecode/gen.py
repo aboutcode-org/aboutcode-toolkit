@@ -20,7 +20,7 @@ from __future__ import unicode_literals
 
 import codecs
 from collections import OrderedDict
-import logging
+
 # FIXME: why posipath???
 from posixpath import basename
 from posixpath import dirname
@@ -41,20 +41,10 @@ from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import unique
 
 
-if python2: 
-    import backports.csv as csv #NOQA
+if python2:
+    import backports.csv as csv  # NOQA
 else:
-    import csv #NOQA
-
-
-LOG_FILENAME = 'error.log'
-
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-handler.setLevel(logging.CRITICAL)
-handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-logger.addHandler(handler)
-file_logger = logging.getLogger(__name__ + '_file')
+    import csv  # NOQA
 
 
 def check_duplicated_columns(location):
@@ -63,7 +53,7 @@ def check_duplicated_columns(location):
     at location.
     """
     location = add_unc(location)
-    # FIXME: why ignore errors?
+    # FIXME: why errors=ignore?
     with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
         reader = csv.reader(csvfile)
         columns = next(reader)
@@ -91,7 +81,7 @@ def check_duplicated_columns(location):
         msg = ('Duplicated column name(s): %(dup_msg)s\n' % locals() +
                'Please correct the input and re-run.')
         errors.append(Error(ERROR, msg))
-    return errors
+    return unique(errors)
 
 
 def check_duplicated_about_file_path(inventory_dict):
@@ -112,15 +102,16 @@ def check_duplicated_about_file_path(inventory_dict):
 
 
 def load_inventory(location, base_dir, license_notice_text_location=None,
-                   use_mapping=False, mapping_file=None):
+                    mapping_file=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files
     stored in the `base_dir`. Return a list of errors and a list of
     About objects validated against the base_dir.
     Optionally use `license_notice_text_location` as the location of
     license and notice texts.
-    Optionally use mappings for field names if `use_mapping` is True
-    or a custom mapping_file if provided.
+
+    Optionally use mappings for field names if `mapping_file` is provided for
+    the CSV format.
     """
     errors = []
     abouts = []
@@ -130,9 +121,9 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
         if dup_cols_err:
             errors.extend(dup_cols_err)
             return errors, abouts
-        inventory = util.load_csv(location, use_mapping, mapping_file)
+        inventory = util.load_csv(location, mapping_file)
     else:
-        inventory = util.load_json(location, use_mapping, mapping_file)
+        inventory = util.load_json(location)
 
     try:
         dup_about_paths_err = check_duplicated_about_file_path(inventory)
@@ -176,9 +167,14 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
         about = model.About(about_file_path=afp)
         about.location = loc
         running_inventory = False
-        ld_errors = about.load_dict(fields, base_dir, running_inventory,
-                                    use_mapping, mapping_file, license_notice_text_location,
-                                    with_empty=False)
+        ld_errors = about.load_dict(
+            fields,
+            base_dir,
+            running_inventory,
+            mapping_file,
+            license_notice_text_location,
+            with_empty=False
+        )
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
         for e in ld_errors:
@@ -188,12 +184,12 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
             if not e in errors:
                 errors.extend(ld_errors)
         abouts.append(about)
-    return errors, abouts
+    return unique(errors), abouts
 
 
 def generate(location, base_dir, license_notice_text_location=None,
              fetch_license=False, policy=None, conf_location=None,
-             with_empty=False, with_absent=False, use_mapping=False, mapping_file=None):
+             with_empty=False, with_absent=False, mapping_file=None):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir using policy flags and configuration file at conf_location.
@@ -216,7 +212,6 @@ def generate(location, base_dir, license_notice_text_location=None,
         location=location,
         base_dir=bdir,
         license_notice_text_location=license_notice_text_location,
-        use_mapping=use_mapping,
         mapping_file=mapping_file)
 
     if gen_license:
@@ -297,7 +292,12 @@ def generate(location, base_dir, license_notice_text_location=None,
                             about.license_name.present = True
 
             # Write the ABOUT files
-            about.dump(dump_loc, use_mapping=use_mapping, mapping_file=mapping_file, with_empty=with_empty, with_absent=with_absent)
+            about.dump(
+                dump_loc,
+                mapping_file=mapping_file,
+                with_empty=with_empty,
+                with_absent=with_absent
+            )
             for e in not_exist_errors:
                 errors.append(Error(INFO, e))
         except Exception as e:
@@ -307,5 +307,4 @@ def generate(location, base_dir, license_notice_text_location=None,
                    u'%(dump_loc)s '
                    u'with error: %(emsg)s' % locals())
             errors.append(Error(ERROR, msg))
-    unique_errors = unique(errors)
-    return unique_errors, abouts
+    return unique(errors), abouts

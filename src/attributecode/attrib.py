@@ -25,6 +25,7 @@ import os
 
 import jinja2
 
+from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
@@ -34,20 +35,31 @@ from attributecode.util import get_about_file_path
 
 
 # FIXME: the template dir should be outside the code tree
-default_template = os.path.join(
+DEFAULT_TEMPLATE_FILE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'templates', 'default_html.template')
 
 
-def generate(abouts, template_string=None, vartext_dict=None):
+def generate(abouts, template=None, variables=None):
     """
-    Generate and return attribution text from a list of About objects and a
-    template string.
-    The returned rendered text may contain template processing error messages.
+    Generate an attribution text from an `abouts` list of About objects, a
+    `template` template text and a `variables` optional mapping of extra
+    variables.
+
+    Return a tuple of (error, attribution text) where error is an Error object
+    or None and attribution text is the generated text or None.
     """
-    syntax_error = check_template(template_string)
-    if syntax_error:
-        return 'Template validation error at line: %r: %r' % (syntax_error)
-    template = jinja2.Template(template_string)
+    rendered = None
+    error = None
+    template_error = check_template(template)
+    if template_error:
+        lineno, message = template_error
+        error = Error(
+            CRITICAL,
+            'Template validation error at line: {lineno}: "{message}"'.format(**locals())
+        )
+        return error, None
+
+    template = jinja2.Template(template)
 
     try:
         captured_license = []
@@ -106,18 +118,25 @@ def generate(abouts, template_string=None, vartext_dict=None):
 
         # Get the current UTC time
         utcnow = datetime.datetime.utcnow()
-        rendered = template.render(abouts=abouts, common_licenses=COMMON_LICENSES,
-                                   license_key_and_context=sorted_license_key_and_context,
-                                   license_file_name_and_key=license_file_name_and_key,
-                                   license_key_to_license_name=license_key_to_license_name,
-                                   license_name_to_license_key=license_name_to_license_key,
-                                   utcnow=utcnow, vartext_dict=vartext_dict)
+        rendered = template.render(
+            abouts=abouts, common_licenses=COMMON_LICENSES,
+            license_key_and_context=sorted_license_key_and_context,
+            license_file_name_and_key=license_file_name_and_key,
+            license_key_to_license_name=license_key_to_license_name,
+            license_name_to_license_key=license_name_to_license_key,
+            utcnow=utcnow,
+            variables=variables
+        )
     except Exception as e:
-        line = getattr(e, 'lineno', None)
-        ln_msg = ' at line: %r' % line if line else ''
-        err = getattr(e, 'message', '')
-        return 'Template processing error%(ln_msg)s: %(err)r' % locals()
-    return rendered
+        lineno = getattr(e, 'lineno', '') or ''
+        if lineno:
+            lineno = ' at line: {}'.format(lineno)
+        err = getattr(e, 'message', '') or ''
+        error = Error(
+            CRITICAL,
+            'Template processing error {lineno}: {err}'.format(**locals()),
+        )
+    return error, rendered
 
 
 def check_template(template_string):
@@ -131,43 +150,46 @@ def check_template(template_string):
         return e.lineno, e.message
 
 
-def generate_from_file(abouts, template_loc=default_template, vartext_dict=None):
+def generate_from_file(abouts, template_loc=DEFAULT_TEMPLATE_FILE, variables=None):
     """
-    Generate and return attribution string from a list of About objects and a
-    template location.
+    Generate an attribution text from an `abouts` list of About objects, a
+    `template_loc` template file location and a `variables` optional
+    mapping of extra variables.
+
+    Return a tuple of (error, attribution text) where error is an Error object
+    or None and attribution text is the generated text or None.
     """
     template_loc = add_unc(template_loc)
     with codecs.open(template_loc, 'rb', encoding='utf-8') as tplf:
         tpls = tplf.read()
-    return generate(abouts, template_string=tpls, vartext_dict=vartext_dict)
+    return generate(abouts, template=tpls, variables=variables)
 
 
-def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=None,
-                      template_loc=None, inventory_location=None, vartext=None):
+def generate_and_save(abouts, output_location, template_loc=None, variables=None,
+                      mapping_file=None, inventory_location=None):
     """
-    Generate attribution file using the `abouts` list of About object
-    at `output_location`.
-    Return a list of errors if any.
+    Generate an attribution text from an `abouts` list of About objects, a
+    `template_loc` template file location and a `variables` optional
+    mapping of extra variables. Save the generated attribution text in the
+    `output_location` file. 
+    Return a list of Error objects if any.
 
-    Optionally use the mapping.config file if `use_mapping` is True.
+    FIXME: these three argument are too complex:
 
-    Optionally use the custom mapping file if mapping_file is set.
-
-    Use the optional `template_loc` custom temaplte or a default template.
-
-    Optionally filter `abouts` object based on the inventory JSON or
-    CSV at `inventory_location`.
+    Optionally use the `mapping_file` mapping config if provided.
+    Optionally filter `abouts` object based on the inventory JSON or CSV at `inventory_location`.
     """
     updated_abouts = []
     lstrip_afp = []
     afp_list = []
     not_match_path = []
     errors = []
-    vartext_dict = {}
 
     if not inventory_location:
         updated_abouts = abouts
-    # Do the following if an filter list (inventory_location) is provided
+
+    # FIXME: this is too complex
+    # Do the following if a filter list (inventory_location) is provided
     else:
         if not os.path.exists(inventory_location):
             # FIXME: this message does not make sense
@@ -176,12 +198,11 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
             return errors
 
         if inventory_location.endswith('.csv') or inventory_location.endswith('.json'):
-            # FIXME: we should use the same inventory lodaing that we use everywhere!!!!
+            # FIXME: we should use the same inventory loading that we use everywhere
 
             try:
                 # Return a list which contains only the about file path
-                about_list = get_about_file_path(
-                    inventory_location, use_mapping=use_mapping, mapping_file=mapping_file)
+                about_list = get_about_file_path(inventory_location, mapping_file=mapping_file)
             # FIXME: why catching all exceptions?
             except Exception:
                 # 'about_file_path' key/column doesn't exist
@@ -227,23 +248,24 @@ def generate_and_save(abouts, output_location, use_mapping=False, mapping_file=N
 
     # Parse license_expression and save to the license list
     for about in updated_abouts:
-        if about.license_expression.value:
-            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
-            if special_char_in_expression:
-                msg = (u"The following character(s) cannot be in the licesne_expression: " +
-                       str(special_char_in_expression))
-                errors.append(Error(ERROR, msg))
-            else:
-                about.license_key.value = lic_list
+        if not about.license_expression.value:
+            continue
+        special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+        if special_char_in_expression:
+            msg = (u"The following character(s) cannot be in the licesne_expression: " +
+                   str(special_char_in_expression))
+            errors.append(Error(ERROR, msg))
+        else:
+            about.license_key.value = lic_list
 
-    # Parse the vartext and save to the vartext dictionary
-    if vartext:
-        for var in vartext:
-            key = var.partition('=')[0]
-            value = var.partition('=')[2]
-            vartext_dict[key] = value
+    rendering_error, rendered = generate_from_file(
+        updated_abouts,
+        template_loc=template_loc,
+        variables=variables
+    )
 
-    rendered = generate_from_file(updated_abouts, template_loc=template_loc, vartext_dict=vartext_dict)
+    if rendering_error:
+        errors.append(rendering_error)
 
     if rendered:
         output_location = add_unc(output_location)

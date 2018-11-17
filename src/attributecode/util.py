@@ -29,6 +29,7 @@ import sys
 
 from attributecode import CRITICAL
 from attributecode import Error
+from attributecode import DEFAULT_MAPPING
 
 
 python2 = sys.version_info[0] < 3
@@ -314,6 +315,8 @@ def load_mapping(location, lowercase=True):
     Raise Exception on errors including empty of non existing location.
     Return an empty mapping if the location is empty or does not exists.
     """
+    if not location:
+        return {}
     mapping = OrderedDict()
     with open(location) as mapping_file:
         for line in mapping_file:
@@ -332,22 +335,16 @@ def load_mapping(location, lowercase=True):
     return mapping
 
 
-DEFAULT_MAPPING_CONFIG_FILE = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)), 'mapping.config')
-
-
-def get_mapping(location=None, lowercase=True,
-                default_mapping_location=DEFAULT_MAPPING_CONFIG_FILE):
+def get_mapping(location=DEFAULT_MAPPING, lowercase=True):
     """
     Return a mapping of user key names to About key names by reading the
     mapping.config file from `location` or the directory of this source file if
     location was not provided.
     """
-    location = location or default_mapping_location
     return load_mapping(location, lowercase)
 
 
-def apply_mapping(abouts, alternate_mapping=None):
+def apply_mapping(abouts, mapping_file=None):
     """
     Given a list of About data dictionaries and a dictionary of
     mapping, return a new About data dictionaries list where the keys
@@ -355,7 +352,11 @@ def apply_mapping(abouts, alternate_mapping=None):
     the mapping from the default mnapping.config if an alternate
     mapping dict is not provided.
     """
-    mapping = get_mapping(alternate_mapping)
+    
+    if not mapping_file:
+        return abouts
+
+    mapping = get_mapping(mapping_file)
 
     if not mapping:
         return abouts
@@ -376,7 +377,7 @@ def apply_mapping(abouts, alternate_mapping=None):
     return mapped_abouts
 
 
-def format_output(about_data, use_mapping, mapping_loc):
+def format_output(about_data, mapping_file=None):
     """
     Convert the about_data dictionary to an ordered dictionary for saneyaml.dump()
     The ordering should be:
@@ -387,9 +388,8 @@ def format_output(about_data, use_mapping, mapping_loc):
     and the rest is the order from the mapping.config file (if any); otherwise alphabetical order.
     """
     mapping_key_order = []
-    # FIXME: we should not
-    if use_mapping or mapping_loc:
-        mapping_key_order = get_mapping(mapping_loc).keys()
+    if mapping_file:
+        mapping_key_order = get_mapping(mapping_file).keys()
 
     priority_keys = ['about_resource', 'name', 'version']
     about_data_keys = []
@@ -418,26 +418,27 @@ def format_output(about_data, use_mapping, mapping_loc):
                 order_dict[other_key] = about_data[other_key]
     return order_dict
 
-
-def get_about_file_path(location, use_mapping=False, mapping_file=None):
+#FIXME: why is this used for
+def get_about_file_path(location, mapping_file=None):
     """
     Read file at location, return a list of about_file_path.
     """
     afp_list = []
     if location.endswith('.csv'):
-        about_data = load_csv(location, use_mapping=use_mapping, mapping_file=mapping_file)
+        about_data = load_csv(location, mapping_file=mapping_file)
     else:
-        about_data = load_json(location, use_mapping=use_mapping, mapping_file=mapping_file)
+        about_data = load_json(location)
 
     for about in about_data:
         afp_list.append(about['about_file_path'])
     return afp_list
 
 
-def load_csv(location, use_mapping=False, mapping_file=None):
+def load_csv(location, mapping_file=None):
     """
     Read CSV at `location`, return a list of ordered dictionaries, one
     for each row.
+    Use `mapping_file` if provided.
     """
     results = []
     # FIXME: why ignore encoding errors here?
@@ -450,18 +451,18 @@ def load_csv(location, use_mapping=False, mapping_file=None):
                 [(key.lower(), value) for key, value in row.items()]
             )
             results.append(updated_row)
-    if use_mapping or mapping_file:
+    if mapping_file:
         results = apply_mapping(results, mapping_file)
     return results
 
 
-def load_json(location, use_mapping=False, mapping_file=None):
+def load_json(location):
     """
     Read JSON file at `location` and return a list of ordered mappings, one for
     each entry.
     """
     # FIXME: IMHO we should know where the JSON is from and its shape
-    # TODO use: object_pairs_hook=OrderedDict
+    # FIXME use: object_pairs_hook=OrderedDict
     with open(location) as json_file:
         results = json.load(json_file)
 
@@ -506,23 +507,18 @@ def load_json(location, use_mapping=False, mapping_file=None):
     #    "name": "test",
     #    ...
     # }
+    # FIXME: this is too clever and complex... IMHO we should not try to guess the format.
+    # instead a command line option should be provided explictly to say what is the format
     if isinstance(results, list):
-        updated_results = sorted(results)
+        results = sorted(results)
     else:
         if u'aboutcode_manager_notice' in results:
-            updated_results = results['components']
+            results = results['components']
         elif u'scancode_notice' in results:
-            updated_results = results['files']
+            results = results['files']
         else:
-            updated_results = [results]
-
-    about_ordered_list = updated_results
-
-    # FIXME: why this double test? either have a mapping file and we use mapping or we do not.
-    # FIXME: IMHO only one argument is needed
-    if use_mapping or mapping_file:
-        about_ordered_list = apply_mapping(updated_results, mapping_file)
-    return about_ordered_list
+            results = [results]
+    return results
 
 
 # FIXME: rename to is_online: BUT do we really need this at all????

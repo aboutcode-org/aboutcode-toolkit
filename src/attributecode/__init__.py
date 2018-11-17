@@ -20,6 +20,7 @@ from __future__ import unicode_literals
 
 from collections import namedtuple
 import logging
+import os
 
 try:
     unicode  # Python 2
@@ -110,3 +111,7 @@ severities = {
     DEBUG : 'DEBUG',
     NOTSET : 'NOTSET'
 }
+
+
+DEFAULT_MAPPING = os.path.join(os.path.abspath(
+    os.path.dirname(__file__)), 'mapping.config')

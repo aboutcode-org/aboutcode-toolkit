@@ -42,6 +42,7 @@ from testing_utils import get_temp_file
 from testing_utils import get_test_loc
 from testing_utils import get_test_lines
 from testing_utils import get_unicode_content
+from attributecode import DEFAULT_MAPPING
 
 
 def check_csv(expected, result):
@@ -733,7 +734,7 @@ owner: nexB Inc.
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 vcs_tool: git
 '''
-        result = a.dumps(use_mapping=True)
+        result = a.dumps(mapping_file=DEFAULT_MAPPING)
         assert expected == result
 
     # We do not support with_absent and with_empty staring in version 3.2.0.
@@ -815,7 +816,7 @@ attribute: yes
 modified: yes
 '''
 
-        result = a.dumps(use_mapping=False, mapping_file=False)
+        result = a.dumps(mapping_file=False)
         assert set(expected) == set(result)
 
 
@@ -831,7 +832,7 @@ modified: yes
 name: AboutCode
 version: 0.11.0
 '''
-        result = a.dumps(use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
+        result = a.dumps(mapping_file=False, with_absent=False, with_empty=False)
         assert expected == result
 
     def test_About_as_dict_contains_special_paths(self):
@@ -945,7 +946,7 @@ version: 0.11.0
         a = model.About()
         a.load(test_file)
         dumped_file = get_temp_file('that.ABOUT')
-        a.dump(dumped_file, use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
+        a.dump(dumped_file, mapping_file=False, with_absent=False, with_empty=False)
 
         expected = get_unicode_content(test_file).splitlines()
         result = get_unicode_content(dumped_file).splitlines()
@@ -1139,8 +1140,8 @@ class CollectorTest(unittest.TestCase):
 
     def test_collect_inventory_with_mapping(self):
         test_loc = get_test_loc('parse/name_mapping_test.ABOUT')
-        mapping = True
-        errors, abouts = model.collect_inventory(test_loc, mapping)
+        mapping_file = DEFAULT_MAPPING
+        errors, abouts = model.collect_inventory(test_loc, mapping_file)
         expected_msg1 = 'Field resource is a custom field'
         expected_msg2 = 'Field custom_mapping is not a supported field and is not defined in the mapping file. This field is ignored.'
         assert len(errors) == 2
@@ -1151,9 +1152,8 @@ class CollectorTest(unittest.TestCase):
 
     def test_collect_inventory_with_custom_mapping(self):
         test_loc = get_test_loc('parse/name_mapping_test.ABOUT')
-        mapping = False
         mapping_file = get_test_loc('custom-mapping-file/mapping.config')
-        errors, abouts = model.collect_inventory(test_loc, mapping, mapping_file)
+        errors, abouts = model.collect_inventory(test_loc, mapping_file)
         expected_msg1 = 'Field resource is a custom field'
         expected_msg2 = 'Field custom_mapping is a custom field'
         assert len(errors) == 2

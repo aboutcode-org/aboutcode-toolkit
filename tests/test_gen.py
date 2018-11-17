@@ -29,6 +29,7 @@ from attributecode import INFO
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import gen
+from attributecode import DEFAULT_MAPPING
 
 
 class GenTest(unittest.TestCase):
@@ -45,9 +46,10 @@ class GenTest(unittest.TestCase):
         assert expected == result
 
     def test_check_duplicated_about_file_path(self):
-        test_dict = [{'about_file_path': u'/test/test.c', u'version': u'1.03', u'name': u'test.c'},
-                     {'about_file_path': u'/test/abc/', u'version': u'1.0', u'name': u'abc'},
-                     {'about_file_path': u'/test/test.c', u'version': u'1.04', u'name': u'test1.c'}]
+        test_dict = [
+            {'about_file_path': u'/test/test.c', u'version': u'1.03', u'name': u'test.c'},
+            {'about_file_path': u'/test/abc/', u'version': u'1.0', u'name': u'abc'},
+            {'about_file_path': u'/test/test.c', u'version': u'1.04', u'name': u'test1.c'}]
         expected = [Error(CRITICAL, u'The input has duplicated values in \'about_file_path\' field: /test/test.c')]
         result = gen.check_duplicated_about_file_path(test_dict)
         assert expected == result
@@ -76,22 +78,19 @@ class GenTest(unittest.TestCase):
                     u'description: |-\n'
                     u'    multi\n'
                     u'    line\n']
-        result = [a.dumps(use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
+        result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
                         for a in abouts]
         assert expected == result
 
     def test_load_inventory_with_mapping(self):
         location = get_test_loc('gen/inv4.csv')
         base_dir = get_test_loc('inv')
-        license_notice_text_location = None
-        use_mapping = True
-        errors, abouts = gen.load_inventory(location,
-                                            base_dir,
-                                            license_notice_text_location,
-                                            use_mapping)
-        expected_error_messages = ['Field about_resource',
-                                   'Field test is not a supported field and is not defined in the mapping file. This field is ignored.',
-                                   'Field resource is a custom field']
+        errors, abouts = gen.load_inventory(
+            location, base_dir, mapping_file=DEFAULT_MAPPING)
+        expected_error_messages = [
+            'Field about_resource',
+            'Field test is not a supported field and is not defined in the mapping file. This field is ignored.',
+            'Field resource is a custom field']
 
         assert len(errors) == 3
         for e in errors:
@@ -101,18 +100,18 @@ class GenTest(unittest.TestCase):
             else:
                 assert e.message in expected_error_messages
 
-        expected = [u'about_resource: .\n'
-                    u'name: AboutCode\n'
-                    u'version: 0.11.0\n'
-                    u'copyright: Copyright (c) nexB, Inc.\n'
-                    u'resource: this.ABOUT\n'
-                    u'description: |-\n'
-                    u'    multi\n'
-                    u'    line\n'
-                    ]
-        result = [a.dumps(use_mapping, mapping_file=False, with_absent=False, with_empty=False)
-                        for a in abouts]
-        assert expected == result
+        expected = (
+            'about_resource: .\n'
+            'name: AboutCode\n'
+            'version: 0.11.0\n'
+            'copyright: Copyright (c) nexB, Inc.\n'
+            'description: |-\n'
+            '    multi\n'
+            '    line\n'
+            'resource: this.ABOUT\n'
+        )
+        result = [a.dumps(with_empty=False) for a in abouts]
+        assert expected == result[0]
 
     def test_generation_dir_endswith_space(self):
         location = get_test_loc('inventory/complex/about_file_path_dir_endswith_space.csv')
@@ -166,14 +165,15 @@ class GenTest(unittest.TestCase):
         assert msg1 in errors[0].message
         assert msg2 in errors[1].message
 
-        in_mem_result = [a.dumps(use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
+        in_mem_result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
                         for a in abouts][0]
-        expected = (u'about_resource: .\n'
-                    u'name: AboutCode\n'
-                    u'version: 0.11.0\n'
-                    u'description: |-\n'
-                    u'    multi\n'
-                    u'    line\n')
+        expected = (
+            'about_resource: .\n'
+            'name: AboutCode\n'
+            'version: 0.11.0\n'
+            'description: |-\n'
+            '    multi\n'
+            '    line\n')
         assert expected == in_mem_result
 
     def test_generate_not_overwrite_original_license_file(self):
@@ -184,11 +184,12 @@ class GenTest(unittest.TestCase):
 
         _errors, abouts = gen.generate(location, base_dir, license_notice_text_location, fetch_license)
 
-        in_mem_result = [a.dumps(use_mapping=False, mapping_file=False, with_absent=False, with_empty=False)
+        in_mem_result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
                         for a in abouts][0]
-        expected = (u'about_resource: .\n'
-                    u'name: AboutCode\n'
-                    u'version: 0.11.0\n'
-                    u'licenses:\n'
-                    u'    -   file: this.LICENSE\n')
+        expected = (
+            'about_resource: .\n'
+            'name: AboutCode\n'
+            'version: 0.11.0\n'
+            'licenses:\n'
+            '    -   file: this.LICENSE\n')
         assert expected == in_mem_result

@@ -32,6 +32,7 @@ from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import model
 from attributecode import util
+from attributecode import DEFAULT_MAPPING
 
 
 class TestResourcePaths(unittest.TestCase):
@@ -313,7 +314,8 @@ class TestMapping(unittest.TestCase):
             ('version', '1'),
             ('copyright', 'Copyright (c) 2013-2017 nexB Inc.')
         ])]
-        assert util.apply_mapping(about) == expected
+        mapping_file = DEFAULT_MAPPING
+        assert expected == util.apply_mapping(about, mapping_file)
 
     def test_load_mapping(self):
         test_file = get_test_loc('test_util/mapping/mapping.config')
@@ -386,7 +388,8 @@ class TestCsv(unittest.TestCase):
     def test_get_about_file_path_from_csv_using_mapping(self):
         test_file = get_test_loc('test_util/csv/about.csv')
         expected = ['about.ABOUT']
-        result = util.get_about_file_path(test_file, use_mapping=True)
+        result = util.get_about_file_path(
+            test_file, mapping_file=DEFAULT_MAPPING)
         assert expected == result
 
     # The column names should be converted to lowercase as the same behavior as
@@ -437,42 +440,39 @@ class TestJson(unittest.TestCase):
         result = util.load_json(test_file)
         assert expected == result
 
-    # FIXME: mappings are a CSV-only feature!!!!!
-    def test_load_json_with_mapping(self):
+    def test_load_json(self):
         test_file = get_test_loc('test_util/json/expected_need_mapping.json')
         expected = [dict(OrderedDict([
-            ('about_file_path', '/load/this.ABOUT'),
+            ('about_file', '/load/this.ABOUT'),
             ('about_resource', '.'),
             ('version', '0.11.0'),
             ('name', 'AboutCode'),
         ])
         )]
-        result = util.load_json(test_file, use_mapping=True)
+        result = util.load_json(test_file)
         assert expected == result
 
-    # FIXME: mappings are a CSV-only feature!!!!!
-    def test_load_non_list_json_with_mapping(self):
+    def test_load_non_list_json(self):
         test_file = get_test_loc('test_util/json/not_a_list_need_mapping.json')
-        mapping_file = get_test_loc('custom-mapping-file/mapping.config')
-        # FIXME: why this disct nesting??
+        # FIXME: why this dict nesting??
         expected = [dict(OrderedDict([
-            ('about_file_path', '/load/this.ABOUT'),
             ('about_resource', '.'),
             ('name', 'AboutCode'),
+            ('path', '/load/this.ABOUT'),
             ('version', '0.11.0'),
         ])
         )]
-        result = util.load_json(test_file, use_mapping=False, mapping_file=mapping_file)
+        result = util.load_json(test_file)
         assert expected == result
 
     # FIXME: mappings are a CSV-only feature!!!!!
     def test_get_about_file_path_from_json_using_mapping(self):
         test_file = get_test_loc('test_util/json/expected.json')
         expected = ['/load/this.ABOUT']
-        result = util.get_about_file_path(test_file, use_mapping=True)
+        result = util.get_about_file_path(test_file, mapping_file=DEFAULT_MAPPING)
         assert expected == result
 
-    def test_load_non_list_json(self):
+    def test_load_non_list_json2(self):
         test_file = get_test_loc('test_util/json/not_a_list.json')
         expected = [OrderedDict([
             ('about_file_path', '/load/this.ABOUT'),
@@ -486,63 +486,59 @@ class TestJson(unittest.TestCase):
 
     def test_load_json_from_abc_mgr(self):
         test_file = get_test_loc('test_util/json/aboutcode_manager_exported.json')
-        mapping_file = get_test_loc('custom-mapping-file/mapping.config')
-        expected = [dict(OrderedDict(
-                    [('license_expression', 'apache-2.0'),
-                     ('copyright', 'Copyright (c) 2017 nexB Inc.'),
-                     ('licenses', [{'key':'apache-2.0'}]),
-                     ('copyrights', [{'statements':['Copyright (c) 2017 nexB Inc.']}]),
-                     ('about_file_path', 'ScanCode'),
-                     ('review_status', 'Analyzed'),
-                     ('name', 'ScanCode'),
-                     ('version', '2.2.1'),
-                     ('owner', 'nexB Inc.'),
-                     ('code_type', 'Source'),
-                     ('is_modified', False),
-                     ('is_deployed', False),
-                     ('feature', ''),
-                     ('purpose', ''),
-                     ('homepage_url', None),
-                     ('download_url', None),
-                     ('license_url', None),
-                     ('notice_url', None),
-                     ('programming_language', 'Python'),
-                     ('notes', ''),
-                     ('fileId', 8458),
-                    ]
-                    ))]
-        result = util.load_json(test_file, use_mapping=False, mapping_file=mapping_file)
+        expected = [dict(OrderedDict([
+            ('license_expression', 'apache-2.0'),
+            ('copyright', 'Copyright (c) 2017 nexB Inc.'),
+            ('licenses', [{'key':'apache-2.0'}]),
+            ('copyrights', [{'statements':['Copyright (c) 2017 nexB Inc.']}]),
+            ('path', 'ScanCode'),
+            ('review_status', 'Analyzed'),
+            ('name', 'ScanCode'),
+            ('version', '2.2.1'),
+            ('owner', 'nexB Inc.'),
+            ('code_type', 'Source'),
+            ('is_modified', False),
+            ('is_deployed', False),
+            ('feature', ''),
+            ('purpose', ''),
+            ('homepage_url', None),
+            ('download_url', None),
+            ('license_url', None),
+            ('notice_url', None),
+            ('programming_language', 'Python'),
+            ('notes', ''),
+            ('fileId', 8458),
+        ]))]
+        result = util.load_json(test_file)
         assert expected == result
 
     def test_load_json_from_scancode(self):
         test_file = get_test_loc('test_util/json/scancode_info.json')
-        mapping_file = get_test_loc('custom-mapping-file/mapping.config')
-        expected = [dict(OrderedDict(
-                    [('about_file_path', 'Api.java'),
-                     ('type', 'file'),
-                     ('name', 'Api.java'),
-                     ('base_name', 'Api'),
-                     ('extension', '.java'),
-                     ('size', 5074),
-                     ('date', '2017-07-15'),
-                     ('sha1', 'c3a48ec7e684a35417241dd59507ec61702c508c'),
-                     ('md5', '326fb262bbb9c2ce32179f0450e24601'),
-                     ('mime_type', 'text/plain'),
-                     ('file_type', 'ASCII text'),
-                     ('programming_language', 'Java'),
-                     ('is_binary', False),
-                     ('is_text', True),
-                     ('is_archive', False),
-                     ('is_media', False),
-                     ('is_source', True),
-                     ('is_script', False),
-                     ('files_count', 0),
-                     ('dirs_count', 0),
-                     ('size_count', 0),
-                     ('scan_errors', []),
-                    ]
-                    ))]
-        result = util.load_json(test_file, use_mapping=False, mapping_file=mapping_file)
+        expected = [dict(OrderedDict([
+            ('type', 'file'),
+            ('name', 'Api.java'),
+            ('path', 'Api.java'),
+            ('base_name', 'Api'),
+            ('extension', '.java'),
+            ('size', 5074),
+            ('date', '2017-07-15'),
+            ('sha1', 'c3a48ec7e684a35417241dd59507ec61702c508c'),
+            ('md5', '326fb262bbb9c2ce32179f0450e24601'),
+            ('mime_type', 'text/plain'),
+            ('file_type', 'ASCII text'),
+            ('programming_language', 'Java'),
+            ('is_binary', False),
+            ('is_text', True),
+            ('is_archive', False),
+            ('is_media', False),
+            ('is_source', True),
+            ('is_script', False),
+            ('files_count', 0),
+            ('dirs_count', 0),
+            ('size_count', 0),
+            ('scan_errors', []),
+        ]))]
+        result = util.load_json(test_file)
         assert expected == result
 
     def test_format_about_dict_for_json_output(self):
@@ -562,7 +558,6 @@ class TestJson(unittest.TestCase):
 
         output = util.format_about_dict_for_json_output(about)
         assert output == expected
-
 
 
 class TestMiscUtils(unittest.TestCase):
@@ -597,7 +592,7 @@ notes: dup key here
 - notes: some notes
   - notes: dup key here
 # some
-    
+
 notes: dup key here
 license_expression: mit
 notes dup key here
@@ -709,4 +704,3 @@ description: sample
         abouts = [a, b]
         results = util.unique(abouts)
         assert [a] == results
-

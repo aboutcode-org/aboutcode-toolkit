@@ -25,6 +25,8 @@ import os
 import sys
 
 import click
+from attributecode.attrib import check_template
+import codecs
 # silence unicode literals warnings
 click.disable_unicode_literals_warning = True
 
@@ -33,10 +35,12 @@ from attributecode.util import unique
 
 from attributecode import __about_spec_version__
 from attributecode import __version__
-from attributecode.attrib import generate_and_save as attrib_generate_and_save
-from attributecode.gen import generate as gen_generate
-from attributecode import model
+from attributecode import DEFAULT_MAPPING
 from attributecode import severities
+from attributecode.attrib import generate_and_save as generate_attribution_doc
+from attributecode.gen import generate as generate_about_files
+from attributecode.model import collect_inventory
+from attributecode.model import write_output
 from attributecode.util import extract_zip
 from attributecode.util import inventory_filter
 
@@ -69,7 +73,6 @@ reportable_errors = [u'CRITICAL', u'ERROR', u'WARNING']
 
 def print_version():
     click.echo('Running aboutcode-toolkit version ' + __version__)
-
 
 
 # we define a main entry command with subcommands
@@ -116,7 +119,7 @@ def validate_filter(ctx, param, value):
 
 @click.argument('output',
     required=True,
-    type=click.Path(exists=False, dir_okay=False, resolve_path=True))
+    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
 # fIXME: this is too complex and should be removed
 @click.option('--filter',
@@ -167,17 +170,20 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
     if not os.path.exists(os.path.dirname(output)):
         # FIXME: there is likely a better way to return an error
-        click.echo('ERROR: <OUTPUT> path does not exists.')
-        # FIXME: return error code?
-        return
+        raise click.UsageError('ERROR: <OUTPUT> path does not exists.')
 
     # FIXME: do we really want to continue support zip as an input?
     if location.lower().endswith('.zip'):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    errors, abouts = model.collect_inventory(
-        location, use_mapping=mapping, mapping_file=mapping_file)
+    if mapping and mapping_file:
+        raise click.UsageError('Invalid combination of options: --mapping and --mapping-file')
+
+    if mapping:
+        mapping_file = DEFAULT_MAPPING
+
+    errors, abouts = collect_inventory(location, mapping_file=mapping_file)
 
     # FIXME: this is too complex
     if filter:
@@ -193,9 +199,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
             break
 
     if not halt_output:
-        write_errors = model.write_output(
-            abouts=abouts, location=output, format=format)
-
+        write_errors = write_output(abouts=abouts, location=output, format=format)
         for err in write_errors:
             errors.append(err)
     else:
@@ -203,12 +207,11 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
             msg = u'Duplicated keys are not supported.\nPlease correct and re-run.'
             click.echo(msg)
 
-    severe_errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         msg = 'Inventory collected with {severe_error_count} errors or warnings detected.'
         click.echo(msg.format(**locals()))
-    sys.exit(severe_errors_count)
+    sys.exit(errors_count)
 
 
 ######################################################################
@@ -224,7 +227,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.argument('output',
     required=True,
-    type=click.Path(exists=True, writable=True, dir_okay=True, resolve_path=True))
+    type=click.Path(exists=False, writable=True, dir_okay=False, resolve_path=True))
 
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
 @click.option('--fetch-license',
@@ -282,22 +285,28 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         print_version()
         click.echo('Generating .ABOUT files...')
 
+    if mapping and mapping_file:
+        raise click.UsageError('Invalid combination of options: --mapping and --mapping-file')
+    if mapping:
+        mapping_file = DEFAULT_MAPPING
+
     if not location.endswith(('.csv', '.json',)):
-        # FIXME: should be a callback IMHO
-        click.echo('ERROR: Invalid input file extension: must be one .csv or .json.')
-        sys.exit(errno.EIO)
+        raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
 
-    errors, abouts = gen_generate(
-        location=location, base_dir=output, license_notice_text_location=license_notice_text_location,
-        fetch_license=fetch_license, use_mapping=mapping, mapping_file=mapping_file)
-
-    severe_errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors, abouts = generate_about_files(
+        location=location,
+        base_dir=output,
+        license_notice_text_location=license_notice_text_location,
+        fetch_license=fetch_license,
+        mapping_file=mapping_file
+    )
     abouts_count = len(abouts)
+
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
-        msg = '{abouts_count} .ABOUT files generated with {severe_errors_count} errors/warnings.'
+        msg = '{abouts_count} .ABOUT files generated with {errors_count} errors/warnings.'
         click.echo(msg.format(**locals()))
-    sys.exit(severe_errors_count)
+    sys.exit(errors_count)
 
 
 ######################################################################
@@ -381,35 +390,41 @@ OUTPUT: Path where to write the attribution document.
         print_version()
         click.echo('Generating attribution...')
 
-    # FIXME: Check for template errors?
+    if mapping and mapping_file:
+        raise click.UsageError('Invalid combination of options: --mapping and --mapping-file')
+    if mapping:
+        mapping_file = DEFAULT_MAPPING
 
-    # FIXME: I am not sure this makes sense to have this here
+    # Check for template early
+    with codecs.open(template, 'rb', encoding='utf-8') as templatef:
+        template_error = check_template(templatef.read())
+    if template_error:
+        lineno, message = template_error
+        raise click.UsageError(
+            'Template validation error at line: {lineno}: "{message}"'.format(**locals()))
+
     # accept zipped ABOUT files as input
     if location.lower().endswith('.zip'):
         location = extract_zip(location)
 
-    errors, abouts = model.collect_inventory(
-        location, use_mapping=mapping, mapping_file=mapping_file)
+    errors, abouts = collect_inventory(location, mapping_file=mapping_file)
 
-    attrib_errors = attrib_generate_and_save(
+    attrib_errors = generate_attribution_doc(
         abouts=abouts,
         output_location=output,
         template_loc=template,
         variables=variable,
-        use_mapping=mapping,
         mapping_file=mapping_file,
         inventory_location=inventory,
     )
-
     errors.extend(attrib_errors)
 
-    severe_errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
 
     if not quiet:
-        msg = 'Attribution generated with {severe_errors_count} errors/warnings.'
+        msg = 'Attribution generated with {errors_count} errors/warnings.'
         click.echo(msg.format(**locals()))
-    sys.exit(severe_errors_count)
+    sys.exit(errors_count)
 
 
 ######################################################################
@@ -437,7 +452,7 @@ LOCATION: Path to a file or directory containing .ABOUT files.
     """
     print_version()
     click.echo('Checking ABOUT files...')
-    errors, _abouts = model.collect_inventory(location)
+    errors, _abouts = collect_inventory(location)
     if verbose:
         reportable = errors
     else:
