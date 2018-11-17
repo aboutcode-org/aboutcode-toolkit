@@ -352,7 +352,7 @@ def apply_mapping(abouts, mapping_file=None):
     the mapping from the default mnapping.config if an alternate
     mapping dict is not provided.
     """
-    
+
     if not mapping_file:
         return abouts
 
@@ -418,7 +418,7 @@ def format_output(about_data, mapping_file=None):
                 order_dict[other_key] = about_data[other_key]
     return order_dict
 
-#FIXME: why is this used for
+# FIXME: why is this used for
 def get_about_file_path(location, mapping_file=None):
     """
     Read file at location, return a list of about_file_path.
@@ -548,11 +548,12 @@ def extract_zip(location):
     """
     import zipfile
     import tempfile
+
     if not zipfile.is_zipfile(location):
         raise Exception('Incorrect zip file %(location)r' % locals())
 
     archive_base_name = os.path.basename(location).replace('.zip', '')
-    base_dir = tempfile.mkdtemp()
+    base_dir = tempfile.mkdtemp(prefix='aboutcode-toolkit-extract-')
     target_dir = os.path.join(base_dir, archive_base_name)
     target_dir = add_unc(target_dir)
     os.makedirs(target_dir)
