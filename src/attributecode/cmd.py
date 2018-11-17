@@ -68,11 +68,20 @@ https://aboutcode.org
 ''' % locals()
 
 
-reportable_errors = [u'CRITICAL', u'ERROR', u'WARNING']
-
 
 def print_version():
     click.echo('Running aboutcode-toolkit version ' + __version__)
+
+
+class AboutCommand(click.Command):
+    def main(self, args=None, prog_name=None, complete_var=None,
+             standalone_mode=True, **extra):
+        """
+        Workaround click bug https://github.com/mitsuhiko/click/issues/365
+        """
+        return AboutCommand.main(
+            self, args=args, prog_name=self.name,
+            complete_var=complete_var, standalone_mode=standalone_mode, **extra)
 
 
 # we define a main entry command with subcommands
@@ -109,7 +118,7 @@ def validate_filter(ctx, param, value):
     return kvals
 
 
-@cli.command(cls=click.Command,
+@cli.command(cls=AboutCommand,
     short_help='Collect .ABOUT files and write an inventory as CSV or JSON.')
 
 @click.argument('location',
@@ -218,7 +227,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 # gen subcommand
 ######################################################################
 
-@cli.command(cls=click.Command,
+@cli.command(cls=AboutCommand,
     short_help='Generate .ABOUT files from an inventory as CSV or JSON.')
 
 @click.argument('location',
@@ -329,7 +338,7 @@ def validate_variables(ctx, param, value):
     return kvals
 
 
-@cli.command(cls=click.Command,
+@cli.command(cls=AboutCommand,
     short_help='Generate an attribution document from .ABOUT files.')
 
 @click.argument('location',
@@ -431,7 +440,7 @@ OUTPUT: Path where to write the attribution document.
 # check subcommand
 ######################################################################
 
-@cli.command(cls=click.Command,
+@cli.command(cls=AboutCommand,
     short_help='Validate that the format of .ABOUT files is correct.')
 
 @click.argument('location',
