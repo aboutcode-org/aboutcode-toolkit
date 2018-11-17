@@ -35,22 +35,22 @@ from attributecode import DEFAULT_MAPPING
 class GenTest(unittest.TestCase):
     def test_check_duplicated_columns(self):
         test_file = get_test_loc('test_gen/dup_keys.csv')
-        expected = [Error(ERROR, u'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
+        expected = [Error(ERROR, 'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
     def test_check_duplicated_columns_handles_lower_upper_case(self):
         test_file = get_test_loc('test_gen/dup_keys_with_diff_case.csv')
-        expected = [Error(ERROR, u'Duplicated column name(s): copyright with Copyright\nPlease correct the input and re-run.')]
+        expected = [Error(ERROR, 'Duplicated column name(s): copyright with Copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
     def test_check_duplicated_about_file_path(self):
         test_dict = [
-            {'about_file_path': u'/test/test.c', u'version': u'1.03', u'name': u'test.c'},
-            {'about_file_path': u'/test/abc/', u'version': u'1.0', u'name': u'abc'},
-            {'about_file_path': u'/test/test.c', u'version': u'1.04', u'name': u'test1.c'}]
-        expected = [Error(CRITICAL, u'The input has duplicated values in \'about_file_path\' field: /test/test.c')]
+            {'about_file_path': '/test/test.c', 'version': '1.03', 'name': 'test.c'},
+            {'about_file_path': '/test/abc/', 'version': '1.0', 'name': 'abc'},
+            {'about_file_path': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
+        expected = [Error(CRITICAL, 'The input has duplicated values in \'about_file_path\' field: /test/test.c')]
         result = gen.check_duplicated_about_file_path(test_dict)
         assert expected == result
 
@@ -122,7 +122,7 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('test_gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([(u'.', None)])
+        expected = OrderedDict([('.', None)])
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
 
@@ -131,11 +131,11 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([(u'test.tar.gz', None)])
+        expected = OrderedDict([('test.tar.gz', None)])
 
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
-        msg = u'Field about_resource'
+        msg = 'Field about_resource'
         assert msg in errors[0].message
 
     def test_generation_with_no_about_resource_reference_no_resource_validation(self):
@@ -143,7 +143,7 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([(u'test.tar.gz', None)])
+        expected = OrderedDict([('test.tar.gz', None)])
 
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
@@ -153,8 +153,8 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        msg1 = u'Field custom1 is not a supported field and is ignored.'
-        msg2 = u'Field about_resource'
+        msg1 = 'Field custom1 is not a supported field and is ignored.'
+        msg2 = 'Field about_resource'
 
         assert msg1 in errors[0].message
         assert msg2 in errors[1].message
