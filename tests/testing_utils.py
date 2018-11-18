@@ -188,7 +188,7 @@ def run_about_command_test_click(options, expected_rc=0, monkeypatch=None, ):
         monkeypatch.setattr(click , 'get_terminal_size', lambda : (80, 43,))
     runner = CliRunner()
 
-    result = runner.invoke(cmd.cli, options, catch_exceptions=False)
+    result = runner.invoke(cmd.about, options, catch_exceptions=False)
 
     output = result.output
     if result.exit_code != expected_rc:

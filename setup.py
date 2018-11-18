@@ -79,7 +79,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'about=attributecode.cmd:cli',
+            'about=attributecode.cmd:about',
         ]
     },
 )

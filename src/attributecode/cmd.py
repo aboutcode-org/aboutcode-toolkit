@@ -92,7 +92,7 @@ class AboutCommand(click.Command):
 @click.group(name='about')
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
 @click.help_option('-h', '--help')
-def cli():
+def about():
     """
 Generate licensing attribution and credit notices from .ABOUT files and inventories.
 
@@ -122,16 +122,32 @@ def validate_filter(ctx, param, value):
     return kvals
 
 
-@cli.command(cls=AboutCommand,
-    short_help='Collect .ABOUT files and write an inventory as CSV or JSON.')
+def validate_mapping(mapping, mapping_file):
+    """
+    Return a mapping_file or None.
+    Raise a UsageError on errors.
+    """
+    if mapping and mapping_file:
+        raise click.UsageError(
+            'Invalid options combination: '
+            '--mapping and --mapping-file are ultually exclusive.')
+    if mapping:
+        return DEFAULT_MAPPING
+    return mapping_file or None
+
+
+@about.command(cls=AboutCommand,
+    short_help='Collect the inventory of .ABOUT files to a CSV or JSON file.')
 
 @click.argument('location',
     required=True,
+    metavar='LOCATION',
     type=click.Path(
         exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
+    metavar='OUTPUT',
     type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
 # fIXME: this is too complex and should be removed
@@ -150,13 +166,16 @@ def validate_filter(ctx, param, value):
 
 @click.option('--mapping',
     is_flag=True,
-    help='Use the default file mapping.config (./attributecode/mapping.config) '
-    'with mapping between input keys and ABOUT field names.')
+    help='Use the default built-in "mapping.config" file '
+         'with mapping between input keys and .ABOUT field names.'
+         'Cannot be combined with the --mapping-file option.')
 
 @click.option('--mapping-file',
     metavar='FILE',
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help='Path to an optional custom mapping FILE '
+         'with mapping between input keys and .ABOUT field names. '
+         'Cannot be combined with the --mapping option.')
 
 @click.option('-q', '--quiet',
     is_flag=True,
@@ -171,7 +190,7 @@ def validate_filter(ctx, param, value):
 def inventory(location, output, mapping, mapping_file,
               format, filter, quiet, verbose):  # NOQA
     """
-Collect a JSON or CSV inventory of packages from .ABOUT files.
+Collect the inventory of .ABOUT file data as CSV or JSON.
 
 LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
 
@@ -181,20 +200,12 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         print_version()
         click.echo('Collecting inventory from ABOUT files...')
 
-    if not os.path.exists(os.path.dirname(output)):
-        # FIXME: there is likely a better way to return an error
-        raise click.UsageError('ERROR: <OUTPUT> path does not exists.')
-
     # FIXME: do we really want to continue support zip as an input?
     if location.lower().endswith('.zip'):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    if mapping and mapping_file:
-        raise click.UsageError('Invalid combination of options: --mapping and --mapping-file')
-
-    if mapping:
-        mapping_file = DEFAULT_MAPPING
+    mapping_file = validate_mapping(mapping, mapping_file)
 
     errors, abouts = collect_inventory(location, mapping_file=mapping_file)
 
@@ -203,7 +214,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         abouts = inventory_filter(abouts, filter)
 
     # Do not write the output if one of the ABOUT files has duplicated keys
-    # TODO: why stop only for this message??????
+    # TODO: why do this check here?? Also if this is the place, we should list what the errors are.
     dup_error_msg = u'Duplicated keys'
     halt_output = False
     for err in errors:
@@ -231,16 +242,28 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 # gen subcommand
 ######################################################################
 
-@cli.command(cls=AboutCommand,
+def validate_location_extension(ctx, param, value):
+    if not value:
+        return
+    if not value.endswith(('.csv', '.json',)):
+        raise click.UsageError(
+            'Invalid input file extension: must be one .csv or .json.')
+    return value
+
+
+@about.command(cls=AboutCommand,
     short_help='Generate .ABOUT files from an inventory as CSV or JSON.')
 
 @click.argument('location',
     required=True,
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True))
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
-    type=click.Path(exists=True, writable=True, file_okay=False, dir_okay=True, resolve_path=True))
+    metavar='OUTPUT',
+    type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
 
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
 @click.option('--fetch-license',
@@ -257,13 +280,16 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.option('--mapping',
     is_flag=True,
-    help='Use the default file mapping.config (./attributecode/mapping.config) '
-         'with mapping between input keys and ABOUT field names.')
+    help='Use the default built-in "mapping.config" file '
+         'with mapping between input keys and .ABOUT field names.'
+         'Cannot be combined with the --mapping-file option.')
 
 @click.option('--mapping-file',
     metavar='FILE',
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help='Path to an optional custom mapping FILE '
+         'with mapping between input keys and .ABOUT field names. '
+         'Cannot be combined with the --mapping option.')
 
 @click.option('-q', '--quiet',
     is_flag=True,
@@ -281,7 +307,7 @@ def gen(location, output,
         mapping, mapping_file,
         quiet, verbose):
     """
-Generate .ABOUT files in OUTPUT directory from a JSON or CSV inventory of .ABOUT files at LOCATION.
+Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
 LOCATION: Path to a JSON or CSV inventory file.
 
@@ -291,10 +317,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         print_version()
         click.echo('Generating .ABOUT files...')
 
-    if mapping and mapping_file:
-        raise click.UsageError('Invalid combination of options: --mapping and --mapping-file')
-    if mapping:
-        mapping_file = DEFAULT_MAPPING
+    mapping_file = validate_mapping(mapping, mapping_file)
 
     if not location.endswith(('.csv', '.json',)):
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
@@ -335,21 +358,41 @@ def validate_variables(ctx, param, value):
     return kvals
 
 
-@cli.command(cls=AboutCommand,
+def validate_template(ctx, param, value):
+    if not value:
+        return DEFAULT_TEMPLATE_FILE
+
+    with io.open(value, encoding='utf-8') as templatef:
+        template_error = check_template(templatef.read())
+
+    if template_error:
+        lineno, message = template_error
+        raise click.UsageError(
+            'Template syntax error at line: '
+            '{lineno}: "{message}"'.format(**locals()))
+    return value
+
+
+@about.command(cls=AboutCommand,
     short_help='Generate an attribution document from .ABOUT files.')
 
 @click.argument('location',
     required=True,
-    type=click.Path(exists=True, readable=True, resolve_path=True))
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
-    type=click.Path(exists=False, writable=True, dir_okay=False, resolve_path=True))
+    metavar='OUTPUT',
+    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
 @click.option('--template',
-    metavar='TEMPLATE_FILE_PATH',
+    metavar='FILE',
+    callback=validate_template,
     type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an optional custom attribution template to generate the attribution document.')
+    help='Path to an optional custom attribution template to generate the '
+         'attribution document. If not provided the default built-in template is used.')
 
 @click.option('--variable',
     multiple=True,
@@ -358,19 +401,23 @@ def validate_variables(ctx, param, value):
     help='Add variable(s) as key=value for use in a custom attribution template.')
 
 @click.option('--inventory',
+    metavar='FILE',
     type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-    help='Path to an optional JSON or CSV inventory file listing the '
+    help='Path to an optional JSON or CSV inventory FILE listing the '
          'subset of .ABOUT files paths to consider when generating the attribution document.')
 
 @click.option('--mapping',
     is_flag=True,
-    help='Use the default file mapping.config (./attributecode/mapping.config) '
-    'with mapping between input keys and ABOUT field names.')
+    help='Use the default built-in "mapping.config" file '
+         'with mapping between input keys and .ABOUT field names.'
+         'Cannot be combined with the --mapping-file option.')
 
 @click.option('--mapping-file',
     metavar='FILE',
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help='Path to an optional custom mapping FILE '
+         'with mapping between input keys and .ABOUT field names. '
+         'Cannot be combined with the --mapping option.')
 
 @click.option('-q', '--quiet',
     is_flag=True,
@@ -396,21 +443,7 @@ OUTPUT: Path where to write the attribution document.
         print_version()
         click.echo('Generating attribution...')
 
-    if mapping and mapping_file:
-        raise click.UsageError('Invalid combination of options: --mapping and --mapping-file')
-    if mapping:
-        mapping_file = DEFAULT_MAPPING
-
-    # Check template syntax early
-    if template:
-        with io.open(template, encoding='utf-8') as templatef:
-            template_error = check_template(templatef.read())
-        if template_error:
-            lineno, message = template_error
-            raise click.UsageError(
-                'Template validation error at line: {lineno}: "{message}"'.format(**locals()))
-    else:
-        template = DEFAULT_TEMPLATE_FILE
+    mapping_file = validate_mapping(mapping, mapping_file)
 
     # accept zipped ABOUT files as input
     if location.lower().endswith('.zip'):
@@ -440,13 +473,17 @@ OUTPUT: Path where to write the attribution document.
 # check subcommand
 ######################################################################
 
-@cli.command(cls=AboutCommand,
+# FIXME: This is really only a dupe of the Inventory command
+
+@about.command(cls=AboutCommand,
     short_help='Validate that the format of .ABOUT files is correct and report '
                'errors and warnings.')
 
 @click.argument('location',
     required=True,
-    type=click.Path(exists=True, readable=True, resolve_path=True))
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
 @click.option('--verbose',
     is_flag=True,
@@ -563,4 +600,4 @@ def parse_key_values(key_values):
 
 
 if __name__ == '__main__':
-    cli()
+    about()

@@ -17,4 +17,4 @@ Commands:
   check      Validate that the format of .ABOUT files is correct and report
              errors and warnings.
   gen        Generate .ABOUT files from an inventory as CSV or JSON.
-  inventory  Collect .ABOUT files and write an inventory as CSV or JSON.
+  inventory  Collect the inventory of .ABOUT files to a CSV or JSON file.
