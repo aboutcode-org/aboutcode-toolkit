@@ -22,9 +22,9 @@ from collections import namedtuple
 import logging
 
 try:
-    basestring  # Python 2
+    unicode  # Python 2
 except NameError:
-    basestring = str  # Python 3 #NOQA
+    unicode = str  # Python 3 #NOQA
 
 
 __version__ = '3.3.0'
@@ -52,10 +52,11 @@ class Error(namedtuple('Error', ['severity', 'message'])):
     """
     def __new__(self, severity, message):
         if message:
-            if isinstance(message, basestring):
+            if isinstance(message, unicode):
                 message = clean_string(message)
             else:
-                message = clean_string(repr(message))
+                message = clean_string(unicode(repr(message), encoding='utf-8'))
+                message = message.strip('"')
 
         return super(Error, self).__new__(
             Error, severity, message)

@@ -171,6 +171,11 @@ class UtilsTest(unittest.TestCase):
         expected = []
         assert expected == result
 
+    def test_space_is_valid_chars(self):
+        result = util.invalid_chars(' ')
+        expected = []
+        assert expected == result
+
     def test_invalid_chars_with_invalid_in_name_and_dir(self):
         result = util.invalid_chars('_$as/afg:')
         expected = [':']
@@ -182,9 +187,9 @@ class UtilsTest(unittest.TestCase):
         expected = ['%', '!', '(', ')', '$', '$', ':']
         assert expected == result
 
-    def test_invalid_chars_with_space(self):
+    def test_invalid_chars_with_space_is_valid(self):
         result = util.invalid_chars('_ Hello')
-        expected = [' ']
+        expected = []
         assert expected == result
 
     def test_check_file_names_with_dupes_return_errors(self):
@@ -218,10 +223,14 @@ class UtilsTest(unittest.TestCase):
             'locations/file',
             'locations/file with space',
             'locations/dir1/dir2/file1',
-            'locations/dir2/file1'
+            'locations/dir2/file1',
+            'Accessibilité/ périmètre'
         ]
-
-        expected = [Error(CRITICAL, "Invalid characters '  ' in file name at: 'locations/file with space'")]
+        import sys
+        if sys.version_info[0] < 3: #python2
+            expected = [Error(CRITICAL, b"Invalid characters '\xe9\xe8' in file name at: 'Accessibilit\xe9/ p\xe9rim\xe8tre'")]
+        else:
+            expected = [Error(CRITICAL, "Invalid characters 'éè' in file name at: 'Accessibilité/ périmètre'")]
         result = util.check_file_names(paths)
 
         assert expected[0].message == result[0].message
