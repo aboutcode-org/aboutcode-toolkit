@@ -19,7 +19,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import defaultdict
-import errno
+from functools import partial
 import io
 import logging
 import os
@@ -103,12 +103,13 @@ Use about <command> --help for help on a command.
 
 
 ######################################################################
-# inventory subcommand
+# option validators
 ######################################################################
 
-def validate_filter(ctx, param, value):
+def validate_key_values(ctx, param, value):
     """
-    Return the parsed filter if valid or raise a UsageError otherwise.
+    Return the a mapping of {key: [values,...] if valid or raise a UsageError
+    otherwise.
     """
     if not value:
         return
@@ -116,7 +117,7 @@ def validate_filter(ctx, param, value):
     kvals, errors = parse_key_values(value)
     if errors:
         ive = '\n'.join(sorted('  ' + x for x in errors))
-        msg = ('Invalid --filter option(s):\n'
+        msg = ('Invalid {param} option(s):\n'
                '{ive}'.format(**locals()))
         raise click.UsageError(msg)
     return kvals
@@ -136,6 +137,20 @@ def validate_mapping(mapping, mapping_file):
     return mapping_file or None
 
 
+def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',))):
+    if not value:
+        return
+    if not value.endswith(extensions):
+        msg = ' '.join(extensions)
+        raise click.UsageError(
+            'Invalid {param} file extension: must be one of: {msg}'.format(**locals()))
+    return value
+
+
+######################################################################
+# inventory subcommand
+######################################################################
+
 @about.command(cls=AboutCommand,
     short_help='Collect the inventory of .ABOUT files to a CSV or JSON file.')
 
@@ -154,7 +169,7 @@ def validate_mapping(mapping, mapping_file):
 @click.option('--filter',
     multiple=True,
     metavar='<key>=<value>',
-    callback=validate_filter,
+    callback=validate_key_values,
     help='Filter the inventory to ABOUT matching these key=value e.g. "license_expression=gpl-2.0')
 
 @click.option('-f', '--format',
@@ -241,15 +256,6 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 ######################################################################
 # gen subcommand
 ######################################################################
-
-def validate_location_extension(ctx, param, value):
-    if not value:
-        return
-    if not value.endswith(('.csv', '.json',)):
-        raise click.UsageError(
-            'Invalid input file extension: must be one .csv or .json.')
-    return value
-
 
 @about.command(cls=AboutCommand,
     short_help='Generate .ABOUT files from an inventory as CSV or JSON.')
@@ -342,22 +348,6 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 # attrib subcommand
 ######################################################################
 
-def validate_variables(ctx, param, value):
-    """
-    Return the variable texts if valid or raise a UsageError otherwise.
-    """
-    if not value:
-        return
-
-    kvals, errors = parse_key_values(value)
-    if errors:
-        ive = '\n'.join(sorted('  ' + x for x in errors))
-        msg = ('Invalid --vartext option(s):\n'
-               '{ive}'.format(**locals()))
-        raise click.UsageError(msg)
-    return kvals
-
-
 def validate_template(ctx, param, value):
     if not value:
         return DEFAULT_TEMPLATE_FILE
@@ -396,7 +386,7 @@ def validate_template(ctx, param, value):
 
 @click.option('--vartext',
     multiple=True,
-    callback=validate_variables,
+    callback=validate_key_values,
     metavar='<key>=<value>',
     help='Add variable text as key=value for use in a custom attribution template.')
 
