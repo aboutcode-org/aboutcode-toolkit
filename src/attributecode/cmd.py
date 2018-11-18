@@ -344,7 +344,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
 def validate_variables(ctx, param, value):
     """
-    Return the variables if valid or raise a UsageError otherwise.
+    Return the variable texts if valid or raise a UsageError otherwise.
     """
     if not value:
         return
@@ -352,7 +352,7 @@ def validate_variables(ctx, param, value):
     kvals, errors = parse_key_values(value)
     if errors:
         ive = '\n'.join(sorted('  ' + x for x in errors))
-        msg = ('Invalid --variable option(s):\n'
+        msg = ('Invalid --vartext option(s):\n'
                '{ive}'.format(**locals()))
         raise click.UsageError(msg)
     return kvals
@@ -394,11 +394,11 @@ def validate_template(ctx, param, value):
     help='Path to an optional custom attribution template to generate the '
          'attribution document. If not provided the default built-in template is used.')
 
-@click.option('--variable',
+@click.option('--vartext',
     multiple=True,
     callback=validate_variables,
     metavar='<key>=<value>',
-    help='Add variable(s) as key=value for use in a custom attribution template.')
+    help='Add variable text as key=value for use in a custom attribution template.')
 
 @click.option('--inventory',
     metavar='FILE',
@@ -429,7 +429,7 @@ def validate_template(ctx, param, value):
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, variable,
+def attrib(location, output, template, vartext,
            inventory, mapping, mapping_file,
            quiet, verbose):
     """
@@ -455,7 +455,7 @@ OUTPUT: Path where to write the attribution document.
         abouts=abouts,
         output_location=output,
         template_loc=template,
-        variables=variable,
+        variables=vartext,
         mapping_file=mapping_file,
         inventory_location=inventory,
     )
