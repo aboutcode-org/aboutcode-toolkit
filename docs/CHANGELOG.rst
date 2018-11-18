@@ -1,3 +1,13 @@
+next
+
+
+2018-XX-XX
+
+    Release 4.0.0
+
+    * Support filenames/path with spaces #310
+
+
 2018-11-15
 
     Release 3.3.0
@@ -82,14 +92,14 @@
     Refined SPECs
 
     Input key changes:
-    ==================
+
     `about_file` is replaced by `about_file_path`
     `dje_license_key` is replaced by `license_expression`
     `version` is no longer a required field
     `home_url` is now `homepage_url`
 
     API Updated:
-    ============
+
      - Break down the 3 major functions: `inventory`, `genabout` and `genattrib` into 3 subcommands:
         i.e.
         `about inventory`, `about generate` and `about attrib`
