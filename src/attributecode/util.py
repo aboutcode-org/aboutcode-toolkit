@@ -598,13 +598,21 @@ def add_unc(location):
 
 
 # FIXME: add docstring
-def copy_license_notice_files(fields, base_dir, license_notice_text_location, afp):
+def copy_license_notice_files(fields, base_dir, reference_dir, afp):
+    """
+    Given a list of (key, value) `fields` tuples and a `base_dir` where ABOUT
+    files and their companion LICENSe are store, and an extra `reference_dir`
+    where reference license an notice files are stored and the `afp`
+    about_file_path value, this function will copy to the base_dir the
+    license_file or notice_file if found in the reference_dir
+    
+    """
     lic_name = ''
     for key, value in fields:
         if key == 'license_file' or key == 'notice_file':
             lic_name = value
 
-            from_lic_path = posixpath.join(to_posix(license_notice_text_location), lic_name)
+            from_lic_path = posixpath.join(to_posix(reference_dir), lic_name)
             about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
             to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
 

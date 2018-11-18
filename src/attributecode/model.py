@@ -34,9 +34,9 @@ import json
 import os
 # FIXME: why posixpath???
 import posixpath
+import re
 
 import yaml
-import re
 
 from attributecode.util import python2
 
@@ -420,7 +420,7 @@ class PathField(ListField):
         self.about_file_path = kwargs.get('about_file_path')
         self.running_inventory = kwargs.get('running_inventory')
         self.base_dir = kwargs.get('base_dir')
-        self.license_notice_text_location = kwargs.get('license_notice_text_location')
+        self.reference_dir = kwargs.get('reference_dir')
 
         if self.base_dir:
             self.base_dir = util.to_posix(self.base_dir)
@@ -447,7 +447,7 @@ class PathField(ListField):
             # the license files, if need to be copied, are located under the path
             # set from the 'license-text-location' option, so the tool should check
             # at the 'license-text-location' instead of the 'base_dir'
-            if not (self.base_dir or self.license_notice_text_location):
+            if not (self.base_dir or self.reference_dir):
                 msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
                        u' No base directory provided' % locals())
                 errors.append(Error(ERROR, msg))
@@ -455,8 +455,8 @@ class PathField(ListField):
                 paths[path] = location
                 continue
 
-            if self.license_notice_text_location:
-                location = posixpath.join(self.license_notice_text_location, path)
+            if self.reference_dir:
+                location = posixpath.join(self.reference_dir, path)
             else:
                 # The 'about_resource' should be a joined path with
                 # the 'about_file_path' and the 'base_dir
@@ -669,7 +669,7 @@ class BooleanField(SingleLineField):
 
 
 def validate_fields(fields, about_file_path, running_inventory, base_dir,
-                    license_notice_text_location=None):
+                    reference_dir=None):
     """
     Validate a sequence of Field objects. Return a list of errors.
     Validation may update the Field objects as needed as a side effect.
@@ -680,7 +680,7 @@ def validate_fields(fields, about_file_path, running_inventory, base_dir,
             base_dir=base_dir,
             about_file_path=about_file_path,
             running_inventory=running_inventory,
-            license_notice_text_location=license_notice_text_location,
+            reference_dir=reference_dir,
         )
         errors.extend(val_err)
     return errors
@@ -972,28 +972,29 @@ class About(object):
         return errors
 
     def process(self, fields, about_file_path, running_inventory=False,
-                base_dir=None, license_notice_text_location=None,
+                base_dir=None, reference_dir=None,
                 mapping_file=None):
         """
-        Hydrate and validate a sequence of field name/value tuples from an
-        ABOUT file. Return a list of errors.
+        Validate and set as attributes on this About object a sequence of
+        `fields` name/value tuples. Return a list of errors.
         """
         self.base_dir = base_dir
-        self.license_notice_text_location = license_notice_text_location
+        self.reference_dir = reference_dir
         afp = self.about_file_path
         errors = []
         hydratation_errors = self.hydrate(fields, mapping_file=mapping_file)
         errors.extend(hydratation_errors)
 
         # We want to copy the license_files before the validation
-        if license_notice_text_location:
+        if reference_dir:
             copy_license_notice_files(
-                fields, base_dir, license_notice_text_location, afp)
+                fields, base_dir, reference_dir, afp)
+
         # we validate all fields, not only these hydrated
         all_fields = self.all_fields()
         validation_errors = validate_fields(
             all_fields, about_file_path, running_inventory,
-            self.base_dir, self.license_notice_text_location)
+            self.base_dir, self.reference_dir)
         errors.extend(validation_errors)
 
         # do not forget to resolve about resource paths The
@@ -1043,12 +1044,10 @@ class About(object):
     # FIXME: an About object should not know about mappings
     def load_dict(self, fields_dict, base_dir, running_inventory=False,
                   mapping_file=None,
-                  license_notice_text_location=None, with_empty=True):
+                  reference_dir=None, with_empty=True):
         """
-        Load the ABOUT file from a fields name/value mapping.
-        If with_empty, create fields with no value for empty fields.
-        Return a list of
-        errors.
+        Load this About object file from a `fields_dict` name/value mapping.
+        Return a list of errors.
         """
         fields = list(fields_dict.items())
         about_file_path = self.about_file_path
@@ -1076,7 +1075,7 @@ class About(object):
             about_file_path=about_file_path, 
             running_inventory=running_inventory, 
             base_dir=base_dir, 
-            license_notice_text_location=license_notice_text_location,
+            reference_dir=reference_dir,
             mapping_file=mapping_file)
         self.errors = errors
         return errors
@@ -1193,7 +1192,7 @@ class About(object):
 # valid field name
 field_name = r'(?P<name>[a-z][0-9a-z_]*)'
 
-valid_field_name = re.compile(field_name, re.UNICODE | re.IGNORECASE).match
+valid_field_name = re.compile(field_name, re.UNICODE | re.IGNORECASE).match  # NOQA
 
 # line in the form of "name: value"
 field_declaration = re.compile(
@@ -1202,7 +1201,7 @@ field_declaration = re.compile(
     r'\s*:\s*'
     r'(?P<value>.*)'
     r'\s*$'
-    , re.UNICODE | re.IGNORECASE
+    , re.UNICODE | re.IGNORECASE  # NOQA
     ).match
 
 
@@ -1212,7 +1211,7 @@ continuation = re.compile(
     r' '
     r'(?P<value>.*)'
     r'\s*$'
-    , re.UNICODE | re.IGNORECASE
+    , re.UNICODE | re.IGNORECASE  # NOQA
     ).match
 
 

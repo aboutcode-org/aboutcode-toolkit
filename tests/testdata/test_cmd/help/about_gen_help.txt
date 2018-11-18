@@ -8,33 +8,15 @@ Usage: about gen [OPTIONS] LOCATION OUTPUT
   OUTPUT: Path to a directory where ABOUT files are generated.
 
 Options:
-  --fetch-license KEY             Fetch license data and texts from a a DejaCode
-                                  License Library API. Create <license>.LICENSE
-                                  files from the text of each license key side-
-                                  by-side with the generated .ABOUT file. Also
-                                  enhance the .ABOUT file with other data such
-                                  name and category.
-                                  
-                                  The following additional
-                                  options are required:
-                                  
-                                  api_url - URL to the
-                                  DejaCode License Library API endpoint
-                                  
-                                  api_key
-                                  - DejaCode API key
-                                  Example syntax:
-                                  
-                                  about gen
-                                  --fetch-license 'api_url' 'api_key'
-  --license-notice-text-location PATH
-                                  Copy the 'license_file' from the directory to
-                                  the generated location.
-  --mapping                       Use the default file mapping.config
-                                  (./attributecode/mapping.config) with mapping
-                                  between input keys and ABOUT field names.
-  --mapping-file FILE             Use a custom mapping file with mapping between
-                                  input keys and ABOUT field names.
-  -q, --quiet                     Do not print error or warning messages.
-  --verbose                       Show all error and warning messages.
-  -h, --help                      Show this message and exit.
+  --fetch-license URL KEY  Fetch license data and text files from a DejaCode
+                           License Library API URL using the API KEY.
+  --reference DIR          Path to a directory with reference license data and
+                           text files.
+  --mapping                Use the default file mapping.config
+                           (./attributecode/mapping.config) with mapping between
+                           input keys and ABOUT field names.
+  --mapping-file FILE      Use a custom mapping file with mapping between input
+                           keys and ABOUT field names.
+  -q, --quiet              Do not print error or warning messages.
+  --verbose                Show all error and warning messages.
+  -h, --help               Show this message and exit.

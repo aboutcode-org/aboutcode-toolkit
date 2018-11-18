@@ -44,7 +44,7 @@ from testing_utils import get_temp_file
 from testing_utils import get_test_loc
 
 
-def check_csv(expected, result, regen=True):
+def check_csv(expected, result, regen=False):
     """
     Assert that the contents of two CSV files locations `expected` and
     `result` are equal.

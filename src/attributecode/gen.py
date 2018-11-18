@@ -101,14 +101,15 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 # TODO: this should be either the CSV or the ABOUT files but not both???
-def load_inventory(location, base_dir, license_notice_text_location=None,
-                    mapping_file=None):
+def load_inventory(location, base_dir, reference_dir=None,
+                   mapping_file=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files
     stored in the `base_dir`. Return a list of errors and a list of
     About objects validated against the `base_dir`.
-    Optionally use `license_notice_text_location` as the location of
-    license and notice texts.
+
+    Optionally use `reference_dir` as the directory location of
+    reference license and notice files to reuse.
 
     Optionally use mappings for field names if `mapping_file` is provided for
     the CSV format.
@@ -116,7 +117,9 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
     errors = []
     abouts = []
     base_dir = util.to_posix(base_dir)
+    # FIXME: do not mix up CSV and JSON
     if location.endswith('.csv'):
+        # FIXME: this should not be done here.
         dup_cols_err = check_duplicated_columns(location)
         if dup_cols_err:
             errors.extend(dup_cols_err)
@@ -126,6 +129,7 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
         inventory = util.load_json(location)
 
     try:
+        # FIXME: this should not be done here.
         dup_about_paths_err = check_duplicated_about_file_path(inventory)
         if dup_about_paths_err:
             errors.extend(dup_about_paths_err)
@@ -157,6 +161,7 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
                 return errors, abouts
         afp = fields.get(model.About.about_file_path_attr)
 
+        # FIXME: this should not be a failure condition
         if not afp or not afp.strip():
             msg = 'Empty column: %(afp)r. Cannot generate .ABOUT file.' % locals()
             errors.append(Error(ERROR, msg))
@@ -172,7 +177,7 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
             base_dir,
             running_inventory,
             mapping_file,
-            license_notice_text_location,
+            reference_dir,
             with_empty=False
         )
         # 'about_resource' field will be generated during the process.
@@ -184,10 +189,11 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
             if not e in errors:
                 errors.extend(ld_errors)
         abouts.append(about)
+
     return unique(errors), abouts
 
 
-def generate(location, base_dir, license_notice_text_location=None,
+def generate(location, base_dir, reference_dir=None,
              fetch_license=False, policy=None, conf_location=None,
              with_empty=False, with_absent=False, mapping_file=None):
     """
@@ -200,6 +206,7 @@ def generate(location, base_dir, license_notice_text_location=None,
     api_url = ''
     api_key = ''
     gen_license = False
+    # FIXME: use two different arguments: key and url
     # Check if the fetch_license contains valid argument
     if fetch_license:
         # Strip the ' and " for api_url, and api_key from input
@@ -207,11 +214,12 @@ def generate(location, base_dir, license_notice_text_location=None,
         api_key = fetch_license[1].strip("'").strip('"')
         gen_license = True
 
+    # TODO: WHY?
     bdir = to_posix(base_dir)
     errors, abouts = load_inventory(
         location=location,
         base_dir=bdir,
-        license_notice_text_location=license_notice_text_location,
+        reference_dir=reference_dir,
         mapping_file=mapping_file)
 
     if gen_license:

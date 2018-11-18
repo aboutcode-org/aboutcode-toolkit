@@ -246,26 +246,19 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.option('--fetch-license',
     nargs=2,
     type=str,
-    metavar='KEY',
-    help='Fetch license data and texts from a a DejaCode License Library API. '
-         'Create <license>.LICENSE files from the text of each license key '
-         'side-by-side with the generated .ABOUT file. Also enhance the .ABOUT '
-         'file with other data such name and category.\n\n'
-         'The following additional options are required:\n\n'
-         'api_url - URL to the DejaCode License Library API endpoint\n\n'
-         'api_key - DejaCode API key'
-         '\nExample syntax:\n\n'
-         "about gen --fetch-license 'api_url' 'api_key'")
+    metavar='URL KEY',
+    help='Fetch license data and text files from a DejaCode License Library '
+         'API URL using the API KEY.')
 
-# TODO: this option help and long name is obscure and would need to be refactored
-@click.option('--license-notice-text-location',
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help="Copy the 'license_file' from the directory to the generated location.")
+@click.option('--reference',
+    metavar='DIR',
+    type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
+    help='Path to a directory with reference license data and text files.')
 
 @click.option('--mapping',
     is_flag=True,
     help='Use the default file mapping.config (./attributecode/mapping.config) '
-    'with mapping between input keys and ABOUT field names.')
+         'with mapping between input keys and ABOUT field names.')
 
 @click.option('--mapping-file',
     metavar='FILE',
@@ -284,7 +277,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 def gen(location, output,
         fetch_license,
-        license_notice_text_location,
+        reference,
         mapping, mapping_file,
         quiet, verbose):
     """
@@ -309,7 +302,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     errors, abouts = generate_about_files(
         location=location,
         base_dir=output,
-        license_notice_text_location=license_notice_text_location,
+        reference_dir=reference,
         fetch_license=fetch_license,
         mapping_file=mapping_file
     )

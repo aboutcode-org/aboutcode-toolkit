@@ -177,11 +177,11 @@ class GenTest(unittest.TestCase):
     def test_generate_not_overwrite_original_license_file(self):
         location = get_test_loc('test_gen/inv5.csv')
         base_dir = get_temp_dir()
-        license_notice_text_location = None
+        reference_dir = None
         fetch_license = ['url', 'lic_key']
 
         _errors, abouts = gen.generate(
-            location, base_dir, license_notice_text_location, fetch_license)
+            location, base_dir, reference_dir, fetch_license)
 
         in_mem_result = [a.dumps(with_empty=False)for a in abouts][0]
         expected = (
