@@ -193,14 +193,11 @@ def load_inventory(location, base_dir, reference_dir=None,
     return unique(errors), abouts
 
 
-def generate(location, base_dir, reference_dir=None,
-             fetch_license=False, policy=None, conf_location=None,
+def generate(location, base_dir, reference_dir=None, fetch_license=False,
              with_empty=False, with_absent=False, mapping_file=None):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
-    base_dir using policy flags and configuration file at conf_location.
-    Policy defines which action to take for merging or overwriting fields and
-    files. Return errors and about objects.
+    base_dir. Return errors and about objects.
     """
     not_exist_errors = []
     api_url = ''
