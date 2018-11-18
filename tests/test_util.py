@@ -187,9 +187,9 @@ class UtilsTest(unittest.TestCase):
         expected = ['%', '!', '(', ')', '$', '$', ':']
         assert expected == result
 
-    def test_invalid_chars_with_space(self):
+    def test_invalid_chars_with_space_is_valid(self):
         result = util.invalid_chars('_ Hello')
-        expected = [' ']
+        expected = []
         assert expected == result
 
     def test_check_file_names_with_dupes_return_errors(self):
@@ -223,10 +223,11 @@ class UtilsTest(unittest.TestCase):
             'locations/file',
             'locations/file with space',
             'locations/dir1/dir2/file1',
-            'locations/dir2/file1'
+            'locations/dir2/file1',
+            'Accessibilité/ périmètre'
         ]
 
-        expected = [Error(CRITICAL, "Invalid characters '  ' in file name at: 'locations/file with space'")]
+        expected = [Error(CRITICAL, "Invalid characters 'éè' in file name at: 'Accessibilité/ périmètre'")]
         result = util.check_file_names(paths)
 
         assert expected[0].message == result[0].message
