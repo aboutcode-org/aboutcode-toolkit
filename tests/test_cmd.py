@@ -408,3 +408,21 @@ def test_about_attrib_command_can_run_minimally_without_error():
     test_dir = get_test_loc('test_cmd/repository-mini')
     result = get_temp_file()
     run_about_command_test_click(['attrib', test_dir, result])
+
+
+def test_about_transform_command_can_run_minimally_without_error():
+    test_file = get_test_loc('test_cmd/transform.csv')
+    result = get_temp_file('file_name.csv')
+    run_about_command_test_click(['transform', test_file, result])
+
+
+def test_about_transform_help_text():
+    check_about_stdout(
+        ['transform', '--help'],
+        'test_cmd/help/about_transform_help.txt', regen=False)
+
+
+def test_about_transform_expanded_help_text():
+    check_about_stdout(
+        ['transform', '--help-format'],
+        'test_cmd/help/about_transform_config_help.txt', regen=False)
