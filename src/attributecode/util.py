@@ -245,7 +245,7 @@ def get_relative_path(base_loc, full_loc):
 def to_native(path):
     """
     Return a path using the current OS path separator given a path that may
-    contain posix or windows separators, converting "/" to "\\" on windows 
+    contain posix or windows separators, converting "/" to "\\" on windows
     and "\\" to "/" on posix OSes.
     """
     path = path.replace(ntpath.sep, os.path.sep)
@@ -532,7 +532,7 @@ def have_network_connection():
     else:
         import http.client as httplib  # NOQA
 
-    http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)
+    http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)  # NOQA
     try:
         http_connection.connect()
     except socket.error:
@@ -605,7 +605,7 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
     where reference license an notice files are stored and the `afp`
     about_file_path value, this function will copy to the base_dir the
     license_file or notice_file if found in the reference_dir
-    
+
     """
     lic_name = ''
     for key, value in fields:
@@ -769,66 +769,3 @@ def unique(sequence):
         if item not in deduped:
             deduped.append(item)
     return deduped
-
-
-# FIXME: remove and replace by saneyaml
-from collections import Hashable
-
-from yaml.reader import Reader
-from yaml.scanner import Scanner
-from yaml.parser import Parser
-from yaml.composer import Composer
-from yaml.constructor import Constructor, ConstructorError
-from yaml.resolver import Resolver
-from yaml.nodes import MappingNode
-
-# FIXME: add docstring
-class NoDuplicateConstructor(Constructor):
-    def construct_mapping(self, node, deep=False):
-        if not isinstance(node, MappingNode):
-            raise ConstructorError(
-                None, None,
-                "expected a mapping node, but found %s" % node.id,
-                node.start_mark)
-        mapping = {}
-        for key_node, value_node in node.value:
-            # keys can be list -> deep
-            key = self.construct_object(key_node, deep=True)
-            # lists are not hashable, but tuples are
-            if not isinstance(key, Hashable):
-                if isinstance(key, list):
-                    key = tuple(key)
-
-            if sys.version_info.major == 2:
-                try:
-                    hash(key)
-                except TypeError as exc:
-                    raise ConstructorError(
-                        "while constructing a mapping", node.start_mark,
-                        "found unacceptable key (%s)" %
-                        exc, key_node.start_mark)
-            else:
-                if not isinstance(key, Hashable):
-                    raise ConstructorError(
-                        "while constructing a mapping", node.start_mark,
-                        "found unhashable key", key_node.start_mark)
-
-            value = self.construct_object(value_node, deep=deep)
-
-            # Actually do the check.
-            if key in mapping:
-                raise KeyError("Got duplicate key: {!r}".format(key))
-
-            mapping[key] = value
-        return mapping
-
-
-# FIXME: add docstring
-class NoDuplicateLoader(Reader, Scanner, Parser, Composer, NoDuplicateConstructor, Resolver):
-    def __init__(self, stream):
-        Reader.__init__(self, stream)
-        Scanner.__init__(self)
-        Parser.__init__(self)
-        Composer.__init__(self)
-        NoDuplicateConstructor.__init__(self)
-        Resolver.__init__(self)

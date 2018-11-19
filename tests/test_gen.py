@@ -74,9 +74,9 @@ class GenTest(unittest.TestCase):
             'about_resource: .\n'
             'name: AboutCode\n'
             'version: 0.11.0\n'
-            'description: |-\n'
-            '    multi\n'
-            '    line\n'
+            'description: |\n'
+            '  multi\n'
+            '  line\n'
         )
         result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
                         for a in abouts]
@@ -102,9 +102,9 @@ class GenTest(unittest.TestCase):
             'name: AboutCode\n'
             'version: 0.11.0\n'
             'copyright: Copyright (c) nexB, Inc.\n'
-            'description: |-\n'
-            '    multi\n'
-            '    line\n'
+            'description: |\n'
+            '  multi\n'
+            '  line\n'
             'resource: this.ABOUT\n'
         )
         result = [a.dumps(with_empty=False) for a in abouts]
@@ -162,16 +162,16 @@ class GenTest(unittest.TestCase):
         assert msg1 in errors[0].message
         assert msg2 in errors[1].message
 
-        in_mem_result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
+        result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
                         for a in abouts][0]
         expected = (
             'about_resource: .\n'
             'name: AboutCode\n'
             'version: 0.11.0\n'
-            'description: |-\n'
-            '    multi\n'
-            '    line\n')
-        assert expected == in_mem_result
+            'description: |\n'
+            '  multi\n'
+            '  line\n')
+        assert expected == result
 
     @skip('FIXME: this test is making a failed, live API call')
     def test_generate_not_overwrite_original_license_file(self):
@@ -183,11 +183,11 @@ class GenTest(unittest.TestCase):
         _errors, abouts = gen.generate(
             location, base_dir, reference_dir, fetch_license)
 
-        in_mem_result = [a.dumps(with_empty=False)for a in abouts][0]
+        result = [a.dumps(with_empty=False)for a in abouts][0]
         expected = (
             'about_resource: .\n'
             'name: AboutCode\n'
             'version: 0.11.0\n'
             'licenses:\n'
             '    -   file: this.LICENSE\n')
-        assert expected == in_mem_result
+        assert expected == result

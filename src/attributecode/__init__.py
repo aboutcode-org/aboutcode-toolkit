@@ -24,11 +24,12 @@ import os
 
 try:
     # Python 2
-    unicode
+    unicode  # NOQA
 except NameError:  # pragma: nocover
-    # Python 3 
-    unicode = str  #NOQA
+    # Python 3
+    unicode = str  # NOQA
 
+import saneyaml
 
 __version__ = '3.3.0'
 
