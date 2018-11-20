@@ -1116,7 +1116,7 @@ class About(object):
         # Group the same license information in a list
         license_group = list(zip_longest(license_key, license_name, license_file, license_url))
         for lic_group in license_group:
-            lic_dict = {}
+            lic_dict = OrderedDict()
             if lic_group[0]:
                 lic_dict['key'] = lic_group[0]
             if lic_group[1]:
