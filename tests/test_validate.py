@@ -46,10 +46,6 @@ def disabled_test_codestyle():
     subprocess.check_output(args=args, cwd=root_dir)
 
 
-def check_about(path):
-    run_about_command_test(['check', path])
-
-
 def test_about_thirdparty():
     run_about_command_test(['check', 'thirdparty'])
 
