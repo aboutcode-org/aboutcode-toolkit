@@ -35,11 +35,17 @@ from attributecode import DEFAULT_MAPPING
 python2 = sys.version_info[0] < 3
 
 if python2:  # pragma: nocover
-    import backports.csv as csv  # NOQA
     from itertools import izip_longest as zip_longest  # NOQA
 else:  # pragma: nocover
-    import csv  # NOQA
     from itertools import zip_longest  # NOQA
+
+if python2:  # pragma: nocover
+    from backports import csv # NOQA
+    # monkey patch backports.csv until bug is fixed
+    # https://github.com/ryanhiebert/backports.csv/issues/30
+    csv.dict = OrderedDict
+else:  # pragma: nocover
+    import csv  # NOQA
 
 
 on_windows = 'win32' in sys.platform
@@ -115,48 +121,6 @@ def check_file_names(paths):
         else:
             seen[path] = orig_path
     return errors
-
-
-def check_duplicate_keys_about_file(about_text):
-    """
-    Return a list of duplicated keys given a ABOUT text string.
-    """
-    seen = set()
-    duplicates = set()
-    for line in about_text.splitlines():
-        """
-        Ignore all the continuation string, mapping/list dahs, string block and empty line.
-        """
-        if not line.strip() :
-            continue
-        if line.startswith((' ', '\t')):
-            continue
-        if line.strip().startswith('-'):
-            continue
-        if ':' not in line:
-            continue
-        # Get the key name
-        key, _, _val = line.partition(':')
-        if key in seen:
-            duplicates.add(key)
-        else:
-            seen.add(key)
-    return sorted(duplicates)
-
-
-def wrap_boolean_value(context):
-    bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
-    input = []  # NOQA
-    for line in context.splitlines():
-        key = line.partition(':')[0]
-        if key in bool_fields:
-            value = "'" + line.partition(':')[2].strip() + "'"
-            updated_line = key + ': ' + value
-            input.append(updated_line)
-        else:
-            input.append(line)
-    updated_context = '\n'.join(input)
-    return updated_context
 
 
 # TODO: rename to normalize_path
@@ -271,40 +235,6 @@ def resource_name(path):
     path = path.rstrip(posixpath.sep)
     _left, right = posixpath.split(path)
     return right.strip()
-
-
-if python2:
-    class OrderedDictReader(csv.DictReader):
-        """
-        A DictReader that return OrderedDicts
-        Copied from csv.DictReader itself backported from Python 3
-        license: python
-        """
-        def __next__(self):
-            if self.line_num == 0:
-                # Used only for its side effect.
-                self.fieldnames
-            row = next(self.reader)
-            self.line_num = self.reader.line_num
-
-            # unlike the basic reader, we prefer not to return blanks,
-            # because we will typically wind up with a dict full of None
-            # values
-            while row == []:
-                row = next(self.reader)
-            d = OrderedDict(zip(self.fieldnames, row))
-            lf = len(self.fieldnames)
-            lr = len(row)
-            if lf < lr:
-                d[self.restkey] = row[lf:]
-            elif lf > lr:
-                for key in self.fieldnames[lr:]:
-                    d[key] = self.restval
-            return d
-
-        next = __next__
-else:
-    OrderedDictReader = csv.DictReader
 
 
 # FIXME: we should use a proper YAML file for this instead
@@ -444,7 +374,7 @@ def load_csv(location, mapping_file=None):
     # FIXME: why ignore encoding errors here?
     with codecs.open(location, mode='rb', encoding='utf-8',
                      errors='ignore') as csvfile:
-        for row in OrderedDictReader(csvfile):
+        for row in csv.DictReader(csvfile):
             # convert all the column keys to lower case as the same
             # behavior as when user use the --mapping
             updated_row = OrderedDict(
