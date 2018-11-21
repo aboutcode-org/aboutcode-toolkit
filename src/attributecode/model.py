@@ -1180,13 +1180,12 @@ def write_output(abouts, location, format):  # NOQA
     Write a CSV/JSON file at location given a list of About objects.
     Return a list of Error objects.
     """
-    errors = []
     about_dicts = about_object_to_list_of_dictionary(abouts)
     location = add_unc(location)
     if format == 'csv':
-        save_as_csv(location, about_dicts, get_field_names(abouts))
+        errors = save_as_csv(location, about_dicts, get_field_names(abouts))
     else:
-        save_as_json(location, about_dicts)
+        errors = save_as_json(location, about_dicts)
     return errors
 
 
@@ -1197,6 +1196,7 @@ def save_as_json(location, about_dicts):
     with io.open(location, mode=mode) as output_file:
         data = util.format_about_dict_for_json_output(about_dicts)
         output_file.write(json.dumps(data, indent=2))
+    return []
 
 
 def save_as_csv(location, about_dicts, field_names):
