@@ -397,13 +397,6 @@ class TestCsv(unittest.TestCase):
         result = util.load_csv(test_file, mapping_file=DEFAULT_MAPPING)
         assert expected == result
 
-    def test_get_about_file_path_from_csv_using_mapping(self):
-        test_file = get_test_loc('test_util/csv/about.csv')
-        expected = ['about.ABOUT']
-        result = util.get_about_file_path(
-            test_file, mapping_file=DEFAULT_MAPPING)
-        assert expected == result
-
     def test_load_csv_does_convert_column_names_to_lowercase(self):
         test_file = get_test_loc('test_util/csv/about_key_with_upper_case.csv')
         expected = [OrderedDict(
@@ -472,13 +465,6 @@ class TestJson(unittest.TestCase):
         ])
         )]
         result = util.load_json(test_file)
-        assert expected == result
-
-    # FIXME: mappings are a CSV-only feature!!!!!
-    def test_get_about_file_path_from_json_using_mapping(self):
-        test_file = get_test_loc('test_util/json/expected.json')
-        expected = ['/load/this.ABOUT']
-        result = util.get_about_file_path(test_file, mapping_file=DEFAULT_MAPPING)
         assert expected == result
 
     def test_load_non_list_json2(self):
@@ -631,17 +617,6 @@ description: sample
         except saneyaml.UnsupportedYamlFeatureError as e :
             # notes: exceptio is rasied only for the first dupe
             assert 'Duplicate key in YAML source: owner' == str(e)
-
-    def test_inventory_filter(self):
-        test_loc = get_test_loc('test_util/inventory_filter')
-        _errors, abouts = model.collect_inventory(test_loc)
-
-        filter_dict = {'name': ['simple']}
-        # The test loc has 2 .about files, only the simple.about is taken after
-        # the filtering
-        updated_abouts = util.inventory_filter(abouts, filter_dict)
-        for about in updated_abouts:
-            assert about.name.value == 'simple'
 
     def test_ungroup_licenses(self):
         about = [

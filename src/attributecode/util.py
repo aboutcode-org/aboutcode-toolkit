@@ -348,21 +348,6 @@ def format_output(about_data, mapping_file=None):
                 order_dict[other_key] = about_data[other_key]
     return order_dict
 
-# FIXME: why is this used for
-def get_about_file_path(location, mapping_file=None):
-    """
-    Read file at location, return a list of about_file_path.
-    """
-    afp_list = []
-    if location.endswith('.csv'):
-        about_data = load_csv(location, mapping_file=mapping_file)
-    else:
-        about_data = load_json(location)
-
-    for about in about_data:
-        afp_list.append(about['about_file_path'])
-    return afp_list
-
 
 def load_csv(location, mapping_file=None):
     """
@@ -565,34 +550,6 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
             except Exception as e:
                 print(repr(e))
                 print('Cannot copy file at %(from_lic_path)r.' % locals())
-
-
-# FIXME: this is NOT a util but something to move with inventories or a method
-# from About objects
-def inventory_filter(abouts, filters):
-    """
-    Return a list of filtered About objects from an `abouts` list of About
-    object using the `filters` mapping of:
-        {field_name: [acceptable_values, ....]}
-
-    ... such that only the About object that have a field_name with a value that
-    matches one of the acceptable values is returned. Other About object are
-    filtered out.
-    """
-    matching_abouts = []
-    for about in abouts:
-        for field_name, acceptable_values in filters.items():
-            # Check if the about object has the filtered attribute and if the
-            # attributed value is the same as the defined in the filter
-            actual_value = getattr(about, field_name, None)
-            if actual_value in acceptable_values and not about in matching_abouts:
-                matching_abouts.append(about)
-                # FIXME: if it matches once it matches always which is probably not right
-                break
-
-    return matching_abouts
-
-
 
 
 # FIXME: we should use a license object instead

@@ -43,7 +43,6 @@ from attributecode.gen import generate as generate_about_files
 from attributecode.model import collect_inventory
 from attributecode.model import write_output
 from attributecode.util import extract_zip
-from attributecode.util import inventory_filter
 
 
 __copyright__ = """
@@ -165,13 +164,6 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
     metavar='OUTPUT',
     type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
-# fIXME: this is too complex and should be removed
-@click.option('--filter',
-    multiple=True,
-    metavar='<key>=<value>',
-    callback=validate_key_values,
-    help='Filter the inventory to ABOUT matching these key=value e.g. "license_expression=gpl-2.0')
-
 @click.option('-f', '--format',
     is_flag=False,
     default='csv',
@@ -203,7 +195,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 @click.help_option('-h', '--help')
 
 def inventory(location, output, mapping, mapping_file,
-              format, filter, quiet, verbose):  # NOQA
+              format, quiet, verbose):  # NOQA
     """
 Collect the inventory of .ABOUT file data as CSV or JSON.
 
@@ -223,10 +215,6 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     mapping_file = validate_mapping(mapping, mapping_file)
 
     errors, abouts = collect_inventory(location, mapping_file=mapping_file)
-
-    # FIXME: this is too complex
-    if filter:
-        abouts = inventory_filter(abouts, filter)
 
     # Do not write the output if one of the ABOUT files has duplicated keys
     # TODO: why do this check here?? Also if this is the place, we should list what the errors are.
@@ -447,7 +435,6 @@ OUTPUT: Path where to write the attribution document.
         template_loc=template,
         variables=vartext,
         mapping_file=mapping_file,
-        inventory_location=inventory,
     )
     errors.extend(attrib_errors)
 
