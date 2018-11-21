@@ -257,10 +257,7 @@ def generate(location, base_dir, reference_dir=None, fetch_license=False):
                 # Write generated LICENSE file
                 license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
-                    # Do not help user to fill in the license name
-                    # if not about.license_name.present:
-                    #    about.license_name.value = lic_name
-                    #    about.license_name.present = True
+                    # use value not "presence"
                     if not about.license_file.present:
                         about.license_file.value = OrderedDict()
                         for lic_key, lic_name, lic_context, lic_url in license_key_name_context_url_list:
