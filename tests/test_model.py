@@ -26,6 +26,7 @@ import shutil
 import unittest
 
 import mock
+import saneyaml
 
 from attributecode import CRITICAL
 from attributecode import ERROR
@@ -40,10 +41,16 @@ from attributecode.util import to_posix
 from testing_utils import extract_test_loc
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
-import saneyaml
+
+try:
+    # Python 2
+    unicode  # NOQA
+except NameError:  # pragma: nocover
+    # Python 3
+    unicode = str  # NOQA
 
 
-def check_csv(expected, result, regen=False):
+def check_csv(expected, result, regen=False, fix_cell_linesep=False):
     """
     Assert that the contents of two CSV files locations `expected` and
     `result` are equal.
@@ -51,8 +58,26 @@ def check_csv(expected, result, regen=False):
     if regen:
         shutil.copyfile(result, expected)
     expected = sorted([sorted(d.items()) for d in load_csv(expected)])
-    result = sorted([sorted(d.items()) for d in load_csv(result)])
+    result = [d.items() for d in load_csv(result)]
+    if fix_cell_linesep:
+        result = [list(fix_crlf(items)) for items in result]
+    result = sorted(sorted(items) for items in result)
+
     assert expected == result
+
+
+def fix_crlf(items):
+    """
+    Hackish... somehow the CVS returned on Windows is sometimes using a backward
+    linesep convention:
+    instead of LF inside cells and CRLF at EOL,
+    they use CRLF everywhere.
+    This is fixing this until we find can why
+    """
+    for key, value in items:
+        if isinstance(value, unicode) and '\r\n' in value:
+            value = value.replace('\r\n', '\n')
+        yield key, value
 
 
 def check_json(expected, result):
@@ -102,7 +127,7 @@ class FieldTest(unittest.TestCase):
     def test_PathField_check_location(self):
         test_file = 'license.LICENSE'
         field = model.PathField(name='f', value=test_file, present=True)
-        base_dir = get_test_loc('test_model/fields')
+        base_dir = get_test_loc('test_model/base_dir')
 
         errors = field.validate(base_dir=base_dir)
         expected_errrors = []
@@ -115,7 +140,7 @@ class FieldTest(unittest.TestCase):
     def test_PathField_check_missing_location(self):
         test_file = 'does.not.exist'
         field = model.PathField(name='f', value=test_file, present=True)
-        base_dir = get_test_loc('test_model/fields')
+        base_dir = get_test_loc('test_model/base_dir')
         errors = field.validate(base_dir=base_dir)
 
         file_path = posixpath.join(base_dir, test_file)
@@ -132,7 +157,7 @@ class FieldTest(unittest.TestCase):
         field = model.FileTextField(
             name='f', value='license.LICENSE', present=True)
 
-        base_dir = get_test_loc('test_model/fields')
+        base_dir = get_test_loc('test_model/base_dir')
         errors = field.validate(base_dir=base_dir)
         assert [] == errors
 
@@ -228,6 +253,18 @@ class YamlParseTest(unittest.TestCase):
             ('other_field', 'value'),
         ]
 
+        assert expected == list(result.items())
+
+    def test_saneyaml_load_does_not_convert_to_crlf(self):
+        test = get_test_content('test_model/crlf/about.ABOUT')
+        result = saneyaml.load(test)
+
+        expected = [
+            (u'about_resource', u'.'),
+            (u'name', u'pytest'),
+            (u'description', u'first line\nsecond line\nthird line\n'),
+            (u'copyright', u'copyright')
+        ]
         assert expected == list(result.items())
 
     def test_saneyaml_load_can_parse_continuations(self):
@@ -937,14 +974,14 @@ class CollectorTest(unittest.TestCase):
         expected = [u'about_resource: .\nname: test\nresource: .\ncustom_mapping: test\n']
         assert expected == [a.dumps() for a in abouts]
 
-    def test_saneyaml_load_license_expression(self):
+    def test_parse_license_expression(self):
         spec_char, returned_lic = model.parse_license_expression('mit or apache-2.0')
         expected_lic = ['mit', 'apache-2.0']
         expected_spec_char = []
         assert expected_lic == returned_lic
         assert expected_spec_char == spec_char
 
-    def test_saneyaml_load_license_expression_with_special_chara(self):
+    def test_parse_license_expression_with_special_chara(self):
         spec_char, returned_lic = model.parse_license_expression('mit, apache-2.0')
         expected_lic = []
         expected_spec_char = [',']
@@ -1019,7 +1056,18 @@ class CollectorTest(unittest.TestCase):
         assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('test_model/inventory/complex/expected.csv')
-        check_csv(expected, result)
+        check_csv(expected, result, fix_cell_linesep=True, regen=False)
+
+    def test_collect_inventory_does_not_convert_lf_to_crlf_from_directory(self):
+        location = get_test_loc('test_model/crlf/about.ABOUT')
+        result = get_temp_file()
+        errors, abouts = model.collect_inventory(location)
+        errors2 = model.write_output(abouts, result, format='csv')
+        errors.extend(errors2)
+        assert all(e.severity == INFO for e in errors)
+
+        expected = get_test_loc('test_model/crlf/expected.csv')
+        check_csv(expected, result, fix_cell_linesep=True, regen=False)
 
 
 class FetchLicenseTest(unittest.TestCase):
