@@ -167,7 +167,7 @@ def run_about_command_test(options, expected_rc=0):
             '{stdout}\n'
             '\n'
             'stderr:\n'
-            '{stderr)\n'
+            '{stderr}\n'
         ).format(**locals())
         assert rc == expected_rc, error
     return stdout, stderr

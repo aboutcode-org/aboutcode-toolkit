@@ -34,20 +34,16 @@ import json
 import os
 # FIXME: why posixpath???
 import posixpath
-import re
-
+import traceback
 
 from attributecode.util import python2
 
-
 if python2:  # pragma: nocover
-    import backports.csv as csv  # NOQA
     from itertools import izip_longest as zip_longest  # NOQA
     from urlparse import urljoin, urlparse  # NOQA
     from urllib2 import urlopen, Request, HTTPError  # NOQA
 else:  # pragma: nocover
     basestring = str  # NOQA
-    import csv  # NOQA
     from itertools import zip_longest  # NOQA
     from urllib.parse import urljoin, urlparse  # NOQA
     from urllib.request import urlopen, Request  # NOQA
@@ -64,6 +60,7 @@ from attributecode import Error
 from attributecode import saneyaml
 from attributecode import util
 from attributecode.util import add_unc
+from attributecode.util import csv
 from attributecode.util import copy_license_notice_files
 from attributecode.util import on_windows
 from attributecode.util import UNC_PREFIX
@@ -508,22 +505,6 @@ class AboutResourceField(PathField):
         errors = super(AboutResourceField, self)._validate(*args, ** kwargs)
         return errors
 
-    def resolve(self, about_file_path):
-        """
-        Resolve resource paths relative to an ABOUT file path.
-        Set a list attribute on self called resolved_paths
-        """
-        self.resolved_paths = []
-        if not about_file_path:
-            # FIXME: should we return an info or warning?
-            # The existence of about_file_path has been checked in the load_inventory()
-            return
-        base_dir = posixpath.dirname(about_file_path).strip(posixpath.sep)
-        for path in self.value.keys():
-            resolved = posixpath.join(base_dir, path)
-            resolved = posixpath.normpath(resolved)
-            self.resolved_paths.append(resolved)
-
 
 class FileTextField(PathField):
     """
@@ -786,46 +767,6 @@ class About(object):
                 and self.fields == other.fields
                 and self.custom_fields == other.custom_fields)
 
-    @staticmethod
-    def attribution_fields(fields):
-        """
-        Return attrib-only fields
-        """
-        attrib_fields = ['name',
-                         'version',
-                         'license_key',
-                         'license_name',
-                         'license_file',
-                         'license_url',
-                         'copyright',
-                         'notice_file',
-                         'notice_url',
-                         'redistribute',
-                         'attribute',
-                         'track_changes',
-                         'modified',
-                         'changelog_file',
-                         'owner',
-                         'author']
-
-        return OrderedDict([(n, o) for n, o in fields.items()
-                            if n in attrib_fields])
-
-    def same_attribution(self, other):
-        """
-        Equality based on attribution-related fields.
-        """
-        return (isinstance(other, self.__class__)
-                and self.attribution_fields(self.fields) == self.attribution_fields(other.fields))
-
-    def resolved_resources_paths(self):
-        """
-        Return a serialized string of resolved resource paths, one per line.
-        """
-        abrf = self.about_resource_path
-        abrf.resolve(self.about_file_path)
-        return u'\n'.join(abrf.resolved_paths)
-
     def all_fields(self, with_absent=True, with_empty=True):
         """
         Return the list of all Field objects.
@@ -996,10 +937,6 @@ class About(object):
             self.base_dir, self.reference_dir)
         errors.extend(validation_errors)
 
-        # do not forget to resolve about resource paths The
-        # 'about_resource' field is now a ListField and those do not
-        # need to resolve
-        # self.about_resource.resolve(self.about_file_path)
         return errors
 
     def load(self, location, mapping_file=None):
@@ -1015,8 +952,6 @@ class About(object):
             loc = add_unc(loc)
             with codecs.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
-            # Check for duplicated key
-            saneyaml.load(input_text, allow_duplicate_keys=False)
             """
             The running_inventory defines if the current process is 'inventory' or not.
             This is used for the validation of the path of the 'about_resource'.
@@ -1027,15 +962,12 @@ class About(object):
             and then join with the 'about_resource'
             """
             running_inventory = True
-            # FIXME: why??
-            # wrap the value of the boolean field in quote to avoid
-            # automatically conversion from yaml.load
-            input = util.wrap_boolean_value(input_text)  # NOQA
-            data = saneyaml.load(input, allow_duplicate_keys=False)
+            data = saneyaml.load(input_text, allow_duplicate_keys=False)
             errs = self.load_dict(data, base_dir, running_inventory, mapping_file)
             errors.extend(errs)
         except Exception as e:
-            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
+            trace = traceback.format_exc()
+            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s'
             errors.append(Error(CRITICAL, msg % locals()))
 
         self.errors = errors
@@ -1072,10 +1004,10 @@ class About(object):
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
         errors = self.process(
-            fields=fields, 
-            about_file_path=about_file_path, 
-            running_inventory=running_inventory, 
-            base_dir=base_dir, 
+            fields=fields,
+            about_file_path=about_file_path,
+            running_inventory=running_inventory,
+            base_dir=base_dir,
             reference_dir=reference_dir,
             mapping_file=mapping_file)
         self.errors = errors
@@ -1149,7 +1081,7 @@ class About(object):
             if about_file_path.endswith('/'):
                 about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
             about_file_path += '.ABOUT'
-        
+
         if on_windows:
             about_file_path = add_unc(about_file_path)
 
@@ -1188,94 +1120,6 @@ class About(object):
                     except:
                         pass
         return license_key_name_context_url
-
-
-# valid field name
-field_name = r'(?P<name>[a-z][0-9a-z_]*)'
-
-valid_field_name = re.compile(field_name, re.UNICODE | re.IGNORECASE).match  # NOQA
-
-# line in the form of "name: value"
-field_declaration = re.compile(
-    r'^'
-    +field_name +
-    r'\s*:\s*'
-    r'(?P<value>.*)'
-    r'\s*$'
-    , re.UNICODE | re.IGNORECASE  # NOQA
-    ).match
-
-
-# continuation line in the form of " value"
-continuation = re.compile(
-    r'^'
-    r' '
-    r'(?P<value>.*)'
-    r'\s*$'
-    , re.UNICODE | re.IGNORECASE  # NOQA
-    ).match
-
-
-def parse(lines):
-    """
-    Parse a list of unicode lines from an ABOUT file. Return a
-    list of errors found during parsing and a list of tuples of (name,
-    value) strings.
-    """
-    errors = []
-    fields = []
-
-    # track current name and value to accumulate possible continuations
-    name = None
-    value = []
-
-    for num, line in enumerate(lines):
-        has_content = line.strip()
-        new_field = field_declaration(line)
-        cont = continuation(line)
-
-        if cont:
-            if name:
-                # name is set, so the continuation is for the field name
-                # append the value
-                value.append(cont.group('value'))
-            else:
-                # name is not set and the line is not empty
-                if has_content:
-                    msg = 'Invalid continuation line: %(num)d: %(line)r'
-                    errors.append(Error(CRITICAL, msg % locals()))
-
-        elif not line or not has_content:
-            # an empty line: append current name/value if any and reset
-            if name:
-                fields.append((name, value,))
-                # reset
-                name = None
-
-        elif new_field:
-            # new field line: yield current name/value if any
-            if name:
-                fields.append((name, value,))
-            # start new field
-            name = new_field.group('name')
-            # values are always stored in a list
-            # even simple single string values
-            value = [new_field.group('value')]
-
-        else:
-            # neither empty, nor new field nor continuation
-            # this is an error
-            msg = 'Invalid line: %(num)d: %(line)r'
-            errors.append(Error(CRITICAL, msg % locals()))
-
-    # append if any name/value was left over on last iteration
-    if name:
-        fields.append((name, value,))
-
-    # rejoin eventual multi-line string values
-    fields = [(name, u'\n'.join(value),) for name, value in fields]
-    return errors, fields
-
 
 def collect_inventory(location, mapping_file=None):
     """
@@ -1393,69 +1237,6 @@ def write_output(abouts, location, format, with_absent=False, with_empty=True): 
     return errors
 
 
-def by_license(abouts):
-    """
-    Return an ordered dict sorted by key of About objects grouped by license
-    """
-    grouped = {}
-    grouped[''] = []
-    no_license = grouped['']
-    for about in abouts:
-        if about.license_expression.value:
-            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
-            if not special_char_in_expression:
-                for lic in lic_list:
-                    if lic in grouped:
-                        grouped[lic].append(about)
-                    else:
-                        grouped[lic] = [about]
-        else:
-            no_license.append(about)
-    return OrderedDict(sorted(grouped.items()))
-
-
-def by_name(abouts):
-    """
-    Return an ordered dict sorted by key of About objects grouped by component
-    name.
-    """
-    grouped = {}
-    grouped[''] = []
-    no_name = grouped['']
-    for about in abouts:
-        name = about.name.value
-        if name:
-            if name in grouped:
-                grouped[name].append(about)
-            else:
-                grouped[name] = [about]
-        else:
-            no_name.append(about)
-    return OrderedDict(sorted(grouped.items()))
-
-
-def by_license_content(abouts):
-    """
-    Return an ordered dict sorted by key of About objects grouped by license
-    content.
-    """
-    grouped = {}
-    grouped[''] = []
-    no_license = grouped['']
-    for about in abouts:
-        if about.license_key.value:
-            special_char_in_expression, lic_list = parse_license_expression(about.license_key.value)
-            if not special_char_in_expression:
-                for lic in lic_list:
-                    if lic in grouped:
-                        grouped[lic].append(about)
-                    else:
-                        grouped[lic] = [about]
-        else:
-            no_license.append(about)
-    return OrderedDict(sorted(grouped.items()))
-
-
 def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
     """
     Modify a list of About data dictionaries by adding license information
@@ -1540,31 +1321,3 @@ def valid_api_url(api_url):
         # All other exceptions yield to invalid api_url
         pass
     return False
-
-
-def verify_license_files_in_location(about, lic_location):
-    """
-    Check the existence of the license file provided in the license_field from the
-    license_text_location.
-    Return a dictionary of the path of where the license should be copied to as
-    the key and the path of where the license should be copied from as the value.
-    """
-    license_location_dict = {}
-    errors = []
-    # The license_file field is filled if the input has license value and
-    # the 'fetch_license' option is used.
-    if about.license_file.value:
-        for lic in about.license_file.value:
-            lic_path = util.to_posix(posixpath.join(lic_location, lic))
-            if posixpath.exists(lic_path):
-                copy_to = os.path.dirname(about.about_file_path)
-                license_location_dict[copy_to] = lic_path
-            else:
-                msg = (u'The license file : '
-                       u'%(lic)s '
-                       u'does not exist in '
-                       u'%(lic_path)s and therefore cannot be copied' % locals())
-                errors.append(Error(ERROR, msg))
-    return license_location_dict, errors
-
-

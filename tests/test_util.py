@@ -22,6 +22,8 @@ from collections import OrderedDict
 import string
 import unittest
 
+import saneyaml
+
 from testing_utils import extract_test_loc
 from testing_utils import get_test_loc
 from testing_utils import on_posix
@@ -197,7 +199,7 @@ class TestResourcePaths(unittest.TestCase):
             'Accessibilité/ périmètre'
         ]
         import sys
-        if sys.version_info[0] < 3: #python2
+        if sys.version_info[0] < 3:  # python2
             expected = [Error(CRITICAL, b"Invalid characters '\xe9\xe8' in file name at: 'Accessibilit\xe9/ p\xe9rim\xe8tre'")]
         else:
             expected = [Error(CRITICAL, "Invalid characters 'éè' in file name at: 'Accessibilité/ périmètre'")]
@@ -569,18 +571,16 @@ class TestJson(unittest.TestCase):
 
 class TestMiscUtils(unittest.TestCase):
 
-    def test_check_duplicate_keys_about_file_with_no_dupe(self):
+    def test_load_yaml_about_file_with_no_dupe(self):
         test = '''
 name: test
 
 license_expression: mit
 notes: dup key here
             '''
-        expected = []
-        assert expected == util.check_duplicate_keys_about_file(test)
+        saneyaml.load(test, allow_duplicate_keys=False)
 
-
-    def test_check_duplicate_keys_about_file_returns_duplicate(self):
+    def test_load_yaml_about_file_raise_exception_on__duplicate(self):
         test = '''
 name: test
 notes: some notes
@@ -590,12 +590,15 @@ notes: dup key here
 license_expression: mit
 notes: dup key here
             '''
-        expected = ['notes']
-        assert expected == util.check_duplicate_keys_about_file(test)
+        try:
+            saneyaml.load(test, allow_duplicate_keys=False)
+            self.fail('Exception not raised')
+        except saneyaml.UnsupportedYamlFeatureError as e :
+            assert 'Duplicate key in YAML source: notes' == str(e)
 
-    def test_check_duplicate_keys_about_file_ignore_non_key_line(self):
+    def test_load_yaml_about_file_raise_exception_on_invalid_yaml_ignore_non_key_line(self):
         test = '''
- name: test
+name: test
 - notes: some notes
   - notes: dup key here
 # some
@@ -604,29 +607,13 @@ notes: dup key here
 license_expression: mit
 notes dup key here
             '''
-        expected = []
-        assert expected == util.check_duplicate_keys_about_file(test)
+        try:
+            saneyaml.load(test, allow_duplicate_keys=False)
+            self.fail('Exception not raised')
+        except Exception:
+            pass
 
-    def test_wrap_boolean_value(self):
-        test = '''
-name: test
-notes: some notes
-
-license_expression: mit
-modified: yes
-track_changes: no
-            '''
-        expected = '''
-name: test
-notes: some notes
-
-license_expression: mit
-modified: 'yes'
-track_changes: 'no'
-            '''
-        assert expected == util.wrap_boolean_value(test)
-
-    def test_check_duplicate_keys_about_file_with_multiline(self):
+    def test_load_yaml_about_file_with_multiline(self):
         test = '''
 name: test
 owner: test
@@ -638,9 +625,12 @@ notes: continuation
  line
 description: sample
             '''
-        # notes: the output IS sorted
-        expected = ['notes', 'owner', ]
-        assert expected == util.check_duplicate_keys_about_file(test)
+        try:
+            saneyaml.load(test, allow_duplicate_keys=False)
+            self.fail('Exception not raised')
+        except saneyaml.UnsupportedYamlFeatureError as e :
+            # notes: exceptio is rasied only for the first dupe
+            assert 'Duplicate key in YAML source: owner' == str(e)
 
     def test_inventory_filter(self):
         test_loc = get_test_loc('test_util/inventory_filter')

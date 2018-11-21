@@ -18,12 +18,11 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import codecs
 from collections import OrderedDict
+import io
 import json
 import posixpath
 import shutil
-import sys
 import unittest
 
 import mock
@@ -42,6 +41,7 @@ from attributecode.util import to_posix
 from testing_utils import extract_test_loc
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
+import saneyaml
 
 
 def check_csv(expected, result, regen=False):
@@ -67,23 +67,13 @@ def check_json(expected, result):
     assert expected == result
 
 
-
 def get_unicode_content(location):
     """
-    Read file at location and return a unicode.
+    Read file at location and return a unicode string.
     """
-    with codecs.open(location, 'rb', encoding='utf-8') as doc:
+    location = get_test_loc(location)
+    with io.open(location, encoding='utf-8') as doc:
         return doc.read()
-
-
-def get_test_lines(path):
-    """
-    Return a list of text lines loaded from the location of a test file or
-    directory given a path relative to the testdata directory.
-    """
-    return get_unicode_content(get_test_loc(path)).splitlines(True)
-
-
 
 
 class FieldTest(unittest.TestCase):
@@ -221,168 +211,117 @@ class FieldTest(unittest.TestCase):
         expected_errors = [Error(ERROR, 'Field s: Cannot span multiple lines: line1\n        line2')]
         self.check_validate(field_class, value, expected, expected_errors)
 
-    def test_AboutResourceField_can_resolve_single_value(self):
-        about_file_path = 'some/dir/me.ABOUT'
-        field = model.AboutResourceField(name='s', value='.', present=True)
-        field.validate()
-        expected = ['some/dir']
-        field.resolve(about_file_path)
-        result = field.resolved_paths
-        assert expected == result
 
-    def check_AboutResourceField_can_resolve_paths_list(self):
-        about_file_path = 'some/dir/me.ABOUT'
-        value = '''.
-                   ../path1
-                   path2/path3/
-                   /path2/path3/
-                   '''
-        field = model.AboutResourceField(name='s', value=value, present=True)
-        field.validate()
-        expected = ['some/dir',
-                    'some/path1',
-                    'some/dir/path2/path3']
-        field.resolve(about_file_path)
-        result = field.resolved_paths
-        assert expected == result
-
-    def test_AboutResourceField_can_resolve_paths_list_multiple_times(self):
-        for _ in range(3):
-            self.check_AboutResourceField_can_resolve_paths_list()
-
-
-class ParseTest(unittest.TestCase):
+class YamlParseTest(unittest.TestCase):
     maxDiff = None
-    def test_parse_can_parse_simple_fields(self):
-        test = get_test_lines('test_model/parse/basic.about')
-        errors, result = list(model.parse(test))
-
-        assert [] == errors
+    def test_saneyaml_load_can_parse_simple_fields(self):
+        test = get_unicode_content('test_model/parse/basic.about')
+        result = saneyaml.load(test)
 
         expected = [
             ('single_line', 'optional'),
             ('other_field', 'value'),
         ]
-        assert expected == result
 
-    def test_parse_can_parse_continuations(self):
-        test = get_test_lines('test_model/parse/continuation.about')
-        errors, result = model.parse(test)
+        assert expected == list(result.items())
 
-        assert [] == errors
+    def test_saneyaml_load_can_parse_continuations(self):
+        test = get_unicode_content('test_model/parse/continuation.about')
+        result = saneyaml.load(test)
 
         expected = [
             ('single_line', 'optional'),
             ('other_field', 'value'),
-            ('multi_line', 'some value\n'
-                             'and more\n'
-                             ' and yet more')]
-        assert expected == result
+            (u'multi_line', u'some value and more and yet more')
+        ]
 
-    def test_parse_can_handle_complex_continuations(self):
-        test = get_test_lines('test_model/parse/complex.about')
-        errors, result = model.parse(test)
-        assert [] == errors
+        assert expected == list(result.items())
+
+    def test_saneyaml_load_can_handle_multiline_texts_and_strips_text_fields(self):
+        test = get_unicode_content('test_model/parse/complex.about')
+        result = saneyaml.load(test)
 
         expected = [
             ('single_line', 'optional'),
-            ('other_field', 'value\n'),
-            ('multi_line', 'some value\n'
-                             'and more\n'
-                             ' and yet more\n'
-                             '  '),
-            ('yetanother', '\nsdasd')]
-        assert expected == result
+            ('other_field', 'value'),
+            ('multi_line', 'some value and more and yet more'),
+            ('yetanother', 'sdasd')]
 
-    def test_parse_error_for_invalid_field_name(self):
-        test = get_test_lines('test_model/parse/invalid_names.about')
-        errors, result = model.parse(test)
+        assert expected == list(result.items())
+
+    def test_saneyaml_load_can_parse_verbatim_text_unstripped(self):
+        test = get_unicode_content('test_model/parse/continuation_verbatim.about')
+        result = saneyaml.load(test)
+
         expected = [
-            ('val3_id_', 'some:value'),
-            ('VALE3_ID_', 'some:value')]
-        assert expected == result
+            (u'single_line', u'optional'),
+            (u'other_field', u'value'),
+            (u'multi_line', u'some value  \n  and more  \n      and yet more   \n \n')
+        ]
 
-        expected_errors = [
-            Error(CRITICAL, "Invalid line: 0: 'invalid space:value\\n'"),
-            Error(CRITICAL, "Invalid line: 1: 'other-field: value\\n'"),
-            Error(CRITICAL, "Invalid line: 4: '_invalid_dash: value\\n'"),
-            Error(CRITICAL, "Invalid line: 5: '3invalid_number: value\\n'"),
-            Error(CRITICAL, "Invalid line: 6: 'invalid.dot: value'")
-            ]
-        assert expected_errors == errors
+        assert expected == list(result.items())
 
-    def test_parse_error_for_invalid_continuation(self):
-        test = get_test_lines('test_model/parse/invalid_continuation.about')
-        errors, result = model.parse(test)
-        expected = [('single_line', 'optional'),
-                    ('other_field', 'value'),
-                    ('multi_line', 'some value\n' 'and more')]
-        assert expected == result
-        expected_errors = [
-            Error(CRITICAL, "Invalid continuation line: 0:"
-                            " ' invalid continuation1\\n'"),
-            Error(CRITICAL, "Invalid continuation line: 7:"
-                            " ' invalid continuation2\\n'")]
-        assert expected_errors == errors
+    def test_saneyaml_load_report_error_for_invalid_field_name(self):
+        test = get_unicode_content('test_model/parse/invalid_names.about')
+        try:
+            saneyaml.load(test)
+            self.fail('Exception not raised')
+        except Exception:
+            pass
 
-    def test_parse_rejects_non_ascii_names_and_accepts_unicode_values(self):
-        test = get_test_lines('test_model/parse/non_ascii_field_name_value.about')
-        errors, result = model.parse(test)
+    def test_saneyaml_dangling_text_is_not_an_invalid_continuation(self):
+        test = get_unicode_content('test_model/parse/invalid_continuation.about')
+        result = saneyaml.load(test)
+        expected = [
+            (u'single_line', u'optional'),
+            (u'other_field', u'value'),
+            (u'multi_line', u'some value and more\ninvalid continuation2')
+        ]
+        assert expected == list(result.items())
+
+    def test_saneyaml_load_accepts_unicode_keys_and_values(self):
+        test = get_unicode_content('test_model/parse/non_ascii_field_name_value.about')
+        result = saneyaml.load(test)
         expected = [
             ('name', 'name'),
             ('about_resource', '.'),
-            ('owner', 'Matías Aguirre')]
-        assert expected == result
+            ('owner', 'Matías Aguirre'),
+            (u'Matías', u'unicode field name')
+        ]
+        assert expected == list(result.items())
 
-        expected_msg = "Invalid line: 3: 'Matías: unicode field name\\n'"
-        if sys.version_info[0] < 3:  # Python 2
-            expected_msg = "Invalid line: 3: 'Mat\\xedas: unicode field name\\n'"
-
-        expected_errors = [
-            Error(CRITICAL, expected_msg)]
-        assert expected_errors == errors
-
-    def test_parse_handles_blank_lines_and_spaces_in_field_names(self):
+    def test_saneyaml_load_accepts_blank_lines_and_spaces_in_field_names(self):
         test = '''
 name: test space
 version: 0.7.0
 about_resource: about.py
 field with spaces: This is a test case for field with spaces
-'''.splitlines(True)
+'''
 
-        errors, result = model.parse(test)
+        result = saneyaml.load(test)
 
         expected = [
             ('name', 'test space'),
             ('version', '0.7.0'),
-            ('about_resource', 'about.py')]
-        assert expected == result
+            ('about_resource', 'about.py'),
+            (u'field with spaces', u'This is a test case for field with spaces'),
+        ]
 
-        expected_errors = [
-            Error(CRITICAL, "Invalid line: 4: 'field with spaces: This is a test case for field with spaces\\n'")]
-        assert expected_errors == errors
+        assert expected == list(result.items())
 
-    def test_parse_ignore_blank_lines_and_lines_without_no_colon(self):
+    def test_saneyaml_loads_blank_lines_and_lines_without_no_colon(self):
         test = '''
 name: no colon test
 test
 version: 0.7.0
 about_resource: about.py
 test with no colon
-'''.splitlines(True)
-        errors, result = model.parse(test)
-
-        expected = [
-            ('name', 'no colon test'),
-            ('version', '0.7.0'),
-            ('about_resource', 'about.py')]
-        assert expected == result
-
-        expected_errors = [
-            Error(CRITICAL, "Invalid line: 2: 'test\\n'"),
-            Error(CRITICAL, "Invalid line: 5: 'test with no colon\\n'")]
-        assert expected_errors == errors
-
+'''
+        try:
+            saneyaml.load(test)
+            self.fail('Exception not raised')
+        except Exception:
+            pass
 
 class AboutTest(unittest.TestCase):
 
@@ -408,7 +347,7 @@ class AboutTest(unittest.TestCase):
         result = a.errors
         assert sorted(expected) == sorted(result)
 
-    def check_About_hydrate(self, about, fields, errors):
+    def check_About_hydrate(self, about, fields):
         expected = set([
             'name',
             'homepage_url',
@@ -431,19 +370,11 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     def test_About_hydrate_normalize_field_names_to_lowercase(self):
-        test_file = get_test_lines('test_gen/parser_tests/upper_field_names.ABOUT')
-        errors, fields = model.parse(test_file)
-        assert [] == errors
-        a = model.About()
-        self.check_About_hydrate(a, fields, errors)
-
-    def test_About_hydrate_can_be_called_multiple_times(self):
-        test_file = get_test_lines('test_gen/parser_tests/upper_field_names.ABOUT')
-        errors, fields = model.parse(test_file)
-        assert [] == errors
+        test_content = get_unicode_content('test_gen/parser_tests/upper_field_names.ABOUT')
+        fields = saneyaml.load(test_content).items()
         a = model.About()
         for _ in range(3):
-            self.check_About_hydrate(a, fields, errors)
+            self.check_About_hydrate(a, fields)
 
     def test_About_with_existing_about_resource_has_no_error(self):
         test_file = get_test_loc('test_gen/parser_tests/about_resource_field.ABOUT')
@@ -594,38 +525,13 @@ this software and releases the component to Public Domain.
         b = model.About(test_file, about_file_path='complete/about.ABOUT')
         assert a == b
 
-    def test_About_equals_with_small_text_differences(self):
+    def test_About_are_not_equal_with_small_text_differences(self):
         test_file = get_test_loc('test_model/equal/complete2/about.ABOUT')
         a = model.About(test_file, about_file_path='complete2/about.ABOUT')
         test_file2 = get_test_loc('test_model/equal/complete/about.ABOUT')
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
         assert a.dumps() != b.dumps()
         assert a == b
-
-    def test_About_same_attribution(self):
-        base_dir = 'some_dir'
-        a = model.About()
-        a.load_dict({'name': 'apache', 'version': '1.1' }, base_dir)
-        b = model.About()
-        b.load_dict({'name': 'apache', 'version': '1.1' }, base_dir)
-        assert a.same_attribution(b)
-
-    def test_About_same_attribution_with_different_resource(self):
-        base_dir = 'some_dir'
-        a = model.About()
-        a.load_dict({'about_resource': 'resource', 'name': 'apache', 'version': '1.1' }, base_dir)
-        b = model.About()
-        b.load_dict({'about_resource': 'other', 'name': 'apache', 'version': '1.1' }, base_dir)
-        assert a.same_attribution(b)
-
-    def test_About_same_attribution_different_data(self):
-        base_dir = 'some_dir'
-        a = model.About()
-        a.load_dict({'about_resource': 'resource', 'name': 'apache', 'version': '1.1' }, base_dir)
-        b = model.About()
-        b.load_dict({'about_resource': 'other', 'name': 'apache', 'version': '1.2' }, base_dir)
-        assert not a.same_attribution(b)
-        assert not b.same_attribution(a)
 
     def test_field_names(self):
         a = model.About()
@@ -922,6 +828,7 @@ version: 0.11.0
         expected = get_test_loc('test_model/expected.json')
         check_json(expected, result)
 
+
 class CollectorTest(unittest.TestCase):
 
     def test_collect_inventory_return_errors(self):
@@ -1038,14 +945,14 @@ class CollectorTest(unittest.TestCase):
         assert expected_msg1 in errors[0].message
         assert expected_msg2 in errors[1].message
 
-    def test_parse_license_expression(self):
+    def test_saneyaml_load_license_expression(self):
         spec_char, returned_lic = model.parse_license_expression('mit or apache-2.0')
         expected_lic = ['mit', 'apache-2.0']
         expected_spec_char = []
         assert expected_lic == returned_lic
         assert expected_spec_char == spec_char
 
-    def test_parse_license_expression_with_special_chara(self):
+    def test_saneyaml_load_license_expression_with_special_chara(self):
         spec_char, returned_lic = model.parse_license_expression('mit, apache-2.0')
         expected_lic = []
         expected_spec_char = [',']
@@ -1121,50 +1028,6 @@ class CollectorTest(unittest.TestCase):
 
         expected = get_test_loc('test_model/inventory/complex/expected.csv')
         check_csv(expected, result)
-
-
-class GroupingsTest(unittest.TestCase):
-
-    def test_by_license(self):
-        base_dir = 'some_dir'
-        a = model.About()
-        a.load_dict({'license_expression': 'apache-2.0 and cddl-1.0', }, base_dir)
-        b = model.About()
-        b.load_dict({'license_expression': 'apache-2.0', }, base_dir)
-        c = model.About()
-        c.load_dict({}, base_dir)
-        d = model.About()
-        d.load_dict({'license_expression': 'bsd', }, base_dir)
-
-        abouts = [a, b, c, d]
-        results = model.by_license(abouts)
-        expected = OrderedDict([
-            ('', [c]),
-            ('apache-2.0', [a, b]),
-            ('bsd', [d]),
-            ('cddl-1.0', [a]),
-            ])
-        assert expected == results
-
-    def test_by_name(self):
-        base_dir = 'some_dir'
-        a = model.About()
-        a.load_dict({'name': 'apache', 'version': '1.1' }, base_dir)
-        b = model.About()
-        b.load_dict({'name': 'apache', 'version': '1.2' }, base_dir)
-        c = model.About()
-        c.load_dict({}, base_dir)
-        d = model.About()
-        d.load_dict({'name': 'eclipse', 'version': '1.1' }, base_dir)
-
-        abouts = [a, b, c, d]
-        results = model.by_name(abouts)
-        expected = OrderedDict([
-            ('', [c]),
-            ('apache', [a, b]),
-            ('eclipse', [d]),
-            ])
-        assert expected == results
 
 
 class FetchLicenseTest(unittest.TestCase):

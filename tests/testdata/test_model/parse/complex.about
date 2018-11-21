@@ -1,10 +1,10 @@
-single_line:optional
+single_line: optional
 other_field: value
  
 
-multi_line  : some value
+multi_line: some value
  and more
   and yet more
    
-yetanother : 
+yetanother: 
  sdasd
