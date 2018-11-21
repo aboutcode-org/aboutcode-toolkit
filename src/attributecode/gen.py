@@ -88,25 +88,23 @@ def check_duplicated_about_file_path(inventory_dict):
         # Ignore all the empty path
         if component['about_file_path']:
             if component['about_file_path'] in afp_list:
-                msg = ("The input has duplicated values in 'about_file_path' field: " + component['about_file_path'])
+                msg = ("The input has duplicated values in 'about_file_path' "
+                       "field: " + component['about_file_path'])
                 errors.append(Error(CRITICAL, msg))
             else:
                 afp_list.append(component['about_file_path'])
     return errors
 
+
 # TODO: this should be either the CSV or the ABOUT files but not both???
-def load_inventory(location, base_dir, reference_dir=None,
-                   mapping_file=None):
+def load_inventory(location, base_dir, reference_dir=None):
     """
-    Load the inventory file at `location` for ABOUT and LICENSE files
-    stored in the `base_dir`. Return a list of errors and a list of
-    About objects validated against the `base_dir`.
+    Load the inventory file at `location` for ABOUT and LICENSE files stored in
+    the `base_dir`. Return a list of errors and a list of About objects
+    validated against the `base_dir`.
 
-    Optionally use `reference_dir` as the directory location of
-    reference license and notice files to reuse.
-
-    Optionally use mappings for field names if `mapping_file` is provided for
-    the CSV format.
+    Optionally use `reference_dir` as the directory location of extra reference
+    license and notice files to reuse.
     """
     errors = []
     abouts = []
@@ -118,7 +116,7 @@ def load_inventory(location, base_dir, reference_dir=None,
         if dup_cols_err:
             errors.extend(dup_cols_err)
             return errors, abouts
-        inventory = util.load_csv(location, mapping_file)
+        inventory = util.load_csv(location)
     else:
         inventory = util.load_json(location)
 
@@ -128,13 +126,9 @@ def load_inventory(location, base_dir, reference_dir=None,
         if dup_about_paths_err:
             errors.extend(dup_about_paths_err)
             return errors, abouts
-    except:
-        msg = (
-               "The essential field 'about_file_path' is not found.\n"
-               "Use the --mapping or --mapping-file option to map the "
-               "input keys and verify the mapping information are correct.\n"
-               "OR correct the column names in the <input>"
-               )
+    except Exception as e:
+        # TODO: why catch ALL Exception
+        msg = "The essential field 'about_file_path' is not found in the <input>"
         errors.append(Error(CRITICAL, msg))
         return errors, abouts
 
@@ -144,16 +138,10 @@ def load_inventory(location, base_dir, reference_dir=None,
 
         for f in required_fields:
             if f not in fields:
-                msg = (
-                    "Required column: %(f)r not found.\n"
-                    "Use the --mapping or --mapping-file option to map the "
-                    "input keys and verify the mapping information are correct.\n"
-                    "OR correct the column names in the <input>"
-                ) % locals()
-
+                msg = "Required fiel: %(f)r not found in the <input>" % locals()
                 errors.append(Error(ERROR, msg))
                 return errors, abouts
-        afp = fields.get(model.About.about_file_path_attr)
+        afp = fields.get(model.About.ABOUT_FILE_PATH_ATTR)
 
         # FIXME: this should not be a failure condition
         if not afp or not afp.strip():
@@ -165,14 +153,12 @@ def load_inventory(location, base_dir, reference_dir=None,
             loc = join(base_dir, afp)
         about = model.About(about_file_path=afp)
         about.location = loc
-        running_inventory = False
+
         ld_errors = about.load_dict(
             fields,
             base_dir,
-            running_inventory,
-            mapping_file,
-            reference_dir,
-            with_empty=False
+            running_inventory=False,
+            reference_dir=reference_dir,
         )
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
@@ -187,8 +173,7 @@ def load_inventory(location, base_dir, reference_dir=None,
     return unique(errors), abouts
 
 
-def generate(location, base_dir, reference_dir=None, fetch_license=False,
-             with_empty=False, with_absent=False, mapping_file=None):
+def generate(location, base_dir, reference_dir=None, fetch_license=False):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir. Return errors and about objects.
@@ -205,13 +190,14 @@ def generate(location, base_dir, reference_dir=None, fetch_license=False,
         api_key = fetch_license[1].strip("'").strip('"')
         gen_license = True
 
-    # TODO: WHY?
+    # TODO: WHY use posix??
     bdir = to_posix(base_dir)
+
     errors, abouts = load_inventory(
         location=location,
         base_dir=bdir,
-        reference_dir=reference_dir,
-        mapping_file=mapping_file)
+        reference_dir=reference_dir
+    )
 
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)
@@ -290,17 +276,14 @@ def generate(location, base_dir, reference_dir=None, fetch_license=False,
                         if about.license_name.value:
                             about.license_name.present = True
 
-            # Write the ABOUT files
-            about.dump(
-                dump_loc,
-                mapping_file=mapping_file,
-                with_empty=with_empty,
-                with_absent=with_absent
-            )
+            about.dump(dump_loc)
+
             for e in not_exist_errors:
                 errors.append(Error(INFO, e))
+
         except Exception as e:
             # only keep the first 100 char of the exception
+            # TODO: truncated errors are likely making diagnotics harder
             emsg = repr(e)[:100]
             msg = (u'Failed to write .ABOUT file at : '
                    u'%(dump_loc)s '

@@ -23,13 +23,14 @@ import json
 import ntpath
 import os
 import posixpath
+import re
 import shutil
 import string
 import sys
 
 from attributecode import CRITICAL
+from attributecode import WARNING
 from attributecode import Error
-from attributecode import DEFAULT_MAPPING
 
 
 python2 = sys.version_info[0] < 3
@@ -40,7 +41,7 @@ else:  # pragma: nocover
     from itertools import zip_longest  # NOQA
 
 if python2:  # pragma: nocover
-    from backports import csv # NOQA
+    from backports import csv  # NOQA
     # monkey patch backports.csv until bug is fixed
     # https://github.com/ryanhiebert/backports.csv/issues/30
     csv.dict = OrderedDict
@@ -237,143 +238,28 @@ def resource_name(path):
     return right.strip()
 
 
-# FIXME: we should use a proper YAML file for this instead
-def load_mapping(location, lowercase=True):
-    """
-    Return a mapping loaded from a mapping configuration file at `location`.
-    If `lowercase` is True, the keys are lowercased.
-    Raise Exception on errors including empty of non existing location.
-    Return an empty mapping if the location is empty or does not exists.
-    """
-    if not location:
-        return {}
-    mapping = OrderedDict()
-    with open(location) as mapping_file:
-        for line in mapping_file:
-            line = line.strip()
-            if not line or ':' not in line or line.startswith('#'):
-                continue
-            if lowercase:
-                line = line.lower()
 
-            about_key, _, user_key = line.partition(':')
-            # FIXME: why do we allow spaces in ABOUT keys and converts these to _????
-            # FIXME: this should be an error instead
-            about_key = about_key.strip().replace(' ', '_')
-            user_key = user_key.strip()
-            mapping[about_key] = user_key
-    return mapping
-
-
-def get_mapping(location=DEFAULT_MAPPING, lowercase=True):
-    """
-    Return a mapping of user key names to About key names by reading the
-    mapping.config file from `location` or the directory of this source file if
-    location was not provided.
-    """
-    return load_mapping(location, lowercase)
-
-
-def apply_mapping(abouts, mapping_file=None):
-    """
-    Given a list of About data dictionaries and a dictionary of
-    mapping, return a new About data dictionaries list where the keys
-    have been replaced by the About mapped_abouts key if present. Load
-    the mapping from the default mnapping.config if an alternate
-    mapping dict is not provided.
-    """
-
-    if not mapping_file:
-        return abouts
-
-    mapping = get_mapping(mapping_file)
-
-    if not mapping:
-        return abouts
-
-    mapped_abouts = []
-    for about in abouts:
-        mapped_about = OrderedDict()
-        for key in about:
-            mapped = []
-            for mapping_keys, input_keys in mapping.items():
-                if key == input_keys:
-                    mapped.append(mapping_keys)
-            if not mapped:
-                mapped.append(key)
-            for mapped_key in mapped:
-                mapped_about[mapped_key] = about[key]
-        mapped_abouts.append(mapped_about)
-    return mapped_abouts
-
-
-def format_output(about_data, mapping_file=None):
-    """
-    Convert the about_data dictionary to an ordered dictionary for saneyaml.dump()
-    The ordering should be:
-
-    about_resource
-    name
-    version <-- if any
-    and the rest is the order from the mapping.config file (if any); otherwise alphabetical order.
-    """
-    mapping_key_order = []
-    if mapping_file:
-        mapping_key_order = get_mapping(mapping_file).keys()
-
-    priority_keys = ['about_resource', 'name', 'version']
-    about_data_keys = []
-    order_dict = OrderedDict()
-    for key in about_data:
-        about_data_keys.append(key)
-    if 'about_resource' in about_data_keys:
-        order_dict['about_resource'] = about_data['about_resource']
-
-    if 'name' in about_data_keys:
-        order_dict['name'] = about_data['name']
-
-    if 'version' in about_data_keys:
-        order_dict['version'] = about_data['version']
-
-    if not mapping_key_order:
-        for other_key in sorted(about_data_keys):
-            if not other_key in priority_keys:
-                order_dict[other_key] = about_data[other_key]
-    else:
-        for key in mapping_key_order:
-            if not key in priority_keys and key in about_data_keys:
-                order_dict[key] = about_data[key]
-        for other_key in sorted(about_data_keys):
-            if not other_key in priority_keys and not other_key in mapping_key_order:
-                order_dict[other_key] = about_data[other_key]
-    return order_dict
-
-
-def load_csv(location, mapping_file=None):
+def load_csv(location):
     """
     Read CSV at `location`, return a list of ordered dictionaries, one
     for each row.
-    Use `mapping_file` if provided.
     """
     results = []
     # FIXME: why ignore encoding errors here?
     with codecs.open(location, mode='rb', encoding='utf-8',
                      errors='ignore') as csvfile:
         for row in csv.DictReader(csvfile):
-            # convert all the column keys to lower case as the same
-            # behavior as when user use the --mapping
+            # convert all the column keys to lower case
             updated_row = OrderedDict(
                 [(key.lower(), value) for key, value in row.items()]
             )
             results.append(updated_row)
-    if mapping_file:
-        results = apply_mapping(results, mapping_file)
     return results
 
 
 def load_json(location):
     """
-    Read JSON file at `location` and return a list of ordered mappings, one for
+    Read JSON file at `location` and return a list of ordered dicts, one for
     each entry.
     """
     # FIXME: IMHO we should know where the JSON is from and its shape
@@ -656,3 +542,17 @@ def unique(sequence):
         if item not in deduped:
             deduped.append(item)
     return deduped
+
+
+def filter_errors(errors, minimum_severity=WARNING):
+    """
+    Return a list of unique `errors` Error object filtering errors that have a
+    severity below `minimum_severity`.
+    """
+    return unique([e for e in errors if e.severity >= minimum_severity])
+
+
+"""
+Return True if a string s  name is safe to use as an attribute name.
+"""
+is_valid_name = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$').match

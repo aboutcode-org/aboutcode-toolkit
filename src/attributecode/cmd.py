@@ -34,7 +34,6 @@ from attributecode.util import unique
 
 from attributecode import __about_spec_version__
 from attributecode import __version__
-from attributecode import DEFAULT_MAPPING
 from attributecode import severities
 from attributecode.attrib import check_template
 from attributecode.attrib import DEFAULT_TEMPLATE_FILE
@@ -43,6 +42,7 @@ from attributecode.gen import generate as generate_about_files
 from attributecode.model import collect_inventory
 from attributecode.model import write_output
 from attributecode.util import extract_zip
+from attributecode.util import filter_errors
 
 
 __copyright__ = """
@@ -107,7 +107,7 @@ Use about <command> --help for help on a command.
 
 def validate_key_values(ctx, param, value):
     """
-    Return the a mapping of {key: [values,...] if valid or raise a UsageError
+    Return the a dict of {key: [values,...] if valid or raise a UsageError
     otherwise.
     """
     if not value:
@@ -120,20 +120,6 @@ def validate_key_values(ctx, param, value):
                '{ive}'.format(**locals()))
         raise click.UsageError(msg)
     return kvals
-
-
-def validate_mapping(mapping, mapping_file):
-    """
-    Return a mapping_file or None.
-    Raise a UsageError on errors.
-    """
-    if mapping and mapping_file:
-        raise click.UsageError(
-            'Invalid options combination: '
-            '--mapping and --mapping-file are mutually exclusive.')
-    if mapping:
-        return DEFAULT_MAPPING
-    return mapping_file or None
 
 
 def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',))):
@@ -171,19 +157,6 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
     type=click.Choice(['json', 'csv']),
     help='Set OUTPUT inventory file format.')
 
-@click.option('--mapping',
-    is_flag=True,
-    help='Use the default built-in "mapping.config" file '
-         'with mapping between input keys and .ABOUT field names.'
-         'Cannot be combined with the --mapping-file option.')
-
-@click.option('--mapping-file',
-    metavar='FILE',
-    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an optional custom mapping FILE '
-         'with mapping between input keys and .ABOUT field names. '
-         'Cannot be combined with the --mapping option.')
-
 @click.option('-q', '--quiet',
     is_flag=True,
     help='Do not print error or warning messages.')
@@ -194,8 +167,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, mapping, mapping_file,
-              format, quiet, verbose):  # NOQA
+def inventory(location, output, format, quiet, verbose):  # NOQA
     """
 Collect the inventory of .ABOUT file data as CSV or JSON.
 
@@ -212,9 +184,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
-    mapping_file = validate_mapping(mapping, mapping_file)
-
-    errors, abouts = collect_inventory(location, mapping_file=mapping_file)
+    errors, abouts = collect_inventory(location)
 
     # Do not write the output if one of the ABOUT files has duplicated keys
     # TODO: why do this check here?? Also if this is the place, we should list what the errors are.
@@ -272,19 +242,6 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
     help='Path to a directory with reference license data and text files.')
 
-@click.option('--mapping',
-    is_flag=True,
-    help='Use the default built-in "mapping.config" file '
-         'with mapping between input keys and .ABOUT field names.'
-         'Cannot be combined with the --mapping-file option.')
-
-@click.option('--mapping-file',
-    metavar='FILE',
-    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an optional custom mapping FILE '
-         'with mapping between input keys and .ABOUT field names. '
-         'Cannot be combined with the --mapping option.')
-
 @click.option('-q', '--quiet',
     is_flag=True,
     help='Do not print error or warning messages.')
@@ -295,11 +252,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.help_option('-h', '--help')
 
-def gen(location, output,
-        fetch_license,
-        reference,
-        mapping, mapping_file,
-        quiet, verbose):
+def gen(location, output, fetch_license, reference, quiet, verbose):
     """
 Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
@@ -311,8 +264,6 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         print_version()
         click.echo('Generating .ABOUT files...')
 
-    mapping_file = validate_mapping(mapping, mapping_file)
-
     if not location.endswith(('.csv', '.json',)):
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
 
@@ -321,7 +272,6 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         base_dir=output,
         reference_dir=reference,
         fetch_license=fetch_license,
-        mapping_file=mapping_file
     )
 
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
@@ -378,25 +328,6 @@ def validate_template(ctx, param, value):
     metavar='<key>=<value>',
     help='Add variable text as key=value for use in a custom attribution template.')
 
-@click.option('--inventory',
-    metavar='FILE',
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-    help='Path to an optional JSON or CSV inventory FILE listing the '
-         'subset of .ABOUT files paths to consider when generating the attribution document.')
-
-@click.option('--mapping',
-    is_flag=True,
-    help='Use the default built-in "mapping.config" file '
-         'with mapping between input keys and .ABOUT field names.'
-         'Cannot be combined with the --mapping-file option.')
-
-@click.option('--mapping-file',
-    metavar='FILE',
-    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an optional custom mapping FILE '
-         'with mapping between input keys and .ABOUT field names. '
-         'Cannot be combined with the --mapping option.')
-
 @click.option('-q', '--quiet',
     is_flag=True,
     help='Do not print error or warning messages.')
@@ -407,9 +338,7 @@ def validate_template(ctx, param, value):
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, vartext,
-           inventory, mapping, mapping_file,
-           quiet, verbose):
+def attrib(location, output, template, vartext, quiet, verbose):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -421,20 +350,17 @@ OUTPUT: Path where to write the attribution document.
         print_version()
         click.echo('Generating attribution...')
 
-    mapping_file = validate_mapping(mapping, mapping_file)
-
     # accept zipped ABOUT files as input
     if location.lower().endswith('.zip'):
         location = extract_zip(location)
 
-    errors, abouts = collect_inventory(location, mapping_file=mapping_file)
+    errors, abouts = collect_inventory(location)
 
     attrib_errors = generate_attribution_doc(
         abouts=abouts,
         output_location=output,
         template_loc=template,
         variables=vartext,
-        mapping_file=mapping_file,
     )
     errors.extend(attrib_errors)
 
@@ -531,7 +457,7 @@ def print_config_help(ctx, param, value):
 
 def transform(location, output, configuration, quiet, verbose):  # NOQA
     """
-Transform the CSV file at LOCATION by applying renamings, filters and checks 
+Transform the CSV file at LOCATION by applying renamings, filters and checks
 and write a new CSV to OUTPUT.
 
 LOCATION: Path to a CSV file.
@@ -609,15 +535,6 @@ def get_error_messages(errors, quiet=False, verbose=False):
                 messages .append(msg)
     return messages, severe_errors_count
 
-
-def filter_errors(errors, minimum_severity=WARNING):
-    """
-    Return a list of unique `errors` Error object filtering errors that have a
-    severity below `minimum_severity`.
-    """
-    return unique([e for e in errors if e.severity >= minimum_severity])
-
-
 ######################################################################
 # Misc
 ######################################################################
@@ -625,7 +542,7 @@ def filter_errors(errors, minimum_severity=WARNING):
 def parse_key_values(key_values):
     """
     Given a list of "key=value" strings, return:
-    - a mapping {key: [value, value, ...]}
+    - a dict {key: [value, value, ...]}
     - a sorted list of unique error messages for invalid entries where there is
       a missing a key or value.
     """

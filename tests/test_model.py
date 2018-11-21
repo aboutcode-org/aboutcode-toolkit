@@ -31,7 +31,6 @@ from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import INFO
 from attributecode import WARNING
-from attributecode import DEFAULT_MAPPING
 from attributecode import Error
 from attributecode import model
 from attributecode.util import add_unc
@@ -348,8 +347,22 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('test_model/parse/dupe_field_name.ABOUT')
         a = model.About(test_file)
         expected = [
-            Error(WARNING, 'Field Name is a duplicate. Original value: "old" replaced with: "new"'),
-            Error(INFO, 'Field About_Resource is a duplicate with the same value as before.')]
+            Error(WARNING, 'Field About_Resource is a duplicate. Original value: "." replaced with: "new value"'),
+            Error(WARNING, 'Field Name is a duplicate. Original value: "old" replaced with: "new"')
+        ]
+
+
+        result = a.errors
+        assert sorted(expected) == sorted(result)
+
+    def test_About_duplicate_field_names_are_not_reported_if_same_value(self):
+        # This test is failing because the YAML does not keep the order when
+        # loads the test files. For instance, it treat the 'About_Resource' as the
+        # first element and therefore the dup key is 'about_resource'.
+        test_file = get_test_loc('test_model/parse/dupe_field_name_no_new_value.ABOUT')
+        a = model.About(test_file)
+        expected = [
+]
         result = a.errors
         assert sorted(expected) == sorted(result)
 
@@ -360,13 +373,16 @@ class AboutTest(unittest.TestCase):
             'download_url',
             'version',
             'copyright',
+            'date',
+            'license_spdx',
+            'license_text_file',
             'notice_file',
             'about_resource'])
 
         expected_errors = [
-            Error(INFO, 'Field date is not a supported field and is ignored.'),
-            Error(INFO, 'Field license_spdx is not a supported field and is ignored.'),
-            Error(INFO, 'Field license_text_file is not a supported field and is ignored.')]
+            Error(INFO, 'Field date is a custom field.'),
+            Error(INFO, 'Field license_spdx is a custom field.'),
+            Error(INFO, 'Field license_text_file is a custom field.')]
 
         errors = about.hydrate(fields)
 
@@ -430,33 +446,47 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('test_model/parse/empty_notice_field.about')
         a = model.About(test_file)
         expected = [
-            Error(WARNING, 'Field notice_file is present but empty')]
+            Error(INFO, 'Field notice_file is present but empty.')]
         result = a.errors
         assert expected == result
 
-    def test_About_custom_fields_are_ignored_if_not_in_mapping(self):
+    def test_About_custom_fields_are_never_ignored(self):
         test_file = get_test_loc('test_model/custom_fields/custom_fields.about')
         a = model.About(test_file)
         result = [(n, f.value) for n, f in a.custom_fields.items()]
-        assert not result
+        expected = [
+            (u'single_line', u'README STUFF'),
+            (u'multi_line', u'line1\nline2'),
+            (u'other', u'sasasas'),
+            (u'empty', u'')
+        ]
 
-    def test_About_custom_fields_are_not_ignored_if_in_mapping(self):
+        assert expected == result
+
+    def test_About_custom_fields_are_not_ignored_and_order_is_preserved(self):
         test_file = get_test_loc('test_model/custom_fields/custom_fields.about')
-        test_mapping = get_test_loc('test_model/custom_fields/mapping.config')
-        a = model.About(test_file, mapping_file=test_mapping)
+        a = model.About(test_file)
         result = [(n, f.value) for n, f in a.custom_fields.items()]
         expected = [
-            ('empty', ''),
-            ('single_line', 'README STUFF'),
-            ('multi_line', 'line1\nline2'),
+            (u'single_line', u'README STUFF'),
+            (u'multi_line', u'line1\nline2'),
+            (u'other', u'sasasas'),
+            (u'empty', u'')
         ]
         assert sorted(expected) == sorted(result)
 
     def test_About_has_errors_for_illegal_custom_field_name(self):
         test_file = get_test_loc('test_model/parse/illegal_custom_field.about')
         a = model.About(test_file)
-        result = a.custom_fields
-        assert {} == result
+        expected_errors = [
+            Error(INFO, 'Field hydrate is a custom field.'),
+            Error(CRITICAL, "Internal error with custom field: 'hydrate': 'illegal name'.")
+        ]
+        assert expected_errors == a.errors
+        assert not hasattr(getattr(a, 'hydrate'), 'value')
+        field = list(a.custom_fields.values())[0]
+        assert 'hydrate' == field.name
+        assert 'illegal name' == field.value
 
     def test_About_file_fields_are_empty_if_present_and_path_missing(self):
         test_file = get_test_loc('test_model/parse/missing_notice_license_files.ABOUT')
@@ -493,23 +523,17 @@ this software and releases the component to Public Domain.
     def test_About_license_and_notice_text_are_empty_if_field_missing(self):
         test_file = get_test_loc('test_model/parse/no_file_fields.ABOUT')
         a = model.About(test_file)
-
-        expected_errors = []
-        assert expected_errors == a.errors
-
-        result = a.license_file.value
-        assert {} == result
-
-        result = a.notice_file.value
-        assert {} == result
+        assert [] == a.errors
+        assert {} == a.license_file.value
+        assert {} == a.notice_file.value
 
     def test_About_rejects_non_ascii_names_and_accepts_unicode_values(self):
         test_file = get_test_loc('test_model/parse/non_ascii_field_name_value.about')
         a = model.About(test_file)
-        result = a.errors
         expected = [
-            Error(INFO, 'Field Mat\xedas is not a supported field and is ignored.')]
-        assert expected == result
+            Error(CRITICAL, "Field name: 'mat\xedas' contains illegal name characters: 0 to 9, a to z, A to Z and _.")
+        ]
+        assert expected == a.errors
 
     def test_About_invalid_boolean_value(self):
         test_file = get_test_loc('test_model/parse/invalid_boolean.about')
@@ -518,7 +542,8 @@ this software and releases the component to Public Domain.
         assert expected_msg in a.errors[0].message
 
     def test_About_contains_about_file_path(self):
-        test_file = get_test_loc('test_model/parse/complete/about.ABOUT')
+        test_file = get_test_loc('test_model/serialize/about.ABOUT')
+        # TODO: I am not sure this override of the about_file_path makes sense
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         assert [] == a.errors
         expected = 'complete/about.ABOUT'
@@ -537,63 +562,26 @@ this software and releases the component to Public Domain.
         test_file2 = get_test_loc('test_model/equal/complete/about.ABOUT')
         b = model.About(test_file2, about_file_path='complete/about.ABOUT')
         assert a.dumps() != b.dumps()
-        assert a == b
+        assert a != b
 
-    def test_field_names(self):
+    def test_get_field_names_only_returns_non_empties(self):
         a = model.About()
-        a.custom_fields['f'] = model.StringField(name='f', value='1',
-                                                 present=True)
+        a.custom_fields['f'] = model.StringField(
+            name='f', value='1', present=True)
         b = model.About()
-        b.custom_fields['g'] = model.StringField(name='g', value='1',
-                                                 present=True)
+        b.custom_fields['g'] = model.StringField(
+            name='g', value='1', present=True)
         abouts = [a, b]
         # ensure that custom fields and about file path are collected
         # and that all fields are in the correct order
         expected = [
-            model.About.about_file_path_attr,
-            # model.About.about_resource_path_attr,
-            'about_resource',
-            'name',
-            'version',
-            'download_url',
-            'description',
-            'homepage_url',
-            'notes',
-            'license_expression',
-            'license_key',
-            'license_name',
-            'license_file',
-            'license_url',
-            'copyright',
-            'notice_file',
-            'notice_url',
-            'redistribute',
-            'attribute',
-            'track_changes',
-            'modified',
-            'internal_use_only',
-            'changelog_file',
-            'owner',
-            'owner_url',
-            'contact',
-            'author',
-            'author_file',
-            'vcs_tool',
-            'vcs_repository',
-            'vcs_path',
-            'vcs_tag',
-            'vcs_branch',
-            'vcs_revision',
-            'checksum_md5',
-            'checksum_sha1',
-            'checksum_sha256',
-            'spec_version',
-            'f',
-            'g']
-        result = model.field_names(abouts)
+            model.About.ABOUT_FILE_PATH_ATTR,
+            'about_resource', 'name', 'f', 'g'
+        ]
+        result = model.get_field_names(abouts)
         assert expected == result
 
-    def test_field_names_does_not_return_duplicates_custom_fields(self):
+    def test_get_field_names_does_not_return_duplicates_custom_fields(self):
         a = model.About()
         a.custom_fields['f'] = model.StringField(name='f', value='1',
                                                  present=True)
@@ -609,63 +597,68 @@ this software and releases the component to Public Domain.
         # and that all fields are in the correct order
         # FIXME: this is not USED
         expected = [
+            'about_file_path',
             'about_resource',
             'name',
             'cf',
             'f',
             'g',
             ]
-        result = model.field_names(abouts, with_paths=False, with_absent=False, with_empty=False)
+        result = model.get_field_names(abouts)
         assert expected == result
 
 
 class SerializationTest(unittest.TestCase):
     def test_About_dumps(self):
-        test_file = get_test_loc('test_model/parse/complete/about.ABOUT')
+        test_file = get_test_loc('test_model/dumps/about.ABOUT')
         a = model.About(test_file)
         assert [] == a.errors
 
         expected = '''about_resource: .
 name: AboutCode
 version: 0.11.0
-copyright: Copyright (c) 2013-2014 nexB Inc.
-license_expression: apache-2.0
-author:
-  - Jillian Daguil
-  - Chin Yeung Li
-  - Philippe Ombredanne
-  - Thomas Druez
 description: |
   AboutCode is a tool
   to process ABOUT files.
   An ABOUT file is a file.
 homepage_url: http://dejacode.org
+license_expression: apache-2.0
+copyright: Copyright (c) 2013-2014 nexB Inc.
+notice_file: NOTICE
+owner: nexB Inc.
+author:
+  - Jillian Daguil
+  - Chin Yeung Li
+  - Philippe Ombredanne
+  - Thomas Druez
+vcs_tool: git
+vcs_repository: https://github.com/dejacode/about-code-tool.git
 licenses:
   - key: apache-2.0
     file: apache-2.0.LICENSE
-notice_file: NOTICE
-owner: nexB Inc.
-vcs_repository: https://github.com/dejacode/about-code-tool.git
-vcs_tool: git
 '''
-        result = a.dumps(mapping_file=DEFAULT_MAPPING)
+        result = a.dumps()
         assert expected == result
 
-
-    def test_About_dumps_does_not_dump_not_present_with_absent_False(self):
+    def test_About_dumps_does_all_non_empty_present_fields(self):
         test_file = get_test_loc('test_model/parse/complete2/about.ABOUT')
         a = model.About(test_file)
         expected_error = [
-            Error(INFO, 'Field custom1 is not a supported field and is ignored.'),
-            Error(INFO, 'Field custom2 is not a supported field and is ignored.')]
+            Error(INFO, 'Field custom1 is a custom field.'),
+            Error(INFO, 'Field custom2 is a custom field.'),
+            Error(INFO, 'Field custom2 is present but empty.')
+        ]
         assert sorted(expected_error) == sorted(a.errors)
 
         expected = '''about_resource: .
 name: AboutCode
 version: 0.11.0
+custom1: |
+  multi
+  line
 '''
-        result = a.dumps(with_absent=False)
-        assert set(expected) == set(result)
+        result = a.dumps()
+        assert expected == result
 
     def test_About_dumps_with_different_boolean_value(self):
         test_file = get_test_loc('test_model/parse/complete2/about2.ABOUT')
@@ -684,32 +677,37 @@ attribute: yes
 modified: yes
 '''
 
-        result = a.dumps(mapping_file=False)
+        result = a.dumps()
         assert set(expected) == set(result)
 
-    def test_About_dumps_does_not_dump_present__empty_with_absent_False(self):
+    def test_About_dumps_all_non_empty_fields(self):
         test_file = get_test_loc('test_model/parse/complete2/about.ABOUT')
         a = model.About(test_file)
         expected_error = [
-            Error(INFO, 'Field custom1 is not a supported field and is ignored.'),
-            Error(INFO, 'Field custom2 is not a supported field and is ignored.')]
+            Error(INFO, 'Field custom1 is a custom field.'),
+            Error(INFO, 'Field custom2 is a custom field.'),
+            Error(INFO, 'Field custom2 is present but empty.')
+        ]
         assert sorted(expected_error) == sorted(a.errors)
 
         expected = '''about_resource: .
 name: AboutCode
 version: 0.11.0
+custom1: |
+  multi
+  line
 '''
-        result = a.dumps(mapping_file=False, with_absent=False, with_empty=False)
+        result = a.dumps()
         assert expected == result
 
     def test_About_as_dict_contains_special_paths(self):
-        test_file = get_test_loc('test_model/parse/complete/about.ABOUT')
+        test_file = get_test_loc('test_model/special/about.ABOUT')
         a = model.About(test_file, about_file_path='complete/about.ABOUT')
         expected_errors = []
         assert expected_errors == a.errors
-        as_dict = a.as_dict(with_paths=True, with_empty=False, with_absent=False)
+        as_dict = a.as_dict()
         expected = 'complete/about.ABOUT'
-        result = as_dict[model.About.about_file_path_attr]
+        result = as_dict[model.About.ABOUT_FILE_PATH_ATTR]
         assert expected == result
 
     def test_load_dump_is_idempotent(self):
@@ -717,7 +715,7 @@ version: 0.11.0
         a = model.About()
         a.load(test_file)
         dumped_file = get_temp_file('that.ABOUT')
-        a.dump(dumped_file, mapping_file=False, with_absent=False, with_empty=False)
+        a.dump(dumped_file)
 
         expected = get_unicode_content(test_file).splitlines()
         result = get_unicode_content(dumped_file).splitlines()
@@ -730,11 +728,11 @@ version: 0.11.0
         file_path = posixpath.join(posixpath.dirname(test_file), 'nose-selecttests-0.3.zip')
         err_msg = 'Field about_resource: Path %s not found' % file_path
         errors = [
-            Error(INFO, 'Field dje_license is not a supported field and is ignored.'),
-            Error(INFO, 'Field license_text_file is not a supported field and is ignored.'),
-            Error(INFO, 'Field scm_tool is not a supported field and is ignored.'),
-            Error(INFO, 'Field scm_repository is not a supported field and is ignored.'),
-            Error(INFO, 'Field test is not a supported field and is ignored.'),
+            Error(INFO, 'Field dje_license is a custom field.'),
+            Error(INFO, 'Field license_text_file is a custom field.'),
+            Error(INFO, 'Field scm_tool is a custom field.'),
+            Error(INFO, 'Field scm_repository is a custom field.'),
+            Error(INFO, 'Field test is a custom field.'),
             Error(INFO, err_msg)]
 
         assert errors == a.errors
@@ -749,7 +747,7 @@ version: 0.11.0
         assert 'Cannot load invalid ABOUT file' in err.message
         assert 'UnicodeDecodeError' in err.message
 
-    def test_as_dict_load_dict_is_idempotent(self):
+    def test_as_dict_load_dict_ignores_empties(self):
         test = {
             'about_resource': '.',
             'author': '',
@@ -762,9 +760,10 @@ version: 0.11.0
             'owner': 'nexB Inc.'}
 
         expected = {
+            'about_file_path': None,
             'about_resource': OrderedDict([('.', None)]),
-            'author': '',
             'copyright': 'Copyright (c) 2013-2014 nexB Inc.',
+            'custom1': 'some custom',
             'description': 'AboutCode is a tool\nfor files.',
             'license_expression': 'apache-2.0',
             'name': 'AboutCode',
@@ -773,11 +772,11 @@ version: 0.11.0
         a = model.About()
         base_dir = 'some_dir'
         a.load_dict(test, base_dir)
-        as_dict = a.as_dict(with_paths=False, with_absent=False, with_empty=True)
+        as_dict = a.as_dict()
         # FIXME: why converting back to dict?
         assert expected == dict(as_dict)
 
-    def test_load_dict_as_dict_is_idempotent(self):
+    def test_load_dict_as_dict_is_idempotent_ignoring_special(self):
         test = {
             'about_resource': ['.'],
             'attribute': 'yes',
@@ -794,9 +793,10 @@ version: 0.11.0
         a = model.About()
         base_dir = 'some_dir'
         a.load_dict(test, base_dir)
-        as_dict = a.as_dict(with_paths=False, with_absent=False, with_empty=True)
+        as_dict = a.as_dict()
 
         expected = {
+            'about_file_path': None,
             'about_resource': OrderedDict([('.', None)]),
             'attribute': 'yes',
             'author': ['Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'],
@@ -846,8 +846,8 @@ class CollectorTest(unittest.TestCase):
         err_msg1 = 'non-supported_date_format.ABOUT: Field about_resource: Path %s not found' % file_path1
         err_msg2 = 'supported_date_format.ABOUT: Field about_resource: Path %s not found' % file_path2
         expected_errors = [
-            Error(INFO, 'non-supported_date_format.ABOUT: Field date is not a supported field and is ignored.'),
-            Error(INFO, 'supported_date_format.ABOUT: Field date is not a supported field and is ignored.'),
+            Error(INFO, 'non-supported_date_format.ABOUT: Field date is a custom field.'),
+            Error(INFO, 'supported_date_format.ABOUT: Field date is a custom field.'),
             Error(INFO, err_msg1),
             Error(INFO, err_msg2)]
         assert sorted(expected_errors) == sorted(errors)
@@ -892,7 +892,7 @@ class CollectorTest(unittest.TestCase):
         assert expected_errors == result
 
     def test_collect_inventory_populate_about_file_path(self):
-        test_loc = get_test_loc('test_model/parse/complete')
+        test_loc = get_test_loc('test_model/inventory/complete')
         errors, abouts = model.collect_inventory(test_loc)
         assert [] == errors
         expected = 'about.ABOUT'
@@ -917,39 +917,25 @@ class CollectorTest(unittest.TestCase):
         returned_lic = abouts[0].license_expression.value
         assert expected_lic == returned_lic
 
-    def test_collect_inventory_with_mapping(self):
-        test_loc = get_test_loc('test_model/parse/name_mapping_test.ABOUT')
-        mapping_file = DEFAULT_MAPPING
-        errors, abouts = model.collect_inventory(test_loc, mapping_file)
+    def test_collect_inventory_always_collects_custom_fieldsg(self):
+        test_loc = get_test_loc('test_model/inventory/custom_fields.ABOUT')
+        errors, abouts = model.collect_inventory(test_loc)
         expected_msg1 = 'Field resource is a custom field'
-        expected_msg2 = 'Field custom_mapping is not a supported field and is not defined in the mapping file. This field is ignored.'
         assert len(errors) == 2
         assert expected_msg1 in errors[0].message
-        assert expected_msg2 in errors[1].message
         # The not supported 'resource' value is collected
         assert abouts[0].resource.value
 
-    def test_collect_inventory_with_custom_mapping(self):
-        test_loc = get_test_loc('test_model/parse/name_mapping_test.ABOUT')
-        mapping_file = get_test_loc('test_model/custom_mapping/mapping.config')
-        errors, abouts = model.collect_inventory(test_loc, mapping_file)
-        expected_msg1 = 'Field resource is a custom field'
-        expected_msg2 = 'Field custom_mapping is a custom field'
-        assert len(errors) == 2
-        assert expected_msg1 in errors[0].message
-        assert expected_msg2 in errors[1].message
-        # The not supported 'resource' value is collected
-        assert abouts[0].resource.value
-        assert abouts[0].custom_mapping.value
-
-    def test_collect_inventory_without_mapping(self):
-        test_loc = get_test_loc('test_model/parse/name_mapping_test.ABOUT')
-        errors, _abouts = model.collect_inventory(test_loc)
-        expected_msg1 = 'Field resource is not a supported field and is ignored.'
-        expected_msg2 = 'Field custom_mapping is not a supported field and is ignored.'
-        assert len(errors) == 2
-        assert expected_msg1 in errors[0].message
-        assert expected_msg2 in errors[1].message
+    def test_collect_inventory_does_not_raise_error_and_maintains_order_on_custom_fields(self):
+        test_loc = get_test_loc('test_model/inventory/custom_fields2.ABOUT')
+        errors, abouts = model.collect_inventory(test_loc)
+        expected_errors = [
+            Error(INFO, 'inventory/custom_fields2.ABOUT: Field resource is a custom field.'),
+            Error(INFO, 'inventory/custom_fields2.ABOUT: Field custom_mapping is a custom field.')
+        ]
+        assert expected_errors == errors
+        expected = [u'about_resource: .\nname: test\nresource: .\ncustom_mapping: test\n']
+        assert expected == [a.dumps() for a in abouts]
 
     def test_saneyaml_load_license_expression(self):
         spec_char, returned_lic = model.parse_license_expression('mit or apache-2.0')
@@ -969,11 +955,11 @@ class CollectorTest(unittest.TestCase):
         # FIXME: This test need to be run under src/attributecode/
         # or otherwise it will fail as the test depends on the launching
         # location
-        test_loc = get_test_loc('test_model/parse/complete')
+        test_loc = get_test_loc('test_model/inventory/relative')
         # Use '.' as the indication of the current directory
         test_loc1 = test_loc + '/./'
         # Use '..' to go back to the parent directory
-        test_loc2 = test_loc + '/../complete'
+        test_loc2 = test_loc + '/../relative'
         errors1, abouts1 = model.collect_inventory(test_loc1)
         errors2, abouts2 = model.collect_inventory(test_loc2)
         assert [] == errors1
@@ -1037,6 +1023,7 @@ class CollectorTest(unittest.TestCase):
 
 
 class FetchLicenseTest(unittest.TestCase):
+
     @mock.patch.object(model, 'urlopen')
     def test_valid_api_url(self, mock_data):
         mock_data.return_value = ''

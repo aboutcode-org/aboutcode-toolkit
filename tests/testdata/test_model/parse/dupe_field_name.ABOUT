@@ -1,4 +1,4 @@
 about_resource: .
 name: old
 Name: new
-About_Resource: .
+About_Resource: new value

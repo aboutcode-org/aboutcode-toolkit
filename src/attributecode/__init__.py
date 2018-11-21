@@ -65,13 +65,24 @@ class Error(namedtuple('Error', ['severity', 'message'])):
             Error, severity, message)
 
     def __repr__(self, *args, **kwargs):
+        sev, msg = self._get_values()
+        return 'Error(%(sev)s,  %(msg)s)' % locals()
+
+    def __eq__(self, other):
+        return repr(self) == repr(other)
+
+    def _get_values(self):
         sev = severities[self.severity]
         msg = self._clean_string(repr(self.message))
-        return 'Error(%(sev)s, %(msg)s)' % locals()
+        return sev, msg
+
+    def render(self):
+        sev, msg = self._get_values()
+        return '%(sev)s: %(msg)s' % locals()
 
     def to_dict(self, *args, **kwargs):
         """
-        Return an ordered mapping of self.
+        Return an ordered dict of self.
         """
         return self._asdict()
 
@@ -114,7 +125,3 @@ severities = {
     DEBUG : 'DEBUG',
     NOTSET : 'NOTSET'
 }
-
-
-DEFAULT_MAPPING = os.path.join(os.path.abspath(
-    os.path.dirname(__file__)), 'mapping.config')

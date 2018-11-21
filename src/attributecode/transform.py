@@ -61,7 +61,7 @@ def transform_data(rows, transformer):
     Read a list of list of CSV-like data `rows` and apply transformations using the
     `transformer` Tranformer.
     Return a tuple of:
-       ([column names...], [transformed ordered mappings...], [Error objects..])
+       ([column names...], [transformed ordered dict...], [Error objects..])
     """
 
     if not transformer:
@@ -81,7 +81,7 @@ def transform_data(rows, transformer):
 
     column_names = transformer.apply_renamings(column_names)
 
-    # convert to mappings using the renamed columns
+    # convert to dicts using the renamed columns
     data = [OrderedDict(zip_longest(column_names, row)) for row in rows]
 
     if transformer.column_filters:
@@ -103,7 +103,7 @@ format, using the same format as an .ABOUT file.
 The attributes that can be set in a configuration file are:
 
 * column_renamings:
-An optional mapping of source CSV column name to target CSV new column name that
+An optional map of source CSV column name to target CSV new column name that
 is used to rename CSV columns.
 
 For instance with this configuration the columns "Directory/Location" will be
@@ -191,8 +191,8 @@ class Transformer(object):
 
     def check_required_columns(self, data):
         """
-        Return a list of Error for a `data` list of ordered mappings where a
-        mapping is missing a value for a required column name.
+        Return a list of Error for a `data` list of ordered dict where a
+        dict is missing a value for a required column name.
         """
         errors = []
         required = set(self.essential_columns + self.required_columns)
@@ -236,7 +236,7 @@ class Transformer(object):
 
     def filter_columns(self, data):
         """
-        Yield transformed mappings from a `data` list of mappings keeping only
+        Yield transformed dicts from a `data` list of dicts keeping only
         columns with a name in the `column_filters`of this Transformer.
         Return the data unchanged if no `column_filters` exists.
         """
@@ -267,7 +267,7 @@ def read_csv_rows(location):
 
 def write_csv(location, data, column_names):  # NOQA
     """
-    Write a CSV file at `location` the `data` list of ordered mappings using the
+    Write a CSV file at `location` the `data` list of ordered dicts using the
     `column_names`.
     """
     with io.open(location, 'w', encoding='utf-8') as csvfile:
