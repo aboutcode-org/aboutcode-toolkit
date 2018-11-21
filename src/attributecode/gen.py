@@ -20,16 +20,13 @@ from __future__ import unicode_literals
 
 import codecs
 from collections import OrderedDict
-import logging
-from posixpath import basename, dirname, exists, join, normpath
-import sys
 
-if sys.version_info[0] < 3: 
-    # Python 2
-    import backports.csv as csv #NOQA
-else:
-    # Python 3
-    import csv #NOQA
+# FIXME: why posipath???
+from posixpath import basename
+from posixpath import dirname
+from posixpath import exists
+from posixpath import join
+from posixpath import normpath
 
 from attributecode import ERROR
 from attributecode import CRITICAL
@@ -38,18 +35,10 @@ from attributecode import Error
 from attributecode import model
 from attributecode import util
 from attributecode.util import add_unc
+from attributecode.util import csv
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
-
-
-LOG_FILENAME = 'error.log'
-
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-handler.setLevel(logging.CRITICAL)
-handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-logger.addHandler(handler)
-file_logger = logging.getLogger(__name__ + '_file')
+from attributecode.util import unique
 
 
 def check_duplicated_columns(location):
@@ -58,7 +47,7 @@ def check_duplicated_columns(location):
     at location.
     """
     location = add_unc(location)
-    # FIXME: why ignore errors?
+    # FIXME: why errors=ignore?
     with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
         reader = csv.reader(csvfile)
         columns = next(reader)
@@ -86,7 +75,7 @@ def check_duplicated_columns(location):
         msg = ('Duplicated column name(s): %(dup_msg)s\n' % locals() +
                'Please correct the input and re-run.')
         errors.append(Error(ERROR, msg))
-    return errors
+    return unique(errors)
 
 
 def check_duplicated_about_file_path(inventory_dict):
@@ -105,31 +94,36 @@ def check_duplicated_about_file_path(inventory_dict):
                 afp_list.append(component['about_file_path'])
     return errors
 
-
-def load_inventory(location, base_dir, license_notice_text_location=None,
-                   use_mapping=False, mapping_file=None):
+# TODO: this should be either the CSV or the ABOUT files but not both???
+def load_inventory(location, base_dir, reference_dir=None,
+                   mapping_file=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files
     stored in the `base_dir`. Return a list of errors and a list of
-    About objects validated against the base_dir.
-    Optionally use `license_notice_text_location` as the location of
-    license and notice texts.
-    Optionally use mappings for field names if `use_mapping` is True
-    or a custom mapping_file if provided.
+    About objects validated against the `base_dir`.
+
+    Optionally use `reference_dir` as the directory location of
+    reference license and notice files to reuse.
+
+    Optionally use mappings for field names if `mapping_file` is provided for
+    the CSV format.
     """
     errors = []
     abouts = []
     base_dir = util.to_posix(base_dir)
+    # FIXME: do not mix up CSV and JSON
     if location.endswith('.csv'):
+        # FIXME: this should not be done here.
         dup_cols_err = check_duplicated_columns(location)
         if dup_cols_err:
             errors.extend(dup_cols_err)
             return errors, abouts
-        inventory = util.load_csv(location, use_mapping, mapping_file)
+        inventory = util.load_csv(location, mapping_file)
     else:
-        inventory = util.load_json(location, use_mapping, mapping_file)
+        inventory = util.load_json(location)
 
     try:
+        # FIXME: this should not be done here.
         dup_about_paths_err = check_duplicated_about_file_path(inventory)
         if dup_about_paths_err:
             errors.extend(dup_about_paths_err)
@@ -161,6 +155,7 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
                 return errors, abouts
         afp = fields.get(model.About.about_file_path_attr)
 
+        # FIXME: this should not be a failure condition
         if not afp or not afp.strip():
             msg = 'Empty column: %(afp)r. Cannot generate .ABOUT file.' % locals()
             errors.append(Error(ERROR, msg))
@@ -171,9 +166,14 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
         about = model.About(about_file_path=afp)
         about.location = loc
         running_inventory = False
-        ld_errors = about.load_dict(fields, base_dir, running_inventory,
-                                    use_mapping, mapping_file, license_notice_text_location,
-                                    with_empty=False)
+        ld_errors = about.load_dict(
+            fields,
+            base_dir,
+            running_inventory,
+            mapping_file,
+            reference_dir,
+            with_empty=False
+        )
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
         for e in ld_errors:
@@ -183,22 +183,21 @@ def load_inventory(location, base_dir, license_notice_text_location=None,
             if not e in errors:
                 errors.extend(ld_errors)
         abouts.append(about)
-    return errors, abouts
+
+    return unique(errors), abouts
 
 
-def generate(location, base_dir, license_notice_text_location=None,
-             fetch_license=False, policy=None, conf_location=None,
-             with_empty=False, with_absent=False, use_mapping=False, mapping_file=None):
+def generate(location, base_dir, reference_dir=None, fetch_license=False,
+             with_empty=False, with_absent=False, mapping_file=None):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
-    base_dir using policy flags and configuration file at conf_location.
-    Policy defines which action to take for merging or overwriting fields and
-    files. Return errors and about objects.
+    base_dir. Return errors and about objects.
     """
     not_exist_errors = []
     api_url = ''
     api_key = ''
     gen_license = False
+    # FIXME: use two different arguments: key and url
     # Check if the fetch_license contains valid argument
     if fetch_license:
         # Strip the ' and " for api_url, and api_key from input
@@ -206,12 +205,12 @@ def generate(location, base_dir, license_notice_text_location=None,
         api_key = fetch_license[1].strip("'").strip('"')
         gen_license = True
 
+    # TODO: WHY?
     bdir = to_posix(base_dir)
     errors, abouts = load_inventory(
         location=location,
         base_dir=bdir,
-        license_notice_text_location=license_notice_text_location,
-        use_mapping=use_mapping,
+        reference_dir=reference_dir,
         mapping_file=mapping_file)
 
     if gen_license:
@@ -292,7 +291,12 @@ def generate(location, base_dir, license_notice_text_location=None,
                             about.license_name.present = True
 
             # Write the ABOUT files
-            about.dump(dump_loc, use_mapping=use_mapping, mapping_file=mapping_file, with_empty=with_empty, with_absent=with_absent)
+            about.dump(
+                dump_loc,
+                mapping_file=mapping_file,
+                with_empty=with_empty,
+                with_absent=with_absent
+            )
             for e in not_exist_errors:
                 errors.append(Error(INFO, e))
         except Exception as e:
@@ -302,17 +306,4 @@ def generate(location, base_dir, license_notice_text_location=None,
                    u'%(dump_loc)s '
                    u'with error: %(emsg)s' % locals())
             errors.append(Error(ERROR, msg))
-    dedup_errors = deduplicate(errors)
-    return dedup_errors, abouts
-
-
-def deduplicate(sequence):
-    """
-    Return a list of unique items found in sequence. Preserve the original
-    sequence order.
-    """
-    deduped = []
-    for item in sequence:
-        if item not in deduped:
-            deduped.append(item)
-    return deduped
+    return unique(errors), abouts

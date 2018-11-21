@@ -1,0 +1,22 @@
+Usage: about inventory [OPTIONS] LOCATION OUTPUT
+
+  Collect the inventory of .ABOUT file data as CSV or JSON.
+
+  LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
+
+  OUTPUT: Path to the JSON or CSV inventory file to create.
+
+Options:
+  --filter <key>=<value>   Filter the inventory to ABOUT matching these
+                           key=value e.g. "license_expression=gpl-2.0
+  -f, --format [json|csv]  Set OUTPUT inventory file format.  [default: csv]
+  --mapping                Use the default built-in "mapping.config" file with
+                           mapping between input keys and .ABOUT field
+                           names.Cannot be combined with the --mapping-file
+                           option.
+  --mapping-file FILE      Path to an optional custom mapping FILE with mapping
+                           between input keys and .ABOUT field names. Cannot be
+                           combined with the --mapping option.
+  -q, --quiet              Do not print error or warning messages.
+  --verbose                Show all error and warning messages.
+  -h, --help               Show this message and exit.

@@ -18,6 +18,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import io
+import os
 import unittest
 
 from testing_utils import get_test_loc
@@ -26,37 +28,91 @@ from attributecode import attrib
 from attributecode import model
 
 
-class AttribTest(unittest.TestCase):
+class TemplateTest(unittest.TestCase):
 
-    def test_check_template(self):
-        assert attrib.check_template('template_string') == None
-        assert attrib.check_template('{{template_string') == (1,
-          "unexpected end of template, expected 'end of print statement'.",)
-        with open(get_test_loc('attrib_gen/test.template')) as tmpl:
+    def test_check_template_simple_valid_returns_None(self):
+        expected = None
+        assert expected == attrib.check_template('template_string')
+
+    def test_check_template_complex_valid_returns_None(self):
+        template = '''
+        {% for about in abouts -%}
+            {{ about.name.value }}: {{ about.version.value }}
+            {% for res in about.about_resource.value -%}
+                resource: {{ res }}
+            {% endfor -%}
+        {% endfor -%}'''
+        expected = None
+        assert expected == attrib.check_template(template)
+
+    def test_check_template_complex_invalid_returns_error(self):
+        template = '''
+        {% for about in abouts -%}
+            {{ about.name.value }}: {{ about.version.value }}
+            {% for res in about.about_ressdsdsdsdsdsdource.value -%}
+                resource: {{] res }}
+            {% endfor -%}
+        {% endfor -%}'''
+        expected = (5, "unexpected ']'")
+        assert expected == attrib.check_template(template)
+
+    def test_check_template_invalid_return_error_lineno_and_message(self):
+        expected = 1, "unexpected end of template, expected 'end of print statement'."
+        assert expected == attrib.check_template('{{template_string')
+
+    def test_check_template_all_builtin_templates_are_valid(self):
+        builtin_templates_dir = os.path.dirname(attrib.DEFAULT_TEMPLATE_FILE)
+        for template in os.listdir(builtin_templates_dir):
+            template_loc = os.path.join(builtin_templates_dir, template)
+            with io.open(template_loc, 'r', encoding='utf-8') as tmpl:
+                template = tmpl.read()
+            try:
+                assert None == attrib.check_template(template)
+            except:
+                raise Exception(template_loc)
+
+
+class GenerateTest(unittest.TestCase):
+
+    def test_generate_from_collected_inventory_wih_custom_temaplte(self):
+        test_file = get_test_loc('test_attrib/gen_simple/attrib.ABOUT')
+        errors, abouts = model.collect_inventory(test_file)
+        assert not errors
+
+        test_template = get_test_loc('test_attrib/gen_simple/test.template')
+        with open(test_template) as tmpl:
             template = tmpl.read()
-        assert attrib.check_template(template) == None
 
-    def test_check_template_default_is_valid(self):
-        with open(attrib.default_template) as tmpl:
-            template = tmpl.read()
-        assert attrib.check_template(template) == None
+        expected = (
+            'Apache HTTP Server: 2.4.3\n'
+            'resource: httpd-2.4.3.tar.gz\n')
 
-    def test_generate(self):
-        expected = (u'Apache HTTP Server: 2.4.3\n'
-                    u'resource: httpd-2.4.3.tar.gz\n')
-        test_file = get_test_loc('attrib_gen/attrib.ABOUT')
-        with open(get_test_loc('attrib_gen/test.template')) as tmpl:
-            template = tmpl.read()
-        _errors, abouts = model.collect_inventory(test_file)
-        result = attrib.generate(abouts, template)
-        self.assertEqual(expected, result)
+        error, result = attrib.generate(abouts, template)
+        assert expected == result
+        assert not error
 
-    def test_generate_from_file_with_default_template(self):
-        test_file = get_test_loc('attrib_gen/attrib.ABOUT')
-        _errors, abouts = model.collect_inventory(test_file)
-        result = attrib.generate_from_file(abouts)
-        with open(get_test_loc('attrib_gen/expected_default_attrib.html')) as exp:
+    def test_generate_with_default_template(self):
+        test_file = get_test_loc('test_attrib/gen_default_template/attrib.ABOUT')
+        errors, abouts = model.collect_inventory(test_file)
+        assert not errors
+
+        error, result = attrib.generate_from_file(abouts)
+        assert not error
+
+        expected_file = get_test_loc(
+            'test_attrib/gen_default_template/expected_default_attrib.html')
+        with open(expected_file) as exp:
             expected = exp.read()
+
         # strip the timestamp: the timestamp is wrapped in italic block
-        self.assertEqual([x.rstrip() for x in expected.splitlines()],
-                         [x.rstrip() for x in result.splitlines() if not '<i>' in x])
+        result = remove_timestamp(result)
+        expected = remove_timestamp(expected)
+        assert expected == result
+
+
+def remove_timestamp(html_text):
+    """
+    Return the `html_text` generated attribution stripped from timestamps: the
+    timestamp is wrapped in italic block in the default template.
+    """
+    return '\n'.join(x for x in html_text.splitlines() if not '<i>' in x)

@@ -1,0 +1,16 @@
+Usage: about transform [OPTIONS] LOCATION OUTPUT
+
+  Transform the CSV file at LOCATION by applying renamings, filters and checks
+  and write a new CSV to OUTPUT.
+
+  LOCATION: Path to a CSV file.
+
+  OUTPUT: Path to CSV inventory file to create.
+
+Options:
+  -c, --configuration FILE  Path to an optional YAML configuration file. See
+                            --help-format for format help.
+  --help-format             Show configuration file format help and exit.
+  -q, --quiet               Do not print error or warning messages.
+  --verbose                 Show all error and warning messages.
+  -h, --help                Show this message and exit.
