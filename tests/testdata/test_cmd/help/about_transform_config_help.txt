@@ -44,15 +44,3 @@ and "version" columns and no other column:
         - name
         - version
 
-* row_filters:
-An optional list of mappings of <column name>: <value> that a source CSV row
-should match to be added to the transformed target CSV. If any column value of a
-row matches any such filter it is kept. Otherwise it is skipped. Filters are
-applied last after all renamings, checks and tranforms and can therefore onlu
-use remaining column names.
-
-For instance with this configuration the target CSV will only contain rows that
-have a "path" equal to "/root/user/lib":
-    row_filters:
-        path : /root/user/lib
-

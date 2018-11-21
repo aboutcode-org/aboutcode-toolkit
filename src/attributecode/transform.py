@@ -92,9 +92,6 @@ def transform_data(rows, transformer):
     if errors:
         return column_names, data, errors
 
-    if transformer.row_filters:
-        data = list(transformer.filter_rows(data))
-
     return column_names, data, errors
 
 
@@ -143,18 +140,6 @@ and "version" columns and no other column:
     column_filters:
         - name
         - version
-
-* row_filters:
-An optional list of mappings of <column name>: <value> that a source CSV row
-should match to be added to the transformed target CSV. If any column value of a
-row matches any such filter it is kept. Otherwise it is skipped. Filters are
-applied last after all renamings, checks and tranforms and can therefore onlu
-use remaining column names.
-
-For instance with this configuration the target CSV will only contain rows that
-have a "path" equal to "/root/user/lib":
-    row_filters:
-        path : /root/user/lib
 '''
 
 
@@ -165,14 +150,19 @@ class Transformer(object):
     column_renamings = attr.attrib(default=attr.Factory(dict))
     required_columns = attr.attrib(default=attr.Factory(list))
     column_filters = attr.attrib(default=attr.Factory(list))
-    row_filters = attr.attrib(default=attr.Factory(list))
 
-    # TODO: populate these!
     # a list of all the standard columns from AboutCode toolkit
     standard_columns = attr.attrib(default=attr.Factory(list), init=False)
     # a list of the subset of standard columns that are essential and MUST be
     # present for AboutCode toolkit to work
     essential_columns = attr.attrib(default=attr.Factory(list), init=False)
+
+    # called by attr after the __init__()
+    def __attrs_post_init__(self, *args, **kwargs):
+        from attributecode.model import About
+        about = About()
+        self.essential_columns = list(about.required_fields)
+        self.standard_columns = [f.name for f in about.all_fields()]
 
     @classmethod
     def default(cls):
@@ -183,7 +173,6 @@ class Transformer(object):
             column_renamings={},
             required_columns=[],
             column_filters=[],
-            row_filters=[],
         )
 
     @classmethod
@@ -198,7 +187,6 @@ class Transformer(object):
             column_renamings=data.get('column_renamings', {}),
             required_columns=data.get('required_columns', []),
             column_filters=data.get('column_filters', []),
-            row_filters=data.get('row_filters', []),
         )
 
     def check_required_columns(self, data):
@@ -256,20 +244,6 @@ class Transformer(object):
         for entry in data:
             items = ((k, v) for k, v in entry.items() if k in column_filters)
             yield OrderedDict(items)
-
-    def filter_rows(self, data):
-        """
-        Yield a filtered list of mappings from a `data` list of mappings keeping
-        only items that match any one of the `row_filters` of this Transformer.
-        Return the data unchanged if no `row_filters` is avilable in this
-        Transformer.
-        """
-        filters = self.row_filters
-        for entry in data:
-            for filt in filters:
-                for filtered_column_name, filtered_column_value in filt.items():
-                    if entry.get(filtered_column_name) == filtered_column_value:
-                        yield entry
 
 
 def check_duplicate_columns(column_names):
