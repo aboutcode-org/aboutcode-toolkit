@@ -183,27 +183,9 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     if location.lower().endswith('.zip'):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
-
     errors, abouts = collect_inventory(location)
-
-    # Do not write the output if one of the ABOUT files has duplicated keys
-    # TODO: why do this check here?? Also if this is the place, we should list what the errors are.
-    dup_error_msg = u'Duplicated keys'
-    halt_output = False
-    for err in errors:
-        if dup_error_msg in err.message:
-            halt_output = True
-            break
-
-    if not halt_output:
-        write_errors = write_output(abouts=abouts, location=output, format=format)
-        for err in write_errors:
-            errors.append(err)
-    else:
-        if not quiet:
-            msg = u'Duplicated keys are not supported.\nPlease correct and re-run.'
-            click.echo(msg)
-
+    write_errors = write_output(abouts=abouts, location=output, format=format)
+    errors.extend(write_errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         msg = 'Inventory collected in {output}.'.format(**locals())
