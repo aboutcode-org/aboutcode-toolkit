@@ -719,18 +719,18 @@ version: 0.11.0
 copyright: Copyright (c) 2013-2014 nexB Inc.
 license_expression: apache-2.0
 author:
-    - Jillian Daguil
-    - Chin Yeung Li
-    - Philippe Ombredanne
-    - Thomas Druez
-description: |-
-    AboutCode is a tool
-    to process ABOUT files.
-    An ABOUT file is a file.
+  - Jillian Daguil
+  - Chin Yeung Li
+  - Philippe Ombredanne
+  - Thomas Druez
+description: |
+  AboutCode is a tool
+  to process ABOUT files.
+  An ABOUT file is a file.
 homepage_url: http://dejacode.org
 licenses:
-    -   file: apache-2.0.LICENSE
-        key: apache-2.0
+  - key: apache-2.0
+    file: apache-2.0.LICENSE
 notice_file: NOTICE
 owner: nexB Inc.
 vcs_repository: https://github.com/dejacode/about-code-tool.git

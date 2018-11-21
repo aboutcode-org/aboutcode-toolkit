@@ -68,9 +68,15 @@ setup(
     ],
     install_requires=[
         'jinja2 >= 2.9, < 3.0',
+
         'click >= 6.7, < 7.0',
+
         "backports.csv ; python_version<'3.6'",
-        'PyYAML >= 3.0, < 4.0',
+
+        # required by saneyaml
+        'PyYAML >= 3.11, <=3.13',
+        'saneyaml',
+
         'boolean.py >= 3.5, < 4.0',
         'license_expression >= 0.94, < 1.0',
     ],

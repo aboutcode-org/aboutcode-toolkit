@@ -36,7 +36,6 @@ import os
 import posixpath
 import re
 
-import yaml
 
 from attributecode.util import python2
 
@@ -180,7 +179,7 @@ class Field(object):
                     # insert 4 spaces for newline values
                     value = u'    '.join(value)
             else:
-                # See https://github.com/nexB/aboutcode-toolkit/issues/323
+                # FIXME: See https://github.com/nexB/aboutcode-toolkit/issues/323
                 # The yaml.load() will throw error if the parsed value
                 # contains ': ' character. A work around is to put a pipe, '|'
                 # to indicate the whole value as a string
@@ -1017,7 +1016,7 @@ class About(object):
             with codecs.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
             # Check for duplicated key
-            yaml.load(input_text, Loader=util.NoDuplicateLoader)
+            saneyaml.load(input_text, allow_duplicate_keys=False)
             """
             The running_inventory defines if the current process is 'inventory' or not.
             This is used for the validation of the path of the 'about_resource'.
@@ -1028,10 +1027,12 @@ class About(object):
             and then join with the 'about_resource'
             """
             running_inventory = True
+            # FIXME: why??
             # wrap the value of the boolean field in quote to avoid
             # automatically conversion from yaml.load
             input = util.wrap_boolean_value(input_text)  # NOQA
-            errs = self.load_dict(saneyaml.load(input), base_dir, running_inventory, mapping_file)
+            data = saneyaml.load(input, allow_duplicate_keys=False)
+            errs = self.load_dict(data, base_dir, running_inventory, mapping_file)
             errors.extend(errs)
         except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
@@ -1115,7 +1116,7 @@ class About(object):
         # Group the same license information in a list
         license_group = list(zip_longest(license_key, license_name, license_file, license_url))
         for lic_group in license_group:
-            lic_dict = {}
+            lic_dict = OrderedDict()
             if lic_group[0]:
                 lic_dict['key'] = lic_group[0]
             if lic_group[1]:
