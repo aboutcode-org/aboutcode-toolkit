@@ -495,6 +495,84 @@ LOCATION: Path to a file or directory containing .ABOUT files.
 
 
 ######################################################################
+# transform subcommand
+######################################################################
+
+def print_config_help(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    from attributecode.transform import tranformer_config_help
+    click.echo(tranformer_config_help)
+    ctx.exit()
+
+
+@about.command(cls=AboutCommand,
+    short_help='Transform a CSV by applying renamings, filters and checks.')
+
+@click.argument('location',
+    required=True,
+    callback=partial(validate_extensions, extensions=('.csv',)),
+    metavar='LOCATION',
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True))
+
+@click.argument('output',
+    required=True,
+    callback=partial(validate_extensions, extensions=('.csv',)),
+    metavar='OUTPUT',
+    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
+
+@click.option('-c', '--configuration',
+    metavar='FILE',
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help='Path to an optional YAML configuration file. See --help-format for '
+         'format help.')
+
+@click.option('--help-format',
+    is_flag=True, is_eager=True, expose_value=False,
+    callback=print_config_help,
+    help='Show configuration file format help and exit.')
+
+@click.option('-q', '--quiet',
+    is_flag=True,
+    help='Do not print error or warning messages.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
+
+@click.help_option('-h', '--help')
+
+def transform(location, output, configuration, quiet, verbose):  # NOQA
+    """
+Transform the CSV file at LOCATION by applying renamings, filters and checks 
+and write a new CSV to OUTPUT.
+
+LOCATION: Path to a CSV file.
+
+OUTPUT: Path to CSV inventory file to create.
+    """
+    from attributecode.transform import transform_csv_to_csv
+    from attributecode.transform import Transformer
+
+    if not quiet:
+        print_version()
+        click.echo('Transforming CSV...')
+
+    if not configuration:
+        transformer = Transformer.default()
+    else:
+        transformer = Transformer.from_file(configuration)
+
+    errors = transform_csv_to_csv(location, output, transformer)
+
+    errors_count = report_errors(errors, quiet, verbose)
+    if not quiet:
+        msg = 'Transformed CSV written to {output}.'.format(**locals())
+        click.echo(msg)
+    sys.exit(errors_count)
+
+
+######################################################################
 # Error management
 ######################################################################
 
