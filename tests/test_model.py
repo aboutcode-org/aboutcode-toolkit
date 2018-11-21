@@ -67,11 +67,17 @@ def check_json(expected, result):
     assert expected == result
 
 
+def get_test_content(test_location):
+    """
+    Read file at test_location and return a unicode string.
+    """
+    return get_unicode_content(get_test_loc(test_location))
+
+
 def get_unicode_content(location):
     """
     Read file at location and return a unicode string.
     """
-    location = get_test_loc(location)
     with io.open(location, encoding='utf-8') as doc:
         return doc.read()
 
@@ -215,7 +221,7 @@ class FieldTest(unittest.TestCase):
 class YamlParseTest(unittest.TestCase):
     maxDiff = None
     def test_saneyaml_load_can_parse_simple_fields(self):
-        test = get_unicode_content('test_model/parse/basic.about')
+        test = get_test_content('test_model/parse/basic.about')
         result = saneyaml.load(test)
 
         expected = [
@@ -226,7 +232,7 @@ class YamlParseTest(unittest.TestCase):
         assert expected == list(result.items())
 
     def test_saneyaml_load_can_parse_continuations(self):
-        test = get_unicode_content('test_model/parse/continuation.about')
+        test = get_test_content('test_model/parse/continuation.about')
         result = saneyaml.load(test)
 
         expected = [
@@ -238,7 +244,7 @@ class YamlParseTest(unittest.TestCase):
         assert expected == list(result.items())
 
     def test_saneyaml_load_can_handle_multiline_texts_and_strips_text_fields(self):
-        test = get_unicode_content('test_model/parse/complex.about')
+        test = get_test_content('test_model/parse/complex.about')
         result = saneyaml.load(test)
 
         expected = [
@@ -250,7 +256,7 @@ class YamlParseTest(unittest.TestCase):
         assert expected == list(result.items())
 
     def test_saneyaml_load_can_parse_verbatim_text_unstripped(self):
-        test = get_unicode_content('test_model/parse/continuation_verbatim.about')
+        test = get_test_content('test_model/parse/continuation_verbatim.about')
         result = saneyaml.load(test)
 
         expected = [
@@ -262,7 +268,7 @@ class YamlParseTest(unittest.TestCase):
         assert expected == list(result.items())
 
     def test_saneyaml_load_report_error_for_invalid_field_name(self):
-        test = get_unicode_content('test_model/parse/invalid_names.about')
+        test = get_test_content('test_model/parse/invalid_names.about')
         try:
             saneyaml.load(test)
             self.fail('Exception not raised')
@@ -270,7 +276,7 @@ class YamlParseTest(unittest.TestCase):
             pass
 
     def test_saneyaml_dangling_text_is_not_an_invalid_continuation(self):
-        test = get_unicode_content('test_model/parse/invalid_continuation.about')
+        test = get_test_content('test_model/parse/invalid_continuation.about')
         result = saneyaml.load(test)
         expected = [
             (u'single_line', u'optional'),
@@ -280,7 +286,7 @@ class YamlParseTest(unittest.TestCase):
         assert expected == list(result.items())
 
     def test_saneyaml_load_accepts_unicode_keys_and_values(self):
-        test = get_unicode_content('test_model/parse/non_ascii_field_name_value.about')
+        test = get_test_content('test_model/parse/non_ascii_field_name_value.about')
         result = saneyaml.load(test)
         expected = [
             ('name', 'name'),
@@ -370,7 +376,7 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     def test_About_hydrate_normalize_field_names_to_lowercase(self):
-        test_content = get_unicode_content('test_gen/parser_tests/upper_field_names.ABOUT')
+        test_content = get_test_content('test_gen/parser_tests/upper_field_names.ABOUT')
         fields = saneyaml.load(test_content).items()
         a = model.About()
         for _ in range(3):
