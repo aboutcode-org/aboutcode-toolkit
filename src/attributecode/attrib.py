@@ -31,7 +31,6 @@ from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
 from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
-from attributecode.util import get_about_file_path
 
 
 # FIXME: the template dir should be outside the code tree
@@ -167,7 +166,7 @@ def generate_from_file(abouts, template_loc=DEFAULT_TEMPLATE_FILE, variables=Non
 
 
 def generate_and_save(abouts, output_location, template_loc=None, variables=None,
-                      mapping_file=None, inventory_location=None):
+                      mapping_file=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template_loc` template file location and a `variables` optional
@@ -175,77 +174,10 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
     `output_location` file. 
     Return a list of Error objects if any.
 
-    FIXME: these three argument are too complex:
-
     Optionally use the `mapping_file` mapping config if provided.
-    Optionally filter `abouts` object based on the inventory JSON or CSV at `inventory_location`.
     """
     updated_abouts = []
-    lstrip_afp = []
-    afp_list = []
-    not_match_path = []
     errors = []
-
-    if not inventory_location:
-        updated_abouts = abouts
-
-    # FIXME: this is too complex
-    # Do the following if a filter list (inventory_location) is provided
-    else:
-        if not os.path.exists(inventory_location):
-            # FIXME: this message does not make sense
-            msg = (u'"INVENTORY_LOCATION" does not exist. Generation halted.')
-            errors.append(Error(ERROR, msg))
-            return errors
-
-        if inventory_location.endswith('.csv') or inventory_location.endswith('.json'):
-            # FIXME: we should use the same inventory loading that we use everywhere
-
-            try:
-                # Return a list which contains only the about file path
-                about_list = get_about_file_path(inventory_location, mapping_file=mapping_file)
-            # FIXME: why catching all exceptions?
-            except Exception:
-                # 'about_file_path' key/column doesn't exist
-
-                msg = u"The required key: 'about_file_path' does not exist. Generation halted."
-                errors.append(Error(ERROR, msg))
-                return errors
-        else:
-            # FIXME: this message does not make sense
-            msg = u'Only .csv and .json are supported for the "INVENTORY_LOCATION". Generation halted.'
-            errors.append(Error(ERROR, msg))
-            return errors
-
-        for afp in about_list:
-            lstrip_afp.append(afp.lstrip('/'))
-
-        # return a list of paths that point all to .ABOUT files
-        about_files_list = as_about_paths(lstrip_afp)
-
-        # Collect all the about_file_path
-        for about in abouts:
-            afp_list.append(about.about_file_path)
-
-        # Get the not matching list if any
-        for fp in about_files_list:
-            if not fp in afp_list:
-                not_match_path.append(fp)
-
-        if not_match_path:
-            if len(not_match_path) == len(about_files_list):
-                msg = "None of the paths in the provided 'inventory_location' match with the 'LOCATION'."
-                errors.append(Error(ERROR, msg))
-                return errors
-            else:
-                for path in not_match_path:
-                    msg = 'Path: ' + path + ' cannot be found.'
-                    errors.append(Error(ERROR, msg))
-
-        for about in abouts:
-            for fp in about_files_list:
-                if about.about_file_path == fp:
-                    updated_abouts.append(about)
 
     # Parse license_expression and save to the license list
     for about in updated_abouts:
@@ -253,7 +185,7 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
             continue
         special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
         if special_char_in_expression:
-            msg = (u"The following character(s) cannot be in the licesne_expression: " +
+            msg = (u"The following character(s) cannot be in the license_expression: " +
                    str(special_char_in_expression))
             errors.append(Error(ERROR, msg))
         else:
@@ -274,24 +206,3 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
             of.write(rendered)
 
     return errors
-
-
-# FIXME: this function purpose needs to be explained.
-def as_about_paths(paths):
-    """
-    Return a list of paths to .ABOUT files from a list of `paths`
-    strings.
-    """
-    from posixpath import basename
-    from posixpath import dirname
-
-    about_paths = []
-    for path in paths:
-        if path.endswith('.ABOUT'):
-            about_paths.append(path)
-        else:
-            # FIXME: this is not the way to check that a path is a directory, too weak
-            if path.endswith('/'):
-                path += basename(dirname(path))
-            about_paths.append(path + '.ABOUT')
-    return about_paths
