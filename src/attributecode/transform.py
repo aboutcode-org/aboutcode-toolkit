@@ -26,16 +26,14 @@ import attr
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import saneyaml
+from attributecode.util import csv
 from attributecode.util import python2
+
 
 if python2:  # pragma: nocover
     from itertools import izip_longest as zip_longest  # NOQA
-
-    import backports.csv as csv  # NOQA
 else:  # pragma: nocover
     from itertools import zip_longest  # NOQA
-
-    import csv  # NOQA
 
 
 def transform_csv_to_csv(location, output, transformer):

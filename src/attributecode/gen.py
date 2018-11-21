@@ -35,16 +35,10 @@ from attributecode import Error
 from attributecode import model
 from attributecode import util
 from attributecode.util import add_unc
-from attributecode.util import python2
+from attributecode.util import csv
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import unique
-
-
-if python2:  # pragma: nocover
-    import backports.csv as csv  # NOQA
-else:  # pragma: nocover
-    import csv  # NOQA
 
 
 def check_duplicated_columns(location):
