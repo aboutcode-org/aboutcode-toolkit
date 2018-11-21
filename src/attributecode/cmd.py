@@ -131,7 +131,7 @@ def validate_mapping(mapping, mapping_file):
     if mapping and mapping_file:
         raise click.UsageError(
             'Invalid options combination: '
-            '--mapping and --mapping-file are ultually exclusive.')
+            '--mapping and --mapping-file are mutually exclusive.')
     if mapping:
         return DEFAULT_MAPPING
     return mapping_file or None
