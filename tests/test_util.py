@@ -33,7 +33,6 @@ from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import model
 from attributecode import util
-from attributecode import DEFAULT_MAPPING
 
 
 class TestResourcePaths(unittest.TestCase):
@@ -300,79 +299,6 @@ class TestGetLocations(unittest.TestCase):
         assert any(longpath in r for r in result)
 
 
-class TestMapping(unittest.TestCase):
-
-    def test_apply_mapping(self):
-        about = [OrderedDict([
-            ('about_resource', '.'),
-            ('name', 'test'),
-            ('confirmed version', '1'),
-            ('confirmed copyright', 'Copyright (c) 2013-2017 nexB Inc.')
-        ])]
-        expected = [OrderedDict([
-            ('about_resource', '.'),
-            ('name', 'test'),
-            ('version', '1'),
-            ('copyright', 'Copyright (c) 2013-2017 nexB Inc.')
-        ])]
-        mapping_file = DEFAULT_MAPPING
-        assert expected == util.apply_mapping(about, mapping_file)
-
-    def test_load_mapping(self):
-        test_file = get_test_loc('test_util/mapping/mapping.config')
-        result = util.load_mapping(test_file)
-        expected = OrderedDict([
-            ('about_file_path', 'about_file'),
-            ('name', 'component'),
-            ('version', 'confirmed version'),
-            ('description', 'description'),
-            ('license_expression', 'dje_license_key'),
-            ('copyright', 'confirmed copyright')
-        ])
-        assert expected == result
-
-    def test_load_mapping_can_preserve_keys_case(self):
-        test_file = get_test_loc('test_util/mapping/case_mapping.config')
-        result = util.load_mapping(test_file, lowercase=False)
-        expected = OrderedDict([
-            (u'about_file_path', u'about_file'),
-            (u'name', u'Component'),
-            (u'version', u'Confirmed Version'),
-            (u'description', u'description'),
-            (u'licEnse_expression', u'dje_license_key'),
-            (u'copYright', u'Confirmed Copyright')])
-        assert expected == result
-
-    def test_load_mapping_replace_space_with_underscore_in_about_keys(self):
-        # FIXME: this is a really weird behaviour ... but at least it is tested now
-        test_file = get_test_loc('test_util/mapping/space_mapping.config')
-        result = util.load_mapping(test_file)
-        expected = OrderedDict([
-            (u'des__cription', u'description'),
-            (u'copy_right', u'confirmed copyright')])
-        assert expected == result
-
-    def test_load_mapping_from_invalid_location_raise_exception(self):
-        try:
-            util.load_mapping('this does not exists')
-            self.fail('Exception not raised')
-        except:
-            pass
-
-    def test_load_mapping_from_None_location_raise_exception(self):
-        try:
-            util.load_mapping(None)
-            self.fail('Exception not raised')
-        except:
-            pass
-
-    def test_load_mapping_only_load_last_instance_of_duplicated_keys(self):
-        test_file = get_test_loc('test_util/mapping/dupe_keys_mapping.config')
-        result = util.load_mapping(test_file)
-        expected = OrderedDict([(u'descr', u'description3'), (u'other', u'bar')])
-        assert expected == result
-
-
 class TestCsv(unittest.TestCase):
 
     def test_load_csv_without_mapping(self):
@@ -386,15 +312,15 @@ class TestCsv(unittest.TestCase):
         result = util.load_csv(test_file)
         assert expected == result
 
-    def test_load_csv_with_mapping(self):
+    def test_load_csv_load_rows(self):
         test_file = get_test_loc('test_util/csv/about.csv')
         expected = [OrderedDict([
-            ('about_file_path', 'about.ABOUT'),
+            ('about_file', 'about.ABOUT'),
             ('about_resource', '.'),
             ('name', 'ABOUT tool'),
             ('version', '0.8.1')])
         ]
-        result = util.load_csv(test_file, mapping_file=DEFAULT_MAPPING)
+        result = util.load_csv(test_file)
         assert expected == result
 
     def test_load_csv_does_convert_column_names_to_lowercase(self):
@@ -429,9 +355,7 @@ class TestCsv(unittest.TestCase):
 
 class TestJson(unittest.TestCase):
 
-    # FIXME: mappings are a CSV-only feature!!!!!
-
-    def test_load_json_without_mapping(self):
+    def test_load_json(self):
         test_file = get_test_loc('test_util/json/expected.json')
         expected = [OrderedDict([
             ('about_file_path', '/load/this.ABOUT'),
@@ -442,7 +366,7 @@ class TestJson(unittest.TestCase):
         result = util.load_json(test_file)
         assert expected == result
 
-    def test_load_json(self):
+    def test_load_json2(self):
         test_file = get_test_loc('test_util/json/expected_need_mapping.json')
         expected = [dict(OrderedDict([
             ('about_file', '/load/this.ABOUT'),

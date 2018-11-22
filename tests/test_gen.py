@@ -29,7 +29,6 @@ from attributecode import INFO
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import gen
-from attributecode import DEFAULT_MAPPING
 from unittest.case import skip
 
 
@@ -52,7 +51,7 @@ class GenTest(unittest.TestCase):
             {'about_file_path': '/test/abc/', 'version': '1.0', 'name': 'abc'},
             {'about_file_path': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
         expected = [
-            Error(CRITICAL, 
+            Error(CRITICAL,
                   "The input has duplicated values in 'about_file_path' field: /test/test.c")]
         result = gen.check_duplicated_about_file_path(test_dict)
         assert expected == result
@@ -63,7 +62,7 @@ class GenTest(unittest.TestCase):
         errors, abouts = gen.load_inventory(location, base_dir)
 
         expected_errors = [
-            Error(INFO, 'Field custom1 is not a supported field and is ignored.'),
+            Error(INFO, 'Field custom1 is a custom field.'),
             Error(INFO, 'Field about_resource: Path')
         ]
         for exp, err in zip(expected_errors, errors):
@@ -71,28 +70,32 @@ class GenTest(unittest.TestCase):
             assert err.message.startswith(exp.message)
 
         expected = (
-            'about_resource: .\n'
-            'name: AboutCode\n'
-            'version: 0.11.0\n'
-            'description: |\n'
-            '  multi\n'
-            '  line\n'
+'''about_resource: .
+name: AboutCode
+version: 0.11.0
+description: |
+  multi
+  line
+custom1: |
+  multi
+  line
+'''
         )
-        result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
-                        for a in abouts]
+        result = [a.dumps() for a in abouts]
         assert expected == result[0]
 
-    def test_load_inventory_with_mapping(self):
+    def test_load_inventory_with_errors(self):
         location = get_test_loc('test_gen/inv4.csv')
         base_dir = get_temp_dir()
-        errors, abouts = gen.load_inventory(location, base_dir, mapping_file=DEFAULT_MAPPING)
+        errors, abouts = gen.load_inventory(location, base_dir)
 
         expected_errors = [
-            Error(INFO, 'Field resource is a custom field'),
-            Error(INFO, 'Field test is not a supported field and is not defined in the mapping file. This field is ignored.'),
-            Error(INFO, 'Field about_resource: Path ')
-            ]
-
+            Error(CRITICAL, "Field name: 'confirmed copyright' contains illegal name characters: 0 to 9, a to z, A to Z and _."),
+            Error(INFO, 'Field resource is a custom field.'),
+            Error(INFO, 'Field test is a custom field.'),
+            Error(INFO, 'Field about_resource: Path')
+        ]
+        # assert [] == errors
         for exp, err in zip(expected_errors, errors):
             assert exp.severity == err.severity
             assert err.message.startswith(exp.message)
@@ -101,13 +104,14 @@ class GenTest(unittest.TestCase):
             'about_resource: .\n'
             'name: AboutCode\n'
             'version: 0.11.0\n'
-            'copyright: Copyright (c) nexB, Inc.\n'
             'description: |\n'
             '  multi\n'
             '  line\n'
+            # 'confirmed copyright: Copyright (c) nexB, Inc.\n'
             'resource: this.ABOUT\n'
+            'test: This is a test\n'
         )
-        result = [a.dumps(with_empty=False) for a in abouts]
+        result = [a.dumps() for a in abouts]
         assert expected == result[0]
 
     def test_generation_dir_endswith_space(self):
@@ -156,21 +160,25 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        msg1 = 'Field custom1 is not a supported field and is ignored.'
+        msg1 = 'Field custom1 is a custom field.'
         msg2 = 'Field about_resource'
 
         assert msg1 in errors[0].message
         assert msg2 in errors[1].message
 
-        result = [a.dumps(mapping_file=False, with_absent=False, with_empty=False)
-                        for a in abouts][0]
+        result = [a.dumps() for a in abouts][0]
         expected = (
-            'about_resource: .\n'
-            'name: AboutCode\n'
-            'version: 0.11.0\n'
-            'description: |\n'
-            '  multi\n'
-            '  line\n')
+'''about_resource: .
+name: AboutCode
+version: 0.11.0
+description: |
+  multi
+  line
+custom1: |
+  multi
+  line
+'''
+        )
         assert expected == result
 
     @skip('FIXME: this test is making a failed, live API call')
@@ -183,7 +191,7 @@ class GenTest(unittest.TestCase):
         _errors, abouts = gen.generate(
             location, base_dir, reference_dir, fetch_license)
 
-        result = [a.dumps(with_empty=False)for a in abouts][0]
+        result = [a.dumps()for a in abouts][0]
         expected = (
             'about_resource: .\n'
             'name: AboutCode\n'

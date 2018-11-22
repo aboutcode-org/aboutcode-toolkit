@@ -6,7 +6,7 @@ format, using the same format as an .ABOUT file.
 The attributes that can be set in a configuration file are:
 
 * column_renamings:
-An optional mapping of source CSV column name to target CSV new column name that
+An optional map of source CSV column name to target CSV new column name that
 is used to rename CSV columns.
 
 For instance with this configuration the columns "Directory/Location" will be

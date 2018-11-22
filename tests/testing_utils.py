@@ -173,7 +173,7 @@ def run_about_command_test(options, expected_rc=0):
     return stdout, stderr
 
 
-def run_about_command_test_click(options, expected_rc=0, monkeypatch=None, ):
+def run_about_command_test_click(options, expected_rc=0, monkeypatch=None,):
     """
     Run an "about" command as a Click-controlled subprocess with the `options`
     list of options. Return a click.testing.Result object.

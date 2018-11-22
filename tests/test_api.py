@@ -50,9 +50,9 @@ class ApiTest(unittest.TestCase):
         request_license_data.return_value = license_data, errors
 
         expected = (
-            'Apache License 2.0', 
-            'apache-2.0', 
-            'Apache License Version 2.0 ...', 
+            'Apache License 2.0',
+            'apache-2.0',
+            'Apache License Version 2.0 ...',
             [])
         result = api.get_license_details_from_api(
             api_url='api_url', api_key='api_key', license_key='license_key')
@@ -67,7 +67,7 @@ class ApiTest(unittest.TestCase):
         license_data = api.request_license_data(
             api_url='http://fake.url/', api_key='api_key', license_key='apache-2.0')
         expected = (
-            {'name': 'Apache 2.0', 'key': 'apache-2.0', 'text': 'Text'}, 
+            {'name': 'Apache 2.0', 'key': 'apache-2.0', 'text': 'Text'},
             []
         )
         assert expected == license_data

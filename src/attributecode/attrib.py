@@ -41,7 +41,7 @@ DEFAULT_TEMPLATE_FILE = os.path.join(
 def generate(abouts, template=None, variables=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
-    `template` template text and a `variables` optional mapping of extra
+    `template` template text and a `variables` optional dict of extra
     variables.
 
     Return a tuple of (error, attribution text) where error is an Error object
@@ -153,28 +153,25 @@ def generate_from_file(abouts, template_loc=DEFAULT_TEMPLATE_FILE, variables=Non
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template_loc` template file location and a `variables` optional
-    mapping of extra variables.
+    dict of extra variables.
 
     Return a tuple of (error, attribution text) where error is an Error object
     or None and attribution text is the generated text or None.
     """
-    
+
     template_loc = add_unc(template_loc)
     with io.open(template_loc, encoding='utf-8') as tplf:
         tpls = tplf.read()
     return generate(abouts, template=tpls, variables=variables)
 
 
-def generate_and_save(abouts, output_location, template_loc=None, variables=None,
-                      mapping_file=None):
+def generate_and_save(abouts, output_location, template_loc=None, variables=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template_loc` template file location and a `variables` optional
-    mapping of extra variables. Save the generated attribution text in the
-    `output_location` file. 
+    dict of extra variables. Save the generated attribution text in the
+    `output_location` file.
     Return a list of Error objects if any.
-
-    Optionally use the `mapping_file` mapping config if provided.
     """
     updated_abouts = []
     errors = []
@@ -200,7 +197,7 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
     if rendering_error:
         errors.append(rendering_error)
 
-    if rendered:    
+    if rendered:
         output_location = add_unc(output_location)
         with io.open(output_location, 'w', encoding='utf-8') as of:
             of.write(rendered)

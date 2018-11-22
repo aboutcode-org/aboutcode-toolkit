@@ -29,7 +29,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
-import codecs
+import io
 import json
 import os
 # FIXME: why posixpath???
@@ -60,8 +60,10 @@ from attributecode import Error
 from attributecode import saneyaml
 from attributecode import util
 from attributecode.util import add_unc
-from attributecode.util import csv
 from attributecode.util import copy_license_notice_files
+from attributecode.util import csv
+from attributecode.util import filter_errors
+from attributecode.util import is_valid_name
 from attributecode.util import on_windows
 from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
@@ -103,6 +105,7 @@ class Field(object):
         """
         errors = []
         name = self.name
+
         self.value = self.default_value()
         if not self.present:
             # required fields must be present
@@ -120,8 +123,8 @@ class Field(object):
                     msg = u'Field %(name)s is required and empty'
                     severity = CRITICAL
                 else:
-                    severity = WARNING
-                    msg = u'Field %(name)s is present but empty'
+                    severity = INFO
+                    msg = u'Field %(name)s is present but empty.'
                 errors.append(Error(severity, msg % locals()))
             else:
                 # present fields with content go through validation...
@@ -398,7 +401,7 @@ class UrlField(StringField):
 class PathField(ListField):
     """
     A field pointing to one or more paths relative to the ABOUT file location.
-    The validated value is an ordered mapping of path->location or None.
+    The validated value is an ordered dict of path->location or None.
     The paths can also be resolved
     """
     def default_value(self):
@@ -424,7 +427,7 @@ class PathField(ListField):
         name = self.name
 
         # FIXME: Why is the PathField an ordered dict?
-        # mapping of normalized paths to a location or None
+        # dict of normalized paths to a location or None
         paths = OrderedDict()
 
         for path in self.value:
@@ -509,7 +512,7 @@ class AboutResourceField(PathField):
 class FileTextField(PathField):
     """
     A path field pointing to one or more text files such as license files.
-    The validated value is an ordered mapping of path->Text or None if no
+    The validated value is an ordered dict of path->Text or None if no
     location or text could not be loaded.
     """
     def _validate(self, *args, **kwargs):
@@ -523,7 +526,7 @@ class FileTextField(PathField):
         super(FileTextField, self)._validate(*args, ** kwargs)
 
         # a FileTextField is a PathField
-        # self.value is a paths to location ordered mapping
+        # self.value is a paths to location ordered dict
         # we will replace the location with the text content
         name = self.name
         for path, location in self.value.items():
@@ -535,7 +538,7 @@ class FileTextField(PathField):
             try:
                 # TODO: we have lots the location by replacing it with a text
                 location = add_unc(location)
-                with codecs.open(location, encoding='utf-8', errors='ignore') as txt:
+                with io.open(location, encoding='utf-8') as txt:
                     text = txt.read()
                 self.value[path] = text
             except Exception as e:
@@ -666,6 +669,13 @@ def validate_fields(fields, about_file_path, running_inventory, base_dir,
     return errors
 
 
+def validate_field_name(name):
+    if not is_valid_name(name):
+        msg = ('Field name: %(name)r contains illegal name characters: '
+               '0 to 9, a to z, A to Z and _.')
+        return Error(CRITICAL, msg % locals())
+
+
 class About(object):
     """
     Represent an ABOUT file and functions to parse and validate a file.
@@ -674,25 +684,28 @@ class About(object):
     # similar
 
     # name of the attribute containing the relative ABOUT file path
-    about_file_path_attr = 'about_file_path'
+    ABOUT_FILE_PATH_ATTR = 'about_file_path'
 
     # name of the attribute containing the resolved relative Resources paths
     about_resource_path_attr = 'about_resource_path'
 
     # Required fields
-    required_fields = [about_file_path_attr, 'name']
+    required_fields = [ABOUT_FILE_PATH_ATTR, 'name']
 
-    def create_fields(self):
+    def get_required_fields(self):
+        return [f for f in self.fields if f.required]
+
+    def set_standard_fields(self):
         """
-        Create fields in an ordered mapping to keep a standard ordering. We
+        Create fields in an ordered dict to keep a standard ordering. We
         could use a metaclass to track ordering django-like but this approach
         is simpler.
         """
         self.fields = OrderedDict([
             ('about_resource', AboutResourceField(required=True)),
             ('name', SingleLineField(required=True)),
-
             ('version', SingleLineField()),
+
             ('download_url', UrlField()),
             ('description', StringField()),
             ('homepage_url', UrlField()),
@@ -740,11 +753,17 @@ class About(object):
             field.name = name
             setattr(self, name, field)
 
-    def __init__(self, location=None, about_file_path=None, mapping_file=None):
-        self.create_fields()
+    def __init__(self, location=None, about_file_path=None, strict=False):
+        """
+        Create an instance.
+        If strict is True, raise an Exception on errors. Otherwise the errors
+        attribute contains the errors.
+        """
+        self.set_standard_fields()
         self.custom_fields = OrderedDict()
 
         self.errors = []
+
         # about file path relative to the root of an inventory using posix
         # path separators
         self.about_file_path = about_file_path
@@ -754,7 +773,10 @@ class About(object):
         self.base_dir = None
         if self.location:
             self.base_dir = os.path.dirname(location)
-            self.load(location, mapping_file)
+            self.errors.extend(self.load(location))
+            if strict and self.errors and filter_errors(self.errors):
+                msg = '\n'.join(map(str, self.errors))
+                raise Exception(msg)
 
     def __repr__(self):
         return repr(self.all_fields())
@@ -767,61 +789,25 @@ class About(object):
                 and self.fields == other.fields
                 and self.custom_fields == other.custom_fields)
 
-    def all_fields(self, with_absent=True, with_empty=True):
+    def all_fields(self):
         """
         Return the list of all Field objects.
-        If with_absent, include absent (not present) fields.
-        If with_empty, include empty fields.
         """
-        all_fields = []
-        bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
-        for field in list(self.fields.values()) + list(self.custom_fields.values()):
-            if field.required:
-                all_fields.append(field)
-            # TODO: The following code need refactor
-            else:
-                if with_absent:
-                    all_fields.append(field)
-                elif field.present:
-                    if with_empty:
-                        all_fields.append(field)
-                    elif field.present and field.value:
-                        all_fields.append(field)
-                    elif field.name in bool_fields:
-                        # Check is the value valid
-                        if not field.value == None:
-                            all_fields.append(field)
-                else:
-                    if field.present:
-                        if not field.value:
-                            if with_empty:
-                                all_fields.append(field)
-                        else:
-                            all_fields.append(field)
-                    else:
-                        if with_absent:
-                            all_fields.append(field)
-        return all_fields
+        return list(self.fields.values()) + list(self.custom_fields.values())
 
-    def as_dict(self, with_paths=False, with_absent=True, with_empty=True):
+    def as_dict(self):
         """
         Return all the standard fields and customer-defined fields of this
-        About object in an ordered mapping.
-        If with_paths, include special paths attributes.
-        If with_absent, include absent (not present) fields.
-        If with_empty, include empty fields.
+        About object in an ordered dict.
         """
-        as_dict = OrderedDict()
-        if with_paths:
-            afpa = self.about_file_path_attr
-            as_dict[afpa] = self.about_file_path
+        data = OrderedDict()
+        data[self.ABOUT_FILE_PATH_ATTR] = self.about_file_path
+        with_values = ((fld.name, fld.serialized_value()) for fld in self.all_fields())
+        non_empty = ((name, value) for name, value in with_values if value)
+        data.update(non_empty)
+        return data
 
-        for field in self.all_fields(with_absent=with_absent,
-                                     with_empty=with_empty):
-            as_dict[field.name] = field.serialized_value()
-        return as_dict
-
-    def hydrate(self, fields, mapping_file=None):
+    def hydrate(self, fields):
         """
         Process an iterable of field (name, value) tuples. Update or create
         Fields attributes and the fields and custom fields dictionaries.
@@ -830,11 +816,21 @@ class About(object):
         errors = []
         seen_fields = OrderedDict()
 
-        mapping = util.get_mapping(mapping_file)
-
         for name, value in fields:
             orig_name = name
             name = name.lower()
+
+            # Some special attributes
+            if name == self.ABOUT_FILE_PATH_ATTR:
+                # this is a special attribute set directly on object
+                setattr(self, name, value)
+                continue
+
+            if name == self.about_resource_path_attr:
+                # this is a special attribute, skip entirely
+                continue
+
+            # A field that has been alredy processed ... and has a value
             previous_value = seen_fields.get(name)
             if previous_value:
                 if value != previous_value:
@@ -842,13 +838,11 @@ class About(object):
                            u'Original value: "%(previous_value)s" '
                            u'replaced with: "%(value)s"')
                     errors.append(Error(WARNING, msg % locals()))
-                else:
-                    msg = (u'Field %(orig_name)s is a duplicate '
-                           u'with the same value as before.')
-                    errors.append(Error(INFO, msg % locals()))
+                    continue
 
             seen_fields[name] = value
 
+            # A standard field (could be essential/required or not)
             standard_field = self.fields.get(name)
             if standard_field:
                 standard_field.original_value = value
@@ -856,64 +850,41 @@ class About(object):
                 standard_field.present = True
                 continue
 
-            if not mapping_file:
-                if not name == self.about_file_path_attr:
-                    msg = (u'Field %(orig_name)s is not a supported field and is ignored.')
-                    errors.append(Error(INFO, msg % locals()))
+            # A custom field
+            # is the name valid?
+            illegal_name_error = validate_field_name(name)
+            if illegal_name_error:
+                errors.append(illegal_name_error)
                 continue
 
-            if name not in mapping.keys():
-                msg = (u'Field %(orig_name)s is not a supported field and is not ' +
-                       u'defined in the mapping file. This field is ignored.')
-                errors.append(Error(INFO, msg % locals()))
-                continue
-
-            # this is a special attribute
-            if name == self.about_file_path_attr:
-                setattr(self, self.about_file_path_attr, value)
-                continue
-
-            # this is a special attribute, skip entirely
-            if name == self.about_resource_path_attr:
-                continue
-
-            msg = (u'Field %(orig_name)s is a custom field')
+            msg = 'Field %(orig_name)s is a custom field.'
             errors.append(Error(INFO, msg % locals()))
+            # is this a known one?
             custom_field = self.custom_fields.get(name)
             if custom_field:
+                # An known custom field
                 custom_field.original_value = value
                 custom_field.value = value
                 custom_field.present = True
-                continue
+            else:
+                # A new, unknown custom field
+                # custom fields are always handled as StringFields
+                # FIXME: with yaml we could just set whatever is provided
+                custom_field = StringField(name=name, value=value, present=True)
+                self.custom_fields[name] = custom_field
+                # FIXME: why would this ever fail???
+                try:
+                    if name in dir(self):
+                        raise Exception('Illegal field: %(name)r: %(value)r.' % locals())
+                    setattr(self, name, custom_field)
+                except:
+                    msg = 'Internal error with custom field: %(name)r: %(value)r.'
+                    errors.append(Error(CRITICAL, msg % locals()))
 
-            if name in dir(self):
-                msg = (u'Field %(orig_name)s has an '
-                       u'illegal reserved name')
-                errors.append(Error(ERROR, msg % locals()))
-                continue
-
-            # custom fields are always handled as StringFields
-            custom_field = StringField(name=name,
-                                       value=value,
-                                       present=True)
-            self.custom_fields[name] = custom_field
-            try:
-                setattr(self, name, custom_field)
-            except:
-                # The intended captured error message should display
-                # the line number of where the invalid line is,
-                # but I am not able to get the line number from
-                # the original code. By-passing the line number
-                # for now.
-                # msg = u'Invalid line: %(line)d: %(orig_name)r'
-                msg = u'Invalid line: %(orig_name)r: ' % locals()
-                msg += u'%s' % custom_field.value
-                errors.append(Error(CRITICAL, msg))
         return errors
 
     def process(self, fields, about_file_path, running_inventory=False,
-                base_dir=None, reference_dir=None,
-                mapping_file=None):
+                base_dir=None, reference_dir=None):
         """
         Validate and set as attributes on this About object a sequence of
         `fields` name/value tuples. Return a list of errors.
@@ -921,27 +892,28 @@ class About(object):
         self.base_dir = base_dir
         self.reference_dir = reference_dir
         afp = self.about_file_path
-        errors = []
-        hydratation_errors = self.hydrate(fields, mapping_file=mapping_file)
-        errors.extend(hydratation_errors)
+
+        errors = self.hydrate(fields)
 
         # We want to copy the license_files before the validation
         if reference_dir:
             copy_license_notice_files(
                 fields, base_dir, reference_dir, afp)
 
-        # we validate all fields, not only these hydrated
-        all_fields = self.all_fields()
+        # TODO: why? we validate all fields, not only these hydrated
         validation_errors = validate_fields(
-            all_fields, about_file_path, running_inventory,
-            self.base_dir, self.reference_dir)
+            self.all_fields(),
+            about_file_path,
+            running_inventory,
+            self.base_dir,
+            self.reference_dir)
         errors.extend(validation_errors)
 
         return errors
 
-    def load(self, location, mapping_file=None):
+    def load(self, location):
         """
-        Read, parse and process the ABOUT file at location.
+        Read, parse and process the ABOUT file at `location`.
         Return a list of errors and update self with errors.
         """
         self.location = location
@@ -950,8 +922,9 @@ class About(object):
         errors = []
         try:
             loc = add_unc(loc)
-            with codecs.open(loc, encoding='utf-8') as txt:
+            with io.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
+            # FIXME: this should be done in the commands, not here
             """
             The running_inventory defines if the current process is 'inventory' or not.
             This is used for the validation of the path of the 'about_resource'.
@@ -963,7 +936,7 @@ class About(object):
             """
             running_inventory = True
             data = saneyaml.load(input_text, allow_duplicate_keys=False)
-            errs = self.load_dict(data, base_dir, running_inventory, mapping_file)
+            errs = self.load_dict(data, base_dir, running_inventory)
             errors.extend(errs)
         except Exception as e:
             trace = traceback.format_exc()
@@ -974,19 +947,20 @@ class About(object):
         return errors
 
     # FIXME: should be a from_dict class factory instead
-    # FIXME: an About object should not know about mappings
-    def load_dict(self, fields_dict, base_dir, running_inventory=False,
-                  mapping_file=None,
-                  reference_dir=None, with_empty=True):
+    # FIXME: running_inventory: remove this : this should be done in the commands, not here
+    def load_dict(self, fields_dict, base_dir, running_inventory=False, reference_dir=None,):
         """
-        Load this About object file from a `fields_dict` name/value mapping.
+        Load this About object file from a `fields_dict` name/value dict.
         Return a list of errors.
         """
+        # do not keep empty
         fields = list(fields_dict.items())
-        about_file_path = self.about_file_path
-        if not with_empty:
-            fields = [(n, v) for n, v in fields_dict.items() if v]
+
         for key, value in fields:
+            if not value:
+                # never return empty or absent fieds
+                continue
+
             if key == u'licenses':
                 # FIXME: use a license object instead
                 lic_key, lic_name, lic_file, lic_url = ungroup_licenses(value)
@@ -1000,26 +974,24 @@ class About(object):
                     fields.append(('license_url', lic_url))
                 # The licenses field has been ungrouped and can be removed.
                 # Otherwise, it will gives the following INFO level error
-                # 'Field licenses is not a supported field and is ignored.'
+                # 'Field licenses is a custom field.'
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
         errors = self.process(
             fields=fields,
-            about_file_path=about_file_path,
+            about_file_path=self.about_file_path,
             running_inventory=running_inventory,
             base_dir=base_dir,
             reference_dir=reference_dir,
-            mapping_file=mapping_file)
+        )
         self.errors = errors
         return errors
 
-    def dumps(self, mapping_file=False, with_absent=False, with_empty=True):
+    def dumps(self):
         """
         Return self as a formatted ABOUT string.
-        If with_absent, include absent (not present) fields.
-        If with_empty, include empty fields.
         """
-        about_data = {}
+        data = OrderedDict()
         # Group the same license information (name, url, file) together
         license_key = []
         license_name = []
@@ -1027,7 +999,10 @@ class About(object):
         license_url = []
         file_fields = ['about_resource', 'notice_file', 'changelog_file', 'author_file']
         bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
-        for field in self.all_fields(with_absent, with_empty):
+        for field in self.all_fields():
+            if not field.value:
+                continue
+
             if field.name == 'license_key' and field.value:
                 license_key = field.value
             elif field.name == 'license_name' and field.value:
@@ -1036,14 +1011,15 @@ class About(object):
                 license_file = field.value.keys()
             elif field.name == 'license_url' and field.value:
                 license_url = field.value
+
             # No multiple 'about_resource' reference supported.
             # Take the first element (should only be one) in the list for the
             # value of 'about_resource'
             elif field.name in file_fields and field.value:
-                about_data[field.name] = list(field.value.keys())[0]
+                data[field.name] = list(field.value.keys())[0]
             else:
                 if field.value or (field.name in bool_fields and not field.value == None):
-                    about_data[field.name] = field.value
+                    data[field.name] = field.value
 
         # Group the same license information in a list
         license_group = list(zip_longest(license_key, license_name, license_file, license_url))
@@ -1057,17 +1033,13 @@ class About(object):
                 lic_dict['file'] = lic_group[2]
             if lic_group[3]:
                 lic_dict['url'] = lic_group[3]
-            about_data.setdefault('licenses', []).append(lic_dict)
+            data.setdefault('licenses', []).append(lic_dict)
 
-        formatted_about_data = util.format_output(about_data, mapping_file)
+        return saneyaml.dump(data)
 
-        return saneyaml.dump(formatted_about_data)
-
-    def dump(self, location, mapping_file=False, with_absent=False, with_empty=True):
+    def dump(self, location):
         """
         Write formatted ABOUT representation of self to location.
-        If with_absent, include absent (not present) fields.
-        If with_empty, include empty fields.
         """
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
@@ -1079,14 +1051,15 @@ class About(object):
         if not about_file_path.endswith('.ABOUT'):
             # FIXME: we should not infer some location.
             if about_file_path.endswith('/'):
-                about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
+                about_file_path = util.to_posix(
+                    os.path.join(parent, os.path.basename(parent)))
             about_file_path += '.ABOUT'
 
         if on_windows:
             about_file_path = add_unc(about_file_path)
 
-        with codecs.open(about_file_path, mode='wb', encoding='utf-8') as dumped:
-            dumped.write(self.dumps(mapping_file, with_absent, with_empty))
+        with io.open(about_file_path, mode='w', encoding='utf-8') as dumped:
+            dumped.write(self.dumps())
 
     def dump_lic(self, location, license_dict):
         """
@@ -1115,13 +1088,14 @@ class About(object):
                             license_name, license_context, license_url = license_dict[lic_key]
                             license_info = (lic_key, license_name, license_context, license_url)
                             license_key_name_context_url.append(license_info)
-                            with codecs.open(license_path, mode='wb', encoding='utf-8') as lic:
+                            with io.open(license_path, mode='w', encoding='utf-8') as lic:
                                 lic.write(license_context)
                     except:
                         pass
         return license_key_name_context_url
 
-def collect_inventory(location, mapping_file=None):
+
+def collect_inventory(location):
     """
     Collect ABOUT files at location and return a list of errors and a list of
     About objects.
@@ -1135,7 +1109,7 @@ def collect_inventory(location, mapping_file=None):
     abouts = []
     for about_loc in about_locations:
         about_file_path = util.get_relative_path(input_location, about_loc)
-        about = About(about_loc, about_file_path, mapping_file)
+        about = About(about_loc, about_file_path)
         # Insert about_file_path reference to the error
         for severity, message in about.errors:
             msg = (about_file_path + ": " + message)
@@ -1145,37 +1119,32 @@ def collect_inventory(location, mapping_file=None):
     return unique(errors), abouts
 
 
-def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
+def get_field_names(abouts):
     """
     Given a list of About objects, return a list of any field names that exist
     in any object, including custom fields.
     """
     fields = []
-    if with_paths:
-        fields.append(About.about_file_path_attr)
-        # fields.append(About.about_resource_path_attr)
+    fields.append(About.ABOUT_FILE_PATH_ATTR)
 
     standard_fields = About().fields.keys()
-    if with_absent:
-        fields.extend(standard_fields)
-    else:
-        standards = []
-        for a in abouts:
-            for name, field in a.fields.items():
-                if field.required:
+    standards = []
+    for a in abouts:
+        for name, field in a.fields.items():
+            if field.required:
+                if name not in standards:
+                    standards.append(name)
+            else:
+                if field.present:
                     if name not in standards:
                         standards.append(name)
-                else:
-                    if field.present:
-                        if name not in standards:
-                            standards.append(name)
-        # resort standard fields in standard order
-        # which is a tad complex as this is a predefined order
-        sorted_std = []
-        for fn in standard_fields:
-            if fn in standards:
-                sorted_std.append(fn)
-        fields.extend(sorted_std)
+    # resort standard fields in standard order
+    # which is a tad complex as this is a predefined order
+    sorted_std = []
+    for fn in standard_fields:
+        if fn in standards:
+            sorted_std.append(fn)
+    fields.extend(sorted_std)
 
     customs = []
     for a in abouts:
@@ -1183,10 +1152,6 @@ def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
             if field.has_content:
                 if name not in customs:
                     customs.append(name)
-            else:
-                if with_empty:
-                    if name not in customs:
-                        customs.append(name)
     # always sort custom fields list by name
     customs.sort()
     fields.extend(customs)
@@ -1194,46 +1159,59 @@ def field_names(abouts, with_paths=True, with_absent=True, with_empty=True):
     return fields
 
 
-def about_object_to_list_of_dictionary(abouts, with_absent=False, with_empty=True):
+def about_object_to_list_of_dictionary(abouts):
     """
     Convert About objects to a list of dictionaries
     """
-    abouts_dictionary_list = []
+    serialized = []
     for about in abouts:
-        ad = about.as_dict(with_paths=True, with_absent=with_absent, with_empty=with_empty)
+        # TODO: this wholeblock should be under sd_dict()
+        ad = about.as_dict()
         if 'about_file_path' in ad.keys():
             afp = ad['about_file_path']
             afp = '/' + afp if not afp.startswith('/') else afp
             ad['about_file_path'] = afp
-        abouts_dictionary_list.append(ad)
-    return abouts_dictionary_list
+        serialized.append(ad)
+    return serialized
 
 
-def write_output(abouts, location, format, with_absent=False, with_empty=True):  # NOQA
+def write_output(abouts, location, format):  # NOQA
     """
     Write a CSV/JSON file at location given a list of About objects.
     Return a list of Error objects.
     """
-    errors = []
-    about_dictionary_list = about_object_to_list_of_dictionary(abouts, with_absent, with_empty)
-    updated_dictionary_list = about_dictionary_list
+    about_dicts = about_object_to_list_of_dictionary(abouts)
     location = add_unc(location)
-    with codecs.open(location, mode='wb', encoding='utf-8') as output_file:
-        if format == 'csv':
-            fieldnames = field_names(abouts)
-            writer = csv.DictWriter(output_file, fieldnames)
-            writer.writeheader()
-            csv_formatted_list = util.format_about_dict_for_csv_output(updated_dictionary_list)
-            for row in csv_formatted_list:
-                # See https://github.com/dejacode/about-code-tool/issues/167
-                try:
-                    writer.writerow(row)
-                except Exception as e:
-                    msg = u'Generation skipped for ' + row['about_file_path'] + u' : ' + str(e)
-                    errors.append(Error(CRITICAL, msg))
-        else:
-            json_fomatted_list = util.format_about_dict_for_json_output(updated_dictionary_list)
-            output_file.write(json.dumps(json_fomatted_list, indent=2))
+    if format == 'csv':
+        errors = save_as_csv(location, about_dicts, get_field_names(abouts))
+    else:
+        errors = save_as_json(location, about_dicts)
+    return errors
+
+
+def save_as_json(location, about_dicts):
+    mode = 'w'
+    if python2:
+        mode = 'wb'
+    with io.open(location, mode=mode) as output_file:
+        data = util.format_about_dict_for_json_output(about_dicts)
+        output_file.write(json.dumps(data, indent=2))
+    return []
+
+
+def save_as_csv(location, about_dicts, field_names):
+    errors = []
+    with io.open(location, mode='w', encoding='utf-8') as output_file:
+        writer = csv.DictWriter(output_file, field_names)
+        writer.writeheader()
+        csv_formatted_list = util.format_about_dict_for_csv_output(about_dicts)
+        for row in csv_formatted_list:
+            # See https://github.com/dejacode/about-code-tool/issues/167
+            try:
+                writer.writerow(row)
+            except Exception as e:
+                msg = u'Generation skipped for ' + row['about_file_path'] + u' : ' + str(e)
+                errors.append(Error(CRITICAL, msg))
     return errors
 
 

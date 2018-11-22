@@ -12,13 +12,6 @@ Options:
                            License Library API URL using the API KEY.
   --reference DIR          Path to a directory with reference license data and
                            text files.
-  --mapping                Use the default built-in "mapping.config" file with
-                           mapping between input keys and .ABOUT field
-                           names.Cannot be combined with the --mapping-file
-                           option.
-  --mapping-file FILE      Path to an optional custom mapping FILE with mapping
-                           between input keys and .ABOUT field names. Cannot be
-                           combined with the --mapping option.
   -q, --quiet              Do not print error or warning messages.
   --verbose                Show all error and warning messages.
   -h, --help               Show this message and exit.

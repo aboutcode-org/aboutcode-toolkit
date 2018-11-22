@@ -12,16 +12,6 @@ Options:
                            the default built-in template is used.
   --vartext <key>=<value>  Add variable text as key=value for use in a custom
                            attribution template.
-  --inventory FILE         Path to an optional JSON or CSV inventory FILE
-                           listing the subset of .ABOUT files paths to consider
-                           when generating the attribution document.
-  --mapping                Use the default built-in "mapping.config" file with
-                           mapping between input keys and .ABOUT field
-                           names.Cannot be combined with the --mapping-file
-                           option.
-  --mapping-file FILE      Path to an optional custom mapping FILE with mapping
-                           between input keys and .ABOUT field names. Cannot be
-                           combined with the --mapping option.
   -q, --quiet              Do not print error or warning messages.
   --verbose                Show all error and warning messages.
   -h, --help               Show this message and exit.
