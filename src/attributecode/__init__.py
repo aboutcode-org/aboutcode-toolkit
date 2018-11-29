@@ -31,7 +31,7 @@ except NameError:  # pragma: nocover
 
 import saneyaml
 
-__version__ = '3.3.0'
+__version__ = '3.4.0.pre1'
 
 __about_spec_version__ = '3.1'
 

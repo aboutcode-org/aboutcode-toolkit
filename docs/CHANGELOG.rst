@@ -3,7 +3,7 @@ next
 
 2018-XX-XX
 
-    Release 4.0.0
+    Release 3.4.0.pre1
 
     * Support filenames/path with spaces #310
 
