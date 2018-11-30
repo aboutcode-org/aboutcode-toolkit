@@ -987,6 +987,15 @@ class About(object):
         self.errors = errors
         return errors
 
+    @classmethod
+    def from_dict(cls, about_data, base_dir=''):
+        """
+        Return an About object loaded from a python dict.
+        """
+        about = cls()
+        about.load_dict(about_data, base_dir=base_dir)
+        return about
+
     def dumps(self):
         """
         Return self as a formatted ABOUT string.

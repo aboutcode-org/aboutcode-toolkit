@@ -849,6 +849,31 @@ custom1: |
 
         assert expected == dict(as_dict)
 
+    def test_about_model_class_from_dict_constructor(self):
+        about_data = {
+            'about_resource': ['.'],
+            'attribute': 'yes',
+            'author': ['Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'],
+            'copyright': 'Copyright (c) 2013-2014 nexB Inc.',
+            'description': 'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
+            'homepage_url': 'http://dejacode.org',
+            'license_expression': 'apache-2.0',
+            'name': 'AboutCode',
+            'owner': 'nexB Inc.',
+            'vcs_repository': 'https://github.com/dejacode/about-code-tool.git',
+            'vcs_tool': 'git',
+            'version': '0.11.0',
+        }
+
+        about = model.About.from_dict(about_data)
+        assert isinstance(about, model.About)
+
+        about_data.update({
+            'about_file_path': None,
+            'about_resource': OrderedDict([('.', None)]),
+        })
+        assert about_data == about.as_dict()
+
     def test_write_output_csv(self):
         path = 'test_model/this.ABOUT'
         test_file = get_test_loc(path)
