@@ -18,7 +18,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import logging
 import ntpath
 import os
 import posixpath
@@ -28,15 +27,7 @@ import sys
 import tempfile
 import zipfile
 
-
-from attributecode.util import add_unc
 from attributecode.util import to_posix
-
-
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-logger.addHandler(handler)
 
 
 TESTDATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'testdata')
@@ -99,7 +90,7 @@ def get_temp_dir(sub_dir_path=None):
 
     if sub_dir_path:
         # create a sub directory hierarchy if requested
-        new_temp_dir = os.path.join(new_temp_dir, sub_dir_path)
+        new_temp_dir = posixpath.join(new_temp_dir, sub_dir_path)
         create_dir(new_temp_dir)
     return new_temp_dir
 
@@ -135,10 +126,7 @@ def extract_test_loc(path, extract_func=extract_zip):
     archive file has been extracted using extract_func.
     """
     archive = get_test_loc(path)
-    if on_windows:
-        target_dir = add_unc(get_temp_dir())
-    else:
-        target_dir = get_temp_dir()
+    target_dir = get_temp_dir()
     extract_func(archive, target_dir)
     return target_dir
 

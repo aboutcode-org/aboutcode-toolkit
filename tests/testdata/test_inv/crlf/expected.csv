@@ -1,4 +1,4 @@
-about_resource,name,description,copyright
-.,pytest,"first line
+about_resource,location,name,description,copyright
+.,about.ABOUT,pytest,"first line
 second line
 third line",copyright

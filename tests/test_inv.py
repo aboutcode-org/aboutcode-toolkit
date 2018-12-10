@@ -362,7 +362,7 @@ class InventoryTest(unittest.TestCase):
         test_dir = get_test_loc('test_inv/crlf/about.ABOUT')
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
-        fix_location(abouts, test_dir)
+        fix_location(abouts, get_test_loc('test_inv/crlf'))
 
         errors2 = inv.save_as_csv(result_file, abouts)
         errors.extend(errors2)

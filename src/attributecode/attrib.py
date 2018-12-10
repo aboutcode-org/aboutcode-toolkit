@@ -181,7 +181,7 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
             continue
         special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
         if special_char_in_expression:
-            msg = (u"The following character(s) cannot be in the license_expression: " +
+            msg = ("The following character(s) cannot be in the license_expression: " +
                    str(special_char_in_expression))
             errors.append(Error(ERROR, msg))
         else:

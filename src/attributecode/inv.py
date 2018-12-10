@@ -29,7 +29,6 @@ from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import util
 from attributecode.model import About
-from attributecode.util import add_unc
 from attributecode.util import csv
 from attributecode.util import get_absolute
 from attributecode.util import python2
@@ -86,7 +85,6 @@ def get_locations(location):
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
-    location = add_unc(location)
     location = get_absolute(location)
     assert os.path.exists(location)
 
@@ -139,7 +137,6 @@ def save_as_json(location, abouts):
     Return a list of Error objects.
     """
 
-    location = add_unc(location)
     serialized = [a.to_dict(with_location=True, with_licenses=True) for a in abouts]
 
     if python2:
@@ -158,7 +155,6 @@ def save_as_csv(location, abouts):
     Return a list of Error objects.
     LEGACY: the licenses list of objects CANNOT be serialized to CSV
     """
-    location = add_unc(location)
     serialized = [a.to_dict(with_location=True, with_licenses=False) for a in abouts]
 
     field_names = get_field_names(abouts)

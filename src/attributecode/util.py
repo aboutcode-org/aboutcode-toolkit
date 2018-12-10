@@ -21,7 +21,6 @@ from collections import OrderedDict
 import ntpath
 import os
 import posixpath
-import shutil
 import string
 import sys
 
@@ -210,7 +209,6 @@ def extract_zip(location):
     archive_base_name = os.path.basename(location).replace('.zip', '')
     base_dir = tempfile.mkdtemp(prefix='aboutcode-toolkit-extract-')
     target_dir = os.path.join(base_dir, archive_base_name)
-    target_dir = add_unc(target_dir)
 
     os.makedirs(target_dir)
 
@@ -230,10 +228,10 @@ def extract_zip(location):
                 target = target.replace(posixpath.sep, ntpath.sep)
                 parent = parent.replace(posixpath.sep, ntpath.sep)
             if not os.path.exists(parent):
-                os.makedirs(add_unc(parent))
+                os.makedirs(parent)
             if not content and is_dir:
                 if not os.path.exists(target):
-                    os.makedirs(add_unc(target))
+                    os.makedirs(target)
             if not os.path.exists(target):
                 with open(target, 'wb') as f:
                     f.write(content)
@@ -251,44 +249,6 @@ def add_unc(location):
             return UNC_PREFIX + os.path.abspath(location.strip(UNC_PREFIX_POSIX))
         return UNC_PREFIX + os.path.abspath(location)
     return location
-
-
-# FIXME: add docstring
-def copy_license_notice_files(fields, base_dir, reference_dir, afp):
-    """
-    Given a list of (key, value) `fields` tuples and a `base_dir` where ABOUT
-    files and their companion LICENSE are stored, and an extra `reference_dir`
-    where reference license and notice files are stored and the `afp`
-    about_file_path value, this function will copy to the base_dir the
-    license_file or notice_file if found in the reference_dir
-
-    """
-    lic_name = ''
-    for key, value in fields:
-        if not key in ('license_file','notice_file'):
-            continue
-        lic_name = value
-
-        from_lic_path = posixpath.join(to_posix(reference_dir), lic_name)
-        about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
-        to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
-
-        if on_windows:
-            from_lic_path = add_unc(from_lic_path)
-            to_lic_path = add_unc(to_lic_path)
-
-        # Strip the white spaces
-        from_lic_path = from_lic_path.strip()
-        to_lic_path = to_lic_path.strip()
-
-        # Errors will be captured when doing the validation
-        if not posixpath.exists(from_lic_path):
-            continue
-
-        if not posixpath.exists(to_lic_path):
-            os.makedirs(to_lic_path)
-
-        shutil.copy2(from_lic_path, to_lic_path)
 
 
 def unique(sequence):
@@ -312,4 +272,3 @@ def filter_errors(errors, minimum_severity=WARNING):
     severity below `minimum_severity`.
     """
     return unique([e for e in errors if e.severity >= minimum_severity])
-
