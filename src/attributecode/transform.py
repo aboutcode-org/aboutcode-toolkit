@@ -26,6 +26,7 @@ import attr
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import saneyaml
+from attributecode.model import About
 from attributecode.util import csv
 from attributecode.util import python2
 
@@ -159,10 +160,8 @@ class Transformer(object):
 
     # called by attr after the __init__()
     def __attrs_post_init__(self, *args, **kwargs):
-        from attributecode.model import About
-        about = About()
-        self.essential_columns = list(about.required_fields)
-        self.standard_columns = [f.name for f in about.all_fields()]
+        self.essential_columns = ['about_resource', 'about_file_path']
+        self.standard_columns = About.standard_fields()
 
     @classmethod
     def default(cls):

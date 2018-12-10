@@ -18,21 +18,18 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from collections import OrderedDict
 import string
 import unittest
 
 import saneyaml
 
-from testing_utils import extract_test_loc
-from testing_utils import get_test_loc
-from testing_utils import on_posix
-from testing_utils import on_windows
-
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import model
 from attributecode import util
+
+from testing_utils import on_posix
+from testing_utils import on_windows
 
 
 class TestResourcePaths(unittest.TestCase):
@@ -207,16 +204,6 @@ class TestResourcePaths(unittest.TestCase):
         assert expected[0].message == result[0].message
         assert expected == result
 
-    def test_is_about_file(self):
-        assert util.is_about_file('test.About')
-        assert util.is_about_file('test2.aboUT')
-        assert not util.is_about_file('no_about_ext.something')
-        assert not util.is_about_file('about')
-        assert not util.is_about_file('about.txt')
-
-    def test_is_about_file_is_false_if_only_bare_extension(self):
-        assert not util.is_about_file('.ABOUT')
-
     def test_get_relative_path(self):
         test = [('/some/path', '/some/path/file', 'file'),
                 ('path', '/path/file', 'file'),
@@ -243,240 +230,6 @@ class TestResourcePaths(unittest.TestCase):
         for loc, expected in test:
             result = util.get_relative_path(loc, loc)
             assert expected == result
-
-
-class TestGetLocations(unittest.TestCase):
-
-    def test_get_locations(self):
-        test_dir = get_test_loc('test_util/about_locations')
-        expected = sorted([
-            'file with_spaces.ABOUT',
-            'file1',
-            'file2',
-            'dir1/file2',
-            'dir1/file2.aBout',
-            'dir1/dir2/file1.about',
-            'dir2/file1'])
-
-        result = sorted(util.get_locations(test_dir))
-        result = [l.partition('/about_locations/')[-1] for l in result]
-        assert expected == result
-
-    def test_get_about_locations(self):
-        test_dir = get_test_loc('test_util/about_locations')
-        expected = sorted([
-            'file with_spaces.ABOUT',
-            'dir1/file2.aBout',
-            'dir1/dir2/file1.about',
-        ])
-
-        result = sorted(util.get_about_locations(test_dir))
-        result = [l.partition('/about_locations/')[-1] for l in result]
-        assert expected == result
-
-    def test_get_locations_can_yield_a_single_file(self):
-        test_file = get_test_loc('test_util/about_locations/file with_spaces.ABOUT')
-        result = list(util.get_locations(test_file))
-        assert 1 == len(result)
-
-    def test_get_about_locations_for_about(self):
-        location = get_test_loc('test_util/get_about_locations')
-        result = list(util.get_about_locations(location))
-        expected = 'get_about_locations/about.ABOUT'
-        assert result[0].endswith(expected)
-
-    # FIXME: these are not very long/deep paths
-    def test_get_locations_with_very_long_path(self):
-        longpath = (
-            'longpath'
-            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
-            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
-            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
-            '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
-        )
-        test_loc = extract_test_loc('test_util/longpath.zip')
-        result = list(util.get_locations(test_loc))
-        assert any(longpath in r for r in result)
-
-
-class TestCsv(unittest.TestCase):
-
-    def test_load_csv_without_mapping(self):
-        test_file = get_test_loc('test_util/csv/about.csv')
-        expected = [OrderedDict([
-            ('about_file', 'about.ABOUT'),
-            ('about_resource', '.'),
-            ('name', 'ABOUT tool'),
-            ('version', '0.8.1')])
-        ]
-        result = util.load_csv(test_file)
-        assert expected == result
-
-    def test_load_csv_load_rows(self):
-        test_file = get_test_loc('test_util/csv/about.csv')
-        expected = [OrderedDict([
-            ('about_file', 'about.ABOUT'),
-            ('about_resource', '.'),
-            ('name', 'ABOUT tool'),
-            ('version', '0.8.1')])
-        ]
-        result = util.load_csv(test_file)
-        assert expected == result
-
-    def test_load_csv_does_convert_column_names_to_lowercase(self):
-        test_file = get_test_loc('test_util/csv/about_key_with_upper_case.csv')
-        expected = [OrderedDict(
-                    [('about_file', 'about.ABOUT'),
-                     ('about_resource', '.'),
-                     ('name', 'ABOUT tool'),
-                     ('version', '0.8.1')])
-                    ]
-        result = util.load_csv(test_file)
-        assert expected == result
-
-    def test_format_about_dict_for_csv_output(self):
-        about = [OrderedDict([
-            (u'about_file_path', u'/input/about1.ABOUT'),
-            (u'about_resource', [u'test.c']),
-            (u'name', u'AboutCode-toolkit'),
-            (u'license_expression', u'mit AND bsd-new'),
-            (u'license_key', [u'mit', u'bsd-new'])])]
-
-        expected = [OrderedDict([
-            (u'about_file_path', u'/input/about1.ABOUT'),
-            (u'about_resource', u'test.c'),
-            (u'name', u'AboutCode-toolkit'),
-            (u'license_expression', u'mit AND bsd-new'),
-            (u'license_key', u'mit\nbsd-new')])]
-
-        output = util.format_about_dict_for_csv_output(about)
-        assert output == expected
-
-
-class TestJson(unittest.TestCase):
-
-    def test_load_json(self):
-        test_file = get_test_loc('test_util/json/expected.json')
-        expected = [OrderedDict([
-            ('about_file_path', '/load/this.ABOUT'),
-            ('about_resource', '.'),
-            ('name', 'AboutCode'),
-            ('version', '0.11.0')])
-        ]
-        result = util.load_json(test_file)
-        assert expected == result
-
-    def test_load_json2(self):
-        test_file = get_test_loc('test_util/json/expected_need_mapping.json')
-        expected = [dict(OrderedDict([
-            ('about_file', '/load/this.ABOUT'),
-            ('about_resource', '.'),
-            ('version', '0.11.0'),
-            ('name', 'AboutCode'),
-        ])
-        )]
-        result = util.load_json(test_file)
-        assert expected == result
-
-    def test_load_non_list_json(self):
-        test_file = get_test_loc('test_util/json/not_a_list_need_mapping.json')
-        # FIXME: why this dict nesting??
-        expected = [dict(OrderedDict([
-            ('about_resource', '.'),
-            ('name', 'AboutCode'),
-            ('path', '/load/this.ABOUT'),
-            ('version', '0.11.0'),
-        ])
-        )]
-        result = util.load_json(test_file)
-        assert expected == result
-
-    def test_load_non_list_json2(self):
-        test_file = get_test_loc('test_util/json/not_a_list.json')
-        expected = [OrderedDict([
-            ('about_file_path', '/load/this.ABOUT'),
-            ('version', '0.11.0'),
-            ('about_resource', '.'),
-            ('name', 'AboutCode'),
-        ])
-        ]
-        result = util.load_json(test_file)
-        assert expected == result
-
-    def test_load_json_from_abc_mgr(self):
-        test_file = get_test_loc('test_util/json/aboutcode_manager_exported.json')
-        expected = [dict(OrderedDict([
-            ('license_expression', 'apache-2.0'),
-            ('copyright', 'Copyright (c) 2017 nexB Inc.'),
-            ('licenses', [{'key':'apache-2.0'}]),
-            ('copyrights', [{'statements':['Copyright (c) 2017 nexB Inc.']}]),
-            ('path', 'ScanCode'),
-            ('review_status', 'Analyzed'),
-            ('name', 'ScanCode'),
-            ('version', '2.2.1'),
-            ('owner', 'nexB Inc.'),
-            ('code_type', 'Source'),
-            ('is_modified', False),
-            ('is_deployed', False),
-            ('feature', ''),
-            ('purpose', ''),
-            ('homepage_url', None),
-            ('download_url', None),
-            ('license_url', None),
-            ('notice_url', None),
-            ('programming_language', 'Python'),
-            ('notes', ''),
-            ('fileId', 8458),
-        ]))]
-        result = util.load_json(test_file)
-        assert expected == result
-
-    def test_load_json_from_scancode(self):
-        test_file = get_test_loc('test_util/json/scancode_info.json')
-        expected = [dict(OrderedDict([
-            ('type', 'file'),
-            ('name', 'Api.java'),
-            ('path', 'Api.java'),
-            ('base_name', 'Api'),
-            ('extension', '.java'),
-            ('size', 5074),
-            ('date', '2017-07-15'),
-            ('sha1', 'c3a48ec7e684a35417241dd59507ec61702c508c'),
-            ('md5', '326fb262bbb9c2ce32179f0450e24601'),
-            ('mime_type', 'text/plain'),
-            ('file_type', 'ASCII text'),
-            ('programming_language', 'Java'),
-            ('is_binary', False),
-            ('is_text', True),
-            ('is_archive', False),
-            ('is_media', False),
-            ('is_source', True),
-            ('is_script', False),
-            ('files_count', 0),
-            ('dirs_count', 0),
-            ('size_count', 0),
-            ('scan_errors', []),
-        ]))]
-        result = util.load_json(test_file)
-        assert expected == result
-
-    def test_format_about_dict_for_json_output(self):
-        about = [OrderedDict([
-            (u'about_file_path', u'/input/about1.ABOUT'),
-            (u'about_resource', OrderedDict([(u'test.c', None)])),
-            (u'name', u'AboutCode-toolkit'),
-            (u'license_key', [u'mit', u'bsd-new'])])]
-
-        expected = [OrderedDict([
-            (u'about_file_path', u'/input/about1.ABOUT'),
-            (u'about_resource', u'test.c'),
-            (u'name', u'AboutCode-toolkit'),
-            (u'licenses', [
-                OrderedDict([(u'key', u'mit')]),
-                OrderedDict([(u'key', u'bsd-new')])])])]
-
-        output = util.format_about_dict_for_json_output(about)
-        assert output == expected
 
 
 class TestMiscUtils(unittest.TestCase):
@@ -542,31 +295,6 @@ description: sample
             # notes: exceptio is rasied only for the first dupe
             assert 'Duplicate key in YAML source: owner' == str(e)
 
-    def test_ungroup_licenses(self):
-        about = [
-            OrderedDict([
-                (u'key', u'mit'),
-                (u'name', u'MIT License'),
-                (u'file', u'mit.LICENSE'),
-                (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit')]),
-            OrderedDict([
-                (u'key', u'bsd-new'),
-                (u'name', u'BSD-3-Clause'),
-                (u'file', u'bsd-new.LICENSE'),
-                (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new')])
-        ]
-        expected_lic_key = [u'mit', u'bsd-new']
-        expected_lic_name = [u'MIT License', u'BSD-3-Clause']
-        expected_lic_file = [u'mit.LICENSE', u'bsd-new.LICENSE']
-        expected_lic_url = [
-            u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
-            u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new']
-        lic_key, lic_name, lic_file, lic_url = util.ungroup_licenses(about)
-        assert expected_lic_key == lic_key
-        assert expected_lic_name == lic_name
-        assert expected_lic_file == lic_file
-        assert expected_lic_url == lic_url
-
     def test_unique_does_deduplicate_and_keep_ordering(self):
         items = ['a', 'b', 'd', 'b', 'c', 'a']
         expected = ['a', 'b', 'd', 'c']
@@ -574,7 +302,6 @@ description: sample
         assert expected == results
 
     def test_unique_can_handle_About_object(self):
-        base_dir = 'some_dir'
         test = {
             'about_resource': '.',
             'author': '',
@@ -587,16 +314,10 @@ description: sample
             'owner': 'nexB Inc.'
         }
 
-        a = model.About()
-        a.load_dict(test, base_dir)
+        a = model.About.from_dict(test)
+        c = model.About.from_dict(test)
+        b = model.About.from_dict(test)
 
-        c = model.About()
-        c.load_dict(test, base_dir)
-
-        b = model.About()
-        test.update(dict(about_resource='asdasdasd'))
-        b.load_dict(test, base_dir)
-
-        abouts = [a, b]
+        abouts = [a, b, c]
         results = util.unique(abouts)
         assert [a] == results

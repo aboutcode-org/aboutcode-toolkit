@@ -22,25 +22,32 @@ import json
 
 from attributecode import ERROR
 from attributecode import Error
+from attributecode import util
+from attributecode import model
 from attributecode.util import python2
 
-
 if python2:  # pragma: nocover
-    from urllib import quote  # NOQA
-    from urllib import urlencode  # NOQA
     from urllib2 import HTTPError  # NOQA
+    from urllib import urlencode  # NOQA
+    from urlparse import urljoin# NOQA
+    from urlparse import urlparse  # NOQA
+    from urllib import quote  # NOQA
     from urllib2 import Request  # NOQA
     from urllib2 import urlopen  # NOQA
 else:  # pragma: nocover
-    from urllib.parse import quote  # NOQA
+    from urllib.error import HTTPError  # NOQA
     from urllib.parse import urlencode  # NOQA
+    from urllib.parse import urljoin# NOQA
+    from urllib.parse import urlparse  # NOQA
+    from urllib.parse import quote  # NOQA
     from urllib.request import Request  # NOQA
     from urllib.request import urlopen  # NOQA
-    from urllib.error import HTTPError  # NOQA
+
+from license_expression import Licensing
 
 
 """
-API call helpers
+API helpers
 """
 
 
@@ -103,17 +110,104 @@ def request_license_data(api_url, api_key, license_key):
     return license_data, errors
 
 
-# FIXME: args should start with license_key
-def get_license_details_from_api(api_url, api_key, license_key):
+def get_license_details(api_url, api_key, license_key):
     """
-    Return a tuple of license data given a `license_key` using the `api_url`
+    Return a License object given a `license_key` using the `api_url`
     authenticating with `api_key`.
-    The details are a tuple of (license_name, license_key, license_text, errors)
-    where errors is a list of strings.
-    Missing values are provided as empty strings.
     """
     license_data, errors = request_license_data(api_url, api_key, license_key)
-    license_name = license_data.get('name', '')
-    license_text = license_data.get('full_text', '')
-    license_key = license_data.get('key', '')
-    return license_name, license_key, license_text, errors
+    if 'key' in license_data:
+        lic = model.License(
+            key=license_data['key'],
+            name=license_data.get('name'),
+            text=license_data.get('full_text'),
+        )
+    else:
+        lic = None
+    return lic, errors
+
+
+def fetch_licenses(abouts, api_url, api_key):
+    """
+    Return a mapping of {license key: License object} given an `abouts` list of
+    About object and a list of Error.
+    """
+    dje_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(api_url))
+    dje_license_url = urljoin(dje_domain, 'urn/?urn=urn:dje:license:{license_key}')
+
+    licenses_by_key = {}
+    errors = []
+
+    if have_network_connection():
+        if not valid_api_url(api_url):
+            msg = "URL not reachable. Invalid '--api_url'. License generation is skipped."
+            errors.append(Error(ERROR, msg))
+    else:
+        msg = 'Network problem. Please check your Internet connection. License generation is skipped.'
+        errors.append(Error(ERROR, msg))
+
+    msg = "Authorization denied. Invalid '--api_key'. License generation is skipped."
+    auth_error = Error(ERROR, msg)
+
+    # collect unique license keys
+    license_keys =set()
+    licensing = Licensing()
+    for about in abouts:
+        if not about.license_expression:
+            # TODO: we should have a check for this
+            continue
+        about_keys = licensing.license_keys(
+            about.license_expression, unique=True, simple=True)
+        license_keys.update(about_keys)
+
+    # fetch license key proper
+    for license_key in license_keys:
+        # No need to go through fetching all the licensesif  we detected invalid '--api_key'
+        if auth_error in errors:
+            break
+
+        license, errs = get_license_details(api_url, api_key, license_key) #NOQA
+        errors.extend(errs)
+        if license:
+            license.url = dje_license_url.format(license_key=license_key)
+            licenses_by_key[license_key] = license_key
+
+
+    return licenses_by_key, util.unique(errors)
+
+
+def valid_api_url(api_url):
+    try:
+        request = Request(api_url)
+        # This will always goes to exception as no key are provided.
+        # The purpose of this code is to validate the provided api_url is correct
+        urlopen(request)
+    except HTTPError as http_e:
+        # The 403 error code is refer to "Authentication credentials were not provided.".
+        # This is correct as no key are provided.
+        if http_e.code == 403:
+            return True
+    except:
+        # All other exceptions yield to invalid api_url
+        pass
+    return False
+
+
+# FIXME: rename to is_online: BUT do we really need this at all????
+def have_network_connection():
+    """
+    Return True if an HTTP connection to some public web site is possible.
+    """
+    import socket
+    if python2:
+        import httplib  # NOQA
+    else:
+        import http.client as httplib  # NOQA
+
+    http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)  # NOQA
+    try:
+        http_connection.connect()
+    except socket.error:
+        return False
+    else:
+        return True

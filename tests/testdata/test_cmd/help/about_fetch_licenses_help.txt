@@ -1,0 +1,16 @@
+Usage: about fetch-licenses [OPTIONS] LOCATION OUTPUT
+
+  Load inventory from LOCATION then fetch license texts and data referenced in
+  this inventory from a remote DejaCode License Library API and finally save
+  the
+
+  LOCATION: Path to a JSON or CSV inventory file.
+
+  OUTPUT: Path where to save the retrieved license data and textx..
+
+Options:
+  --api-key API-KEY  DejaCode License Library API KEY.
+  --api-url API-URL  DejaCode License Library API URL.
+  -q, --quiet        Do not print error or warning messages.
+  --verbose          Show all error and warning messages.
+  -h, --help         Show this message and exit.

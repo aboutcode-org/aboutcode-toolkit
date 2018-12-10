@@ -18,64 +18,18 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import codecs
-from collections import OrderedDict
+import io
+import json
+import os
 
-# FIXME: why posipath???
-from posixpath import basename
-from posixpath import dirname
-from posixpath import exists
-from posixpath import join
-from posixpath import normpath
-
+from attributecode import api
 from attributecode import ERROR
 from attributecode import CRITICAL
-from attributecode import INFO
 from attributecode import Error
 from attributecode import model
 from attributecode import util
-from attributecode.util import add_unc
 from attributecode.util import csv
-from attributecode.util import to_posix
-from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import unique
-
-
-def check_duplicated_columns(location):
-    """
-    Return a list of errors for duplicated column names in a CSV file
-    at location.
-    """
-    location = add_unc(location)
-    # FIXME: why errors=ignore?
-    with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
-        reader = csv.reader(csvfile)
-        columns = next(reader)
-        columns = [col for col in columns]
-
-    seen = set()
-    dupes = OrderedDict()
-    for col in columns:
-        c = col.lower()
-        if c in seen:
-            if c in dupes:
-                dupes[c].append(col)
-            else:
-                dupes[c] = [col]
-        seen.add(c.lower())
-
-    errors = []
-    if dupes:
-        dup_msg = []
-        for name, names in dupes.items():
-            names = u', '.join(names)
-            msg = '%(name)s with %(names)s' % locals()
-            dup_msg.append(msg)
-        dup_msg = u', '.join(dup_msg)
-        msg = ('Duplicated column name(s): %(dup_msg)s\n' % locals() +
-               'Please correct the input and re-run.')
-        errors.append(Error(ERROR, msg))
-    return unique(errors)
 
 
 def check_duplicated_about_file_path(inventory_dict):
@@ -96,194 +50,186 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 
-# TODO: this should be either the CSV or the ABOUT files but not both???
-def load_inventory(location, base_dir, reference_dir=None):
+def load_inventory(location, base_dir=None):
     """
-    Load the inventory file at `location` for ABOUT and LICENSE files stored in
-    the `base_dir`. Return a list of errors and a list of About objects
-    validated against the `base_dir`.
-
-    Optionally use `reference_dir` as the directory location of extra reference
-    license and notice files to reuse.
+    Load the inventory file at `location` as About objects.
+    Use the `base_dir` to resolve the ABOUT file location.
+    Return a list of errors and a list of About objects.
     """
     errors = []
     abouts = []
-    base_dir = util.to_posix(base_dir)
-    # FIXME: do not mix up CSV and JSON
-    if location.endswith('.csv'):
-        # FIXME: this should not be done here.
-        dup_cols_err = check_duplicated_columns(location)
-        if dup_cols_err:
-            errors.extend(dup_cols_err)
-            return errors, abouts
-        inventory = util.load_csv(location)
-    else:
-        inventory = util.load_json(location)
 
-    try:
-        # FIXME: this should not be done here.
-        dup_about_paths_err = check_duplicated_about_file_path(inventory)
-        if dup_about_paths_err:
-            errors.extend(dup_about_paths_err)
-            return errors, abouts
-    except Exception as e:
-        # TODO: why catch ALL Exception
-        msg = "The essential field 'about_file_path' is not found in the <input>"
-        errors.append(Error(CRITICAL, msg))
+    if location.endswith('.csv'):
+        inventory = load_csv(location)
+    elif location.endswith('.json'):
+        inventory = load_json(location)
+    else:
+        raise Exception(
+            'Unsupported inventory file type. '
+            'Must be one of .csv or .json: {}'.format(location))
+    inventory = list(inventory)
+
+    # FIXME: this should not be done here.
+    dup_about_paths_err = check_duplicated_about_file_path(inventory)
+    if dup_about_paths_err:
+        errors.extend(dup_about_paths_err)
         return errors, abouts
 
-    for i, fields in enumerate(inventory):
-        # check does the input contains the required fields
-        required_fields = model.About.required_fields
+    if base_dir:
+        base_dir = util.to_posix(base_dir)
 
-        for f in required_fields:
-            if f not in fields:
-                msg = "Required fiel: %(f)r not found in the <input>" % locals()
-                errors.append(Error(ERROR, msg))
-                return errors, abouts
-        afp = fields.get(model.About.ABOUT_FILE_PATH_ATTR)
-
-        # FIXME: this should not be a failure condition
-        if not afp or not afp.strip():
-            msg = 'Empty column: %(afp)r. Cannot generate .ABOUT file.' % locals()
+    for entry in inventory:
+        entry = dict(entry)
+        about_file_path = entry.pop('about_file_path', None)
+        if not about_file_path or not about_file_path.strip():
+            msg = (
+                'Empty or missing "about_file_path": '
+                'Cannot generate .ABOUT file for: "{}"'.format(about_file_path))
             errors.append(Error(ERROR, msg))
             continue
-        else:
-            afp = util.to_posix(afp)
-            loc = join(base_dir, afp)
-        about = model.About(about_file_path=afp)
-        about.location = loc
+        about_file_path = util.to_posix(about_file_path)
 
-        ld_errors = about.load_dict(
-            fields,
-            base_dir,
-            running_inventory=False,
-            reference_dir=reference_dir,
-        )
-        # 'about_resource' field will be generated during the process.
-        # No error need to be raise for the missing 'about_resource'.
-        for e in ld_errors:
-            if e.message == 'Field about_resource is required':
-                ld_errors.remove(e)
-        for e in ld_errors:
-            if not e in errors:
-                errors.extend(ld_errors)
-        abouts.append(about)
+        try:
+            about = model.About.from_dict(entry)
+            if base_dir:
+                about.location = os.path.join(base_dir, about_file_path)
+
+            print('creating about:' + repr(about))
+            abouts.append(about)
+        except Exception as e:
+            msg = (
+                'Cannot create About from inventory entry '
+                'for: "{}".\n'.format(about_file_path) + str(e))
+            errors.append(Error(ERROR, msg))
+            continue
 
     return unique(errors), abouts
 
 
-def generate(location, base_dir, reference_dir=None, fetch_license=False):
+def load_csv(location):
     """
-    Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
-    base_dir. Return errors and about objects.
+    Read CSV at `location` and yield an ordered mapping for each row.
     """
-    not_exist_errors = []
-    api_url = ''
-    api_key = ''
-    gen_license = False
-    # FIXME: use two different arguments: key and url
-    # Check if the fetch_license contains valid argument
-    if fetch_license:
-        # Strip the ' and " for api_url, and api_key from input
-        api_url = fetch_license[0].strip("'").strip('"')
-        api_key = fetch_license[1].strip("'").strip('"')
-        gen_license = True
+    with io.open(location, encoding='utf-8') as csvfile:
+        for row in csv.DictReader(csvfile):
+            yield row
 
-    # TODO: WHY use posix??
-    bdir = to_posix(base_dir)
 
-    errors, abouts = load_inventory(
-        location=location,
-        base_dir=bdir,
-        reference_dir=reference_dir
-    )
+def load_json(location):
+    """
+    Read JSON file at `location` and return a list of ordered dicts, one for
+    each entry.
+    """
+    # FIXME: IMHO we should know where the JSON is from and its shape
+    # FIXME use: object_pairs_hook=OrderedDict
+    with open(location) as json_file:
+        results = json.load(json_file)
 
-    if gen_license:
-        license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)
-        if err:
-            for e in err:
-                # Avoid having same error multiple times
-                if not e in errors:
-                    errors.append(e)
+    # If the loaded JSON is not a list,
+    # - JSON output from AboutCode Manager:
+    # look for the "components" field as it is the field
+    # that contain everything the tool needs and ignore other fields.
+    # For instance,
+    # {
+    #    "aboutcode_manager_notice":"xyz",
+    #    "aboutcode_manager_version":"xxx",
+    #    "components":
+    #    [{
+    #        "license_expression":"apache-2.0",
+    #        "copyright":"Copyright (c) 2017 nexB Inc.",
+    #        "path":"ScanCode",
+    #        ...
+    #    }]
+    # }
+    #
+    # - JSON output from ScanCode:
+    # look for the "files" field as it is the field
+    # that contain everything the tool needs and ignore other fields:
+    # For instance,
+    # {
+    #    "scancode_notice":"xyz",
+    #    "scancode_version":"xxx",
+    #    "files":
+    #    [{
+    #        "path": "test",
+    #        "type": "directory",
+    #        "name": "test",
+    #        ...
+    #    }]
+    # }
+    #
+    # - JSON file that is not produced by scancode or aboutcode toolkit
+    # For instance,
+    # {
+    #    "path": "test",
+    #    "type": "directory",
+    #    "name": "test",
+    #    ...
+    # }
+    # FIXME: this is too clever and complex... IMHO we should not try to guess the format.
+    # instead a command line option should be provided explictly to say what is the format
+    if isinstance(results, list):
+        results = sorted(results)
+    else:
+        if u'aboutcode_manager_notice' in results:
+            results = results['components']
+        elif u'scancode_notice' in results:
+            results = results['files']
+        else:
+            results = [results]
+    return results
 
+
+def generate_about_files(inventory_location, target_dir,
+                   reference_dir=None, api_url=None, api_key=None):
+    """
+    Load ABOUT data from a CSV or JSON inventory at `inventory_location`.
+    Write .ABOUT files in the `target_dir` directory.
+
+    If `reference_dir` is provided reuse and copy license and notice files
+    referenced in the inventory.
+
+    If an `api_url` and an `api_key` are provided then the license data and
+    texts are fetched from this API URL.
+
+    Return a list errors and a list of About objects.
+    """
+    errors, abouts = load_inventory(inventory_location, base_dir=target_dir)
+
+    notices_by_name = {}
+    licenses_by_key = {}
+
+    if api_url and api_key:
+        licenses_by_key, fetch_errors = api.fetch_licenses(abouts, api_url, api_key)
+        errors.extend(fetch_errors)
+
+    if reference_dir:
+        notices_by_name, extra_licenses_by_key = model.load_license_references(reference_dir)
+        # we update (and possibly override) existing API-fetched licenses with local ones
+        licenses_by_key.update(extra_licenses_by_key)
+
+    # update all licenses and notices
     for about in abouts:
-        if about.about_file_path.startswith('/'):
-            about.about_file_path = about.about_file_path.lstrip('/')
-        dump_loc = join(bdir, about.about_file_path.lstrip('/'))
+        about.update_licenses(licenses_by_key)
 
-        # The following code is to check if there is any directory ends with spaces
-        split_path = about.about_file_path.split('/')
-        dir_endswith_space = False
-        for segment in split_path:
-            if segment.endswith(' '):
-                msg = (u'File path : '
-                       u'%(dump_loc)s '
-                       u'contains directory name ends with spaces which is not '
-                       u'allowed. Generation skipped.' % locals())
+        if about.notice_file:
+            notice_text = notices_by_name.get(about.notice_file)
+            if not notice_text:
+                msg = (
+                    'Empty or missing notice_file. '
+                    'Cannot generate valid .ABOUT file: {}'.format(about.notice_file))
                 errors.append(Error(ERROR, msg))
-                dir_endswith_space = True
-                break
-        if dir_endswith_space:
-            # Continue to work on the next about object
-            continue
+                continue
+            about.notice_text = notice_text
 
-        try:
-            # Generate value for 'about_resource' if it does not exist
-            if not about.about_resource.value:
-                about.about_resource.value = OrderedDict()
-                about_resource_value = ''
-                if about.about_file_path.endswith('/'):
-                    about_resource_value = u'.'
-                else:
-                    about_resource_value = basename(about.about_file_path)
-                about.about_resource.value[about_resource_value] = None
-                about.about_resource.present = True
-                # Check for the existence of the 'about_resource'
-                # If the input already have the 'about_resource' field, it will
-                # be validated when creating the about object
-                loc = util.to_posix(dump_loc)
-                about_file_loc = loc
-                path = join(dirname(util.to_posix(about_file_loc)), about_resource_value)
-                if not exists(path):
-                    path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
-                    path = normpath(path)
-                    msg = (u'Field about_resource: '
-                           u'%(path)s '
-                           u'does not exist' % locals())
-                    not_exist_errors.append(msg)
+    # TODO: validate inventory!!!!! to catch error begore creating ABOUT files
 
-            if gen_license:
-                # Write generated LICENSE file
-                license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
-                if license_key_name_context_url_list:
-                    # use value not "presence"
-                    if not about.license_file.present:
-                        about.license_file.value = OrderedDict()
-                        for lic_key, lic_name, lic_context, lic_url in license_key_name_context_url_list:
-                            gen_license_name = lic_key + u'.LICENSE'
-                            about.license_file.value[gen_license_name] = lic_context
-                            about.license_file.present = True
-                            if not about.license_name.present:
-                                about.license_name.value.append(lic_name)
-                            if not about.license_url.present:
-                                about.license_url.value.append(lic_url)
-                        if about.license_url.value:
-                            about.license_url.present = True
-                        if about.license_name.value:
-                            about.license_name.present = True
+    # fix the location to ensure this is a proper .ABOUT file
+    for about in abouts:
+        loc = about.location
+        if not loc.endswith('.ABOUT'):
+            loc = loc.rstrip('\\/').strip() + '.ABOUT'
+        about.location = loc
+        about.dump(location=loc, with_files=True)
 
-            about.dump(dump_loc)
-
-            for e in not_exist_errors:
-                errors.append(Error(INFO, e))
-
-        except Exception as e:
-            # only keep the first 100 char of the exception
-            # TODO: truncated errors are likely making diagnotics harder
-            emsg = repr(e)[:100]
-            msg = (u'Failed to write .ABOUT file at : '
-                   u'%(dump_loc)s '
-                   u'with error: %(emsg)s' % locals())
-            errors.append(Error(ERROR, msg))
     return unique(errors), abouts

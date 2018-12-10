@@ -1,6 +1,5 @@
 about_resource: xtrans-1.3.5.txz
 name: xtrans
-about_resource_path: xtrans-1.3.5.txz
 version: v 1.3.5
 license_expression: mit
 license_name: MIT License

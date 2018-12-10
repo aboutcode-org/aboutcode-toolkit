@@ -19,7 +19,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 # Common license keys
-COMMON_LICENSES = (
+COMMON_LICENSES = set([
     'aes-128-3.0',
     'agpl-3.0-plus',
     'apache-1.1',
@@ -86,4 +86,4 @@ COMMON_LICENSES = (
     'uoi-ncsa',
     'x11',
     'zlib',
-)
+])

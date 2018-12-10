@@ -19,31 +19,20 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
+import os
 import unittest
+
+from attributecode import ERROR
+from attributecode import CRITICAL
+from attributecode import Error
+from attributecode import gen
+from attributecode import model
 
 from testing_utils import get_temp_dir
 from testing_utils import get_test_loc
 
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import gen
-from unittest.case import skip
-
 
 class GenTest(unittest.TestCase):
-    def test_check_duplicated_columns(self):
-        test_file = get_test_loc('test_gen/dup_keys.csv')
-        expected = [Error(ERROR, 'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
-        result = gen.check_duplicated_columns(test_file)
-        assert expected == result
-
-    def test_check_duplicated_columns_handles_lower_upper_case(self):
-        test_file = get_test_loc('test_gen/dup_keys_with_diff_case.csv')
-        expected = [Error(ERROR, 'Duplicated column name(s): copyright with Copyright\nPlease correct the input and re-run.')]
-        result = gen.check_duplicated_columns(test_file)
-        assert expected == result
 
     def test_check_duplicated_about_file_path(self):
         test_dict = [
@@ -56,146 +45,290 @@ class GenTest(unittest.TestCase):
         result = gen.check_duplicated_about_file_path(test_dict)
         assert expected == result
 
-    def test_load_inventory(self):
+    def test_load_inventory_base(self):
         location = get_test_loc('test_gen/inv.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir)
 
-        expected_errors = [
-            Error(INFO, 'Field custom1 is a custom field.'),
-            Error(INFO, 'Field about_resource: Path')
-        ]
-        for exp, err in zip(expected_errors, errors):
-            assert exp.severity == err.severity
-            assert err.message.startswith(exp.message)
+        expected_errors = []
+        assert expected_errors == errors
 
-        expected = (
-'''about_resource: .
-name: AboutCode
-version: 0.11.0
-description: |
-  multi
-  line
-custom1: |
-  multi
-  line
-'''
-        )
-        result = [a.dumps() for a in abouts]
-        assert expected == result[0]
+        expected = [OrderedDict([
+            ('about_resource', u'.'),
+            ('name', u'AboutCode'),
+            ('version', u'0.11.0'),
+            ('description', u'multi\nline'),
+            (u'custom1', u'multi\nline')
+        ])]
+        result = [a.to_dict() for a in abouts]
+        assert expected == result
 
     def test_load_inventory_with_errors(self):
         location = get_test_loc('test_gen/inv4.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir)
-
         expected_errors = [
-            Error(CRITICAL, "Field name: 'confirmed copyright' contains illegal name characters: 0 to 9, a to z, A to Z and _."),
-            Error(INFO, 'Field resource is a custom field.'),
-            Error(INFO, 'Field test is a custom field.'),
-            Error(INFO, 'Field about_resource: Path')
+            Error(ERROR, 'Cannot create About from inventory entry for: '
+                  '"inv/this.ABOUT".\nInvalid data: all keys must be lowercase.')
         ]
-        # assert [] == errors
-        for exp, err in zip(expected_errors, errors):
-            assert exp.severity == err.severity
-            assert err.message.startswith(exp.message)
+        assert expected_errors == errors
 
-        expected = (
-            'about_resource: .\n'
-            'name: AboutCode\n'
-            'version: 0.11.0\n'
-            'description: |\n'
-            '  multi\n'
-            '  line\n'
-            # 'confirmed copyright: Copyright (c) nexB, Inc.\n'
-            'resource: this.ABOUT\n'
-            'test: This is a test\n'
-        )
-        result = [a.dumps() for a in abouts]
-        assert expected == result[0]
+        result = [a.to_dict() for a in abouts]
+        assert [] == result
 
-    def test_generation_dir_endswith_space(self):
+    def test_generate_about_files_dir_endswith_space(self):
         location = get_test_loc('test_gen/inventory/complex/about_file_path_dir_endswith_space.csv')
         base_dir = get_temp_dir()
-        errors, _abouts = gen.generate(location, base_dir)
-        expected_errors_msg1 = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
-        expected_errors_msg2 = 'Field about_resource'
-        assert errors
-        assert len(errors) == 2
-        assert expected_errors_msg1 in errors[0].message or expected_errors_msg1 in errors[1].message
-        assert expected_errors_msg2 in errors[0].message or expected_errors_msg2 in errors[1].message
+        errors, _abouts = gen.generate_about_files(location, base_dir)
+        assert [] == errors
+        result = sorted(os.listdir(os.path.join(base_dir, 'about ')))
+        assert ['about.ABOUT'] == result
 
-    def test_generation_with_no_about_resource(self):
+    def test_generate_about_files_with_about_file_path_as_directory(self):
         location = get_test_loc('test_gen/inv2.csv')
         base_dir = get_temp_dir()
-        errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([('.', None)])
-        assert abouts[0].about_resource.value == expected
-        assert len(errors) == 1
+        errors, abouts = gen.generate_about_files(location, base_dir)
+        expected = []
+        assert expected == errors
 
-    def test_generation_with_no_about_resource_reference(self):
+        expected = [OrderedDict([('name', u'AboutCode'), ('version', u'0.11.0')])]
+        assert expected == [a.to_dict() for a in abouts]
+        
+        generated_about_loc = abouts[0].location
+        about_file = model.About.load(generated_about_loc)
+        expected = OrderedDict([('name', u'AboutCode'), ('version', u'0.11.0')])
+        assert expected == about_file.to_dict()
+
+    def test_generate_about_files_with_no_about_resource_reference(self):
         location = get_test_loc('test_gen/inv3.csv')
         base_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([('test.tar.gz', None)])
+        errors, abouts = gen.generate_about_files(location, base_dir)
+        expected = []
+        assert expected == errors
 
-        assert abouts[0].about_resource.value == expected
-        assert len(errors) == 1
-        msg = 'Field about_resource'
-        assert msg in errors[0].message
+        expected = [OrderedDict([('name', u'AboutCode'), ('version', u'0.11.0')])]
+        assert expected == [a.to_dict() for a in abouts]
 
-    def test_generation_with_no_about_resource_reference_no_resource_validation(self):
+    def test_generate_about_files_with_no_about_resource_reference_no_resource_validation(self):
         location = get_test_loc('test_gen/inv3.csv')
         base_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([('test.tar.gz', None)])
+        errors, abouts = gen.generate_about_files(location, base_dir)
+        expected = []
+        assert expected == errors
 
-        assert abouts[0].about_resource.value == expected
-        assert len(errors) == 1
+        expected = [OrderedDict([('name', u'AboutCode'), ('version', u'0.11.0')])]
+        assert expected == [a.to_dict() for a in abouts]
 
-    def test_generate(self):
+    def test_generate_about_files_simple(self):
         location = get_test_loc('test_gen/inv.csv')
-        base_dir = get_temp_dir()
+        target_dir = get_temp_dir()
 
-        errors, abouts = gen.generate(location, base_dir)
-        msg1 = 'Field custom1 is a custom field.'
-        msg2 = 'Field about_resource'
+        errors, abouts = gen.generate_about_files(location, target_dir)
+        assert [] == errors
 
-        assert msg1 in errors[0].message
-        assert msg2 in errors[1].message
-
-        result = [a.dumps() for a in abouts][0]
-        expected = (
-'''about_resource: .
-name: AboutCode
-version: 0.11.0
-description: |
-  multi
-  line
-custom1: |
-  multi
-  line
-'''
-        )
+        result = [a.to_dict() for a in abouts]
+        expected = [OrderedDict([
+            ('about_resource', u'.'),
+            ('name', u'AboutCode'),
+            ('version', u'0.11.0'),
+            ('description', u'multi\nline'),
+            (u'custom1', u'multi\nline')])
+        ]
         assert expected == result
 
-    @skip('FIXME: this test is making a failed, live API call')
-    def test_generate_not_overwrite_original_license_file(self):
-        location = get_test_loc('test_gen/inv5.csv')
-        base_dir = get_temp_dir()
-        reference_dir = None
-        fetch_license = ['url', 'lic_key']
+        generated = os.listdir(os.path.join(target_dir, 'inv'))
+        expected = ['this.ABOUT']
+        assert expected == generated
 
-        _errors, abouts = gen.generate(
-            location, base_dir, reference_dir, fetch_license)
+    def test_generate_about_files_reuses_licenses_from_reference_dir(self):
+        inventory_location = get_test_loc('test_gen/inv-with-complex-expression-and-notice.csv')
+        target_dir = get_temp_dir()
+        reference_dir = get_test_loc('test_gen/reference')
 
-        result = [a.dumps()for a in abouts][0]
-        expected = (
-            'about_resource: .\n'
-            'name: AboutCode\n'
-            'version: 0.11.0\n'
-            'licenses:\n'
-            '    -   file: this.LICENSE\n')
+        errors, abouts = gen.generate_about_files(inventory_location, target_dir, reference_dir)
+        expected_errors = []
+        assert expected_errors == errors
+
+        result = [a.to_dict() for a in abouts]
+        expected = [
+            OrderedDict([
+                ('about_resource', u'some res'), 
+                ('name', u'AboutCode'), ('version', u'0.11.0'), 
+                ('license_expression', u'mit AND bsd-new OR gpl-2.0'), 
+                ('licenses', [
+                    OrderedDict([('key', u'mit'), ('file', u'mit.LICENSE'), ('name', u'MIT License'), ('url', u'http://mit.license.com')]), 
+                    OrderedDict([('key', u'bsd-new'), ('file', u'bsd-new.LICENSE'), ('name', u'BSD License'), ('url', u'http://BSD.license.com')]), 
+                    OrderedDict([('key', u'gpl-2.0'), ('file', u'gpl-2.0.LICENSE'), ('name', u'GPL 2.0 License'), ('url', u'http://gpl.license.com')])]), 
+                ('notice_file', u'this.NOTICE'), 
+                (u'custom1', u'multi\nline')]),
+    
+            OrderedDict([
+                ('about_resource', u'some other res'), 
+                ('name', u'MyNmae'), ('version', u'12'), 
+                ('license_expression', u'bsd-new'), 
+                ('licenses', [OrderedDict([
+                    ('key', u'bsd-new'), ('file', u'bsd-new.LICENSE'), ('name', u'BSD License'), ('url', u'http://BSD.license.com')])]), 
+                ('notice_file', u'that.NOTICE'), 
+                (u'custom1', u'multi\nline')])
+        ]
+        
+        assert expected == result
+
+        generated_files = os.listdir(os.path.join(target_dir, 'inv'))
+        expected = [
+            'bsd-new.LICENSE',
+            'gpl-2.0.LICENSE',
+            'mit.LICENSE',
+            'that.ABOUT',
+            'that.NOTICE',
+            'this.ABOUT',
+            'this.NOTICE',
+        ]
+
+        assert expected == sorted(generated_files)
+
+
+class TestJson(unittest.TestCase):
+
+    def test_load_json(self):
+        test_file = get_test_loc('test_gen/json/expected.json')
+        expected = [OrderedDict([
+            ('about_file_path', '/load/this.ABOUT'),
+            ('about_resource', '.'),
+            ('name', 'AboutCode'),
+            ('version', '0.11.0')])
+        ]
+        result = gen.load_json(test_file)
+        assert expected == result
+
+    def test_load_json2(self):
+        test_file = get_test_loc('test_gen/json/expected_need_mapping.json')
+        expected = [dict(OrderedDict([
+            ('about_file', '/load/this.ABOUT'),
+            ('about_resource', '.'),
+            ('version', '0.11.0'),
+            ('name', 'AboutCode'),
+        ])
+        )]
+        result = gen.load_json(test_file)
+        assert expected == result
+
+    def test_load_non_list_json(self):
+        test_file = get_test_loc('test_gen/json/not_a_list_need_mapping.json')
+        # FIXME: why this dict nesting??
+        expected = [dict(OrderedDict([
+            ('about_resource', '.'),
+            ('name', 'AboutCode'),
+            ('path', '/load/this.ABOUT'),
+            ('version', '0.11.0'),
+        ])
+        )]
+        result = gen.load_json(test_file)
+        assert expected == result
+
+    def test_load_non_list_json2(self):
+        test_file = get_test_loc('test_gen/json/not_a_list.json')
+        expected = [OrderedDict([
+            ('about_file_path', '/load/this.ABOUT'),
+            ('version', '0.11.0'),
+            ('about_resource', '.'),
+            ('name', 'AboutCode'),
+        ])
+        ]
+        result = gen.load_json(test_file)
+        assert expected == result
+
+    def test_load_json_from_abc_mgr(self):
+        test_file = get_test_loc('test_gen/json/aboutcode_manager_exported.json')
+        expected = [dict(OrderedDict([
+            ('license_expression', 'apache-2.0'),
+            ('copyright', 'Copyright (c) 2017 nexB Inc.'),
+            ('licenses', [{'key':'apache-2.0'}]),
+            ('copyrights', [{'statements':['Copyright (c) 2017 nexB Inc.']}]),
+            ('path', 'ScanCode'),
+            ('review_status', 'Analyzed'),
+            ('name', 'ScanCode'),
+            ('version', '2.2.1'),
+            ('owner', 'nexB Inc.'),
+            ('code_type', 'Source'),
+            ('is_modified', False),
+            ('is_deployed', False),
+            ('feature', ''),
+            ('purpose', ''),
+            ('homepage_url', None),
+            ('download_url', None),
+            ('license_url', None),
+            ('notice_url', None),
+            ('programming_language', 'Python'),
+            ('notes', ''),
+            ('fileId', 8458),
+        ]))]
+        result = gen.load_json(test_file)
+        assert expected == result
+
+    def test_load_json_from_scancode(self):
+        test_file = get_test_loc('test_gen/json/scancode_info.json')
+        expected = [dict(OrderedDict([
+            ('type', 'file'),
+            ('name', 'Api.java'),
+            ('path', 'Api.java'),
+            ('base_name', 'Api'),
+            ('extension', '.java'),
+            ('size', 5074),
+            ('date', '2017-07-15'),
+            ('sha1', 'c3a48ec7e684a35417241dd59507ec61702c508c'),
+            ('md5', '326fb262bbb9c2ce32179f0450e24601'),
+            ('mime_type', 'text/plain'),
+            ('file_type', 'ASCII text'),
+            ('programming_language', 'Java'),
+            ('is_binary', False),
+            ('is_text', True),
+            ('is_archive', False),
+            ('is_media', False),
+            ('is_source', True),
+            ('is_script', False),
+            ('files_count', 0),
+            ('dirs_count', 0),
+            ('size_count', 0),
+            ('scan_errors', []),
+        ]))]
+        result = gen.load_json(test_file)
+        assert expected == result
+
+
+class TestCsv(unittest.TestCase):
+
+    def test_load_csv_without_mapping(self):
+        test_file = get_test_loc('test_gen/csv/about.csv')
+        expected = [OrderedDict([
+            ('about_file', 'about.ABOUT'),
+            ('about_resource', '.'),
+            ('name', 'ABOUT tool'),
+            ('version', '0.8.1')
+        ])]
+        result = list(gen.load_csv(test_file))
+        assert expected == result
+
+    def test_load_csv_load_rows(self):
+        test_file = get_test_loc('test_gen/csv/about.csv')
+        expected = [OrderedDict([
+            ('about_file', 'about.ABOUT'),
+            ('about_resource', '.'),
+            ('name', 'ABOUT tool'),
+            ('version', '0.8.1')
+        ])]
+        result = list(gen.load_csv(test_file))
+        assert expected == result
+
+    def test_load_csv_does_not_convert_column_names_to_lowercase(self):
+        test_file = get_test_loc('test_gen/csv/about_key_with_upper_case.csv')
+        expected = [OrderedDict([
+            ('about_file', 'about.ABOUT'),
+            ('about_resource', '.'),
+            ('nAme', 'ABOUT tool'),
+            ('Version', '0.8.1')
+        ])]
+        result = list(gen.load_csv(test_file))
         assert expected == result

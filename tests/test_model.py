@@ -989,8 +989,7 @@ class CollectorTest(unittest.TestCase):
         errors, abouts = model.collect_inventory(test_loc)
         expected_errors = [
             Error(INFO, 'inventory/custom_fields2.ABOUT: Field resource is a custom field.'),
-            Error(INFO, 'inventory/custom_fields2.ABOUT: Field custom_mapping is a custom field.')
-        ]
+            Error(INFO, 'inventory/custom_fields2.ABOUT: Field custom_mapping is a custom field.')]
         assert expected_errors == errors
         expected = [u'about_resource: .\nname: test\nresource: .\ncustom_mapping: test\n']
         assert expected == [a.dumps() for a in abouts]

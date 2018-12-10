@@ -17,13 +17,10 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import codecs
 from collections import OrderedDict
-import json
 import ntpath
 import os
 import posixpath
-import re
 import shutil
 import string
 import sys
@@ -136,36 +133,6 @@ def get_absolute(location):
     return location
 
 
-def get_locations(location):
-    """
-    Return a list of locations of files given the `location` of a
-    a file or a directory tree containing ABOUT files.
-    File locations are normalized using posix path separators.
-    """
-    location = add_unc(location)
-    location = get_absolute(location)
-    assert os.path.exists(location)
-
-    if os.path.isfile(location):
-        yield location
-    else:
-        for base_dir, _, files in os.walk(location):
-            for name in files:
-                bd = to_posix(base_dir)
-                yield posixpath.join(bd, name)
-
-
-def get_about_locations(location):
-    """
-    Return a list of locations of ABOUT files given the `location` of a
-    a file or a directory tree containing ABOUT files.
-    File locations are normalized using posix path separators.
-    """
-    for loc in get_locations(location):
-        if is_about_file(loc):
-            yield loc
-
-
 def get_relative_path(base_loc, full_loc):
     """
     Return a posix path for a given full location relative to a base location.
@@ -218,15 +185,6 @@ def to_native(path):
     return path
 
 
-def is_about_file(path):
-    """
-    Return True if the path represents a valid ABOUT file name.
-    """
-    if path:
-        path = path.lower()
-        return path.endswith('.about') and path != '.about'
-
-
 def resource_name(path):
     """
     Return the file or directory name from a path.
@@ -236,110 +194,6 @@ def resource_name(path):
     path = path.rstrip(posixpath.sep)
     _left, right = posixpath.split(path)
     return right.strip()
-
-
-
-def load_csv(location):
-    """
-    Read CSV at `location`, return a list of ordered dictionaries, one
-    for each row.
-    """
-    results = []
-    # FIXME: why ignore encoding errors here?
-    with codecs.open(location, mode='rb', encoding='utf-8',
-                     errors='ignore') as csvfile:
-        for row in csv.DictReader(csvfile):
-            # convert all the column keys to lower case
-            updated_row = OrderedDict(
-                [(key.lower(), value) for key, value in row.items()]
-            )
-            results.append(updated_row)
-    return results
-
-
-def load_json(location):
-    """
-    Read JSON file at `location` and return a list of ordered dicts, one for
-    each entry.
-    """
-    # FIXME: IMHO we should know where the JSON is from and its shape
-    # FIXME use: object_pairs_hook=OrderedDict
-    with open(location) as json_file:
-        results = json.load(json_file)
-
-    # If the loaded JSON is not a list,
-    # - JSON output from AboutCode Manager:
-    # look for the "components" field as it is the field
-    # that contain everything the tool needs and ignore other fields.
-    # For instance,
-    # {
-    #    "aboutcode_manager_notice":"xyz",
-    #    "aboutcode_manager_version":"xxx",
-    #    "components":
-    #    [{
-    #        "license_expression":"apache-2.0",
-    #        "copyright":"Copyright (c) 2017 nexB Inc.",
-    #        "path":"ScanCode",
-    #        ...
-    #    }]
-    # }
-    #
-    # - JSON output from ScanCode:
-    # look for the "files" field as it is the field
-    # that contain everything the tool needs and ignore other fields:
-    # For instance,
-    # {
-    #    "scancode_notice":"xyz",
-    #    "scancode_version":"xxx",
-    #    "files":
-    #    [{
-    #        "path": "test",
-    #        "type": "directory",
-    #        "name": "test",
-    #        ...
-    #    }]
-    # }
-    #
-    # - JSON file that is not produced by scancode or aboutcode toolkit
-    # For instance,
-    # {
-    #    "path": "test",
-    #    "type": "directory",
-    #    "name": "test",
-    #    ...
-    # }
-    # FIXME: this is too clever and complex... IMHO we should not try to guess the format.
-    # instead a command line option should be provided explictly to say what is the format
-    if isinstance(results, list):
-        results = sorted(results)
-    else:
-        if u'aboutcode_manager_notice' in results:
-            results = results['components']
-        elif u'scancode_notice' in results:
-            results = results['files']
-        else:
-            results = [results]
-    return results
-
-
-# FIXME: rename to is_online: BUT do we really need this at all????
-def have_network_connection():
-    """
-    Return True if an HTTP connection to some public web site is possible.
-    """
-    import socket
-    if python2:
-        import httplib  # NOQA
-    else:
-        import http.client as httplib  # NOQA
-
-    http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)  # NOQA
-    try:
-        http_connection.connect()
-    except socket.error:
-        return False
-    else:
-        return True
 
 
 def extract_zip(location):
@@ -357,6 +211,7 @@ def extract_zip(location):
     base_dir = tempfile.mkdtemp(prefix='aboutcode-toolkit-extract-')
     target_dir = os.path.join(base_dir, archive_base_name)
     target_dir = add_unc(target_dir)
+
     os.makedirs(target_dir)
 
     if target_dir.endswith((ntpath.sep, posixpath.sep)):
@@ -402,131 +257,38 @@ def add_unc(location):
 def copy_license_notice_files(fields, base_dir, reference_dir, afp):
     """
     Given a list of (key, value) `fields` tuples and a `base_dir` where ABOUT
-    files and their companion LICENSe are store, and an extra `reference_dir`
-    where reference license an notice files are stored and the `afp`
+    files and their companion LICENSE are stored, and an extra `reference_dir`
+    where reference license and notice files are stored and the `afp`
     about_file_path value, this function will copy to the base_dir the
     license_file or notice_file if found in the reference_dir
 
     """
     lic_name = ''
     for key, value in fields:
-        if key == 'license_file' or key == 'notice_file':
-            lic_name = value
+        if not key in ('license_file','notice_file'):
+            continue
+        lic_name = value
 
-            from_lic_path = posixpath.join(to_posix(reference_dir), lic_name)
-            about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
-            to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
+        from_lic_path = posixpath.join(to_posix(reference_dir), lic_name)
+        about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
+        to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
 
-            if on_windows:
-                from_lic_path = add_unc(from_lic_path)
-                to_lic_path = add_unc(to_lic_path)
+        if on_windows:
+            from_lic_path = add_unc(from_lic_path)
+            to_lic_path = add_unc(to_lic_path)
 
-            # Strip the white spaces
-            from_lic_path = from_lic_path.strip()
-            to_lic_path = to_lic_path.strip()
+        # Strip the white spaces
+        from_lic_path = from_lic_path.strip()
+        to_lic_path = to_lic_path.strip()
 
-            # Errors will be captured when doing the validation
-            if not posixpath.exists(from_lic_path):
-                continue
+        # Errors will be captured when doing the validation
+        if not posixpath.exists(from_lic_path):
+            continue
 
-            if not posixpath.exists(to_lic_path):
-                os.makedirs(to_lic_path)
-            try:
-                shutil.copy2(from_lic_path, to_lic_path)
-            except Exception as e:
-                print(repr(e))
-                print('Cannot copy file at %(from_lic_path)r.' % locals())
+        if not posixpath.exists(to_lic_path):
+            os.makedirs(to_lic_path)
 
-
-# FIXME: we should use a license object instead
-def ungroup_licenses(licenses):
-    """
-    Ungroup multiple licenses information
-    """
-    lic_key = []
-    lic_name = []
-    lic_file = []
-    lic_url = []
-    for lic in licenses:
-        if 'key' in lic:
-            lic_key.append(lic['key'])
-        if 'name' in lic:
-            lic_name.append(lic['name'])
-        if 'file' in lic:
-            lic_file.append(lic['file'])
-        if 'url' in lic:
-            lic_url.append(lic['url'])
-    return lic_key, lic_name, lic_file, lic_url
-
-
-# FIXME: add docstring
-def format_about_dict_for_csv_output(about_dictionary_list):
-    csv_formatted_list = []
-    file_fields = ['license_file', 'notice_file', 'changelog_file', 'author_file']
-    for element in about_dictionary_list:
-        row_list = OrderedDict()
-        for key in element:
-            if element[key]:
-                if isinstance(element[key], list):
-                    row_list[key] = u'\n'.join((element[key]))
-                elif key == u'about_resource' or key in file_fields:
-                    row_list[key] = u'\n'.join((element[key].keys()))
-                else:
-                    row_list[key] = element[key]
-        csv_formatted_list.append(row_list)
-    return csv_formatted_list
-
-
-# FIXME: add docstring
-def format_about_dict_for_json_output(about_dictionary_list):
-    licenses = ['license_key', 'license_name', 'license_file', 'license_url']
-    file_fields = ['notice_file', 'changelog_file', 'author_file']
-    json_formatted_list = []
-    for element in about_dictionary_list:
-        row_list = OrderedDict()
-        # FIXME: aboid using parallel list... use an object instead
-        license_key = []
-        license_name = []
-        license_file = []
-        license_url = []
-
-        for key in element:
-            if element[key]:
-                # The 'about_resource' is an ordered dict
-                if key == 'about_resource':
-                    row_list[key] = list(element[key].keys())[0]
-                elif key in licenses:
-                    if key == 'license_key':
-                        license_key = element[key]
-                    elif key == 'license_name':
-                        license_name = element[key]
-                    elif key == 'license_file':
-                        license_file = element[key].keys()
-                    elif key == 'license_url':
-                        license_url = element[key]
-                elif key in file_fields:
-                    row_list[key] = element[key].keys()
-                else:
-                    row_list[key] = element[key]
-
-        # Group the same license information in a list
-        license_group = list(zip_longest(license_key, license_name, license_file, license_url))
-        if license_group:
-            licenses_list = []
-            for lic_group in license_group:
-                lic_dict = OrderedDict()
-                if lic_group[0]:
-                    lic_dict['key'] = lic_group[0]
-                if lic_group[1]:
-                    lic_dict['name'] = lic_group[1]
-                if lic_group[2]:
-                    lic_dict['file'] = lic_group[2]
-                if lic_group[3]:
-                    lic_dict['url'] = lic_group[3]
-                licenses_list.append(lic_dict)
-            row_list['licenses'] = licenses_list
-        json_formatted_list.append(row_list)
-    return json_formatted_list
+        shutil.copy2(from_lic_path, to_lic_path)
 
 
 def unique(sequence):
@@ -551,8 +313,3 @@ def filter_errors(errors, minimum_severity=WARNING):
     """
     return unique([e for e in errors if e.severity >= minimum_severity])
 
-
-"""
-Return True if a string s  name is safe to use as an attribute name.
-"""
-is_valid_name = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$').match

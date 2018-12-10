@@ -115,7 +115,7 @@ class Field(object):
                 return errors
         else:
             # present fields should have content ...
-            # The boolean value can be True, False and None
+            # The boolean value can be True, False and None.
             # The value True or False is the content of boolean fields
             if not self.has_content:
                 # ... especially if required

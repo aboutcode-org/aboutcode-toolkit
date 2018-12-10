@@ -29,20 +29,23 @@ import click
 # silence unicode literals warnings
 click.disable_unicode_literals_warning = True
 
-from attributecode import WARNING
-from attributecode.util import unique
-
 from attributecode import __about_spec_version__
 from attributecode import __version__
+from attributecode import Error
+from attributecode import CRITICAL
+from attributecode import WARNING
 from attributecode import severities
+
 from attributecode.attrib import check_template
 from attributecode.attrib import DEFAULT_TEMPLATE_FILE
-from attributecode.attrib import generate_and_save as generate_attribution_doc
-from attributecode.gen import generate as generate_about_files
-from attributecode.model import collect_inventory
-from attributecode.model import write_output
+from attributecode.attrib import generate_attribution_doc
+from attributecode.gen import generate_about_files
+from attributecode.inv import collect_inventory
+from attributecode.inv import save_as_json
+from attributecode.inv import save_as_csv
 from attributecode.util import extract_zip
 from attributecode.util import filter_errors
+from attributecode.util import unique
 
 
 __copyright__ = """
@@ -180,11 +183,18 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         click.echo('Collecting inventory from ABOUT files...')
 
     # FIXME: do we really want to continue support zip as an input?
+    # accept zipped ABOUT files as input
     if location.lower().endswith('.zip'):
-        # accept zipped ABOUT files as input
         location = extract_zip(location)
+
     errors, abouts = collect_inventory(location)
-    write_errors = write_output(abouts=abouts, location=output, format=format)
+
+    writers = {
+        'json': save_as_json,
+        'csv': save_as_csv,
+    }
+    writer = writers[format]
+    write_errors = writer(location=output, abouts=abouts)
     errors.extend(write_errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
@@ -204,20 +214,12 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     required=True,
     metavar='LOCATION',
     type=click.Path(
-        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
+        exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
     metavar='OUTPUT',
     type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
-
-# FIXME: the CLI UX should be improved with two separate options for API key and URL
-@click.option('--fetch-license',
-    nargs=2,
-    type=str,
-    metavar='URL KEY',
-    help='Fetch license data and text files from a DejaCode License Library '
-         'API URL using the API KEY.')
 
 @click.option('--reference',
     metavar='DIR',
@@ -234,7 +236,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, fetch_license, reference, quiet, verbose):
+def gen(location, output,reference, quiet, verbose):
     """
 Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
@@ -250,16 +252,86 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
 
     errors, abouts = generate_about_files(
-        location=location,
-        base_dir=output,
-        reference_dir=reference,
-        fetch_license=fetch_license,
-    )
+        inventory_location=location,
+        target_dir=output,
+        reference_dir=reference)
 
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         abouts_count = len(abouts)
-        msg = '{abouts_count} .ABOUT files generated in {output}.'.format(**locals())
+        msg = '{abouts_count} .ABOUT files generated in {output}'.format(**locals())
+        click.echo(msg)
+    sys.exit(errors_count)
+
+
+######################################################################
+# fetch-licenses subcommand
+######################################################################
+
+@about.command(cls=AboutCommand,
+    short_help='Fetch and save license texts and data referenced in an'
+        'inventory from a remote DejaCode License Library API.',
+    name='fetch-licenses')
+
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True))
+
+@click.argument('output',
+    required=True,
+    callback=partial(validate_extensions, extensions=('.csv',)),
+    metavar='OUTPUT',
+    type=click.Path(exists=False, dir_okay=True, file_okay=False, writable=True, resolve_path=True))
+
+@click.option('--api-key',
+    metavar='API-KEY',
+    type=str,
+    help='DejaCode License Library API KEY.')
+
+@click.option('--api-url',
+    metavar='API-URL',
+    type=str,
+    help='DejaCode License Library API URL.')
+
+@click.option('-q', '--quiet',
+    is_flag=True,
+    help='Do not print error or warning messages.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
+
+@click.help_option('-h', '--help')
+
+def fetch_licenses(location, output, api_key, api_url, quiet, verbose):  # NOQA
+    """
+Load inventory from LOCATION then fetch license texts and data referenced in
+this inventory from a remote DejaCode License Library API and finally save the
+
+LOCATION: Path to a JSON or CSV inventory file.
+
+OUTPUT: Path where to save the retrieved license data and textx..
+    """
+    from attributecode import api
+    from attributecode import gen
+
+    if not quiet:
+        print_version()
+        click.echo('Fetching licenses...')
+
+    errors, abouts = gen.load_inventory(location)
+
+    licenses_by_key, fetch_errors = api.fetch_licenses(abouts, api_url, api_key)
+    errors.extend(fetch_errors)
+
+    for license in licenses_by_key.values():  # NOQA
+        license.dump(output)
+
+    errors_count = report_errors(errors, quiet, verbose)
+    if not quiet:
+        msg = 'Licenses saved to {output}'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
 
@@ -332,19 +404,35 @@ OUTPUT: Path where to write the attribution document.
         print_version()
         click.echo('Generating attribution...')
 
-    # accept zipped ABOUT files as input
-    if location.lower().endswith('.zip'):
-        location = extract_zip(location)
+    errors = []
 
-    errors, abouts = collect_inventory(location)
+    template_error = check_template(template)
+    if template_error:
+        lineno, message = template_error
+        errors.apend(Error(
+            CRITICAL,
+            'Template validation error at line: {lineno}: "{message}"'.format(**locals())
+        ))
 
-    attrib_errors = generate_attribution_doc(
-        abouts=abouts,
-        output_location=output,
-        template_loc=template,
-        variables=vartext,
-    )
-    errors.extend(attrib_errors)
+    else:
+        # FIXME: this is not a feature. Unzipping should be done by the users IMHO
+        # accept zipped ABOUT files as input
+        if location.lower().endswith('.zip'):
+            location = extract_zip(location)
+
+        errors, abouts = collect_inventory(location)
+
+        # load all files
+        for about in abouts:
+            about.load_files()
+
+        attrib_errors = generate_attribution_doc(
+            abouts=abouts,
+            output_location=output,
+            template_loc=template,
+            variables=vartext,
+        )
+        errors.extend(attrib_errors)
 
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
 

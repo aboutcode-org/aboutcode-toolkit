@@ -1,0 +1,8 @@
+[
+  {
+    "about_resource": ".", 
+    "location": "/home/pombreda/w421/aboutcode-toolkit/tests/testdata/test_inv/this.ABOUT", 
+    "name": "AboutCode", 
+    "version": "0.11.0"
+  }
+]

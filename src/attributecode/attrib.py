@@ -109,7 +109,7 @@ def generate(abouts, template=None, variables=None):
                     else:
                         lic_name_expression_list.append(segment)
 
-                # Join the license name expression into a single string
+                # Join the name expression into a single string
                 lic_name_expression = ' '.join(lic_name_expression_list)
 
                 # Add the license name expression string into the about object
