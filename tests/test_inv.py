@@ -52,7 +52,7 @@ def load_csv(location):
         for row in csv.DictReader(csvfile):
             yield row
 
-def check_csv(expected, result, regen=False, fix_cell_linesep=False):
+def check_csv(expected, result, regen=False):
     """
     Assert that the contents of two CSV files locations `expected` and
     `result` are equal.
@@ -61,25 +61,9 @@ def check_csv(expected, result, regen=False, fix_cell_linesep=False):
         shutil.copyfile(result, expected)
     expected = sorted([sorted(d.items()) for d in load_csv(expected)])
     result = [d.items() for d in load_csv(result)]
-    if fix_cell_linesep:
-        result = [list(fix_crlf(items)) for items in result]
     result = sorted(sorted(items) for items in result)
 
     assert expected == result
-
-
-def fix_crlf(items):
-    """
-    Hackish... somehow the CVS returned on Windows is sometimes using a backward
-    linesep convention:
-    instead of LF inside cells and CRLF at EOL,
-    they use CRLF everywhere.
-    This is fixing this until we find can why
-    """
-    for key, value in items:
-        if isinstance(value, unicode) and '\r\n' in value:
-            value = value.replace('\r\n', '\n')
-        yield key, value
 
 
 def check_json(expected, result, regen=False):
@@ -356,9 +340,9 @@ class InventoryTest(unittest.TestCase):
         assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('test_inv/complex/expected.csv')
-        check_csv(expected, result_file, fix_cell_linesep=True)
+        check_csv(expected, result_file)
 
-    def test_collect_inventory_does_not_convert_lf_to_crlf_from_directory(self):
+    def test_collect_inventory_does_not_damage_line_endings(self):
         test_dir = get_test_loc('test_inv/crlf/about.ABOUT')
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
@@ -370,7 +354,7 @@ class InventoryTest(unittest.TestCase):
         assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('test_inv/crlf/expected.csv')
-        check_csv(expected, result_file, fix_cell_linesep=True)
+        check_csv(expected, result_file)
 
     def test_write_output_csv(self):
         test_file = get_test_loc('test_inv/this.ABOUT')

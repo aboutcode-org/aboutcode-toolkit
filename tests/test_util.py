@@ -209,7 +209,6 @@ class TestResourcePaths(unittest.TestCase):
                 ('path', '/path/file', 'file'),
                 ('/path', '/path/file', 'file'),
                 ('/path/', '/path/file/', 'file'),
-                ('/path/', 'path/', 'path'),
                 ('/p1/p2/p3', '/p1/p2//p3/file', 'file'),
                 (r'c:\some/path', 'c:/some/path/file', 'file'),
                 (r'c:\\some\\path\\', 'c:/some/path/file', 'file'),
@@ -218,18 +217,12 @@ class TestResourcePaths(unittest.TestCase):
             result = util.get_relative_path(base_loc, full_loc)
             assert expected == result
 
-    def test_get_relative_path_with_same_path_twice(self):
-        test = [('/some/path/file', 'path/file'),
-                ('/path/file', 'path/file'),
-                ('/path/file/', 'path/file'),
-                ('path/', 'path'),
-                ('/p1/p2//p3/file', 'p3/file'),
-                ('c:/some/path/file', 'path/file'),
-                (r'c:\\some\\path\\file', 'path/file'),
-                ]
-        for loc, expected in test:
-            result = util.get_relative_path(loc, loc)
-            assert expected == result
+    def test_get_relative_path_with_same_path_raise_exception(self):
+        try:
+            util.get_relative_path('/some/path/file', '/some/path/file')
+            self.fail('Exception not raised')
+        except AssertionError as e:
+            assert 'is the same as' in str(e)
 
 
 class TestMiscUtils(unittest.TestCase):

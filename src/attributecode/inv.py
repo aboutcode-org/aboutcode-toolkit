@@ -30,7 +30,7 @@ from attributecode import Error
 from attributecode import util
 from attributecode.model import About
 from attributecode.util import csv
-from attributecode.util import get_absolute
+from attributecode.util import normalize
 from attributecode.util import python2
 from attributecode.util import to_posix
 from attributecode.util import unique
@@ -47,7 +47,7 @@ def collect_inventory(location):
     list of errors and a list of About objects.
     """
     errors = []
-    input_location = util.get_absolute(location)
+    input_location = normalize(location)
     about_locations = list(get_about_locations(input_location))
 
     name_errors = util.check_file_names(about_locations)
@@ -85,7 +85,7 @@ def get_locations(location):
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
-    location = get_absolute(location)
+    location = normalize(location)
     assert os.path.exists(location)
 
     if os.path.isfile(location):

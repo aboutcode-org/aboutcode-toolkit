@@ -18,7 +18,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
-import ntpath
 import os
 import posixpath
 import string
@@ -51,17 +50,22 @@ on_windows = 'win32' in sys.platform
 def to_posix(path):
     """
     Return a path using the posix path separator given a path that may contain
-    posix or windows separators, converting "\\" to "/". NB: this path will
-    still be valid in the windows explorer (except for a UNC or share name). It
-    will be a valid path everywhere in Python. It will not be valid for windows
+    posix or windows separators, converting "\\" to "/". 
+    NB: this path will still be valid in the windows explorer. It will be a
+    valid path everywhere in Python. It may not lways be valid for windows
     command line operations.
     """
-    return path.replace(ntpath.sep, posixpath.sep)
+    return path.replace('\\', '/')
 
 
-UNC_PREFIX = u'\\\\?\\'
-UNC_PREFIX_POSIX = to_posix(UNC_PREFIX)
-UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
+def to_native(path):
+    """
+    Return a path using the current OS path separator given a path that may
+    contain posix or windows separators, converting "/" to "\\" on windows
+    and "\\" to "/" on posix OSes.
+    """
+    return path.replace('\\', os.path.sep).replace('/', os.path.sep)
+
 
 valid_file_chars = string.digits + string.ascii_letters + '_-.' + ' '
 
@@ -74,6 +78,7 @@ def invalid_chars(path):
     rname = resource_name(path)
     name = rname.lower()
     return [c for c in name if c not in valid_file_chars]
+
 
 
 def check_file_names(paths):
@@ -120,8 +125,7 @@ def check_file_names(paths):
     return errors
 
 
-# TODO: rename to normalize_path
-def get_absolute(location):
+def normalize(location):
     """
     Return an absolute normalized location.
     """
@@ -134,54 +138,27 @@ def get_absolute(location):
 
 def get_relative_path(base_loc, full_loc):
     """
-    Return a posix path for a given full location relative to a base location.
-    The first segment of the different between full_loc and base_loc will become
-    the first segment of the returned path.
+    Return a posix path for a given full_loc location relative to a base_loc
+    location.
     """
     def norm(p):
-        if p.startswith(UNC_PREFIX) or p.startswith(to_posix(UNC_PREFIX)):
-            p = p.strip(UNC_PREFIX).strip(to_posix(UNC_PREFIX))
         p = to_posix(p)
-        p = p.strip(posixpath.sep)
-        p = posixpath.normpath(p)
-        return p
+        p = p.strip('/')
+        return posixpath.normpath(p)
 
     base = norm(base_loc)
-    path = norm(full_loc)
+    full = norm(full_loc)
 
-    assert path.startswith(base), ('Cannot compute relative path: '
-                                   '%(path)r does not start with %(base)r'
-                                   % locals())
-    base_name = resource_name(base)
-    no_dir = base == base_name
-    same_loc = base == path
-    if same_loc:
-        # this is the case of a single file or single dir
-        if no_dir:
-            # we have no dir: the full path is the same as the resource name
-            relative = base_name
-        else:
-            # we have at least one dir
-            parent_dir = posixpath.dirname(base)
-            parent_dir = resource_name(parent_dir)
-            relative = posixpath.join(parent_dir, base_name)
-    else:
-        relative = path[len(base) + 1:]
-        # We don't want to keep the first segment of the root of the returned path.
-        # See https://github.com/nexB/attributecode/issues/276
-        # relative = posixpath.join(base_name, relative)
+    assert full.startswith(base), (
+        'Cannot compute relative path: %(full_loc)r does not starts with %(base_loc)r'% locals())
+
+    assert full!= base, (
+        'Cannot compute relative path: %(full_loc)r is the same as: %(base_loc)r' % locals())
+    relative = full[len(base) + 1:]
+    # We don't want to keep the first segment of the root of the returned path.
+    # See https://github.com/nexB/attributecode/issues/276
+    # relative = posixpath.join(base_name, relative)
     return relative
-
-
-def to_native(path):
-    """
-    Return a path using the current OS path separator given a path that may
-    contain posix or windows separators, converting "/" to "\\" on windows
-    and "\\" to "/" on posix OSes.
-    """
-    path = path.replace(ntpath.sep, os.path.sep)
-    path = path.replace(posixpath.sep, os.path.sep)
-    return path
 
 
 def resource_name(path):
@@ -190,7 +167,7 @@ def resource_name(path):
     """
     path = path.strip()
     path = to_posix(path)
-    path = path.rstrip(posixpath.sep)
+    path = path.rstrip('/')
     _left, right = posixpath.split(path)
     return right.strip()
 
@@ -212,7 +189,7 @@ def extract_zip(location):
 
     os.makedirs(target_dir)
 
-    if target_dir.endswith((ntpath.sep, posixpath.sep)):
+    if target_dir.endswith(('\\', '/')):
         target_dir = target_dir[:-1]
 
     with zipfile.ZipFile(location) as zipf:
@@ -220,13 +197,13 @@ def extract_zip(location):
             name = info.filename
             content = zipf.read(name)
             target = os.path.join(target_dir, name)
-            is_dir = target.endswith((ntpath.sep, posixpath.sep))
+            is_dir = target.endswith(('\\', '/'))
             if is_dir:
                 target = target[:-1]
             parent = os.path.dirname(target)
             if on_windows:
-                target = target.replace(posixpath.sep, ntpath.sep)
-                parent = parent.replace(posixpath.sep, ntpath.sep)
+                target = target.replace('/', '\\')
+                parent = parent.replace('/', '\\')
             if not os.path.exists(parent):
                 os.makedirs(parent)
             if not content and is_dir:
@@ -236,19 +213,6 @@ def extract_zip(location):
                 with open(target, 'wb') as f:
                     f.write(content)
     return target_dir
-
-
-def add_unc(location):
-    """
-    Convert a `location` to an absolute Window UNC path to support long paths on
-    Windows. Return the location unchanged if not on Windows. See
-    https://msdn.microsoft.com/en-us/library/aa365247.aspx
-    """
-    if on_windows and not location.startswith(UNC_PREFIX):
-        if location.startswith(UNC_PREFIX_POSIX):
-            return UNC_PREFIX + os.path.abspath(location.strip(UNC_PREFIX_POSIX))
-        return UNC_PREFIX + os.path.abspath(location)
-    return location
 
 
 def unique(sequence):

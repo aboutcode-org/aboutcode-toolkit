@@ -50,6 +50,7 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 
+
 def load_inventory(location, base_dir=None):
     """
     Load the inventory file at `location` as About objects.
@@ -88,6 +89,14 @@ def load_inventory(location, base_dir=None):
             errors.append(Error(ERROR, msg))
             continue
         about_file_path = util.to_posix(about_file_path)
+        
+        segments = about_file_path.split('/')
+        if any(seg !=seg.strip() for seg in segments):
+            msg = (
+                'Invalid "about_file_path": must not end or start with a space. '
+                'Cannot generate .ABOUT file for: "{}"'.format(about_file_path))
+            errors.append(Error(ERROR, msg))
+            continue
 
         try:
             about = model.About.from_dict(entry)

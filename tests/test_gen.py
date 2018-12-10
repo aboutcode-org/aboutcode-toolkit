@@ -76,13 +76,14 @@ class GenTest(unittest.TestCase):
         result = [a.to_dict() for a in abouts]
         assert [] == result
 
-    def test_generate_about_files_dir_endswith_space(self):
+    def test_generate_about_files_fails_to_generate_if_one_dir_endswith_space(self):
         location = get_test_loc('test_gen/inventory/complex/about_file_path_dir_endswith_space.csv')
         base_dir = get_temp_dir()
         errors, _abouts = gen.generate_about_files(location, base_dir)
-        assert [] == errors
-        result = sorted(os.listdir(os.path.join(base_dir, 'about ')))
-        assert ['about.ABOUT'] == result
+        expected = [
+            Error(ERROR,  'Invalid "about_file_path": must not end or start with a space. '
+                  'Cannot generate .ABOUT file for: "about /about.ABOUT"')]
+        assert expected == errors
 
     def test_generate_about_files_with_about_file_path_as_directory(self):
         location = get_test_loc('test_gen/inv2.csv')
