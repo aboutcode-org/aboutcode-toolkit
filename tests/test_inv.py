@@ -150,7 +150,7 @@ class InventoryTest(unittest.TestCase):
         ]
         fix_location(abouts, test_loc)
 
-        assert expected_paths == [a.location for a in abouts]
+        assert sorted(expected_paths) == sorted([a.location for a in abouts])
 
         expected_name = ['distribute', 'date_test']
         result_name = [a.name for a in abouts]
@@ -387,6 +387,8 @@ class InventoryTest(unittest.TestCase):
     def test_write_output_json(self):
         test_file = get_test_loc('test_inv/this.ABOUT')
         about = model.About.load(location=test_file)
+
+        fix_location([about], get_test_loc('test_inv'))
 
         result_file = get_temp_file()
         inv.save_as_json(result_file, [about])
