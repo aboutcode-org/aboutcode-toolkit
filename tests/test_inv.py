@@ -22,7 +22,9 @@ from collections import OrderedDict
 import io
 import json
 import shutil
+import sys
 import unittest
+from unittest.case import skipIf
 
 from attributecode import CRITICAL
 from attributecode import INFO
@@ -30,11 +32,12 @@ from attributecode import Error
 from attributecode import inv
 from attributecode import model
 from attributecode.util import csv
+from attributecode.util import on_windows
+from attributecode.util import to_posix
 
 from testing_utils import extract_test_loc
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
-from attributecode.util import to_posix
 
 try:
     # Python 2
@@ -44,6 +47,9 @@ except NameError:  # pragma: nocover
     unicode = str  # NOQA
 
 
+py3 = sys.version_info[0] == 3
+
+
 def load_csv(location):
     """
     Read CSV at `location` and yield an ordered mapping for each row.
@@ -51,6 +57,7 @@ def load_csv(location):
     with io.open(location, encoding='utf-8') as csvfile:
         for row in csv.DictReader(csvfile):
             yield row
+
 
 def check_csv(expected, result, regen=False):
     """
@@ -116,6 +123,7 @@ class InventoryTest(unittest.TestCase):
         expected_errors = [Error(INFO, 'Field date is a custom field.')]
         assert expected_errors == errors
 
+    @skipIf(on_windows and not py3, 'Windows support for long path requires https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation')
     def test_collect_inventory_with_long_path(self):
         test_loc = extract_test_loc('test_inv/longpath.zip')
         _errors, abouts = inv.collect_inventory(test_loc)
@@ -343,10 +351,10 @@ class InventoryTest(unittest.TestCase):
         check_csv(expected, result_file)
 
     def test_collect_inventory_does_not_damage_line_endings(self):
-        test_dir = get_test_loc('test_inv/crlf/about.ABOUT')
+        test_dir = get_test_loc('test_inv/crlf')
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
-        fix_location(abouts, get_test_loc('test_inv/crlf'))
+        fix_location(abouts, test_dir)
 
         errors2 = inv.save_as_csv(result_file, abouts)
         errors.extend(errors2)
@@ -431,7 +439,7 @@ class TestGetLocations(unittest.TestCase):
         expected = 'get_about_locations/about.ABOUT'
         assert result[0].endswith(expected)
 
-    # FIXME: these are not very long/deep paths
+    @skipIf(on_windows and not py3, 'Windows support for long path requires https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation')
     def test_get_locations_with_very_long_path(self):
         longpath = (
             'longpath'
