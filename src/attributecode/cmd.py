@@ -139,7 +139,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 ######################################################################
 
 @about.command(cls=AboutCommand,
-    short_help='Collect the inventory of .ABOUT files to a CSV or JSON file.')
+    short_help='Collect an inventory of .ABOUT files in a CSV or JSON file.')
 
 @click.argument('location',
     required=True,
@@ -207,7 +207,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 ######################################################################
 
 @about.command(cls=AboutCommand,
-    short_help='Generate .ABOUT files from an inventory as CSV or JSON.')
+    short_help='Generate .ABOUT files from an CSV or JSON inventory.')
 
 @click.argument('location',
     required=True,
@@ -268,8 +268,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 ######################################################################
 
 @about.command(cls=AboutCommand,
-    short_help='Fetch and save license texts and data referenced in an'
-        'inventory from a remote DejaCode License Library API.',
+    short_help='Fetch licenses from a remote DejaCode License Library API.',
     name='fetch-licenses')
 
 @click.argument('location',
@@ -448,8 +447,7 @@ OUTPUT: Path where to write the attribution document.
 # FIXME: This is really only a dupe of the Inventory command
 
 @about.command(cls=AboutCommand,
-    short_help='Validate that the format of .ABOUT files is correct and report '
-               'errors and warnings.')
+    short_help='Validate the format of .ABOUT files.')
 
 @click.argument('location',
     required=True,
@@ -489,7 +487,7 @@ def print_config_help(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Transform a CSV by applying renamings, filters and checks.')
+    short_help='Transform a CSV by renaming and filtering columns.')
 
 @click.argument('location',
     required=True,

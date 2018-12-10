@@ -14,10 +14,8 @@ Options:
 
 Commands:
   attrib          Generate an attribution document from .ABOUT files.
-  check           Validate that the format of .ABOUT files is correct and report
-                  errors and warnings.
-  fetch-licenses  Fetch and save license texts and data referenced in
-                  aninventory from a remote DejaCode License Library API.
-  gen             Generate .ABOUT files from an inventory as CSV or JSON.
-  inventory       Collect the inventory of .ABOUT files to a CSV or JSON file.
-  transform       Transform a CSV by applying renamings, filters and checks.
+  check           Validate the format of .ABOUT files.
+  fetch-licenses  Fetch licenses from a remote DejaCode License Library API.
+  gen             Generate .ABOUT files from an CSV or JSON inventory.
+  inventory       Collect an inventory of .ABOUT files in a CSV or JSON file.
+  transform       Transform a CSV by renaming and filtering columns.
