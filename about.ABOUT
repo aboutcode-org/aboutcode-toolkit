@@ -2,8 +2,6 @@ about_resource: .
 name: AboutCode-toolkit
 about_resource_path: .
 
-version: 3.0.0.dev6
-
 description: |
     AboutCode Toolkit is a tool to process ABOUT files. An ABOUT file
     provides a simple way to document the provenance (origin and license)
@@ -12,9 +10,12 @@ description: |
 
 homepage_url: http://www.nexb.com/community.html
 
-license: apache-2.0
-license_name: Apache 2.0
-license_file: apache-2.0.LICENSE
+license_expression: apache-2.0
+licenses:
+    - key: apache-2.0
+      name: Apache 2.0
+      file: apache-2.0.LICENSE
+
 copyright: Copyright (c) 2013-2017 nexB Inc.
 
 notice_file: NOTICE
