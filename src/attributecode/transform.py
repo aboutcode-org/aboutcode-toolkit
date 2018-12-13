@@ -258,7 +258,8 @@ def read_csv_rows(location):
     """
     Yield rows (as a list of values) from a CSV file at `location`.
     """
-    with io.open(location, encoding='utf-8') as csvfile:
+    # note: Excel can produce unreadable UTF files
+    with io.open(location, encoding='utf-8', errors='replace') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             yield row
