@@ -20,6 +20,8 @@ from __future__ import unicode_literals
 
 import json
 
+import click
+
 from attributecode import ERROR
 from attributecode import Error
 from attributecode import util
@@ -81,6 +83,7 @@ def request_license_data(api_url, api_key, license_key):
         response_content = response.read().decode('utf-8')
         # FIXME: this should be an ordered dict
         license_data = json.loads(response_content)
+
         if not license_data['results']:
             msg = u"Invalid 'license': %s" % license_key
             errors.append(Error(ERROR, msg))
@@ -127,7 +130,7 @@ def get_license_details(api_url, api_key, license_key):
     return lic, errors
 
 
-def fetch_licenses(abouts, api_url, api_key):
+def fetch_licenses(abouts, api_url, api_key, verbose=False):
     """
     Return a mapping of {license key: License object} given an `abouts` list of
     About object and a list of Error.
@@ -135,18 +138,17 @@ def fetch_licenses(abouts, api_url, api_key):
     dje_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(api_url))
     dje_license_url = urljoin(dje_domain, 'urn/?urn=urn:dje:license:{license_key}')
 
-    licenses_by_key = {}
     errors = []
 
     if have_network_connection():
         if not valid_api_url(api_url):
-            msg = "URL not reachable. Invalid '--api_url'. License generation is skipped."
+            msg = "URL not reachable. Invalid '--api_url'. License retrieval is skipped."
             errors.append(Error(ERROR, msg))
     else:
-        msg = 'Network problem. Please check your Internet connection. License generation is skipped.'
+        msg = 'Network problem. Please check your Internet connection. License retrieval is skipped.'
         errors.append(Error(ERROR, msg))
 
-    msg = "Authorization denied. Invalid '--api_key'. License generation is skipped."
+    msg = "Authorization denied. Invalid '--api_key'. License retrieval is skipped."
     auth_error = Error(ERROR, msg)
 
     # collect unique license keys
@@ -160,18 +162,21 @@ def fetch_licenses(abouts, api_url, api_key):
             about.license_expression, unique=True, simple=True)
         license_keys.update(about_keys)
 
+    licenses_by_key = {}
+
     # fetch license key proper
-    for license_key in license_keys:
+    for license_key in sorted(license_keys):
         # No need to go through fetching all the licensesif  we detected invalid '--api_key'
         if auth_error in errors:
             break
-
         license, errs = get_license_details(api_url, api_key, license_key) #NOQA
         errors.extend(errs)
         if license:
             license.url = dje_license_url.format(license_key=license_key)
-            licenses_by_key[license_key] = license_key
+            licenses_by_key[license_key] = license
 
+            if verbose:
+                click.echo('Fetched license: {}'.format(license_key))
 
     return licenses_by_key, util.unique(errors)
 

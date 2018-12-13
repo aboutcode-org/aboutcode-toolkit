@@ -89,9 +89,12 @@ def load_inventory(location, base_dir=None):
             errors.append(Error(ERROR, msg))
             continue
         about_file_path = util.to_posix(about_file_path)
-        
+
+        # Ensure there is no absolute directory path
+        about_file_path = about_file_path.strip('/')
+
         segments = about_file_path.split('/')
-        if any(seg !=seg.strip() for seg in segments):
+        if any(seg != seg.strip() for seg in segments):
             msg = (
                 'Invalid "about_file_path": must not end or start with a space. '
                 'Cannot generate .ABOUT file for: "{}"'.format(about_file_path))
@@ -103,7 +106,6 @@ def load_inventory(location, base_dir=None):
             if base_dir:
                 about.location = os.path.join(base_dir, about_file_path)
 
-            print('creating about:' + repr(about))
             abouts.append(about)
         except Exception as e:
             msg = (
@@ -216,29 +218,31 @@ def generate_about_files(inventory_location, target_dir,
         notices_by_name, extra_licenses_by_key = model.load_license_references(reference_dir)
         # we update (and possibly override) existing API-fetched licenses with local ones
         licenses_by_key.update(extra_licenses_by_key)
+        
+
+    # TODO: validate inventory!!!!! to catch error before creating ABOUT files
 
     # update all licenses and notices
     for about in abouts:
+        # fix the location to ensure this is a proper .ABOUT file
+        loc = about.location
+        if not loc.endswith('.ABOUT'):
+            loc = loc.rstrip('\\/').strip() + '.ABOUT'
+        about.location = loc
+
         about.update_licenses(licenses_by_key)
 
         if about.notice_file:
             notice_text = notices_by_name.get(about.notice_file)
             if not notice_text:
                 msg = (
-                    'Empty or missing notice_file. '
-                    'Cannot generate valid .ABOUT file: {}'.format(about.notice_file))
+                    'Cannot generate valid .ABOUT file for: "{}". '
+                    'Empty or missing notice_file: {}'.format(about.location, about.notice_file))
                 errors.append(Error(ERROR, msg))
-                continue
-            about.notice_text = notice_text
+            else:
+                about.notice_text = notice_text
 
-    # TODO: validate inventory!!!!! to catch error begore creating ABOUT files
-
-    # fix the location to ensure this is a proper .ABOUT file
-    for about in abouts:
-        loc = about.location
-        if not loc.endswith('.ABOUT'):
-            loc = loc.rstrip('\\/').strip() + '.ABOUT'
-        about.location = loc
-        about.dump(location=loc, with_files=True)
+        # create the files proper
+        about.dump(location=about.location, with_files=True)
 
     return unique(errors), abouts

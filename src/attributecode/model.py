@@ -1219,7 +1219,7 @@ def save_as_csv(location, about_dicts, field_names):
             try:
                 writer.writerow(row)
             except Exception as e:
-                msg = u'Generation skipped for ' + row['about_file_path'] + u' : ' + str(e)
+                msg = 'Generation skipped for ' + row['about_file_path'] + u' : ' + str(e)
                 errors.append(Error(CRITICAL, msg))
     return errors
 

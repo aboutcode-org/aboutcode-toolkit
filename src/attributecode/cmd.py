@@ -274,22 +274,24 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.argument('location',
     required=True,
     metavar='LOCATION',
+    callback=partial(validate_extensions, extensions=('.csv',)),
     type=click.Path(
         exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
-    callback=partial(validate_extensions, extensions=('.csv',)),
     metavar='OUTPUT',
-    type=click.Path(exists=False, dir_okay=True, file_okay=False, writable=True, resolve_path=True))
+    type=click.Path(exists=True, dir_okay=True, file_okay=False, writable=True, resolve_path=True))
 
 @click.option('--api-key',
     metavar='API-KEY',
+    envvar='DEJACODE_API_KEY',
     type=str,
     help='DejaCode License Library API KEY.')
 
 @click.option('--api-url',
     metavar='API-URL',
+    envvar='DEJACODE_API_URL',
     type=str,
     help='DejaCode License Library API URL.')
 
@@ -321,7 +323,7 @@ OUTPUT: Path where to save the retrieved license data and textx..
 
     errors, abouts = gen.load_inventory(location)
 
-    licenses_by_key, fetch_errors = api.fetch_licenses(abouts, api_url, api_key)
+    licenses_by_key, fetch_errors = api.fetch_licenses(abouts, api_url, api_key, verbose)
     errors.extend(fetch_errors)
 
     for license in licenses_by_key.values():  # NOQA

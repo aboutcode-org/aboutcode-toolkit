@@ -96,7 +96,7 @@ class ApiTest(unittest.TestCase):
         valid_api_url.return_value = False
         error_msg = (
             'Network problem. Please check your Internet connection. '
-            'License generation is skipped.')
+            'License retrieval is skipped.')
         expected = ({}, [Error(ERROR, error_msg)])
         assert api.fetch_licenses([], '', '') == expected
 
