@@ -41,10 +41,13 @@ Collect and validate inventories of ABOUT files
 """
 
 
-def collect_inventory(location):
+def collect_inventory(location, check_files=False):
     """
     Collect any ABOUT files in the directory tree at `location` and return a
     list of errors and a list of About objects.
+
+    If `check_files` is True, also check that files referenced in an ABOUT file
+    exist (about_resource, license and notice files, etc.)
     """
     errors = []
     input_location = normalize(location)
@@ -58,14 +61,18 @@ def collect_inventory(location):
         about = About.load(about_file_loc)
         abouts.append(about)
 
+        if check_files:
+            about.check_files()
+
         # this could be a dict keys by path to keep per-path things?
         errors.extend(about.errors)
 
-#         # TODO: WHY???
-#         # Insert about_file_path reference in every error
-#         for severity, message in about.errors:
-#             msg = (about_file_loc + ": " + message)
-#             errors.append(Error(severity, msg))
+        # TODO: WHY???
+        # Insert about_file_path reference in every error
+        # FIXME: this should be an attribute of the Error object
+        # for severity, message in about.errors:
+        #     msg = (about_file_loc + ": " + message)
+        #     errors.append(Error(severity, msg))
 
     return sorted(unique(errors)), abouts
 

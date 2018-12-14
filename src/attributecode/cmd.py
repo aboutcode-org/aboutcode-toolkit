@@ -159,6 +159,10 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
     type=click.Choice(['json', 'csv']),
     help='Set OUTPUT inventory file format.')
 
+@click.option('-c', '--check-files',
+    is_flag=True,
+    help='Check that code and license files referenced in ABOUT files exist.')
+
 @click.option('-q', '--quiet',
     is_flag=True,
     help='Do not print error or warning messages.')
@@ -169,7 +173,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, format, quiet, verbose):  # NOQA
+def inventory(location, output, format, check_files, quiet, verbose):  # NOQA
     """
 Collect the inventory of .ABOUT file data as CSV or JSON.
 
@@ -186,7 +190,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     if location.lower().endswith('.zip'):
         location = extract_zip(location)
 
-    errors, abouts = collect_inventory(location)
+    errors, abouts = collect_inventory(location, check_files=check_files)
 
     writers = {
         'json': save_as_json,
@@ -235,7 +239,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.help_option('-h', '--help')
 
-def gen(location, output,reference, quiet, verbose):
+def gen(location, output, reference, quiet, verbose):
     """
 Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
@@ -457,13 +461,17 @@ OUTPUT: Path where to write the attribution document.
     type=click.Path(
         exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
+@click.option('-c', '--check-files',
+    is_flag=True,
+    help='Check that code and license files referenced in ABOUT files exist.')
+
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def check(location, verbose):
+def check(location, check_files, verbose):
     """
 Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
@@ -471,7 +479,7 @@ LOCATION: Path to a file or directory containing .ABOUT files.
     """
     print_version()
     click.echo('Checking ABOUT files...')
-    errors, _abouts = collect_inventory(location)
+    errors, _abouts = collect_inventory(location, check_files=check_files)
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
     sys.exit(severe_errors_count)
 
@@ -594,7 +602,9 @@ def get_error_messages(errors, quiet=False, verbose=False):
         error_msg = 'Command completed with {} errors or warnings.'.format(severe_errors_count)
         messages.append(error_msg)
 
-    for severity, message in errors:
+    for error in errors:
+        severity = error.severity
+        message = error.message
         sevcode = severities.get(severity) or 'UNKNOWN'
         msg = '{sevcode}: {message}'.format(**locals())
         if not quiet:

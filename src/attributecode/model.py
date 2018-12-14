@@ -32,7 +32,6 @@ from collections import OrderedDict
 import io
 import json
 import os
-# FIXME: why posixpath???
 import posixpath
 import traceback
 

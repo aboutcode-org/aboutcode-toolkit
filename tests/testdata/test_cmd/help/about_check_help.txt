@@ -5,5 +5,7 @@ Usage: about check [OPTIONS] LOCATION
   LOCATION: Path to a file or directory containing .ABOUT files.
 
 Options:
-  --verbose   Show all error and warning messages.
-  -h, --help  Show this message and exit.
+  -c, --check-files  Check that code and license files referenced in ABOUT files
+                     exist.
+  --verbose          Show all error and warning messages.
+  -h, --help         Show this message and exit.
