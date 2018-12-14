@@ -1,8 +1,7 @@
 about_resource: .
 name: license name
 notice_file: test.NOTICE 
-license_expression:
-    - mit
+license_expression: mit
 licenses:
     - key: mit
       file: test.LICENSE

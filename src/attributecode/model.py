@@ -924,7 +924,7 @@ class About(object):
             loc = add_unc(loc)
             with io.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
-            # FIXME: this should be done in the commands, not here
+            # FIXME: this should be done in the cmd, not here
             """
             The running_inventory defines if the current process is 'inventory' or not.
             This is used for the validation of the path of the 'about_resource'.

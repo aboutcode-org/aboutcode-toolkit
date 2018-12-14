@@ -158,16 +158,14 @@ class InventoryTest(unittest.TestCase):
 
         assert expected == errors
         expected = [OrderedDict([
-            ('about_resource', u'django_snippets_2413.py'),
-            ('name', u'Yet another query string template tag'),
-            ('version', u'2011-04-12'),
-            ('download_url', u'http://djangosnippets.org/snippets/2413/download/'),
-            ('homepage_url', u'http://djangosnippets.org/snippets/2413/'),
-            ('notes', u'This file was modified to include the line "register = Library()" without which the template tag is not registered.'),
-            (u'license_text_file', u'django_snippets.LICENSE'),
-            (u'license_url', u'http://djangosnippets.org/about/tos/'),
-        ])
-        ]
+            ('about_resource', u'django_snippets_2413.py'), 
+            ('name', u'Yet another query string template tag'), 
+            ('version', u'2011-04-12'), 
+            ('homepage_url', u'http://djangosnippets.org/snippets/2413/'), 
+            ('download_url', u'http://djangosnippets.org/snippets/2413/download/'), 
+            ('notes', u'This file was modified to include the line "register = Library()" without which the template tag is not registered.'), 
+            (u'license_text_file', u'django_snippets.LICENSE'), 
+            (u'license_url', u'http://djangosnippets.org/about/tos/')])]
         assert expected == [a.to_dict() for a in abouts]
 
     def test_collect_inventory_return_no_warnings_and_model_can_use_relative_paths(self):
@@ -191,22 +189,21 @@ class InventoryTest(unittest.TestCase):
         fix_location(abouts, test_loc)
 
         expected = [OrderedDict([
-            ('about_resource', u'.'),
-            ('name', u'AboutCode'),
-            ('version', u'0.11.0'),
-            ('description', u'AboutCode is a tool \nto process ABOUT files. \nAn ABOUT file is a file.'),
-            ('homepage_url', u'http://dejacode.org'),
-            ('license_expression', u'apache-2.0'),
-            ('licenses', [OrderedDict([('key', u'apache-2.0'), ('file', u'apache-2.0.LICENSE')])]),
-            ('copyright', u'Copyright (c) 2013-2014 nexB Inc.'),
-            ('notice_file', u'NOTICE'),
-            ('owner', u'nexB Inc.'),
-            ('vcs_tool', u'git'),
-            ('vcs_repository', u'https://github.com/dejacode/about-code-tool.git'),
-            (u'author', [u'Jillian Daguil', u'Chin Yeung Li', u'Philippe Ombredanne', u'Thomas Druez']),
-            (u'license_file', u'apache-2.0.LICENSE'),
-            (u'license_key', u'apache-2.0'),
-        ])]
+            ('about_resource', u'.'), 
+            ('name', u'AboutCode'), 
+            ('version', u'0.11.0'), 
+            ('description', u'AboutCode is a tool \nto process ABOUT files. \nAn ABOUT file is a file.'), 
+            ('homepage_url', u'http://dejacode.org'), 
+            ('copyright', u'Copyright (c) 2013-2014 nexB Inc.'), 
+            ('license_expression', u'apache-2.0'), 
+            ('licenses', [OrderedDict([('file', u'apache-2.0.LICENSE'), ('key', u'apache-2.0')])]), 
+            ('notice_file', u'NOTICE'), 
+            ('owner', u'nexB Inc.'), 
+            ('vcs_tool', u'git'), 
+            ('vcs_repository', u'https://github.com/dejacode/about-code-tool.git'), 
+            (u'author', [u'Jillian Daguil', u'Chin Yeung Li', u'Philippe Ombredanne', u'Thomas Druez']), 
+            (u'license_file', u'apache-2.0.LICENSE'), (u'license_key', u'apache-2.0')])
+        ]
         assert expected == [a.to_dict() for a in abouts]
 
     def test_collect_inventory_with_multi_line(self):
@@ -219,7 +216,7 @@ class InventoryTest(unittest.TestCase):
         results = [l.url for l in abouts[0].licenses]
         assert expected == results
 
-        assert 'mit or apache-2.0' == abouts[0].license_expression
+        assert 'mit OR apache-2.0' == abouts[0].license_expression
 
     def test_collect_inventory_always_collects_custom_fields(self):
         test_loc = get_test_loc('test_inv/custom_fields.ABOUT')
@@ -270,16 +267,19 @@ class InventoryTest(unittest.TestCase):
             ('version', u'0.11.0'),
             ('description', u'AboutCode is a tool \nto process ABOUT files. \nAn ABOUT file is a file.'),
             ('homepage_url', u'http://dejacode.org'),
-            ('license_expression', u'apache-2.0'),
-            ('licenses', [OrderedDict([('key', u'apache-2.0'), ('file', u'apache-2.0.LICENSE')])]),
             ('copyright', u'Copyright (c) 2013-2014 nexB Inc.'),
+            ('license_expression', u'apache-2.0'),
+            ('licenses', [OrderedDict([
+                ('file', u'apache-2.0.LICENSE'),
+                ('key', u'apache-2.0'), 
+                ])]),
             ('notice_file', u'NOTICE'),
             ('owner', u'nexB Inc.'),
             ('vcs_tool', u'git'),
             ('vcs_repository', u'https://github.com/dejacode/about-code-tool.git'),
-            (u'author', [u'Jillian Daguil', u'Chin Yeung Li', u'Philippe Ombredanne', u'Thomas Druez']),
-            (u'license_file', u'apache-2.0.LICENSE'),
-            (u'license_key', u'apache-2.0'),
+            ('author', [u'Jillian Daguil', u'Chin Yeung Li', u'Philippe Ombredanne', u'Thomas Druez']),
+            ('license_file', u'apache-2.0.LICENSE'),
+            ('license_key', u'apache-2.0'),
         ])]
         assert expected == [a.to_dict() for a in abouts1]
 

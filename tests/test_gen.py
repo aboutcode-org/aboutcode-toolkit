@@ -68,8 +68,8 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir)
         expected_errors = [
-            Error(ERROR, 'Cannot create About from inventory entry for: '
-                  '"inv/this.ABOUT".\nInvalid data: all keys must be lowercase.')
+            Error(ERROR, 'Cannot create .ABOUT file for: "inv/this.ABOUT".\n'
+                  'Invalid data: all keys must be lowercase.')
         ]
         assert expected_errors == errors
 
@@ -81,8 +81,8 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
         errors, _abouts = gen.generate_about_files(location, base_dir)
         expected = [
-            Error(ERROR,  'Invalid "about_file_path": must not end or start with a space. '
-                  'Cannot generate .ABOUT file for: "about /about.ABOUT"')]
+            Error(ERROR, 'Invalid "about_file_path": must not end or start '
+                  'with a space for: "about /about.ABOUT"')]
         assert expected == errors
 
     def test_generate_about_files_with_about_file_path_as_directory(self):
@@ -94,7 +94,7 @@ class GenTest(unittest.TestCase):
 
         expected = [OrderedDict([('name', u'AboutCode'), ('version', u'0.11.0')])]
         assert expected == [a.to_dict() for a in abouts]
-        
+
         generated_about_loc = abouts[0].location
         about_file = model.About.load(generated_about_loc)
         expected = OrderedDict([('name', u'AboutCode'), ('version', u'0.11.0')])
@@ -155,26 +155,31 @@ class GenTest(unittest.TestCase):
         result = [a.to_dict() for a in abouts]
         expected = [
             OrderedDict([
-                ('about_resource', u'some res'), 
-                ('name', u'AboutCode'), ('version', u'0.11.0'), 
-                ('license_expression', u'mit AND bsd-new OR gpl-2.0'), 
+                ('about_resource', u'some res'),
+                ('name', u'AboutCode'),
+                ('version', u'0.11.0'),
+                ('license_expression', u'(mit AND bsd-new) OR gpl-2.0'),
                 ('licenses', [
-                    OrderedDict([('key', u'mit'), ('file', u'mit.LICENSE'), ('name', u'MIT License'), ('url', u'http://mit.license.com')]), 
-                    OrderedDict([('key', u'bsd-new'), ('file', u'bsd-new.LICENSE'), ('name', u'BSD License'), ('url', u'http://BSD.license.com')]), 
-                    OrderedDict([('key', u'gpl-2.0'), ('file', u'gpl-2.0.LICENSE'), ('name', u'GPL 2.0 License'), ('url', u'http://gpl.license.com')])]), 
-                ('notice_file', u'this.NOTICE'), 
+                    OrderedDict([('file', u'mit.LICENSE'), ('key', u'mit'),
+                                 ('name', u'MIT License'), ('url', u'http://mit.license.com')]),
+                    OrderedDict([('file', u'bsd-new.LICENSE'), ('key', u'bsd-new'),
+                                 ('name', u'BSD License'), ('url', u'http://BSD.license.com')]),
+                    OrderedDict([('file', u'gpl-2.0.LICENSE'), ('key', u'gpl-2.0'),
+                                 ('name', u'GPL 2.0 License'), ('url', u'http://gpl.license.com')])]),
+                ('notice_file', u'this.NOTICE'),
                 (u'custom1', u'multi\nline')]),
-    
             OrderedDict([
-                ('about_resource', u'some other res'), 
-                ('name', u'MyNmae'), ('version', u'12'), 
-                ('license_expression', u'bsd-new'), 
-                ('licenses', [OrderedDict([
-                    ('key', u'bsd-new'), ('file', u'bsd-new.LICENSE'), ('name', u'BSD License'), ('url', u'http://BSD.license.com')])]), 
-                ('notice_file', u'that.NOTICE'), 
+                ('about_resource', u'some other res'),
+                ('name', u'MyNmae'),
+                ('version', u'12'),
+                ('license_expression', u'bsd-new'),
+                ('licenses', [
+                    OrderedDict([('file', u'bsd-new.LICENSE'), ('key', u'bsd-new'),
+                                 ('name', u'BSD License'), ('url', u'http://BSD.license.com')])]),
+                ('notice_file', u'that.NOTICE'),
                 (u'custom1', u'multi\nline')])
         ]
-        
+
         assert expected == result
 
         generated_files = os.listdir(os.path.join(target_dir, 'inv'))

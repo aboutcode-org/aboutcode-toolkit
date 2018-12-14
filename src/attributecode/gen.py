@@ -22,10 +22,9 @@ import io
 import json
 import os
 
-from attributecode import api
+from attributecode import Error
 from attributecode import ERROR
 from attributecode import CRITICAL
-from attributecode import Error
 from attributecode import model
 from attributecode import util
 from attributecode.util import csv
@@ -81,11 +80,10 @@ def load_inventory(location, base_dir=None):
 
     for entry in inventory:
         entry = dict(entry)
+
         about_file_path = entry.pop('about_file_path', None)
         if not about_file_path or not about_file_path.strip():
-            msg = (
-                'Empty or missing "about_file_path": '
-                'Cannot generate .ABOUT file for: "{}"'.format(about_file_path))
+            msg = ('Empty or missing "about_file_path" for: "{}"'.format(about_file_path))
             errors.append(Error(ERROR, msg))
             continue
         about_file_path = util.to_posix(about_file_path)
@@ -95,9 +93,7 @@ def load_inventory(location, base_dir=None):
 
         segments = about_file_path.split('/')
         if any(seg != seg.strip() for seg in segments):
-            msg = (
-                'Invalid "about_file_path": must not end or start with a space. '
-                'Cannot generate .ABOUT file for: "{}"'.format(about_file_path))
+            msg = ('Invalid "about_file_path": must not end or start with a space for: "{}"'.format(about_file_path))
             errors.append(Error(ERROR, msg))
             continue
 
@@ -107,10 +103,9 @@ def load_inventory(location, base_dir=None):
                 about.location = os.path.join(base_dir, about_file_path)
 
             abouts.append(about)
+
         except Exception as e:
-            msg = (
-                'Cannot create About from inventory entry '
-                'for: "{}".\n'.format(about_file_path) + str(e))
+            msg = ('Cannot create .ABOUT file for: "{}".\n'.format(about_file_path) + str(e))
             errors.append(Error(ERROR, msg))
             continue
 
@@ -191,8 +186,7 @@ def load_json(location):
     return results
 
 
-def generate_about_files(inventory_location, target_dir,
-                   reference_dir=None, api_url=None, api_key=None):
+def generate_about_files(inventory_location, target_dir, reference_dir=None):
     """
     Load ABOUT data from a CSV or JSON inventory at `inventory_location`.
     Write .ABOUT files in the `target_dir` directory.
@@ -200,44 +194,47 @@ def generate_about_files(inventory_location, target_dir,
     If `reference_dir` is provided reuse and copy license and notice files
     referenced in the inventory.
 
-    If an `api_url` and an `api_key` are provided then the license data and
-    texts are fetched from this API URL.
-
     Return a list errors and a list of About objects.
     """
     errors, abouts = load_inventory(inventory_location, base_dir=target_dir)
 
-    notices_by_name = {}
+    notices_by_filename = {}
     licenses_by_key = {}
 
-    if api_url and api_key:
-        licenses_by_key, fetch_errors = api.fetch_licenses(abouts, api_url, api_key)
-        errors.extend(fetch_errors)
-
     if reference_dir:
-        notices_by_name, extra_licenses_by_key = model.load_license_references(reference_dir)
-        # we update (and possibly override) existing API-fetched licenses with local ones
-        licenses_by_key.update(extra_licenses_by_key)
+        notices_by_filename, licenses_by_key = model.load_license_references(reference_dir)
         
-
     # TODO: validate inventory!!!!! to catch error before creating ABOUT files
 
     # update all licenses and notices
     for about in abouts:
-        # fix the location to ensure this is a proper .ABOUT file
+        # Fix the location to ensure this is a proper .ABOUT file
         loc = about.location
         if not loc.endswith('.ABOUT'):
             loc = loc.rstrip('\\/').strip() + '.ABOUT'
         about.location = loc
+        
+        # used as a "prettier" display of .ABOUT file path
+        about_path = loc.replace(target_dir, '').strip('/')
 
-        about.update_licenses(licenses_by_key)
+        # Update the License objects of this About using a mapping of reference licenses as {key: License}
+        for license in about.licenses:  # NOQA
+            ref_lic = licenses_by_key.get(license.key)
+            if not ref_lic:
+                msg = (
+                    'Cannot generate valid .ABOUT file for: "{}". '
+                    'Reference license is missing: {}'.format(about_path, license.key))
+                errors.append(Error(ERROR, msg))
+                continue
 
+            license.update(ref_lic)
+            
         if about.notice_file:
-            notice_text = notices_by_name.get(about.notice_file)
+            notice_text = notices_by_filename.get(about.notice_file)
             if not notice_text:
                 msg = (
                     'Cannot generate valid .ABOUT file for: "{}". '
-                    'Empty or missing notice_file: {}'.format(about.location, about.notice_file))
+                    'Empty or missing notice_file: {}'.format(about_path, about.notice_file))
                 errors.append(Error(ERROR, msg))
             else:
                 about.notice_text = notice_text

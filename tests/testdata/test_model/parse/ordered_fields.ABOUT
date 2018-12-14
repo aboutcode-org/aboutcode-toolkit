@@ -1,4 +1,6 @@
 download_url: http://some.com/this
 name: old
+other: junk
 version: new
 about_resource: .
+that: foo

@@ -858,7 +858,7 @@ custom1: |
             'owner': 'nexB Inc.',
             'vcs_repository': 'https://github.com/dejacode/about-code-tool.git',
             'vcs_tool': 'git',
-            'version': '0.11.0',
+            'version': '0.11.0'
         }
 
         about = model.About.from_dict(about_data)
