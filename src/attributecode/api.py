@@ -31,7 +31,7 @@ from attributecode.util import python2
 if python2:  # pragma: nocover
     from urllib2 import HTTPError  # NOQA
     from urllib import urlencode  # NOQA
-    from urlparse import urljoin# NOQA
+    from urlparse import urljoin  # NOQA
     from urlparse import urlparse  # NOQA
     from urllib import quote  # NOQA
     from urllib2 import Request  # NOQA
@@ -39,7 +39,7 @@ if python2:  # pragma: nocover
 else:  # pragma: nocover
     from urllib.error import HTTPError  # NOQA
     from urllib.parse import urlencode  # NOQA
-    from urllib.parse import urljoin# NOQA
+    from urllib.parse import urljoin  # NOQA
     from urllib.parse import urlparse  # NOQA
     from urllib.parse import quote  # NOQA
     from urllib.request import Request  # NOQA
@@ -81,24 +81,23 @@ def request_license_data(api_url, api_key, license_key):
         request = Request(quoted_url, headers=headers)
         response = urlopen(request)
         response_content = response.read().decode('utf-8')
-        # FIXME: this should be an ordered dict
         license_data = json.loads(response_content)
 
         if not license_data['results']:
-            msg = u"Invalid 'license': %s" % license_key
+            msg = 'Invalid license key: %s' % license_key
             errors.append(Error(ERROR, msg))
 
     except HTTPError as http_e:
         # some auth problem
         if http_e.code == 403:
-            msg = (u"Authorization denied. Invalid '--api_key'. "
+            msg = (u"Authorization denied. Invalid '--api-key'. "
                    u"License generation is skipped.")
             errors.append(Error(ERROR, msg))
         else:
             # Since no api_url/api_key/network status have
             # problem detected, it yields 'license' is the cause of
             # this exception.
-            msg = u"Invalid 'license': %s" % license_key
+            msg = 'Invalid license key: %s' % license_key
             errors.append(Error(ERROR, msg))
 
     except Exception as e:
@@ -120,10 +119,15 @@ def get_license_details(api_url, api_key, license_key):
     """
     license_data, errors = request_license_data(api_url, api_key, license_key)
     if 'key' in license_data:
+        dje_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(api_url))
+        dje_license_url = urljoin(dje_domain, 'urn/?urn=urn:dje:license:{license_key}')
+        url = dje_license_url.format(license_key=license_key)
+
         lic = model.License(
             key=license_data['key'],
             name=license_data.get('name'),
             text=license_data.get('full_text'),
+            url=url,
         )
     else:
         lic = None
@@ -135,8 +139,6 @@ def fetch_licenses(abouts, api_url, api_key, verbose=False):
     Return a mapping of {license key: License object} given an `abouts` list of
     About object and a list of Error.
     """
-    dje_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(api_url))
-    dje_license_url = urljoin(dje_domain, 'urn/?urn=urn:dje:license:{license_key}')
 
     errors = []
 
@@ -152,7 +154,7 @@ def fetch_licenses(abouts, api_url, api_key, verbose=False):
     auth_error = Error(ERROR, msg)
 
     # collect unique license keys
-    license_keys =set()
+    license_keys = set()
     licensing = Licensing()
     for about in abouts:
         if not about.license_expression:
@@ -169,10 +171,9 @@ def fetch_licenses(abouts, api_url, api_key, verbose=False):
         # No need to go through fetching all the licensesif  we detected invalid '--api_key'
         if auth_error in errors:
             break
-        license, errs = get_license_details(api_url, api_key, license_key) #NOQA
+        license, errs = get_license_details(api_url, api_key, license_key)  # NOQA
         errors.extend(errs)
         if license:
-            license.url = dje_license_url.format(license_key=license_key)
             licenses_by_key[license_key] = license
 
             if verbose:
