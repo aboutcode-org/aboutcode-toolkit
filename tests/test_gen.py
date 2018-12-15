@@ -68,9 +68,13 @@ class GenTest(unittest.TestCase):
         target_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, target_dir)
         expected_errors = [
-            Error(CRITICAL, 'Cannot create .ABOUT file for: "inv/this.ABOUT".\n'
-                  'Invalid data: all field names must be lowercase.')            
+            Error(CRITICAL, 'Custom field name: \'Confirmed Copyright\' contains illegal characters. '
+                  'Only these characters are allowed: ASCII letters, digits and "_" underscore. '
+                  'The first character must be a letter.'),
+            Error(CRITICAL, "Custom field name: 'Confirmed Copyright' must be lowercase."),
+            Error(CRITICAL, "Custom field name: 'Resource' must be lowercase.")
         ]
+
         assert expected_errors == errors
         assert [] == abouts
 
@@ -99,26 +103,13 @@ class GenTest(unittest.TestCase):
         expected = OrderedDict([('about_resource', u'.'), ('name', u'AboutCode'), ('version', u'0.11.0')])
         assert expected == about_file.to_dict()
 
-    def test_generate_about_files_fails_with_no_about_resource_reference(self):
-        location = get_test_loc('test_gen/inv3.csv')
-        target_dir = get_temp_dir()
-
-        errors, abouts = gen.generate_about_files(location, target_dir)
-        expected = [
-            Error(CRITICAL,  'Cannot create .ABOUT file for: "inv/test.tar.gz".\n'
-                  'Field "about_resource" is required and empty or missing.')
-        ]
-        assert expected == errors
-        assert [] == abouts
-
     def test_generate_about_files_is_empty_and_has_errors_if_about_resource_reference_missing(self):
         location = get_test_loc('test_gen/inv3.csv')
         target_dir = get_temp_dir()
 
         errors, abouts = gen.generate_about_files(location, target_dir)
         expected = [
-            Error(CRITICAL,  'Cannot create .ABOUT file for: "inv/test.tar.gz".\n'
-                  'Field "about_resource" is required and empty or missing.')
+            Error(CRITICAL, 'Required field "about_resource" is missing.')
         ]
         assert expected == errors
         assert [] == abouts
@@ -129,13 +120,14 @@ class GenTest(unittest.TestCase):
 
         errors, abouts = gen.generate_about_files(location, target_dir)
         expected = [
-            Error(CRITICAL,  'Cannot create .ABOUT file for: "inv/test.tar.gz".\n'
-                  'Field "about_resource" is required and empty or missing.')
+            Error(CRITICAL,
+                'Cannot create .ABOUT file for: "inv/test.tar.gz".\n'
+                'Required field "about_resource" is missing.')
         ]
         assert expected == errors
         expected = [OrderedDict([('about_resource', u'inv/My.gz'), ('name', u'AboutCode'), ('version', u'0.11.0')])]
-        assert expected  == [a.to_dict() for a in abouts]
-        assert 1== len(os.listdir(target_dir))
+        assert expected == [a.to_dict() for a in abouts]
+        assert 1 == len(os.listdir(target_dir))
 
     def test_generate_about_files_simple(self):
         location = get_test_loc('test_gen/inv.csv')

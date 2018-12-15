@@ -201,7 +201,9 @@ class AboutTest(unittest.TestCase):
             model.About.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
-            expected = (Error(CRITICAL, 'Invalid data: lowercased field names must be unique.'),)
+            expected = (
+                Error(CRITICAL, "Custom field name: 'About_Resource' must be lowercase."),
+                Error(CRITICAL, "Custom field name: 'Name' must be lowercase."))
             assert expected == e.args
 
     def test_About_duplicate_field_names_are_not_reported_if_same_value(self):
@@ -210,7 +212,9 @@ class AboutTest(unittest.TestCase):
             model.About.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
-            expected = (Error(CRITICAL,  'Invalid data: lowercased field names must be unique.'),)
+            expected = (
+                Error(CRITICAL, "Custom field name: 'About_Resource' must be lowercase."),
+                Error(CRITICAL, "Custom field name: 'Name' must be lowercase."),)
             assert expected == e.args
 
     def test_About_fails_if_field_names_are_not_lowercase(self):
@@ -219,8 +223,9 @@ class AboutTest(unittest.TestCase):
             model.About.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
-            expected = (Error(CRITICAL,  'Invalid data: all field names must be lowercase.'),)
-            assert expected ==e.args
+            expected = (
+                Error(CRITICAL, "Custom field name: 'homepage_URL' must be lowercase."),)
+            assert expected == e.args
 
     def test_About_with_existing_about_resource_has_no_error(self):
         test_file = get_test_loc('test_model/parser_tests/about_resource_field.ABOUT')
@@ -246,7 +251,7 @@ class AboutTest(unittest.TestCase):
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
-                Error(CRITICAL, 'Field "about_resource" is required and empty or missing.'),
+                Error(CRITICAL, 'Required field "about_resource" is missing.'),
             )
             assert expected == e.args
 
@@ -257,7 +262,7 @@ class AboutTest(unittest.TestCase):
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
-                Error(CRITICAL, 'Field "about_resource" is required and empty or missing.'),
+               Error(CRITICAL, 'Required field "about_resource" is missing.'),
             )
             assert expected == e.args
 

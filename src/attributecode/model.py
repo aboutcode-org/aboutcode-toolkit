@@ -58,14 +58,45 @@ def validate_custom_fields(about_obj, attribute, value):
         return
 
     errors = []
-    is_valid_name = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$').match
 
     if value and not isinstance(value, dict):
         msg = (
             'Custom fields must be a dictionary: %(value)r.')
         raise Exception(Error(CRITICAL, msg % locals()))
 
-    for name in value.keys():
+    errors.extend(validate_custom_field_names(field_names=value.keys()))
+
+    if errors:
+        raise Exception(*errors)
+
+    if value and not isinstance(value, dict):
+        msg = (
+            'Custom fields must be a dictionary: %(value)r.')
+        raise Exception(Error(CRITICAL, msg % locals()))
+
+    errors.extend(validate_custom_field_names(field_names=value.keys()))
+
+    if errors:
+        raise Exception(*errors)
+
+
+def convert_custom_fields(value):
+    if value:
+        value = {key: string_cleaner(value) for key, value in value.items()}
+    return value
+
+
+def validate_custom_field_names(field_names):
+    """
+    Check a list of custom field name and return a list of Error.
+    """
+    if not field_names:
+        return []
+
+    errors = []
+    is_valid_name = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$').match
+
+    for name in sorted(field_names):
         # Check if names aresafe to use as an attribute name.
         if not is_valid_name(name):
             msg = (
@@ -75,11 +106,10 @@ def validate_custom_fields(about_obj, attribute, value):
                 'The first character must be a letter.')
             errors.append(Error(CRITICAL, msg % locals()))
         if not name.lower() == name:
-            msg = 'Field name: %(name)r must be lowercase. '
+            msg = 'Custom field name: %(name)r must be lowercase.'
             errors.append(Error(CRITICAL, msg % locals()))
 
-    if errors:
-        raise Exception(*errors)
+    return errors
 
 
 booleans = {
@@ -129,7 +159,7 @@ def path_converter(value):
 
 def about_resource_validator(about_obj, attribute, value):
     if not value or not value.strip():
-        msg = 'Field "about_resource" is required and empty or missing.'
+        msg = 'Required field "about_resource" is empty.'
         raise Exception(Error(CRITICAL, msg))
 
 
@@ -148,6 +178,69 @@ def string_cleaner(value):
     if value and isinstance(value, str):
         value = value.strip()
     return value
+
+
+def split_fields(data, skip_empty=False):
+    """
+    Given a `data` mapping return two mappings: one with only standard fields
+    and one with custom fields.
+    """
+    standard_fields = {}
+    custom_fields = {}
+
+    standard_field_names = set(attr.fields_dict(About).keys())
+
+    for key, value in data.items():
+        if skip_empty and not value:
+            continue
+        if key in standard_field_names:
+            standard_fields[key] = value
+        else:
+            custom_fields[key] = value
+    return standard_fields, custom_fields
+
+
+def validate_unique_names(field_names):
+    """
+    Given a list of field names, validate their unicity and case.
+    Return a list of Error.
+    """
+    errors = []
+    keys = set(field_names)
+    keys_lower = set([k.lower() for k in keys])
+    if len(keys) != len(keys_lower):
+        errors.append(Error(CRITICAL, 'Invalid fields: lowercased field names must be unique.'))
+
+    if keys != keys_lower:
+        errors.append(Error(CRITICAL, 'Invalid fields: all field names must be lowercase.'))
+
+    empty = False
+    for name in field_names:
+        if not name:
+            empty = True
+            break
+    if empty:
+        errors.append(Error(CRITICAL, 'Invalid empty field name.'))
+    return errors
+
+
+def validate_field_names(standard_field_names, custom_field_names, for_gen=False):
+    """
+    Validate a `field_names` sequence of field names. Return a list of Error.
+    """
+    errors = []
+    errors.extend(validate_unique_names(
+        list(standard_field_names) + list(standard_field_names)))
+
+    if for_gen and 'about_file_path' not in standard_field_names:
+        errors.append(Error(CRITICAL, 'Required field "about_file_path" is missing or empty.'))
+
+    if 'about_resource' not in standard_field_names:
+        errors.append(Error(CRITICAL, 'Required field "about_resource" is missing.'))
+
+    errors.extend(validate_custom_field_names(custom_field_names))
+
+    return errors
 
 
 ################################################################################
@@ -376,7 +469,8 @@ class About(object):
 
     # custom files as name: value
     custom_fields = attr.attrib(
-        default=attr.Factory(dict), repr=False, validator=validate_custom_fields)
+        default=attr.Factory(dict), repr=False,
+        validator=validate_custom_fields, converter=convert_custom_fields)
 
     # list of Error object
     errors = attr.attrib(default=attr.Factory(list), repr=False)
@@ -404,40 +498,42 @@ class About(object):
         Return an About object built a `data` mapping.
         """
         data = dict(data)
-        keys = set(data.keys())
-        keys_lower = set([k.lower() for k in keys])
-        if len(keys) != len(keys_lower):
-            raise Exception(
-                Error(CRITICAL, 
-                      'Invalid data: lowercased field names must be unique.'))
+        standard_fields, custom_fields = split_fields(data, skip_empty=True)
+        standard_fields.pop('errors', None)
 
-        if keys != keys_lower:
-            raise Exception(
-                Error(CRITICAL, 
-                      'Invalid data: all field names must be lowercase.'))
+        errors = validate_field_names(
+            standard_fields.keys(), custom_fields.keys())
+        if errors:
+            raise Exception(*errors)
 
-        licenses = data.pop('licenses', []) or []
+        licenses = standard_fields.pop('licenses', []) or []
         licenses = [License.from_dict(l) for l in licenses]
-
-        standard_fields = {}
-        custom_fields = {}
-
-        standard_field_names = set(attr.fields_dict(cls).keys())
-
-        # strip strings and skip empties
-        for key, value in data.items():
-            if isinstance(value, str):
-                value = value.strip()
-
-            if not value:
-                continue
-
-            if key in standard_field_names:
-                standard_fields[key] = value
-            else:
-                custom_fields[key] = value
-
         return About(licenses=licenses, custom_fields=custom_fields, **standard_fields)
+
+    @classmethod
+    def load(cls, location):
+        """
+        Return an About object built from the YAML file at `location` or None.
+        Raise Exception on non-recoverable errors.
+        """
+        # TODO: expand/resolve/abs/etc
+        loc = util.to_posix(location)
+
+        with io.open(loc, encoding='utf-8') as inp:
+            text = inp.read()
+        about = cls.loads(text)
+        if about:
+            about.location = location
+            return about
+
+    @classmethod
+    def loads(cls, text):
+        """
+        Return an About object built from a YAML `text` or None.
+        Raise Exception on non-recoverable errors.
+        """
+        data = saneyaml.load(text, allow_duplicate_keys=False)
+        return cls.from_dict(data)
 
     def to_dict(self, with_licenses=True, with_location=False):
         """
@@ -464,6 +560,29 @@ class About(object):
 
         return data
 
+    def dumps(self):
+        """
+        Return a YAML representation for this About.
+        If `with_files` is True, also write any reference notice or license file.
+        """
+        return saneyaml.dump(self.to_dict(), indent=2)
+
+    def dump(self, location, with_files=False):
+        """
+        Write this About object to the YAML file at `location`.
+        If `with_files` is True, also write any reference notice or license file.
+        """
+        parent = os.path.dirname(location)
+        if not os.path.exists(parent):
+            os.makedirs(parent)
+
+        with io.open(location, 'w', encoding='utf-8') as out:
+            out.write(self.dumps())
+
+        if with_files:
+            base_dir = os.path.dirname(location)
+            self.write_files(base_dir)
+
     @classmethod
     def standard_fields(cls):
         """
@@ -489,29 +608,6 @@ class About(object):
 
         return standard, custom
 
-    def dumps(self):
-        """
-        Return a YAML representation for this About.
-        If `with_files` is True, also write any reference notice or license file.
-        """
-        return saneyaml.dump(self.to_dict(), indent=2)
-
-    def dump(self, location, with_files=False):
-        """
-        Write this About object to the YAML file at `location`.
-        If `with_files` is True, also write any reference notice or license file.
-        """
-        parent = os.path.dirname(location)
-        if not os.path.exists(parent):
-            os.makedirs(parent)
-
-        with io.open(location, 'w', encoding='utf-8') as out:
-            out.write(self.dumps())
-
-        if with_files:
-            base_dir = os.path.dirname(location)
-            self.write_files(base_dir)
-
     def write_files(self, base_dir=None):
         """
         Write all referenced license and notice files.
@@ -532,31 +628,6 @@ class About(object):
 
         for license in self.licenses:  # NOQA
             _write(license.text, license.file_loc(base_dir))
-
-    @classmethod
-    def load(cls, location):
-        """
-        Return an About object built from the YAML file at `location` or None.
-        Raise Exception on non-recoverable errors.
-        """
-        # TODO: expand/resolve/abs/etc
-        loc = util.to_posix(location)
-
-        with io.open(loc, encoding='utf-8') as inp:
-            text = inp.read()
-        about = cls.loads(text)
-        if about:
-            about.location = location
-            return about
-
-    @classmethod
-    def loads(cls, text):
-        """
-        Return an About object built from a YAML `text` or None.
-        Raise Exception on non-recoverable errors.
-        """
-        data = saneyaml.load(text, allow_duplicate_keys=False)
-        return cls.from_dict(data)
 
     def field_names(self):
         """
@@ -656,4 +727,3 @@ class About(object):
                 license.text = text
 
         return errors
-

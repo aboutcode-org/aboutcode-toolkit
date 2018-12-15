@@ -20,7 +20,7 @@ other column names referenced below are these that exist AFTER the renamings
 have been applied to the existing column names.
 
 * kept_columns:
-An optional list of column names that should be kept in the transformed CSV. 
+An optional list of column names that should be kept in the transformed CSV.
 If this list is NOT provided, all the columns from the source CSV will be kept
 and eventually added in generated .ABOUT files.
 If this list is provided, only the listed columns are kept in the transformed

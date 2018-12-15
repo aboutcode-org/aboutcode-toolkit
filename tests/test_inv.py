@@ -304,8 +304,7 @@ class InventoryTest(unittest.TestCase):
         inv.save_as_csv(result_file, abouts)
 
         expected_errors = [
-            Error(CRITICAL,
-                  'Field "about_resource" is required and empty or missing.')]
+            Error(CRITICAL, 'Required field "about_resource" is missing.')]
         assert expected_errors == errors
 
         expected = get_test_loc('test_inv/no_about_resource_key/expected.csv')
@@ -320,8 +319,7 @@ class InventoryTest(unittest.TestCase):
         inv.save_as_csv(result_file, abouts)
 
         expected_errors = [
-            Error(CRITICAL,
-                  'Field "about_resource" is required and empty or missing.')]
+            Error(CRITICAL, 'Required field "about_resource" is missing.')]
         assert expected_errors == errors
 
         expected = get_test_loc('test_inv/some_missing_about_resource/expected.csv')

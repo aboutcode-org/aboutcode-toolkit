@@ -57,7 +57,6 @@ def load_inventory(location, base_dir=None):
     Use the `base_dir` to resolve the ABOUT file location.
     Return a list of errors and a list of About objects.
     """
-    errors = []
     abouts = []
 
     if location.endswith('.csv'):
@@ -65,19 +64,32 @@ def load_inventory(location, base_dir=None):
     elif location.endswith('.json'):
         inventory = load_json(location)
     else:
-        raise Exception(Error(CRITICAL,
-            'Unsupported inventory file type. '
-            'Must be one of .csv or .json: {}'.format(location)))
+        err = Error(CRITICAL, 'Unsupported inventory file type. Must be one of .csv or .json')
+        return [err], []
+
     inventory = list(inventory)
 
-    # FIXME: this should not be done here.
+    if not inventory:
+        err = Error(CRITICAL, 'Empty inventory.')
+        return [err], []
+
+    # various check prior to generation
+    # validate field names
+    sample = dict(inventory[0])
+    standard_fields, custom_fields = model.split_fields(sample)
+    fields_err = model.validate_field_names(standard_fields.keys(), custom_fields.keys())
+    if fields_err:
+        return fields_err, abouts
+
+    # validate duplicated paths
     dup_about_paths_err = check_duplicated_about_file_path(inventory)
     if dup_about_paths_err:
-        errors.extend(dup_about_paths_err)
-        return errors, abouts
+        return dup_about_paths_err, abouts
 
     if base_dir:
         base_dir = util.to_posix(base_dir)
+
+    errors = []
 
     for entry in inventory:
         entry = dict(entry)
@@ -87,10 +99,9 @@ def load_inventory(location, base_dir=None):
             msg = ('Empty or missing "about_file_path" for: "{}"'.format(about_file_path))
             errors.append(Error(ERROR, msg))
             continue
-        about_file_path = util.to_posix(about_file_path)
 
         # Ensure there is no absolute directory path
-        about_file_path = about_file_path.strip('/')
+        about_file_path = util.to_posix(about_file_path).strip('/')
 
         segments = about_file_path.split('/')
         if any(seg != seg.strip() for seg in segments):
@@ -103,9 +114,7 @@ def load_inventory(location, base_dir=None):
             about = model.About.from_dict(entry)
             if base_dir:
                 about.location = os.path.join(base_dir, about_file_path)
-
             abouts.append(about)
-
         except Exception as e:
             if len(e.args) == 1 and isinstance(e.args[0], Error):
                 err = e.args[0]
@@ -205,7 +214,6 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
     Return a list errors and a list of About objects.
     """
     errors, abouts = load_inventory(inventory_location, base_dir=target_dir)
-
     notices_by_filename = {}
     licenses_by_key = {}
 
