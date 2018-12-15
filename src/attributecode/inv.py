@@ -61,13 +61,13 @@ def collect_inventory(location, check_files=False):
         try:
             about = About.load(about_file_loc)
             abouts.append(about)
-    
+
             if check_files:
                 about.check_files()
-    
+
             # this could be a dict keys by path to keep per-path things?
             errors.extend(about.errors)
-    
+
         except Exception as exce:
             if all(isinstance(e, Error) for e in exce.args):
                 errors.extend(exce.args)

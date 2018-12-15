@@ -65,7 +65,7 @@ class Error(namedtuple('Error', ['severity', 'message'])):
 
     def __repr__(self, *args, **kwargs):
         sev, msg = self._get_values()
-        return 'Error(%(sev)s,  %(msg)s)' % locals()
+        return 'Error(%(sev)s, %(msg)s)' % locals()
 
     def __eq__(self, other):
         return repr(self) == repr(other)

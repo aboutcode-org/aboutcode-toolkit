@@ -44,7 +44,7 @@ on_windows = 'win32' in sys.platform
 def to_posix(path):
     """
     Return a path using the posix path separator given a path that may contain
-    posix or windows separators, converting "\\" to "/". 
+    posix or windows separators, converting "\\" to "/".
     NB: this path will still be valid in the windows explorer. It will be a
     valid path everywhere in Python. It may not lways be valid for windows
     command line operations.
@@ -143,9 +143,9 @@ def get_relative_path(base_loc, full_loc):
     full = norm(full_loc)
 
     assert full.startswith(base), (
-        'Cannot compute relative path: %(full_loc)r does not starts with %(base_loc)r'% locals())
+        'Cannot compute relative path: %(full_loc)r does not starts with %(base_loc)r' % locals())
 
-    assert full!= base, (
+    assert full != base, (
         'Cannot compute relative path: %(full_loc)r is the same as: %(base_loc)r' % locals())
     relative = full[len(base) + 1:]
     # We don't want to keep the first segment of the root of the returned path.
