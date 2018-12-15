@@ -89,7 +89,7 @@ def create_attribution_text(abouts, template_text, variables=None):
             variables=variables,
             # legacy for compatibility
             vartext=variables,
-            abouts=abouts,
+            abouts=sorted(abouts),
             common_licenses=COMMON_LICENSES,
             common_licenses_in_use=common_licenses_in_use,
         )
