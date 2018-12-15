@@ -43,7 +43,6 @@ from attributecode.inv import collect_inventory
 from attributecode.inv import save_as_json
 from attributecode.inv import save_as_csv
 from attributecode.util import extract_zip
-from attributecode.util import filter_errors
 from attributecode.util import unique
 
 
@@ -534,8 +533,8 @@ def print_config_help(ctx, param, value):
 
 def transform(location, output, configuration, quiet, verbose):  # NOQA
     """
-Transform the CSV file at LOCATION by applying renamings, filters and checks
-and write a new CSV to OUTPUT.
+Transform and validate the CSV file at LOCATION by applying renamings and
+filters and write a new CSV to OUTPUT.
 
 LOCATION: Path to a CSV file.
 
@@ -648,6 +647,14 @@ def parse_key_values(key_values):
             parsed_key_values[key].append(value)
 
     return dict(parsed_key_values), sorted(errors)
+
+
+def filter_errors(errors, minimum_severity=WARNING):
+    """
+    Return a list of unique `errors` Error object filtering errors that have a
+    severity below `minimum_severity`.
+    """
+    return unique([e for e in errors if e.severity >= minimum_severity])
 
 
 if __name__ == '__main__':

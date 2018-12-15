@@ -78,8 +78,8 @@ def create_attribution_text(abouts, template_text, variables=None):
             licenses_by_key[license.key] = license
 
     # a sorted common licenses list in use for reporting
-    common_licenses_in_use = sorted(lic for key, lic in licenses_by_key.items()
-                                   if key in COMMON_LICENSES)
+    common_licenses_in_use = sorted(
+        lic for key, lic in licenses_by_key.items() if key in COMMON_LICENSES)
 
     try:
         # Get the current UTC time

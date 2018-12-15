@@ -25,7 +25,6 @@ import unittest
 import saneyaml
 
 from attributecode import CRITICAL
-from attributecode import INFO
 from attributecode import Error
 from attributecode import model
 from attributecode.util import unique
@@ -188,11 +187,7 @@ class AboutTest(unittest.TestCase):
         # fields in this file are not in the standard order
         test_file = get_test_loc('test_model/parse/ordered_fields.ABOUT')
         a = model.About.load(test_file)
-        expected = [
-            Error(INFO, 'Field other is a custom field.'),
-            Error(INFO, 'Field that is a custom field.'),
-        ]
-        assert sorted(expected) == sorted(a.errors)
+        assert [] == a.errors
 
         expected_std = ['location', 'about_resource', 'name', 'version', 'download_url']
         expected_cust = sorted(['other', 'that'])
@@ -201,43 +196,37 @@ class AboutTest(unittest.TestCase):
         assert expected_cust == sorted(custom)
 
     def test_About_duplicate_field_names_are_detected_with_different_case(self):
-        # This test is failing because the YAML does not keep the order when
-        # loads the test files. For instance, it treat the 'About_Resource' as the
-        # first element and therefore the dup key is 'about_resource'.
         test_file = get_test_loc('test_model/parse/dupe_field_name.ABOUT')
-        a = model.About.load(test_file)
-        assert 'lowercased keys must be unique' in repr(a.errors)
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except Exception as e:
+            expected = (Error(CRITICAL, 'Invalid data: lowercased field names must be unique.'),)
+            assert expected == e.args
 
     def test_About_duplicate_field_names_are_not_reported_if_same_value(self):
-        # This test is failing because the YAML does not keep the order when
-        # loads the test files. For instance, it treat the 'About_Resource' as the
-        # first element and therefore the dup key is 'about_resource'.
         test_file = get_test_loc('test_model/parse/dupe_field_name_no_new_value.ABOUT')
-        a = model.About(test_file)
-        expected = [
-]
-        result = a.errors
-        assert sorted(expected) == sorted(result)
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except Exception as e:
+            expected = (Error(CRITICAL,  'Invalid data: lowercased field names must be unique.'),)
+            assert expected == e.args
 
     def test_About_fails_if_field_names_are_not_lowercase(self):
         test_file = get_test_loc('test_model/parser_tests/upper_field_names.ABOUT')
-        a = model.About.load(test_file)
-        assert 'all keys must be lowercase' in repr(a.errors)
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except Exception as e:
+            expected = (Error(CRITICAL,  'Invalid data: all field names must be lowercase.'),)
+            assert expected ==e.args
 
     def test_About_with_existing_about_resource_has_no_error(self):
         test_file = get_test_loc('test_model/parser_tests/about_resource_field.ABOUT')
         a = model.About.load(test_file)
         assert [] == a.errors
         assert a.about_resource
-
-    def test_About_has_errors_when_about_resource_is_missing(self):
-        test_file = get_test_loc('test_model/parser_tests/.ABOUT')
-        about = model.About.load(test_file)
-        about.check_files()
-
-        expected = [Error(CRITICAL, 'Field about_resource is required and empty or missing.')]
-        result = about.errors
-        assert expected == result
 
     def test_About_has_errors_when_about_resource_does_not_exist(self):
         test_file = get_test_loc('test_model/parser_tests/missing_about_ref.ABOUT')
@@ -249,23 +238,28 @@ class AboutTest(unittest.TestCase):
         ]
         assert expected == about.errors
 
-    def test_About_has_errors_when_missing_required_fields_are_missing(self):
+    def test_About_raise_exception_when_missing_required_fields_are_missing(self):
         test_file = get_test_loc('test_model/parse/missing_required.ABOUT')
-        a = model.About.load(test_file)
-        expected = [
-            Error(CRITICAL, 'Field about_resource is required and empty or missing.'),
-        ]
-        result = a.errors
-        assert expected == result
 
-    def test_About_has_errors_when_required_fields_are_empty(self):
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except Exception as e:
+            expected = (
+                Error(CRITICAL, 'Field "about_resource" is required and empty or missing.'),
+            )
+            assert expected == e.args
+
+    def test_About_raise_exception_when_required_fields_are_empty(self):
         test_file = get_test_loc('test_model/parse/empty_required.ABOUT')
-        a = model.About.load(test_file)
-        expected = [
-            Error(CRITICAL, 'Field about_resource is required and empty or missing.'),
-        ]
-        result = a.errors
-        assert expected == result
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except Exception as e:
+            expected = (
+                Error(CRITICAL, 'Field "about_resource" is required and empty or missing.'),
+            )
+            assert expected == e.args
 
     def test_About_has_no_errors_with_empty_notice_file_field(self):
         test_file = get_test_loc('test_model/parse/empty_notice_field.about')
@@ -299,10 +293,7 @@ class AboutTest(unittest.TestCase):
     def test_About_has_info_for_custom_field_name(self):
         test_file = get_test_loc('test_model/parse/illegal_custom_field.about')
         about = model.About.load(test_file)
-        expected_errors = [
-            Error(INFO, 'Field hydrate is a custom field.'),
-        ]
-        assert expected_errors == about.errors
+        assert [] == about.errors
 
     def test_About_check_files_collect_errors_if_path_missing(self):
         test_file = get_test_loc('test_model/parse/missing_notice_license_files.ABOUT')
@@ -339,36 +330,37 @@ this software and releases the component to Public Domain.
         assert not a.notice_file
         assert [] == a.licenses
 
-    def test_About_rejects_non_ascii_names_and_accepts_unicode_values(self):
+    def test_About_cannot_be_created_with_non_ascii_custom_field_names(self):
         test_file = get_test_loc('test_model/parse/non_ascii_field_name_value.about')
-        a = model.About.load(test_file)
-        expected = [
-            Error(CRITICAL, 'Field name: \'mat\xedas\' contains illegal characters. '
-                  'Only these characters are allowed: ASCII letters, digits '
-                  'and "_" underscore. The first characters must be a letter'),
-            Error(INFO, 'Field mat\xedas is a custom field.')
-        ]
-        assert expected == a.errors
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except Exception as e:
+            expected = (
+                Error(CRITICAL,
+                      'Custom field name: \'mat\xedas\' contains illegal characters. '
+                      'Only these characters are allowed: ASCII letters, digits '
+                      'and "_" underscore. The first character must be a letter.'),
+                )
+            assert expected == e.args
 
-    def test_About_invalid_boolean_value(self):
+    def test_About_cannot_be_created_with_invalid_boolean_value(self):
         test_file = get_test_loc('test_model/parse/invalid_boolean.about')
-        a = model.About.load(test_file)
-        expected = [
-            Error(CRITICAL, "Field name: 'modified' has an invalid flag value: "
-                  "'blah': should be one of yes or no or true or false.")
-        ]
-        assert expected == a.errors
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except Exception as e:
+            expected = (
+                Error(CRITICAL, "Field name: 'modified' has an invalid flag value: "
+                      "'blah': should be one of yes or no or true or false."),
+            )
+            assert expected == e.args
 
     def test_About_contains_about_file_path(self):
         test_file = get_test_loc('test_model/serialize/about.ABOUT')
         # TODO: I am not sure this override of the about_file_path makes sense
         a = model.About.load(test_file)
-        expeted = [
-            Error(INFO, 'Field author is a custom field.'),
-            Error(INFO, 'Field license_file is a custom field.'),
-            Error(INFO, 'Field license_key is a custom field.'),
-        ]
-        assert expeted == sorted(a.errors)
+        assert [] == a.errors
 
         expected = 'test_model/serialize/about.ABOUT'
         assert a.location.endswith(expected)
@@ -390,9 +382,9 @@ this software and releases the component to Public Domain.
         assert about != about2
 
     def test_get_field_names_only_returns_non_empties(self):
-        a = model.About(notice_file='sadasdasd')
+        a = model.About(about_resource='.', notice_file='sadasdasd')
         a.custom_fields['f'] = '1'
-        expected = ['notice_file'], ['f']
+        expected = ['about_resource', 'notice_file'], ['f']
         assert expected == a.fields()
 
 
@@ -401,11 +393,7 @@ class SerializationTest(unittest.TestCase):
     def test_About_dumps(self):
         test_file = get_test_loc('test_model/dumps/about.ABOUT')
         a = model.About.load(test_file)
-
-        expected = [
-            Error(INFO, 'Field author is a custom field.')
-        ]
-        assert expected == a.errors
+        assert [] == a.errors
 
         expected = '''about_resource: .
 name: AboutCode
@@ -438,10 +426,7 @@ author:
     def test_About_dumps_does_all_non_empty_present_fields(self):
         test_file = get_test_loc('test_model/parse/complete2/about.ABOUT')
         a = model.About.load(test_file)
-        expected_error = [
-            Error(INFO, 'Field custom1 is a custom field.'),
-        ]
-        assert sorted(expected_error) == sorted(a.errors)
+        assert [] == a.errors
 
         expected = '''about_resource: .
 name: AboutCode
@@ -453,34 +438,23 @@ custom1: |
         result = a.dumps()
         assert expected == result
 
-    def test_About_dumps_with_different_boolean_value(self):
+    def test_About_is_not_created_with_invalid_flag_value(self):
         test_file = get_test_loc('test_model/parse/complete2/about2.ABOUT')
-        a = model.About.load(test_file)
-        expected_error = [
-            Error(CRITICAL,
-                  "Field name: 'track_changes' has an invalid flag value: 'blah':"
-                  " should be one of yes or no or true or false."),
-        ]
-        assert expected_error == sorted(a.errors)
-
-        expected = '''about_resource: .
-name: AboutCode
-version: 0.11.1
-attribute: yes
-modified: yes
-track_changes: blah
-'''
-
-        result = a.dumps()
-        assert expected == result
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except Exception as e:
+            expected_error = (
+                Error(CRITICAL,
+                      "Field name: 'track_changes' has an invalid flag value: 'blah':"
+                      " should be one of yes or no or true or false."),
+            )
+            assert expected_error == e.args
 
     def test_About_dumps_all_non_empty_fields(self):
         test_file = get_test_loc('test_model/parse/complete2/about.ABOUT')
         a = model.About.load(test_file)
-        expected_error = [
-            Error(INFO, 'Field custom1 is a custom field.'),
-        ]
-        assert expected_error == a.errors
+        assert [] == a.errors
 
         expected = '''about_resource: .
 name: AboutCode
@@ -495,12 +469,7 @@ custom1: |
     def test_About_to_dict_contains_special_paths(self):
         test_file = get_test_loc('test_model/special/about.ABOUT')
         a = model.About.load(test_file)
-        expected_errors = [
-            Error(INFO, 'Field author is a custom field.'),
-            Error(INFO, 'Field license_file is a custom field.'),
-            Error(INFO, 'Field license_key is a custom field.'),
-        ]
-        assert expected_errors == sorted(a.errors)
+        assert [] == sorted(a.errors)
 
         result = a.to_dict()
         expected = OrderedDict([
@@ -537,25 +506,19 @@ custom1: |
         a = model.About.load(test_file)
         a.check_files()
         errors = [
-            Error(INFO, 'Field dje_license is a custom field.'),
-            Error(INFO, 'Field license_text_file is a custom field.'),
-            Error(INFO, 'Field license_url is a custom field.'),
-            Error(INFO, 'Field scm_repository is a custom field.'),
-            Error(INFO, 'Field scm_tool is a custom field.'),
-            Error(INFO, 'Field test is a custom field.'),
             Error(CRITICAL, 'File about_resource: "nose-selecttests-0.3.zip" does not exists'),
         ]
 
-        assert errors == sorted(unique(a.errors))
+        assert errors == unique(a.errors)
         assert 'Copyright (c) 2012, Domen Kožar' == a.copyright
 
-    def test_load_has_errors_for_non_unicode(self):
+    def test_load_raise_exception_for_non_unicode(self):
         test_file = get_test_loc('test_model/unicode/not-unicode.ABOUT')
-        a = model.About.load(test_file)
-        err = a.errors[0]
-        assert CRITICAL == err.severity
-        assert 'Cannot load invalid ABOUT file' in err.message
-        assert 'UnicodeDecodeError' in err.message
+        try:
+            model.About.load(test_file)
+            self.fail('Exception not raised')
+        except UnicodeDecodeError:
+            pass
 
     def test_to_dict_load_dict_ignores_empties(self):
         test = {
@@ -648,8 +611,8 @@ custom1: |
 
 class ReferenceTest(unittest.TestCase):
 
-    def test_load_license_references_can_load_non_utf_files(self):
+    def test_get_reference_licenses_can_load_non_utf_files(self):
         test_dir = get_test_loc('test_model/reference')
-        notices_by_name, licenses_by_key = model.load_license_references(test_dir)
+        notices_by_name, licenses_by_key = model.get_reference_licenses(test_dir)
         assert ['bad.NOTICE'] == list(notices_by_name.keys())
         assert ['weird'] == list(licenses_by_key.keys())

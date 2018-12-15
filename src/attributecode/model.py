@@ -32,34 +32,127 @@ from collections import OrderedDict
 import io
 import os
 import re
-import traceback
-
-import click
-
-from attributecode.util import python2
-
-if python2:  # pragma: nocover
-    from itertools import izip_longest as zip_longest  # NOQA
-    from urlparse import urljoin, urlparse  # NOQA
-    from urllib2 import urlopen, Request, HTTPError  # NOQA
-    str = unicode  # NOQA
-else:  # pragma: nocover
-    from itertools import zip_longest  # NOQA
-    from urllib.parse import urljoin, urlparse  # NOQA
-    from urllib.request import urlopen, Request  # NOQA
-    from urllib.error import HTTPError  # NOQA
 
 import attr
+import click
 from license_expression import Licensing
 
-# from attributecode import api
 from attributecode import CRITICAL
-from attributecode import INFO
 from attributecode import Error
 from attributecode import saneyaml
 from attributecode import util
 
+if util.python2:
+    str = unicode  # NOQA
 
+
+################################################################################
+# Validation and conversion utilities
+################################################################################
+
+def validate_custom_fields(about_obj, attribute, value):
+    """
+    Check a mapping of custom_fields. Raise an Exception on errors.
+    """
+    if not value:
+        return
+
+    errors = []
+    is_valid_name = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$').match
+
+    if value and not isinstance(value, dict):
+        msg = (
+            'Custom fields must be a dictionary: %(value)r.')
+        raise Exception(Error(CRITICAL, msg % locals()))
+
+    for name in value.keys():
+        # Check if names aresafe to use as an attribute name.
+        if not is_valid_name(name):
+            msg = (
+                'Custom field name: %(name)r contains illegal characters. '
+                'Only these characters are allowed: '
+                'ASCII letters, digits and "_" underscore. '
+                'The first character must be a letter.')
+            errors.append(Error(CRITICAL, msg % locals()))
+        if not name.lower() == name:
+            msg = 'Field name: %(name)r must be lowercase. '
+            errors.append(Error(CRITICAL, msg % locals()))
+
+    if errors:
+        raise Exception(*errors)
+
+
+booleans = {
+    'yes': True, 'y': True, 'true': True, 'x': True,
+    'no': False, 'n': False, 'false': False, }
+
+
+def boolean_converter(value):
+    """
+    Convert a yes/no value to a proper True/False boolean value.
+    """
+    if value is True or value is False:
+        return value
+
+    if isinstance(value, str):
+        value = value.lower().strip()
+        if value in booleans:
+            return booleans[value]
+    return value
+
+
+def validate_flag_field(about_obj, attribute, value):
+    """
+    Check a boolean flag value for errors. Raise an Exception on errors.
+    """
+    if value is True or value is False:
+        return
+
+    name = attribute.name
+    msg = (
+        'Field name: %(name)r has an invalid flag value: '
+        '%(value)r: should be one of yes or no or true or false.')
+    raise Exception(Error(CRITICAL, msg % locals()))
+
+
+def copyright_converter(value):
+    if value:
+        value = '\n'.join(v.strip() for v in value.splitlines(False)).strip()
+    return value
+
+
+def path_converter(value):
+    if value:
+        value = util.to_posix(value).strip('/')
+    return value
+
+
+def about_resource_validator(about_obj, attribute, value):
+    if not value or not value.strip():
+        msg = 'Field "about_resource" is required and empty or missing.'
+        raise Exception(Error(CRITICAL, msg))
+
+
+def license_expression_converter(value):
+    """
+    Validate and normalize the license expression.
+    """
+    if value:
+        licensing = Licensing()
+        expression = licensing.parse(value, simple=True)
+        value = str(expression)
+    return value
+
+
+def string_cleaner(value):
+    if value and isinstance(value, str):
+        value = value.strip()
+    return value
+
+
+################################################################################
+# Models proper
+################################################################################
 
 @attr.attributes
 class License(object):
@@ -67,11 +160,11 @@ class License(object):
     A license object
     """
     # POSIX path relative to the ABOUT file location where the text file lives
-    file = attr.attrib(default=None, repr=False)
-    key = attr.attrib(default=None,)
-    name = attr.attrib(default=None)
-    url = attr.attrib(default=None, repr=False)
-    text = attr.attrib(default=None, repr=False)
+    file = attr.attrib(default=None, repr=False, converter=path_converter)
+    key = attr.attrib(default=None, converter=string_cleaner)
+    name = attr.attrib(default=None, converter=string_cleaner)
+    url = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    text = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
     def __attrs_post_init__(self, *args, **kwargs):
         if not self.file:
@@ -118,8 +211,7 @@ class License(object):
             key=data['key'],
             name=data.get('name'),
             file=data.get('file'),
-            url=data.get('url'),
-        )
+            url=data.get('url'))
 
     @property
     def default_file_name(self):
@@ -159,17 +251,17 @@ class License(object):
             out.write(text)
 
 
-def load_license_references(reference_dir):
+def get_reference_licenses(reference_dir):
     """
+    Return reference licenses text and data loaded from `reference_dir`.
+
     Return a mapping of notices as {notice_file: notice text} and a mapping of
     {license key: License} loaded from a `reference_dir`.
-    In the `reference_dir`, all the files must be UTF-8 encoded text files:
-     - license files must be named after their license key and can consist of:
-      - a text file with .LICENSE extension
-      - an optional companion .yml YAML data file with extra license data to load
-        as a License obejct.
 
-     - The notice files are any file that is not a license file pair.
+    In the `reference_dir` there can be pairs of text and data files for a license key:
+      - a license text file must be named after its license key as `key.LICENSE`
+      - a license .yml YAML data file with license data to load as a License object.
+    All other files not part of a license files pair are treated as "notice files".
 
     For instance, we can have the files foo.LICENSE and foo.yml where foo.yml contains:
 
@@ -177,6 +269,7 @@ def load_license_references(reference_dir):
         name: The Foo License
         url: http://zddfsdfsd.com/FOO
     """
+
     notices_by_name = {}
     licenses_by_key = {}
     ref_files = os.listdir(reference_dir)
@@ -190,13 +283,13 @@ def load_license_references(reference_dir):
 
         if lic.file not in text_files:
             click.echo(
-                'ERROR: The license: {} does not have a '
+                'ERROR: The reference license: {} does not have a '
                 'corresponding text file: {}'.format(lic.key, lic.file))
         else:
             lic.load_text(reference_dir)
             text_files.remove(lic.file)
 
-        assert lic.text is not None, 'Incorrect license with no text: {}'.format(lic.key)
+        assert lic.text is not None, 'Incorrect reference license with no text: {}'.format(lic.key)
 
     # whatever is left are "notice" files
     for notice_file in text_files:
@@ -210,40 +303,6 @@ def load_license_references(reference_dir):
     return notices_by_name, licenses_by_key
 
 
-booleans = {
-        'yes': True, 'y': True, 'true': True, 'x': True,
-        'no': False, 'n': False, 'false': False,
-}
-
-
-def boolean_converter(value):
-    if isinstance(value, str):
-        vallo = value.lower()
-        if vallo in booleans:
-            return booleans[vallo]
-    return value
-
-
-def copyright_converter(value):
-    if value:
-        value = '\n'.join(v.strip() for v in value.splitlines(False))
-    return value
-
-
-def about_resource_converter(value):
-    if value:
-        value = util.to_posix(value).strip('/')
-    return value
-
-
-def license_expression_converter(value):
-    if value:
-        licensing = Licensing()
-        expression = licensing.parse(value, simple=True)
-        value = str(expression)
-    return value
-
-
 @attr.attributes
 class About(object):
     """
@@ -253,17 +312,17 @@ class About(object):
     location = attr.attrib(default=None, repr=False)
 
     # this is a path relative to the ABOUT file location
-    about_resource = attr.attrib(
-        default=None, converter=about_resource_converter)
+    about_resource = attr.attrib(default=None,
+        converter=path_converter, validator=about_resource_validator)
 
     # everything else is optional
 
-    name = attr.attrib(default=None)
-    version = attr.attrib(default=None)
-    description = attr.attrib(default=None, repr=False)
-    homepage_url = attr.attrib(default=None, repr=False)
-    download_url = attr.attrib(default=None, repr=False)
-    notes = attr.attrib(default=None, repr=False)
+    name = attr.attrib(default=None, converter=string_cleaner)
+    version = attr.attrib(default=None, converter=string_cleaner)
+    description = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    homepage_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    download_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    notes = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
     copyright = attr.attrib(
         default=None, repr=False, converter=copyright_converter)
@@ -272,46 +331,58 @@ class About(object):
 
     # boolean flags as yes/no
     attribute = attr.attrib(
-        default=False, type=bool, converter=boolean_converter, repr=False)
+        default=False, type=bool, repr=False,
+        validator=validate_flag_field, converter=boolean_converter,)
+
     redistribute = attr.attrib(
-        default=False, type=bool, converter=boolean_converter, repr=False)
+        default=False, type=bool, repr=False,
+        validator=validate_flag_field, converter=boolean_converter,)
+
     modified = attr.attrib(
-        default=False, type=bool, converter=boolean_converter, repr=False)
+        default=False, type=bool, repr=False,
+        validator=validate_flag_field, converter=boolean_converter,)
+
     track_changes = attr.attrib(
-        default=False, type=bool, converter=boolean_converter, repr=False)
+        default=False, type=bool, repr=False,
+        validator=validate_flag_field, converter=boolean_converter,)
+
     internal_use_only = attr.attrib(
-        default=False, type=bool, converter=boolean_converter, repr=False)
+        default=False, type=bool, repr=False,
+        validator=validate_flag_field, converter=boolean_converter,)
 
     # a list of License objects
     licenses = attr.attrib(default=attr.Factory(list), repr=False)
 
     # path relative to the ABOUT file location
-    notice_file = attr.attrib(default=None, repr=False)
+    notice_file = attr.attrib(default=None, repr=False, converter=path_converter)
     # the text loaded from notice_file
-    notice_text = attr.attrib(default=None, repr=False)
-    notice_url = attr.attrib(default=None, repr=False)
+    notice_text = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    notice_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
     # path relative to the ABOUT file location
-    changelog_file = attr.attrib(default=None, repr=False)
+    changelog_file = attr.attrib(default=None, repr=False, converter=path_converter)
 
-    owner = attr.attrib(default=None, repr=False)
-    owner_url = attr.attrib(default=None, repr=False)
+    owner = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    owner_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
-    vcs_tool = attr.attrib(default=None, repr=False)
-    vcs_repository = attr.attrib(default=None, repr=False)
-    vcs_revision = attr.attrib(default=None, repr=False)
+    vcs_tool = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    vcs_repository = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    vcs_revision = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
-    checksum_md5 = attr.attrib(default=None, repr=False)
-    checksum_sha1 = attr.attrib(default=None, repr=False)
-    checksum_sha256 = attr.attrib(default=None, repr=False)
-    spec_version = attr.attrib(default=None, repr=False)
+    checksum_md5 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    checksum_sha1 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    checksum_sha256 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    spec_version = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
     # custom files as name: value
-    custom_fields = attr.attrib(default=attr.Factory(dict), repr=False)
+    custom_fields = attr.attrib(
+        default=attr.Factory(dict), repr=False, validator=validate_custom_fields)
+
     # list of Error object
     errors = attr.attrib(default=attr.Factory(list), repr=False)
 
-    excluded_fields = set([
+    # these fields are excluded from a to_dict() serialization
+    _excluded_fields = set([
         'errors',
         'custom_fields',
         'notice_text',
@@ -327,16 +398,55 @@ class About(object):
             licenses = [License(key=key) for key in keys]
             self.licenses = licenses
 
+    @classmethod
+    def from_dict(cls, data):
+        """
+        Return an About object built a `data` mapping.
+        """
+        data = dict(data)
+        keys = set(data.keys())
+        keys_lower = set([k.lower() for k in keys])
+        if len(keys) != len(keys_lower):
+            raise Exception(
+                Error(CRITICAL, 
+                      'Invalid data: lowercased field names must be unique.'))
+
+        if keys != keys_lower:
+            raise Exception(
+                Error(CRITICAL, 
+                      'Invalid data: all field names must be lowercase.'))
+
+        licenses = data.pop('licenses', []) or []
+        licenses = [License.from_dict(l) for l in licenses]
+
+        standard_fields = {}
+        custom_fields = {}
+
+        standard_field_names = set(attr.fields_dict(cls).keys())
+
+        # strip strings and skip empties
+        for key, value in data.items():
+            if isinstance(value, str):
+                value = value.strip()
+
+            if not value:
+                continue
+
+            if key in standard_field_names:
+                standard_fields[key] = value
+            else:
+                custom_fields[key] = value
+
+        return About(licenses=licenses, custom_fields=custom_fields, **standard_fields)
+
     def to_dict(self, with_licenses=True, with_location=False):
         """
         Return an OrderedDict of About data (excluding texts and file locations).
         Fields with empty values are not included.
         """
-        excluded_fields = set(self.excluded_fields)
-
+        excluded_fields = set(self._excluded_fields)
         if not with_licenses:
             excluded_fields.add('licenses')
-
         if not with_location:
             excluded_fields.add('location')
 
@@ -347,6 +457,7 @@ class About(object):
             recurse=True, filter=valid_fields, dict_factory=OrderedDict)
 
         # add custom fields
+        # note: we sort these fields by name
         for key, value in sorted(self.custom_fields.items()):
             if value:
                 data[key] = value
@@ -359,7 +470,7 @@ class About(object):
         Return a list of standard field names available in this class.
         """
         return [f for f in attr.fields_dict(cls).keys()
-                if f not in cls.excluded_fields]
+                if f not in cls._excluded_fields]
 
     def fields(self):
         """
@@ -368,7 +479,7 @@ class About(object):
         """
 
         def valid_fields(attribute, value):
-            return (value and attribute.name not in self.excluded_fields)
+            return (value and attribute.name not in self._excluded_fields)
 
         standard = attr.asdict(
             self, recurse=False, filter=valid_fields, dict_factory=OrderedDict)
@@ -426,20 +537,14 @@ class About(object):
     def load(cls, location):
         """
         Return an About object built from the YAML file at `location` or None.
+        Raise Exception on non-recoverable errors.
         """
         # TODO: expand/resolve/abs/etc
         loc = util.to_posix(location)
-        about = None
-        try:
-            with io.open(loc, encoding='utf-8') as inp:
-                text = inp.read()
-            about = cls.loads(text)
-        except Exception as e:
-            trace = traceback.format_exc()
-            msg = 'Cannot load invalid ABOUT file from: %(location)r: %(e)r\n%(trace)s'
-            about = About()
-            about.errors.append(Error(CRITICAL, msg % locals()))
 
+        with io.open(loc, encoding='utf-8') as inp:
+            text = inp.read()
+        about = cls.loads(text)
         if about:
             about.location = location
             return about
@@ -448,58 +553,10 @@ class About(object):
     def loads(cls, text):
         """
         Return an About object built from a YAML `text` or None.
+        Raise Exception on non-recoverable errors.
         """
-        about = None
-        try:
-            data = saneyaml.load(text, allow_duplicate_keys=False)
-            about = cls.from_dict(data)
-        except Exception as e:
-            trace = traceback.format_exc()
-            msg = 'Cannot load invalid ABOUT file from: %(text)r: %(e)r\n%(trace)s'
-            about = About()
-            about.errors.append(Error(CRITICAL, msg % locals()))
-        return about
-
-    @classmethod
-    def from_dict(cls, data):
-        """
-        Return an About object built a `data` mapping.
-        """
-        data = dict(data)
-
-        standard_field_names = set(attr.fields_dict(cls).keys())
-
-        keys = set(data.keys())
-        keys_lower = set([k.lower() for k in keys])
-        if len(keys) != len(keys_lower):
-            raise Exception('Invalid data: lowercased keys must be unique.')
-
-        if keys != keys_lower:
-            raise Exception('Invalid data: all keys must be lowercase.')
-
-        licenses = data.pop('licenses', []) or []
-        licenses = [License.from_dict(l) for l in licenses]
-
-        standard_fields = {}
-        custom_fields = {}
-
-        # strip strings nd skip empties
-        for key, value in data.items():
-            if isinstance(value, str):
-                value = value.strip()
-
-            if not value:
-                continue
-
-            if key in standard_field_names:
-                standard_fields[key] = value
-            else:
-                custom_fields[key] = value
-
-        about = About(licenses=licenses, custom_fields=custom_fields, **standard_fields)
-
-        about.validate()
-        return about
+        data = saneyaml.load(text, allow_duplicate_keys=False)
+        return cls.from_dict(data)
 
     def field_names(self):
         """
@@ -508,49 +565,6 @@ class About(object):
         standard = list(attr.fields_dict(self.__class__).keys())
         custom = [k for k, v in self.custom_fields.items() if v]
         return standard + custom
-
-    def validate(self):
-        """
-        Check self for errors. Reset, update and return self.errors.
-        """
-        is_valid_name = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$').match
-
-        if not self.about_resource:
-            msg = 'Field about_resource is required and empty or missing.'
-            self.errors.append(Error(CRITICAL, msg))
-
-        for name in self.custom_fields.keys():
-            # Check if names aresafe to use as an attribute name.
-            if not is_valid_name(name):
-                msg = (
-                    'Field name: %(name)r contains illegal characters. '
-                    'Only these characters are allowed: '
-                    'ASCII letters, digits and "_" underscore. '
-                    'The first characters must be a letter')
-                self.errors.append(Error(CRITICAL, msg % locals()))
-
-            msg = 'Field %(name)s is a custom field.'
-            self.errors.append(Error(INFO, msg % locals()))
-
-        boolean_fields = (
-                'redistribute',
-                'attribute',
-                'track_changes',
-                'modified',
-                'internal_use_only',
-        )
-
-        for name in boolean_fields:
-            value = getattr(self, name, False)
-            if value and value is not True:
-                msg = (
-                    'Field name: %(name)r has an invalid flag value: '
-                    '%(value)r: should be one of yes or no or true or false.')
-                self.errors.append(Error(CRITICAL, msg % locals()))
-
-        # TODO: add check on license_expression!!! And it might be a required??
-
-        return self.errors
 
     def about_resource_loc(self, base_dir=None):
         """
@@ -642,3 +656,4 @@ class About(object):
                 license.text = text
 
         return errors
+

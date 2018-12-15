@@ -89,7 +89,7 @@ class GenerateTest(unittest.TestCase):
         assert not error
 
     def test_generate_with_default_template(self, regen=False):
-        test_file = get_test_loc('test_attrib/gen_default_template/attrib.ABOUT')
+        test_file = get_test_loc('test_attrib/gen_default_template')
         errors, abouts = inv.collect_inventory(test_file)
         assert not errors
 

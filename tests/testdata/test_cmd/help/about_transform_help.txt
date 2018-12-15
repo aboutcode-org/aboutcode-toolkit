@@ -1,7 +1,7 @@
 Usage: about transform [OPTIONS] LOCATION OUTPUT
 
-  Transform the CSV file at LOCATION by applying renamings, filters and checks
-  and write a new CSV to OUTPUT.
+  Transform and validate the CSV file at LOCATION by applying renamings and
+  filters and write a new CSV to OUTPUT.
 
   LOCATION: Path to a CSV file.
 

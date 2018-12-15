@@ -24,16 +24,10 @@ import string
 import sys
 
 from attributecode import CRITICAL
-from attributecode import WARNING
 from attributecode import Error
 
 
 python2 = sys.version_info[0] < 3
-
-if python2:  # pragma: nocover
-    from itertools import izip_longest as zip_longest  # NOQA
-else:  # pragma: nocover
-    from itertools import zip_longest  # NOQA
 
 if python2:  # pragma: nocover
     from backports import csv  # NOQA
@@ -78,7 +72,6 @@ def invalid_chars(path):
     rname = resource_name(path)
     name = rname.lower()
     return [c for c in name if c not in valid_file_chars]
-
 
 
 def check_file_names(paths):
@@ -228,11 +221,3 @@ def unique(sequence):
         if item not in deduped:
             deduped.append(item)
     return deduped
-
-
-def filter_errors(errors, minimum_severity=WARNING):
-    """
-    Return a list of unique `errors` Error object filtering errors that have a
-    severity below `minimum_severity`.
-    """
-    return unique([e for e in errors if e.severity >= minimum_severity])

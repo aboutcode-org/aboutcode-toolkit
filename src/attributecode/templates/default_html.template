@@ -18,7 +18,7 @@
     <!-- table of contents listing every entry -->    
     <div class="oss-table-of-contents">
         {% for about in abouts %}
-            <p><a href="#package_{{ loop.index0 }}">{{ about.name }} {{ about.version }}</a></p>
+            <p><a href="#package_{{ loop.index0 }}">{{ about.name }} {{ about.version or '' }}</a></p>
         {% endfor %}
     </div>
 
@@ -28,14 +28,14 @@
 
     {% for about in abouts %}
         <div class="oss-package" id="package_{{ loop.index0 }}">
-            <h3 class="package-name">{{ about.name }} {{ about.version }}</h3>
+            <h3 class="package-name">{{ about.name }} {{ about.version or '' }}</h3>
 
             {% if about.license_expression %}
                 <p>This package is licensed under: {{ about.license_expression }} </p>
             {% endif %}
 
             {% if about.copyright %}
-                <pre>{{about.copyright}}</pre>
+                <pre>{{ about.copyright }}</pre>
             {% endif %}
 
             {% if about.notice_text %}

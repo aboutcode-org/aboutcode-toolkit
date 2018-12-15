@@ -120,7 +120,7 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_return_errors(self):
         test_loc = get_test_loc('test_inv/collect_inventory_errors')
         errors, _abouts = inv.collect_inventory(test_loc)
-        expected_errors = [Error(INFO, 'Field date is a custom field.')]
+        expected_errors = []
         assert expected_errors == errors
 
     @skipIf(on_windows and not py3, 'Windows support for long path requires https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation')
@@ -151,20 +151,16 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_can_collect_a_single_file(self):
         test_loc = get_test_loc('test_inv/single_file/django_snippets_2413.ABOUT')
         errors, abouts = inv.collect_inventory(test_loc)
-        expected = [
-            Error(INFO, 'Field license_text_file is a custom field.'),
-            Error(INFO, 'Field license_url is a custom field.'),
-        ]
-
+        expected = []
         assert expected == errors
         expected = [OrderedDict([
-            ('about_resource', u'django_snippets_2413.py'), 
-            ('name', u'Yet another query string template tag'), 
-            ('version', u'2011-04-12'), 
-            ('homepage_url', u'http://djangosnippets.org/snippets/2413/'), 
-            ('download_url', u'http://djangosnippets.org/snippets/2413/download/'), 
-            ('notes', u'This file was modified to include the line "register = Library()" without which the template tag is not registered.'), 
-            (u'license_text_file', u'django_snippets.LICENSE'), 
+            ('about_resource', u'django_snippets_2413.py'),
+            ('name', u'Yet another query string template tag'),
+            ('version', u'2011-04-12'),
+            ('homepage_url', u'http://djangosnippets.org/snippets/2413/'),
+            ('download_url', u'http://djangosnippets.org/snippets/2413/download/'),
+            ('notes', u'This file was modified to include the line "register = Library()" without which the template tag is not registered.'),
+            (u'license_text_file', u'django_snippets.LICENSE'),
             (u'license_url', u'http://djangosnippets.org/about/tos/')])]
         assert expected == [a.to_dict() for a in abouts]
 
@@ -178,30 +174,25 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_populate_location(self):
         test_loc = get_test_loc('test_inv/complete')
         errors, abouts = inv.collect_inventory(test_loc)
-        expected = [
-            Error(INFO, 'Field author is a custom field.'),
-            Error(INFO, 'Field license_file is a custom field.'),
-            Error(INFO, 'Field license_key is a custom field.'),
-        ]
-
+        expected = []
         assert expected == errors
 
         fix_location(abouts, test_loc)
 
         expected = [OrderedDict([
-            ('about_resource', u'.'), 
-            ('name', u'AboutCode'), 
-            ('version', u'0.11.0'), 
-            ('description', u'AboutCode is a tool \nto process ABOUT files. \nAn ABOUT file is a file.'), 
-            ('homepage_url', u'http://dejacode.org'), 
-            ('copyright', u'Copyright (c) 2013-2014 nexB Inc.'), 
-            ('license_expression', u'apache-2.0'), 
-            ('licenses', [OrderedDict([('file', u'apache-2.0.LICENSE'), ('key', u'apache-2.0')])]), 
-            ('notice_file', u'NOTICE'), 
-            ('owner', u'nexB Inc.'), 
-            ('vcs_tool', u'git'), 
-            ('vcs_repository', u'https://github.com/dejacode/about-code-tool.git'), 
-            (u'author', [u'Jillian Daguil', u'Chin Yeung Li', u'Philippe Ombredanne', u'Thomas Druez']), 
+            ('about_resource', u'.'),
+            ('name', u'AboutCode'),
+            ('version', u'0.11.0'),
+            ('description', u'AboutCode is a tool \nto process ABOUT files. \nAn ABOUT file is a file.'),
+            ('homepage_url', u'http://dejacode.org'),
+            ('copyright', u'Copyright (c) 2013-2014 nexB Inc.'),
+            ('license_expression', u'apache-2.0'),
+            ('licenses', [OrderedDict([('file', u'apache-2.0.LICENSE'), ('key', u'apache-2.0')])]),
+            ('notice_file', u'NOTICE'),
+            ('owner', u'nexB Inc.'),
+            ('vcs_tool', u'git'),
+            ('vcs_repository', u'https://github.com/dejacode/about-code-tool.git'),
+            (u'author', [u'Jillian Daguil', u'Chin Yeung Li', u'Philippe Ombredanne', u'Thomas Druez']),
             (u'license_file', u'apache-2.0.LICENSE'), (u'license_key', u'apache-2.0')])
         ]
         assert expected == [a.to_dict() for a in abouts]
@@ -221,21 +212,14 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_always_collects_custom_fields(self):
         test_loc = get_test_loc('test_inv/custom_fields.ABOUT')
         errors, abouts = inv.collect_inventory(test_loc)
-        expected = [
-            Error(INFO, 'Field custom_mapping is a custom field.'),
-            Error(INFO, 'Field resource is a custom field.'),
-        ]
-
+        expected = []
         assert expected == errors
         assert {'custom_mapping': 'test', 'resource': '.'} == abouts[0].custom_fields
 
     def test_collect_inventory_does_not_raise_error_and_maintains_order_on_custom_fields(self):
         test_loc = get_test_loc('test_inv/custom_fields2.ABOUT')
         errors, abouts = inv.collect_inventory(test_loc)
-        expected_errors = [
-            Error(INFO, 'Field custom_mapping is a custom field.'),
-            Error(INFO, 'Field resource is a custom field.'),
-        ]
+        expected_errors = []
         assert expected_errors == errors
 
         expected = [OrderedDict([
@@ -255,11 +239,7 @@ class InventoryTest(unittest.TestCase):
         # Use '..' to go back to the parent directory
         test_loc2 = test_loc + '/../relative'
         errors1, abouts1 = inv.collect_inventory(test_loc1)
-        expected_errors = [
-            Error(INFO, 'Field author is a custom field.'),
-            Error(INFO, 'Field license_file is a custom field.'),
-            Error(INFO, 'Field license_key is a custom field.'),
-        ]
+        expected_errors = []
         assert expected_errors == errors1
         expected = [OrderedDict([
             ('about_resource', u'.'),
@@ -271,7 +251,7 @@ class InventoryTest(unittest.TestCase):
             ('license_expression', u'apache-2.0'),
             ('licenses', [OrderedDict([
                 ('file', u'apache-2.0.LICENSE'),
-                ('key', u'apache-2.0'), 
+                ('key', u'apache-2.0'),
                 ])]),
             ('notice_file', u'NOTICE'),
             ('owner', u'nexB Inc.'),
@@ -296,13 +276,7 @@ class InventoryTest(unittest.TestCase):
 
         inv.save_as_csv(result_file, abouts)
 
-        expected_errors = [
-            Error(INFO, 'Field author is a custom field.'),
-            Error(INFO, 'Field license_file is a custom field.'),
-            Error(INFO, 'Field license_key is a custom field.'),
-        ]
-
-        assert expected_errors == sorted(errors)
+        assert [] == errors
 
         expected = get_test_loc('test_inv/basic/expected.csv')
         check_csv(expected, result_file)
@@ -321,7 +295,7 @@ class InventoryTest(unittest.TestCase):
         expected = get_test_loc('test_inv/basic_with_about_resource_path/expected.csv')
         check_csv(expected, result_file)
 
-    def test_collect_inventory_with_no_about_resource_from_directory(self):
+    def test_collect_inventory_is_empty_when_about_resource_is_missing(self):
         test_dir = get_test_loc('test_inv/no_about_resource_key')
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
@@ -331,11 +305,27 @@ class InventoryTest(unittest.TestCase):
 
         expected_errors = [
             Error(CRITICAL,
-                  'Field about_resource is required and empty or missing.')]
+                  'Field "about_resource" is required and empty or missing.')]
         assert expected_errors == errors
 
         expected = get_test_loc('test_inv/no_about_resource_key/expected.csv')
-        check_csv(expected, result_file)
+        check_csv(expected, result_file, regen=False)
+
+    def test_collect_inventory_contains_only_about_with_about_resource(self):
+        test_dir = get_test_loc('test_inv/some_missing_about_resource')
+        result_file = get_temp_file()
+        errors, abouts = inv.collect_inventory(test_dir)
+        fix_location(abouts, test_dir)
+
+        inv.save_as_csv(result_file, abouts)
+
+        expected_errors = [
+            Error(CRITICAL,
+                  'Field "about_resource" is required and empty or missing.')]
+        assert expected_errors == errors
+
+        expected = get_test_loc('test_inv/some_missing_about_resource/expected.csv')
+        check_csv(expected, result_file, regen=False)
 
     def test_collect_inventory_complex_from_directory(self):
         test_dir = get_test_loc('test_inv/complex')

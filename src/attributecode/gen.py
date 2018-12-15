@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from collections import OrderedDict
 import io
 import json
 import os
@@ -64,9 +65,9 @@ def load_inventory(location, base_dir=None):
     elif location.endswith('.json'):
         inventory = load_json(location)
     else:
-        raise Exception(
+        raise Exception(Error(CRITICAL,
             'Unsupported inventory file type. '
-            'Must be one of .csv or .json: {}'.format(location))
+            'Must be one of .csv or .json: {}'.format(location)))
     inventory = list(inventory)
 
     # FIXME: this should not be done here.
@@ -93,7 +94,8 @@ def load_inventory(location, base_dir=None):
 
         segments = about_file_path.split('/')
         if any(seg != seg.strip() for seg in segments):
-            msg = ('Invalid "about_file_path": must not end or start with a space for: "{}"'.format(about_file_path))
+            msg = ('Invalid "about_file_path": must not end or start with a '
+                   'space for: "{}"'.format(about_file_path))
             errors.append(Error(ERROR, msg))
             continue
 
@@ -105,8 +107,14 @@ def load_inventory(location, base_dir=None):
             abouts.append(about)
 
         except Exception as e:
-            msg = ('Cannot create .ABOUT file for: "{}".\n'.format(about_file_path) + str(e))
-            errors.append(Error(ERROR, msg))
+            if len(e.args) == 1 and isinstance(e.args[0], Error):
+                err = e.args[0]
+                msg = ('Cannot create .ABOUT file for: "{}".\n'.format(about_file_path) + err.message)
+                err = Error(CRITICAL, msg)
+            else:
+                msg = ('Cannot create .ABOUT file for: "{}".\n'.format(about_file_path) + str(e))
+                err = Error(CRITICAL, msg)
+            errors.append(err)
             continue
 
     return unique(errors), abouts
@@ -128,8 +136,8 @@ def load_json(location):
     """
     # FIXME: IMHO we should know where the JSON is from and its shape
     # FIXME use: object_pairs_hook=OrderedDict
-    with open(location) as json_file:
-        results = json.load(json_file)
+    with io.open(location, 'rb') as json_file:
+        results = json.load(json_file, object_pairs_hook=OrderedDict)
 
     # If the loaded JSON is not a list,
     # - JSON output from AboutCode Manager:
@@ -202,8 +210,8 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
     licenses_by_key = {}
 
     if reference_dir:
-        notices_by_filename, licenses_by_key = model.load_license_references(reference_dir)
-        
+        notices_by_filename, licenses_by_key = model.get_reference_licenses(reference_dir)
+
     # TODO: validate inventory!!!!! to catch error before creating ABOUT files
 
     # update all licenses and notices
@@ -213,7 +221,7 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
         if not loc.endswith('.ABOUT'):
             loc = loc.rstrip('\\/').strip() + '.ABOUT'
         about.location = loc
-        
+
         # used as a "prettier" display of .ABOUT file path
         about_path = loc.replace(target_dir, '').strip('/')
 
@@ -228,7 +236,7 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
                 continue
 
             license.update(ref_lic)
-            
+
         if about.notice_file:
             notice_text = notices_by_filename.get(about.notice_file)
             if not notice_text:

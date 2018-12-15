@@ -85,9 +85,9 @@ def transform_data(rows, transformer):
     # convert to dicts using the renamed columns
     data = [OrderedDict(zip_longest(column_names, row)) for row in rows]
 
-    if transformer.column_filters:
+    if transformer.kept_columns:
         data = list(transformer.filter_columns(data))
-        column_names = [c for c in column_names if c in transformer.column_filters]
+        column_names = [c for c in column_names if c in transformer.kept_columns]
 
     errors = transformer.check_required_columns(data)
     if errors:
@@ -117,28 +117,29 @@ The renaming is always applied first before other transforms and checks. All
 other column names referenced below are these that exist AFTER the renamings
 have been applied to the existing column names.
 
+* kept_columns:
+An optional list of column names that should be kept in the transformed CSV. 
+If this list is NOT provided, all the columns from the source CSV will be kept
+and eventually added in generated .ABOUT files.
+If this list is provided, only the listed columns are kept in the transformed
+CSV and other columns are removed.
+
+For instance with this configuration the target CSV will only contains the "name"
+and "version" columns and no other column:
+    kept_columns:
+        - name
+        - version
+
 * required_columns:
 An optional list of required column names that must have a value, beyond the
 standard columns names. If a source CSV does not have such a column or a row is
-missing a value for a required column, an error is reported.
+missing a value for a listed required column, an error is reported.
+This validation occurs after processing the CVS for "kept_columns"
 
 For instance with this configuration an error will be reported if the columns
 "name" and "version" are missing or if any row does not have a value set for
 these columns:
     required_columns:
-        - name
-        - version
-
-* column_filters:
-An optional list of column names that should be kept in the transformed CSV. If
-this list is provided, all the columns from the source CSV that should be kept
-in the target CSV must be listed be even if they are standard or required
-columns. If this list is not provided, all source CSV columns are kept in the
-transformed target CSV.
-
-For instance with this configuration the target CSV will only contains the "name"
-and "version" columns and no other column:
-    column_filters:
         - name
         - version
 '''
@@ -150,7 +151,7 @@ class Transformer(object):
 
     column_renamings = attr.attrib(default=attr.Factory(dict))
     required_columns = attr.attrib(default=attr.Factory(list))
-    column_filters = attr.attrib(default=attr.Factory(list))
+    kept_columns = attr.attrib(default=attr.Factory(list))
 
     # a list of all the standard columns from AboutCode toolkit
     standard_columns = attr.attrib(default=attr.Factory(list), init=False)
@@ -171,8 +172,7 @@ class Transformer(object):
         return cls(
             column_renamings={},
             required_columns=[],
-            column_filters=[],
-        )
+            kept_columns=[])
 
     @classmethod
     def from_file(cls, location):
@@ -185,7 +185,7 @@ class Transformer(object):
         return cls(
             column_renamings=data.get('column_renamings', {}),
             required_columns=data.get('required_columns', []),
-            column_filters=data.get('column_filters', []),
+            kept_columns=data.get('kept_columns', []),
         )
 
     def check_required_columns(self, data):
@@ -227,7 +227,7 @@ class Transformer(object):
 
     def clean_columns(self, column_names):
         """
-        Apply standard cleanups to a list of columns and return these.
+        Apply standard cleanups to a list of column names and return these.
         """
         if not column_names:
             return column_names
@@ -235,14 +235,17 @@ class Transformer(object):
 
     def filter_columns(self, data):
         """
-        Yield transformed dicts from a `data` list of dicts keeping only
-        columns with a name in the `column_filters`of this Transformer.
-        Return the data unchanged if no `column_filters` exists.
+        Yield transformed mappings from a `data` list of mapping keeping only
+        columns with a name in the `kept_columns`of this Transformer.
+        Return the data unchanged if `kept_columns` does not exist or is empty.
         """
-        column_filters = set(self.clean_columns(self.column_filters))
+        kept_columns = set(self.clean_columns(self.kept_columns))
         for entry in data:
-            items = ((k, v) for k, v in entry.items() if k in column_filters)
-            yield OrderedDict(items)
+            if kept_columns:
+                items = ((k, v) for k, v in entry.items() if k in kept_columns)
+                yield OrderedDict(items)
+            else:
+                yield entry
 
 
 def check_duplicate_columns(column_names):
