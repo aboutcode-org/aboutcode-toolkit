@@ -21,6 +21,7 @@ from __future__ import unicode_literals
 # Common license keys
 COMMON_LICENSES = set([
     'aes-128-3.0',
+    'agpl-3.0',
     'agpl-3.0-plus',
     'apache-1.1',
     'apache-2.0',
@@ -44,7 +45,10 @@ COMMON_LICENSES = set([
     'cc-by-2.5',
     'cc-by-sa-3.0',
     'curl',
+    'epl-1.0',
+    'epl-2.0',
     'freetype',
+    'gpl-1.0',
     'gpl-1.0-plus',
     'gpl-2.0',
     'gpl-2.0-bison',
@@ -74,7 +78,9 @@ COMMON_LICENSES = set([
     'net-snmp',
     'npl-1.1',
     'ntpl',
+    'openssl',
     'openssl-ssleay',
+    'python',
     'ssleay-windows',
     'rsa-md4',
     'rsa-md5',
