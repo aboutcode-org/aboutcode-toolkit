@@ -70,7 +70,7 @@ def create_attribution_text(abouts, template_text, variables=None):
     rendered = None
     errors = []
 
-    template = jinja2.Template(template_text)
+    template = jinja2.Template(template_text, autoescape=True)
 
     licenses_by_key = {}
     for about in abouts:

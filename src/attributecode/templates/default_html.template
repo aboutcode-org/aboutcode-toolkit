@@ -1,6 +1,7 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8"/>
     <style type="text/css">
       div.additional-license-text-list {display:block}
       body {font-family: Helvetica, Arial, sans-serif;}
@@ -14,66 +15,47 @@
     <div>
       <p>Licenses, acknowledgments and required copyright notices for open source packages:</p>
     </div>
-
     <!-- table of contents listing every entry -->    
     <div class="oss-table-of-contents">
-        {% for about in abouts %}
+        {% for about in abouts -%}
             <p><a href="#package_{{ loop.index0 }}">{{ about.name }} {{ about.version or '' }}</a></p>
         {% endfor %}
     </div>
-
     <hr/>
 
     <!-- list of attribution notice, copyright, licenses -->    
-
-    {% for about in abouts %}
-        <div class="oss-package" id="package_{{ loop.index0 }}">
-            <h3 class="package-name">{{ about.name }} {{ about.version or '' }}</h3>
-
-            {% if about.license_expression %}
-                <p>This package is licensed under: {{ about.license_expression }} </p>
-            {% endif %}
-
-            {% if about.copyright %}
-                <pre>{{ about.copyright }}</pre>
-            {% endif %}
-
-            {% if about.notice_text %}
-                <pre class="package-notice">{{ about.notice_text }}</pre>
-            {% endif %}
-
-            {% for license in about.licenses %}
-                {% if license.key in common_licenses %}
-                    <p>Full text of
-                        <a class="{{ license.key }}" href="#package-license-{{ license.key }}">
-                        {{ license.key }} - {{ license.name }}
-                        </a>
-                        is available at the end of this document.
-                    </p>
-                {% else %}
-                    <p> {{ license.key }} - {{ license.name }} </p>
-                    <p> <pre>
-                    {{ license.text}}
-                    </pre> </p>
-                {% endif %}
-                
-            {% endfor %}
-        </div>
+    {% for about in abouts -%}
+    <div class="oss-package" id="package_{{ loop.index0 }}">
+        <h3 class="package-name">{{ about.name }} {{ about.version or '' }}</h3>
+        {% if about.license_expression -%}
+            <p>This package is licensed under: <b>{{ about.license_expression }}</b></p>
+        {%- endif %}
+        {% if about.copyright -%}
+            <pre>{{ about.copyright}}</pre>
+        {%- endif %}
+        {% if about.notice_text -%}
+            <pre class="package-notice">{{ about.notice_text}}</pre>
+        {%- endif %}{% for license in about.licenses -%}
+            {% if license.key in common_licenses -%}
+            <p>Full text of <a class="{{ license.key }}" href="#package-license-{{ license.key }}">{{ license.key }} - {{ license.name }}</a> is available at the end of this document.</p>
+            {% else -%}
+            <p> {{ license.key }} - {{ license.name  or ''}} </p>
+            <p> <pre>{{ license.text or ''}}</pre> </p>
+            {%- endif %}
+        {%- endfor %}
+    </div>
     {% endfor %}
 
     <hr/>
 
     <!-- list of common licenses -->    
-
     <h3>Common Licenses in Use:</h3>
-
-    {% for license in common_licenses_in_use %}
+    {% for license in common_licenses_in_use -%}
         <h3 id="package-license-{{ license.key }}">{{ license.key }} - {{ license.name }}</h3>
         <p> <pre>{{ license.text }}</pre> </p>
-    {% endfor %}
+    {%- endfor %}
 
     <h3><a id="End">End</a></h3>
     <i>This file was generated on: {{ utcnow }} (UTC)</i>
     </body>
 </html>
-
