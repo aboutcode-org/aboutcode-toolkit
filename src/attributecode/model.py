@@ -346,10 +346,9 @@ class License(object):
 
 def get_reference_licenses(reference_dir):
     """
-    Return reference licenses text and data loaded from `reference_dir`.
-
-    Return a mapping of notices as {notice_file: notice text} and a mapping of
-    {license key: License} loaded from a `reference_dir`.
+    Return reference licenses text and data loaded from `reference_dir`as a
+    tuple of two mappings: a mapping of notices as {notice_file: notice text}
+    and a mapping of {license key: License} loaded from a `reference_dir`.
 
     In the `reference_dir` there can be pairs of text and data files for a license key:
       - a license text file must be named after its license key as `key.LICENSE`
