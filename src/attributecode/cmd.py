@@ -133,6 +133,14 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
     return value
 
 
+def validate_api_url(ctx, param, value):
+    if value:
+        value = value.strip('/')
+        if not value.endswith('licenses'):
+            value = '/'.join([value, 'licenses'])
+    return value
+
+
 ######################################################################
 # inventory subcommand
 ######################################################################
@@ -295,6 +303,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.option('--api-url',
     metavar='API-URL',
     envvar='DEJACODE_API_URL',
+    callback=validate_api_url,
     type=str,
     help='DejaCode License Library API URL.')
 
