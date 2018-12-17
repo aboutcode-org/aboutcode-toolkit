@@ -126,8 +126,10 @@ def boolean_converter(value):
 
     if isinstance(value, str):
         value = value.lower().strip()
-        if value in booleans:
-            return booleans[value]
+        if not value:
+            value = False
+        elif value in booleans:
+            value = booleans[value]
     return value
 
 
@@ -153,7 +155,7 @@ def copyright_converter(value):
 
 def path_converter(value):
     if value:
-        value = util.to_posix(value).strip('/')
+        value = util.to_posix(value).strip().strip('/')
     return value
 
 
