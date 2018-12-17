@@ -307,12 +307,14 @@ class TestParseKeyValues(unittest.TestCase):
             'keY=bar',
         ]
         expected = {
-            'key': ['value', 'bar'],
-            'this': ['THat']
+            'key': 'value',
+            'this': 'THat'
             }
         keyvals, errors = cmd.parse_key_values(test)
         assert expected == keyvals
-        assert not errors
+
+        expected_errs = ['duplicated <key> already defined: "keY=bar".']
+        assert expected_errs == errors
 
 
     def test_parse_key_values_with_errors(self):
@@ -323,7 +325,7 @@ class TestParseKeyValues(unittest.TestCase):
             'FOO=bar'
         ]
         expected = {
-            'foo': ['bar'],
+            'foo': 'bar',
         }
         keyvals, errors = cmd.parse_key_values(test)
         assert expected == keyvals

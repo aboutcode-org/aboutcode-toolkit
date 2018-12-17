@@ -116,8 +116,9 @@ def validate_key_values(ctx, param, value):
 
     kvals, errors = parse_key_values(value)
     if errors:
+        name = param.name
         ive = '\n'.join(sorted('  ' + x for x in errors))
-        msg = ('Invalid {param} option(s):\n'
+        msg = ('Invalid {name} option(s):\n'
                '{ive}'.format(**locals()))
         raise click.UsageError(msg)
     return kvals
@@ -629,21 +630,25 @@ def get_error_messages(errors, quiet=False, verbose=False):
 def parse_key_values(key_values):
     """
     Given a list of "key=value" strings, return:
-    - a dict {key: [value, value, ...]}
+    - a dict {key: value}
     - a sorted list of unique error messages for invalid entries where there is
-      a missing a key or value.
+      a missing a key or value or duplicated key.
     """
     if not key_values:
         return {}, []
 
     errors = set()
-    parsed_key_values = defaultdict(list)
+    parsed_key_values = {}
     for key_value in key_values:
         key, _, value = key_value.partition('=')
 
-        key = key.strip().lower()
+        key = key.strip().strip('\'"').lower()
         if not key:
             errors.add('missing <key> in "{key_value}".'.format(**locals()))
+            continue
+
+        if key in parsed_key_values:
+            errors.add('duplicated <key> already defined: "{key_value}".'.format(**locals()))
             continue
 
         value = value.strip()
@@ -651,11 +656,9 @@ def parse_key_values(key_values):
             errors.add('missing <value> in "{key_value}".'.format(**locals()))
             continue
 
-        values = parsed_key_values[key]
-        if value not in values:
-            parsed_key_values[key].append(value)
+        parsed_key_values[key] = value
 
-    return dict(parsed_key_values), sorted(errors)
+    return parsed_key_values, sorted(errors)
 
 
 def filter_errors(errors, minimum_severity=WARNING):
