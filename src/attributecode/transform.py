@@ -97,18 +97,20 @@ def transform_data(rows, transformer):
 
 
 tranformer_config_help = '''
-A transform configuration file is used to describe which transformations and
-validations to apply to a source CSV file. This is a simple text file using YAML
-format, using the same format as an .ABOUT file.
 
-The attributes that can be set in a configuration file are:
+A transform configuration file is used to describe which transformations and to
+apply to a source CSV file. This configuration file a simple text file using
+YAML format (the same format as an .ABOUT file).
+
+The settings that can be defines in a configuration file are:
 
 * column_renamings:
-An optional map of source CSV column name to target CSV new column name that
+An optional map of source CSV column names to target CSV new column names that
 is used to rename CSV columns.
 
 For instance with this configuration the columns "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
+
     column_renamings:
         'Directory/Location': about_resource
         foo: bar
@@ -117,28 +119,37 @@ The renaming is always applied first before other transforms and checks. All
 other column names referenced below are these that exist AFTER the renamings
 have been applied to the existing column names.
 
+
 * kept_columns:
 An optional list of column names that should be kept in the transformed CSV.
+
 If this list is NOT provided, all the columns from the source CSV will be kept
-and eventually added in generated .ABOUT files.
+(and added in generated .ABOUT files if the CSV is used for this later).
+
 If this list is provided, only the listed columns are kept in the transformed
-CSV and other columns are removed.
+CSV and all other columns are removed.
 
 For instance with this configuration the target CSV will only contains the "name"
 and "version" columns and no other column:
+
     kept_columns:
         - name
         - version
 
+
 * required_columns:
 An optional list of required column names that must have a value, beyond the
-standard columns names. If a source CSV does not have such a column or a row is
-missing a value for a listed required column, an error is reported.
-This validation occurs after processing the CVS for "kept_columns"
+standard required columns names (e.g. about_resource and about file_path for
+the gen command).
+
+If a source CSV does not have such a column or a row is missing a value for a
+listed required column, an error is reported. This validation occurs after
+processing the CVS for "kept_columns"
 
 For instance with this configuration an error will be reported if the columns
 "name" and "version" are missing or if any row does not have a value set for
 these columns:
+
     required_columns:
         - name
         - version
