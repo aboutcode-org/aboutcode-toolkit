@@ -1210,7 +1210,7 @@ def save_as_json(location, about_dicts):
 
 def save_as_csv(location, about_dicts, field_names):
     errors = []
-    with io.open(location, mode='w', encoding='utf-8') as output_file:
+    with io.open(location, mode='w', encoding='utf-8', newline='') as output_file:
         writer = csv.DictWriter(output_file, field_names)
         writer.writeheader()
         csv_formatted_list = util.format_about_dict_for_csv_output(about_dicts)
