@@ -173,11 +173,10 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
     `output_location` file.
     Return a list of Error objects if any.
     """
-    updated_abouts = []
     errors = []
 
     # Parse license_expression and save to the license list
-    for about in updated_abouts:
+    for about in abouts:
         if not about.license_expression.value:
             continue
         special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
@@ -189,7 +188,7 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
             about.license_key.value = lic_list
 
     rendering_error, rendered = generate_from_file(
-        updated_abouts,
+        abouts,
         template_loc=template_loc,
         variables=variables
     )
