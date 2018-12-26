@@ -1097,7 +1097,7 @@ class About(object):
                             license_name, license_context, license_url = license_dict[lic_key]
                             license_info = (lic_key, license_name, license_context, license_url)
                             license_key_name_context_url.append(license_info)
-                            with io.open(license_path, mode='w', encoding='utf-8') as lic:
+                            with io.open(license_path, mode='w', encoding='utf-8', newline='\n') as lic:
                                 lic.write(license_context)
                     except:
                         pass
