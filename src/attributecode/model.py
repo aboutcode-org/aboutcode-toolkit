@@ -459,13 +459,14 @@ class About(object):
     owner = attr.attrib(default=None, repr=False, converter=string_cleaner)
     owner_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
-    vcs_tool = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    vcs_repository = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    vcs_revision = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    # SPDX-like VCS URL
+    vcs_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
-    checksum_md5 = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    checksum_sha1 = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    checksum_sha256 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    md5 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    sha1 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    sha256 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    sha512 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+
     spec_version = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
     # custom files as name: value

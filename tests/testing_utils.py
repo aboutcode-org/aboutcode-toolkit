@@ -18,6 +18,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from collections import OrderedDict
+import json
 import ntpath
 import os
 import posixpath
@@ -28,6 +30,13 @@ import tempfile
 import zipfile
 
 from attributecode.util import to_posix
+
+try:
+    # Python 2
+    unicode  # NOQA
+except NameError:  # pragma: nocover
+    # Python 3
+    unicode = str  # NOQA
 
 
 TESTDATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'testdata')
@@ -198,3 +207,22 @@ def get_opts(options):
             return b' '.join(options)
         except:
             return b' '.join(map(repr, options))
+
+
+def check_json(expected, result, regen=False):
+    """
+    Assert that the contents of two JSON files are equal.
+    """
+
+    if isinstance(result, (unicode, str)):
+        with open(result) as r:
+            result = json.load(r, object_pairs_hook=OrderedDict)
+
+    if regen:
+        with open(expected, 'w') as o:
+            o.write(json.dumps(result, indent=2))
+
+    with open(expected) as e:
+        expected = json.load(e, object_pairs_hook=OrderedDict)
+
+    assert expected == result

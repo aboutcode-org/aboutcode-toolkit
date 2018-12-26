@@ -20,7 +20,6 @@ from __future__ import unicode_literals
 
 from collections import OrderedDict
 import io
-import json
 import shutil
 import sys
 import unittest
@@ -35,6 +34,7 @@ from attributecode.util import csv
 from attributecode.util import on_windows
 from attributecode.util import to_posix
 
+from testing_utils import check_json
 from testing_utils import extract_test_loc
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
@@ -69,24 +69,6 @@ def check_csv(expected, result, regen=False):
     expected = sorted([sorted(d.items()) for d in load_csv(expected)])
     result = [d.items() for d in load_csv(result)]
     result = sorted(sorted(items) for items in result)
-
-    assert expected == result
-
-
-def check_json(expected, result, regen=False):
-    """
-    Assert that the contents of two JSON files are equal.
-    """
-
-    with open(result) as r:
-        result = json.load(r, object_pairs_hook=OrderedDict)
-
-    if regen:
-        with open(expected, 'wb') as o:
-            o.write(json.dumps(result, indent=2))
-
-    with open(expected) as e:
-        expected = json.load(e, object_pairs_hook=OrderedDict)
 
     assert expected == result
 
@@ -178,24 +160,9 @@ class InventoryTest(unittest.TestCase):
         assert expected == errors
 
         fix_location(abouts, test_loc)
-
-        expected = [OrderedDict([
-            ('about_resource', u'.'),
-            ('name', u'AboutCode'),
-            ('version', u'0.11.0'),
-            ('description', u'AboutCode is a tool \nto process ABOUT files. \nAn ABOUT file is a file.'),
-            ('homepage_url', u'http://dejacode.org'),
-            ('copyright', u'Copyright (c) 2013-2014 nexB Inc.'),
-            ('license_expression', u'apache-2.0'),
-            ('licenses', [OrderedDict([('file', u'apache-2.0.LICENSE'), ('key', u'apache-2.0')])]),
-            ('notice_file', u'NOTICE'),
-            ('owner', u'nexB Inc.'),
-            ('vcs_tool', u'git'),
-            ('vcs_repository', u'https://github.com/dejacode/about-code-tool.git'),
-            (u'author', [u'Jillian Daguil', u'Chin Yeung Li', u'Philippe Ombredanne', u'Thomas Druez']),
-            (u'license_file', u'apache-2.0.LICENSE'), (u'license_key', u'apache-2.0')])
-        ]
-        assert expected == [a.to_dict() for a in abouts]
+        expected = get_test_loc('test_inv/complete-expected.json')
+        result= [a.to_dict() for a in abouts]
+        check_json(expected, result)
 
     def test_collect_inventory_with_multi_line(self):
         test_loc = get_test_loc('test_inv/multi_line_license_expression.ABOUT')
@@ -239,33 +206,16 @@ class InventoryTest(unittest.TestCase):
         # Use '..' to go back to the parent directory
         test_loc2 = test_loc + '/../relative'
         errors1, abouts1 = inv.collect_inventory(test_loc1)
-        expected_errors = []
-        assert expected_errors == errors1
-        expected = [OrderedDict([
-            ('about_resource', u'.'),
-            ('name', u'AboutCode'),
-            ('version', u'0.11.0'),
-            ('description', u'AboutCode is a tool \nto process ABOUT files. \nAn ABOUT file is a file.'),
-            ('homepage_url', u'http://dejacode.org'),
-            ('copyright', u'Copyright (c) 2013-2014 nexB Inc.'),
-            ('license_expression', u'apache-2.0'),
-            ('licenses', [OrderedDict([
-                ('file', u'apache-2.0.LICENSE'),
-                ('key', u'apache-2.0'),
-                ])]),
-            ('notice_file', u'NOTICE'),
-            ('owner', u'nexB Inc.'),
-            ('vcs_tool', u'git'),
-            ('vcs_repository', u'https://github.com/dejacode/about-code-tool.git'),
-            ('author', [u'Jillian Daguil', u'Chin Yeung Li', u'Philippe Ombredanne', u'Thomas Druez']),
-            ('license_file', u'apache-2.0.LICENSE'),
-            ('license_key', u'apache-2.0'),
-        ])]
-        assert expected == [a.to_dict() for a in abouts1]
+        assert [] == errors1
+        expected = get_test_loc('test_inv/relative-1-expected.json')
+        result= [a.to_dict() for a in abouts1]
+        check_json(expected, result)
 
         errors2, abouts2 = inv.collect_inventory(test_loc2)
-        assert expected_errors == errors2
-        assert expected == [a.to_dict() for a in abouts2]
+        assert [] == errors2
+        expected = get_test_loc('test_inv/relative-2-expected.json')
+        result= [a.to_dict() for a in abouts2]
+        check_json(expected, result)
 
     def test_collect_inventory_basic_from_directory(self):
         test_dir = get_test_loc('test_inv/basic')

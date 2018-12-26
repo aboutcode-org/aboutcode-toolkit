@@ -30,6 +30,7 @@ from attributecode import model
 from attributecode.util import unique
 
 from testing_utils import get_test_loc
+from testing_utils import check_json
 
 
 try:
@@ -476,28 +477,9 @@ custom1: |
         a = model.About.load(test_file)
         assert [] == sorted(a.errors)
 
+        expected = get_test_loc('test_model/special/about-expected.json')
         result = a.to_dict()
-        expected = OrderedDict([
-            ('about_resource', '.'),
-            ('name', 'AboutCode'),
-            ('version', '0.11.0'),
-            ('description', 'AboutCode is a tool \nto process ABOUT files. \nAn ABOUT file is a file.'),
-            ('homepage_url', 'http://dejacode.org'),
-            ('copyright', 'Copyright (c) 2013-2014 nexB Inc.'),
-            ('license_expression', 'apache-2.0'),
-            ('licenses', [OrderedDict([
-                ('file', 'apache-2.0.LICENSE'),
-                ('key', 'apache-2.0'),
-                ])]),
-            ('notice_file', 'NOTICE'),
-            ('owner', 'nexB Inc.'),
-            ('vcs_tool', 'git'),
-            ('vcs_repository', 'https://github.com/dejacode/about-code-tool.git'),
-            ('author', ['Jillian Daguil', 'Chin Yeung Li', 'Philippe Ombredanne', 'Thomas Druez']),
-            ('license_file', 'apache-2.0.LICENSE'),
-            ('license_key', 'apache-2.0'),
-        ])
-        assert expected == result
+        check_json(expected, result)
 
     def test_load_dump_is_idempotent(self):
         test_file = get_test_loc('test_model/this.ABOUT')
@@ -604,12 +586,12 @@ custom1: |
             ('licenses', [OrderedDict([
                 ('file', 'apache-2.0.LICENSE'),
                 ('key', 'apache-2.0'),
-                ])]),
+            ])]),
             ('owner', 'nexB Inc.'),
-            ('vcs_tool', 'git'),
+            ('author', ['Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez']),
             ('vcs_repository', 'https://github.com/dejacode/about-code-tool.git'),
-            ('author', [
-                'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'])])
+            ('vcs_tool', 'git'),
+        ])
         about = model.About.from_dict(data)
         assert data.items() == about.to_dict().items()
 
