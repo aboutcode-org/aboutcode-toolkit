@@ -108,7 +108,7 @@ is used to rename CSV columns.
 
 For instance with this configuration the columns "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
-    renamings:
+    column_renamings:
         'Directory/Location' : about_resource
         foo : bar
 
@@ -270,7 +270,7 @@ def write_csv(location, data, column_names):  # NOQA
     Write a CSV file at `location` the `data` list of ordered dicts using the
     `column_names`.
     """
-    with io.open(location, 'w', encoding='utf-8') as csvfile:
+    with io.open(location, 'w', encoding='utf-8', newline='\n') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=column_names)
         writer.writeheader()
         writer.writerows(data)
