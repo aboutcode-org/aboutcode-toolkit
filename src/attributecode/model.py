@@ -731,7 +731,7 @@ class About(object):
             ('owner', StringField()),
             ('owner_url', UrlField()),
             ('contact', StringField()),
-            ('author', ListField()),
+            ('author', StringField()),
             ('author_file', FileTextField()),
 
             ('vcs_tool', SingleLineField()),

@@ -4,11 +4,7 @@ name: AboutCode
 version: 0.11.0
 
 owner: nexB Inc.
-author:
-    - Jillian Daguil
-    - Chin Yeung Li
-    - Philippe Ombredanne
-    - Thomas Druez
+author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
 
 homepage_url: http://dejacode.org
 

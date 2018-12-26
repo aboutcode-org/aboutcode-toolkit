@@ -663,11 +663,7 @@ license_expression: apache-2.0
 copyright: Copyright (c) 2013-2014 nexB Inc.
 notice_file: NOTICE
 owner: nexB Inc.
-author:
-  - Jillian Daguil
-  - Chin Yeung Li
-  - Philippe Ombredanne
-  - Thomas Druez
+author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
 vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 licenses:
@@ -817,7 +813,7 @@ custom1: |
         test = {
             'about_resource': ['.'],
             'attribute': 'yes',
-            'author': ['Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'],
+            'author': 'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez',
             'copyright': 'Copyright (c) 2013-2014 nexB Inc.',
             'description': 'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
             'homepage_url': 'http://dejacode.org',
@@ -836,7 +832,7 @@ custom1: |
             'about_file_path': None,
             'about_resource': OrderedDict([('.', None)]),
             'attribute': 'yes',
-            'author': ['Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'],
+            'author': 'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez',
             'copyright': 'Copyright (c) 2013-2014 nexB Inc.',
             'description': 'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
             'homepage_url': 'http://dejacode.org',
@@ -853,7 +849,7 @@ custom1: |
         about_data = {
             'about_resource': ['.'],
             'attribute': 'yes',
-            'author': ['Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez'],
+            'author': 'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez',
             'copyright': 'Copyright (c) 2013-2014 nexB Inc.',
             'description': 'AboutCode is a tool to process ABOUT files. An ABOUT file is a file.',
             'homepage_url': 'http://dejacode.org',
