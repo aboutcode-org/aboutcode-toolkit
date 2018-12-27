@@ -461,7 +461,7 @@ OUTPUT: Path to CSV inventory file to create.
     errors = transform_csv_to_csv(location, output, transformer)
 
     errors_count = report_errors(errors, quiet, verbose)
-    if not quiet:
+    if not quiet and not errors:
         msg = 'Transformed CSV written to {output}.'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
