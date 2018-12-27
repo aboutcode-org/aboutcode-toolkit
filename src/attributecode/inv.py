@@ -51,35 +51,41 @@ def collect_inventory(location, check_files=False):
     """
     errors = []
     input_location = normalize(location)
-    about_locations = list(get_about_locations(input_location))
+    about_locations = []
+    try:
+        about_locations.extend(get_about_locations(input_location))
+    except Exception as e:
+        errors.append(Error(CRITICAL, str(e)))
 
     name_errors = util.check_file_names(about_locations)
     errors.extend(name_errors)
 
     abouts = []
-    for about_file_loc in about_locations:
-        try:
-            about = About.load(about_file_loc)
-            abouts.append(about)
 
-            if check_files:
-                about.check_files()
+    if not errors:
+        for about_file_loc in about_locations:
+            try:
+                about = About.load(about_file_loc)
+                abouts.append(about)
 
-            # this could be a dict keys by path to keep per-path things?
-            errors.extend(about.errors)
+                if check_files:
+                    about.check_files()
 
-        except Exception as exce:
-            if all(isinstance(e, Error) for e in exce.args):
-                errors.extend(exce.args)
-            else:
-                errors.append(Error(CRITICAL, str(exce)))
+                # this could be a dict keys by path to keep per-path things?
+                errors.extend(about.errors)
 
-        # TODO: WHY???
-        # Insert about_file_path reference in every error
-        # FIXME: this should be an attribute of the Error object
-        # for severity, message in about.errors:
-        #     msg = (about_file_loc + ": " + message)
-        #     errors.append(Error(severity, msg))
+            except Exception as exce:
+                if all(isinstance(e, Error) for e in exce.args):
+                    errors.extend(exce.args)
+                else:
+                    errors.append(Error(CRITICAL, str(exce)))
+
+            # TODO: WHY???
+            # Insert about_file_path reference in every error
+            # FIXME: this should be an attribute of the Error object
+            # for severity, message in about.errors:
+            #     msg = (about_file_loc + ": " + message)
+            #     errors.append(Error(severity, msg))
 
     return sorted(unique(errors)), abouts
 
@@ -105,10 +111,11 @@ def get_locations(location):
     if os.path.isfile(location):
         yield location
     else:
-        for base_dir, _, files in os.walk(location):
-            for name in files:
-                bd = to_posix(base_dir)
-                yield posixpath.join(bd, name)
+        for name in os.listdir(location):
+            base_dir = to_posix(location)
+            path = posixpath.join(base_dir , name)
+            for f in get_locations(path):
+                yield f
 
 
 def get_about_locations(location):
