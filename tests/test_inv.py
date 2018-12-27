@@ -135,33 +135,25 @@ class InventoryTest(unittest.TestCase):
         errors, abouts = inv.collect_inventory(test_loc)
         expected = []
         assert expected == errors
-        expected = [OrderedDict([
-            ('about_resource', u'django_snippets_2413.py'),
-            ('name', u'Yet another query string template tag'),
-            ('version', u'2011-04-12'),
-            ('homepage_url', u'http://djangosnippets.org/snippets/2413/'),
-            ('download_url', u'http://djangosnippets.org/snippets/2413/download/'),
-            ('notes', u'This file was modified to include the line "register = Library()" without which the template tag is not registered.'),
-            (u'license_text_file', u'django_snippets.LICENSE'),
-            (u'license_url', u'http://djangosnippets.org/about/tos/')])]
-        assert expected == [a.to_dict() for a in abouts]
+        expected_loc = get_test_loc('test_inv/single_file/django_snippets_2413.ABOUT-expected.json')
+        result = [a.to_dict(with_path=True) for a in abouts]
+        check_json(expected_loc, result, regen=False)
 
     def test_collect_inventory_return_no_warnings_and_model_can_use_relative_paths(self):
         test_loc = get_test_loc('test_inv/rel/allAboutInOneDir')
         errors, _abouts = inv.collect_inventory(test_loc)
         expected_errors = []
-        result = [(level, e) for level, e in errors if level > INFO]
+        result = [(e.severity, e.message) for e in errors if e.severity > INFO]
         assert expected_errors == result
 
-    def test_collect_inventory_populate_location(self):
+    def test_collect_inventory_populate_about_file_path(self):
         test_loc = get_test_loc('test_inv/complete')
         errors, abouts = inv.collect_inventory(test_loc)
         expected = []
         assert expected == errors
 
-        fix_location(abouts, test_loc)
         expected = get_test_loc('test_inv/complete-expected.json')
-        result= [a.to_dict() for a in abouts]
+        result = [a.to_dict(with_path=True) for a in abouts]
         check_json(expected, result)
 
     def test_collect_inventory_with_multi_line(self):
@@ -208,13 +200,13 @@ class InventoryTest(unittest.TestCase):
         errors1, abouts1 = inv.collect_inventory(test_loc1)
         assert [] == errors1
         expected = get_test_loc('test_inv/relative-1-expected.json')
-        result= [a.to_dict() for a in abouts1]
+        result = [a.to_dict() for a in abouts1]
         check_json(expected, result)
 
         errors2, abouts2 = inv.collect_inventory(test_loc2)
         assert [] == errors2
         expected = get_test_loc('test_inv/relative-2-expected.json')
-        result= [a.to_dict() for a in abouts2]
+        result = [a.to_dict() for a in abouts2]
         check_json(expected, result)
 
     def test_collect_inventory_basic_from_directory(self):
@@ -222,10 +214,7 @@ class InventoryTest(unittest.TestCase):
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
 
-        fix_location(abouts, test_dir)
-
         inv.save_as_csv(result_file, abouts)
-
         assert [] == errors
 
         expected = get_test_loc('test_inv/basic/expected.csv')
@@ -236,10 +225,7 @@ class InventoryTest(unittest.TestCase):
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
 
-        fix_location(abouts, test_dir)
-
         inv.save_as_csv(result_file, abouts)
-
         expected_errors = []
         assert expected_errors == errors
         expected = get_test_loc('test_inv/basic_with_about_resource_path/expected.csv')
@@ -249,12 +235,13 @@ class InventoryTest(unittest.TestCase):
         test_dir = get_test_loc('test_inv/no_about_resource_key')
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
-        fix_location(abouts, test_dir)
 
         inv.save_as_csv(result_file, abouts)
 
         expected_errors = [
-            Error(CRITICAL, 'Required field "about_resource" is missing.')]
+            Error(CRITICAL,
+                  'Required field "about_resource" is missing.',
+                  path='about/about.ABOUT')]
         assert expected_errors == errors
 
         expected = get_test_loc('test_inv/no_about_resource_key/expected.csv')
@@ -269,7 +256,9 @@ class InventoryTest(unittest.TestCase):
         inv.save_as_csv(result_file, abouts)
 
         expected_errors = [
-            Error(CRITICAL, 'Required field "about_resource" is missing.')]
+            Error(CRITICAL,
+                  'Required field "about_resource" is missing.',
+                  path='about/about.ABOUT')]
         assert expected_errors == errors
 
         expected = get_test_loc('test_inv/some_missing_about_resource/expected.csv')
@@ -279,7 +268,6 @@ class InventoryTest(unittest.TestCase):
         test_dir = get_test_loc('test_inv/complex')
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
-        fix_location(abouts, test_dir)
 
         inv.save_as_csv(result_file, abouts)
 
@@ -292,8 +280,6 @@ class InventoryTest(unittest.TestCase):
         test_dir = get_test_loc('test_inv/crlf')
         result_file = get_temp_file()
         errors, abouts = inv.collect_inventory(test_dir)
-        fix_location(abouts, test_dir)
-
         errors2 = inv.save_as_csv(result_file, abouts)
         errors.extend(errors2)
 
@@ -306,8 +292,6 @@ class InventoryTest(unittest.TestCase):
         test_file = get_test_loc('test_inv/this.ABOUT')
         about = model.About.load(test_file)
 
-        fix_location([about], get_test_loc('test_inv'))
-
         result_file = get_temp_file()
         inv.save_as_csv(result_file, [about])
 
@@ -317,12 +301,8 @@ class InventoryTest(unittest.TestCase):
     def test_write_output_json(self):
         test_file = get_test_loc('test_inv/this.ABOUT')
         about = model.About.load(location=test_file)
-
-        fix_location([about], get_test_loc('test_inv'))
-
         result_file = get_temp_file()
         inv.save_as_json(result_file, [about])
-
         expected = get_test_loc('test_inv/expected.json')
         check_json(expected, result_file)
 

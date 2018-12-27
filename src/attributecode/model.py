@@ -154,16 +154,19 @@ def copyright_converter(value):
 
 
 def path_converter(value):
-    if value:
+    if value and isinstance(value, str):
         value = util.to_posix(value).strip().strip('/')
     return value
 
 
 def about_resource_validator(about_obj, attribute, value):
+    if value and not isinstance(value, str):
+        msg = 'Required field "about_resource" must be a single string.'
+        raise Exception(Error(CRITICAL, msg))
+
     if not value or not value.strip():
         msg = 'Required field "about_resource" is empty.'
         raise Exception(Error(CRITICAL, msg))
-
 
 def license_expression_converter(value):
     """
@@ -405,6 +408,9 @@ class About(object):
     # the absolute location where this is stored
     location = attr.attrib(default=None, repr=False)
 
+    # a relative posix path where this file is stored
+    about_file_path = attr.attrib(default=None, repr=False)
+
     # this is a path relative to the ABOUT file location
     about_resource = attr.attrib(default=None,
         converter=path_converter, validator=about_resource_validator)
@@ -479,10 +485,11 @@ class About(object):
 
     # these fields are excluded from a to_dict() serialization
     _excluded_fields = set([
+        'location',
         'errors',
         'custom_fields',
         'notice_text',
-        # this is the License text
+        # this is for the licenses.text attribute
         'text',
     ])
 
@@ -537,16 +544,16 @@ class About(object):
         data = saneyaml.load(text, allow_duplicate_keys=False)
         return cls.from_dict(data)
 
-    def to_dict(self, with_licenses=True, with_location=False):
+    def to_dict(self, with_licenses=True, with_path=False):
         """
-        Return an OrderedDict of About data (excluding texts and file locations).
+        Return an OrderedDict of About data (excluding texts and ABOUT file path).
         Fields with empty values are not included.
         """
         excluded_fields = set(self._excluded_fields)
         if not with_licenses:
             excluded_fields.add('licenses')
-        if not with_location:
-            excluded_fields.add('location')
+        if not with_path:
+            excluded_fields.add('about_file_path')
 
         def valid_fields(attr, value):
             return (value and attr.name not in excluded_fields)
@@ -665,35 +672,35 @@ class About(object):
         Check that referenced files exist. Update and return self.errors.
         """
         if self.location and not os.path.exists(self.location):
-            msg = u'ABOUT file location: {} does not exists.'.format(self.location)
+            msg = 'ABOUT file location: {} does not exists.'.format(self.location)
             self.errors.append(Error(CRITICAL, msg))
 
         base_dir = base_dir or os.path.dirname(self.location)
 
         if not os.path.exists(base_dir):
-            msg = u'base_dir: {} does not exists: unable to check files existence.'.format(base_dir)
+            msg = 'base_dir: {} does not exists: unable to check files existence.'.format(base_dir)
             self.errors.append(Error(CRITICAL, msg))
             return
 
         about_resource_loc = self.about_resource_loc(base_dir)
         if about_resource_loc and not os.path.exists(about_resource_loc):
-            msg = u'File about_resource: "{}" does not exists'.format(self.about_resource)
+            msg = 'File about_resource: "{}" does not exists'.format(self.about_resource)
             self.errors.append(Error(CRITICAL, msg))
 
         notice_file_loc = self.notice_file_loc(base_dir)
         if notice_file_loc and not os.path.exists(notice_file_loc):
-            msg = u'File notice_file: "{}" does not exists'.format(self.notice_file)
+            msg = 'File notice_file: "{}" does not exists'.format(self.notice_file)
             self.errors.append(Error(CRITICAL, msg))
 
         changelog_file_loc = self.changelog_file_loc(base_dir)
         if changelog_file_loc and not os.path.exists(changelog_file_loc):
-            msg = u'File changelog_file: "{}" does not exists'.format(self.changelog_file)
+            msg = 'File changelog_file: "{}" does not exists'.format(self.changelog_file)
             self.errors.append(Error(CRITICAL, msg))
 
         for license in self.licenses:  # NOQA
             license_file_loc = license.file_loc(base_dir)
             if not os.path.exists(license_file_loc):
-                msg = u'License file: "{}" does not exists'.format(license.file)
+                msg = 'License file: "{}" does not exists'.format(license.file)
                 self.errors.append(Error(CRITICAL, msg))
 
         return self.errors

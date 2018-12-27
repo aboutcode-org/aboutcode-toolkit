@@ -1,0 +1,13 @@
+[
+  {
+    "about_file_path": "django_snippets_2413.ABOUT",
+    "about_resource": "django_snippets_2413.py",
+    "name": "Yet another query string template tag",
+    "version": "2011-04-12",
+    "homepage_url": "http://djangosnippets.org/snippets/2413/",
+    "download_url": "http://djangosnippets.org/snippets/2413/download/",
+    "notes": "This file was modified to include the line \"register = Library()\" without which the template tag is not registered.",
+    "license_text_file": "django_snippets.LICENSE",
+    "license_url": "http://djangosnippets.org/about/tos/"
+  }
+]

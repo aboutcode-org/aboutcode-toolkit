@@ -27,6 +27,7 @@ import saneyaml
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import model
+from attributecode.util import python2
 from attributecode.util import unique
 
 from testing_utils import get_test_loc
@@ -188,9 +189,11 @@ class AboutTest(unittest.TestCase):
         # fields in this file are not in the standard order
         test_file = get_test_loc('test_model/parse/ordered_fields.ABOUT')
         a = model.About.load(test_file)
+        a.about_file_path = 'this.ABOUT'
+
         assert [] == a.errors
 
-        expected_std = ['location', 'about_resource', 'name', 'version', 'download_url']
+        expected_std = ['about_file_path', 'about_resource', 'name', 'version', 'download_url']
         expected_cust = sorted(['other', 'that'])
         standard, custom = a.fields()
         assert expected_std == standard
@@ -338,16 +341,17 @@ this software and releases the component to Public Domain.
 
     def test_About_cannot_be_created_with_non_ascii_custom_field_names(self):
         test_file = get_test_loc('test_model/parse/non_ascii_field_name_value.about')
+
+
+        var = 'mat\\xedas' if python2 else 'matías'
+        msg = ('Custom field name: \'{}\' contains illegal characters. '
+               'Only these characters are allowed: ASCII letters, digits and "_" underscore. '
+               'The first character must be a letter.').format(var)
         try:
             model.About.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
-            expected = (
-                Error(CRITICAL,
-                      'Custom field name: \'mat\xedas\' contains illegal characters. '
-                      'Only these characters are allowed: ASCII letters, digits '
-                      'and "_" underscore. The first character must be a letter.'),
-                )
+            expected = (Error(CRITICAL, msg),)
             assert expected == e.args
 
     def test_About_cannot_be_created_with_invalid_boolean_value(self):

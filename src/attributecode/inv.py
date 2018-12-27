@@ -22,6 +22,7 @@ import json
 import os
 # FIXME: why posixpath???
 import posixpath
+import traceback
 
 import attr
 
@@ -34,6 +35,8 @@ from attributecode.util import normalize
 from attributecode.util import python2
 from attributecode.util import to_posix
 from attributecode.util import unique
+from attributecode.util import get_relative_path
+from attributecode.util import resource_name
 
 
 """
@@ -55,7 +58,7 @@ def collect_inventory(location, check_files=False):
     try:
         about_locations.extend(get_about_locations(input_location))
     except Exception as e:
-        errors.append(Error(CRITICAL, str(e)))
+        errors.append(Error(CRITICAL, str(e) + '\n' + traceback.format_exc()))
 
     name_errors = util.check_file_names(about_locations)
     errors.extend(name_errors)
@@ -63,9 +66,19 @@ def collect_inventory(location, check_files=False):
     abouts = []
 
     if not errors:
-        for about_file_loc in about_locations:
+        is_file = os.path.isfile(input_location)
+        if is_file:
+            # corner case for a single file: the relative path is file name
+            file_name = resource_name(input_location)
+            locs_and_relpaths = [(input_location, file_name)]
+        else:
+            locs_and_relpaths = get_relative_paths_and_locations(about_locations, input_location)
+
+        for about_file_loc, about_file_path in locs_and_relpaths :
+            about = None
             try:
                 about = About.load(about_file_loc)
+                about.about_file_path = about_file_path
                 abouts.append(about)
 
                 if check_files:
@@ -76,16 +89,22 @@ def collect_inventory(location, check_files=False):
 
             except Exception as exce:
                 if all(isinstance(e, Error) for e in exce.args):
-                    errors.extend(exce.args)
+                    for err in exce.args:
+                        if not err.path:
+                            err.path = about_file_path
+                        errors.append(err)
                 else:
-                    errors.append(Error(CRITICAL, str(exce)))
+                    errors.append(Error(
+                        CRITICAL,
+                        str(exce) + '\n' + traceback.format_exc()),
+                        path=about_file_path
+                    )
 
-            # TODO: WHY???
-            # Insert about_file_path reference in every error
-            # FIXME: this should be an attribute of the Error object
-            # for severity, message in about.errors:
-            #     msg = (about_file_loc + ": " + message)
-            #     errors.append(Error(severity, msg))
+            if about:
+                # Insert path reference in every About error
+                for err in about.errors:
+                    if not err.path:
+                        err.path = about_file_path
 
     return sorted(unique(errors)), abouts
 
@@ -101,7 +120,7 @@ def is_about_file(path):
 
 def get_locations(location):
     """
-    Return a list of locations of files given the `location` of a
+    Yield posix locations of files given the `location` of a
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
@@ -127,6 +146,16 @@ def get_about_locations(location):
     for loc in get_locations(location):
         if is_about_file(loc):
             yield loc
+
+
+def get_relative_paths_and_locations(locations, base_location):
+    """
+    Yield a tuple of (location, relative path) given an iterable of `locations`
+    and a `base_location` used to compute the `relative_path` of each location.
+    """
+    for location in locations:
+        relative_path = get_relative_path(base_location, location)
+        yield location, relative_path
 
 
 def get_field_names(abouts):
@@ -158,7 +187,7 @@ def save_as_json(location, abouts):
     Return a list of Error objects.
     """
 
-    serialized = [a.to_dict(with_location=True, with_licenses=True) for a in abouts]
+    serialized = [a.to_dict(with_path=True, with_licenses=True) for a in abouts]
 
     if python2:
         with io.open(location, 'wb') as out:
@@ -176,7 +205,7 @@ def save_as_csv(location, abouts):
     Return a list of Error objects.
     LEGACY: the licenses list of objects CANNOT be serialized to CSV
     """
-    serialized = [a.to_dict(with_location=True, with_licenses=False) for a in abouts]
+    serialized = [a.to_dict(with_path=True, with_licenses=False) for a in abouts]
 
     field_names = get_field_names(abouts)
 

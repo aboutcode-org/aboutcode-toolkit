@@ -1,4 +1,4 @@
-location,about_resource,name,description,copyright
+about_file_path,about_resource,name,description,copyright
 about.ABOUT,.,pytest,"first line
 second line
 third line",copyright

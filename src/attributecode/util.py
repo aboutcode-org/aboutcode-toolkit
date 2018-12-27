@@ -73,7 +73,7 @@ def invalid_chars(path):
     name = rname.lower()
     return [c for c in name if c not in valid_file_chars]
 
-
+# FIXME: do not checl for invalida characters
 def check_file_names(paths):
     """
     Given a sequence of file paths, check that file names are valid and that
@@ -148,6 +148,7 @@ def get_relative_path(base_loc, full_loc):
     assert full != base, (
         'Cannot compute relative path: %(full_loc)r is the same as: %(base_loc)r' % locals())
     relative = full[len(base) + 1:]
+
     # We don't want to keep the first segment of the root of the returned path.
     # See https://github.com/nexB/attributecode/issues/276
     # relative = posixpath.join(base_name, relative)

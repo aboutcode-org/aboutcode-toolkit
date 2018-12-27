@@ -18,8 +18,11 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from collections import namedtuple
+from collections import OrderedDict
 import os
+
+import attr
+import saneyaml
 
 try:
     # Python 2
@@ -28,7 +31,6 @@ except NameError:  # pragma: nocover
     # Python 3
     unicode = str  # NOQA
 
-import saneyaml
 
 __version__ = '4.0.0.pre1'
 
@@ -48,31 +50,29 @@ limitations under the License.
 """
 
 
-class Error(namedtuple('Error', ['severity', 'message'])):
+def message_converter(value):
+    if value:
+        if isinstance(value, unicode):
+            value = clean_string(value)
+        else:
+            value = clean_string(unicode(repr(value), encoding='utf-8'))
+            value = value.strip('"')
+    return value
+
+
+@attr.attributes()
+class Error(object):
     """
-    An Error data with a severity and message.
+    An Error data with a severity and message and an optional path attribute.
     """
-    def __new__(self, severity, message):
-        if message:
-            if isinstance(message, unicode):
-                message = self._clean_string(message)
-            else:
-                message = self._clean_string(unicode(repr(message), encoding='utf-8'))
-                message = message.strip('"')
-
-        return super(Error, self).__new__(
-            Error, severity, message)
-
-    def __repr__(self, *args, **kwargs):
-        sev, msg = self._get_values()
-        return 'Error(%(sev)s, %(msg)s)' % locals()
-
-    def __eq__(self, other):
-        return repr(self) == repr(other)
+    severity = attr.attrib()
+    message = attr.attrib(converter=message_converter)
+    # relative POSIX path of the ABOUT file
+    path = attr.attrib(default=None)#, repr=False)
 
     def _get_values(self):
         sev = severities[self.severity]
-        msg = self._clean_string(repr(self.message))
+        msg = clean_string(repr(self.message))
         return sev, msg
 
     def render(self):
@@ -83,28 +83,28 @@ class Error(namedtuple('Error', ['severity', 'message'])):
         """
         Return an ordered dict of self.
         """
-        return self._asdict()
+        return attr.asdict(self, dict_factory=OrderedDict)
 
-    @staticmethod
-    def _clean_string(s):
-        """
-        Return a cleaned string for `s`, stripping eventual "u" prefixes
-        from unicode representations.
-        """
-        if not s:
-            return s
-        if s.startswith(('u"', "u'")):
-            s = s.lstrip('u')
-        s = s.replace('[u"', '["')
-        s = s.replace("[u'", "['")
-        s = s.replace("(u'", "('")
-        s = s.replace("(u'", "('")
-        s = s.replace("{u'", "{'")
-        s = s.replace("{u'", "{'")
-        s = s.replace(" u'", " '")
-        s = s.replace(" u'", " '")
-        s = s.replace("\\\\", "\\")
+
+def clean_string(s):
+    """
+    Return a cleaned string for `s`, stripping eventual "u" prefixes
+    from unicode representations.
+    """
+    if not s:
         return s
+    if s.startswith(('u"', "u'")):
+        s = s.lstrip('u')
+    s = s.replace('[u"', '["')
+    s = s.replace("[u'", "['")
+    s = s.replace("(u'", "('")
+    s = s.replace("(u'", "('")
+    s = s.replace("{u'", "{'")
+    s = s.replace("{u'", "{'")
+    s = s.replace(" u'", " '")
+    s = s.replace(" u'", " '")
+    s = s.replace("\\\\", "\\")
+    return s
 
 
 # modeled after the logging levels

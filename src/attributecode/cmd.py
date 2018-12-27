@@ -614,11 +614,17 @@ def get_error_messages(errors, quiet=False, verbose=False):
     for error in errors:
         severity = error.severity
         message = error.message
+        path = error.path
         sevcode = severities.get(severity) or 'UNKNOWN'
-        msg = '{sevcode}: {message}'.format(**locals())
+
+        msg = '{sevcode}: '
+        if path:
+            msg += 'in ABOUT file: "{path}": '
+        msg += '{message}'
+        msg = msg.format(**locals())
         if not quiet:
             if verbose:
-                messages .append(msg)
+                messages.append(msg)
             elif severity >= WARNING:
                 messages .append(msg)
     return messages, severe_errors_count
