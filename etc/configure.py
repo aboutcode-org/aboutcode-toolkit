@@ -126,14 +126,22 @@ def clean(root_dir):
     Remove cleanable directories and files in root_dir.
     """
     print('* Cleaning ...')
-    cleanable = '''build bin lib Lib include Include Scripts local
-                   django_background_task.log
-                   develop-eggs eggs parts .installed.cfg
-                   .Python
-                   .cache
-                   pip-selfcheck.json
-                   '''.split()
-
+    cleanable = '''
+        __pycache__
+        .pytest_cache
+        build
+        bin
+        lib
+        Lib
+        include
+        Include
+        Scripts
+        local
+        .eggs
+        .cache
+        pip-selfcheck.json
+        src/aboutcode_toolkit.egg-info
+    '''.split()
     # also clean __pycache__ if any
     cleanable.extend(find_pycache(root_dir))
 

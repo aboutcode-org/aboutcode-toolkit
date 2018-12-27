@@ -18,7 +18,6 @@ set ABOUT_ROOT_DIR=%~dp0
 @rem there is a space at the end of the set SCANCODE_CLI_ARGS=  line ... 
 @rem NEVER remove this!
 @rem otherwise, this script and scancode do not work.  
-
 set ABOUT_CLI_ARGS= 
 @rem Collect/Slurp all command line arguments in a variable
 :collectarg
@@ -42,7 +41,7 @@ if not exist "c:\python27\python.exe" (
     echo(
     echo On Windows, AboutCode requires Python 2.7.x 32 bits to be installed first.
     echo(
-    echo Please download and install Python 2.7 ^(Windows x86 MSI installer^) version 2.7.10.
+    echo Please download and install Python 2.7 ^(Windows x86 MSI installer^) version 2.7.15.
     echo Install Python on the c: drive and use all default installer options.
     echo Do NOT install Python v3 or any 64 bits edition.
     echo Instead download Python from this url and see the README.rst file for more details:
