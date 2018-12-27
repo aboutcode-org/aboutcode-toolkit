@@ -23,10 +23,10 @@ import unittest
 
 import saneyaml
 
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import model
-from attributecode import util
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import model
+from aboutcode import util
 
 from testing_utils import on_posix
 from testing_utils import on_windows

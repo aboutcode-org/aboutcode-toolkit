@@ -22,8 +22,8 @@ import io
 import os
 import unittest
 
-from attributecode import attrib
-from attributecode import inv
+from aboutcode import attrib
+from aboutcode import inv
 
 from testing_utils import get_test_loc
 

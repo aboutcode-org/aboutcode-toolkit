@@ -20,7 +20,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-from attributecode import transform
+from aboutcode import transform
 
 from testing_utils import get_test_loc
 

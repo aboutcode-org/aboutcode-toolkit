@@ -22,10 +22,10 @@ import unittest
 
 import mock
 
-from attributecode import api
-from attributecode import ERROR
-from attributecode import Error
-from attributecode.model import License
+from aboutcode import api
+from aboutcode import ERROR
+from aboutcode import Error
+from aboutcode.model import License
 
 
 class FakeResponse(object):
@@ -89,8 +89,8 @@ class ApiTest(unittest.TestCase):
         mock_data.return_value = ''
         assert api.valid_api_url('non_valid_url') is False
 
-    @mock.patch('attributecode.api.have_network_connection')
-    @mock.patch('attributecode.api.valid_api_url')
+    @mock.patch('aboutcode.api.have_network_connection')
+    @mock.patch('aboutcode.api.valid_api_url')
     def test_fetch_licenses(self, have_network_connection, valid_api_url):
         have_network_connection.return_value = True
 

@@ -25,14 +25,14 @@ import sys
 import unittest
 from unittest.case import skipIf
 
-from attributecode import CRITICAL
-from attributecode import INFO
-from attributecode import Error
-from attributecode import inv
-from attributecode import model
-from attributecode.util import csv
-from attributecode.util import on_windows
-from attributecode.util import to_posix
+from aboutcode import CRITICAL
+from aboutcode import INFO
+from aboutcode import Error
+from aboutcode import inv
+from aboutcode import model
+from aboutcode.util import csv
+from aboutcode.util import on_windows
+from aboutcode.util import to_posix
 
 from testing_utils import check_json
 from testing_utils import extract_test_loc
@@ -189,7 +189,7 @@ class InventoryTest(unittest.TestCase):
         assert expected == [a.to_dict() for a in abouts]
 
     def test_collect_inventory_works_with_relative_paths(self):
-        # FIXME: This test need to be run under src/attributecode/
+        # FIXME: This test need to be run under src/aboutcode/
         # or otherwise it will fail as the test depends on the launching
         # location
         test_loc = get_test_loc('test_inv/relative')

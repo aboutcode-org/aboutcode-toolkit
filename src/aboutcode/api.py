@@ -22,11 +22,11 @@ import json
 
 import click
 
-from attributecode import ERROR
-from attributecode import Error
-from attributecode import util
-from attributecode import model
-from attributecode.util import python2
+from aboutcode import ERROR
+from aboutcode import Error
+from aboutcode import util
+from aboutcode import model
+from aboutcode.util import python2
 
 if python2:  # pragma: nocover
     from urllib2 import HTTPError  # NOQA

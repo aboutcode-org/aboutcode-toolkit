@@ -23,12 +23,13 @@ import io
 
 import attr
 
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import saneyaml
-from attributecode.model import About
-from attributecode.util import csv
-from attributecode.util import python2
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import saneyaml
+from aboutcode.model import About
+from aboutcode.util import csv
+from aboutcode.util import python2
+
 
 if python2:  # pragma: nocover
     from itertools import izip_longest as zip_longest  # NOQA
@@ -283,7 +284,7 @@ def write_csv(location, data, column_names):  # NOQA
     Write a CSV file at `location` the `data` list of ordered dicts using the
     `column_names`.
     """
-    with io.open(location, 'w', encoding='utf-8', newline='\n') as csvfile:
+    with io.open(location, 'w', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=column_names)
         writer.writeheader()
         writer.writerows(data)

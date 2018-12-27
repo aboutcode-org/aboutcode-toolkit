@@ -21,14 +21,14 @@ from __future__ import unicode_literals
 import io
 import unittest
 
-from attributecode import CRITICAL
-from attributecode import DEBUG
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import NOTSET
-from attributecode import WARNING
-from attributecode import cmd
-from attributecode import Error
+from aboutcode import CRITICAL
+from aboutcode import DEBUG
+from aboutcode import ERROR
+from aboutcode import INFO
+from aboutcode import NOTSET
+from aboutcode import WARNING
+from aboutcode import cmd
+from aboutcode import Error
 
 from testing_utils import run_about_command_test_click
 from testing_utils import get_test_loc

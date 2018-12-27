@@ -23,13 +23,13 @@ import io
 import json
 import os
 
-from attributecode import Error
-from attributecode import ERROR
-from attributecode import CRITICAL
-from attributecode import model
-from attributecode import util
-from attributecode.util import csv
-from attributecode.util import unique
+from aboutcode import Error
+from aboutcode import ERROR
+from aboutcode import CRITICAL
+from aboutcode import model
+from aboutcode import util
+from aboutcode.util import csv
+from aboutcode.util import unique
 
 
 def check_duplicated_about_file_path(inventory_dict):

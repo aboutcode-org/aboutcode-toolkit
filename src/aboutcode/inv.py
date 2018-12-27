@@ -26,17 +26,17 @@ import traceback
 
 import attr
 
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import util
-from attributecode.model import About
-from attributecode.util import csv
-from attributecode.util import normalize
-from attributecode.util import python2
-from attributecode.util import to_posix
-from attributecode.util import unique
-from attributecode.util import get_relative_path
-from attributecode.util import resource_name
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import util
+from aboutcode.model import About
+from aboutcode.util import csv
+from aboutcode.util import normalize
+from aboutcode.util import python2
+from aboutcode.util import to_posix
+from aboutcode.util import unique
+from aboutcode.util import get_relative_path
+from aboutcode.util import resource_name
 
 
 """

@@ -23,8 +23,8 @@ import posixpath
 import string
 import sys
 
-from attributecode import CRITICAL
-from attributecode import Error
+from aboutcode import CRITICAL
+from aboutcode import Error
 
 
 python2 = sys.version_info[0] < 3
@@ -150,7 +150,7 @@ def get_relative_path(base_loc, full_loc):
     relative = full[len(base) + 1:]
 
     # We don't want to keep the first segment of the root of the returned path.
-    # See https://github.com/nexB/attributecode/issues/276
+    # See https://github.com/nexB/aboutcode/issues/276
     # relative = posixpath.join(base_name, relative)
     return relative
 

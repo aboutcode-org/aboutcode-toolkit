@@ -37,10 +37,10 @@ import attr
 import click
 from license_expression import Licensing
 
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import saneyaml
-from attributecode import util
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import saneyaml
+from aboutcode import util
 
 if util.python2:
     str = unicode  # NOQA

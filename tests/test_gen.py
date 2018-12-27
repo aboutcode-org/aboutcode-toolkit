@@ -22,11 +22,11 @@ from collections import OrderedDict
 import os
 import unittest
 
-from attributecode import ERROR
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import gen
-from attributecode import model
+from aboutcode import ERROR
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import gen
+from aboutcode import model
 
 from testing_utils import get_temp_dir
 from testing_utils import get_test_loc

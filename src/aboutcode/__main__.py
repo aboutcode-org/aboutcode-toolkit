@@ -20,5 +20,5 @@ from __future__ import unicode_literals
 
 
 if __name__ == '__main__':  # pragma: nocover
-    from attributecode import cmd
+    from aboutcode import cmd
     cmd.about()

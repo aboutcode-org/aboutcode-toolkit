@@ -24,11 +24,11 @@ import unittest
 
 import saneyaml
 
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import model
-from attributecode.util import python2
-from attributecode.util import unique
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode import model
+from aboutcode.util import python2
+from aboutcode.util import unique
 
 from testing_utils import get_test_loc
 from testing_utils import check_json

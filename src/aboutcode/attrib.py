@@ -24,9 +24,9 @@ import os
 
 import jinja2
 
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode.licenses import COMMON_LICENSES
+from aboutcode import CRITICAL
+from aboutcode import Error
+from aboutcode.licenses import COMMON_LICENSES
 
 
 # FIXME: the template dir should be outside the code tree

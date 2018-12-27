@@ -29,7 +29,7 @@ import sys
 import tempfile
 import zipfile
 
-from attributecode.util import to_posix
+from aboutcode.util import to_posix
 
 try:
     # Python 2
@@ -68,7 +68,7 @@ def create_dir(location):
                  | stat.S_IROTH | stat.S_IXOTH)
 
 
-def build_temp_dir(prefix='test-attributecode-'):
+def build_temp_dir(prefix='test-aboutcode-'):
     """
     Create and return a new unique empty directory created in base_dir.
     """
@@ -77,7 +77,7 @@ def build_temp_dir(prefix='test-attributecode-'):
     return location
 
 
-def get_temp_file(file_name='test-attributecode-tempfile'):
+def get_temp_file(file_name='test-aboutcode-tempfile'):
     """
     Return a unique new temporary file location to a non-existing
     temporary file that can safely be created without a risk of name
@@ -179,7 +179,7 @@ def run_about_command_test_click(options, expected_rc=0, monkeypatch=None,):
     """
     import click
     from click.testing import CliRunner
-    from attributecode import cmd
+    from aboutcode import cmd
     if monkeypatch:
         monkeypatch.setattr(click._termui_impl, 'isatty', lambda _: True)
         monkeypatch.setattr(click , 'get_terminal_size', lambda : (80, 43,))
