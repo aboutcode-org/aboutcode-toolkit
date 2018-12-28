@@ -1,0 +1,13 @@
+Usage: about inventory [OPTIONS] LOCATION OUTPUT
+
+  Collect the inventory of .ABOUT file data as CSV or JSON.
+
+  LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
+
+  OUTPUT: Path to the JSON or CSV inventory file to create.
+
+Options:
+  -f, --format [json|csv]  Set OUTPUT inventory file format.  [default: csv]
+  -q, --quiet              Do not print error or warning messages.
+  --verbose                Show all error and warning messages.
+  -h, --help               Show this message and exit.

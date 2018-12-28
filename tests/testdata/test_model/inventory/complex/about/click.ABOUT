@@ -1,0 +1,18 @@
+about_resource: click-3.2-py2.py3-none-any.whl
+version: 3.2
+download_url: https://pypi.python.org/packages/2.7/c/click/click-3.2-py2.py3-none-any.whl#md5=7d0bf0ca4e8ce6056e35cc8135d21abd
+name: click
+owner: Armin Ronacher
+contact: armin.ronacher@active-4.com
+homepage_url: http://click.pocoo.org/
+vcs_tool: git
+vcs_repository: https://github.com/mitsuhiko/click.git
+description: |
+    A simple wrapper around optparse for 
+    powerful command line utilities.
+dje_license: bsd-new
+license_text_file: click.LICENSE
+notes: |
+    Click uses parts of optparse written by Gregory P. Ward and maintained 
+    by the Python software foundation.  This is limited to code in the parser.py
+    module and is under the same license as clikc itself.

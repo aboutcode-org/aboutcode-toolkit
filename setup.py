@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name='aboutcode-toolkit',
-    version='3.3.0',
+    version='3.4.0.pre1',
     license='Apache-2.0',
     description=(
         'AboutCode-toolkit is a tool to document the provenance (origin and license) of '
@@ -68,9 +68,15 @@ setup(
     ],
     install_requires=[
         'jinja2 >= 2.9, < 3.0',
+
         'click >= 6.7, < 7.0',
+
         "backports.csv ; python_version<'3.6'",
-        'PyYAML >= 3.0, < 4.0',
+
+        # required by saneyaml
+        'PyYAML >= 3.11, <=3.13',
+        'saneyaml',
+
         'boolean.py >= 3.5, < 4.0',
         'license_expression >= 0.94, < 1.0',
     ],
@@ -79,7 +85,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'about=attributecode.cmd:cli',
+            'about=attributecode.cmd:about',
         ]
     },
 )

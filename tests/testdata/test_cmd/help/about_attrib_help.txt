@@ -1,0 +1,17 @@
+Usage: about attrib [OPTIONS] LOCATION OUTPUT
+
+  Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
+
+  LOCATION: Path to a file, directory or .zip archive containing .ABOUT files.
+
+  OUTPUT: Path where to write the attribution document.
+
+Options:
+  --template FILE          Path to an optional custom attribution template to
+                           generate the attribution document. If not provided
+                           the default built-in template is used.
+  --vartext <key>=<value>  Add variable text as key=value for use in a custom
+                           attribution template.
+  -q, --quiet              Do not print error or warning messages.
+  --verbose                Show all error and warning messages.
+  -h, --help               Show this message and exit.

@@ -1,0 +1,15 @@
+about_resource: pip-1.5.6-py2.py3-none-any.whl
+version: 1.5.6
+download_url: https://pypi.python.org/packages/source/p/pip/pip-1.5.6.tar.gz#md5=01026f87978932060cc86c1dc527903e
+
+name: pip
+owner: The pip developers
+contact: python-virtualenv@groups.google.com
+homepage_url: http://www.pip-installer.org
+
+author_file: pip.AUTHORS
+dje_license: mit, lgpl-2.1
+license_text_file: pip.LICENSE
+
+vcs_tool: git
+vcs_repository: https://github.com/pypa/pip.git

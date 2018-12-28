@@ -64,9 +64,10 @@ or on windows::
     configure
 
 
-USAGE
+REFERENCE
 -----
-See https://github.com/nexB/aboutcode-toolkit/blob/master/USAGE.rst for USAGE.
+See https://github.com/nexB/aboutcode-toolkit/blob/master/REFERENCE.rst for reference
+on aboutcode-toolkit usage.
 
 
 TESTS and DEVELOPMENT

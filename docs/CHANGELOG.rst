@@ -1,5 +1,8 @@
-2018-xx-xx
+2018-XX-XX
 
+    Release 3.4.0.pre1
+
+    * Support filenames/path with spaces #310
     * Update ABOUT file format to match the specification
 
 2018-11-15

@@ -18,15 +18,16 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import codecs
 import logging
 import ntpath
 import os
 import posixpath
 import stat
+import subprocess
 import sys
 import tempfile
 import zipfile
+
 
 from attributecode.util import add_unc
 from attributecode.util import to_posix
@@ -44,7 +45,7 @@ on_windows = 'win32' in sys.platform
 on_posix = not on_windows
 
 
-def get_test_loc(path):
+def get_test_loc(path, must_exists=True):
     """
     Return the location of a test file or directory given a path relative to
     the testdata directory.
@@ -52,25 +53,9 @@ def get_test_loc(path):
     base = to_posix(TESTDATA_DIR)
     path = to_posix(path)
     path = posixpath.join(base, path)
-    # path = to_native(path)
+    if must_exists:
+        assert os.path.exists(path)
     return path
-
-
-def get_unicode_content(location):
-    """
-    Read file at location and return a unicode.
-    """
-    with codecs.open(location, 'rb', encoding='utf-8') as doc:
-        return doc.read()
-
-
-def get_test_lines(path):
-    """
-    Return a list of text lines loaded from the location of a test file or
-    directory given a path relative to the testdata directory.
-    """
-    return get_unicode_content(get_test_loc(path)).splitlines(True)
-
 
 def create_dir(location):
     """
@@ -158,11 +143,70 @@ def extract_test_loc(path, extract_func=extract_zip):
     return target_dir
 
 
-class FakeResponse(object):
-    response_content = None
+def run_about_command_test(options, expected_rc=0):
+    """
+    Run an "about" command as a plain subprocess with the `options` list of options.
+    Assert that rc equals `expected_rc`.
+    On success, return stdout and stderr.
+    """
+    root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    about_cmd = os.path.join(root_dir, 'about')
+    args = [about_cmd] + options
+    about = subprocess.Popen(
+        args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True if on_windows else False)
+    stdout, stderr = about.communicate()
+    rc = about.poll()
+    if rc != expected_rc:
+        opts = ' '.join(args)
+        error = (
+            'Failure to run command: %(opts)s\n'
+            'stdout:\n'
+            '{stdout}\n'
+            '\n'
+            'stderr:\n'
+            '{stderr}\n'
+        ).format(**locals())
+        assert rc == expected_rc, error
+    return stdout, stderr
 
-    def __init__(self, response_content):
-        self.response_content = response_content
 
-    def read(self):
-        return self.response_content
+def run_about_command_test_click(options, expected_rc=0, monkeypatch=None,):
+    """
+    Run an "about" command as a Click-controlled subprocess with the `options`
+    list of options. Return a click.testing.Result object.
+
+    If monkeypatch is provided, a tty with a size (80, 43) is mocked.
+    """
+    import click
+    from click.testing import CliRunner
+    from attributecode import cmd
+    if monkeypatch:
+        monkeypatch.setattr(click._termui_impl, 'isatty', lambda _: True)
+        monkeypatch.setattr(click , 'get_terminal_size', lambda : (80, 43,))
+    runner = CliRunner()
+
+    result = runner.invoke(cmd.about, options, catch_exceptions=False)
+
+    output = result.output
+    if result.exit_code != expected_rc:
+        opts = get_opts(options)
+        error = '''
+Failure to run: about %(opts)s
+output:
+%(output)s
+''' % locals()
+        assert result.exit_code == expected_rc, error
+    return result
+
+
+def get_opts(options):
+    try:
+        return ' '.join(options)
+    except:
+        try:
+            return b' '.join(options)
+        except:
+            return b' '.join(map(repr, options))

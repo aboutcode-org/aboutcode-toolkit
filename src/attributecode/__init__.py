@@ -20,15 +20,18 @@ from __future__ import unicode_literals
 
 from collections import namedtuple
 import logging
+import os
 
 try:
-    basestring  # Python 2
-except NameError:
-    basestring = str  # Python 3 #NOQA
+    # Python 2
+    unicode  # NOQA
+except NameError:  # pragma: nocover
+    # Python 3
+    unicode = str  # NOQA
 
+import saneyaml
 
-__version__ = '3.3.0'
-
+__version__ = '3.4.0.pre1'
 
 __about_spec_version__ = '3.1'
 
@@ -52,39 +55,58 @@ class Error(namedtuple('Error', ['severity', 'message'])):
     """
     def __new__(self, severity, message):
         if message:
-            if isinstance(message, basestring):
-                message = clean_string(message)
+            if isinstance(message, unicode):
+                message = self._clean_string(message)
             else:
-                message = clean_string(repr(message))
+                message = self._clean_string(unicode(repr(message), encoding='utf-8'))
+                message = message.strip('"')
 
         return super(Error, self).__new__(
             Error, severity, message)
 
     def __repr__(self, *args, **kwargs):
+        sev, msg = self._get_values()
+        return 'Error(%(sev)s,  %(msg)s)' % locals()
+
+    def __eq__(self, other):
+        return repr(self) == repr(other)
+
+    def _get_values(self):
         sev = severities[self.severity]
-        msg = clean_string(repr(self.message))
-        return 'Error(%(sev)s, %(msg)s)' % locals()
+        msg = self._clean_string(repr(self.message))
+        return sev, msg
 
+    def render(self):
+        sev, msg = self._get_values()
+        return '%(sev)s: %(msg)s' % locals()
 
-def clean_string(s):
-    """
-    Return a cleaned string for `s`, stripping eventual "u" prefixes
-    from unicode representations.
-    """
-    if not s:
+    def to_dict(self, *args, **kwargs):
+        """
+        Return an ordered dict of self.
+        """
+        return self._asdict()
+
+    @staticmethod
+    def _clean_string(s):
+        """
+        Return a cleaned string for `s`, stripping eventual "u" prefixes
+        from unicode representations.
+        """
+        if not s:
+            return s
+        if s.startswith(('u"', "u'")):
+            s = s.lstrip('u')
+        s = s.replace('[u"', '["')
+        s = s.replace("[u'", "['")
+        s = s.replace("(u'", "('")
+        s = s.replace("(u'", "('")
+        s = s.replace("{u'", "{'")
+        s = s.replace("{u'", "{'")
+        s = s.replace(" u'", " '")
+        s = s.replace(" u'", " '")
+        s = s.replace("\\\\", "\\")
         return s
-    if s.startswith(('u"', "u'")):
-        s = s.lstrip('u')
-    s = s.replace('[u"', '["')
-    s = s.replace("[u'", "['")
-    s = s.replace("(u'", "('")
-    s = s.replace("(u'", "('")
-    s = s.replace("{u'", "{'")
-    s = s.replace("{u'", "{'")
-    s = s.replace(" u'", " '")
-    s = s.replace(" u'", " '")
-    s = s.replace("\\\\", "\\")
-    return s
+
 
 # modeled after the logging levels
 CRITICAL = 50
@@ -96,10 +118,10 @@ NOTSET = 0
 
 
 severities = {
-    CRITICAL : u'CRITICAL',
-    ERROR : u'ERROR',
-    WARNING : u'WARNING',
-    INFO : u'INFO',
-    DEBUG : u'DEBUG',
-    NOTSET : u'NOTSET'
-    }
+    CRITICAL : 'CRITICAL',
+    ERROR : 'ERROR',
+    WARNING : 'WARNING',
+    INFO : 'INFO',
+    DEBUG : 'DEBUG',
+    NOTSET : 'NOTSET'
+}
