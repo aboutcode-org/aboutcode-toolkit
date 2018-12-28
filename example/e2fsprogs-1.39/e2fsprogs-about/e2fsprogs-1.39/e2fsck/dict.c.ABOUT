@@ -1,10 +1,9 @@
 about_resource: dict.c
 name: dict.c
-license_file: KazKylheku.LICENSE
-copyright: Copyright (C) 1997 Kaz Kylheku <kaz@ashi.footprints.net>
 attribute: yes
-owner: Kaz Kylheku
-category: Attribution
-confirmed_license: Kaz Kylheku License
-component_type: c language text
 checksum_sha1: 52e5af00e28008e9fb264a88f46566947e4b09f7
+copyright: >-
+    Copyright (C) 1997 Kaz Kylheku <kaz@ashi.footprints.net>
+licenses:
+    -   file: KazKylheku.LICENSE
+owner: Kaz Kylheku

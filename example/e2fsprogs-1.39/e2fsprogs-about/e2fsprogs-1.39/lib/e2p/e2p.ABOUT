@@ -1,15 +1,14 @@
 about_resource: .
 name: e2p
-license_name: GNU Library General Public License 2.0
-license_file: lgpl-2.0.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.0
-copyright: |
+attribute: yes
+copyright: |-
     Copyright (C) 1992, 1993, 1994  Remy Card
     Copyright (c) 1999 Theodore Ts
-redistribute: yes
-attribute: yes
+license_expression: lgpl-2.0
+licenses:
+    -   file: lgpl-2.0.LICENSE
+        key: lgpl-2.0
+        name: GNU Library General Public License 2.0
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.0
 owner: Theodore Ts'o
-dje_license_key: lgpl-2.0
-category: Copyleft Limited
-confirmed_license: LGPL 2.0
-component_type: directory
+redistribute: yes

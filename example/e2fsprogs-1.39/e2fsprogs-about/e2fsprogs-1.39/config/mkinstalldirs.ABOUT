@@ -1,12 +1,11 @@
 about_resource: mkinstalldirs
 name: mkinstalldirs
-download_url: http://svn.apache.org/repos/asf/axis/axis1/c/trunk/mkinstalldirs
-license_name: Public Domain
-license_file: public-domain.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
-owner: Noah Friedman
-dje_license_key: public-domain
-category: Public Domain
-confirmed_license: Public Domain
-component_type: posix shell script text executable
 checksum_sha1: e8066bf9dc4353afffcfc5c2ec1cc9cc757585de
+download_url: http://svn.apache.org/repos/asf/axis/axis1/c/trunk/mkinstalldirs
+license_expression: public-domain
+licenses:
+    -   file: public-domain.LICENSE
+        key: public-domain
+        name: Public Domain
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
+owner: Noah Friedman
