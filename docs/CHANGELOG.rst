@@ -1,3 +1,7 @@
+2018-xx-xx
+
+    * Update ABOUT file format to match the specification
+
 2018-11-15
 
     Release 3.3.0
