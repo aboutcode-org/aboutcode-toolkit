@@ -50,7 +50,6 @@ def check_duplicated_about_file_path(inventory_dict):
     return errors
 
 
-
 def load_inventory(location, base_dir=None):
     """
     Load the inventory file at `location` as About objects.

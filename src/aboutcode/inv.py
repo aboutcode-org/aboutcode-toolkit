@@ -124,15 +124,15 @@ def get_locations(location):
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
-    location = normalize(location)
     assert os.path.exists(location)
+    location = normalize(location)
+    location = to_posix(location)
 
     if os.path.isfile(location):
         yield location
     else:
         for name in os.listdir(location):
-            base_dir = to_posix(location)
-            path = posixpath.join(base_dir , name)
+            path = posixpath.join(location , name)
             for f in get_locations(path):
                 yield f
 
