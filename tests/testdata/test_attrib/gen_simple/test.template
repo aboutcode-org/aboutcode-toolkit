@@ -1,4 +1,4 @@
-{% for about in abouts -%}
+{% for about in packages -%}
 {{ about.name }}: {{ about.version }}
 resource: {{ about.about_resource }}
 {% endfor -%}

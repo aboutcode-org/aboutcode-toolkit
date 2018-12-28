@@ -1,4 +1,4 @@
 Name,Version,License,Homepage
-{% for about in abouts %}
+{% for about in packages %}
 "{{about.name}}","{{about.version}}","{{about.license_expression}}","{{about.homepage_url}}"
 {% endfor %}

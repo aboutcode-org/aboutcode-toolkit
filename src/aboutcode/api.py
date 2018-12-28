@@ -134,10 +134,10 @@ def get_license_details(api_url, api_key, license_key):
     return lic, errors
 
 
-def fetch_licenses(abouts, api_url, api_key, verbose=False):
+def fetch_licenses(packages, api_url, api_key, verbose=False):
     """
-    Return a mapping of {license key: License object} given an `abouts` list of
-    About object and a list of Error.
+    Return a mapping of {license key: License object} given an `packages` list of
+    Package object and a list of Error.
     """
 
     errors = []
@@ -156,7 +156,7 @@ def fetch_licenses(abouts, api_url, api_key, verbose=False):
     # collect unique license keys
     license_keys = set()
     licensing = Licensing()
-    for about in abouts:
+    for about in packages:
         if not about.license_expression:
             # TODO: we should have a check for this
             continue

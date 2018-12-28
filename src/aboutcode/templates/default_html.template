@@ -17,14 +17,14 @@
     </div>
     <!-- table of contents listing every entry -->    
     <div class="oss-table-of-contents">
-        {% for about in abouts -%}
+        {% for about in packages -%}
             <p><a href="#package_{{ loop.index0 }}">{{ about.name }} {{ about.version or '' }}</a></p>
         {% endfor %}
     </div>
     <hr/>
 
     <!-- list of attribution notice, copyright, licenses -->    
-    {% for about in abouts -%}
+    {% for about in packages -%}
     <div class="oss-package" id="package_{{ loop.index0 }}">
         <h3 class="package-name">{{ about.name }} {{ about.version or '' }}</h3>
         {% if about.license_expression -%}

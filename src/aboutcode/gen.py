@@ -52,11 +52,11 @@ def check_duplicated_about_file_path(inventory_dict):
 
 def load_inventory(location, base_dir=None):
     """
-    Load the inventory file at `location` as About objects.
+    Load the inventory file at `location` as Package objects.
     Use the `base_dir` to resolve the ABOUT file location.
-    Return a list of errors and a list of About objects.
+    Return a list of errors and a list of Package objects.
     """
-    abouts = []
+    packages = []
 
     if location.endswith('.csv'):
         inventory = load_csv(location)
@@ -78,12 +78,12 @@ def load_inventory(location, base_dir=None):
     standard_fields, custom_fields = model.split_fields(sample)
     fields_err = model.validate_field_names(standard_fields.keys(), custom_fields.keys())
     if fields_err:
-        return fields_err, abouts
+        return fields_err, packages
 
     # validate duplicated paths
     dup_about_paths_err = check_duplicated_about_file_path(inventory)
     if dup_about_paths_err:
-        return dup_about_paths_err, abouts
+        return dup_about_paths_err, packages
 
     if base_dir:
         base_dir = util.to_posix(base_dir)
@@ -110,10 +110,10 @@ def load_inventory(location, base_dir=None):
             continue
 
         try:
-            about = model.About.from_dict(entry)
+            about = model.Package.from_dict(entry)
             if base_dir:
                 about.location = os.path.join(base_dir, about_file_path)
-            abouts.append(about)
+            packages.append(about)
         except Exception as e:
             if len(e.args) == 1 and isinstance(e.args[0], Error):
                 err = e.args[0]
@@ -125,7 +125,7 @@ def load_inventory(location, base_dir=None):
             errors.append(err)
             continue
 
-    return unique(errors), abouts
+    return unique(errors), packages
 
 
 def load_csv(location):
@@ -210,9 +210,9 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
     If `reference_dir` is provided reuse and copy license and notice files
     referenced in the inventory.
 
-    Return a list errors and a list of About objects.
+    Return a list errors and a list of Package objects.
     """
-    errors, abouts = load_inventory(inventory_location, base_dir=target_dir)
+    errors, packages = load_inventory(inventory_location, base_dir=target_dir)
     notices_by_filename = {}
     licenses_by_key = {}
 
@@ -222,7 +222,7 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
     # TODO: validate inventory!!!!! to catch error before creating ABOUT files
 
     # update all licenses and notices
-    for about in abouts:
+    for about in packages:
         # Fix the location to ensure this is a proper .ABOUT file
         loc = about.location
         if not loc.endswith('.ABOUT'):
@@ -232,7 +232,7 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
         # used as a "prettier" display of .ABOUT file path
         about_path = loc.replace(target_dir, '').strip('/')
 
-        # Update the License objects of this About using a mapping of reference licenses as {key: License}
+        # Update the License objects of this Package using a mapping of reference licenses as {key: License}
         for license in about.licenses:  # NOQA
             ref_lic = licenses_by_key.get(license.key)
             if not ref_lic:
@@ -257,4 +257,4 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
         # create the files proper
         about.dump(location=about.location, with_files=True)
 
-    return unique(errors), abouts
+    return unique(errors), packages

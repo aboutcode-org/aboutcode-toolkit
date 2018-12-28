@@ -48,7 +48,7 @@ class GenTest(unittest.TestCase):
     def test_load_inventory_base(self):
         location = get_test_loc('test_gen/inv.csv')
         target_dir = get_temp_dir()
-        errors, abouts = gen.load_inventory(location, target_dir)
+        errors, packages = gen.load_inventory(location, target_dir)
 
         expected_errors = []
         assert expected_errors == errors
@@ -60,13 +60,13 @@ class GenTest(unittest.TestCase):
             ('description', u'multi\nline'),
             (u'custom1', u'multi\nline')
         ])]
-        result = [a.to_dict() for a in abouts]
+        result = [a.to_dict() for a in packages]
         assert expected == result
 
     def test_load_inventory_with_errors(self):
         location = get_test_loc('test_gen/inv4.csv')
         target_dir = get_temp_dir()
-        errors, abouts = gen.load_inventory(location, target_dir)
+        errors, packages = gen.load_inventory(location, target_dir)
         expected_errors = [
             Error(CRITICAL, 'Custom field name: \'Confirmed Copyright\' contains illegal characters. '
                   'Only these characters are allowed: ASCII letters, digits and "_" underscore. '
@@ -76,12 +76,12 @@ class GenTest(unittest.TestCase):
         ]
 
         assert expected_errors == errors
-        assert [] == abouts
+        assert [] == packages
 
     def test_generate_about_files_fails_to_generate_if_one_dir_endswith_space(self):
         location = get_test_loc('test_gen/inventory/complex/about_file_path_dir_endswith_space.csv')
         target_dir = get_temp_dir()
-        errors, _abouts = gen.generate_about_files(location, target_dir)
+        errors, _packages = gen.generate_about_files(location, target_dir)
         expected = [
             Error(ERROR, 'Invalid "about_file_path": must not end or start '
                   'with a space for: "about /about.ABOUT"')]
@@ -90,16 +90,16 @@ class GenTest(unittest.TestCase):
     def test_generate_about_files_with_about_file_path_as_directory_generate_about_file_name(self):
         location = get_test_loc('test_gen/inv2.csv')
         target_dir = get_temp_dir()
-        errors, abouts = gen.generate_about_files(location, target_dir)
+        errors, packages = gen.generate_about_files(location, target_dir)
         expected = []
         assert expected == errors
 
         expected = [OrderedDict([('about_resource', u'.'), ('name', u'AboutCode'), ('version', u'0.11.0')])]
-        assert expected == [a.to_dict() for a in abouts]
+        assert expected == [a.to_dict() for a in packages]
 
-        generated_about_loc = abouts[0].location
+        generated_about_loc = packages[0].location
         assert generated_about_loc.endswith('ABOUT')
-        about_file = model.About.load(generated_about_loc)
+        about_file = model.Package.load(generated_about_loc)
         expected = OrderedDict([('about_resource', u'.'), ('name', u'AboutCode'), ('version', u'0.11.0')])
         assert expected == about_file.to_dict()
 
@@ -107,18 +107,18 @@ class GenTest(unittest.TestCase):
         location = get_test_loc('test_gen/inv3.csv')
         target_dir = get_temp_dir()
 
-        errors, abouts = gen.generate_about_files(location, target_dir)
+        errors, packages = gen.generate_about_files(location, target_dir)
         expected = [
             Error(CRITICAL, 'Required field "about_resource" is missing.')
         ]
         assert expected == errors
-        assert [] == abouts
+        assert [] == packages
 
     def test_generate_about_files_is_partial_and_has_errors_if_some_about_resource_reference_missing(self):
         location = get_test_loc('test_gen/inv_with_some_about_resource_missing.csv')
         target_dir = get_temp_dir()
 
-        errors, abouts = gen.generate_about_files(location, target_dir)
+        errors, packages = gen.generate_about_files(location, target_dir)
         expected = [
             Error(CRITICAL,
                 'Cannot create .ABOUT file for: "inv/test.tar.gz".\n'
@@ -126,17 +126,17 @@ class GenTest(unittest.TestCase):
         ]
         assert expected == errors
         expected = [OrderedDict([('about_resource', u'inv/My.gz'), ('name', u'AboutCode'), ('version', u'0.11.0')])]
-        assert expected == [a.to_dict() for a in abouts]
+        assert expected == [a.to_dict() for a in packages]
         assert 1 == len(os.listdir(target_dir))
 
     def test_generate_about_files_simple(self):
         location = get_test_loc('test_gen/inv.csv')
         target_dir = get_temp_dir()
 
-        errors, abouts = gen.generate_about_files(location, target_dir)
+        errors, packages = gen.generate_about_files(location, target_dir)
         assert [] == errors
 
-        result = [a.to_dict() for a in abouts]
+        result = [a.to_dict() for a in packages]
         expected = [OrderedDict([
             ('about_resource', u'.'),
             ('name', u'AboutCode'),
@@ -155,11 +155,11 @@ class GenTest(unittest.TestCase):
         target_dir = get_temp_dir()
         reference_dir = get_test_loc('test_gen/reference')
 
-        errors, abouts = gen.generate_about_files(inventory_location, target_dir, reference_dir)
+        errors, packages = gen.generate_about_files(inventory_location, target_dir, reference_dir)
         expected_errors = []
         assert expected_errors == errors
 
-        result = [a.to_dict() for a in abouts]
+        result = [a.to_dict() for a in packages]
         expected = [
             OrderedDict([
                 ('about_resource', u'some res'),

@@ -26,7 +26,7 @@ import attr
 from aboutcode import CRITICAL
 from aboutcode import Error
 from aboutcode import saneyaml
-from aboutcode.model import About
+from aboutcode.model import Package
 from aboutcode.util import csv
 from aboutcode.util import python2
 
@@ -173,7 +173,7 @@ class Transformer(object):
     # called by attr after the __init__()
     def __attrs_post_init__(self, *args, **kwargs):
         self.essential_columns = ['about_resource', 'about_file_path']
-        self.standard_columns = About.standard_fields()
+        self.standard_columns = Package.standard_fields()
 
     @classmethod
     def default(cls):

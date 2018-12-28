@@ -29,7 +29,7 @@ import attr
 from aboutcode import CRITICAL
 from aboutcode import Error
 from aboutcode import util
-from aboutcode.model import About
+from aboutcode.model import Package
 from aboutcode.util import csv
 from aboutcode.util import normalize
 from aboutcode.util import python2
@@ -47,7 +47,7 @@ Collect and validate inventories of ABOUT files
 def collect_inventory(location, check_files=False):
     """
     Collect any ABOUT files in the directory tree at `location` and return a
-    list of errors and a list of About objects.
+    list of errors and a list of Package objects.
 
     If `check_files` is True, also check that files referenced in an ABOUT file
     exist (about_resource, license and notice files, etc.)
@@ -63,7 +63,7 @@ def collect_inventory(location, check_files=False):
     name_errors = util.check_file_names(about_locations)
     errors.extend(name_errors)
 
-    abouts = []
+    packages = []
 
     if not errors:
         is_file = os.path.isfile(input_location)
@@ -77,9 +77,9 @@ def collect_inventory(location, check_files=False):
         for about_file_loc, about_file_path in locs_and_relpaths :
             about = None
             try:
-                about = About.load(about_file_loc)
+                about = Package.load(about_file_loc)
                 about.about_file_path = about_file_path
-                abouts.append(about)
+                packages.append(about)
 
                 if check_files:
                     about.check_files()
@@ -101,12 +101,12 @@ def collect_inventory(location, check_files=False):
                     )
 
             if about:
-                # Insert path reference in every About error
+                # Insert path reference in every Package error
                 for err in about.errors:
                     if not err.path:
                         err.path = about_file_path
 
-    return sorted(unique(errors)), abouts
+    return sorted(unique(errors)), packages
 
 
 def is_about_file(path):
@@ -158,21 +158,21 @@ def get_relative_paths_and_locations(locations, base_location):
         yield location, relative_path
 
 
-def get_field_names(abouts):
+def get_field_names(packages):
     """
-    Given a list of About objects, return a list of any field names that exist
+    Given a list of Package objects, return a list of any field names that exist
     in any object, including custom fields.
     """
     standard_seen = set()
     custom_seen = set()
-    for a in abouts:
+    for a in packages:
         standard, custom = a.fields()
         standard_seen.update(standard)
         custom_seen.update(custom)
 
     # resort standard fields in standard order
     # which is a tad complex as this is a predefined order
-    standard_names = list(attr.fields_dict(About).keys())
+    standard_names = list(attr.fields_dict(Package).keys())
     standard = []
     for name in standard_names:
         if name in standard_seen:
@@ -181,13 +181,13 @@ def get_field_names(abouts):
     return standard + sorted(custom_seen)
 
 
-def save_as_json(location, abouts):
+def save_as_json(location, packages):
     """
-    Write a JSON file at `location` given a list of About objects.
+    Write a JSON file at `location` given a list of Package objects.
     Return a list of Error objects.
     """
 
-    serialized = [a.to_dict(with_path=True, with_licenses=True) for a in abouts]
+    serialized = [a.to_dict(with_path=True, with_licenses=True) for a in packages]
 
     if python2:
         with io.open(location, 'wb') as out:
@@ -199,15 +199,15 @@ def save_as_json(location, abouts):
     return []
 
 
-def save_as_csv(location, abouts):
+def save_as_csv(location, packages):
     """
-    Write a CSV file at `location` given a list of About objects.
+    Write a CSV file at `location` given a list of Package objects.
     Return a list of Error objects.
     LEGACY: the licenses list of objects CANNOT be serialized to CSV
     """
-    serialized = [a.to_dict(with_path=True, with_licenses=False) for a in abouts]
+    serialized = [a.to_dict(with_path=True, with_licenses=False) for a in packages]
 
-    field_names = get_field_names(abouts)
+    field_names = get_field_names(packages)
 
     errors = []
 

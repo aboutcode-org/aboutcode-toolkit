@@ -198,14 +198,14 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     if location.lower().endswith('.zip'):
         location = extract_zip(location)
 
-    errors, abouts = collect_inventory(location, check_files=check_files)
+    errors, packages = collect_inventory(location, check_files=check_files)
 
     writers = {
         'json': save_as_json,
         'csv': save_as_csv,
     }
     writer = writers[format]
-    write_errors = writer(location=output, abouts=abouts)
+    write_errors = writer(location=output, packages=packages)
     errors.extend(write_errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
@@ -262,15 +262,15 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     if not location.endswith(('.csv', '.json',)):
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
 
-    errors, abouts = generate_about_files(
+    errors, packages = generate_about_files(
         inventory_location=location,
         target_dir=output,
         reference_dir=reference)
 
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
-        abouts_count = len(abouts)
-        msg = '{abouts_count} .ABOUT files generated in {output}'.format(**locals())
+        packages_count = len(packages)
+        msg = '{packages_count} .ABOUT files generated in {output}'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
 
@@ -335,9 +335,9 @@ OUTPUT: Path where to save the fetched reference license data and texts.
         print_version()
         click.echo('Fetching licenses...')
 
-    errors, abouts = gen.load_inventory(location)
+    errors, packages = gen.load_inventory(location)
 
-    licenses_by_key, fetch_errors = api.fetch_licenses(abouts, api_url, api_key, verbose)
+    licenses_by_key, fetch_errors = api.fetch_licenses(packages, api_url, api_key, verbose)
     errors.extend(fetch_errors)
 
     for license in licenses_by_key.values():  # NOQA
@@ -434,14 +434,14 @@ OUTPUT: Path where to write the attribution document.
         if location.lower().endswith('.zip'):
             location = extract_zip(location)
 
-        errors, abouts = collect_inventory(location)
+        errors, packages = collect_inventory(location)
 
         # load all files
-        for about in abouts:
+        for about in packages:
             about.load_files()
 
         attrib_errors = generate_attribution_doc(
-            abouts=abouts,
+            packages=packages,
             output_location=output,
             template_loc=template,
             variables=vartext,
@@ -489,7 +489,7 @@ LOCATION: Path to a file or directory containing .ABOUT files.
     """
     print_version()
     click.echo('Checking ABOUT files...')
-    errors, _abouts = collect_inventory(location, check_files=check_files)
+    errors, _packages = collect_inventory(location, check_files=check_files)
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
     sys.exit(severe_errors_count)
 

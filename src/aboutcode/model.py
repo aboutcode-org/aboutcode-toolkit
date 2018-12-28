@@ -193,7 +193,7 @@ def split_fields(data, skip_empty=False):
     standard_fields = {}
     custom_fields = {}
 
-    standard_field_names = set(attr.fields_dict(About).keys())
+    standard_field_names = set(attr.fields_dict(Package).keys())
 
     for key, value in data.items():
         if skip_empty and not value:
@@ -401,7 +401,7 @@ def get_reference_licenses(reference_dir):
 
 
 @attr.attributes
-class About(object):
+class Package(object):
     """
     A package object
     """
@@ -494,7 +494,7 @@ class About(object):
     @classmethod
     def from_dict(cls, data):
         """
-        Return an About object built a `data` mapping.
+        Return a Package object built a `data` mapping.
         """
         data = dict(data)
         standard_fields, custom_fields = split_fields(data, skip_empty=True)
@@ -507,12 +507,12 @@ class About(object):
 
         licenses = standard_fields.pop('licenses', []) or []
         licenses = [License.from_dict(l) for l in licenses]
-        return About(licenses=licenses, custom_fields=custom_fields, **standard_fields)
+        return Package(licenses=licenses, custom_fields=custom_fields, **standard_fields)
 
     @classmethod
     def load(cls, location):
         """
-        Return an About object built from the YAML file at `location` or None.
+        Return a Package object built from the YAML file at `location` or None.
         Raise Exception on non-recoverable errors.
         """
         # TODO: expand/resolve/abs/etc
@@ -528,7 +528,7 @@ class About(object):
     @classmethod
     def loads(cls, text):
         """
-        Return an About object built from a YAML `text` or None.
+        Return a Package object built from a YAML `text` or None.
         Raise Exception on non-recoverable errors.
         """
         data = saneyaml.load(text, allow_duplicate_keys=False)
@@ -546,7 +546,7 @@ class About(object):
 
     def to_dict(self, with_licenses=True, with_path=False, excluded_fields=_excluded_fields):
         """
-        Return an OrderedDict of About data (excluding texts and ABOUT file path).
+        Return an OrderedDict of Package data (excluding texts and ABOUT file path).
         Fields with empty values are not included.
         """
         excluded_fields = set(excluded_fields)
@@ -582,14 +582,14 @@ class About(object):
 
     def dumps(self):
         """
-        Return a YAML representation for this About.
+        Return a YAML representation for this Package.
         If `with_files` is True, also write any reference notice or license file.
         """
         return saneyaml.dump(self.to_dict(), indent=2)
 
     def dump(self, location, with_files=False):
         """
-        Write this About object to the YAML file at `location`.
+        Write this Package object to the YAML file at `location`.
         If `with_files` is True, also write any reference notice or license file.
         """
         parent = os.path.dirname(location)

@@ -36,7 +36,7 @@ class TemplateTest(unittest.TestCase):
 
     def test_check_template_with_complex_valid_template_returns_None(self):
         template = '''
-        {% for about in abouts -%}
+        {% for about in packages -%}
             {{ about.name.value }}: {{ about.version.value }}
             {% for res in about.about_resource.value -%}
                 resource: {{ res }}
@@ -47,7 +47,7 @@ class TemplateTest(unittest.TestCase):
 
     def test_check_template_with_complex_invalid_template_returns_error(self):
         template = '''
-        {% for about in abouts -%}
+        {% for about in packages -%}
             {{ about.name.value }}: {{ about.version.value }}
             {% for res in about.about_ressdsdsdsdsdsdource.value -%}
                 resource: {{] res }}
@@ -73,7 +73,7 @@ class GenerateTest(unittest.TestCase):
 
     def test_generate_from_collected_inventory_wih_custom_template(self):
         test_file = get_test_loc('test_attrib/gen_simple/attrib.ABOUT')
-        errors, abouts = inv.collect_inventory(test_file)
+        errors, packages = inv.collect_inventory(test_file)
         assert not errors
 
         test_template = get_test_loc('test_attrib/gen_simple/test.template')
@@ -84,20 +84,20 @@ class GenerateTest(unittest.TestCase):
             'Apache HTTP Server: 2.4.3\n'
             'resource: httpd-2.4.3.tar.gz\n')
 
-        error, result = attrib.create_attribution_text(abouts, template_text)
+        error, result = attrib.create_attribution_text(packages, template_text)
         assert expected == result
         assert not error
 
     def test_generate_with_default_template(self, regen=False):
         test_file = get_test_loc('test_attrib/gen_default_template')
-        errors, abouts = inv.collect_inventory(test_file)
+        errors, packages = inv.collect_inventory(test_file)
         assert not errors
 
         test_template = attrib.DEFAULT_TEMPLATE_FILE
         with open(test_template) as tmpl:
             template_text = tmpl.read()
 
-        error, result = attrib.create_attribution_text(abouts, template_text)
+        error, result = attrib.create_attribution_text(packages, template_text)
         assert not error
 
         expected_file = get_test_loc(

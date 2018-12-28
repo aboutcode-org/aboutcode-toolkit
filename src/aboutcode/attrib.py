@@ -34,11 +34,11 @@ DEFAULT_TEMPLATE_FILE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'templates', 'default_html.template')
 
 
-def generate_attribution_doc(abouts, output_location,
+def generate_attribution_doc(packages, output_location,
                             template_loc=DEFAULT_TEMPLATE_FILE, variables=None):
     """
-    Generate and save an attribution doc at `output_location` using an `abouts`
-    list of About objects, a `template_loc` template file location and a
+    Generate and save an attribution doc at `output_location` using an `packages`
+    list of Package objects, a `template_loc` template file location and a
     `variables` optional dict of extra variables.
     Return a list of Error objects if any.
     """
@@ -48,7 +48,7 @@ def generate_attribution_doc(abouts, output_location,
         template_text = inp.read()
 
     rendering_errors, rendered = create_attribution_text(
-        abouts, template_text=template_text, variables=variables)
+        packages, template_text=template_text, variables=variables)
 
     errors.extend(rendering_errors)
 
@@ -59,9 +59,9 @@ def generate_attribution_doc(abouts, output_location,
     return errors
 
 
-def create_attribution_text(abouts, template_text, variables=None):
+def create_attribution_text(packages, template_text, variables=None):
     """
-    Generate an attribution text from an `abouts` list of About objects, a
+    Generate an attribution text from an `packages` list of Package objects, a
     `template_text` template text and a `variables` optional dict of extra
     variables. 
 
@@ -75,7 +75,7 @@ def create_attribution_text(abouts, template_text, variables=None):
     template = jinja2.Template(template_text, autoescape=True)
 
     licenses_by_key = {}
-    for about in abouts:
+    for about in packages:
         for license in about.licenses:  # NOQA
             licenses_by_key[license.key] = license
 
@@ -83,10 +83,10 @@ def create_attribution_text(abouts, template_text, variables=None):
     common_licenses_in_use = sorted(
         lic for key, lic in licenses_by_key.items() if key in COMMON_LICENSES)
 
-    # compute unique About objects
-    unique_packages = sorted({about.hashable(): about for about in abouts}.values())
+    # compute unique Package objects
+    unique_packages = sorted({about.hashable(): about for about in packages}.values())
 
-    abouts = sorted(abouts)
+    packages = sorted(packages)
 
     try:
         rendered = template.render(
@@ -96,7 +96,7 @@ def create_attribution_text(abouts, template_text, variables=None):
             variables=variables,
             # a list of all packages objects
 
-            packages=abouts,
+            packages=packages,
             # a list of unique packages
             unique_packages=unique_packages,
 
@@ -111,7 +111,7 @@ def create_attribution_text(abouts, template_text, variables=None):
             # prefer using variables
             vartext=variables,
             # a list of all about objects: use packages instead
-            abouts=abouts,
+            abouts=packages,
             ############################
         )
 

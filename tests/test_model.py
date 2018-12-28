@@ -183,12 +183,12 @@ test with no colon
             pass
 
 
-class AboutTest(unittest.TestCase):
+class PackageTest(unittest.TestCase):
 
-    def test_About_load_ignores_original_field_order_and_uses_standard_predefined_order(self):
+    def test_Package_load_ignores_original_field_order_and_uses_standard_predefined_order(self):
         # fields in this file are not in the standard order
         test_file = get_test_loc('test_model/parse/ordered_fields.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         a.about_file_path = 'this.ABOUT'
 
         assert [] == a.errors
@@ -199,10 +199,10 @@ class AboutTest(unittest.TestCase):
         assert expected_std == standard
         assert expected_cust == sorted(custom)
 
-    def test_About_duplicate_field_names_are_detected_with_different_case(self):
+    def test_Package_duplicate_field_names_are_detected_with_different_case(self):
         test_file = get_test_loc('test_model/parse/dupe_field_name.ABOUT')
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
@@ -210,10 +210,10 @@ class AboutTest(unittest.TestCase):
                 Error(CRITICAL, "Custom field name: 'Name' must be lowercase."))
             assert expected == e.args
 
-    def test_About_duplicate_field_names_are_not_reported_if_same_value(self):
+    def test_Package_duplicate_field_names_are_not_reported_if_same_value(self):
         test_file = get_test_loc('test_model/parse/dupe_field_name_no_new_value.ABOUT')
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
@@ -221,25 +221,25 @@ class AboutTest(unittest.TestCase):
                 Error(CRITICAL, "Custom field name: 'Name' must be lowercase."),)
             assert expected == e.args
 
-    def test_About_fails_if_field_names_are_not_lowercase(self):
+    def test_Package_fails_if_field_names_are_not_lowercase(self):
         test_file = get_test_loc('test_model/parser_tests/upper_field_names.ABOUT')
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
                 Error(CRITICAL, "Custom field name: 'homepage_URL' must be lowercase."),)
             assert expected == e.args
 
-    def test_About_with_existing_about_resource_has_no_error(self):
+    def test_Package_with_existing_about_resource_has_no_error(self):
         test_file = get_test_loc('test_model/parser_tests/about_resource_field.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         assert [] == a.errors
         assert a.about_resource
 
-    def test_About_has_errors_when_about_resource_does_not_exist(self):
+    def test_Package_has_errors_when_about_resource_does_not_exist(self):
         test_file = get_test_loc('test_model/parser_tests/missing_about_ref.ABOUT')
-        about = model.About.load(test_file)
+        about = model.Package.load(test_file)
         about.check_files()
 
         expected = [
@@ -247,11 +247,11 @@ class AboutTest(unittest.TestCase):
         ]
         assert expected == about.errors
 
-    def test_About_raise_exception_when_missing_required_fields_are_missing(self):
+    def test_Package_raise_exception_when_missing_required_fields_are_missing(self):
         test_file = get_test_loc('test_model/parse/missing_required.ABOUT')
 
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
@@ -259,10 +259,10 @@ class AboutTest(unittest.TestCase):
             )
             assert expected == e.args
 
-    def test_About_raise_exception_when_required_fields_are_empty(self):
+    def test_Package_raise_exception_when_required_fields_are_empty(self):
         test_file = get_test_loc('test_model/parse/empty_required.ABOUT')
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
@@ -270,16 +270,16 @@ class AboutTest(unittest.TestCase):
             )
             assert expected == e.args
 
-    def test_About_has_no_errors_with_empty_notice_file_field(self):
+    def test_Package_has_no_errors_with_empty_notice_file_field(self):
         test_file = get_test_loc('test_model/parse/empty_notice_field.about')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         expected = []
         result = a.errors
         assert expected == result
 
-    def test_About_custom_fields_are_never_ignored_unless_empty(self):
+    def test_Package_custom_fields_are_never_ignored_unless_empty(self):
         test_file = get_test_loc('test_model/custom_fields/custom_fields.about')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         expected = {
             'single_line': 'README STUFF',
             'multi_line': 'line1\nline2',
@@ -288,9 +288,9 @@ class AboutTest(unittest.TestCase):
 
         assert expected == a.custom_fields
 
-    def test_About_custom_fields_order_is_ignored_and_order_is_not_preserved(self):
+    def test_Package_custom_fields_order_is_ignored_and_order_is_not_preserved(self):
         test_file = get_test_loc('test_model/custom_fields/custom_fields.about')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         result = sorted(a.custom_fields.items())
         expected = [
             (u'multi_line', u'line1\nline2'),
@@ -299,14 +299,14 @@ class AboutTest(unittest.TestCase):
         ]
         assert sorted(expected) == sorted(result)
 
-    def test_About_has_info_for_custom_field_name(self):
+    def test_Package_has_info_for_custom_field_name(self):
         test_file = get_test_loc('test_model/parse/illegal_custom_field.about')
-        about = model.About.load(test_file)
+        about = model.Package.load(test_file)
         assert [] == about.errors
 
-    def test_About_check_files_collect_errors_if_path_missing(self):
+    def test_Package_check_files_collect_errors_if_path_missing(self):
         test_file = get_test_loc('test_model/parse/missing_notice_license_files.ABOUT')
-        about = model.About.load(test_file)
+        about = model.Package.load(test_file)
 
         about.check_files()
 
@@ -318,9 +318,9 @@ class AboutTest(unittest.TestCase):
 
         assert 'test.NOTICE' == about.notice_file
 
-    def test_About_notice_and_license_text_are_loaded_from_file(self):
+    def test_Package_notice_and_license_text_are_loaded_from_file(self):
         test_file = get_test_loc('test_model/parse/license_file_notice_file.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         a.load_files()
 
         expected = '''Tester holds the copyright for test component. Tester relinquishes copyright of
@@ -332,14 +332,14 @@ this software and releases the component to Public Domain.
         expected = '''Test component is released to Public Domain.'''
         assert expected == a.notice_text
 
-    def test_About_license_and_notice_text_are_empty_if_field_missing(self):
+    def test_Package_license_and_notice_text_are_empty_if_field_missing(self):
         test_file = get_test_loc('test_model/parse/no_file_fields.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         assert [] == a.errors
         assert not a.notice_file
         assert [] == a.licenses
 
-    def test_About_cannot_be_created_with_non_ascii_custom_field_names(self):
+    def test_Package_cannot_be_created_with_non_ascii_custom_field_names(self):
         test_file = get_test_loc('test_model/parse/non_ascii_field_name_value.about')
 
 
@@ -348,16 +348,16 @@ this software and releases the component to Public Domain.
                'Only these characters are allowed: ASCII letters, digits and "_" underscore. '
                'The first character must be a letter.').format(var)
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
             expected = (Error(CRITICAL, msg),)
             assert expected == e.args
 
-    def test_About_cannot_be_created_with_invalid_boolean_value(self):
+    def test_Package_cannot_be_created_with_invalid_boolean_value(self):
         test_file = get_test_loc('test_model/parse/invalid_boolean.about')
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
@@ -366,33 +366,33 @@ this software and releases the component to Public Domain.
             )
             assert expected == e.args
 
-    def test_About_contains_about_file_path(self):
+    def test_Package_contains_about_file_path(self):
         test_file = get_test_loc('test_model/serialize/about.ABOUT')
         # TODO: I am not sure this override of the about_file_path makes sense
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         assert [] == a.errors
 
         expected = 'test_model/serialize/about.ABOUT'
         assert a.location.endswith(expected)
 
-    def test_About_equals(self):
+    def test_Package_equals(self):
         test_file = get_test_loc('test_model/equal/complete/about.ABOUT')
-        a = model.About.load(test_file)
-        b = model.About.load(test_file)
+        a = model.Package.load(test_file)
+        b = model.Package.load(test_file)
         assert a == b
 
-    def test_About_are_not_equal_with_small_text_differences(self):
+    def test_Package_are_not_equal_with_small_text_differences(self):
         test_file = get_test_loc('test_model/equal/complete/about.ABOUT')
-        about = model.About.load(location=test_file)
+        about = model.Package.load(location=test_file)
 
         test_file2 = get_test_loc('test_model/equal/complete2/about.ABOUT')
-        about2 = model.About.load(test_file2)
+        about2 = model.Package.load(test_file2)
 
         assert about.dumps() != about2.dumps()
         assert about != about2
 
     def test_get_field_names_only_returns_non_empties(self):
-        a = model.About(about_resource='.', notice_file='sadasdasd')
+        a = model.Package(about_resource='.', notice_file='sadasdasd')
         a.custom_fields['f'] = '1'
         expected = ['about_resource', 'notice_file'], ['f']
         assert expected == a.fields()
@@ -400,9 +400,9 @@ this software and releases the component to Public Domain.
 
 class SerializationTest(unittest.TestCase):
 
-    def test_About_dumps(self):
+    def test_Package_dumps(self):
         test_file = get_test_loc('test_model/dumps/about.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         assert [] == a.errors
 
         expected = '''about_resource: .
@@ -429,13 +429,13 @@ author:
   - Thomas Druez
 '''
 
-        expected = model.About.loads(expected)
-        result = model.About.loads(a.dumps())
+        expected = model.Package.loads(expected)
+        result = model.Package.loads(a.dumps())
         assert expected.to_dict() == result.to_dict()
 
-    def test_About_dumps_does_all_non_empty_present_fields(self):
+    def test_Package_dumps_does_all_non_empty_present_fields(self):
         test_file = get_test_loc('test_model/parse/complete2/about.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         assert [] == a.errors
 
         expected = '''about_resource: .
@@ -448,10 +448,10 @@ custom1: |
         result = a.dumps()
         assert expected == result
 
-    def test_About_is_not_created_with_invalid_flag_value(self):
+    def test_Package_is_not_created_with_invalid_flag_value(self):
         test_file = get_test_loc('test_model/parse/complete2/about2.ABOUT')
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except Exception as e:
             expected_error = (
@@ -461,9 +461,9 @@ custom1: |
             )
             assert expected_error == e.args
 
-    def test_About_dumps_all_non_empty_fields(self):
+    def test_Package_dumps_all_non_empty_fields(self):
         test_file = get_test_loc('test_model/parse/complete2/about.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         assert [] == a.errors
 
         expected = '''about_resource: .
@@ -476,9 +476,9 @@ custom1: |
         result = a.dumps()
         assert expected == result
 
-    def test_About_to_dict_contains_special_paths(self):
+    def test_Package_to_dict_contains_special_paths(self):
         test_file = get_test_loc('test_model/special/about.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         assert [] == sorted(a.errors)
 
         expected = get_test_loc('test_model/special/about-expected.json')
@@ -487,14 +487,14 @@ custom1: |
 
     def test_load_dump_is_idempotent(self):
         test_file = get_test_loc('test_model/this.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         expected = get_unicode_content(test_file).splitlines()
         result = a.dumps().splitlines()
         assert expected == result
 
     def test_load_can_load_unicode(self):
         test_file = get_test_loc('test_model/unicode/nose-selecttests.ABOUT')
-        a = model.About.load(test_file)
+        a = model.Package.load(test_file)
         a.check_files()
         errors = [
             Error(CRITICAL, 'File about_resource: "nose-selecttests-0.3.zip" does not exists'),
@@ -506,7 +506,7 @@ custom1: |
     def test_load_raise_exception_for_non_unicode(self):
         test_file = get_test_loc('test_model/unicode/not-unicode.ABOUT')
         try:
-            model.About.load(test_file)
+            model.Package.load(test_file)
             self.fail('Exception not raised')
         except UnicodeDecodeError:
             pass
@@ -537,7 +537,7 @@ custom1: |
             (u'custom1', u'some custom')]
         )
 
-        a = model.About.from_dict(test)
+        a = model.Package.from_dict(test)
         assert expected == a.to_dict()
 
     def test_load_dict_as_dict_is_idempotent_ignoring_special(self):
@@ -555,7 +555,7 @@ custom1: |
             'vcs_tool': 'git',
             'version': '0.11.0'}
 
-        a = model.About.from_dict(test)
+        a = model.Package.from_dict(test)
 
         expected = {
             'about_resource': '.',
@@ -596,7 +596,7 @@ custom1: |
             ('vcs_repository', 'https://github.com/dejacode/about-code-tool.git'),
             ('vcs_tool', 'git'),
         ])
-        about = model.About.from_dict(data)
+        about = model.Package.from_dict(data)
         assert data.items() == about.to_dict().items()
 
 

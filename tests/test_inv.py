@@ -88,11 +88,11 @@ def get_unicode_content(location):
         return doc.read()
 
 
-def fix_location(abouts, test_dir):
+def fix_location(packages, test_dir):
     """
     Fix the about.location by removing the `test_dir` from the path.
     """
-    for a in abouts:
+    for a in packages:
         loc = a.location.replace(test_dir, '').strip('/\\')
         a.location = to_posix(loc)
 
@@ -101,14 +101,14 @@ class InventoryTest(unittest.TestCase):
 
     def test_collect_inventory_return_errors(self):
         test_loc = get_test_loc('test_inv/collect_inventory_errors')
-        errors, _abouts = inv.collect_inventory(test_loc)
+        errors, _packages = inv.collect_inventory(test_loc)
         expected_errors = []
         assert expected_errors == errors
 
     @skipIf(on_windows and not py3, 'Windows support for long path requires https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation')
     def test_collect_inventory_with_long_path(self):
         test_loc = extract_test_loc('test_inv/longpath.zip')
-        _errors, abouts = inv.collect_inventory(test_loc)
+        _errors, packages = inv.collect_inventory(test_loc)
 
         expected_paths = [
             'longpath/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
@@ -122,62 +122,62 @@ class InventoryTest(unittest.TestCase):
             '/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1/longpath1'
             '/longpath1/supported_date_format.ABOUT'
         ]
-        fix_location(abouts, test_loc)
+        fix_location(packages, test_loc)
 
-        assert sorted(expected_paths) == sorted([a.location for a in abouts])
+        assert sorted(expected_paths) == sorted([a.location for a in packages])
 
         expected_name = ['distribute', 'date_test']
-        result_name = [a.name for a in abouts]
+        result_name = [a.name for a in packages]
         assert sorted(expected_name) == sorted(result_name)
 
     def test_collect_inventory_can_collect_a_single_file(self):
         test_loc = get_test_loc('test_inv/single_file/django_snippets_2413.ABOUT')
-        errors, abouts = inv.collect_inventory(test_loc)
+        errors, packages = inv.collect_inventory(test_loc)
         expected = []
         assert expected == errors
         expected_loc = get_test_loc('test_inv/single_file/django_snippets_2413.ABOUT-expected.json')
-        result = [a.to_dict(with_path=True) for a in abouts]
+        result = [a.to_dict(with_path=True) for a in packages]
         check_json(expected_loc, result, regen=False)
 
     def test_collect_inventory_return_no_warnings_and_model_can_use_relative_paths(self):
         test_loc = get_test_loc('test_inv/rel/allAboutInOneDir')
-        errors, _abouts = inv.collect_inventory(test_loc)
+        errors, _packages = inv.collect_inventory(test_loc)
         expected_errors = []
         result = [(e.severity, e.message) for e in errors if e.severity > INFO]
         assert expected_errors == result
 
     def test_collect_inventory_populate_about_file_path(self):
         test_loc = get_test_loc('test_inv/complete')
-        errors, abouts = inv.collect_inventory(test_loc)
+        errors, packages = inv.collect_inventory(test_loc)
         expected = []
         assert expected == errors
 
         expected = get_test_loc('test_inv/complete-expected.json')
-        result = [a.to_dict(with_path=True) for a in abouts]
+        result = [a.to_dict(with_path=True) for a in packages]
         check_json(expected, result)
 
     def test_collect_inventory_with_multi_line(self):
         test_loc = get_test_loc('test_inv/multi_line_license_expression.ABOUT')
-        errors, abouts = inv.collect_inventory(test_loc)
+        errors, packages = inv.collect_inventory(test_loc)
         assert [] == errors
         expected = [
             'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
             'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:apache-2.0']
-        results = [l.url for l in abouts[0].licenses]
+        results = [l.url for l in packages[0].licenses]
         assert expected == results
 
-        assert 'mit OR apache-2.0' == abouts[0].license_expression
+        assert 'mit OR apache-2.0' == packages[0].license_expression
 
     def test_collect_inventory_always_collects_custom_fields(self):
         test_loc = get_test_loc('test_inv/custom_fields.ABOUT')
-        errors, abouts = inv.collect_inventory(test_loc)
+        errors, packages = inv.collect_inventory(test_loc)
         expected = []
         assert expected == errors
-        assert {'custom_mapping': 'test', 'resource': '.'} == abouts[0].custom_fields
+        assert {'custom_mapping': 'test', 'resource': '.'} == packages[0].custom_fields
 
     def test_collect_inventory_does_not_raise_error_and_maintains_order_on_custom_fields(self):
         test_loc = get_test_loc('test_inv/custom_fields2.ABOUT')
-        errors, abouts = inv.collect_inventory(test_loc)
+        errors, packages = inv.collect_inventory(test_loc)
         expected_errors = []
         assert expected_errors == errors
 
@@ -186,7 +186,7 @@ class InventoryTest(unittest.TestCase):
             ('name', u'test'),
             (u'custom_mapping', u'test'),
             (u'resource', u'.')])]
-        assert expected == [a.to_dict() for a in abouts]
+        assert expected == [a.to_dict() for a in packages]
 
     def test_collect_inventory_works_with_relative_paths(self):
         # FIXME: This test need to be run under src/aboutcode/
@@ -197,24 +197,24 @@ class InventoryTest(unittest.TestCase):
         test_loc1 = test_loc + '/./'
         # Use '..' to go back to the parent directory
         test_loc2 = test_loc + '/../relative'
-        errors1, abouts1 = inv.collect_inventory(test_loc1)
+        errors1, packages1 = inv.collect_inventory(test_loc1)
         assert [] == errors1
         expected = get_test_loc('test_inv/relative-1-expected.json')
-        result = [a.to_dict() for a in abouts1]
+        result = [a.to_dict() for a in packages1]
         check_json(expected, result)
 
-        errors2, abouts2 = inv.collect_inventory(test_loc2)
+        errors2, packages2 = inv.collect_inventory(test_loc2)
         assert [] == errors2
         expected = get_test_loc('test_inv/relative-2-expected.json')
-        result = [a.to_dict() for a in abouts2]
+        result = [a.to_dict() for a in packages2]
         check_json(expected, result)
 
     def test_collect_inventory_basic_from_directory(self):
         test_dir = get_test_loc('test_inv/basic')
         result_file = get_temp_file()
-        errors, abouts = inv.collect_inventory(test_dir)
+        errors, packages = inv.collect_inventory(test_dir)
 
-        inv.save_as_csv(result_file, abouts)
+        inv.save_as_csv(result_file, packages)
         assert [] == errors
 
         expected = get_test_loc('test_inv/basic/expected.csv')
@@ -223,9 +223,9 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_with_about_resource_path_from_directory(self):
         test_dir = get_test_loc('test_inv/basic_with_about_resource_path')
         result_file = get_temp_file()
-        errors, abouts = inv.collect_inventory(test_dir)
+        errors, packages = inv.collect_inventory(test_dir)
 
-        inv.save_as_csv(result_file, abouts)
+        inv.save_as_csv(result_file, packages)
         expected_errors = []
         assert expected_errors == errors
         expected = get_test_loc('test_inv/basic_with_about_resource_path/expected.csv')
@@ -234,9 +234,9 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_is_empty_when_about_resource_is_missing(self):
         test_dir = get_test_loc('test_inv/no_about_resource_key')
         result_file = get_temp_file()
-        errors, abouts = inv.collect_inventory(test_dir)
+        errors, packages = inv.collect_inventory(test_dir)
 
-        inv.save_as_csv(result_file, abouts)
+        inv.save_as_csv(result_file, packages)
 
         expected_errors = [
             Error(CRITICAL,
@@ -250,10 +250,10 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_contains_only_about_with_about_resource(self):
         test_dir = get_test_loc('test_inv/some_missing_about_resource')
         result_file = get_temp_file()
-        errors, abouts = inv.collect_inventory(test_dir)
-        fix_location(abouts, test_dir)
+        errors, packages = inv.collect_inventory(test_dir)
+        fix_location(packages, test_dir)
 
-        inv.save_as_csv(result_file, abouts)
+        inv.save_as_csv(result_file, packages)
 
         expected_errors = [
             Error(CRITICAL,
@@ -267,9 +267,9 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_complex_from_directory(self):
         test_dir = get_test_loc('test_inv/complex')
         result_file = get_temp_file()
-        errors, abouts = inv.collect_inventory(test_dir)
+        errors, packages = inv.collect_inventory(test_dir)
 
-        inv.save_as_csv(result_file, abouts)
+        inv.save_as_csv(result_file, packages)
 
         assert all(e.severity == INFO for e in errors)
 
@@ -279,8 +279,8 @@ class InventoryTest(unittest.TestCase):
     def test_collect_inventory_does_not_damage_line_endings(self):
         test_dir = get_test_loc('test_inv/crlf')
         result_file = get_temp_file()
-        errors, abouts = inv.collect_inventory(test_dir)
-        errors2 = inv.save_as_csv(result_file, abouts)
+        errors, packages = inv.collect_inventory(test_dir)
+        errors2 = inv.save_as_csv(result_file, packages)
         errors.extend(errors2)
 
         assert all(e.severity == INFO for e in errors)
@@ -290,7 +290,7 @@ class InventoryTest(unittest.TestCase):
 
     def test_write_output_csv(self):
         test_file = get_test_loc('test_inv/this.ABOUT')
-        about = model.About.load(test_file)
+        about = model.Package.load(test_file)
 
         result_file = get_temp_file()
         inv.save_as_csv(result_file, [about])
@@ -300,7 +300,7 @@ class InventoryTest(unittest.TestCase):
 
     def test_write_output_json(self):
         test_file = get_test_loc('test_inv/this.ABOUT')
-        about = model.About.load(location=test_file)
+        about = model.Package.load(location=test_file)
         result_file = get_temp_file()
         inv.save_as_json(result_file, [about])
         expected = get_test_loc('test_inv/expected.json')

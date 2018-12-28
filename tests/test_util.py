@@ -294,7 +294,7 @@ description: sample
         results = util.unique(items)
         assert expected == results
 
-    def test_unique_can_handle_About_object(self):
+    def test_unique_can_handle_Package_object(self):
         test = {
             'about_resource': '.',
             'author': '',
@@ -307,10 +307,10 @@ description: sample
             'owner': 'nexB Inc.'
         }
 
-        a = model.About.from_dict(test)
-        c = model.About.from_dict(test)
-        b = model.About.from_dict(test)
+        a = model.Package.from_dict(test)
+        c = model.Package.from_dict(test)
+        b = model.Package.from_dict(test)
 
-        abouts = [a, b, c]
-        results = util.unique(abouts)
+        packages = [a, b, c]
+        results = util.unique(packages)
         assert [a] == results
