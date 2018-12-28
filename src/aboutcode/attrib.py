@@ -63,9 +63,11 @@ def create_attribution_text(abouts, template_text, variables=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template_text` template text and a `variables` optional dict of extra
-    variables.
+    variables. 
 
     Return a list of errors and the attribution text (or None).
+    
+    TODO: document data available to the template.
     """
     rendered = None
     errors = []
@@ -81,21 +83,41 @@ def create_attribution_text(abouts, template_text, variables=None):
     common_licenses_in_use = sorted(
         lic for key, lic in licenses_by_key.items() if key in COMMON_LICENSES)
 
+    # compute unique About objects
+    unique_packages = sorted({about.hashable(): about for about in abouts}.values())
+
+    abouts = sorted(abouts)
+
     try:
-        # Get the current UTC time
-        utcnow = datetime.datetime.utcnow()
         rendered = template.render(
-            utcnow=utcnow,
+            # the current UTC time
+            utcnow=datetime.datetime.utcnow(),
+            # variables from CLI vartext option
             variables=variables,
-            # legacy for compatibility
-            vartext=variables,
-            abouts=sorted(abouts),
+            # a list of all packages objects
+
+            packages=abouts,
+            # a list of unique packages
+            unique_packages=unique_packages,
+
+            # list of common licenses keys
             common_licenses=COMMON_LICENSES,
+            # sorted list of common License object actually used across all packages
             common_licenses_in_use=common_licenses_in_use,
+
+            ############################
+            # legacy data for backward compatibility
+            ############################
+            # prefer using variables
+            vartext=variables,
+            # a list of all about objects: use packages instead
+            abouts=abouts,
+            ############################
         )
 
     except Exception as e:
-        err = str(e)
+        import traceback
+        err = str(e) + '\n' + traceback.format_exc()
         error = Error(CRITICAL, 'Template processing error: {}'.format(err))
         errors.append(error)
 
