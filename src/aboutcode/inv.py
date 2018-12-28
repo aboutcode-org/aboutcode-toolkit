@@ -75,17 +75,17 @@ def collect_inventory(location, check_files=False):
             locs_and_relpaths = get_relative_paths_and_locations(about_locations, input_location)
 
         for about_file_loc, about_file_path in locs_and_relpaths :
-            about = None
+            package = None
             try:
-                about = Package.load(about_file_loc)
-                about.about_file_path = about_file_path
-                packages.append(about)
+                package = Package.load(about_file_loc)
+                package.about_file_path = about_file_path
+                packages.append(package)
 
                 if check_files:
-                    about.check_files()
+                    package.check_files()
 
                 # this could be a dict keys by path to keep per-path things?
-                errors.extend(about.errors)
+                errors.extend(package.errors)
 
             except Exception as exce:
                 if all(isinstance(e, Error) for e in exce.args):
@@ -96,13 +96,13 @@ def collect_inventory(location, check_files=False):
                 else:
                     errors.append(Error(
                         CRITICAL,
-                        str(exce) + '\n' + traceback.format_exc()),
+                        str(exce) + '\n' + traceback.format_exc(),
                         path=about_file_path
-                    )
+                    ))
 
-            if about:
+            if package:
                 # Insert path reference in every Package error
-                for err in about.errors:
+                for err in package.errors:
                     if not err.path:
                         err.path = about_file_path
 

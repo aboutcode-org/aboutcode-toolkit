@@ -156,13 +156,13 @@ def fetch_licenses(packages, api_url, api_key, verbose=False):
     # collect unique license keys
     license_keys = set()
     licensing = Licensing()
-    for about in packages:
-        if not about.license_expression:
+    for package in packages:
+        if not package.license_expression:
             # TODO: we should have a check for this
             continue
-        about_keys = licensing.license_keys(
-            about.license_expression, unique=True, simple=True)
-        license_keys.update(about_keys)
+        package_license_keys = licensing.license_keys(
+            package.license_expression, unique=True, simple=True)
+        license_keys.update(package_license_keys)
 
     licenses_by_key = {}
 

@@ -17,25 +17,25 @@
     </div>
     <!-- table of contents listing every entry -->    
     <div class="oss-table-of-contents">
-        {% for about in packages -%}
-            <p><a href="#package_{{ loop.index0 }}">{{ about.name }} {{ about.version or '' }}</a></p>
+        {% for package in packages -%}
+            <p><a href="#package_{{ loop.index0 }}">{{ package.name }} {{ package.version or '' }}</a></p>
         {% endfor %}
     </div>
     <hr/>
 
     <!-- list of attribution notice, copyright, licenses -->    
-    {% for about in packages -%}
+    {% for package in packages -%}
     <div class="oss-package" id="package_{{ loop.index0 }}">
-        <h3 class="package-name">{{ about.name }} {{ about.version or '' }}</h3>
-        {% if about.license_expression -%}
-            <p>This package is licensed under: <b>{{ about.license_expression }}</b></p>
+        <h3 class="package-name">{{ package.name }} {{ package.version or '' }}</h3>
+        {% if package.license_expression -%}
+            <p>This package is licensed under: <b>{{ package.license_expression }}</b></p>
         {%- endif %}
-        {% if about.copyright -%}
-            <pre>{{ about.copyright}}</pre>
+        {% if package.copyright -%}
+            <pre>{{ package.copyright}}</pre>
         {%- endif %}
-        {% if about.notice_text -%}
-            <pre class="package-notice">{{ about.notice_text}}</pre>
-        {%- endif %}{% for license in about.licenses -%}
+        {% if package.notice_text -%}
+            <pre class="package-notice">{{ package.notice_text}}</pre>
+        {%- endif %}{% for license in package.licenses -%}
             {% if license.key in common_licenses -%}
             <p>Full text of <a class="{{ license.key }}" href="#package-license-{{ license.key }}">{{ license.key }} - {{ license.name }}</a> is available at the end of this document.</p>
             {% else -%}

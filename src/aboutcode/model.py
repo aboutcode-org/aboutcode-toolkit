@@ -520,10 +520,10 @@ class Package(object):
 
         with io.open(loc, encoding='utf-8') as inp:
             text = inp.read()
-        about = cls.loads(text)
-        if about:
-            about.location = location
-            return about
+        package = cls.loads(text)
+        if package:
+            package.location = location
+            return package
 
     @classmethod
     def loads(cls, text):

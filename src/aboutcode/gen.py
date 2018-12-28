@@ -32,21 +32,23 @@ from aboutcode.util import csv
 from aboutcode.util import unique
 
 
-def check_duplicated_about_file_path(inventory_dict):
+def check_duplicated_about_file_path(inventory):
     """
-    Return a list of errors for duplicated about_file_path in a CSV file at location.
+    Return a list of errors for duplicated about_file_path in the `inventory`
+    list of data mappings.
     """
-    afp_list = []
+    unique_afps = set()
     errors = []
-    for component in inventory_dict:
+    for item in inventory:
+        afp = item.get('about_file_path')
         # Ignore all the empty path
-        if component['about_file_path']:
-            if component['about_file_path'] in afp_list:
-                msg = ("The input has duplicated values in 'about_file_path' "
-                       "field: " + component['about_file_path'])
-                errors.append(Error(CRITICAL, msg))
-            else:
-                afp_list.append(component['about_file_path'])
+        if not afp:
+            continue
+        if afp in unique_afps:
+            msg = "The input has duplicated values in 'about_file_path' field: {}".format(afp)
+            errors.append(Error(CRITICAL, msg))
+        else:
+            unique_afps.add(afp)
     return errors
 
 
@@ -63,7 +65,9 @@ def load_inventory(location, base_dir=None):
     elif location.endswith('.json'):
         inventory = load_json(location)
     else:
-        err = Error(CRITICAL, 'Unsupported inventory file type. Must be one of .csv or .json')
+        err = Error(
+            CRITICAL,
+            'Unsupported inventory file type. Must be one of .csv or .json')
         return [err], []
 
     inventory = list(inventory)
@@ -76,7 +80,8 @@ def load_inventory(location, base_dir=None):
     # validate field names
     sample = dict(inventory[0])
     standard_fields, custom_fields = model.split_fields(sample)
-    fields_err = model.validate_field_names(standard_fields.keys(), custom_fields.keys())
+    fields_err = model.validate_field_names(
+        standard_fields.keys(), custom_fields.keys())
     if fields_err:
         return fields_err, packages
 
@@ -110,10 +115,10 @@ def load_inventory(location, base_dir=None):
             continue
 
         try:
-            about = model.Package.from_dict(entry)
+            package = model.Package.from_dict(entry)
             if base_dir:
-                about.location = os.path.join(base_dir, about_file_path)
-            packages.append(about)
+                package.location = os.path.join(base_dir, about_file_path)
+            packages.append(package)
         except Exception as e:
             if len(e.args) == 1 and isinstance(e.args[0], Error):
                 err = e.args[0]
@@ -222,18 +227,18 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
     # TODO: validate inventory!!!!! to catch error before creating ABOUT files
 
     # update all licenses and notices
-    for about in packages:
+    for package in packages:
         # Fix the location to ensure this is a proper .ABOUT file
-        loc = about.location
+        loc = package.location
         if not loc.endswith('.ABOUT'):
             loc = loc.rstrip('\\/').strip() + '.ABOUT'
-        about.location = loc
+        package.location = loc
 
         # used as a "prettier" display of .ABOUT file path
         about_path = loc.replace(target_dir, '').strip('/')
 
         # Update the License objects of this Package using a mapping of reference licenses as {key: License}
-        for license in about.licenses:  # NOQA
+        for license in package.licenses:  # NOQA
             ref_lic = licenses_by_key.get(license.key)
             if not ref_lic:
                 msg = (
@@ -244,17 +249,17 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
 
             license.update(ref_lic)
 
-        if about.notice_file:
-            notice_text = notices_by_filename.get(about.notice_file)
+        if package.notice_file:
+            notice_text = notices_by_filename.get(package.notice_file)
             if not notice_text:
                 msg = (
                     'Cannot generate valid .ABOUT file for: "{}". '
-                    'Empty or missing notice_file: {}'.format(about_path, about.notice_file))
+                    'Empty or missing notice_file: {}'.format(about_path, package.notice_file))
                 errors.append(Error(ERROR, msg))
             else:
-                about.notice_text = notice_text
+                package.notice_text = notice_text
 
         # create the files proper
-        about.dump(location=about.location, with_files=True)
+        package.dump(location=package.location, with_files=True)
 
     return unique(errors), packages

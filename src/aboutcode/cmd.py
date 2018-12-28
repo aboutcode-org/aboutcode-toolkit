@@ -437,8 +437,8 @@ OUTPUT: Path where to write the attribution document.
         errors, packages = collect_inventory(location)
 
         # load all files
-        for about in packages:
-            about.load_files()
+        for package in packages:
+            package.load_files()
 
         attrib_errors = generate_attribution_doc(
             packages=packages,

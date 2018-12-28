@@ -63,10 +63,10 @@ def create_attribution_text(packages, template_text, variables=None):
     """
     Generate an attribution text from an `packages` list of Package objects, a
     `template_text` template text and a `variables` optional dict of extra
-    variables. 
+    variables.
 
     Return a list of errors and the attribution text (or None).
-    
+
     TODO: document data available to the template.
     """
     rendered = None
@@ -75,8 +75,8 @@ def create_attribution_text(packages, template_text, variables=None):
     template = jinja2.Template(template_text, autoescape=True)
 
     licenses_by_key = {}
-    for about in packages:
-        for license in about.licenses:  # NOQA
+    for package in packages:
+        for license in package.licenses:  # NOQA
             licenses_by_key[license.key] = license
 
     # a sorted common licenses list in use for reporting
@@ -84,7 +84,7 @@ def create_attribution_text(packages, template_text, variables=None):
         lic for key, lic in licenses_by_key.items() if key in COMMON_LICENSES)
 
     # compute unique Package objects
-    unique_packages = sorted({about.hashable(): about for about in packages}.values())
+    unique_packages = sorted({package.hashable(): package for package in packages}.values())
 
     packages = sorted(packages)
 
@@ -110,7 +110,7 @@ def create_attribution_text(packages, template_text, variables=None):
             ############################
             # prefer using variables
             vartext=variables,
-            # a list of all about objects: use packages instead
+            # a list of all package objects: use packages instead
             abouts=packages,
             ############################
         )

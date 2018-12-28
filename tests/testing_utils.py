@@ -149,13 +149,13 @@ def run_about_command_test(options, expected_rc=0):
     root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     about_cmd = os.path.join(root_dir, 'about')
     args = [about_cmd] + options
-    about = subprocess.Popen(
+    runner = subprocess.Popen(
         args,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         shell=True if on_windows else False)
-    stdout, stderr = about.communicate()
-    rc = about.poll()
+    stdout, stderr = runner.communicate()
+    rc = runner.poll()
     if rc != expected_rc:
         opts = ' '.join(args)
         error = (

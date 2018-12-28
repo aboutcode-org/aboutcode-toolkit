@@ -239,13 +239,13 @@ class PackageTest(unittest.TestCase):
 
     def test_Package_has_errors_when_about_resource_does_not_exist(self):
         test_file = get_test_loc('test_model/parser_tests/missing_about_ref.ABOUT')
-        about = model.Package.load(test_file)
-        about.check_files()
+        package = model.Package.load(test_file)
+        package.check_files()
 
         expected = [
             Error(CRITICAL, 'File about_resource: "about_file_missing.c" does not exists')
         ]
-        assert expected == about.errors
+        assert expected == package.errors
 
     def test_Package_raise_exception_when_missing_required_fields_are_missing(self):
         test_file = get_test_loc('test_model/parse/missing_required.ABOUT')
@@ -301,22 +301,22 @@ class PackageTest(unittest.TestCase):
 
     def test_Package_has_info_for_custom_field_name(self):
         test_file = get_test_loc('test_model/parse/illegal_custom_field.about')
-        about = model.Package.load(test_file)
-        assert [] == about.errors
+        package = model.Package.load(test_file)
+        assert [] == package.errors
 
     def test_Package_check_files_collect_errors_if_path_missing(self):
         test_file = get_test_loc('test_model/parse/missing_notice_license_files.ABOUT')
-        about = model.Package.load(test_file)
+        package = model.Package.load(test_file)
 
-        about.check_files()
+        package.check_files()
 
         expected_errors = [
             Error(CRITICAL, 'File notice_file: "test.NOTICE" does not exists'),
             Error(CRITICAL, 'License file: "test.LICENSE" does not exists'),
         ]
-        assert expected_errors == about.errors
+        assert expected_errors == package.errors
 
-        assert 'test.NOTICE' == about.notice_file
+        assert 'test.NOTICE' == package.notice_file
 
     def test_Package_notice_and_license_text_are_loaded_from_file(self):
         test_file = get_test_loc('test_model/parse/license_file_notice_file.ABOUT')
@@ -383,13 +383,13 @@ this software and releases the component to Public Domain.
 
     def test_Package_are_not_equal_with_small_text_differences(self):
         test_file = get_test_loc('test_model/equal/complete/about.ABOUT')
-        about = model.Package.load(location=test_file)
+        package = model.Package.load(location=test_file)
 
         test_file2 = get_test_loc('test_model/equal/complete2/about.ABOUT')
-        about2 = model.Package.load(test_file2)
+        package2 = model.Package.load(test_file2)
 
-        assert about.dumps() != about2.dumps()
-        assert about != about2
+        assert package.dumps() != package2.dumps()
+        assert package != package2
 
     def test_get_field_names_only_returns_non_empties(self):
         a = model.Package(about_resource='.', notice_file='sadasdasd')
@@ -596,8 +596,8 @@ custom1: |
             ('vcs_repository', 'https://github.com/dejacode/about-code-tool.git'),
             ('vcs_tool', 'git'),
         ])
-        about = model.Package.from_dict(data)
-        assert data.items() == about.to_dict().items()
+        package = model.Package.from_dict(data)
+        assert data.items() == package.to_dict().items()
 
 
 class ReferenceTest(unittest.TestCase):

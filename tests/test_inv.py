@@ -90,7 +90,7 @@ def get_unicode_content(location):
 
 def fix_location(packages, test_dir):
     """
-    Fix the about.location by removing the `test_dir` from the path.
+    Fix the package.location by removing the `test_dir` from the path.
     """
     for a in packages:
         loc = a.location.replace(test_dir, '').strip('/\\')
@@ -290,19 +290,17 @@ class InventoryTest(unittest.TestCase):
 
     def test_write_output_csv(self):
         test_file = get_test_loc('test_inv/this.ABOUT')
-        about = model.Package.load(test_file)
-
+        package = model.Package.load(test_file)
         result_file = get_temp_file()
-        inv.save_as_csv(result_file, [about])
-
+        inv.save_as_csv(result_file, [package])
         expected = get_test_loc('test_inv/expected.csv')
         check_csv(expected, result_file)
 
     def test_write_output_json(self):
         test_file = get_test_loc('test_inv/this.ABOUT')
-        about = model.Package.load(location=test_file)
+        package = model.Package.load(location=test_file)
         result_file = get_temp_file()
-        inv.save_as_json(result_file, [about])
+        inv.save_as_json(result_file, [package])
         expected = get_test_loc('test_inv/expected.json')
         check_json(expected, result_file)
 

@@ -68,7 +68,7 @@ class Error(object):
     severity = attr.attrib()
     message = attr.attrib(converter=message_converter)
     # relative POSIX path of the ABOUT file
-    path = attr.attrib(default=None)#, repr=False)
+    path = attr.attrib(default=None)  # , repr=False)
 
     def _get_values(self):
         sev = severities[self.severity]

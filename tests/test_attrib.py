@@ -36,9 +36,9 @@ class TemplateTest(unittest.TestCase):
 
     def test_check_template_with_complex_valid_template_returns_None(self):
         template = '''
-        {% for about in packages -%}
-            {{ about.name.value }}: {{ about.version.value }}
-            {% for res in about.about_resource.value -%}
+        {% for package in packages -%}
+            {{ package.name.value }}: {{ package.version.value }}
+            {% for res in package.about_resource.value -%}
                 resource: {{ res }}
             {% endfor -%}
         {% endfor -%}'''
@@ -47,9 +47,9 @@ class TemplateTest(unittest.TestCase):
 
     def test_check_template_with_complex_invalid_template_returns_error(self):
         template = '''
-        {% for about in packages -%}
-            {{ about.name.value }}: {{ about.version.value }}
-            {% for res in about.about_ressdsdsdsdsdsdource.value -%}
+        {% for package in packages -%}
+            {{ package.name.value }}: {{ package.version.value }}
+            {% for res in package.about_ressdsdsdsdsdsdource.value -%}
                 resource: {{] res }}
             {% endfor -%}
         {% endfor -%}'''
@@ -74,7 +74,7 @@ class GenerateTest(unittest.TestCase):
     def test_generate_from_collected_inventory_wih_custom_template(self):
         test_file = get_test_loc('test_attrib/gen_simple/attrib.ABOUT')
         errors, packages = inv.collect_inventory(test_file)
-        assert not errors
+        assert [] == errors
 
         test_template = get_test_loc('test_attrib/gen_simple/test.template')
         with open(test_template) as tmpl:
