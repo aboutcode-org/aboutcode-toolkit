@@ -483,16 +483,6 @@ class About(object):
     # list of Error object
     errors = attr.attrib(default=attr.Factory(list), repr=False)
 
-    # these fields are excluded from a to_dict() serialization
-    _excluded_fields = set([
-        'location',
-        'errors',
-        'custom_fields',
-        'notice_text',
-        # this is for the licenses.text attribute
-        'text',
-    ])
-
     def __attrs_post_init__(self, *args, **kwargs):
         # populate licenses from expression
         if self.license_expression and not self.licenses:
@@ -544,12 +534,22 @@ class About(object):
         data = saneyaml.load(text, allow_duplicate_keys=False)
         return cls.from_dict(data)
 
-    def to_dict(self, with_licenses=True, with_path=False):
+    # these fields are excluded from a to_dict() serialization
+    _excluded_fields = set([
+        'location',
+        'errors',
+        'custom_fields',
+        'notice_text',
+        # this is for the licenses.text attribute
+        'text',
+    ])
+
+    def to_dict(self, with_licenses=True, with_path=False, excluded_fields=_excluded_fields):
         """
         Return an OrderedDict of About data (excluding texts and ABOUT file path).
         Fields with empty values are not included.
         """
-        excluded_fields = set(self._excluded_fields)
+        excluded_fields = set(excluded_fields)
         if not with_licenses:
             excluded_fields.add('licenses')
         if not with_path:
@@ -568,6 +568,17 @@ class About(object):
                 data[key] = value
 
         return data
+
+    def hashable(self):
+        """
+        Return a hashable data representing this object and that is usable for
+        comparison and unicity checks. The about_resource filed is ignored and
+        not included. All texts are included if present.
+        """
+        excluded_fields = set([
+            'location', 'errors', 'custom_fields',
+            'about_file_path', 'about_resource'])
+        return repr(tuple(self.to_dict(excluded_fields=excluded_fields).items()))
 
     def dumps(self):
         """
@@ -617,6 +628,14 @@ class About(object):
 
         return standard, custom
 
+    def field_names(self):
+        """
+        Return a list of all field names in use in this object.
+        """
+        standard = list(attr.fields_dict(self.__class__).keys())
+        custom = [k for k, v in self.custom_fields.items() if v]
+        return standard + custom
+
     def write_files(self, base_dir=None):
         """
         Write all referenced license and notice files.
@@ -637,14 +656,6 @@ class About(object):
 
         for license in self.licenses:  # NOQA
             _write(license.text, license.file_loc(base_dir))
-
-    def field_names(self):
-        """
-        Return a list of all field names in use in this object.
-        """
-        standard = list(attr.fields_dict(self.__class__).keys())
-        custom = [k for k, v in self.custom_fields.items() if v]
-        return standard + custom
 
     def about_resource_loc(self, base_dir=None):
         """
