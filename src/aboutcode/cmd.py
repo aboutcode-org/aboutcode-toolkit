@@ -321,11 +321,12 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 def fetch_licenses(location, output, api_key, api_url, quiet, verbose):  # NOQA
     """
 Load inventory from LOCATION then fetch license texts and data referenced in
-this inventory from a remote DejaCode License Library API and finally save the
+this inventory from a remote DejaCode License Library API and save the license
+texts and data in the OUTPUT directory.
 
 LOCATION: Path to a JSON or CSV inventory file.
 
-OUTPUT: Path where to save the retrieved license data and textx..
+OUTPUT: Path where to save the fetched reference license data and texts.
     """
     from aboutcode import api
     from aboutcode import gen
