@@ -90,11 +90,11 @@ def get_unicode_content(location):
 
 def fix_location(packages, test_dir):
     """
-    Fix the package.location by removing the `test_dir` from the path.
+    Fix the package.about_file_location by removing the `test_dir` from the path.
     """
     for a in packages:
-        loc = a.location.replace(test_dir, '').strip('/\\')
-        a.location = to_posix(loc)
+        loc = a.about_file_location.replace(test_dir, '').strip('/\\')
+        a.about_file_location = to_posix(loc)
 
 
 class InventoryTest(unittest.TestCase):
@@ -124,7 +124,7 @@ class InventoryTest(unittest.TestCase):
         ]
         fix_location(packages, test_loc)
 
-        assert sorted(expected_paths) == sorted([a.location for a in packages])
+        assert sorted(expected_paths) == sorted([a.about_file_location for a in packages])
 
         expected_name = ['distribute', 'date_test']
         result_name = [a.name for a in packages]
@@ -298,7 +298,7 @@ class InventoryTest(unittest.TestCase):
 
     def test_write_output_json(self):
         test_file = get_test_loc('test_inv/this.ABOUT')
-        package = model.Package.load(location=test_file)
+        package = model.Package.load(about_file_location=test_file)
         result_file = get_temp_file()
         inv.save_as_json(result_file, [package])
         expected = get_test_loc('test_inv/expected.json')

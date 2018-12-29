@@ -115,10 +115,9 @@ def load_inventory(location, base_dir=None):
             continue
 
         try:
-            package = model.Package.from_dict(entry)
             if base_dir:
-                package.location = os.path.join(base_dir, about_file_path)
-            packages.append(package)
+                entry['about_file_location'] = os.path.join(base_dir, about_file_path)
+            packages.append(model.Package.from_dict(entry))
         except Exception as e:
             if len(e.args) == 1 and isinstance(e.args[0], Error):
                 err = e.args[0]
@@ -229,10 +228,10 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
     # update all licenses and notices
     for package in packages:
         # Fix the location to ensure this is a proper .ABOUT file
-        loc = package.location
+        loc = package.about_file_location
         if not loc.endswith('.ABOUT'):
             loc = loc.rstrip('\\/').strip() + '.ABOUT'
-        package.location = loc
+        package.about_file_location = loc
 
         # used as a "prettier" display of .ABOUT file path
         about_path = loc.replace(target_dir, '').strip('/')
@@ -260,6 +259,6 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
                 package.notice_text = notice_text
 
         # create the files proper
-        package.dump(location=package.location, with_files=True)
+        package.dump(location=package.about_file_location, with_files=True)
 
     return unique(errors), packages

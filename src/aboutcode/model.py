@@ -283,6 +283,10 @@ class License(object):
         if not self.file:
             self.file = self.default_file_name
 
+    @property
+    def default_file_name(self):
+        return self.key + '.LICENSE'
+
     def to_dict(self):
         """
         Return an OrderedDict of license data (excluding texts).
@@ -325,10 +329,6 @@ class License(object):
             name=data.get('name'),
             file=data.get('file'),
             url=data.get('url'))
-
-    @property
-    def default_file_name(self):
-        return self.key + '.LICENSE'
 
     def file_loc(self, base_dir):
         fn = self.file or self.default_file_name
@@ -422,7 +422,7 @@ class Package(object):
     """
 
     # the absolute location where the ABOUT file is stored
-    location = string_attrib(cmp=False)
+    about_file_location = string_attrib(cmp=False)
 
     # a relative posix path where the ABOUT file is stored
     about_file_path = string_attrib(cmp=False)
@@ -488,6 +488,10 @@ class Package(object):
             licenses = [License(key=key) for key in keys]
             self.licenses = licenses
 
+    @property
+    def base_dir(self):
+        return os.path.dirname(self.about_file_location)
+
     @classmethod
     def from_dict(cls, data):
         """
@@ -497,8 +501,7 @@ class Package(object):
         standard_fields, custom_fields = split_fields(data, skip_empty=True)
         standard_fields.pop('errors', None)
 
-        errors = validate_field_names(
-            standard_fields.keys(), custom_fields.keys())
+        errors = validate_field_names(standard_fields.keys(), custom_fields.keys())
         if errors:
             raise Exception(*errors)
 
@@ -507,33 +510,33 @@ class Package(object):
         return Package(licenses=licenses, custom_fields=custom_fields, **standard_fields)
 
     @classmethod
-    def load(cls, location):
+    def load(cls, about_file_location):
         """
-        Return a Package object built from the YAML file at `location` or None.
-        Raise Exception on non-recoverable errors.
+        Return a Package object built from the YAML file at
+        `about_file_location` or None. Raise Exception on errors.
         """
         # TODO: expand/resolve/abs/etc
-        loc = util.to_posix(location)
+        about_file_location = util.to_posix(about_file_location)
 
-        with io.open(loc, encoding='utf-8') as inp:
+        with io.open(about_file_location, encoding='utf-8') as inp:
             text = inp.read()
-        package = cls.loads(text)
-        if package:
-            package.location = location
-            return package
+
+        data = saneyaml.load(text, allow_duplicate_keys=False)
+        data['about_file_location'] = about_file_location
+        return cls.from_dict(data)
 
     @classmethod
     def loads(cls, text):
         """
         Return a Package object built from a YAML `text` or None.
-        Raise Exception on non-recoverable errors.
+        Raise Exception on errors.
         """
         data = saneyaml.load(text, allow_duplicate_keys=False)
         return cls.from_dict(data)
 
     # these fields are excluded from a to_dict() serialization
     _excluded_fields = set([
-        'location',
+        'about_file_location',
         'errors',
         'custom_fields',
         'notice_text',
@@ -637,7 +640,7 @@ class Package(object):
         """
         Write all referenced license and notice files.
         """
-        base_dir = base_dir or os.path.dirname(self.location)
+        base_dir = base_dir or self.base_dir
 
         def _write(text, target_loc):
             if target_loc:
@@ -658,35 +661,35 @@ class Package(object):
         """
         Return the location to the about_resource.
         """
-        base_dir = base_dir or os.path.dirname(self.location)
+        base_dir = base_dir or self.base_dir
         return self.about_resource and os.path.join(base_dir, self.about_resource)
 
     def notice_file_loc(self, base_dir=None):
         """
         Return the location to the notice_file or None.
         """
-        base_dir = base_dir or os.path.dirname(self.location)
+        base_dir = base_dir or self.base_dir
         return self.notice_file and os.path.join(base_dir, self.notice_file)
 
     def changelog_file_loc(self, base_dir=None):
         """
         Return the location to the changelog_file or None.
         """
-        base_dir = base_dir or os.path.dirname(self.location)
+        base_dir = base_dir or self.base_dir
         return self.changelog_file and os.path.join(base_dir, self.changelog_file)
 
     def check_files(self, base_dir=None):
         """
         Check that referenced files exist. Update and return self.errors.
         """
-        if self.location and not os.path.exists(self.location):
-            msg = 'ABOUT file location: {} does not exists.'.format(self.location)
+        if self.about_file_location and not os.path.exists(self.about_file_location ):
+            msg = 'ABOUT file: {} does not exists.'.format(self.about_file_location )
             self.errors.append(Error(CRITICAL, msg))
 
-        base_dir = base_dir or os.path.dirname(self.location)
+        base_dir = base_dir or self.base_dir
 
         if not os.path.exists(base_dir):
-            msg = 'base_dir: {} does not exists: unable to check files existence.'.format(base_dir)
+            msg = 'Base directory: {} does not exists: unable to check files existence.'.format(base_dir)
             self.errors.append(Error(CRITICAL, msg))
             return
 
@@ -717,7 +720,7 @@ class Package(object):
         """
         Load all referenced license and notice texts. Return a list of errors.
         """
-        base_dir = base_dir or os.path.dirname(self.location)
+        base_dir = base_dir or self.base_dir
         errors = []
 
         def _load_text(loc):

@@ -27,6 +27,7 @@ from aboutcode import Error
 from aboutcode import util
 from aboutcode import model
 from aboutcode.util import python2
+from aboutcode import CRITICAL
 
 if python2:  # pragma: nocover
     from urllib2 import HTTPError  # NOQA
@@ -59,14 +60,8 @@ def request_license_data(api_url, api_key, license_key):
     Return a tuple of (dictionary of license data, list of errors) given a
     `license_key`. Send a request to `api_url` authenticating with `api_key`.
     """
-    headers = {
-        'Authorization': 'Token %s' % api_key,
-    }
-    payload = {
-        'api_key': api_key,
-        'key': license_key,
-        'format': 'json'
-    }
+    headers = {'Authorization': 'Token %s' % api_key}
+    payload = {'api_key': api_key, 'key': license_key, 'format': 'json'}
 
     api_url = api_url.rstrip('/')
     payload = urlencode(payload)
@@ -118,19 +113,20 @@ def get_license_details(api_url, api_key, license_key):
     authenticating with `api_key`.
     """
     license_data, errors = request_license_data(api_url, api_key, license_key)
-    if 'key' in license_data:
+    lic = None
+    key = license_data.get('key')
+    if key:
+        is_active = license_data.get('is_active', False)
+        if not is_active:
+            errors.append(Error(CRITICAL, 'License key is NOT active: {}'))
+
+        name = license_data.get('name')
+        text = license_data.get('full_text')
         dje_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(api_url))
         dje_license_url = urljoin(dje_domain, 'urn/?urn=urn:dje:license:{license_key}')
         url = dje_license_url.format(license_key=license_key)
 
-        lic = model.License(
-            key=license_data['key'],
-            name=license_data.get('name'),
-            text=license_data.get('full_text'),
-            url=url,
-        )
-    else:
-        lic = None
+        lic = model.License(key=key, name=name, text=text, url=url)
     return lic, errors
 
 

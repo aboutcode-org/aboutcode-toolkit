@@ -98,7 +98,7 @@ class GenTest(unittest.TestCase):
         expected = [OrderedDict([('about_resource', u'.'), ('name', u'AboutCode'), ('version', u'0.11.0')])]
         assert expected == [a.to_dict() for a in packages]
 
-        generated_about_loc = packages[0].location
+        generated_about_loc = packages[0].about_file_location
         assert generated_about_loc.endswith('ABOUT')
         about_file = model.Package.load(generated_about_loc)
         expected = OrderedDict([('about_resource', u'.'), ('name', u'AboutCode'), ('version', u'0.11.0')])

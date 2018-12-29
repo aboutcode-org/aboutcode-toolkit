@@ -373,7 +373,7 @@ this software and releases the component to Public Domain.
         assert [] == a.errors
 
         expected = 'test_model/serialize/about.ABOUT'
-        assert a.location.endswith(expected)
+        assert a.about_file_location.endswith(expected)
 
     def test_Package_equals(self):
         test_file = get_test_loc('test_model/equal/complete/about.ABOUT')
@@ -383,7 +383,7 @@ this software and releases the component to Public Domain.
 
     def test_Package_are_not_equal_with_small_text_differences(self):
         test_file = get_test_loc('test_model/equal/complete/about.ABOUT')
-        package = model.Package.load(location=test_file)
+        package = model.Package.load(about_file_location=test_file)
 
         test_file2 = get_test_loc('test_model/equal/complete2/about.ABOUT')
         package2 = model.Package.load(test_file2)
