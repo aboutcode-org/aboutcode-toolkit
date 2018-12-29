@@ -29,6 +29,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
+from functools import partial
 import io
 import os
 import re
@@ -148,12 +149,14 @@ def validate_flag_field(about_obj, attribute, value):
 
 
 def copyright_converter(value):
+    value = string_cleaner(value)
     if value:
         value = '\n'.join(v.strip() for v in value.splitlines(False)).strip()
     return value
 
 
 def path_converter(value):
+    value = string_cleaner(value)
     if value and isinstance(value, str):
         value = util.to_posix(value).strip().strip('/')
     return value
@@ -172,6 +175,7 @@ def license_expression_converter(value):
     """
     Validate and normalize the license expression.
     """
+    value = string_cleaner(value)
     if value:
         licensing = Licensing()
         expression = licensing.parse(value, simple=True)
@@ -252,17 +256,28 @@ def validate_field_names(standard_field_names, custom_field_names, for_gen=False
 # Models proper
 ################################################################################
 
+
+# shorthand for attributes
+optional_attrib = partial(attr.attrib, default=None)
+non_repr_attrib = partial(optional_attrib, repr=False)
+
+string_attrib = partial(non_repr_attrib, type=str, converter=string_cleaner)
+path_attrib = partial(non_repr_attrib, type=str, converter=path_converter)
+bool_attrib = partial(non_repr_attrib, default=False, type=bool,
+    validator=validate_flag_field, converter=boolean_converter)
+
+
 @attr.attributes
 class License(object):
     """
     A license object
     """
     # POSIX path relative to the ABOUT file location where the text file lives
-    key = attr.attrib(converter=string_cleaner)
-    name = attr.attrib(default=None, converter=string_cleaner)
-    file = attr.attrib(default=None, repr=False, converter=path_converter)
-    url = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    text = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    key = string_attrib(repr=True)
+    name = string_attrib()
+    file = path_attrib(default=None)
+    url = string_attrib()
+    text = string_attrib(cmp=False)
 
     def __attrs_post_init__(self, *args, **kwargs):
         if not self.file:
@@ -400,88 +415,70 @@ def get_reference_licenses(reference_dir):
     return notices_by_name, licenses_by_key
 
 
-@attr.attributes
+@attr.attributes(slots=True)
 class Package(object):
     """
     A package object
     """
-    # the absolute location where this is stored
-    location = attr.attrib(default=None, repr=False)
 
-    # a relative posix path where this file is stored
-    about_file_path = attr.attrib(default=None, repr=False)
+    # the absolute location where the ABOUT file is stored
+    location = string_attrib(cmp=False)
+
+    # a relative posix path where the ABOUT file is stored
+    about_file_path = string_attrib(cmp=False)
 
     # this is a path relative to the ABOUT file location
-    about_resource = attr.attrib(default=None,
-        converter=path_converter, validator=about_resource_validator)
-
     # everything else is optional
+    about_resource = path_attrib(repr=True, validator=about_resource_validator)
 
-    name = attr.attrib(default=None, converter=string_cleaner)
-    version = attr.attrib(default=None, converter=string_cleaner)
-    description = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    homepage_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    download_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    notes = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    name = string_attrib(repr=True)
+    version = string_attrib(repr=True)
+    description = string_attrib()
+    homepage_url = string_attrib()
+    download_url = string_attrib()
+    notes = string_attrib()
 
-    copyright = attr.attrib(
-        default=None, repr=False, converter=copyright_converter)
-    license_expression = attr.attrib(
-        default=None, repr=False, converter=license_expression_converter)
+    copyright = string_attrib(converter=copyright_converter)
+    license_expression = string_attrib(converter=license_expression_converter)
 
     # boolean flags as yes/no
-    attribute = attr.attrib(
-        default=False, type=bool, repr=False,
-        validator=validate_flag_field, converter=boolean_converter,)
-
-    redistribute = attr.attrib(
-        default=False, type=bool, repr=False,
-        validator=validate_flag_field, converter=boolean_converter,)
-
-    modified = attr.attrib(
-        default=False, type=bool, repr=False,
-        validator=validate_flag_field, converter=boolean_converter,)
-
-    track_changes = attr.attrib(
-        default=False, type=bool, repr=False,
-        validator=validate_flag_field, converter=boolean_converter,)
-
-    internal_use_only = attr.attrib(
-        default=False, type=bool, repr=False,
-        validator=validate_flag_field, converter=boolean_converter,)
+    attribute = bool_attrib()
+    redistribute = bool_attrib()
+    modified = bool_attrib()
+    track_changes = bool_attrib()
+    internal_use_only = bool_attrib()
 
     # a list of License objects
-    licenses = attr.attrib(default=attr.Factory(list), repr=False)
+    licenses = non_repr_attrib(default=attr.Factory(list))
 
     # path relative to the ABOUT file location
-    notice_file = attr.attrib(default=None, repr=False, converter=path_converter)
+    notice_file = path_attrib()
     # the text loaded from notice_file
-    notice_text = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    notice_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    notice_text = string_attrib()
+    notice_url = string_attrib()
 
     # path relative to the ABOUT file location
-    changelog_file = attr.attrib(default=None, repr=False, converter=path_converter)
+    changelog_file = path_attrib()
 
-    owner = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    owner_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    owner = string_attrib()
+    owner_url = string_attrib()
 
     # SPDX-like VCS URL
-    vcs_url = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    vcs_url = string_attrib()
 
-    md5 = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    sha1 = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    sha256 = attr.attrib(default=None, repr=False, converter=string_cleaner)
-    sha512 = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    md5 = string_attrib()
+    sha1 = string_attrib()
+    sha256 = string_attrib()
+    sha512 = string_attrib()
 
-    spec_version = attr.attrib(default=None, repr=False, converter=string_cleaner)
+    spec_version = string_attrib()
 
     # custom files as name: value
-    custom_fields = attr.attrib(
-        default=attr.Factory(dict), repr=False,
-        validator=validate_custom_fields, converter=convert_custom_fields)
+    custom_fields = non_repr_attrib(
+        default=attr.Factory(dict), validator=validate_custom_fields, converter=convert_custom_fields)
 
     # list of Error object
-    errors = attr.attrib(default=attr.Factory(list), repr=False)
+    errors = non_repr_attrib(default=attr.Factory(list), cmp=False)
 
     def __attrs_post_init__(self, *args, **kwargs):
         # populate licenses from expression
