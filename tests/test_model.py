@@ -530,9 +530,9 @@ custom1: |
             ('copyright', u'Copyright (c) 2013-2014 nexB Inc.'),
             ('license_expression', u'apache-2.0'),
             ('licenses', [OrderedDict([
-                ('file', u'apache-2.0.LICENSE'),
                 ('key', u'apache-2.0'),
-                ])]),
+                ('file', u'apache-2.0.LICENSE'),
+            ])]),
             ('owner', u'nexB Inc.'),
             (u'custom1', u'some custom')]
         )
@@ -566,8 +566,8 @@ custom1: |
             'homepage_url': 'http://dejacode.org',
             'license_expression': 'apache-2.0',
             'licenses': [OrderedDict([
-                ('file', u'apache-2.0.LICENSE'),
                 ('key', u'apache-2.0'),
+                ('file', u'apache-2.0.LICENSE'),
                 ])],
             'name': 'AboutCode',
             'owner': 'nexB Inc.',
@@ -588,8 +588,8 @@ custom1: |
             ('license_expression', 'apache-2.0'),
             ('attribute', True),
             ('licenses', [OrderedDict([
-                ('file', 'apache-2.0.LICENSE'),
                 ('key', 'apache-2.0'),
+                ('file', 'apache-2.0.LICENSE'),
             ])]),
             ('owner', 'nexB Inc.'),
             ('author', ['Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez']),

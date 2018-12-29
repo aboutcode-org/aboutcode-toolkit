@@ -28,6 +28,7 @@ from aboutcode import Error
 from aboutcode import gen
 from aboutcode import model
 
+from testing_utils import check_json
 from testing_utils import get_temp_dir
 from testing_utils import get_test_loc
 
@@ -160,34 +161,8 @@ class GenTest(unittest.TestCase):
         assert expected_errors == errors
 
         result = [a.to_dict() for a in packages]
-        expected = [
-            OrderedDict([
-                ('about_resource', u'some res'),
-                ('name', u'AboutCode'),
-                ('version', u'0.11.0'),
-                ('license_expression', u'(mit AND bsd-new) OR gpl-2.0'),
-                ('licenses', [
-                    OrderedDict([('file', u'mit.LICENSE'), ('key', u'mit'),
-                                 ('name', u'MIT License'), ('url', u'http://mit.license.com')]),
-                    OrderedDict([('file', u'bsd-new.LICENSE'), ('key', u'bsd-new'),
-                                 ('name', u'BSD License'), ('url', u'http://BSD.license.com')]),
-                    OrderedDict([('file', u'gpl-2.0.LICENSE'), ('key', u'gpl-2.0'),
-                                 ('name', u'GPL 2.0 License'), ('url', u'http://gpl.license.com')])]),
-                ('notice_file', u'this.NOTICE'),
-                (u'custom1', u'multi\nline')]),
-            OrderedDict([
-                ('about_resource', u'some other res'),
-                ('name', u'MyNmae'),
-                ('version', u'12'),
-                ('license_expression', u'bsd-new'),
-                ('licenses', [
-                    OrderedDict([('file', u'bsd-new.LICENSE'), ('key', u'bsd-new'),
-                                 ('name', u'BSD License'), ('url', u'http://BSD.license.com')])]),
-                ('notice_file', u'that.NOTICE'),
-                (u'custom1', u'multi\nline')])
-        ]
-
-        assert expected == result
+        expected = get_test_loc('test_gen/reference-expected.json')
+        check_json(expected, result)
 
         generated_files = os.listdir(os.path.join(target_dir, 'inv'))
         expected = [
@@ -199,7 +174,6 @@ class GenTest(unittest.TestCase):
             'this.ABOUT',
             'this.NOTICE',
         ]
-
         assert expected == sorted(generated_files)
 
 

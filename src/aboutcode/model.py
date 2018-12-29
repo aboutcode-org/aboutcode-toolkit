@@ -258,9 +258,9 @@ class License(object):
     A license object
     """
     # POSIX path relative to the ABOUT file location where the text file lives
-    file = attr.attrib(default=None, repr=False, converter=path_converter)
-    key = attr.attrib(default=None, converter=string_cleaner)
+    key = attr.attrib(converter=string_cleaner)
     name = attr.attrib(default=None, converter=string_cleaner)
+    file = attr.attrib(default=None, repr=False, converter=path_converter)
     url = attr.attrib(default=None, repr=False, converter=string_cleaner)
     text = attr.attrib(default=None, repr=False, converter=string_cleaner)
 
@@ -282,14 +282,14 @@ class License(object):
 
     def update(self, other_license):
         """
-        Update self unset fields with data from another License.
+        Update self "unset" fields with data from another License.
         """
         assert isinstance(other_license, License)
         assert other_license.key == self.key
         self.name = self.name or other_license.name
-        self.text = self.text or other_license.text
-        self.file = self.file or other_license.file
         self.url = self.url or other_license.url
+        self.file = self.file or other_license.file
+        self.text = self.text or other_license.text
 
     @classmethod
     def load(cls, location):
