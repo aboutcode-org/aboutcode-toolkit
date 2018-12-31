@@ -60,7 +60,7 @@ def message_converter(value):
     return value
 
 
-@attr.attributes()
+@attr.attributes(repr=False)
 class Error(object):
     """
     An Error data with a severity and message and an optional path attribute.
@@ -70,13 +70,14 @@ class Error(object):
     # relative POSIX path of the ABOUT file
     path = attr.attrib(default=None)  # , repr=False)
 
-    def _get_values(self):
+    def __repr__(self):
         sev = severities[self.severity]
         msg = clean_string(repr(self.message))
-        return sev, msg
+        return 'Error(%(sev)s, %(msg)s)' % locals()
 
     def render(self):
-        sev, msg = self._get_values()
+        sev = severities[self.severity]
+        msg = clean_string(repr(self.message))        
         return '%(sev)s: %(msg)s' % locals()
 
     def to_dict(self, *args, **kwargs):
