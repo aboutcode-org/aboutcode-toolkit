@@ -334,7 +334,7 @@ class License(object):
 
     def file_loc(self, base_dir):
         fn = self.file or self.default_file_name
-        return os.path.join(base_dir, fn)
+        return os.path.join(base_dir, util.to_native(fn))
 
     def load_text(self, base_dir):
         """
@@ -594,10 +594,10 @@ class Package(object):
 
     def dump(self, location, with_files=False):
         """
-        Write this Package object to the YAML file at `location`.
-        If `with_files` is True, also write any reference notice or license file.
+        Write this Package object to the .ABOUT file at `location`.
+        If `with_files` is True, also write any referenced notice or license file.
         """
-        location = util.to_posix(location)
+        location = util.to_native(location)
         base_dir = os.path.dirname(location)
         if not os.path.exists(base_dir):
             os.makedirs(base_dir)
@@ -676,14 +676,14 @@ class Package(object):
         Return the location to the notice_file or None.
         """
         base_dir = base_dir or self.base_dir
-        return self.notice_file and os.path.join(base_dir, self.notice_file)
+        return self.notice_file and os.path.join(base_dir, util.to_native(self.notice_file))
 
     def changelog_file_loc(self, base_dir=None):
         """
         Return the location to the changelog_file or None.
         """
         base_dir = base_dir or self.base_dir
-        return self.changelog_file and os.path.join(base_dir, self.changelog_file)
+        return self.changelog_file and os.path.join(base_dir, util.to_native(self.changelog_file))
 
     def check_files(self, base_dir=None):
         """
