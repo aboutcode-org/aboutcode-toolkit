@@ -30,26 +30,7 @@ from aboutcode import model
 from aboutcode import util
 from aboutcode.util import csv
 from aboutcode.util import unique
-
-
-def check_duplicated_about_file_path(inventory):
-    """
-    Return a list of errors for duplicated about_file_path in the `inventory`
-    list of data mappings.
-    """
-    unique_afps = set()
-    errors = []
-    for item in inventory:
-        afp = item.get('about_file_path')
-        # Ignore all the empty path
-        if not afp:
-            continue
-        if afp in unique_afps:
-            msg = "The input has duplicated values in 'about_file_path' field: {}".format(afp)
-            errors.append(Error(CRITICAL, msg))
-        else:
-            unique_afps.add(afp)
-    return errors
+from aboutcode.util import resource_name
 
 
 def load_inventory(location, base_dir=None):
@@ -77,18 +58,14 @@ def load_inventory(location, base_dir=None):
         return [err], []
 
     # various check prior to generation
-    # validate field names
+
+    # validate field names using the first row fields as a sample
     sample = dict(inventory[0])
     standard_fields, custom_fields = model.split_fields(sample)
     fields_err = model.validate_field_names(
         standard_fields.keys(), custom_fields.keys())
     if fields_err:
         return fields_err, packages
-
-    # validate duplicated paths
-    dup_about_paths_err = check_duplicated_about_file_path(inventory)
-    if dup_about_paths_err:
-        return dup_about_paths_err, packages
 
     if base_dir:
         base_dir = util.to_posix(base_dir)
@@ -97,34 +74,45 @@ def load_inventory(location, base_dir=None):
 
     for entry in inventory:
         entry = dict(entry)
+        about_resource = entry['about_resource'].strip()
+        about_resource = util.to_posix(about_resource.strip('/'))
 
-        about_file_path = entry.pop('about_file_path', None)
-        if not about_file_path or not about_file_path.strip():
-            msg = ('Empty or missing "about_file_path" for: "{}"'.format(about_file_path))
-            errors.append(Error(ERROR, msg))
-            continue
+        file_name = resource_name(about_resource)
+        entry['about_resource'] = file_name
+
+        about_file_path = entry.get('about_file_path', '').strip()
+        if not about_file_path:
+            about_file_path = about_resource
 
         # Ensure there is no absolute directory path
-        about_file_path = util.to_posix(about_file_path).strip('/')
+        about_file_path = util.to_posix(about_file_path).strip('/').strip()
 
         segments = about_file_path.split('/')
         if any(seg != seg.strip() for seg in segments):
-            msg = ('Invalid "about_file_path": must not end or start with a '
-                   'space for: "{}"'.format(about_file_path))
+            msg = ('Invalid path to create an ABOUT file: a directory '
+                   'cannot start or end with a space: "{}"'.format(about_file_path))
             errors.append(Error(ERROR, msg))
-            continue
 
         try:
+            if not about_file_path.endswith('.ABOUT'):
+                about_file_path += '.ABOUT'
+
+            entry['about_file_path'] = about_file_path
             if base_dir:
                 entry['about_file_location'] = os.path.join(base_dir, about_file_path)
+
             packages.append(model.Package.from_dict(entry))
+
         except Exception as e:
             if len(e.args) == 1 and isinstance(e.args[0], Error):
                 err = e.args[0]
-                msg = ('Cannot create .ABOUT file for: "{}".\n'.format(about_file_path) + err.message)
+                msg = 'Cannot create .ABOUT file for: "{}".\n{}'.format(
+                    about_file_path, err.message)
                 err = Error(CRITICAL, msg)
             else:
-                msg = ('Cannot create .ABOUT file for: "{}".\n'.format(about_file_path) + str(e))
+                import traceback
+                msg = 'Cannot create .ABOUT file for: "{}".\n{}\n{}'.format(
+                    about_file_path, str(e) , traceback.format_exc())
                 err = Error(CRITICAL, msg)
             errors.append(err)
             continue
@@ -228,13 +216,17 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
     # update all licenses and notices
     for package in packages:
         # Fix the location to ensure this is a proper .ABOUT file
-        loc = package.about_file_location
-        if not loc.endswith('.ABOUT'):
-            loc = loc.rstrip('\\/').strip() + '.ABOUT'
-        package.about_file_location = loc
+        afl = package.about_file_location
+        if not afl:
+            pass
+
+        if not afl.endswith('.ABOUT'):
+            afl = afl.rstrip('\\/').strip() + '.ABOUT'
+
+        package.about_file_location = afl
 
         # used as a "prettier" display of .ABOUT file path
-        about_path = loc.replace(target_dir, '').strip('/')
+        about_path = afl.replace(target_dir, '').strip('/')
 
         # Update the License objects of this Package using a mapping of reference licenses as {key: License}
         for license in package.licenses:  # NOQA
@@ -259,6 +251,6 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
                 package.notice_text = notice_text
 
         # create the files proper
-        package.dump(location=package.about_file_location, with_files=True)
+        package.dump(location=afl, with_files=True)
 
     return unique(errors), packages

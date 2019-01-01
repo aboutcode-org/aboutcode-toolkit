@@ -35,17 +35,6 @@ from testing_utils import get_test_loc
 
 class GenTest(unittest.TestCase):
 
-    def test_check_duplicated_about_file_path(self):
-        test_dict = [
-            {'about_file_path': '/test/test.c', 'version': '1.03', 'name': 'test.c'},
-            {'about_file_path': '/test/abc/', 'version': '1.0', 'name': 'abc'},
-            {'about_file_path': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
-        expected = [
-            Error(CRITICAL,
-                  "The input has duplicated values in 'about_file_path' field: /test/test.c")]
-        result = gen.check_duplicated_about_file_path(test_dict)
-        assert expected == result
-
     def test_load_inventory_base(self):
         location = get_test_loc('test_gen/inv.csv')
         target_dir = get_temp_dir()
@@ -69,13 +58,13 @@ class GenTest(unittest.TestCase):
         target_dir = get_temp_dir()
         errors, packages = gen.load_inventory(location, target_dir)
         expected_errors = [
+            Error(CRITICAL, 'Invalid fields: all field names must be lowercase.'),
             Error(CRITICAL, 'Custom field name: \'Confirmed Copyright\' contains illegal characters. '
                   'Only these characters are allowed: ASCII letters, digits and "_" underscore. '
                   'The first character must be a letter.'),
             Error(CRITICAL, "Custom field name: 'Confirmed Copyright' must be lowercase."),
             Error(CRITICAL, "Custom field name: 'Resource' must be lowercase.")
         ]
-
         assert expected_errors == errors
         assert [] == packages
 
@@ -84,8 +73,8 @@ class GenTest(unittest.TestCase):
         target_dir = get_temp_dir()
         errors, _packages = gen.generate_about_files(location, target_dir)
         expected = [
-            Error(ERROR, 'Invalid "about_file_path": must not end or start '
-                  'with a space for: "about /about.ABOUT"')]
+            Error(ERROR, 'Invalid path to create an ABOUT file: a directory '
+                  'cannot start or end with a space: "about /about.ABOUT"')]
         assert expected == errors
 
     def test_generate_about_files_with_about_file_path_as_directory_generate_about_file_name(self):
@@ -122,11 +111,11 @@ class GenTest(unittest.TestCase):
         errors, packages = gen.generate_about_files(location, target_dir)
         expected = [
             Error(CRITICAL,
-                'Cannot create .ABOUT file for: "inv/test.tar.gz".\n'
+                'Cannot create .ABOUT file for: "inv/test.tar.gz.ABOUT".\n'
                 'Required field "about_resource" is missing.')
         ]
         assert expected == errors
-        expected = [OrderedDict([('about_resource', u'inv/My.gz'), ('name', u'AboutCode'), ('version', u'0.11.0')])]
+        expected = [OrderedDict([('about_resource', u'My.gz'), ('name', u'AboutCode'), ('version', u'0.11.0')])]
         assert expected == [a.to_dict() for a in packages]
         assert 1 == len(os.listdir(target_dir))
 
@@ -175,6 +164,27 @@ class GenTest(unittest.TestCase):
             'this.NOTICE',
         ]
         assert expected == sorted(generated_files)
+
+    def test_generate_about_files_does_not_require_about_file_path(self):
+        inventory_location = get_test_loc('test_gen/inv_no_afp.csv')
+        target_dir = get_temp_dir()
+        reference_dir = get_test_loc('test_gen/reference')
+
+        errors, packages = gen.generate_about_files(inventory_location, target_dir, reference_dir)
+        expected_errors = []
+        assert expected_errors == errors
+
+        result = [a.to_dict() for a in packages]
+        expected = get_test_loc('test_gen/inv_no_afp-expected.json')
+        check_json(expected, result)
+
+        generated_files1 = os.listdir(os.path.join(target_dir, 'this'))
+        expected = ['aboutcode.ABOUT', 'bsd-new.LICENSE']
+        assert expected == sorted(generated_files1)
+
+        generated_files2 = os.listdir(os.path.join(target_dir, 'that'))
+        expected = ['bsd-new.LICENSE', 'commons-log.jar.ABOUT', 'mit.LICENSE']
+        assert expected == sorted(generated_files2)
 
 
 class TestJson(unittest.TestCase):

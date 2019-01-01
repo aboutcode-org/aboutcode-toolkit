@@ -233,21 +233,23 @@ def validate_unique_names(field_names):
     return errors
 
 
-def validate_field_names(standard_field_names, custom_field_names, for_gen=False):
+def validate_field_names(standard_field_names, custom_field_names):
     """
     Validate a `field_names` sequence of field names. Return a list of Error.
     """
     errors = []
-    errors.extend(validate_unique_names(
-        list(standard_field_names) + list(standard_field_names)))
-
-    if for_gen and 'about_file_path' not in standard_field_names:
-        errors.append(Error(CRITICAL, 'Required field "about_file_path" is missing or empty.'))
+    standard_field_names = list(standard_field_names)
 
     if 'about_resource' not in standard_field_names:
         errors.append(Error(CRITICAL, 'Required field "about_resource" is missing.'))
 
-    errors.extend(validate_custom_field_names(custom_field_names))
+    custom_field_names = list(custom_field_names)
+
+    uni_errors = validate_unique_names(standard_field_names + custom_field_names)
+    errors.extend(uni_errors)
+
+    cf_errors = validate_custom_field_names(custom_field_names)
+    errors.extend(cf_errors)
 
     return errors
 
@@ -522,6 +524,8 @@ class Package(object):
             text = inp.read()
 
         data = saneyaml.load(text, allow_duplicate_keys=False)
+        if not isinstance(data, dict):
+            raise Exception('Invalid ABOUT file: should be name/value pairs: {}'.format(about_file_location))
         data['about_file_location'] = about_file_location
         return cls.from_dict(data)
 
@@ -576,8 +580,9 @@ class Package(object):
         not included. All texts are included if present.
         """
         excluded_fields = set([
-            'location', 'errors', 'custom_fields',
-            'about_file_path', 'about_resource'])
+            'about_resource', 'errors',
+            'about_file_location', 'about_file_path',
+        ])
         return repr(tuple(self.to_dict(excluded_fields=excluded_fields).items()))
 
     def dumps(self):
@@ -682,8 +687,8 @@ class Package(object):
         """
         Check that referenced files exist. Update and return self.errors.
         """
-        if self.about_file_location and not os.path.exists(self.about_file_location ):
-            msg = 'ABOUT file: {} does not exists.'.format(self.about_file_location )
+        if self.about_file_location and not os.path.exists(self.about_file_location):
+            msg = 'ABOUT file: {} does not exists.'.format(self.about_file_location)
             self.errors.append(Error(CRITICAL, msg))
 
         base_dir = base_dir or self.base_dir

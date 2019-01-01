@@ -65,46 +65,48 @@ def collect_inventory(location, check_files=False):
 
     packages = []
 
-    if not errors:
-        is_file = os.path.isfile(input_location)
-        if is_file:
-            # corner case for a single file: the relative path is file name
-            file_name = resource_name(input_location)
-            locs_and_relpaths = [(input_location, file_name)]
-        else:
-            locs_and_relpaths = get_relative_paths_and_locations(about_locations, input_location)
+    if errors:
+        return sorted(unique(errors)), packages
+    
+    
+    is_file = os.path.isfile(input_location)
 
-        for about_file_loc, about_file_path in locs_and_relpaths :
-            package = None
-            try:
-                package = Package.load(about_file_loc)
-                package.about_file_path = about_file_path
-                packages.append(package)
+    for about_file_loc in about_locations :
+        package = None
+        try:
+            if is_file:
+                about_file_path = resource_name(input_location)
+            else:
+                about_file_path = get_relative_path(input_location, about_file_loc)
 
-                if check_files:
-                    package.check_files()
+            package = Package.load(about_file_loc)
+            package.about_file_path = about_file_path
+            packages.append(package)
 
-                # this could be a dict keys by path to keep per-path things?
-                errors.extend(package.errors)
+            if check_files:
+                package.check_files()
 
-            except Exception as exce:
-                if all(isinstance(e, Error) for e in exce.args):
-                    for err in exce.args:
-                        if not err.path:
-                            err.path = about_file_path
-                        errors.append(err)
-                else:
-                    errors.append(Error(
-                        CRITICAL,
-                        str(exce) + '\n' + traceback.format_exc(),
-                        path=about_file_path
-                    ))
+            # this could be a dict keys by path to keep per-path things?
+            errors.extend(package.errors)
 
-            if package:
-                # Insert path reference in every Package error
-                for err in package.errors:
+        except Exception as exce:
+            if all(isinstance(e, Error) for e in exce.args):
+                for err in exce.args:
                     if not err.path:
                         err.path = about_file_path
+                    errors.append(err)
+            else:
+                errors.append(Error(
+                    CRITICAL,
+                    str(exce) + '\n' + traceback.format_exc(),
+                    path=about_file_path
+                ))
+
+        if package:
+            # Insert path reference in every Package error
+            for err in package.errors:
+                if not err.path:
+                    err.path = about_file_path
 
     return sorted(unique(errors)), packages
 
@@ -146,16 +148,6 @@ def get_about_locations(location):
     for loc in get_locations(location):
         if is_about_file(loc):
             yield loc
-
-
-def get_relative_paths_and_locations(locations, base_location):
-    """
-    Yield a tuple of (location, relative path) given an iterable of `locations`
-    and a `base_location` used to compute the `relative_path` of each location.
-    """
-    for location in locations:
-        relative_path = get_relative_path(base_location, location)
-        yield location, relative_path
 
 
 def get_field_names(packages):

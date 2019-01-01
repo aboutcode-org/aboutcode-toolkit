@@ -172,7 +172,7 @@ class Transformer(object):
 
     # called by attr after the __init__()
     def __attrs_post_init__(self, *args, **kwargs):
-        self.essential_columns = ['about_resource', 'about_file_path']
+        self.essential_columns = ['about_resource']
         self.standard_columns = Package.standard_fields()
 
     @classmethod
@@ -247,7 +247,7 @@ class Transformer(object):
     def filter_columns(self, data):
         """
         Yield transformed mappings from a `data` list of mapping keeping only
-        columns with a name in the `kept_columns`of this Transformer.
+        columns with a name in the `kept_columns` of this Transformer.
         Return the data unchanged if `kept_columns` does not exist or is empty.
         """
         kept_columns = set(self.clean_columns(self.kept_columns))

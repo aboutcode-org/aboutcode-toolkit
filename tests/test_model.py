@@ -206,6 +206,8 @@ class PackageTest(unittest.TestCase):
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
+                Error(CRITICAL, 'Invalid fields: lowercased field names must be unique.'),
+                Error(CRITICAL, 'Invalid fields: all field names must be lowercase.'),
                 Error(CRITICAL, "Custom field name: 'About_Resource' must be lowercase."),
                 Error(CRITICAL, "Custom field name: 'Name' must be lowercase."))
             assert expected == e.args
@@ -217,8 +219,11 @@ class PackageTest(unittest.TestCase):
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
+                Error(CRITICAL, 'Invalid fields: lowercased field names must be unique.'),
+                Error(CRITICAL, 'Invalid fields: all field names must be lowercase.'),
                 Error(CRITICAL, "Custom field name: 'About_Resource' must be lowercase."),
-                Error(CRITICAL, "Custom field name: 'Name' must be lowercase."),)
+                Error(CRITICAL, "Custom field name: 'Name' must be lowercase."),
+            )
             assert expected == e.args
 
     def test_Package_fails_if_field_names_are_not_lowercase(self):
@@ -228,7 +233,9 @@ class PackageTest(unittest.TestCase):
             self.fail('Exception not raised')
         except Exception as e:
             expected = (
-                Error(CRITICAL, "Custom field name: 'homepage_URL' must be lowercase."),)
+                Error(CRITICAL, 'Invalid fields: all field names must be lowercase.'),
+                Error(CRITICAL, "Custom field name: 'homepage_URL' must be lowercase."),
+            )
             assert expected == e.args
 
     def test_Package_with_existing_about_resource_has_no_error(self):
