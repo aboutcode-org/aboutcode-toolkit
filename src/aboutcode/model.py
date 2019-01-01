@@ -597,15 +597,15 @@ class Package(object):
         Write this Package object to the YAML file at `location`.
         If `with_files` is True, also write any reference notice or license file.
         """
-        parent = os.path.dirname(location)
-        if not os.path.exists(parent):
-            os.makedirs(parent)
+        location = util.to_posix(location)
+        base_dir = os.path.dirname(location)
+        if not os.path.exists(base_dir):
+            os.makedirs(base_dir)
 
         with io.open(location, 'w', encoding='utf-8') as out:
             out.write(self.dumps())
 
         if with_files:
-            base_dir = os.path.dirname(location)
             self.write_files(base_dir)
 
     @classmethod
@@ -648,14 +648,16 @@ class Package(object):
         base_dir = base_dir or self.base_dir
 
         def _write(text, target_loc):
-            if target_loc:
-                text = text or ''
-                parent = os.path.dirname(target_loc)
-                if not os.path.exists(parent):
-                    os.makedirs(parent)
+            if not target_loc:
+                return
 
-                with io.open(target_loc, 'w', encoding='utf-8') as out:
-                    out.write(text)
+            text = text or ''
+            parent = os.path.dirname(target_loc)
+            if not os.path.exists(parent):
+                os.makedirs(parent)
+
+            with io.open(target_loc, 'w', encoding='utf-8') as out:
+                out.write(text)
 
         _write(self.notice_text, self.notice_file_loc(base_dir))
 
