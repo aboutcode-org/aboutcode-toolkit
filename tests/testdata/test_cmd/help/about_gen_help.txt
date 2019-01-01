@@ -10,6 +10,5 @@ Usage: about gen [OPTIONS] LOCATION OUTPUT
 Options:
   --reference DIR  Path to a directory with reference license data and text
                    files.
-  -q, --quiet      Do not print error or warning messages.
   --verbose        Show all error and warning messages.
   -h, --help       Show this message and exit.

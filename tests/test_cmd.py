@@ -47,7 +47,7 @@ def test_report_errors(capsys):
         Error(DEBUG, 'msg4'),
         Error(NOTSET, 'msg4'),
     ]
-    ec = cmd.report_errors(errors, quiet=False, verbose=True, log_file_loc=None)
+    ec = cmd.report_errors(errors, verbose=True, log_file_loc=None)
     assert 3 == ec
     out, err = capsys.readouterr()
     expected_out = [
@@ -71,7 +71,7 @@ def test_report_errors_without_verbose(capsys):
         Error(DEBUG, 'msg4'),
         Error(NOTSET, 'msg4'),
     ]
-    ec = cmd.report_errors(errors, quiet=False, verbose=False, log_file_loc=None)
+    ec = cmd.report_errors(errors, verbose=False, log_file_loc=None)
     assert 3 == ec
     out, err = capsys.readouterr()
     expected_out = [
@@ -84,39 +84,6 @@ def test_report_errors_without_verbose(capsys):
     assert expected_out == out.splitlines(False)
 
 
-def test_report_errors_with_quiet_ignores_verbose_flag(capsys):
-    errors = [
-        Error(CRITICAL, 'msg1'),
-        Error(ERROR, 'msg2'),
-        Error(INFO, 'msg3'),
-        Error(WARNING, 'msg4'),
-        Error(DEBUG, 'msg4'),
-        Error(NOTSET, 'msg4'),
-        Error(WARNING, 'msg4'),
-    ]
-    severe_errors_count = cmd.report_errors(errors, quiet=True, verbose=True)
-    assert severe_errors_count == 3
-    out, err = capsys.readouterr()
-    assert '' == out
-    assert '' == err
-
-
-def test_report_errors_with_quiet_ignores_verbose_flag2(capsys):
-    errors = [
-        Error(CRITICAL, 'msg1'),
-        Error(ERROR, 'msg2'),
-        Error(INFO, 'msg3'),
-        Error(WARNING, 'msg4'),
-        Error(DEBUG, 'msg4'),
-        Error(NOTSET, 'msg4'),
-        Error(WARNING, 'msg4'),
-    ]
-    severe_errors_count = cmd.report_errors(errors, quiet=True, verbose=False)
-    assert severe_errors_count == 3
-    out, err = capsys.readouterr()
-    assert '' == out
-    assert '' == err
-
 def test_report_errors_with_verbose_flag(capsys):
     errors = [
         Error(CRITICAL, 'msg1'),
@@ -127,7 +94,7 @@ def test_report_errors_with_verbose_flag(capsys):
         Error(NOTSET, 'msg4'),
         Error(WARNING, 'msg4'),
     ]
-    severe_errors_count = cmd.report_errors(errors, quiet=False, verbose=True)
+    severe_errors_count = cmd.report_errors(errors, verbose=True)
     assert severe_errors_count == 3
     out, err = capsys.readouterr()
     expected_out = [
@@ -155,7 +122,7 @@ def test_report_errors_can_write_to_logfile():
     ]
 
     result_file = get_temp_file()
-    _ec = cmd.report_errors(errors, quiet=False, verbose=True,
+    _ec = cmd.report_errors(errors, verbose=True,
                            log_file_loc=result_file)
     with io.open(result_file, 'r', encoding='utf-8') as rf:
         result = rf.read()
@@ -183,7 +150,7 @@ def test_report_errors_does_not_report_duplicate_errors(capsys):
         Error(WARNING, 'msg4'),
         Error(CRITICAL, 'msg1'),
     ]
-    severe_errors_count = cmd.report_errors(errors, quiet=True, verbose=True)
+    severe_errors_count = cmd.report_errors(errors, verbose=True)
     assert severe_errors_count == 3
 
 
@@ -205,22 +172,6 @@ def test_get_error_messages():
         'ERROR: msg2',
         'WARNING: msg4',
     ]
-    assert expected == emsgs
-
-
-def test_get_error_messages_quiet():
-    errors = [
-        Error(CRITICAL, 'msg1'),
-        Error(ERROR, 'msg2'),
-        Error(INFO, 'msg3'),
-        Error(WARNING, 'msg4'),
-        Error(DEBUG, 'msg4'),
-        Error(NOTSET, 'msg4'),
-    ]
-
-    emsgs, ec = cmd.get_error_messages(errors, quiet=True)
-    assert 3 == ec
-    expected = []
     assert expected == emsgs
 
 

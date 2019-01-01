@@ -171,17 +171,13 @@ def validate_api_url(ctx, param, value):
     is_flag=True,
     help='Check that code and license files referenced in ABOUT files exist.')
 
-@click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, format, check_files, quiet, verbose):  # NOQA
+def inventory(location, output, format, check_files, verbose):  # NOQA
     """
 Collect the inventory of .ABOUT file data as CSV or JSON.
 
@@ -189,9 +185,8 @@ LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
 
 OUTPUT: Path to the JSON or CSV inventory file to create.
     """
-    if not quiet:
-        print_version()
-        click.echo('Collecting inventory from ABOUT files...')
+    print_version()
+    click.echo('Collecting inventory from ABOUT files...')
 
     # FIXME: do we really want to continue support zip as an input?
     # accept zipped ABOUT files as input
@@ -207,10 +202,12 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     writer = writers[format]
     write_errors = writer(location=output, packages=packages)
     errors.extend(write_errors)
-    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
-    if not quiet:
-        msg = 'Inventory collected in {output}.'.format(**locals())
-        click.echo(msg)
+    log_file_loc = output + '-error.log'
+    errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
+    msg = 'Inventory collected in {output}'
+    if errors_count:
+        msg += ' with ERRORS\nSee log file: {log_file_loc}'
+    click.echo(msg.format(**locals()))
     sys.exit(errors_count)
 
 
@@ -237,17 +234,13 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
     help='Path to a directory with reference license data and text files.')
 
-@click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, reference, quiet, verbose):
+def gen(location, output, reference, verbose):
     """
 Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
@@ -255,9 +248,8 @@ LOCATION: Path to a JSON or CSV inventory file.
 
 OUTPUT: Path to a directory where ABOUT files are generated.
     """
-    if not quiet:
-        print_version()
-        click.echo('Generating .ABOUT files...')
+    print_version()
+    click.echo('Generating .ABOUT files...')
 
     if not location.endswith(('.csv', '.json',)):
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
@@ -267,11 +259,14 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         target_dir=output,
         reference_dir=reference)
 
-    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
-    if not quiet:
-        packages_count = len(packages)
-        msg = '{packages_count} .ABOUT files generated in {output}'.format(**locals())
-        click.echo(msg)
+    log_file_loc = output + '-error.log'
+    errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
+
+    packages_count = len(packages)
+    msg = '{packages_count} .ABOUT files generated in {output}'
+    if errors_count:
+        msg += ' with ERRORS\nSee log file: {log_file_loc}'
+    click.echo(msg.format(**locals()))
     sys.exit(errors_count)
 
 
@@ -308,32 +303,27 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     type=str,
     help='DejaCode License Library API URL.')
 
-@click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def fetch_licenses(location, output, api_key, api_url, quiet, verbose):  # NOQA
+def fetch_licenses(location, output, api_key, api_url, verbose):  # NOQA
     """
 Load inventory from LOCATION then fetch license texts and data referenced in
-this inventory from a remote DejaCode License Library API and save the license
-texts and data in the OUTPUT directory.
+this inventory license expressions from a remote DejaCode License Library API
+and save the license texts and data in the OUTPUT directory.
 
 LOCATION: Path to a JSON or CSV inventory file.
 
-OUTPUT: Path where to save the fetched reference license data and texts.
+OUTPUT: Directory path where to save the fetched reference license data and texts.
     """
     from aboutcode import api
     from aboutcode import gen
 
-    if not quiet:
-        print_version()
-        click.echo('Fetching licenses...')
+    print_version()
+    click.echo('Fetching licenses...')
 
     errors, packages = gen.load_inventory(location)
 
@@ -343,10 +333,12 @@ OUTPUT: Path where to save the fetched reference license data and texts.
     for license in licenses_by_key.values():  # NOQA
         license.dump(output)
 
-    errors_count = report_errors(errors, quiet, verbose)
-    if not quiet:
-        msg = 'Licenses saved to {output}'.format(**locals())
-        click.echo(msg)
+    log_file_loc = output + '-error.log'
+    errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
+    msg = 'Licenses saved to {output}'
+    if errors_count:
+        msg += ' with ERRORS\nSee log file: {log_file_loc}'
+    click.echo(msg.format(**locals()))
     sys.exit(errors_count)
 
 
@@ -383,22 +375,18 @@ def validate_template(ctx, param, value):
     metavar='OUTPUT',
     type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
-@click.option('--template',
+@click.option('-t', '--template',
     metavar='FILE',
     callback=validate_template,
     type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
     help='Path to an optional custom attribution template to generate the '
          'attribution document. If not provided the default built-in template is used.')
 
-@click.option('--vartext',
+@click.option('-v', '--vartext',
     multiple=True,
     callback=validate_key_values,
     metavar='<key>=<value>',
     help='Add variable text as key=value for use in a custom attribution template.')
-
-@click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
 
 @click.option('--verbose',
     is_flag=True,
@@ -406,7 +394,7 @@ def validate_template(ctx, param, value):
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, vartext, quiet, verbose):
+def attrib(location, output, template, vartext, verbose):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -414,9 +402,8 @@ LOCATION: Path to a file, directory or .zip archive containing .ABOUT files.
 
 OUTPUT: Path where to write the attribution document.
     """
-    if not quiet:
-        print_version()
-        click.echo('Generating attribution...')
+    print_version()
+    click.echo('Generating attribution...')
 
     errors = []
 
@@ -448,11 +435,12 @@ OUTPUT: Path where to write the attribution document.
         )
         errors.extend(attrib_errors)
 
-    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
-
-    if not quiet:
-        msg = 'Attribution generated in: {output}'.format(**locals())
-        click.echo(msg)
+    log_file_loc=output + '-error.log'
+    errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
+    msg = 'Attribution generated in: {output}'
+    if errors_count:
+        msg += ' with ERRORS\nSee log file: {log_file_loc}'
+    click.echo(msg.format(**locals()))
     sys.exit(errors_count)
 
 
@@ -490,8 +478,8 @@ LOCATION: Path to a file or directory containing .ABOUT files.
     print_version()
     click.echo('Checking ABOUT files...')
     errors, _packages = collect_inventory(location, check_files=check_files)
-    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
-    sys.exit(severe_errors_count)
+    errors_count = report_errors(errors, verbose)
+    sys.exit(errors_count)
 
 
 ######################################################################
@@ -532,20 +520,16 @@ def print_config_help(ctx, param, value):
     callback=print_config_help,
     help='Show configuration file format help and exit.')
 
-@click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def transform(location, output, configuration, quiet, verbose):  # NOQA
+def transform(location, output, configuration, verbose):  # NOQA
     """
-Transform and validate the CSV file at LOCATION by applying renamings and
-filters and write a new CSV to OUTPUT.
+Transform and validate the CSV file at LOCATION by renaming or deleting columns
+and write a new CSV to OUTPUT.
 
 LOCATION: Path to a CSV file.
 
@@ -554,9 +538,8 @@ OUTPUT: Path to CSV inventory file to create.
     from aboutcode.transform import transform_csv_to_csv
     from aboutcode.transform import Transformer
 
-    if not quiet:
-        print_version()
-        click.echo('Transforming CSV...')
+    print_version()
+    click.echo('Transforming CSV...')
 
     if not configuration:
         transformer = Transformer.default()
@@ -565,10 +548,12 @@ OUTPUT: Path to CSV inventory file to create.
 
     errors = transform_csv_to_csv(location, output, transformer)
 
-    errors_count = report_errors(errors, quiet, verbose)
-    if not quiet:
-        msg = 'Transformed CSV written to {output}.'.format(**locals())
-        click.echo(msg)
+    log_file_loc=output + '-error.log'
+    errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
+    msg = 'Transformed CSV written to {output}'
+    if errors_count:
+        msg += ' with ERRORS\nSee log file: {log_file_loc}'
+    click.echo(msg.format(**locals()))
     sys.exit(errors_count)
 
 
@@ -576,31 +561,31 @@ OUTPUT: Path to CSV inventory file to create.
 # Error management
 ######################################################################
 
-def report_errors(errors, quiet, verbose, log_file_loc=None):
+def report_errors(errors, verbose, log_file_loc=None):
     """
-    Report the `errors` list of Error objects to screen based on the `quiet` and
-    `verbose` flags.
+    Report the `errors` list of Error objects to screen based on the `verbose`
+    flag.
 
     If `log_file_loc` file location is provided also write a verbose log to this
-    file.
-    Return True if there were severe error reported.
+    file. Return True if there were severe error reported.
     """
     errors = unique(errors)
-    messages, severe_errors_count = get_error_messages(errors, quiet, verbose)
+    messages, severe_errors_count = get_error_messages(errors, verbose)
     for msg in messages:
         click.echo(msg)
     if log_file_loc:
-        log_msgs, _ = get_error_messages(errors, quiet=False, verbose=True)
-        with io.open(log_file_loc, 'w', encoding='utf-8') as lf:
-            lf.write('\n'.join(log_msgs))
+        log_msgs, _ = get_error_messages(errors, verbose=True)
+        if log_msgs:
+            with io.open(log_file_loc, 'w', encoding='utf-8') as lf:
+                lf.write('\n'.join(log_msgs))
     return severe_errors_count
 
 
-def get_error_messages(errors, quiet=False, verbose=False):
+def get_error_messages(errors, verbose=False):
     """
     Return a tuple of (list of error message strings to report,
-    severe_errors_count) given an `errors` list of Error objects and using the
-    `quiet` and `verbose` flags.
+    severe_errors_count) given an `errors` list of Error objects using the
+    `verbose` flags.
     """
     errors = unique(errors)
     severe_errors = filter_errors(errors, WARNING)
@@ -608,7 +593,7 @@ def get_error_messages(errors, quiet=False, verbose=False):
 
     messages = []
 
-    if severe_errors and not quiet:
+    if severe_errors:
         error_msg = 'Command completed with {} errors or warnings.'.format(severe_errors_count)
         messages.append(error_msg)
 
@@ -623,11 +608,10 @@ def get_error_messages(errors, quiet=False, verbose=False):
             msg += 'in ABOUT file: "{path}": '
         msg += '{message}'
         msg = msg.format(**locals())
-        if not quiet:
-            if verbose:
-                messages.append(msg)
-            elif severity >= WARNING:
-                messages .append(msg)
+        if verbose:
+            messages.append(msg)
+        elif severity >= WARNING:
+            messages .append(msg)
     return messages, severe_errors_count
 
 ######################################################################

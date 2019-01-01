@@ -10,6 +10,5 @@ Options:
   -f, --format [json|csv]  Set OUTPUT inventory file format.  [default: csv]
   -c, --check-files        Check that code and license files referenced in ABOUT
                            files exist.
-  -q, --quiet              Do not print error or warning messages.
   --verbose                Show all error and warning messages.
   -h, --help               Show this message and exit.
