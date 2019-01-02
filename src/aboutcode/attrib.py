@@ -97,22 +97,25 @@ def create_attribution_text(packages, template_text, variables=None):
             # a list of all packages objects
 
             packages=packages,
+
             # a list of unique packages
             unique_packages=unique_packages,
+
+            # sorted list of unique license objects
+            unique_licenses=sorted(licenses_by_key.values()),
 
             # list of common licenses keys
             common_licenses=COMMON_LICENSES,
             # sorted list of common License object actually used across all packages
             common_licenses_in_use=common_licenses_in_use,
 
-            ############################
+            ####################################################################
             # legacy data for backward compatibility
-            ############################
+            ####################################################################
             # prefer using variables
-            vartext=variables,
+            vartext_dict=variables,
             # a list of all package objects: use packages instead
             abouts=packages,
-            ############################
         )
 
     except Exception as e:
