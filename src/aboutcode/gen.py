@@ -74,33 +74,49 @@ def load_inventory(location, base_dir=None):
 
     for entry in inventory:
         entry = dict(entry)
-        about_resource = entry['about_resource'].strip()
-        about_resource = util.to_posix(about_resource.strip('/'))
+        abr = entry['about_resource']
+        about_resource = util.to_posix(abr)
 
+        if abr != about_resource:
+            msg = ('Invalid "about_resource". Path must be a POSIX path '
+                   'using "/" (slash) as separator: "{}"'.format(abr))
+            errors.append(Error(ERROR, msg))
+            continue
+
+
+        abfp = entry.get('about_file_path', '')
+        if abfp and abfp != util.to_posix(abfp):
+            msg = ('Invalid "about_file_path". Path must be a POSIX path '
+                   'using "/" (slash) as separator: "{}"'.format(abr))
+            errors.append(Error(ERROR, msg))
+            continue
+
+        if not abfp:
+            abfp = about_resource
+
+        # Ensure there is no absolute directory path
+        about_file_path = util.to_posix(abfp).strip('/')
+
+        # Skip paths with lead and trailing spaces in directories or files segments
+        if has_spaces(about_file_path):
+            msg = ('Invalid path to create an ABOUT file: a path segment '
+                   'cannot start or end with a space: "{}"'.format(about_file_path))
+            errors.append(Error(ERROR, msg))
+            continue
+
+        # always use the file name as the about_resource to make this relative
+        # to the ABOUT file location
         file_name = resource_name(about_resource)
         entry['about_resource'] = file_name
 
-        about_file_path = entry.get('about_file_path', '').strip()
-        if not about_file_path:
-            about_file_path = about_resource
+        if not about_file_path.endswith('.ABOUT'):
+            about_file_path += '.ABOUT'
 
-        # Ensure there is no absolute directory path
-        about_file_path = util.to_posix(about_file_path).strip('/').strip()
-
-        segments = about_file_path.split('/')
-        if any(seg != seg.strip() for seg in segments):
-            msg = ('Invalid path to create an ABOUT file: a directory '
-                   'cannot start or end with a space: "{}"'.format(about_file_path))
-            errors.append(Error(ERROR, msg))
+        entry['about_file_path'] = about_file_path
+        if base_dir:
+            entry['about_file_location'] = os.path.join(base_dir, about_file_path)
 
         try:
-            if not about_file_path.endswith('.ABOUT'):
-                about_file_path += '.ABOUT'
-
-            entry['about_file_path'] = about_file_path
-            if base_dir:
-                entry['about_file_location'] = os.path.join(base_dir, about_file_path)
-
             packages.append(model.Package.from_dict(entry))
 
         except Exception as e:
@@ -118,6 +134,15 @@ def load_inventory(location, base_dir=None):
             continue
 
     return unique(errors), packages
+
+
+def has_spaces(path):
+    """
+    Return True if any segments of the `path` string contains a leading or
+    trailing space.
+    """
+    path = util.to_posix(path).strip('/')
+    return any(seg != seg.strip() for seg in path.split('/') if seg)
 
 
 def load_csv(location):

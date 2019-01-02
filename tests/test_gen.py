@@ -73,7 +73,7 @@ class GenTest(unittest.TestCase):
         target_dir = get_temp_dir()
         errors, _packages = gen.generate_about_files(location, target_dir)
         expected = [
-            Error(ERROR, 'Invalid path to create an ABOUT file: a directory '
+            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment '
                   'cannot start or end with a space: "about /about.ABOUT"')]
         assert expected == errors
 
@@ -185,6 +185,34 @@ class GenTest(unittest.TestCase):
         generated_files2 = os.listdir(os.path.join(target_dir, 'that'))
         expected = ['bsd-new.LICENSE', 'commons-log.jar.ABOUT', 'mit.LICENSE']
         assert expected == sorted(generated_files2)
+
+    def test_generate_about_files_skip_files_with_spaces(self):
+        inventory_location = get_test_loc('test_gen/inv_with_spaces.csv')
+        target_dir = get_temp_dir()
+        reference_dir = get_test_loc('test_gen/reference')
+
+        errors, packages = gen.generate_about_files(inventory_location, target_dir, reference_dir)
+        expected_errors = [
+            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that/ commons-log.jar"'),
+            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that/commons-log.jar "'),
+            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that /commons-log.jar"'),
+            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment cannot start or end with a space: " that/commons-log.jar"')
+        ]
+        assert expected_errors == errors
+        assert not packages
+
+    def test_generate_about_files_skip_files_with_non_posix_about_resource(self):
+        inventory_location = get_test_loc('test_gen/inv_with_not_posix.csv')
+        target_dir = get_temp_dir()
+        reference_dir = get_test_loc('test_gen/reference')
+
+        errors, packages = gen.generate_about_files(inventory_location, target_dir, reference_dir)
+        expected_errors = [
+            Error(ERROR, 'Invalid "about_resource". Path must be a POSIX path '
+                  'using "/" (slash) as separator: "this\\aboutcode"')
+            ]
+        assert expected_errors == errors
+        assert not packages
 
 
 class TestJson(unittest.TestCase):
