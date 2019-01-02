@@ -171,6 +171,7 @@ def about_resource_validator(about_obj, attribute, value):
         msg = 'Required field "about_resource" is empty.'
         raise Exception(Error(CRITICAL, msg))
 
+
 def license_expression_converter(value):
     """
     Validate and normalize the license expression.
