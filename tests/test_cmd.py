@@ -355,6 +355,10 @@ def test_about_attrib_help_text():
         ['attrib', '--help'],
         'test_cmd/help/about_attrib_help.txt', regen=False)
 
+def test_about_reformat_help_text():
+    check_about_stdout(
+        ['reformat', '--help'],
+        'test_cmd/help/about_reformat_help.txt', regen=False)
 
 def test_about_command_fails_with_an_unknown_subcommand():
     test_dir = get_temp_dir()

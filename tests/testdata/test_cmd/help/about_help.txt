@@ -18,4 +18,6 @@ Commands:
   fetch-licenses  Fetch licenses from a remote DejaCode License Library API.
   gen             Generate .ABOUT files from an CSV or JSON inventory.
   inventory       Collect an inventory of .ABOUT files in a CSV or JSON file.
+  reformat        Reformat existing .ABOUT files in-place to the standard format
+                  and ordering.
   transform       Transform a CSV by renaming and filtering columns.

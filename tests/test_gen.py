@@ -36,7 +36,7 @@ from testing_utils import get_test_loc
 class GenTest(unittest.TestCase):
 
     def test_load_inventory_base(self):
-        location = get_test_loc('test_gen/inv.csv')
+        location = get_test_loc('test_gen/inv_simple.csv')
         target_dir = get_temp_dir()
         errors, packages = gen.load_inventory(location, target_dir)
 
@@ -44,13 +44,14 @@ class GenTest(unittest.TestCase):
         assert expected_errors == errors
 
         expected = [OrderedDict([
-            ('about_resource', u'.'),
+            ('about_file_path', u'inv/about.zip.ABOUT'),
+            ('about_resource', u'about.zip'),
             ('name', u'AboutCode'),
             ('version', u'0.11.0'),
             ('description', u'multi\nline'),
             (u'custom1', u'multi\nline')
         ])]
-        result = [a.to_dict() for a in packages]
+        result = [a.to_dict(with_path=True) for a in packages]
         assert expected == result
 
     def test_load_inventory_with_errors(self):
@@ -73,7 +74,7 @@ class GenTest(unittest.TestCase):
         target_dir = get_temp_dir()
         errors, _packages = gen.generate_about_files(location, target_dir)
         expected = [
-            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment '
+            Error(ERROR, 'Skipping invalid path to create an ABOUT file: a path segment '
                   'cannot start or end with a space: "about /about.ABOUT"')]
         assert expected == errors
 
@@ -111,8 +112,9 @@ class GenTest(unittest.TestCase):
         errors, packages = gen.generate_about_files(location, target_dir)
         expected = [
             Error(CRITICAL,
-                'Cannot create .ABOUT file for: "inv/test.tar.gz.ABOUT".\n'
-                'Required field "about_resource" is missing.')
+                  'Required field "about_resource" is missing in row: 1.')
+#                 'Cannot create .ABOUT file for: "inv/test.tar.gz.ABOUT".\n'
+#                 'Required field "about_resource" is missing.')
         ]
         assert expected == errors
         expected = [OrderedDict([('about_resource', u'My.gz'), ('name', u'AboutCode'), ('version', u'0.11.0')])]
@@ -120,7 +122,45 @@ class GenTest(unittest.TestCase):
         assert 1 == len(os.listdir(target_dir))
 
     def test_generate_about_files_simple(self):
-        location = get_test_loc('test_gen/inv.csv')
+        location = get_test_loc('test_gen/inv_simple.csv')
+        target_dir = get_temp_dir()
+
+        errors, packages = gen.generate_about_files(location, target_dir)
+        assert [] == errors
+
+        result = [a.to_dict(with_path=True) for a in packages]
+        expected = [OrderedDict([
+            ('about_file_path', 'inv/about.zip.ABOUT'),
+            ('about_resource', 'about.zip'),
+            ('name', 'AboutCode'),
+            ('version', '0.11.0'),
+            ('description', 'multi\nline'),
+            ('custom1', 'multi\nline')])
+        ]
+        assert expected == result
+
+        generated = os.listdir(os.path.join(target_dir, 'inv'))
+        expected = ['about.zip.ABOUT']
+        assert expected == generated
+
+    def test_generate_about_files_with_dot_about_resource_return_errors(self):
+        location = get_test_loc('test_gen/inv_with_dot.csv')
+        target_dir = get_temp_dir()
+
+        errors, packages = gen.generate_about_files(location, target_dir)
+        expected = [
+            Error(ERROR, 'Skipping invalid "about_resource". Path cannot be a '
+                  'single "." (period) without an "about_file_path"')
+        ]
+        assert expected == errors
+
+        assert [] == packages
+
+        generated = os.listdir(target_dir)
+        assert [] == generated
+
+    def test_generate_about_files_simple_with_afp(self):
+        location = get_test_loc('test_gen/inv_with_afp.csv')
         target_dir = get_temp_dir()
 
         errors, packages = gen.generate_about_files(location, target_dir)
@@ -193,10 +233,10 @@ class GenTest(unittest.TestCase):
 
         errors, packages = gen.generate_about_files(inventory_location, target_dir, reference_dir)
         expected_errors = [
-            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that/ commons-log.jar"'),
-            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that/commons-log.jar "'),
-            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that /commons-log.jar"'),
-            Error(ERROR, 'Invalid path to create an ABOUT file: a path segment cannot start or end with a space: " that/commons-log.jar"')
+            Error(ERROR, 'Skipping invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that/ commons-log.jar"'),
+            Error(ERROR, 'Skipping invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that/commons-log.jar "'),
+            Error(ERROR, 'Skipping invalid path to create an ABOUT file: a path segment cannot start or end with a space: "that /commons-log.jar"'),
+            Error(ERROR, 'Skipping invalid path to create an ABOUT file: a path segment cannot start or end with a space: " that/commons-log.jar"')
         ]
         assert expected_errors == errors
         assert not packages
@@ -208,7 +248,7 @@ class GenTest(unittest.TestCase):
 
         errors, packages = gen.generate_about_files(inventory_location, target_dir, reference_dir)
         expected_errors = [
-            Error(ERROR, 'Invalid "about_resource". Path must be a POSIX path '
+            Error(ERROR, 'Skipping invalid "about_resource". Path must be a POSIX path '
                   'using "/" (slash) as separator: "this\\aboutcode"')
             ]
         assert expected_errors == errors

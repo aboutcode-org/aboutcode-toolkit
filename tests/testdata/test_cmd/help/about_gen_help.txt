@@ -8,7 +8,10 @@ Usage: about gen [OPTIONS] LOCATION OUTPUT
   OUTPUT: Path to a directory where ABOUT files are generated.
 
 Options:
-  --reference DIR  Path to a directory with reference license data and text
-                   files.
-  --verbose        Show all error and warning messages.
-  -h, --help       Show this message and exit.
+  --reference DIR     Path to a directory with reference license data and text
+                      files.
+  --legacy-placement  Use legacy .ABOUT file placement: when creating an ABOUT
+                      file to document a directory, create the ABOUT file INSIDE
+                      the directory and not side-by-side with the directory.
+  --verbose           Show all error and warning messages.
+  -h, --help          Show this message and exit.

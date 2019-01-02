@@ -220,7 +220,7 @@ def check_json(expected, result, regen=False):
 
     if regen:
         with open(expected, 'w') as o:
-            o.write(json.dumps(result, indent=2))
+            o.write(json.dumps(result, indent=2, separators=(',', ': ')))
 
     with open(expected) as e:
         expected = json.load(e, object_pairs_hook=OrderedDict)

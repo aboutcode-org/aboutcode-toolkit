@@ -1,0 +1,10 @@
+Usage: about reformat [OPTIONS] LOCATION
+
+      Reformat existing .ABOUT files in-place to the standard format and
+      ordering.     Does nothing if there are errors.
+
+  LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
+
+Options:
+  --verbose   Show all error and warning messages.
+  -h, --help  Show this message and exit.

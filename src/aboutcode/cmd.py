@@ -234,13 +234,19 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
     help='Path to a directory with reference license data and text files.')
 
+@click.option('--legacy-placement',
+    is_flag=True,
+    help='Use legacy .ABOUT file placement: when creating an ABOUT file to '
+    'document a directory, create the ABOUT file INSIDE the directory and not '
+    'side-by-side with the directory.')
+
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, reference, verbose):
+def gen(location, output, reference, legacy_placement, verbose):
     """
 Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
@@ -257,7 +263,8 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     errors, packages = generate_about_files(
         inventory_location=location,
         target_dir=output,
-        reference_dir=reference)
+        reference_dir=reference,
+        legacy_placement=legacy_placement)
 
     log_file_loc = output + '-error.log'
     errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
@@ -554,6 +561,57 @@ OUTPUT: Path to CSV inventory file to create.
     if errors_count:
         msg += ' with ERRORS\nSee log file: {log_file_loc}'
     click.echo(msg.format(**locals()))
+    sys.exit(errors_count)
+
+
+######################################################################
+# reformat subcommand
+######################################################################
+
+@about.command(cls=AboutCommand,
+    short_help='Reformat existing .ABOUT files in-place to the standard format and ordering.')
+
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
+
+@click.help_option('-h', '--help')
+
+def reformat(location, verbose):  # NOQA
+    """
+    Reformat existing .ABOUT files in-place to the standard format and ordering.
+    Does nothing if there are errors.
+
+LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
+    """
+    print_version()
+    click.echo('Collecting inventory from ABOUT files...')
+
+    # FIXME: do we really want to continue support zip as an input?
+    # accept zipped ABOUT files as input
+    if location.lower().endswith('.zip'):
+        location = extract_zip(location)
+
+    errors, packages = collect_inventory(location)
+    errors_count = 0
+    if not errors:
+        click.echo('Saving reformatted ABOUT files...')
+        for package in packages:
+            package.dump(package.about_file_location)
+        click.echo('Saved {} reformatted ABOUT files.'.format(len(packages)))
+
+    if errors:
+        click.echo('Errors found. Aborting.')
+        log_file_loc = location + '-error.log'
+        errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
+        msg = 'See log file: {log_file_loc}'
+        click.echo(msg.format(**locals()))
     sys.exit(errors_count)
 
 

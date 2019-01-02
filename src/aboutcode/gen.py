@@ -21,7 +21,7 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 import io
 import json
-import os
+import posixpath
 
 from aboutcode import Error
 from aboutcode import ERROR
@@ -33,7 +33,7 @@ from aboutcode.util import unique
 from aboutcode.util import resource_name
 
 
-def load_inventory(location, base_dir=None):
+def load_inventory(location, base_dir=None, legacy_placement=False):
     """
     Load the inventory file at `location` as Package objects.
     Use the `base_dir` to resolve the ABOUT file location.
@@ -72,49 +72,72 @@ def load_inventory(location, base_dir=None):
 
     errors = []
 
-    for entry in inventory:
+    for rn, entry in enumerate(inventory, 1):
         entry = dict(entry)
-        abr = entry['about_resource']
-        about_resource = util.to_posix(abr)
 
+        abr = entry.get('about_resource', '')
+        if not abr:
+            errors.append(Error(CRITICAL, 'Required field "about_resource" is missing in row: {}.'.format(rn)))
+            continue
+
+        about_resource = util.to_posix(abr)
         if abr != about_resource:
-            msg = ('Invalid "about_resource". Path must be a POSIX path '
+            msg = ('Skipping invalid "about_resource". Path must be a POSIX path '
                    'using "/" (slash) as separator: "{}"'.format(abr))
             errors.append(Error(ERROR, msg))
             continue
-
+        file_name = resource_name(abr)
 
         abfp = entry.get('about_file_path', '')
         if abfp and abfp != util.to_posix(abfp):
-            msg = ('Invalid "about_file_path". Path must be a POSIX path '
+            msg = ('Skipping invalid "about_file_path". Path must be a POSIX path '
                    'using "/" (slash) as separator: "{}"'.format(abr))
             errors.append(Error(ERROR, msg))
             continue
 
         if not abfp:
+            abr_is_dot = abr == '.'
+            if abr_is_dot:
+                msg = ('Skipping invalid "about_resource". Path cannot be a '
+                       'single "." (period) without an "about_file_path"')
+                errors.append(Error(ERROR, msg))
+                continue
+
             abfp = about_resource
 
+        abfp = util.to_posix(abfp)
         # Ensure there is no absolute directory path
-        about_file_path = util.to_posix(abfp).strip('/')
+        about_file_path = abfp.strip('/')
 
         # Skip paths with lead and trailing spaces in directories or files segments
         if has_spaces(about_file_path):
-            msg = ('Invalid path to create an ABOUT file: a path segment '
+            msg = ('Skipping invalid path to create an ABOUT file: a path segment '
                    'cannot start or end with a space: "{}"'.format(about_file_path))
             errors.append(Error(ERROR, msg))
             continue
 
-        # always use the file name as the about_resource to make this relative
-        # to the ABOUT file location
-        file_name = resource_name(about_resource)
-        entry['about_resource'] = file_name
+        # Deal with legacy ABOUT file placement
+        if not legacy_placement:
+            # always use the file name as the about_resource to make this relative
+            # to the ABOUT file location
+            entry['about_resource'] = file_name
+        else:
+            # 1. we do not override the about_resource field to its filename and
+            # use instead the full "about_file_path"
+            # 2. if we have a directory, we use this placement for the ABOUT file:
+            # about_file_path/file_name : this will force the creation of the ABOUT
+            # file insude the documented directory
+            is_directory = abfp.endswith('/')
+            if is_directory:
+                about_file_path = posixpath.join(about_file_path, file_name)
 
         if not about_file_path.endswith('.ABOUT'):
             about_file_path += '.ABOUT'
 
         entry['about_file_path'] = about_file_path
+
         if base_dir:
-            entry['about_file_location'] = os.path.join(base_dir, about_file_path)
+            entry['about_file_location'] = posixpath.join(base_dir, about_file_path)
 
         try:
             packages.append(model.Package.from_dict(entry))
@@ -122,7 +145,7 @@ def load_inventory(location, base_dir=None):
         except Exception as e:
             if len(e.args) == 1 and isinstance(e.args[0], Error):
                 err = e.args[0]
-                msg = 'Cannot create .ABOUT file for: "{}".\n{}'.format(
+                msg = 'Cannot create .ABOUT file for: "{}":\n{}'.format(
                     about_file_path, err.message)
                 err = Error(CRITICAL, msg)
             else:
@@ -219,7 +242,8 @@ def load_json(location):
     return results
 
 
-def generate_about_files(inventory_location, target_dir, reference_dir=None):
+def generate_about_files(inventory_location, target_dir, reference_dir=None,
+                         legacy_placement=False):
     """
     Load ABOUT data from a CSV or JSON inventory at `inventory_location`.
     Write .ABOUT files in the `target_dir` directory.
@@ -229,7 +253,8 @@ def generate_about_files(inventory_location, target_dir, reference_dir=None):
 
     Return a list errors and a list of Package objects.
     """
-    errors, packages = load_inventory(inventory_location, base_dir=target_dir)
+    errors, packages = load_inventory(
+        inventory_location, base_dir=target_dir, legacy_placement=legacy_placement)
     notices_by_filename = {}
     licenses_by_key = {}
 
