@@ -57,7 +57,6 @@ def get_unicode_content(location):
         return doc.read()
 
 
-
 class YamlParseTest(unittest.TestCase):
     maxDiff = None
 
@@ -305,6 +304,11 @@ class PackageTest(unittest.TestCase):
             (u'single_line', u'README STUFF'),
         ]
         assert sorted(expected) == sorted(result)
+
+    def test_Package_custom_fields_are_available_as_direct_instance_attributes(self):
+        test_file = get_test_loc('test_model/custom_fields/custom_fields.about')
+        a = model.Package.load(test_file)
+        assert 'sasasas' == a.other
 
     def test_Package_has_info_for_custom_field_name(self):
         test_file = get_test_loc('test_model/parse/illegal_custom_field.about')

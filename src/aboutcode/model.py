@@ -491,6 +491,15 @@ class Package(object):
             licenses = [License(key=key) for key in keys]
             self.licenses = licenses
 
+    def __getattr__(self, name):
+        """
+        Make custom fields available as direct instance attributes.
+        """
+        try:
+            return self.custom_fields[name]
+        except ValueError:
+            raise AttributeError(self.__class__.__name__+'{} is invalid.'.format(name))
+
     @property
     def base_dir(self):
         return os.path.dirname(self.about_file_location)
