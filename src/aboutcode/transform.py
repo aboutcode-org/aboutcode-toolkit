@@ -73,7 +73,7 @@ def transform_data(rows, transformer):
     column_names = next(rows)
     column_names = transformer.clean_columns(column_names)
 
-    dupes = check_duplicate_columns(column_names)
+    dupes = get_duplicate_columns(column_names)
 
     if dupes:
         msg = 'Duplicated column name: {name}'
@@ -176,16 +176,6 @@ class Transformer(object):
         self.standard_columns = Package.standard_fields()
 
     @classmethod
-    def default(cls):
-        """
-        Return a default Transformer with built-in transforms.
-        """
-        return cls(
-            column_renamings={},
-            required_columns=[],
-            kept_columns=[])
-
-    @classmethod
     def from_file(cls, location):
         """
         Load and return a Transformer instance from a YAML configuration file at
@@ -206,10 +196,8 @@ class Transformer(object):
         """
         errors = []
         required = set(self.essential_columns + self.required_columns)
-        if not required:
-            return []
 
-        for rn, item in enumerate(data):
+        for rn, item in enumerate(data, 1):
             missings = [rk for rk in required if not item.get(rk)]
             if not missings:
                 continue
@@ -259,7 +247,7 @@ class Transformer(object):
                 yield entry
 
 
-def check_duplicate_columns(column_names):
+def get_duplicate_columns(column_names):
     """
     Check that there are no duplicate in the `column_names` list of column name
     strings, ignoring case. Return a list of unique duplicated column names.
@@ -274,6 +262,7 @@ def read_csv_rows(location):
     """
     # note: Excel can produce unreadable UTF files
     with io.open(location, encoding='utf-8', errors='replace') as csvfile:
+        # note: we do not use a dict reader to check later for duplicate column names
         reader = csv.reader(csvfile)
         for row in reader:
             yield row
