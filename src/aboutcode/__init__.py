@@ -77,7 +77,7 @@ class Error(object):
 
     def render(self):
         sev = severities[self.severity]
-        msg = clean_string(repr(self.message))        
+        msg = clean_string(repr(self.message))
         return '%(sev)s: %(msg)s' % locals()
 
     def to_dict(self, *args, **kwargs):

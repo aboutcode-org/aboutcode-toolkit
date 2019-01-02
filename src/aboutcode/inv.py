@@ -67,8 +67,8 @@ def collect_inventory(location, check_files=False):
 
     if errors:
         return sorted(unique(errors)), packages
-    
-    
+
+
     is_file = os.path.isfile(input_location)
 
     for about_file_loc in about_locations :

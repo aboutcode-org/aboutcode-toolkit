@@ -435,7 +435,7 @@ OUTPUT: Path where to write the attribution document.
         )
         errors.extend(attrib_errors)
 
-    log_file_loc=output + '-error.log'
+    log_file_loc = output + '-error.log'
     errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
     msg = 'Attribution generated in: {output}'
     if errors_count:
@@ -548,7 +548,7 @@ OUTPUT: Path to CSV inventory file to create.
 
     errors = transform_csv_to_csv(location, output, transformer)
 
-    log_file_loc=output + '-error.log'
+    log_file_loc = output + '-error.log'
     errors_count = report_errors(errors, verbose, log_file_loc=log_file_loc)
     msg = 'Transformed CSV written to {output}'
     if errors_count:
