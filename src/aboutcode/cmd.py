@@ -142,6 +142,15 @@ def validate_api_url(ctx, param, value):
     return value
 
 
+def validate_unique_fields(ctx, param, value):
+    """
+    Return a set of unique_fields.
+    """
+    if not value:
+        return
+    values = [v.strip() for v in value.split(',') if v and v.strip()]
+    return set(values)
+
 ######################################################################
 # inventory subcommand
 ######################################################################
@@ -393,7 +402,18 @@ def validate_template(ctx, param, value):
     multiple=True,
     callback=validate_key_values,
     metavar='<key>=<value>',
-    help='Add variable text as key=value for use in a custom attribution template.')
+    help='Add variable text as key=value for use in a custom attribution template. '
+         'Can be used multiple times for multiple variable texts.')
+
+@click.option('--unique-fields',
+    callback=validate_unique_fields,
+    metavar='FIELD,FIELD...',
+    help='Comma-separated list of fields to consider for an entry to be unique '
+         'in a custom attribution template. For example with this option '
+         '--field=name,version,component,license_expression then the value of '
+         'the fields name, version, component and license_expression will be '
+         'used together to determine if two ABOUT entries are different and '
+         'compute a list of unique ABOUT entries.')
 
 @click.option('--verbose',
     is_flag=True,
@@ -401,7 +421,7 @@ def validate_template(ctx, param, value):
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, vartext, verbose):
+def attrib(location, output, template, vartext, unique_fields, verbose):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
@@ -439,6 +459,7 @@ OUTPUT: Path where to write the attribution document.
             output_location=output,
             template_loc=template,
             variables=vartext,
+            unique_fields=unique_fields,
         )
         errors.extend(attrib_errors)
 

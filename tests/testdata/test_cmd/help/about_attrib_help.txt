@@ -11,6 +11,16 @@ Options:
                                to generate the attribution document. If not
                                provided the default built-in template is used.
   -v, --vartext <key>=<value>  Add variable text as key=value for use in a
-                               custom attribution template.
+                               custom attribution template. Can be used multiple
+                               times for multiple variable texts.
+  --unique-fields TEXT         Comma-separated list of fields to consider for an
+                               entry to be unique in a custom attribution
+                               template. For example with this option
+                               --field=name,version,component,license_expression
+                               then the value of the fields name, version,
+                               component and license_expression will be used
+                               together to determine if two ABOUT entries are
+                               different and compute a list of unique ABOUT
+                               entries.
   --verbose                    Show all error and warning messages.
   -h, --help                   Show this message and exit.

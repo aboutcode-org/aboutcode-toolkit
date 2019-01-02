@@ -34,8 +34,8 @@ DEFAULT_TEMPLATE_FILE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'templates', 'default_html.template')
 
 
-def generate_attribution_doc(packages, output_location,
-                            template_loc=DEFAULT_TEMPLATE_FILE, variables=None):
+def generate_attribution_doc(packages, output_location, template_loc=DEFAULT_TEMPLATE_FILE,
+                             variables=None, unique_fields=frozenset()):
     """
     Generate and save an attribution doc at `output_location` using an `packages`
     list of Package objects, a `template_loc` template file location and a
@@ -48,7 +48,7 @@ def generate_attribution_doc(packages, output_location,
         template_text = inp.read()
 
     rendering_errors, rendered = create_attribution_text(
-        packages, template_text=template_text, variables=variables)
+        packages, template_text=template_text, variables=variables, unique_fields=unique_fields)
 
     errors.extend(rendering_errors)
 
@@ -59,7 +59,7 @@ def generate_attribution_doc(packages, output_location,
     return errors
 
 
-def create_attribution_text(packages, template_text, variables=None):
+def create_attribution_text(packages, template_text, variables=None, unique_fields=frozenset()):
     """
     Generate an attribution text from an `packages` list of Package objects, a
     `template_text` template text and a `variables` optional dict of extra
@@ -74,6 +74,21 @@ def create_attribution_text(packages, template_text, variables=None):
 
     template = jinja2.Template(template_text, autoescape=True)
 
+    # compute unique Package objects, eventually using provided fields
+    if unique_fields:
+        unique_fields = sorted(unique_fields)
+        uniques = {}
+        for package in packages:
+            unique_key = ''.join(repr(getattr(package, name, '')) for name in unique_fields)
+
+            if unique_key not in uniques:
+                uniques[unique_key] = package
+
+        packages = uniques.values()
+    # else:
+    #     packages = {package.hashable(): package for package in packages}.values()
+    packages = sorted(packages)
+
     licenses_by_key = {}
     for package in packages:
         for license in package.licenses:  # NOQA
@@ -83,23 +98,16 @@ def create_attribution_text(packages, template_text, variables=None):
     common_licenses_in_use = sorted(
         lic for key, lic in licenses_by_key.items() if key in COMMON_LICENSES)
 
-    # compute unique Package objects
-    unique_packages = sorted({package.hashable(): package for package in packages}.values())
-
-    packages = sorted(packages)
-
     try:
         rendered = template.render(
             # the current UTC time
             utcnow=datetime.datetime.utcnow(),
             # variables from CLI vartext option
             variables=variables,
+
             # a list of all packages objects
-
+            # possibly made unique based on some field name values
             packages=packages,
-
-            # a list of unique packages
-            unique_packages=unique_packages,
 
             # sorted list of unique license objects
             unique_licenses=sorted(licenses_by_key.values()),
@@ -112,10 +120,10 @@ def create_attribution_text(packages, template_text, variables=None):
             ####################################################################
             # legacy data for backward compatibility
             ####################################################################
-            # prefer using variables
-            vartext_dict=variables,
             # a list of all package objects: use packages instead
             abouts=packages,
+            # prefer using variables
+            vartext_dict=variables,
         )
 
     except Exception as e:
