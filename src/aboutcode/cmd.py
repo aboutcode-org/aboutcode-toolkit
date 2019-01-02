@@ -542,7 +542,7 @@ OUTPUT: Path to CSV inventory file to create.
     click.echo('Transforming CSV...')
 
     if not configuration:
-        transformer = Transformer.default()
+        transformer = Transformer()
     else:
         transformer = Transformer.from_file(configuration)
 
