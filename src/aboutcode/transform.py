@@ -202,7 +202,7 @@ class Transformer(object):
             if not missings:
                 continue
 
-            missings = ', '.join(missings)
+            missings = ', '.join(sorted(missings))
             msg = 'Row {rn} is missing required values for columns: {missings}'
             errors.append(Error(CRITICAL, msg.format(**locals())))
         return errors

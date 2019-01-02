@@ -57,7 +57,7 @@ class TransformTest(unittest.TestCase):
         transformer = transform.Transformer(required_columns=required_columns)
         errors = transformer.check_required_columns(test_data)
         expected = [
-            Error(CRITICAL, 'Row 1 is missing required values for columns: required, about_resource'),
-            Error(CRITICAL, 'Row 2 is missing required values for columns: required, foo')]
+            Error(CRITICAL, 'Row 1 is missing required values for columns: about_resource, required'),
+            Error(CRITICAL, 'Row 2 is missing required values for columns: foo, required')]
 
         assert expected == errors
