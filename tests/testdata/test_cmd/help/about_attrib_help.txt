@@ -13,5 +13,7 @@ Options:
   -v, --vartext <key>=<value>  Add variable text as key=value for use in a
                                custom attribution template. Can be used multiple
                                times for multiple variable texts.
+  --help-template              Show additional help to write custom attribution
+                               templates and exit.
   --verbose                    Show all error and warning messages.
   -h, --help                   Show this message and exit.

@@ -367,6 +367,16 @@ def validate_template(ctx, param, value):
             '{lineno}: "{message}"'.format(**locals()))
     return value
 
+def display_template_help(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    base_dir = os.path.dirname(__file__)
+    with io.open(os.path.join(base_dir , 'template-help.txt'), encoding='utf-8') as th:
+        template_help = th.read()
+
+    click.echo(template_help)
+    ctx.exit()
+
 
 @about.command(cls=AboutCommand,
     short_help='Generate an attribution document from .ABOUT files.')
@@ -395,6 +405,11 @@ def validate_template(ctx, param, value):
     metavar='<key>=<value>',
     help='Add variable text as key=value for use in a custom attribution template. '
          'Can be used multiple times for multiple variable texts.')
+
+@click.option('--help-template',
+    is_flag=True, is_eager=True, expose_value=False,
+    callback=display_template_help,
+    help='Show additional help to write custom attribution templates and exit.')
 
 @click.option('--verbose',
     is_flag=True,
