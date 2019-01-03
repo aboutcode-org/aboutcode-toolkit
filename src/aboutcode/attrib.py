@@ -110,7 +110,7 @@ def create_attribution_text(packages, template_text, variables=None, unique_fiel
             packages=packages,
 
             # sorted list of unique license objects
-            unique_licenses=sorted(licenses_by_key.values()),
+            licenses=sorted(licenses_by_key.values()),
 
             # list of common licenses keys
             common_licenses=COMMON_LICENSES,
