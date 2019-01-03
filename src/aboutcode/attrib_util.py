@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from jinja2 import Environment
 from jinja2.filters import environmentfilter
 from jinja2.filters import make_attrgetter
 from jinja2.filters import ignore_case
@@ -25,8 +26,22 @@ from jinja2.filters import FilterArgumentError
 
 
 """
-Extra JINJA2 custom filters
+Extra JINJA2 custom filters and other template utilities.
 """
+
+
+def get_template(template_text):
+    """
+    Return a template built from a text string.
+    Register custom templates as needed.
+    """
+    env = Environment(autoescape=True)
+    # register our custom filters
+    env.filters.update(dict(
+        unique_together=unique_together,
+        multi_sort=multi_sort))
+    return env.from_string(template_text)
+
 
 @environmentfilter
 def multi_sort(environment, value, reverse=False, case_sensitive=False,

@@ -27,8 +27,7 @@ import jinja2
 from aboutcode import CRITICAL
 from aboutcode import Error
 from aboutcode.licenses import COMMON_LICENSES
-from aboutcode.attrib_util import unique_together
-from aboutcode.attrib_util import multi_sort
+from aboutcode.attrib_util import get_template
 
 
 # FIXME: the template dir should be outside the code tree
@@ -59,14 +58,6 @@ def generate_attribution_doc(
             of.write(rendered)
 
     return errors
-
-
-def get_template(template_text):
-    env = jinja2.Environment(autoescape=True)
-    # register our custom filters
-    env.filters.update(dict(
-        unique_together=unique_together, multi_sort=multi_sort))
-    return env.from_string(template_text)
 
 
 def create_attribution_text(packages, template_text, variables=None):
