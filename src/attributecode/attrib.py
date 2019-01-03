@@ -32,6 +32,7 @@ import jinja2
 import attributecode
 from attributecode import ERROR
 from attributecode import Error
+from attributecode.attrib_util import get_template
 from attributecode.licenses import COMMON_LICENSES
 from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
@@ -46,7 +47,7 @@ def generate(abouts, template_string=None, vartext_dict=None):
     syntax_error = check_template(template_string)
     if syntax_error:
         return 'Template validation error at line: %r: %r' % (syntax_error)
-    template = jinja2.Template(template_string)
+    template = get_template(template_string)
 
     try:
         captured_license = []
@@ -119,13 +120,14 @@ def generate(abouts, template_string=None, vartext_dict=None):
     return rendered
 
 
+
 def check_template(template_string):
     """
     Check the syntax of a template. Return an error tuple (line number,
     message) if the template is invalid or None if it is valid.
     """
     try:
-        jinja2.Template(template_string)
+        get_template(template_string)
     except (jinja2.TemplateSyntaxError, jinja2.TemplateAssertionError) as e:
         return e.lineno, e.message
 
