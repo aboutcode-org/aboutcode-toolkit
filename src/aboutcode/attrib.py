@@ -23,6 +23,10 @@ import io
 import os
 
 import jinja2
+from jinja2.filters import environmentfilter
+from jinja2.filters import make_attrgetter
+from jinja2.filters import ignore_case
+from jinja2.filters import FilterArgumentError
 
 from aboutcode import CRITICAL
 from aboutcode import Error
@@ -34,8 +38,8 @@ DEFAULT_TEMPLATE_FILE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'templates', 'default_html.template')
 
 
-def generate_attribution_doc(packages, output_location, template_loc=DEFAULT_TEMPLATE_FILE,
-                             variables=None, unique_fields=frozenset()):
+def generate_attribution_doc(
+        packages, output_location, template_loc=DEFAULT_TEMPLATE_FILE, variables=None):
     """
     Generate and save an attribution doc at `output_location` using an `packages`
     list of Package objects, a `template_loc` template file location and a
@@ -48,7 +52,7 @@ def generate_attribution_doc(packages, output_location, template_loc=DEFAULT_TEM
         template_text = inp.read()
 
     rendering_errors, rendered = create_attribution_text(
-        packages, template_text=template_text, variables=variables, unique_fields=unique_fields)
+        packages, template_text=template_text, variables=variables)
 
     errors.extend(rendering_errors)
 
@@ -59,7 +63,15 @@ def generate_attribution_doc(packages, output_location, template_loc=DEFAULT_TEM
     return errors
 
 
-def create_attribution_text(packages, template_text, variables=None, unique_fields=frozenset()):
+def get_template(template_text):
+    env = jinja2.Environment(autoescape=True)
+    # register our custom filters
+    env.filters.update(dict(
+        unique_together=unique_together, multi_sort=multi_sort))
+    return env.from_string(template_text)
+
+
+def create_attribution_text(packages, template_text, variables=None):
     """
     Generate an attribution text from an `packages` list of Package objects, a
     `template_text` template text and a `variables` optional dict of extra
@@ -67,26 +79,12 @@ def create_attribution_text(packages, template_text, variables=None, unique_fiel
 
     Return a list of errors and the attribution text (or None).
 
-    TODO: document data available to the template.
+    TODO: document data available to the template and how to write custom templates.
     """
     rendered = None
     errors = []
+    template = get_template(template_text)
 
-    template = jinja2.Template(template_text, autoescape=True)
-
-    # compute unique Package objects, eventually using provided fields
-    if unique_fields:
-        unique_fields = sorted(unique_fields)
-        uniques = {}
-        for package in packages:
-            unique_key = ''.join(repr(getattr(package, name, '')) for name in unique_fields)
-
-            if unique_key not in uniques:
-                uniques[unique_key] = package
-
-        packages = uniques.values()
-    # else:
-    #     packages = {package.hashable(): package for package in packages}.values()
     packages = sorted(packages)
 
     licenses_by_key = {}
@@ -105,8 +103,7 @@ def create_attribution_text(packages, template_text, variables=None, unique_fiel
             # variables from CLI vartext option
             variables=variables,
 
-            # a list of all packages objects
-            # possibly made unique based on some field name values
+            # a list of all sorted packages objects
             packages=packages,
 
             # sorted list of unique license objects
@@ -141,6 +138,87 @@ def check_template(template_text):
     message) if the template is invalid or None if it is valid.
     """
     try:
-        jinja2.Template(template_text)
+        get_template(template_text)
     except (jinja2.TemplateSyntaxError, jinja2.TemplateAssertionError) as e:
         return e.lineno, e.message
+
+
+################################################################################
+# Extra JINJA2 custom filters
+################################################################################
+
+
+@environmentfilter
+def multi_sort(environment, value, reverse=False, case_sensitive=False,
+               attributes=None):
+    """
+    Sort an iterable using an "attributes" list of attribute names available on
+    each iterable item. Sort ascending unless reverse is "true". Ignore the case
+    of strings unless "case_sensitive" is "true".
+
+    .. sourcecode:: jinja
+
+        {% for item in iterable|multi_sort(attributes=['date', 'name']) %}
+            ...
+        {% endfor %}
+    """
+    if not attributes:
+        raise FilterArgumentError(
+            'The multi_sort filter requires a list of attributes as argument, '
+            'such as in: '
+            "for item in iterable|multi_sort(attributes=['date', 'name'])")
+
+    # build a list of attribute getters, one for each attribute
+    do_ignore_case = ignore_case if not case_sensitive else None
+    attribute_getters = []
+    for attribute in attributes:
+        ag = make_attrgetter(environment, attribute, postprocess=do_ignore_case)
+        attribute_getters.append(ag)
+
+    # build a key function that has runs all attribute getters
+    def key(v):
+        return [a(v) for a in attribute_getters]
+
+    return sorted(value, key=key, reverse=reverse)
+
+
+@environmentfilter
+def unique_together(environment, value, case_sensitive=False, attributes=None):
+    """
+    Return a list of unique items from an iterable. Unicity is checked when
+    considering together all the values of an "attributes" list of attribute
+    names available on each iterable item.. The items order is preserved. Ignore
+    the case of strings unless "case_sensitive" is "true".
+    .. sourcecode:: jinja
+
+        {% for item in iterable|unique_together(attributes=['date', 'name']) %}
+            ...
+        {% endfor %}
+
+    """
+    if not attributes:
+        raise FilterArgumentError(
+            'The unique_together filter requires a list of attributes as argument, '
+            'such as in: '
+            "{% for item in iterable|unique_together(attributes=['date', 'name']) %} ")
+
+    # build a list of attribute getters, one for each attribute
+    do_ignore_case = ignore_case if not case_sensitive else None
+    attribute_getters = []
+    for attribute in attributes:
+        ag = make_attrgetter(environment, attribute, postprocess=do_ignore_case)
+        attribute_getters.append(ag)
+
+    # build a unique_key function that has runs all attribute getters
+    # and returns a hashable tuple
+    def unique_key(v):
+        return tuple(repr(a(v)) for a in attribute_getters)
+
+    unique = []
+    seen = set()
+    for item in value:
+        key = unique_key(item)
+        if key not in seen:
+            seen.add(key)
+            unique.append(item)
+    return unique
