@@ -53,6 +53,7 @@ else:  # Python 3
     from urllib.error import HTTPError  # NOQA
 
 from license_expression import Licensing
+import saneyaml
 
 from attributecode import CRITICAL
 from attributecode import ERROR
@@ -60,7 +61,6 @@ from attributecode import INFO
 from attributecode import WARNING
 from attributecode import api
 from attributecode import Error
-from attributecode import saneyaml
 from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import copy_license_notice_files
@@ -1015,8 +1015,6 @@ class About(object):
             loc = add_unc(loc)
             with codecs.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
-            # Check for duplicated key
-            yaml.load(input_text, Loader=util.NoDuplicateLoader)
             """
             The running_inventory defines if the current process is 'inventory' or not.
             This is used for the validation of the path of the 'about_resource'.
@@ -1030,7 +1028,9 @@ class About(object):
             # wrap the value of the boolean field in quote to avoid
             # automatically conversion from yaml.load
             input = util.wrap_boolean_value(input_text)  # NOQA
-            errs = self.load_dict(saneyaml.load(input), base_dir, running_inventory, use_mapping, mapping_file)
+            data = saneyaml.load(input, allow_duplicate_keys=False)
+
+            errs = self.load_dict(data, base_dir, running_inventory, use_mapping, mapping_file)
             errors.extend(errs)
         except Exception as e:
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n' + str(e)
@@ -1121,7 +1121,8 @@ class About(object):
                 lic_dict['url'] = lic_group[3]
             about_data.setdefault('licenses', []).append(lic_dict)
         formatted_about_data = util.format_output(about_data, use_mapping, mapping_file)
-        return saneyaml.dump(formatted_about_data)
+
+        return saneyaml.dump(formatted_about_data, indent=2)
 
     def dump(self, location, use_mapping=False, mapping_file=False, with_absent=False, with_empty=True):
         """
