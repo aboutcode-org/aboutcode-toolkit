@@ -27,7 +27,7 @@ except NameError:
     basestring = str  # Python 3 #NOQA
 
 
-__version__ = '3.3.0'
+__version__ = '3.3.1'
 
 
 __about_spec_version__ = '3.1'

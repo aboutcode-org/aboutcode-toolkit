@@ -1,3 +1,14 @@
+2018-01-03
+
+    Release 3.3.1
+
+    * Add new Jinja2 custom template filters to multi_sort to sort and
+      unique_together to compute unique lists. Both filter take an attributes
+      list of attribute names and use all these attribute names to sort or
+      compute unique values.
+    * Use saneyaml library to dump and load YAML
+
+
 2018-11-15
 
     Release 3.3.0
