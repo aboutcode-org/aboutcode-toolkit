@@ -66,7 +66,7 @@ def request_license_data(api_url, api_key, license_key):
     api_url = api_url.rstrip('/')
     payload = urlencode(payload)
 
-    full_url = '%(api_url)s/?%(payload)s' % locals()
+    full_url = '{api_url}/?{payload}'.format(**locals())
     # handle special characters in URL such as space etc.
     quoted_url = quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
 
@@ -118,7 +118,7 @@ def get_license_details(api_url, api_key, license_key):
     if key:
         is_active = license_data.get('is_active', False)
         if not is_active:
-            errors.append(Error(CRITICAL, 'License key is NOT active: {}'))
+            errors.append(Error(CRITICAL, 'License key is NOT active: {}'.format(license_key)))
 
         name = license_data.get('name')
         text = license_data.get('full_text')
@@ -206,7 +206,7 @@ def have_network_connection():
     else:
         import http.client as httplib  # NOQA
 
-    http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)  # NOQA
+    http_connection = httplib.HTTPConnection('enterprise.dejacode.com', timeout=10)  # NOQA
     try:
         http_connection.connect()
     except socket.error:
