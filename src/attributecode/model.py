@@ -1081,7 +1081,7 @@ class About(object):
         If with_absent, include absent (not present) fields.
         If with_empty, include empty fields.
         """
-        about_data = {}
+        about_data = OrderedDict()
         # Group the same license information (name, url, file) together
         license_key = []
         license_name = []
@@ -1110,7 +1110,7 @@ class About(object):
         # Group the same license information in a list
         license_group = list(zip_longest(license_key, license_name, license_file, license_url))
         for lic_group in license_group:
-            lic_dict = {}
+            lic_dict = OrderedDict()
             if lic_group[0]:
                 lic_dict['key'] = lic_group[0]
             if lic_group[1]:
