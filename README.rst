@@ -72,12 +72,12 @@ on aboutcode-toolkit usage.
 
 TESTS and DEVELOPMENT
 ---------------------
-To install all the needed development dependencies, run (on posix)::
+To install all the needed development dependencies, run (on posix):
     source configure etc/conf/dev
-or on windows::
+or on windows:
     configure etc/conf/dev
 
-To verify that everything works fine you can run the test suite with::
+To verify that everything works fine you can run the test suite with:
     py.test
 
 
