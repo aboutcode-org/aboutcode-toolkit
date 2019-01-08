@@ -1,4 +1,11 @@
-2018-01-03
+2019-01-07
+
+    Release 3.3.2
+
+    * Add `+` sign as a valid character
+
+
+2019-01-03
 
     Release 3.3.1
 

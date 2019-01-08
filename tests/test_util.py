@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -166,7 +166,7 @@ class UtilsTest(unittest.TestCase):
             assert res.endswith(expect)
 
     def test_invalid_chars_with_valid_chars(self):
-        name = string.digits + string.ascii_letters + '_-.'
+        name = string.digits + string.ascii_letters + '_-.+'
         result = util.invalid_chars(name)
         expected = []
         assert expected == result
