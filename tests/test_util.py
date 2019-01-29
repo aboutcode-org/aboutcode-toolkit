@@ -133,7 +133,7 @@ class TestResourcePaths(unittest.TestCase):
         assert expected == result
 
     def test_invalid_chars_with_valid_chars(self):
-        name = string.digits + string.ascii_letters + '_-.'
+        name = string.digits + string.ascii_letters + '_-.+'
         result = util.invalid_chars(name)
         expected = []
         assert expected == result

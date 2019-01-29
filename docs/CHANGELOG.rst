@@ -4,6 +4,7 @@
 
     * Support filenames/path with spaces #310
     * Update ABOUT file format to match the specification
+    * Support filename/path with a "+" plus sign #392
 
 2018-11-15
 

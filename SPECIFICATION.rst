@@ -72,7 +72,7 @@ A file name can contain only these US-ASCII characters:
 
 - digits from 0 to 9
 - uppercase and lowercase letters from A to Z
-- the "_" underscore, "-" dash and "." period signs.
+- the "_" underscore, "-" dash, "+" plus and "." period signs.
 
 - The case of a file name is not significant. On case-sensitive file systems
   (such as on Linux), a tool must report an error if two ABOUT files stored in
