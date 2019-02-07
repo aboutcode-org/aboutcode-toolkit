@@ -1,6 +1,6 @@
 about_resource: .
 name: AboutCode-toolkit
-version: 3.0.0.dev6
+version: 3.4.0.pre1
 author:
     - >-
         Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
