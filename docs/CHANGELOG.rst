@@ -1,10 +1,9 @@
-2018-XX-XX
+2019-XX-XX
 
     Release 3.4.0.pre1
 
-    * Support filenames/path with spaces #310
+    * Support filenames/path with special characters #310 #378 #392
     * Update ABOUT file format to match the specification
-    * Support filename/path with a "+" plus sign #392
 
 2018-11-15
 

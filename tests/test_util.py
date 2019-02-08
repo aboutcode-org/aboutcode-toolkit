@@ -149,9 +149,9 @@ class TestResourcePaths(unittest.TestCase):
         assert expected == result
 
     def test_invalid_chars_in_file_name(self):
-        name = '%657!1351()275612$_$asafg:'
+        name = '%657!1351()275612$_$asafg:~|[]{}+-.'
         result = util.invalid_chars(name)
-        expected = ['%', '!', '(', ')', '$', '$', ':']
+        expected = ['%', '!', '$', '$', ':']
         assert expected == result
 
     def test_invalid_chars_with_space_is_valid(self):
