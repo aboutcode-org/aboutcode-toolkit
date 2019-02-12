@@ -31,12 +31,12 @@ except NameError:  # pragma: nocover
 
 import saneyaml
 
-__version__ = '3.4.0.pre1'
+__version__ = '4.0.0.pre1'
 
 __about_spec_version__ = '3.1'
 
 __copyright__ = """
-Copyright (c) 2013-2018 nexB Inc. All rights reserved. http://dejacode.org
+Copyright (c) 2013-2019 nexB Inc. All rights reserved. http://dejacode.org
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at

@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name='aboutcode-toolkit',
-    version='3.4.0.pre1',
+    version='4.0.0.pre1',
     license='Apache-2.0',
     description=(
         'AboutCode-toolkit is a tool to document the provenance (origin and license) of '
