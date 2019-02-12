@@ -291,7 +291,7 @@ You should prepare a filtered version of your software inventory (the one that y
 
 You can run attrib using the default_html.template (or default_json.template if want JSON output) provided with the AboutCode Toolkit tools:   
 
-[https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/templates/default_html.template](https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/templates/default_html.template) 
+[https://github.com/nexB/aboutcode-toolkit/blob/develop/templates/default_html.template](https://github.com/nexB/aboutcode-toolkit/blob/develop/templates/default_html.template) 
 
 If you choose to do that, you will most likely want to edit the generated .html file to provide header information about your own organization and product. 
 

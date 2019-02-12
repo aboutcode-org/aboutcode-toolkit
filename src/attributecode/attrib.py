@@ -34,9 +34,8 @@ from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
 
 
-# FIXME: the template dir should be outside the code tree
 DEFAULT_TEMPLATE_FILE = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), 'templates', 'default_html.template')
+    os.path.dirname(os.path.realpath(__file__)), '../../templates', 'default_html.template')
 
 
 def generate(abouts, template=None, variables=None):
