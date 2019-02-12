@@ -752,7 +752,12 @@ custom1: |
 
         expected = get_unicode_content(test_file).splitlines()
         result = get_unicode_content(dumped_file).splitlines()
-        assert expected == result
+        # Ignore comment and empty line
+        filtered_result = []
+        for line in result:
+            if not line.startswith('#') and not line == '':
+                filtered_result.append(line)
+        assert expected == filtered_result
 
     def test_load_can_load_unicode(self):
         test_file = get_test_loc('test_model/unicode/nose-selecttests.ABOUT')

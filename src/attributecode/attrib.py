@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -25,6 +25,7 @@ import os
 
 import jinja2
 
+from attributecode import __version__
 from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import Error
@@ -124,6 +125,7 @@ def generate(abouts, template=None, variables=None):
             license_key_to_license_name=license_key_to_license_name,
             license_name_to_license_key=license_name_to_license_key,
             utcnow=utcnow,
+            tkversion=__version__,
             variables=variables
         )
     except Exception as e:

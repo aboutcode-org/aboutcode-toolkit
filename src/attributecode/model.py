@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -51,6 +51,7 @@ else:  # pragma: nocover
 
 from license_expression import Licensing
 
+from attributecode import __version__
 from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import INFO
@@ -69,6 +70,7 @@ from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
 from attributecode.util import unique
 
+genereated_tk_version = "# Generated with AboutCode Toolkit Version %s \n\n" % __version__
 
 class Field(object):
     """
@@ -1068,6 +1070,7 @@ class About(object):
             about_file_path = add_unc(about_file_path)
 
         with io.open(about_file_path, mode='w', encoding='utf-8') as dumped:
+            dumped.write(genereated_tk_version)
             dumped.write(self.dumps())
 
     def dump_lic(self, location, license_dict):

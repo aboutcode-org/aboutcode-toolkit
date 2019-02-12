@@ -81,7 +81,7 @@
     {% endfor %}
 
     <h3><a id="End">End</a></h3>
-    <i>This file was generated on: {{ utcnow }} (UTC)</i>
+    <i>This file was generated with AboutCode Toolkit version: {{ tkversion }} on: {{ utcnow }} (UTC)</i>
     </body>
 </html>
 
