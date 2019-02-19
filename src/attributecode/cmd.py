@@ -179,7 +179,6 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         print_version()
         click.echo('Collecting inventory from ABOUT files...')
 
-    # FIXME: do we really want to continue support zip as an input?
     if location.lower().endswith('.zip'):
         # accept zipped ABOUT files as input
         location = extract_zip(location)

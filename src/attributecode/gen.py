@@ -138,7 +138,7 @@ def load_inventory(location, base_dir, reference_dir=None):
 
         for f in required_fields:
             if f not in fields:
-                msg = "Required fiel: %(f)r not found in the <input>" % locals()
+                msg = "Required field: %(f)r not found in the <input>" % locals()
                 errors.append(Error(ERROR, msg))
                 return errors, abouts
         afp = fields.get(model.About.ABOUT_FILE_PATH_ATTR)
