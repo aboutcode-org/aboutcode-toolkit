@@ -118,20 +118,26 @@ trailing white spaces: they must be ignored.
 
 The field value is composed of one or more lines of plain US-ASCII printable text.
 
-When a field value contains more than one line of text,  a 'literal block'
-(using |), or a 'folded block' (using '>') is need.
+When a field value is a long string, additional continuation lines must start
+with at least one space. In this case, the first space of an additional
+continuation line is ignored and should be removed from the field value by tools.
 
 For instance::
 
-    description: >
-        This is a long description for a software component that spans
-        multiple lines with arbitrary line breaks.
+    description: This is a long description for a
+     software component that additional continuation line is used.
 
-or::
+
+When a field value contains more than one line of text,  a 'literal block'
+(using |) is need.
+
+For instance::
 
     description: |
         This is a long description for a software component that spans
         multiple lines with arbitrary line breaks.
+
+        This text contains multiple lines.
 
 
 Fields are mandatory or optional
