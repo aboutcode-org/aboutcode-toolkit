@@ -1,4 +1,4 @@
-ABOUT File Specification v3.1
+ABOUT File Specification v3.1.2
 
 
 Purpose
