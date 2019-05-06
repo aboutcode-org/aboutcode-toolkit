@@ -428,7 +428,10 @@ class PathField(ListField):
 
         name = self.name
 
-        # FIXME: Why is the PathField an ordered dict?
+        # Why is the PathField an ordered dict?
+        # Ans: The reason why the PathField use an ordered dict is because
+        # for the FileTextField, the key is used as the path to the file and 
+        # the value is used as the context of the file 
         # dict of normalized paths to a location or None
         paths = OrderedDict()
 
@@ -692,7 +695,7 @@ class About(object):
     about_resource_path_attr = 'about_resource_path'
 
     # Required fields
-    required_fields = [ABOUT_FILE_PATH_ATTR, 'name']
+    required_fields = ['name']
 
     def get_required_fields(self):
         return [f for f in self.fields if f.required]
@@ -1137,7 +1140,7 @@ def get_field_names(abouts):
     in any object, including custom fields.
     """
     fields = []
-    fields.append(About.ABOUT_FILE_PATH_ATTR)
+    # fields.append(About.ABOUT_FILE_PATH_ATTR)
 
     standard_fields = About().fields.keys()
     standards = []
@@ -1179,10 +1182,17 @@ def about_object_to_list_of_dictionary(abouts):
     for about in abouts:
         # TODO: this wholeblock should be under sd_dict()
         ad = about.as_dict()
+        # Update the 'about_resource' field with the relative path
+        # from the output location
         if 'about_file_path' in ad.keys():
             afp = ad['about_file_path']
-            afp = '/' + afp if not afp.startswith('/') else afp
-            ad['about_file_path'] = afp
+            afp_parent = posixpath.dirname(afp)
+            afp_parent = '/' + afp_parent if not afp_parent.startswith('/') else afp_parent
+            about_resource = ad['about_resource']
+            for resource in about_resource:
+                updated_about_resource = posixpath.join(afp_parent, resource)
+            ad['about_resource'] = OrderedDict([(updated_about_resource, None)])
+            del ad['about_file_path']
         serialized.append(ad)
     return serialized
 
