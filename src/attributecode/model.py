@@ -693,9 +693,12 @@ class About(object):
 
     # name of the attribute containing the resolved relative Resources paths
     about_resource_path_attr = 'about_resource_path'
+    
+    # name of the attribute containing the resolved relative Resources paths
+    ABOUT_RESOURCE_ATTR = 'about_resource'    
 
     # Required fields
-    required_fields = ['name']
+    required_fields = ['name', ABOUT_RESOURCE_ATTR]
 
     def get_required_fields(self):
         return [f for f in self.fields if f.required]
@@ -913,7 +916,6 @@ class About(object):
             self.base_dir,
             self.reference_dir)
         errors.extend(validation_errors)
-
         return errors
 
     def load(self, location):
@@ -1130,7 +1132,6 @@ def collect_inventory(location):
             msg = (about_file_path + ": " + message)
             errors.append(Error(severity, msg))
         abouts.append(about)
-
     return unique(errors), abouts
 
 
@@ -1184,16 +1185,24 @@ def about_object_to_list_of_dictionary(abouts):
         ad = about.as_dict()
         # Update the 'about_resource' field with the relative path
         # from the output location
-        if 'about_file_path' in ad.keys():
-            afp = ad['about_file_path']
-            afp_parent = posixpath.dirname(afp)
-            afp_parent = '/' + afp_parent if not afp_parent.startswith('/') else afp_parent
-            about_resource = ad['about_resource']
-            for resource in about_resource:
-                updated_about_resource = posixpath.join(afp_parent, resource)
-            ad['about_resource'] = OrderedDict([(updated_about_resource, None)])
-            del ad['about_file_path']
-        serialized.append(ad)
+        try:
+            if ad['about_resource']:
+                if 'about_file_path' in ad.keys():
+                    afp = ad['about_file_path']
+                    afp_parent = posixpath.dirname(afp)
+                    afp_parent = '/' + afp_parent if not afp_parent.startswith('/') else afp_parent
+                    about_resource = ad['about_resource']
+                    for resource in about_resource:
+                        updated_about_resource = posixpath.normpath(posixpath.join(afp_parent, resource))
+                        if resource == u'.':
+                            updated_about_resource = updated_about_resource + '/'
+                    ad['about_resource'] = OrderedDict([(updated_about_resource, None)])
+                    del ad['about_file_path']
+                serialized.append(ad)
+        except Exception as e:
+            # The missing required field, about_resource, has already been checked
+            # and the error has already been logged.
+            pass
     return serialized
 
 

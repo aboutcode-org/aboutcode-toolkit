@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -45,15 +45,15 @@ class GenTest(unittest.TestCase):
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
-    def test_check_duplicated_about_file_path(self):
+    def test_check_duplicated_about_resource(self):
         test_dict = [
-            {'about_file_path': '/test/test.c', 'version': '1.03', 'name': 'test.c'},
-            {'about_file_path': '/test/abc/', 'version': '1.0', 'name': 'abc'},
-            {'about_file_path': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
+            {'about_resource': '/test/test.c', 'version': '1.03', 'name': 'test.c'},
+            {'about_resource': '/test/abc/', 'version': '1.0', 'name': 'abc'},
+            {'about_resource': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
         expected = [
             Error(CRITICAL,
-                  "The input has duplicated values in 'about_file_path' field: /test/test.c")]
-        result = gen.check_duplicated_about_file_path(test_dict)
+                  "The input has duplicated values in 'about_resource' field: /test/test.c")]
+        result = gen.check_duplicated_about_resource(test_dict)
         assert expected == result
 
     def test_load_inventory(self):
