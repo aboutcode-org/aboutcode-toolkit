@@ -185,8 +185,6 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
             msg = (u"The following character(s) cannot be in the license_expression: " +
                    str(special_char_in_expression))
             errors.append(Error(ERROR, msg))
-        else:
-            about.license_key.value = lic_list
 
     rendering_error, rendered = generate_from_file(
         abouts,

@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -23,10 +23,10 @@ import os
 import unittest
 
 from testing_utils import get_test_loc
+from testing_utils import get_temp_file
 
 from attributecode import attrib
 from attributecode import model
-
 
 class TemplateTest(unittest.TestCase):
 
@@ -109,6 +109,18 @@ class GenerateTest(unittest.TestCase):
         expected = remove_timestamp(expected)
         assert expected == result
 
+    def test_lic_key_name_sync(self):
+        test_file = get_test_loc('test_attrib/gen_license_key_name_check/test.ABOUT')
+        expected = get_test_loc('test_attrib/gen_license_key_name_check/expected/expected.html')
+        template_loc = get_test_loc('test_attrib/gen_license_key_name_check/custom.template')
+        output_file = get_temp_file()
+
+        errors, abouts = model.collect_inventory(test_file)
+        attrib.generate_and_save(abouts, output_file, template_loc)
+
+        f1 = open(output_file, "r").read()
+        f2 = open(expected,"r").read()
+        assert f1 == f2
 
 def remove_timestamp(html_text):
     """
