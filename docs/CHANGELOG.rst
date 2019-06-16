@@ -5,6 +5,7 @@
     * Support filenames/path with special characters #310 #378 #392
     * Update ABOUT file format to match the specification
     * Log version of which AbcTK was used #397
+    * Fix the licenses (key, name, file) not in sync issue #406
 
 2018-11-15
 
