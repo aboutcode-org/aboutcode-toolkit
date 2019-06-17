@@ -74,6 +74,8 @@ def generate(abouts, template=None, variables=None):
             if about.license_file:
                 # We want to create a dictionary which have the license short name as
                 # the key and license text as the value
+                print("##################################################")
+                print(about.license_file)
                 for license_text_name in about.license_file.value:
                     if not license_text_name in captured_license:
                         captured_license.append(license_text_name)
@@ -84,6 +86,8 @@ def generate(abouts, template=None, variables=None):
                         license_key_and_context[license_key] = about.license_file.value[license_text_name]
                         sorted_license_key_and_context = collections.OrderedDict(sorted(license_key_and_context.items()))
                         license_file_name_and_key[license_text_name] = license_key
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! LIC KEY AND CONTEXT")
+                print(license_key_and_context)
 
             # Convert/map the key in license expression to license name
             if about.license_expression.value and about.license_name.value:
@@ -117,6 +121,8 @@ def generate(abouts, template=None, variables=None):
 
         # Get the current UTC time
         utcnow = datetime.datetime.utcnow()
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ BEFORE Render")
+        print(license_key_and_context)
         rendered = template.render(
             abouts=abouts, common_licenses=COMMON_LICENSES,
             license_key_and_context=sorted_license_key_and_context,

@@ -116,8 +116,6 @@ class GenerateTest(unittest.TestCase):
         output_file = get_temp_file()
 
         errors, abouts = model.collect_inventory(test_file)
-        print("################################################3")
-        print(abouts)
         attrib.generate_and_save(abouts, output_file, template_loc)
 
         with open(output_file) as of:
@@ -126,6 +124,7 @@ class GenerateTest(unittest.TestCase):
             f2 = '\n'.join(ef.readlines(False))
 
         assert f1 == f2
+        assert 1 == 2
 
 def remove_timestamp(html_text):
     """
