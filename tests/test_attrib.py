@@ -118,8 +118,8 @@ class GenerateTest(unittest.TestCase):
         errors, abouts = model.collect_inventory(test_file)
         attrib.generate_and_save(abouts, output_file, template_loc)
 
-        f1 = open(output_file, "r").read()
-        f2 = open(expected,"r").read()
+        f1 = open(output_file, "r").read().strip()
+        f2 = open(expected,"r").read().strip()
         assert f1 == f2
 
 def remove_timestamp(html_text):
