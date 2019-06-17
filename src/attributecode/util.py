@@ -51,6 +51,8 @@ else:  # pragma: nocover
 
 on_windows = 'win32' in sys.platform
 
+# boolean field name
+boolean_fields = ['redistribute', 'attribute', 'track_change', 'modified', 'internal_use_only']
 
 def to_posix(path):
     """
@@ -123,6 +125,23 @@ def check_file_names(paths):
             seen[path] = orig_path
     return errors
 
+def wrap_boolean_value(context):
+    updated_context = ''
+    for line in context.splitlines():
+        """
+        wrap the boolean value in quote
+        """
+        key = line.partition(':')[0]
+        value = line.partition(':')[2].strip()
+        value = '"' + value + '"'
+        print(value)
+        if key in boolean_fields and not value == "":
+            updated_context += key + ': ' + value + '\n'
+        else:
+            updated_context += line + '\n'
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    print(updated_context)
+    return updated_context
 
 # TODO: rename to normalize_path
 def get_absolute(location):
