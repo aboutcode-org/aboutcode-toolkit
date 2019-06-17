@@ -795,21 +795,8 @@ class About(object):
     def all_fields(self):
         """
         Return the list of all Field objects.
-        If with_absent, include absent (not present) fields.
-        If with_empty, include empty fields.
         """
-        all_fields = []
-
-        for field in list(self.fields.values()) + list(self.custom_fields.values()):
-            if field.required:
-                all_fields.append(field)
-            else:
-                if field.present:
-                    if field.value:
-                        all_fields.append(field)
-                    elif field.name in boolean_fields and not field.value == None:
-                        all_fields.append(field)
-        return all_fields
+        return list(self.fields.values()) + list(self.custom_fields.values())
 
     def as_dict(self):
         """
