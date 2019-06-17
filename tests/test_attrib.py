@@ -116,6 +116,8 @@ class GenerateTest(unittest.TestCase):
         output_file = get_temp_file()
 
         errors, abouts = model.collect_inventory(test_file)
+        print("################################################3")
+        print(abouts)
         attrib.generate_and_save(abouts, output_file, template_loc)
 
         with open(output_file) as of:
