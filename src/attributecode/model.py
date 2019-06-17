@@ -910,7 +910,6 @@ class About(object):
         afp = self.about_file_path
 
         errors = self.hydrate(fields)
-
         # We want to copy the license_files before the validation
         if reference_dir:
             copy_license_notice_files(
@@ -997,6 +996,7 @@ class About(object):
                 # 'Field licenses is a custom field.'
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
+
         errors = self.process(
             fields=fields,
             about_file_path=self.about_file_path,
@@ -1027,9 +1027,9 @@ class About(object):
         license_file = []
         license_url = []
         file_fields = ['about_resource', 'notice_file', 'changelog_file', 'author_file']
-        bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
+        bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified', 'internal_use_only']
         for field in self.all_fields():
-            if not field.value:
+            if not field.value and not field.name in bool_fields:
                 continue
 
             if field.name == 'license_key' and field.value:
@@ -1046,8 +1046,10 @@ class About(object):
             # value of 'about_resource'
             elif field.name in file_fields and field.value:
                 data[field.name] = list(field.value.keys())[0]
+            elif field.name in bool_fields and not field.value == None:
+                data[field.name] = field.value
             else:
-                if field.value or (field.name in bool_fields and not field.value == None):
+                if field.value:
                     data[field.name] = field.value
 
         # Group the same license information in a list

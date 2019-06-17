@@ -134,13 +134,10 @@ def wrap_boolean_value(context):
         key = line.partition(':')[0]
         value = line.partition(':')[2].strip()
         value = '"' + value + '"'
-        print(value)
         if key in boolean_fields and not value == "":
             updated_context += key + ': ' + value + '\n'
         else:
             updated_context += line + '\n'
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    print(updated_context)
     return updated_context
 
 # TODO: rename to normalize_path

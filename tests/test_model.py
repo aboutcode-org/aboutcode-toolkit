@@ -681,6 +681,8 @@ licenses:
             Error(INFO, 'Field custom2 is a custom field.'),
             Error(INFO, 'Field custom2 is present but empty.')
         ]
+        print("########################################")
+        print(a.errors)
         assert sorted(expected_error) == sorted(a.errors)
 
         expected = '''about_resource: .
