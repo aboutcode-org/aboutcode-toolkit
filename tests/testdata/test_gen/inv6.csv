@@ -1,0 +1,2 @@
+about_file_path,about_resource,name,version,download_url,description,homepage_url,notes,license_name,license_file,license_url,copyright,notice_file,notice_url,redistribute,attribute,track_change,modified,changelog_file,owner,owner_url,contact,author,vcs_tool,vcs_repository,vcs_path,vcs_tag,vcs_branch,vcs_revision,checksum_md5,checksum_sha1,spec_version
+inv/this.ABOUT,.,AboutCode,0.11.0,,,,,,,,,,,Yes,Y,,N,,,,,,,,,,,,,,

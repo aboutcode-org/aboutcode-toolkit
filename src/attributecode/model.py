@@ -61,11 +61,13 @@ from attributecode import Error
 from attributecode import saneyaml
 from attributecode import util
 from attributecode.util import add_unc
+from attributecode.util import boolean_fields
 from attributecode.util import copy_license_notice_files
 from attributecode.util import csv
 from attributecode.util import filter_errors
 from attributecode.util import is_valid_name
 from attributecode.util import on_windows
+from attributecode.util import wrap_boolean_value
 from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
 from attributecode.util import unique
@@ -119,7 +121,7 @@ class Field(object):
             # present fields should have content ...
             # The boolean value can be True, False and None
             # The value True or False is the content of boolean fields
-            if not self.has_content:
+            if not name in boolean_fields and not self.has_content:
                 # ... especially if required
                 if self.required:
                     msg = u'Field %(name)s is required and empty'
@@ -585,8 +587,7 @@ class BooleanField(SingleLineField):
             self.value = None
         elif flag is None:
             name = self.name
-            msg = (u'Field %(name)s: field is empty. '
-                   u'Defaulting flag to no.' % locals())
+            msg = (u'Field %(name)s: field is present but empty. ' % locals())
             errors.append(Error(INFO, msg))
             self.value = None
         else:
@@ -896,7 +897,6 @@ class About(object):
         afp = self.about_file_path
 
         errors = self.hydrate(fields)
-
         # We want to copy the license_files before the validation
         if reference_dir:
             copy_license_notice_files(
@@ -926,6 +926,10 @@ class About(object):
             loc = add_unc(loc)
             with io.open(loc, encoding='utf-8') as txt:
                 input_text = txt.read()
+            # The 'Yes' and 'No' will be converted to 'True' and 'False' in the yaml.load()
+            # Therefore, we need to wrap the original value in quote to prevent
+            # the conversion
+            input = wrap_boolean_value(input_text)
             # FIXME: this should be done in the commands, not here
             """
             The running_inventory defines if the current process is 'inventory' or not.
@@ -937,7 +941,7 @@ class About(object):
             and then join with the 'about_resource'
             """
             running_inventory = True
-            data = saneyaml.load(input_text, allow_duplicate_keys=False)
+            data = saneyaml.load(input, allow_duplicate_keys=False)
             errs = self.load_dict(data, base_dir, running_inventory)
             errors.extend(errs)
         except Exception as e:
@@ -979,6 +983,7 @@ class About(object):
                 # 'Field licenses is a custom field.'
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
+
         errors = self.process(
             fields=fields,
             about_file_path=self.about_file_path,
@@ -1009,9 +1014,9 @@ class About(object):
         license_file = []
         license_url = []
         file_fields = ['about_resource', 'notice_file', 'changelog_file', 'author_file']
-        bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified']
+        bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified', 'internal_use_only']
         for field in self.all_fields():
-            if not field.value:
+            if not field.value and not field.name in bool_fields:
                 continue
 
             if field.name == 'license_key' and field.value:
@@ -1028,8 +1033,10 @@ class About(object):
             # value of 'about_resource'
             elif field.name in file_fields and field.value:
                 data[field.name] = list(field.value.keys())[0]
+            elif field.name in bool_fields and not field.value == None:
+                data[field.name] = field.value
             else:
-                if field.value or (field.name in bool_fields and not field.value == None):
+                if field.value:
                     data[field.name] = field.value
 
         # Group the same license information in a list
@@ -1127,7 +1134,6 @@ def collect_inventory(location):
             msg = (about_file_path + ": " + message)
             errors.append(Error(severity, msg))
         abouts.append(about)
-
     return unique(errors), abouts
 
 

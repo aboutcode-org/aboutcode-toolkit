@@ -199,3 +199,18 @@ custom1: |
             'licenses:\n'
             '    -   file: this.LICENSE\n')
         assert expected == result
+
+    def test_boolean_value_not_lost(self):
+        location = get_test_loc('test_gen/inv6.csv')
+        base_dir = get_temp_dir()
+
+        _errors, abouts = gen.generate(location, base_dir)
+
+        in_mem_result = [a.dumps() for a in abouts][0]
+        expected = (u'about_resource: .\n'
+                    u'name: AboutCode\n'
+                    u'version: 0.11.0\n'
+                    u'redistribute: yes\n'
+                    u'attribute: yes\n'
+                    u'modified: no\n')
+        assert expected == in_mem_result

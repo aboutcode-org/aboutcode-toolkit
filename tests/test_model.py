@@ -578,6 +578,27 @@ this software and releases the component to Public Domain.
         expected_msg = "Field modified: Invalid flag value: 'blah'"
         assert expected_msg in a.errors[0].message
 
+    def test_About_boolean_value(self):
+        test_file = get_test_loc('test_model/parse/boolean_data.about')
+        a = model.About(test_file)
+        expected_msg = "Field track_changes is present but empty."
+        assert expected_msg in a.errors[0].message
+        # Context of the test file
+        """
+        about_resource: .
+        name: boolean_data
+        attribute: False
+        modified: true
+        internal_use_only: no
+        redistribute: yes
+        track_changes:
+        """
+        assert a.attribute.value is False
+        assert a.modified.value is True
+        assert a.internal_use_only.value is False
+        assert a.redistribute.value is True
+        assert a.track_changes.value is None
+
     def test_About_contains_about_file_path(self):
         test_file = get_test_loc('test_model/serialize/about.ABOUT')
         # TODO: I am not sure this override of the about_file_path makes sense
@@ -681,6 +702,8 @@ licenses:
             Error(INFO, 'Field custom2 is a custom field.'),
             Error(INFO, 'Field custom2 is present but empty.')
         ]
+        print("########################################")
+        print(a.errors)
         assert sorted(expected_error) == sorted(a.errors)
 
         expected = '''about_resource: .
