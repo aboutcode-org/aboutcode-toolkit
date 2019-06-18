@@ -1,11 +1,12 @@
 2019-XX-XX
 
-    Release 3.4.0.pre1
+    Release 4.0.0.pre1
 
     * Support filenames/path with special characters #310 #378 #392
     * Update ABOUT file format to match the specification
     * Log version of which AbcTK was used #397
     * Fix the licenses (key, name, file) not in sync issue #406
+    * Correct invalid msg for boolean fields #403
 
 2018-11-15
 
