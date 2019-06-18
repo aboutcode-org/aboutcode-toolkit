@@ -14,7 +14,8 @@
         <div class="oss-component" id="component_{{ loop.index0 }}">
 			{% for i in range(about_object.license_file.value|length) %}
 			  <h2>{{ about_object.license_key.value[i] | e}}</h2>
-			  <pre>{{ about_object.license_file.value.values()[i] | e}}</pre>
+			  {% set lic_text = about_object.license_file.value.values() | list %}
+			  <pre>{{ lic_text[i] | e }}</pre>
 			{% endfor %}
 		
         </div>

@@ -124,7 +124,6 @@ class GenerateTest(unittest.TestCase):
             f2 = '\n'.join(ef.readlines(False))
 
         assert f1 == f2
-        assert 1 == 2
 
 def remove_timestamp(html_text):
     """
