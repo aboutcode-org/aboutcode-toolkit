@@ -630,11 +630,10 @@ this software and releases the component to Public Domain.
         b.custom_fields['g'] = model.StringField(
             name='g', value='1', present=True)
         abouts = [a, b]
-        # ensure that custom fields and about file path are collected
-        # and that all fields are in the correct order
+        # ensure all fields (including custom fields) and
+        # about_resource are collected in the correct order
         expected = [
-            model.About.ABOUT_FILE_PATH_ATTR,
-            'about_resource', 'name', 'f', 'g'
+            model.About.ABOUT_RESOURCE_ATTR, 'name', 'f', 'g'
         ]
         result = model.get_field_names(abouts)
         assert expected == result
@@ -651,11 +650,9 @@ this software and releases the component to Public Domain.
         b.custom_fields['cf'] = model.StringField(name='cf', value='2',
                                                  present=True)
         abouts = [a, b]
-        # ensure that custom fields and about file path are collected
-        # and that all fields are in the correct order
-        # FIXME: this is not USED
+        # ensure all fields (including custom fields) and
+        # about_resource are collected in the correct order
         expected = [
-            'about_file_path',
             'about_resource',
             'name',
             'cf',
@@ -1091,9 +1088,6 @@ class CollectorTest(unittest.TestCase):
 
         expected_errors = [Error(CRITICAL, 'about/about.ABOUT: Field about_resource is required')]
         assert expected_errors == errors
-
-        expected = get_test_loc('test_model/inventory/no_about_resource_key/expected.csv')
-        check_csv(expected, result)
 
     def test_collect_inventory_complex_from_directory(self):
         location = get_test_loc('test_model/inventory/complex')

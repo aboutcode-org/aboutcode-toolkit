@@ -46,7 +46,7 @@ from attributecode.util import filter_errors
 
 
 __copyright__ = """
-    Copyright (c) 2013-2018 nexB Inc and others. All rights reserved.
+    Copyright (c) 2013-2019 nexB Inc and others. All rights reserved.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at

@@ -78,21 +78,21 @@ def check_duplicated_columns(location):
     return unique(errors)
 
 
-def check_duplicated_about_file_path(inventory_dict):
+def check_duplicated_about_resource(inventory_dict):
     """
-    Return a list of errors for duplicated about_file_path in a CSV file at location.
+    Return a list of errors for duplicated about_resource in a CSV file at location.
     """
-    afp_list = []
+    arp_list = []
     errors = []
     for component in inventory_dict:
         # Ignore all the empty path
-        if component['about_file_path']:
-            if component['about_file_path'] in afp_list:
-                msg = ("The input has duplicated values in 'about_file_path' "
-                       "field: " + component['about_file_path'])
+        if component['about_resource']:
+            if component['about_resource'] in arp_list:
+                msg = ("The input has duplicated values in 'about_resource' "
+                       "field: " + component['about_resource'])
                 errors.append(Error(CRITICAL, msg))
             else:
-                afp_list.append(component['about_file_path'])
+                arp_list.append(component['about_resource'])
     return errors
 
 
@@ -122,13 +122,13 @@ def load_inventory(location, base_dir, reference_dir=None):
 
     try:
         # FIXME: this should not be done here.
-        dup_about_paths_err = check_duplicated_about_file_path(inventory)
-        if dup_about_paths_err:
-            errors.extend(dup_about_paths_err)
+        dup_about_resource_err = check_duplicated_about_resource(inventory)
+        if dup_about_resource_err:
+            errors.extend(dup_about_resource_err)
             return errors, abouts
     except Exception as e:
         # TODO: why catch ALL Exception
-        msg = "The essential field 'about_file_path' is not found in the <input>"
+        msg = "The essential field 'about_resource' is not found in the <input>"
         errors.append(Error(CRITICAL, msg))
         return errors, abouts
 
@@ -141,7 +141,7 @@ def load_inventory(location, base_dir, reference_dir=None):
                 msg = "Required field: %(f)r not found in the <input>" % locals()
                 errors.append(Error(ERROR, msg))
                 return errors, abouts
-        afp = fields.get(model.About.ABOUT_FILE_PATH_ATTR)
+        afp = fields.get(model.About.ABOUT_RESOURCE_ATTR)
 
         # FIXME: this should not be a failure condition
         if not afp or not afp.strip():
@@ -154,17 +154,30 @@ def load_inventory(location, base_dir, reference_dir=None):
         about = model.About(about_file_path=afp)
         about.location = loc
 
+        # Update value for 'about_resource'
+        # keep only the filename or '.' if it's a directory
+        if 'about_resource' in fields:
+            updated_resource_value = u''
+            resource_path = fields['about_resource']
+            if resource_path.endswith(u'/'):
+                updated_resource_value = u'.'
+            else:
+                updated_resource_value = basename(resource_path)
+            fields['about_resource'] = updated_resource_value
+        
         ld_errors = about.load_dict(
             fields,
             base_dir,
             running_inventory=False,
             reference_dir=reference_dir,
         )
+        """
         # 'about_resource' field will be generated during the process.
         # No error need to be raise for the missing 'about_resource'.
         for e in ld_errors:
             if e.message == 'Field about_resource is required':
                 ld_errors.remove(e)
+        """
         for e in ld_errors:
             if not e in errors:
                 errors.extend(ld_errors)
@@ -172,6 +185,8 @@ def load_inventory(location, base_dir, reference_dir=None):
 
     return unique(errors), abouts
 
+def update_about_resource(self):
+    pass
 
 def generate(location, base_dir, reference_dir=None, fetch_license=False):
     """

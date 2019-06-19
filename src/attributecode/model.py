@@ -430,7 +430,10 @@ class PathField(ListField):
 
         name = self.name
 
-        # FIXME: Why is the PathField an ordered dict?
+        # Why is the PathField an ordered dict?
+        # Ans: The reason why the PathField use an ordered dict is because
+        # for the FileTextField, the key is used as the path to the file and 
+        # the value is used as the context of the file 
         # dict of normalized paths to a location or None
         paths = OrderedDict()
 
@@ -691,9 +694,12 @@ class About(object):
 
     # name of the attribute containing the resolved relative Resources paths
     about_resource_path_attr = 'about_resource_path'
+    
+    # name of the attribute containing the resolved relative Resources paths
+    ABOUT_RESOURCE_ATTR = 'about_resource'    
 
     # Required fields
-    required_fields = [ABOUT_FILE_PATH_ATTR, 'name']
+    required_fields = ['name', ABOUT_RESOURCE_ATTR]
 
     def get_required_fields(self):
         return [f for f in self.fields if f.required]
@@ -910,7 +916,6 @@ class About(object):
             self.base_dir,
             self.reference_dir)
         errors.extend(validation_errors)
-
         return errors
 
     def load(self, location):
@@ -1143,7 +1148,7 @@ def get_field_names(abouts):
     in any object, including custom fields.
     """
     fields = []
-    fields.append(About.ABOUT_FILE_PATH_ATTR)
+    # fields.append(About.ABOUT_FILE_PATH_ATTR)
 
     standard_fields = About().fields.keys()
     standards = []
@@ -1185,11 +1190,26 @@ def about_object_to_list_of_dictionary(abouts):
     for about in abouts:
         # TODO: this wholeblock should be under sd_dict()
         ad = about.as_dict()
-        if 'about_file_path' in ad.keys():
-            afp = ad['about_file_path']
-            afp = '/' + afp if not afp.startswith('/') else afp
-            ad['about_file_path'] = afp
-        serialized.append(ad)
+        # Update the 'about_resource' field with the relative path
+        # from the output location
+        try:
+            if ad['about_resource']:
+                if 'about_file_path' in ad.keys():
+                    afp = ad['about_file_path']
+                    afp_parent = posixpath.dirname(afp)
+                    afp_parent = '/' + afp_parent if not afp_parent.startswith('/') else afp_parent
+                    about_resource = ad['about_resource']
+                    for resource in about_resource:
+                        updated_about_resource = posixpath.normpath(posixpath.join(afp_parent, resource))
+                        if resource == u'.':
+                            updated_about_resource = updated_about_resource + '/'
+                    ad['about_resource'] = OrderedDict([(updated_about_resource, None)])
+                    del ad['about_file_path']
+                serialized.append(ad)
+        except Exception as e:
+            # The missing required field, about_resource, has already been checked
+            # and the error has already been logged.
+            pass
     return serialized
 
 

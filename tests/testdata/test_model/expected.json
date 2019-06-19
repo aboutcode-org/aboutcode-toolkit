@@ -1,7 +1,6 @@
 [
   {
-    "about_file_path": "/test_model/this.ABOUT", 
-    "about_resource": ".", 
+    "about_resource": "/test_model/", 
     "name": "AboutCode", 
     "version": "0.11.0"
   }
