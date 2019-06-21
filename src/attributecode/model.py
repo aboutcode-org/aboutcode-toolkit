@@ -936,6 +936,9 @@ class About(object):
             # Therefore, we need to wrap the original value in quote to prevent
             # the conversion
             pre_input = wrap_boolean_value(input_text)
+            # saneyaml.load() will have parsing error if the input has
+            # tab value. Therefore, we should check if the input contains
+            # any tab and then convert it to spaces.
             input = replace_tab_with_spaces(pre_input)
             # FIXME: this should be done in the commands, not here
             """
