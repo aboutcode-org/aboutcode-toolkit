@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -138,6 +138,15 @@ def wrap_boolean_value(context):
             updated_context += key + ': ' + value + '\n'
         else:
             updated_context += line + '\n'
+    return updated_context
+
+def replace_tab_with_spaces(context):
+    updated_context = ''
+    for line in context.splitlines():
+        """
+        Replace tab with 4 spaces
+        """
+        updated_context += line.replace('\t', '    ') + '\n'
     return updated_context
 
 # TODO: rename to normalize_path

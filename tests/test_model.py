@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -37,6 +37,7 @@ from attributecode import model
 from attributecode.util import add_unc
 from attributecode.util import load_csv
 from attributecode.util import to_posix
+from attributecode.util import replace_tab_with_spaces
 
 from testing_utils import extract_test_loc
 from testing_utils import get_temp_file
@@ -299,6 +300,19 @@ class YamlParseTest(unittest.TestCase):
             (u'single_line', u'optional'),
             (u'other_field', u'value'),
             (u'multi_line', u'some value  \n  and more  \n      and yet more   \n \n')
+        ]
+
+        assert expected == list(result.items())
+
+    def test_saneyaml_load_can_parse_verbatim_tab_text_unstripped(self):
+        test = get_test_content('test_model/parse/continuation_verbatim_with_tab.about')
+        data = replace_tab_with_spaces(test)
+        result = saneyaml.load(data)
+
+        expected = [
+            (u'single_line', u'optional'),
+            (u'other_field', u'value'),
+            (u'multi_line', u'This is a long description\nwith tab.\n')
         ]
 
         assert expected == list(result.items())
@@ -699,8 +713,6 @@ licenses:
             Error(INFO, 'Field custom2 is a custom field.'),
             Error(INFO, 'Field custom2 is present but empty.')
         ]
-        print("########################################")
-        print(a.errors)
         assert sorted(expected_error) == sorted(a.errors)
 
         expected = '''about_resource: .

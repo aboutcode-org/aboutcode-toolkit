@@ -67,6 +67,7 @@ from attributecode.util import csv
 from attributecode.util import filter_errors
 from attributecode.util import is_valid_name
 from attributecode.util import on_windows
+from attributecode.util import replace_tab_with_spaces
 from attributecode.util import wrap_boolean_value
 from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
@@ -934,7 +935,8 @@ class About(object):
             # The 'Yes' and 'No' will be converted to 'True' and 'False' in the yaml.load()
             # Therefore, we need to wrap the original value in quote to prevent
             # the conversion
-            input = wrap_boolean_value(input_text)
+            pre_input = wrap_boolean_value(input_text)
+            input = replace_tab_with_spaces(pre_input)
             # FIXME: this should be done in the commands, not here
             """
             The running_inventory defines if the current process is 'inventory' or not.
