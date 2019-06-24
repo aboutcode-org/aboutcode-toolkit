@@ -11,8 +11,8 @@ about
 
 ::
 
-    --version    Show the version and exit.
-    --help       Show this message and exit.
+    --version        Show the version and exit.
+    -h, --help       Show this message and exit.
 
 **Commands:**
 
@@ -22,6 +22,7 @@ about
   check      LOCATION: directory
   gen        LOCATION: input file, OUTPUT: directory
   inventory  LOCATION: directory, OUTPUT: csv file
+  transform  LOCATION: csv file, OUTPUT: csv file
 
 
 attrib
@@ -351,4 +352,57 @@ The multiple licenses support format for ABOUT files are by "grouping" with the 
             name: apache-2.0.LICENSE
         -   key: mit
             name: mit.LICENSE
+
+
+transform
+=========
+
+**Syntax**
+
+::
+
+    about transform [OPTIONS] LOCATION OUTPUT
+
+    LOCATION: Path to a CSV file.
+    OUTPUT: Path to CSV inventory file to create.
+
+**Options:**
+
+::
+
+  -c, --configuration FILE  Path to an optional YAML configuration file. See
+                            --help-format for format help.
+  --help-format             Show configuration file format help and exit.
+  -q, --quiet               Do not print error or warning messages.
+  --verbose                 Show all error and warning messages.
+  -h, --help                Show this message and exit.
+
+Purpose
+-------
+Transform the CSV file at LOCATION by applying renamings, filters and checks and write a new CSV to OUTPUT.
+
+Options
+-------
+
+::
+
+    -c, --configuration
+
+        Path to an optional YAML configuration file. See--help-format for format help.
+
+    $ about transform -c 'path to the YAML configuration file' LOCATION OUTPUT
+
+    --help-format
+
+        Show configuration file format help and exit.
+        This option will print out examples of the the YAML configuration file.
+        
+        Keys configuration are: `column_renamings`, `required_columns` and `column_filters`
+
+    $ about transform --help-format
+
+    --verbose
+
+        This option tells the tool to show all errors found.
+        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
