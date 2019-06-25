@@ -406,3 +406,6 @@ Options
         This option tells the tool to show all errors found.
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
+Special Notes
+=============
+When using the `column_filters` configuration, all the standard required columns (`about_resource` and `name`) and the user definied `required_columns` need to be included.
