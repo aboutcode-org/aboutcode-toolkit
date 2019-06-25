@@ -478,7 +478,11 @@ def ungroup_licenses(licenses):
         if 'name' in lic:
             lic_name.append(lic['name'])
         if 'file' in lic:
-            lic_file.append(lic['file'])
+            if isinstance(lic['file'], list):
+                for lic in lic['file']:
+                    lic_file.append(lic)
+            else:
+                lic_file.append(lic['file'])
         if 'url' in lic:
             lic_url.append(lic['url'])
     return lic_key, lic_name, lic_file, lic_url
@@ -492,10 +496,19 @@ def format_about_dict_for_csv_output(about_dictionary_list):
         row_list = OrderedDict()
         for key in element:
             if element[key]:
-                if isinstance(element[key], list):
-                    row_list[key] = u'\n'.join((element[key]))
-                elif key == u'about_resource' or key in file_fields:
+                if key == u'about_resource' or key in file_fields:
                     row_list[key] = u'\n'.join((element[key].keys()))
+                elif isinstance(element[key], list):
+                    """
+                    element_list = []
+                    for items in element[key]:
+                        if isinstance(items, list):
+                            for item in items:
+                                element_list.append(item)
+                        else:
+                            element_list.append(items)
+                    """
+                    row_list[key] = u'\n'.join(element[key])
                 else:
                     row_list[key] = element[key]
         csv_formatted_list.append(row_list)
