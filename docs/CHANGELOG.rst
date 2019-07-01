@@ -2,12 +2,12 @@
 
     Release 4.0.0.pre1
 
-    * Support filenames/path with special characters #310 #378 #392
     * Update ABOUT file format to match the specification
     * Log version of which AbcTK was used #397
     * Fix the licenses (key, name, file) not in sync issue #406
     * Correct invalid msg for boolean fields #403
     * Remove the `about_file_path` key/column from input/output #364
+    * Use ',' to support multiple files #404
 
 2018-11-15
 

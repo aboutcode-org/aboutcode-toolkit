@@ -1,0 +1,10 @@
+about_resource: .
+name: multiple_files
+
+notice_file: NOTICE, NOTICE1
+author_file: AUTHOR
+changelog_file:
+
+licenses:
+    - key: lgpl-2.1
+	  file: COPYING, COPYING.LESSER
