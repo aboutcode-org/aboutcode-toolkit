@@ -1,3 +1,10 @@
+2019-06-30
+
+    Release 3.3.3
+
+    * Support filenames/path with special characters #310 #378 #392
+
+
 2019-01-07
 
     Release 3.3.2
