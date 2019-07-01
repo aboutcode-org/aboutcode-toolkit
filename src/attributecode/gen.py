@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -36,6 +36,7 @@ from attributecode import model
 from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import csv
+from attributecode.util import file_fields
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import unique
@@ -96,6 +97,24 @@ def check_duplicated_about_resource(inventory_dict):
     return errors
 
 
+def check_newline_in_file_field(inventory_dict):
+    """
+    Return a list of errors for newline characters detected in *_file fields.
+    """
+    errors = []
+    for component in inventory_dict:
+        for k in component.keys():
+            if k in file_fields:
+                try:
+                    if '\n' in component[k]:
+                        msg = ("New line character detected in '%s' for '%s' which is not supported."
+                                "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
+                        errors.append(Error(CRITICAL, msg))
+                except:
+                    pass
+    return errors
+
+
 # TODO: this should be either the CSV or the ABOUT files but not both???
 def load_inventory(location, base_dir, reference_dir=None):
     """
@@ -125,6 +144,10 @@ def load_inventory(location, base_dir, reference_dir=None):
         dup_about_resource_err = check_duplicated_about_resource(inventory)
         if dup_about_resource_err:
             errors.extend(dup_about_resource_err)
+            return errors, abouts
+        newline_in_file = check_newline_in_file_field(inventory)
+        if newline_in_file:
+            errors.extend(newline_in_file)
             return errors, abouts
     except Exception as e:
         # TODO: why catch ALL Exception
@@ -164,7 +187,7 @@ def load_inventory(location, base_dir, reference_dir=None):
             else:
                 updated_resource_value = basename(resource_path)
             fields['about_resource'] = updated_resource_value
-        
+
         ld_errors = about.load_dict(
             fields,
             base_dir,

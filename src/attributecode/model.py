@@ -64,6 +64,7 @@ from attributecode.util import add_unc
 from attributecode.util import boolean_fields
 from attributecode.util import copy_license_notice_files
 from attributecode.util import csv
+from attributecode.util import file_fields
 from attributecode.util import filter_errors
 from attributecode.util import is_valid_name
 from attributecode.util import on_windows
@@ -438,66 +439,68 @@ class PathField(ListField):
         # dict of normalized paths to a location or None
         paths = OrderedDict()
 
-        for path in self.value:
-            path = path.strip()
-            path = util.to_posix(path)
+        for path_value in self.value:
+            p = path_value.split(',')
+            for path in p:
+                path = path.strip()
+                path = util.to_posix(path)
 
-            # normalize eventual / to .
-            # and a succession of one or more ////// to . too
-            if path.strip() and not path.strip(posixpath.sep):
-                path = '.'
-
-            # removing leading and trailing path separator
-            # path are always relative
-            path = path.strip(posixpath.sep)
-
-            # the license files, if need to be copied, are located under the path
-            # set from the 'license-text-location' option, so the tool should check
-            # at the 'license-text-location' instead of the 'base_dir'
-            if not (self.base_dir or self.reference_dir):
-                msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
-                       u' No base directory provided' % locals())
-                errors.append(Error(ERROR, msg))
-                location = None
+                # normalize eventual / to .
+                # and a succession of one or more ////// to . too
+                if path.strip() and not path.strip(posixpath.sep):
+                    path = '.'
+        
+                # removing leading and trailing path separator
+                # path are always relative
+                path = path.strip(posixpath.sep)
+        
+                # the license files, if need to be copied, are located under the path
+                # set from the 'license-text-location' option, so the tool should check
+                # at the 'license-text-location' instead of the 'base_dir'
+                if not (self.base_dir or self.reference_dir):
+                    msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
+                           u' No base directory provided' % locals())
+                    errors.append(Error(ERROR, msg))
+                    location = None
+                    paths[path] = location
+                    continue
+        
+                if self.reference_dir:
+                    location = posixpath.join(self.reference_dir, path)
+                else:
+                    # The 'about_resource' should be a joined path with
+                    # the 'about_file_path' and the 'base_dir
+                    if not self.running_inventory and self.about_file_path:
+                        # Get the parent directory of the 'about_file_path'
+                        afp_parent = posixpath.dirname(self.about_file_path)
+        
+                        # Create a relative 'about_resource' path by joining the
+                        # parent of the 'about_file_path' with the value of the
+                        # 'about_resource'
+                        arp = posixpath.join(afp_parent, path)
+                        normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
+                        location = posixpath.join(self.base_dir, normalized_arp)
+                    else:
+                        location = posixpath.join(self.base_dir, path)
+        
+                location = util.to_native(location)
+                location = os.path.abspath(os.path.normpath(location))
+                location = util.to_posix(location)
+                location = add_unc(location)
+        
+                if not os.path.exists(location):
+                    # We don't want to show the UNC_PREFIX in the error message
+                    location = util.to_posix(location.strip(UNC_PREFIX))
+                    msg = (u'Field %(name)s: Path %(location)s not found'
+                           % locals())
+                    # We want to show INFO error for 'about_resource'
+                    if name == u'about_resource':
+                        errors.append(Error(INFO, msg))
+                    else:
+                        errors.append(Error(CRITICAL, msg))
+                    location = None
+        
                 paths[path] = location
-                continue
-
-            if self.reference_dir:
-                location = posixpath.join(self.reference_dir, path)
-            else:
-                # The 'about_resource' should be a joined path with
-                # the 'about_file_path' and the 'base_dir
-                if not self.running_inventory and self.about_file_path:
-                    # Get the parent directory of the 'about_file_path'
-                    afp_parent = posixpath.dirname(self.about_file_path)
-
-                    # Create a relative 'about_resource' path by joining the
-                    # parent of the 'about_file_path' with the value of the
-                    # 'about_resource'
-                    arp = posixpath.join(afp_parent, path)
-                    normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
-                    location = posixpath.join(self.base_dir, normalized_arp)
-                else:
-                    location = posixpath.join(self.base_dir, path)
-
-            location = util.to_native(location)
-            location = os.path.abspath(os.path.normpath(location))
-            location = util.to_posix(location)
-            location = add_unc(location)
-
-            if not os.path.exists(location):
-                # We don't want to show the UNC_PREFIX in the error message
-                location = util.to_posix(location.strip(UNC_PREFIX))
-                msg = (u'Field %(name)s: Path %(location)s not found'
-                       % locals())
-                # We want to show INFO error for 'about_resource'
-                if name == u'about_resource':
-                    errors.append(Error(INFO, msg))
-                else:
-                    errors.append(Error(CRITICAL, msg))
-                location = None
-
-            paths[path] = location
 
         self.value = paths
         return errors
@@ -516,7 +519,6 @@ class AboutResourceField(PathField):
         errors = super(AboutResourceField, self)._validate(*args, ** kwargs)
         return errors
 
-
 class FileTextField(PathField):
     """
     A path field pointing to one or more text files such as license files.
@@ -529,10 +531,7 @@ class FileTextField(PathField):
         of errors. base_dir is the directory used to resolve a file location
         from a path.
         """
-
         errors = super(FileTextField, self)._validate(*args, ** kwargs)
-        super(FileTextField, self)._validate(*args, ** kwargs)
-
         # a FileTextField is a PathField
         # self.value is a paths to location ordered dict
         # we will replace the location with the text content
@@ -559,7 +558,6 @@ class FileTextField(PathField):
         # set or reset self
         self.errors = errors
         return errors
-
 
 class BooleanField(SingleLineField):
     """
@@ -976,7 +974,6 @@ class About(object):
             if not value:
                 # never return empty or absent fieds
                 continue
-
             if key == u'licenses':
                 # FIXME: use a license object instead
                 lic_key, lic_name, lic_file, lic_url = ungroup_licenses(value)
@@ -1023,7 +1020,6 @@ class About(object):
         license_name = []
         license_file = []
         license_url = []
-        file_fields = ['about_resource', 'notice_file', 'changelog_file', 'author_file']
         bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified', 'internal_use_only']
         for field in self.all_fields():
             if not field.value and not field.name in bool_fields:
@@ -1034,7 +1030,12 @@ class About(object):
             elif field.name == 'license_name' and field.value:
                 license_name = field.value
             elif field.name == 'license_file' and field.value:
-                license_file = field.value.keys()
+                # Restore the original_value as it was parsed for
+                # validation purpose
+                if field.original_value:
+                    license_file = field.original_value.split('\n')
+                else:
+                    license_file = field.value.keys()
             elif field.name == 'license_url' and field.value:
                 license_url = field.value
 
@@ -1042,7 +1043,7 @@ class About(object):
             # Take the first element (should only be one) in the list for the
             # value of 'about_resource'
             elif field.name in file_fields and field.value:
-                data[field.name] = list(field.value.keys())[0]
+                data[field.name] = field.original_value
             elif field.name in bool_fields and not field.value == None:
                 data[field.name] = field.value
             else:
@@ -1193,8 +1194,17 @@ def about_object_to_list_of_dictionary(abouts):
     """
     serialized = []
     for about in abouts:
+        # Restore the *_file value to the original value
+        # The *_file's original_value may be parsed (i.e. split(',))
+        # for validation purpose.  
+        about.license_file.value = about.license_file.original_value
+        about.notice_file.value = about.notice_file.original_value 
+        about.changelog_file.value = about.changelog_file.original_value
+        about.author_file.value = about.author_file.original_value
+
         # TODO: this wholeblock should be under sd_dict()
         ad = about.as_dict()
+
         # Update the 'about_resource' field with the relative path
         # from the output location
         try:
@@ -1207,7 +1217,8 @@ def about_object_to_list_of_dictionary(abouts):
                     for resource in about_resource:
                         updated_about_resource = posixpath.normpath(posixpath.join(afp_parent, resource))
                         if resource == u'.':
-                            updated_about_resource = updated_about_resource + '/'
+                            if not updated_about_resource == '/': 
+                                updated_about_resource = updated_about_resource + '/'
                     ad['about_resource'] = OrderedDict([(updated_about_resource, None)])
                     del ad['about_file_path']
                 serialized.append(ad)
