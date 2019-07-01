@@ -32,10 +32,10 @@ setup(
         'Collect inventories, generate attribution documentation.'
     ),
     long_description=(
-        'AttributeCode provides a simple way to document the'
-        'provenance (i.e. origin and license) of software components that'
-        'you use in your project. This documentation is stored in *.ABOUT'
-        'files, side-by-side with the documented code.'
+        'AttributeCode provides a simple way to document the '
+        'provenance (i.e. origin and license) of software components that '
+        'you use in your project. This documentation is stored in \*.ABOUT '
+        'files, side-by-side with the documented code. '
     ),
     author='Chin-Yeung Li, Jillian Daguil, Thomas Druez, Philippe Ombredanne and others.',
     author_email='info@nexb.com',
