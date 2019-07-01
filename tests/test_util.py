@@ -177,14 +177,14 @@ class UtilsTest(unittest.TestCase):
         assert expected == result
 
     def test_invalid_chars_in_file_name(self):
-        name = '%657!1351()275612$_$asafg:'
+        name = '%657!1351()275612$_$asaf>g:<'
         result = util.invalid_chars(name)
-        expected = ['%', '!', '(', ')', '$', '$', ':']
+        expected = [u'%', u'!', u'$', u'$', u'>', u':', u'<']
         assert expected == result
 
-    def test_invalid_chars_with_space(self):
+    def test_valid_chars_with_space(self):
         result = util.invalid_chars('_ Hello')
-        expected = [' ']
+        expected = []
         assert expected == result
 
     def test_check_file_names_with_dupes_return_errors(self):
@@ -211,20 +211,6 @@ class UtilsTest(unittest.TestCase):
 
         expected = []
         result = util.check_file_names(paths)
-        assert expected == result
-
-    def test_check_file_names_with_invalid_chars_return_errors(self):
-        paths = [
-            'locations/file',
-            'locations/file with space',
-            'locations/dir1/dir2/file1',
-            'locations/dir2/file1'
-        ]
-
-        expected = [Error(CRITICAL, "Invalid characters '  ' in file name at: 'locations/file with space'")]
-        result = util.check_file_names(paths)
-
-        assert expected[0].message == result[0].message
         assert expected == result
 
     def test_get_about_locations(self):
