@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -459,7 +459,7 @@ OUTPUT: Path to CSV inventory file to create.
 
     errors = transform_csv_to_csv(location, output, transformer)
 
-    errors_count = report_errors(errors, quiet, verbose)
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet and not errors:
         msg = 'Transformed CSV written to {output}.'.format(**locals())
         click.echo(msg)
