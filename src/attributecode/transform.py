@@ -28,6 +28,7 @@ from attributecode import Error
 from attributecode import saneyaml
 from attributecode.util import csv
 from attributecode.util import python2
+from attributecode.util import replace_tab_with_spaces
 
 
 if python2:  # pragma: nocover
@@ -182,7 +183,7 @@ class Transformer(object):
         `location`.
         """
         with io.open(location, encoding='utf-8') as conf:
-            data = saneyaml.load(conf.read())
+            data = saneyaml.load(replace_tab_with_spaces(conf.read()))
         return cls(
             column_renamings=data.get('column_renamings', {}),
             required_columns=data.get('required_columns', []),
