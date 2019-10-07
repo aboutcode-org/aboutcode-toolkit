@@ -1,0 +1,3 @@
+column_renamings:
+    'Directory/Filename' : about_resource
+    Component: name
