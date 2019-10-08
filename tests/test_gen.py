@@ -56,6 +56,18 @@ class GenTest(unittest.TestCase):
         result = gen.check_duplicated_about_resource(test_dict)
         assert expected == result
 
+    def test_check_newline_in_file_field(self):
+        test_dict = [
+            {'about_resource': '/test/test.c', 'name': 'test.c', 'notice_file': 'NOTICE\nNOTICE2'},
+            {'about_resource': '/test/abc/', 'version': '1.0', 'name': 'abc'},
+            {'about_resource': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
+        expected = [
+            Error(CRITICAL,
+                  "New line character detected in 'notice_file' for '/test/test.c' which is not supported."
+                  "\nPlease use ',' to declare multiple files.")]
+        result = gen.check_newline_in_file_field(test_dict)
+        assert expected == result
+
     def test_load_inventory(self):
         location = get_test_loc('test_gen/inv.csv')
         base_dir = get_temp_dir()

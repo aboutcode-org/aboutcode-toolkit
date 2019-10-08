@@ -53,6 +53,7 @@ on_windows = 'win32' in sys.platform
 
 # boolean field name
 boolean_fields = ['redistribute', 'attribute', 'track_change', 'modified', 'internal_use_only']
+file_fields = ['about_resource', 'notice_file', 'changelog_file', 'author_file']
 
 def to_posix(path):
     """
@@ -487,14 +488,13 @@ def ungroup_licenses(licenses):
 # FIXME: add docstring
 def format_about_dict_for_csv_output(about_dictionary_list):
     csv_formatted_list = []
-    file_fields = ['license_file', 'notice_file', 'changelog_file', 'author_file']
     for element in about_dictionary_list:
         row_list = OrderedDict()
         for key in element:
             if element[key]:
                 if isinstance(element[key], list):
                     row_list[key] = u'\n'.join((element[key]))
-                elif key == u'about_resource' or key in file_fields:
+                elif key == u'about_resource':
                     row_list[key] = u'\n'.join((element[key].keys()))
                 else:
                     row_list[key] = element[key]
@@ -505,7 +505,6 @@ def format_about_dict_for_csv_output(about_dictionary_list):
 # FIXME: add docstring
 def format_about_dict_for_json_output(about_dictionary_list):
     licenses = ['license_key', 'license_name', 'license_file', 'license_url']
-    file_fields = ['notice_file', 'changelog_file', 'author_file']
     json_formatted_list = []
     for element in about_dictionary_list:
         row_list = OrderedDict()
@@ -526,11 +525,9 @@ def format_about_dict_for_json_output(about_dictionary_list):
                     elif key == 'license_name':
                         license_name = element[key]
                     elif key == 'license_file':
-                        license_file = element[key].keys()
+                        license_file = element[key]
                     elif key == 'license_url':
                         license_url = element[key]
-                elif key in file_fields:
-                    row_list[key] = element[key].keys()
                 else:
                     row_list[key] = element[key]
 

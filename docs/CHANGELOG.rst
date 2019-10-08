@@ -8,7 +8,8 @@
     * Fix the licenses (key, name, file) not in sync issue #406
     * Correct invalid msg for boolean fields #403
     * Remove the `about_file_path` key/column from input/output #364
-    # Fix bugs in `transform` #408, #412
+    * Use ',' to support multiple files #404
+    * Fix bugs in `transform` #408, #412
 
 2018-11-15
 
