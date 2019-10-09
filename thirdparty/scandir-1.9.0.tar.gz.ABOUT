@@ -1,5 +1,7 @@
 about_resource: scandir-1.9.0.tar.gz
-attribute: true
+name: scandir
+version: 1.9.0
+attribute: yes
 checksum_md5: 506c4cc5f38c00b301642a9cb0433910
 checksum_sha1: 64c550daec4ef70aa913e1e046b265ff9914c3e8
 copyright: Copyright (c) Ben Hoyt
@@ -7,10 +9,9 @@ download_url: https://files.pythonhosted.org/packages/16/2a/557af1181e6b4e30254d
 homepage_url: https://github.com/benhoyt/scandir
 license_expression: bsd-new
 licenses:
--   file: bsd-new.LICENSE
-    key: bsd-new
-    name: BSD-3-Clause
-name: scandir
+    -   file: bsd-new.LICENSE
+        key: bsd-new
+        name: BSD-3-Clause
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new
 owner: Ben Hoyt
 vcs_repository: https://github.com/benhoyt/scandir
-version: 1.9.0

@@ -1,16 +1,15 @@
 about_resource: .
 name: e2fsprogs
-version: 1.39
-download_url: http://sourceforge.net/projects/e2fsprogs/files/e2fsprogs/1.39/e2fsprogs-1.39.tar.gz/
-license_name: GNU General Public License 2.0
-license_file: gpl-2.0.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0
-copyright: Copyright (c) 1997-2004 Theodore Ts'o
-notice_file: e2fsprogs-1.39.NOTICE
-redistribute: yes
+version: '1.39'
 attribute: yes
+copyright: Copyright (c) 1997-2004 Theodore Ts'o
+download_url: http://sourceforge.net/projects/e2fsprogs/files/e2fsprogs/1.39/e2fsprogs-1.39.tar.gz/
+license_expression: gpl-2.0
+licenses:
+    -   file: gpl-2.0.LICENSE
+        key: gpl-2.0
+        name: GNU General Public License 2.0
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0
+notice_file: e2fsprogs-1.39.NOTICE
 owner: Theodore Ts'o
-dje_license_key: gpl-2.0
-category: Copyleft
-confirmed_license: GPL 2.0
-component_type: directory
+redistribute: yes

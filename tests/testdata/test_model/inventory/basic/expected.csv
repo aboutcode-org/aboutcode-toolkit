@@ -1,0 +1,2 @@
+about_resource,name,version,description,homepage_url,license_expression,license_key,license_file,copyright,notice_file,owner,author,vcs_tool,vcs_repository
+/about/,AboutCode,0.11.0,AboutCode is a tool to process ABOUT files. An ABOUT file is a file.,http://dejacode.org,apache-2.0,apache-2.0,apache-2.0.LICENSE,Copyright (c) 2013-2014 nexB Inc.,NOTICE,nexB Inc.,"Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez",git,https://github.com/dejacode/about-code-tool.git

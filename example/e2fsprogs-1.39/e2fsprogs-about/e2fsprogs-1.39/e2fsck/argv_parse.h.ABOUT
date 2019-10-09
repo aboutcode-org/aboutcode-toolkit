@@ -1,13 +1,12 @@
 about_resource: argv_parse.h
 name: argv_parse.h
-license_name: MIT Old Style with legal disclaimer 2
-license_file: mit-old-style-legal-2.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit-old-style-legal-2
-copyright: Copyright 1999 by Theodore Ts'o
 attribute: yes
-owner: Theodore Ts'o
-dje_license_key: mit-old-style-legal-2
-category: Attribution
-confirmed_license: MIT Old Style legal 2
-component_type: c language text
 checksum_sha1: fbe63cb7e5c5c90ba03b47e1e105ac1e50c2ba2a
+copyright: Copyright 1999 by Theodore Ts'o
+license_expression: mit-old-style-legal-2
+licenses:
+    -   file: mit-old-style-legal-2.LICENSE
+        key: mit-old-style-legal-2
+        name: MIT Old Style with legal disclaimer 2
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit-old-style-legal-2
+owner: Theodore Ts'o

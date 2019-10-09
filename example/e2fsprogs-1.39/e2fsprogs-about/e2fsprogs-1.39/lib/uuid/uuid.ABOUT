@@ -1,12 +1,11 @@
 about_resource: .
 name: uuid
-license_name: BSD-Modified
-license_file: bsd-new.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new
-copyright: Copyright (C) 1996, 1997 Theodore Ts'o
 attribute: yes
+copyright: Copyright (C) 1996, 1997 Theodore Ts'o
+license_expression: bsd-new
+licenses:
+    -   file: bsd-new.LICENSE
+        key: bsd-new
+        name: BSD-3-Clause
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new
 owner: Theodore Ts'o
-dje_license_key: bsd-new
-category: Attribution
-confirmed_license: BSD-Modified
-component_type: directory

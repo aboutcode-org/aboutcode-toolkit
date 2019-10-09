@@ -1,0 +1,17 @@
+Usage: about gen [OPTIONS] LOCATION OUTPUT
+
+  Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at
+  LOCATION.
+
+  LOCATION: Path to a JSON or CSV inventory file.
+
+  OUTPUT: Path to a directory where ABOUT files are generated.
+
+Options:
+  --fetch-license URL KEY  Fetch license data and text files from a DejaCode
+                           License Library API URL using the API KEY.
+  --reference DIR          Path to a directory with reference license data and
+                           text files.
+  -q, --quiet              Do not print error or warning messages.
+  --verbose                Show all error and warning messages.
+  -h, --help               Show this message and exit.

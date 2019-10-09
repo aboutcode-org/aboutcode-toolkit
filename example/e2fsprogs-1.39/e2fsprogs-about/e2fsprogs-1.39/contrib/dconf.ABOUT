@@ -1,10 +1,8 @@
 about_resource: dconf
 name: dconf
-download_url: http://stuff.mit.edu/afs/sipb.mit.edu/user/tytso/e2fsprogs/contrib/dconf
-license_file: UlrichWindl.LICENSE
-copyright: Copyright (c) 1994 Ulrich Windl
-owner: Ulrich Windl
-category: Attribution
-confirmed_license: Ulrich Windl License
-component_type: posix shell script text executable
 checksum_sha1: 98bd1184714d0463da59644c4b01559947b5c4e0
+copyright: Copyright (c) 1994 Ulrich Windl
+download_url: http://stuff.mit.edu/afs/sipb.mit.edu/user/tytso/e2fsprogs/contrib/dconf
+licenses:
+    -   file: UlrichWindl.LICENSE
+owner: Ulrich Windl

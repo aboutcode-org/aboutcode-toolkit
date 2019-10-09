@@ -1,0 +1,10 @@
+about_resource: .
+name: test
+license_expression: LGPL-3.0-or-later OR Apache-2.0
+licenses:
+  - key: Apache-2.0
+    name: Apache License 2.0
+    file: LICENSES/Apache-2.0.txt
+  - key: LGPL-3.0-or-later
+    name: LGPL
+    file: LICENSES/LGPL-3.0.txt

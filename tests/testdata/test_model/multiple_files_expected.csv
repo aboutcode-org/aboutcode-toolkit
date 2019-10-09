@@ -1,0 +1,2 @@
+about_resource,name,notice_file,author_file,changelog_file,license_key,license_file
+/test_model/,multiple_files,"NOTICE, NOTICE1",AUTHOR,,lgpl-2.1,"COPYING, COPYING.LESSER"

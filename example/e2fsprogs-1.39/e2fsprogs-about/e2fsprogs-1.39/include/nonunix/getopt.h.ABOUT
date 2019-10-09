@@ -1,15 +1,15 @@
 about_resource: getopt.h
 name: getopt.h
-download_url: http://stuff.mit.edu/afs/sipb.mit.edu/user/tytso/e2fsprogs/include/nonunix/getopt.h
-license_name: GNU Library General Public License 2.0
-license_file: lgpl-2.0.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.0
-copyright: Copyright (C) 1989,90,91,92,93,94,96,97 Free Software Foundation, Inc.
-redistribute: yes
 attribute: yes
-owner: GNU C Library
-dje_license_key: lgpl-2.0
-category: Copyleft Limited
-confirmed_license: LGPL 2.0
-component_type: c language text
 checksum_sha1: 2fede7afd8211e66071476da4553a44029be67d5
+copyright: >-
+    Copyright (C) 1989,90,91,92,93,94,96,97 Free Software Foundation, Inc.
+download_url: http://stuff.mit.edu/afs/sipb.mit.edu/user/tytso/e2fsprogs/include/nonunix/getopt.h
+license_expression: lgpl-2.0
+licenses:
+    -   file: lgpl-2.0.LICENSE
+        key: lgpl-2.0
+        name: GNU Library General Public License 2.0
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:lgpl-2.0
+owner: GNU C Library
+redistribute: yes

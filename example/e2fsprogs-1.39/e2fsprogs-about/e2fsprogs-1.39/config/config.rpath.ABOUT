@@ -1,14 +1,14 @@
 about_resource: config.rpath
 name: config.rpath
-license_name: GNU General Public License 2.0 with Autoconf exception
-license_file: gpl-2.0-autoconf.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0-autoconf
-copyright: Copyright 1996-2002 Free Software Foundation, Inc.
-redistribute: yes
 attribute: yes
-owner: Theodore Ts'o
-dje_license_key: gpl-2.0-autoconf
-category: Copyleft
-confirmed_license: GPL 2.0 with Autoconf exception
-component_type: posix shell script text executable
 checksum_sha1: 98461658e371e01ef48f2ea173823c96fecc6145
+copyright: >-
+    Copyright 1996-2002 Free Software Foundation, Inc.
+license_expression: gpl-2.0-autoconf
+licenses:
+    -   file: gpl-2.0-autoconf.LICENSE
+        key: gpl-2.0-autoconf
+        name: GPL 2.0 with Autoconf exception
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0-autoconf
+owner: Theodore Ts'o
+redistribute: yes

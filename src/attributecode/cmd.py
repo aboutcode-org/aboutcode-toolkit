@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -18,29 +18,35 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import errno
+from collections import defaultdict
+from functools import partial
+import io
 import logging
 import os
-from os.path import exists, join
 import sys
 
 import click
 # silence unicode literals warnings
 click.disable_unicode_literals_warning = True
 
+from attributecode import WARNING
+from attributecode.util import unique
+
 from attributecode import __about_spec_version__
 from attributecode import __version__
-from attributecode.attrib import generate_and_save as attrib_generate_and_save
-from attributecode.gen import generate as gen_generate
-from attributecode import model
 from attributecode import severities
+from attributecode.attrib import check_template
+from attributecode.attrib import DEFAULT_TEMPLATE_FILE
+from attributecode.attrib import generate_and_save as generate_attribution_doc
+from attributecode.gen import generate as generate_about_files
+from attributecode.model import collect_inventory
+from attributecode.model import write_output
 from attributecode.util import extract_zip
-from attributecode.util import to_posix
-from attributecode.util import inventory_filter
+from attributecode.util import filter_errors
 
 
 __copyright__ = """
-    Copyright (c) 2013-2017 nexB Inc. All rights reserved.
+    Copyright (c) 2013-2019 nexB Inc and others. All rights reserved.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -62,18 +68,19 @@ https://aboutcode.org
 ''' % locals()
 
 
-problematic_errors = [u'CRITICAL', u'ERROR', u'WARNING']
-
 
 def print_version():
     click.echo('Running aboutcode-toolkit version ' + __version__)
 
 
 class AboutCommand(click.Command):
+    """
+    An enhanced click Command working around some Click quirk.
+    """
     def main(self, args=None, prog_name=None, complete_var=None,
              standalone_mode=True, **extra):
         """
-        Workaround click 4.0 bug https://github.com/mitsuhiko/click/issues/365
+        Workaround click bug https://github.com/mitsuhiko/click/issues/365
         """
         return click.Command.main(
             self, args=args, prog_name=self.name,
@@ -84,7 +91,7 @@ class AboutCommand(click.Command):
 @click.group(name='about')
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
 @click.help_option('-h', '--help')
-def cli():
+def about():
     """
 Generate licensing attribution and credit notices from .ABOUT files and inventories.
 
@@ -95,394 +102,455 @@ Use about <command> --help for help on a command.
 
 
 ######################################################################
+# option validators
+######################################################################
+
+def validate_key_values(ctx, param, value):
+    """
+    Return the a dict of {key: [values,...] if valid or raise a UsageError
+    otherwise.
+    """
+    if not value:
+        return
+
+    kvals, errors = parse_key_values(value)
+    if errors:
+        ive = '\n'.join(sorted('  ' + x for x in errors))
+        msg = ('Invalid {param} option(s):\n'
+               '{ive}'.format(**locals()))
+        raise click.UsageError(msg)
+    return kvals
+
+
+def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',))):
+    if not value:
+        return
+    if not value.endswith(extensions):
+        msg = ' '.join(extensions)
+        raise click.UsageError(
+            'Invalid {param} file extension: must be one of: {msg}'.format(**locals()))
+    return value
+
+
+######################################################################
 # inventory subcommand
 ######################################################################
 
-@cli.command(cls=AboutCommand,
-    short_help='Collect .ABOUT files and write an inventory as CSV or JSON.')
+@about.command(cls=AboutCommand,
+    short_help='Collect the inventory of .ABOUT files to a CSV or JSON file.')
 
-@click.argument('location', nargs=1, required=True,
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
     type=click.Path(
         exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
-@click.argument('output', nargs=1, required=True,
-    type=click.Path(exists=False, dir_okay=False, resolve_path=True))
+@click.argument('output',
+    required=True,
+    metavar='OUTPUT',
+    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
-@click.option('--filter', nargs=1, multiple=True,
-    help='Filter for the output inventory. e.g. "license_expression=gpl-2.0')
-
-@click.option('-f', '--format', is_flag=False, default='csv', show_default=True,
+@click.option('-f', '--format',
+    is_flag=False,
+    default='csv',
+    show_default=True,
     type=click.Choice(['json', 'csv']),
     help='Set OUTPUT inventory file format.')
 
-@click.option('--mapping', is_flag=True,
-    help='Use the default file mapping.config (./attributecode/mapping.config) with mapping between input keys and ABOUT field names.')
-
-@click.option('--mapping-file', metavar='FILE', nargs=1,
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
-
-@click.option('--mapping-output', metavar='FILE', nargs=1,
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help='Use a custom mapping file with mapping between ABOUT field names and output keys')
-
-@click.option('--verbose', is_flag=True, default=False,
-    help='Show all errors and warnings. '
-        'By default, the tool only prints these '
-        'error levels: CRITICAL, ERROR, and WARNING. '
-        'Use this option to print all errors and warning '
-        'for any level.'
-)
-
-@click.option('-q', '--quiet', is_flag=True,
+@click.option('-q', '--quiet',
+    is_flag=True,
     help='Do not print error or warning messages.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def inventory(location, output, mapping, mapping_file, mapping_output, filter, quiet, format, verbose):  # NOQA
+def inventory(location, output, format, quiet, verbose):  # NOQA
     """
-Collect a JSON or CSV inventory of components from .ABOUT files.
+Collect the inventory of .ABOUT file data as CSV or JSON.
 
 LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
 
 OUTPUT: Path to the JSON or CSV inventory file to create.
     """
-    print_version()
+    if not quiet:
+        print_version()
+        click.echo('Collecting inventory from ABOUT files...')
 
-    if not exists(os.path.dirname(output)):
-        # FIXME: there is likely a better way to return an error
-        click.echo('ERROR: <OUTPUT> path does not exists.')
-        # FIXME: return error code?
-        return
-
-    click.echo('Collecting inventory from: %(location)s and writing output to: %(output)s' % locals())
-
-    # FIXME: do we really want to continue support zip as an input?
     if location.lower().endswith('.zip'):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
-
-    errors, abouts = model.collect_inventory(location, use_mapping=mapping, mapping_file=mapping_file)
-
-    updated_abouts = []
-    if filter:
-        filter_dict = {}
-        # Parse the filter and save to the filter dictionary with a list of value
-        for element in filter:
-            key = element.partition('=')[0]
-            value = element.partition('=')[2]
-            if key in filter_dict:
-                filter_dict[key].append(value)
-            else:
-                value_list = [value]
-                filter_dict[key] = value_list
-        updated_abouts = inventory_filter(abouts, filter_dict)
-    else:
-        updated_abouts = abouts
-
-    # Do not write the output if one of the ABOUT files has duplicated key names
-    dup_error_msg = u'Duplicated key name(s)'
-    halt_output = False
-    for err in errors:
-        if dup_error_msg in err.message:
-            halt_output = True
-            break
-
-    if not halt_output:
-        write_errors = model.write_output(updated_abouts, output, format, mapping_output)
-        for err in write_errors:
-            errors.append(err)
-    else:
-        msg = u'Duplicated key names are not supported.\n' + \
-                        'Please correct and re-run.'
-        print(msg)
-
-    error_count = 0
-
-    for e in errors:
-        # Only count as warning/error if CRITICAL, ERROR and WARNING
-        if e.severity > 20:
-            error_count = error_count + 1
-
-    log_errors(errors, error_count, quiet, verbose, os.path.dirname(output))
-    click.echo(' %(error_count)d errors or warnings detected.' % locals())
-    sys.exit(0)
+    errors, abouts = collect_inventory(location)
+    write_errors = write_output(abouts=abouts, location=output, format=format)
+    errors.extend(write_errors)
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    if not quiet:
+        msg = 'Inventory collected in {output}.'.format(**locals())
+        click.echo(msg)
+    sys.exit(errors_count)
 
 
 ######################################################################
 # gen subcommand
 ######################################################################
 
-@cli.command(cls=AboutCommand,
+@about.command(cls=AboutCommand,
     short_help='Generate .ABOUT files from an inventory as CSV or JSON.')
 
-@click.argument('location', nargs=1, required=True,
-    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True))
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
-@click.argument('output', nargs=1, required=True,
-    type=click.Path(exists=True, writable=True, dir_okay=True, resolve_path=True))
+@click.argument('output',
+    required=True,
+    metavar='OUTPUT',
+    type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
 
-@click.option('--fetch-license', type=str, nargs=2, metavar='KEY',
-    help=('Fetch licenses text from a DejaCode API. and create <license>.LICENSE side-by-side '
-        'with the generated .ABOUT file using data fetched from a DejaCode License Library. '
-        'The "license" key is needed in the input. '
-        'The following additional options are required:\n\n'
-        'api_url - URL to the DejaCode License Library API endpoint\n\n'
-        'api_key - DejaCode API key'
-        '\nExample syntax:\n\n'
-        "about gen --fetch-license 'api_url' 'api_key'")
-    )
+# FIXME: the CLI UX should be improved with two separate options for API key and URL
+@click.option('--fetch-license',
+    nargs=2,
+    type=str,
+    metavar='URL KEY',
+    help='Fetch license data and text files from a DejaCode License Library '
+         'API URL using the API KEY.')
 
-# TODO: this option help and long name is obscure and would need to be refactored
-@click.option('--license-notice-text-location', nargs=1,
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help="Copy the 'license_file' from the directory to the generated location.")
+@click.option('--reference',
+    metavar='DIR',
+    type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
+    help='Path to a directory with reference license data and text files.')
 
-@click.option('--mapping', is_flag=True,
-    help='Use the default file mapping.config (./attributecode/mapping.config) with mapping between input keys and ABOUT field names.')
-
-@click.option('--mapping-file', metavar='FILE', nargs=1,
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
-
-@click.option('--verbose', is_flag=True, default=False,
-    help='Show all errors and warnings. '
-        'By default, the tool only prints these '
-        'error levels: CRITICAL, ERROR, and WARNING. '
-        'Use this option to print all errors and warning '
-        'for any level.'
-)
-
-@click.option('-q', '--quiet', is_flag=True,
+@click.option('-q', '--quiet',
+    is_flag=True,
     help='Do not print error or warning messages.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, mapping, mapping_file, license_notice_text_location, fetch_license,
-        quiet, verbose):
+def gen(location, output, fetch_license, reference, quiet, verbose):
     """
-Generate .ABOUT files in OUTPUT directory from a JSON or CSV inventory of .ABOUT files at LOCATION.
+Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
 LOCATION: Path to a JSON or CSV inventory file.
 
 OUTPUT: Path to a directory where ABOUT files are generated.
     """
-    print_version()
+    if not quiet:
+        print_version()
+        click.echo('Generating .ABOUT files...')
 
-    if not location.endswith('.csv') and not location.endswith('.json'):
-        click.echo('ERROR: Invalid input file format:  must be .csv or .json.')
-        sys.exit(errno.EIO)
+    if not location.endswith(('.csv', '.json',)):
+        raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
 
-    click.echo('Generating .ABOUT files...')
+    errors, abouts = generate_about_files(
+        location=location,
+        base_dir=output,
+        reference_dir=reference,
+        fetch_license=fetch_license,
+    )
 
-    errors, abouts = gen_generate(
-        location=location, base_dir=output, license_notice_text_location=license_notice_text_location,
-        fetch_license=fetch_license, use_mapping=mapping, mapping_file=mapping_file)
-
-    about_count = len(abouts)
-    error_count = 0
-
-    for e in errors:
-        # Only count as warning/error if CRITICAL, ERROR and WARNING
-        if e.severity > 20:
-            error_count = error_count + 1
-    log_errors(errors, error_count, quiet, verbose, output)
-    click.echo('Generated %(about_count)d .ABOUT files with %(error_count)d errors or warnings' % locals())
-    sys.exit(0)
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    if not quiet:
+        abouts_count = len(abouts)
+        msg = '{abouts_count} .ABOUT files generated in {output}.'.format(**locals())
+        click.echo(msg)
+    sys.exit(errors_count)
 
 
 ######################################################################
 # attrib subcommand
 ######################################################################
 
-@cli.command(cls=AboutCommand,
+def validate_template(ctx, param, value):
+    if not value:
+        return DEFAULT_TEMPLATE_FILE
+
+    with io.open(value, encoding='utf-8') as templatef:
+        template_error = check_template(templatef.read())
+
+    if template_error:
+        lineno, message = template_error
+        raise click.UsageError(
+            'Template syntax error at line: '
+            '{lineno}: "{message}"'.format(**locals()))
+    return value
+
+
+@about.command(cls=AboutCommand,
     short_help='Generate an attribution document from .ABOUT files.')
 
-@click.argument('location', nargs=1, required=True,
-    type=click.Path(exists=True, readable=True, resolve_path=True))
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
-@click.argument('output', nargs=1, required=True,
-    type=click.Path(exists=False, writable=True, resolve_path=True))
+@click.argument('output',
+    required=True,
+    metavar='OUTPUT',
+    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
-@click.option('--inventory', required=False,
-    type=click.Path(exists=True, file_okay=True, resolve_path=True),
-    help='Path to an optional JSON or CSV inventory file listing the '
-        'subset of .ABOUT files path to consider when generating attribution.'
-    )
+@click.option('--template',
+    metavar='FILE',
+    callback=validate_template,
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help='Path to an optional custom attribution template to generate the '
+         'attribution document. If not provided the default built-in template is used.')
 
-@click.option('--mapping', is_flag=True,
-    help='Use the default file mapping.config (./attributecode/mapping.config) with mapping between input keys and ABOUT field names.')
+@click.option('--vartext',
+    multiple=True,
+    callback=validate_key_values,
+    metavar='<key>=<value>',
+    help='Add variable text as key=value for use in a custom attribution template.')
 
-@click.option('--mapping-file', metavar='FILE', nargs=1,
-    type=click.Path(exists=True, dir_okay=True, readable=True, resolve_path=True),
-    help='Use a custom mapping file with mapping between input keys and ABOUT field names.')
-
-@click.option('--template', type=click.Path(exists=True), nargs=1,
-    help='Path to an optional custom attribution template used for generation.')
-
-@click.option('--vartext', nargs=1, multiple=True,
-    help='Variable texts to the attribution template.')
-
-@click.option('--verbose', is_flag=True, default=False,
-    help='Show all errors and warnings. '
-        'By default, the tool only prints these '
-        'error levels: CRITICAL, ERROR, and WARNING. '
-        'Use this option to print all errors and warning '
-        'for any level.'
-)
-
-@click.option('-q', '--quiet', is_flag=True,
+@click.option('-q', '--quiet',
+    is_flag=True,
     help='Do not print error or warning messages.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
-def attrib(location, output, template, mapping, mapping_file, inventory, vartext, quiet, verbose):
+def attrib(location, output, template, vartext, quiet, verbose):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
 
-LOCATION: Path to an .ABOUT file, a directory containing .ABOUT files or a .zip archive containing .ABOUT files.
+LOCATION: Path to a file, directory or .zip archive containing .ABOUT files.
 
-OUTPUT: Path to output file to write the attribution to.
+OUTPUT: Path where to write the attribution document.
     """
-    print_version()
-    click.echo('Generating attribution...')
+    if not quiet:
+        print_version()
+        click.echo('Generating attribution...')
 
     # accept zipped ABOUT files as input
     if location.lower().endswith('.zip'):
         location = extract_zip(location)
 
-    inv_errors, abouts = model.collect_inventory(location, use_mapping=mapping, mapping_file=mapping_file)
-    no_match_errors = attrib_generate_and_save(
-        abouts=abouts, output_location=output,
-        use_mapping=mapping, mapping_file=mapping_file, template_loc=template,
-        inventory_location=inventory, vartext=vartext)
+    errors, abouts = collect_inventory(location)
 
-    if not no_match_errors:
-        # Check for template error
-        with open(output, 'r') as output_file:
-            first_line = output_file.readline()
-            if first_line.startswith('Template'):
-                click.echo(first_line)
-                sys.exit(errno.ENOEXEC)
+    attrib_errors = generate_attribution_doc(
+        abouts=abouts,
+        output_location=output,
+        template_loc=template,
+        variables=vartext,
+    )
+    errors.extend(attrib_errors)
 
-    for no_match_error in no_match_errors:
-        inv_errors.append(no_match_error)
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
 
-    error_count = 0
-
-    for e in inv_errors:
-        # Only count as warning/error if CRITICAL, ERROR and WARNING
-        if e.severity > 20:
-            error_count = error_count + 1
-
-    log_errors(inv_errors, error_count, quiet, verbose, os.path.dirname(output))
-    click.echo(' %(error_count)d errors or warnings detected.' % locals())
-    click.echo('Finished.')
-    sys.exit(0)
+    if not quiet:
+        msg = 'Attribution generated in: {output}'.format(**locals())
+        click.echo(msg)
+    sys.exit(errors_count)
 
 
 ######################################################################
 # check subcommand
 ######################################################################
 
-@cli.command(cls=AboutCommand, short_help='Validate that the format of .ABOUT files is correct.')
+# FIXME: This is really only a dupe of the Inventory command
 
-@click.argument('location', nargs=1, required=True,
-    type=click.Path(exists=True, readable=True, resolve_path=True))
+@about.command(cls=AboutCommand,
+    short_help='Validate that the format of .ABOUT files is correct and report '
+               'errors and warnings.')
 
-@click.option('--verbose', is_flag=True, default=False,
-    help='Show all errors and warnings. '
-        'By default, the tool only prints these '
-        'error levels: CRITICAL, ERROR, and WARNING. '
-        'Use this option to print all errors and warning '
-        'for any level.'
-)
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
 
 def check(location, verbose):
     """
-Check and validate .ABOUT file(s) at LOCATION for errors and
-print error messages on the terminal.
+Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
-LOCATION: Path to a .ABOUT file or a directory containing .ABOUT files.
+LOCATION: Path to a file or directory containing .ABOUT files.
     """
-    click.echo('Running aboutcode-toolkit version ' + __version__)
+    print_version()
     click.echo('Checking ABOUT files...')
+    errors, _abouts = collect_inventory(location)
+    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
+    sys.exit(severe_errors_count)
 
-    errors, abouts = model.collect_inventory(location)
 
-    msg_format = '%(sever)s: %(message)s'
-    print_errors = []
-    number_of_errors = 0
-    for severity, message in errors:
-        sever = severities[severity]
-        # Only problematic_errors should be counted.
-        # Others such as INFO should not be counted as error.
-        if sever in problematic_errors:
-            number_of_errors = number_of_errors + 1
-        if verbose:
-            print_errors.append(msg_format % locals())
-        elif sever in problematic_errors:
-            print_errors.append(msg_format % locals())
+######################################################################
+# transform subcommand
+######################################################################
 
-    for err in print_errors:
-        print(err)
+def print_config_help(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    from attributecode.transform import tranformer_config_help
+    click.echo(tranformer_config_help)
+    ctx.exit()
 
-    if print_errors:
-        click.echo('Found {} errors.'.format(number_of_errors))
-        # FIXME: not sure this is the right way to exit with a return code
-        sys.exit(1)
+
+@about.command(cls=AboutCommand,
+    short_help='Transform a CSV by applying renamings, filters and checks.')
+
+@click.argument('location',
+    required=True,
+    callback=partial(validate_extensions, extensions=('.csv',)),
+    metavar='LOCATION',
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True))
+
+@click.argument('output',
+    required=True,
+    callback=partial(validate_extensions, extensions=('.csv',)),
+    metavar='OUTPUT',
+    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
+
+@click.option('-c', '--configuration',
+    metavar='FILE',
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help='Path to an optional YAML configuration file. See --help-format for '
+         'format help.')
+
+@click.option('--help-format',
+    is_flag=True, is_eager=True, expose_value=False,
+    callback=print_config_help,
+    help='Show configuration file format help and exit.')
+
+@click.option('-q', '--quiet',
+    is_flag=True,
+    help='Do not print error or warning messages.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
+
+@click.help_option('-h', '--help')
+
+def transform(location, output, configuration, quiet, verbose):  # NOQA
+    """
+Transform the CSV file at LOCATION by applying renamings, filters and checks
+and write a new CSV to OUTPUT.
+
+LOCATION: Path to a CSV file.
+
+OUTPUT: Path to CSV inventory file to create.
+    """
+    from attributecode.transform import transform_csv_to_csv
+    from attributecode.transform import Transformer
+
+    if not quiet:
+        print_version()
+        click.echo('Transforming CSV...')
+
+    if not configuration:
+        transformer = Transformer.default()
     else:
-        click.echo('No error found.')
-    sys.exit(0)
+        transformer = Transformer.from_file(configuration)
+
+    errors = transform_csv_to_csv(location, output, transformer)
+
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    if not quiet and not errors:
+        msg = 'Transformed CSV written to {output}.'.format(**locals())
+        click.echo(msg)
+    sys.exit(errors_count)
 
 
-def log_errors(errors, err_count, quiet, verbose, base_dir=False):
+######################################################################
+# Error management
+######################################################################
+
+def report_errors(errors, quiet, verbose, log_file_loc=None):
     """
-    Iterate of sequence of Error objects and print and log errors with
-    a severity superior or equal to level.
+    Report the `errors` list of Error objects to screen based on the `quiet` and
+    `verbose` flags.
+
+    If `log_file_loc` file location is provided also write a verbose log to this
+    file.
+    Return True if there were severe error reported.
     """
-    logger = logging.getLogger(__name__)
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.CRITICAL)
-    handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-    logger.addHandler(handler)
-    file_logger = logging.getLogger(__name__ + '_file')
+    errors = unique(errors)
+    messages, severe_errors_count = get_error_messages(errors, quiet, verbose)
+    for msg in messages:
+        click.echo(msg)
+    if log_file_loc:
+        log_msgs, _ = get_error_messages(errors, quiet=False, verbose=True)
+        with io.open(log_file_loc, 'w', encoding='utf-8') as lf:
+            lf.write('\n'.join(log_msgs))
+    return severe_errors_count
 
-    msg_format = '%(sever)s: %(message)s'
 
-    # Create error.log if problematic_error detected
-    if base_dir and have_problematic_error(errors):
-        bdir = to_posix(base_dir)
-        LOG_FILENAME = 'error.log'
-        log_path = join(bdir, LOG_FILENAME)
-        if exists(log_path):
-            os.remove(log_path)
-        f = open(log_path, "a")
-        error_msg = str(err_count) + u" errors or warnings detected."
-        f.write(error_msg)
-        file_handler = logging.FileHandler(log_path)
-        file_logger.addHandler(file_handler)
+def get_error_messages(errors, quiet=False, verbose=False):
+    """
+    Return a tuple of (list of error message strings to report,
+    severe_errors_count) given an `errors` list of Error objects and using the
+    `quiet` and `verbose` flags.
+    """
+    errors = unique(errors)
+    severe_errors = filter_errors(errors, WARNING)
+    severe_errors_count = len(severe_errors)
+
+    messages = []
+
+    if severe_errors and not quiet:
+        error_msg = 'Command completed with {} errors or warnings.'.format(severe_errors_count)
+        messages.append(error_msg)
 
     for severity, message in errors:
-        sever = severities[severity]
+        sevcode = severities.get(severity) or 'UNKNOWN'
+        msg = '{sevcode}: {message}'.format(**locals())
         if not quiet:
             if verbose:
-                print(msg_format % locals())
-            elif sever in problematic_errors:
-                print(msg_format % locals())
-        if base_dir:
-            # The logger will only log error for severity >= 30
-            file_logger.log(severity, msg_format % locals())
+                messages .append(msg)
+            elif severity >= WARNING:
+                messages .append(msg)
+    return messages, severe_errors_count
 
+######################################################################
+# Misc
+######################################################################
 
-def have_problematic_error(errors):
-    for severity, message in errors:  # NOQA
-        sever = severities[severity]
-        if sever in problematic_errors:
-            return True
-    return False
+def parse_key_values(key_values):
+    """
+    Given a list of "key=value" strings, return:
+    - a dict {key: [value, value, ...]}
+    - a sorted list of unique error messages for invalid entries where there is
+      a missing a key or value.
+    """
+    if not key_values:
+        return {}, []
+
+    errors = set()
+    parsed_key_values = defaultdict(list)
+    for key_value in key_values:
+        key, _, value = key_value.partition('=')
+
+        key = key.strip().lower()
+        if not key:
+            errors.add('missing <key> in "{key_value}".'.format(**locals()))
+            continue
+
+        value = value.strip()
+        if not value:
+            errors.add('missing <value> in "{key_value}".'.format(**locals()))
+            continue
+
+        values = parsed_key_values[key]
+        if value not in values:
+            parsed_key_values[key].append(value)
+
+    return dict(parsed_key_values), sorted(errors)
+
 
 if __name__ == '__main__':
-    cli()
+    about()

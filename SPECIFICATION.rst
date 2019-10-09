@@ -1,4 +1,4 @@
-ABOUT File Specification v3.1.1
+ABOUT File Specification v3.1.4
 
 
 Purpose
@@ -22,7 +22,7 @@ versions of a software component.
 Getting Started
 ~~~~~~~~~~~~~~~
 
-A simple and valid ABOUT file named httpd.ABOUT may look like this::
+A simple and valid ABOUT file named httpd-2.4.3.tar.gz.ABOUT may look like this::
 
         about_resource: httpd-2.4.3.tar.gz
         name: Apache HTTP Server
@@ -32,14 +32,15 @@ A simple and valid ABOUT file named httpd.ABOUT may look like this::
         license_expression: apache-2.0
         licenses:
             -   key: apache-2.0
-            -   file: apache-2.0.LICENSE
+                name: Apache License 2.0
+                file: apache-2.0.LICENSE
         notice_file: httpd.NOTICE
         copyright: Copyright (c) 2012 The Apache Software Foundation.
 
 The meaning of this ABOUT file is:
 
 - The file "httpd-2.4.3.tar.gz" is stored in the same directory and side-by-side
-  with the ABOUT file "httpd.ABOUT" that documents it.
+  with the ABOUT file "httpd-2.4.3.tar.gz.ABOUT" that documents it.
 
 - The name of this component is "Apache HTTP Server" with version "2.4.3".
 
@@ -60,6 +61,7 @@ Specification
 An ABOUT file is an ASCII YAML formatted text file.
 Note that while Unicode characters are not supported in
 an ABOUT file proper, external files can contain UTF-8 Unicode.
+The key for the licenses field and the license_expression are dejacode license key.
 
 
 ABOUT file name
@@ -72,7 +74,7 @@ A file name can contain only these US-ASCII characters:
 
 - digits from 0 to 9
 - uppercase and lowercase letters from A to Z
-- the "_" underscore, "-" dash, "." period and "+" period signs.
+- the following symbols: "_", "-", "+", ".", "(", ")", "~", "[", "]", "{", "}"
 
 - The case of a file name is not significant. On case-sensitive file systems
   (such as on Linux), a tool must report an error if two ABOUT files stored in
@@ -104,9 +106,9 @@ A field name can contain only these US-ASCII characters:
 - Field names are not case sensitive. For example, "HOMEPAGE_URL" and "HomePage_url"
   represent the same field name.
 
-- A field name must start at the beginning of a new line. It can be followed by
-  one or more spaces that must be ignored. These spaces are commonly used to
-  improve the readability of an ABOUT file.
+- A field name must start at the beginning of a new line. No spaces is allowed in the 
+  field name. It can be followed by one or more spaces that must be ignored. 
+  These spaces are commonly used to improve the readability of an ABOUT file.
 
 
 Field value
@@ -140,20 +142,11 @@ For instance::
         This text contains multiple lines.
 
 
-Fields are mandatory or optional
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fields are mandatory, optional or custom extension
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As defined in this specification, a field can be mandatory or optional. Tools
+A field can be mandatory, optional or custom extension. Tools
 must report an error for missing mandatory fields.
-
-
-Extension and ignored fields
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-An ignored field is a field with a name that is not defined in this
-specification. Custom extension fields are also supported and must be processed
-by tools as ignored fields unless a certain tool can process a certain extension
-field.
 
 
 Fields validation
@@ -165,9 +158,9 @@ name syntax or invalid content. Tools should report additional validation error
 details. The validation process should check that each field name is
 syntactically correct and that fields contain correct values according to its
 concise, common sense definition in this specification. For certain fields,
-additional and specific validations are relevant such as checksum verification,
-URL validation, path resolution and verification, and so forth. Tools should
-report a warning for ignored fields.
+additional and specific validations are relevant such as URL validation, 
+path resolution and verification, and so forth. Tools should
+report a warning for present fields that do not have any value.
 
 
 Fields order and multiple occurrences
@@ -177,7 +170,7 @@ The field order does not matter. Multiple occurrences of a field name is not
 supported.
 
 The tool processing an ABOUT file or CSV/JSON input will issue an error when a
-field name occurs more than once in the input file (as for any other ignored field).
+field name occurs more than once in the input file.
 
 
 Field referencing a file
@@ -204,6 +197,15 @@ above the ABOUT file directory, using a relative POSIX path::
     licenses:
         -   file: ../docs/ruby.README
 
+In addition, there may be cases that a license can have 2 or more referenced license files.
+If this is the case, a comma ',' is used to identify multiple files
+For instance::
+
+    license_expression: gpl-2.0-plus
+    licenses:
+        -   key: gpl-2.0-plus
+            file: COPYING, COPYING.LESSER
+
 Field referencing a URL
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -219,7 +221,7 @@ download URL is referenced this way::
 Flag fields
 ~~~~~~~~~~~
 
-Flag fields have a "true" or "false" value. True, T, Yes or Y , x must be
+Flag fields have a "true" or "false" value. True, T, Yes, Y or x must be
 interpreted as "true" in any case combination. False, F, No or N must be
 interpreted as "false" in any case combination.
 
@@ -316,14 +318,14 @@ Optional Licensing fields
 
 - license_url: URL to the license text for the component.
 
-- license_expression: The license expression that apply to the component. You
+- license_expression: The DejaCode license expression that apply to the component. You
   can separate each identifier using " or " and " and " to document the
   relationship between multiple license identifiers, such as a choice among
   multiple licenses.
 
-- license_name: The license short name for the license.
+- license_name: The DejaCode license short name for the license.
 
-- license_key: The license key(s) for the component.
+- license_key: The DejaCode license key(s) for the component.
 
 
 Optional Boolean flag fields
@@ -348,9 +350,7 @@ Optional Extension fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can create extension fields by prefixing them with a short prefix to
-distinguish these from the standard fields. You should provide documentation for
-these extensions and create or extend existing tools to support these
-extensions. Other tools must ignore these extensions.
+distinguish these from the standard fields (but this is not necessary).
 
 
 Optional Extension fields to reference files stored in a version control system (VCS)
@@ -408,6 +408,9 @@ to verify the integrity of a file documented by an ABOUT file.
 - checksum_sha1: SHA1 for the file documented by this ABOUT file in the
   "about_resource" field.
 
+- checksum_sha256: SHA256 for the file documented by this ABOUT file in the
+  "about_resource" field.
+  
 Some examples::
 
       checksum_md5: f30b9c173b1f19cf42ffa44f78e4b96c

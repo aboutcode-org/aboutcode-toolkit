@@ -19,6 +19,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: nocover
     from attributecode import cmd
-    cmd.cli()
+    cmd.about()

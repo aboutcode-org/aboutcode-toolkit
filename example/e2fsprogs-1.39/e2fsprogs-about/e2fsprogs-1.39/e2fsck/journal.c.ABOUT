@@ -1,17 +1,16 @@
 about_resource: journal.c
 name: journal.c
-license_name: GNU General Public License 2.0
-license_file: gpl-2.0.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0
-copyright: |
+attribute: yes
+checksum_sha1: 02ef021aec0bea6f3a7377ab72d43491c5866dc5
+copyright: |-
     Copyright (C) 2000 Andreas Dilger
     Copyright (C) 2000 Theodore Ts'o
     Copyright (C) 1999 Red Hat Software
-redistribute: yes
-attribute: yes
+license_expression: gpl-2.0
+licenses:
+    -   file: gpl-2.0.LICENSE
+        key: gpl-2.0
+        name: GNU General Public License 2.0
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0
 owner: Stephen C. Tweedie
-dje_license_key: gpl-2.0
-category: Copyleft
-confirmed_license: GPL 2.0
-component_type: c language text
-checksum_sha1: 02ef021aec0bea6f3a7377ab72d43491c5866dc5
+redistribute: yes

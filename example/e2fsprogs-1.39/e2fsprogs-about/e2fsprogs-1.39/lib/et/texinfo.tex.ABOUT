@@ -1,14 +1,14 @@
 about_resource: texinfo.tex
 name: texinfo.tex
-license_name: GNU General Public License 2.0
-license_file: gpl-2.0.LICENSE
-license_url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0
-copyright: Copyright (C) 1985, 1986, 1988 Richard M. Stallman
-redistribute: yes
 attribute: yes
-owner: Theodore Ts'o
-dje_license_key: gpl-2.0
-category: Copyleft
-confirmed_license: GPL 2.0
-component_type: tex language text
 checksum_sha1: 1b73dbf5dbc340a945d2bc75f61cc212f5ae3c08
+copyright: >-
+    Copyright (C) 1985, 1986, 1988 Richard M. Stallman
+license_expression: gpl-2.0
+licenses:
+    -   file: gpl-2.0.LICENSE
+        key: gpl-2.0
+        name: GNU General Public License 2.0
+        url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:gpl-2.0
+owner: Theodore Ts'o
+redistribute: yes

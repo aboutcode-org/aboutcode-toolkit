@@ -42,7 +42,7 @@ You will need to install a Python interpreter if you do not have one already
 installed.
 
 On Linux and Mac, Python is typically pre-installed. To verify which
-version may be pre-installed, open a terminal and type::
+version may be pre-installed, open a terminal and type:
 
     python --version
 
@@ -58,25 +58,26 @@ INSTALLATION
 Checkout or download and extract the AboutCode Toolkit from:
     https://github.com/nexB/aboutcode-toolkit/
 
-To install all the needed dependencies in a virtualenv, run (on posix)::
+To install all the needed dependencies in a virtualenv, run (on posix):
     source configure
-or on windows::
+or on windows:
     configure
 
 
-USAGE
+REFERENCE
 -----
-See https://github.com/nexB/aboutcode-toolkit/blob/master/USAGE.rst for USAGE.
+See https://github.com/nexB/aboutcode-toolkit/blob/master/REFERENCE.rst for reference
+on aboutcode-toolkit usage.
 
 
 TESTS and DEVELOPMENT
 ---------------------
-To install all the needed development dependencies, run (on posix)::
+To install all the needed development dependencies, run (on posix):
     source configure etc/conf/dev
-or on windows::
+or on windows:
     configure etc/conf/dev
 
-To verify that everything works fine you can run the test suite with::
+To verify that everything works fine you can run the test suite with:
     py.test
 
 

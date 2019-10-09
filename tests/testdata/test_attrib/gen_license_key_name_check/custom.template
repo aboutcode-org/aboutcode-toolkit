@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <style type="text/css">
+      div.additional-license-text-list {display:block}
+      body {font-family: Helvetica, Arial, sans-serif;}
+      pre {white-space: pre-wrap;}
+    </style>
+    <title>Open Source Software Information</title>
+  </head>
+
+
+    {% for about_object in abouts %}
+        <div class="oss-component" id="component_{{ loop.index0 }}">
+			{% for i in range(about_object.license_file.value|length) %}
+			  <h2>{{ about_object.license_key.value[i] | e}}</h2>
+			  {% set lic_text = about_object.license_file.value.values() | list %}
+			  <pre>{{ lic_text[i] | e }}</pre>
+			{% endfor %}
+		
+        </div>
+    {% endfor %}
+
+    <hr/>
+
+    </body>
+</html>
+
