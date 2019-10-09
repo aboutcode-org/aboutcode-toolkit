@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -31,9 +31,9 @@ except NameError:  # pragma: nocover
 
 import saneyaml
 
-__version__ = '4.0.0.pre1'
+__version__ = '4.0.0'
 
-__about_spec_version__ = '3.1'
+__about_spec_version__ = '3.1.4'
 
 __copyright__ = """
 Copyright (c) 2013-2019 nexB Inc. All rights reserved. http://dejacode.org

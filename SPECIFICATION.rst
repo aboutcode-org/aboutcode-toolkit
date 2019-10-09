@@ -1,4 +1,4 @@
-ABOUT File Specification v3.1.3
+ABOUT File Specification v3.1.4
 
 
 Purpose
@@ -196,6 +196,15 @@ above the ABOUT file directory, using a relative POSIX path::
 
     licenses:
         -   file: ../docs/ruby.README
+
+In addition, there may be cases that a license can have 2 or more referenced license files.
+If this is the case, a comma ',' is used to identify multiple files
+For instance::
+
+    license_expression: gpl-2.0-plus
+    licenses:
+        -   key: gpl-2.0-plus
+            file: COPYING, COPYING.LESSER
 
 Field referencing a URL
 ~~~~~~~~~~~~~~~~~~~~~~~

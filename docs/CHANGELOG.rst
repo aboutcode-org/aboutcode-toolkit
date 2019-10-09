@@ -1,6 +1,6 @@
-2019-XX-XX
+2019-10-09
 
-    Release 4.0.0.pre1
+    Release 4.0.0
 
     * Support filenames/path with special characters #310 #378 #392
     * Update ABOUT file format to match the specification
@@ -19,7 +19,7 @@
     * New UrlListField introduced for list of urls
     * The UrlField is now only taking single URL value
     * The owner is now a StringField instead of ListField
-    * Format the ordering of the genreated ABOUT file (See https://github.com/nexB/aboutcode-toolkit/issues/349#issuecomment-438871444)
+    * Format the ordering of the generated ABOUT file (See https://github.com/nexB/aboutcode-toolkit/issues/349#issuecomment-438871444)
     * '+' and '(' and ')' is now supported in license_expression
     * The key 'about_resource_path' is removed
     * Revert back the requirement of the 'name' field

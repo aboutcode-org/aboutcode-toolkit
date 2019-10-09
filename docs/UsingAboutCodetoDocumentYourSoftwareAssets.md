@@ -5,29 +5,29 @@
 [Key Terminology](#KeyTerminology)  
 [Using gen to Generate AboutCode Toolkit Files](#UsinggentoGenerateAboutCodeToolkitFiles)
 * [Prepare Your Software Inventory for gen Standard Column Names](#PrepareYourSoftwareInventoryforgenStandardColumnNames)  
-* [Optionally Define Custom Fields for gen with MAPPING.CONFIG](#OptionallyDefineCustomFieldsforgenwithMAPPING.CONFIG)  
+* [Fields Renaming and Optional Custom Fields](#FieldsRenamingOptionalCustomFields)  
 * [Run gen to Generate AboutCode Toolkit Files](#RungentoGenerateAboutCodeToolkitFiles)  
-
 [Using attrib to Generate a Product Attribution Notice Package](#UsingattribtoGenerateaProductAttributionNoticePackage)  
 * [Prepare a Filtered Product BOM to Use as Input to attrib](#PrepareaFilteredProductBOMtoUseasInputtoattrib)  
 * [Prepare an Attribution Template to Use as Input to attrib](#PrepareanAttributionTemplatetoUseasInputtoattrib)  
-    - [Use jinja2 Features to Customize Your Attribution Template](#Usejinja2FeaturestoCustomizeYourAttributionTemplate)  
+[Use jinja2 Features to Customize Your Attribution Template](#Usejinja2FeaturestoCustomizeYourAttributionTemplate)  
 * [Run attrib to Generate a Product Attribution Notice Package](#RunattribtoGenerateaProductAttributionNoticePackage)  
-
 [Using inventory to Generate a Software Inventory](#UsinginventorytoGenerateaSoftwareInventory)  
-* [Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files](#GenerateaSoftwareInventoryofYourCodebasefromAboutCode ToolkitFiles)  
+* [Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files](#GenerateaSoftwareInventory)  
 
 #<a name="AboutCodeToolkitDefined">AboutCode Toolkit Defined</a>
 
 AboutCode Toolkit is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. AboutCode Toolkit files have a simple, standard format that identifies components and their associated licenses. The current AboutCode Toolkit subcommands are: 
 
-* **gen**: Create AboutCode Toolkit files from a Software Inventory file (.csv or .json format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase.  You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes. 
-
 * **attrib**: Generate a Product Attribution notice document (HTML format) from your AboutCode Toolkit files. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your .html template. 
 
-* **about**: Generate a Software Inventory list (.csv or .json format) from your codebase based on your AboutCode Toolkit files. Note that this Software Inventory will only include components that have AboutCode Toolkit data.  So if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
+* **check**: A simple command to validate the AboutCode Toolkit files and output errors/warnings if any on the terminal.
 
-* **check**: A simple command to validate the ABOUT files and output errors/warnings if any on the terminal.
+* **gen**: Create AboutCode Toolkit files from a Software Inventory file (.csv or .json format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase.  You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes. 
+
+* **inventory**: Generate a Software Inventory list (.csv or .json format) from your codebase based on your AboutCode Toolkit files. Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
+
+* **transform**: A command to transform an input CSV by applying renaming and filters and then output to a new CSV.
 
 Additional AboutCode Toolkit information is available at:  
 
@@ -47,7 +47,7 @@ Some key terminology that applies to AboutCode Toolkit tool usage:
 
 ## <a name="PrepareYourSoftwareInventoryforgenStandardColumnNames">Prepare Your Software Inventory for gen Standard Column Names</a>
 
-You should start with a software inventory of your codebase in spreadsheet format. You need to prepare a version of it that will identify the column values that you want to appear in your .ABOUT files.  Note the following standard column names (defined in the ABOUT File Specification), which gen will use to look for the values that it will store in your generated .ABOUT files, as well as any additional text files that you identify, which it will copy and store next to the .ABOUT files. 
+You should start with a software inventory of your codebase in spreadsheet format. You need to prepare a version of it that will identify the column values that you want to appear in your .ABOUT files. Note the following standard column names (defined in the ABOUT File Specification), which gen will use to look for the values that it will store in your generated .ABOUT files, as well as any additional text files that you identify, which it will copy and store next to the .ABOUT files. 
 
 <table>
   <tr>
@@ -56,9 +56,9 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Notes</td>
   </tr>
   <tr>
-    <td>about_file_path</td>
-    <td>File or directory name.  If this is a path name, use a "/" forward slash as path separators.</td>
-    <td>Mandatory.  Tells the tool where to generate the .ABOUT Files. Note that 'gen' will use this to construct the “about_resource” field in the generated .ABOUT file, setting it to a “.” if the about_file names a directory, otherwise using the file name.</td>
+    <td>about_resource</td>
+    <td>Name/path of the component resource</td>
+    <td>Mandatory.</td>
   </tr>
   <tr>
     <td>name</td>
@@ -66,23 +66,8 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Mandatory</td>
   </tr>
   <tr>
-    <td>about_resource</td>
-    <td>Name of the component resource</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
     <td>version</td>
     <td>Component version</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>spec_version</td>
-    <td>The version of the ABOUT file format specification used for this file. </td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>description</td>
-    <td>Component description</td>
     <td>Optional</td>
   </tr>
   <tr>
@@ -91,13 +76,13 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
-    <td>homepage_url</td>
-    <td>URL to the homepage for this component</td>
+    <td>description</td>
+    <td>Component description</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>changelog_file</td>
-    <td>changelog text file name</td>
+    <td>homepage_url</td>
+    <td>URL to the homepage for this component</td>
     <td>Optional</td>
   </tr>
   <tr>
@@ -106,40 +91,14 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
-    <td>owner</td>
-    <td>name of the organization or person that owns or provides the component</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>owner_url</td>
-    <td>URL to the owner for the component</td>
-    <td>Optional</td>
-  </tr>  
-  <tr>
-<td>copyright</td>
-    <td>copyright statement for the component</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>notice_file</td>
-    <td>URL to the notice text for the component</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
-    <td>notice_url</td>
-    <td>notice text file name</td>
-    <td>Optional</td>
+    <td>license_expression</td>
+    <td>Expression for the license of the component using DejaCode Enterprise license key(s).</td>
+    <td>Optional. You can separate each identifier using " or " and " and " to document the relationship between multiple license identifiers, such as a choice among multiple licenses.</td>
   </tr>
   <tr>
     <td>license_key</td>
     <td>DejaCode Enterprise license key for the component.</td>
     <td>Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.</td>
-  </tr>
-  <tr>
-    <td>license_expression</td>
-    <td>Expression for the license of the component using DejaCode Enterprise license key(s).</td>
-    <td>Optional. You can separate each identifier using " or " and " and " to document the relationship between multiple license identifiers, such as a choice 
-among multiple licenses.</td>
   </tr>
   <tr>
     <td>license_name</td>
@@ -149,11 +108,26 @@ among multiple licenses.</td>
   <tr>
     <td>license file</td>
     <td>license file name</td>
-    <td>Optional. gen will look for the file name (if a directory is specified in the --license-text-location option) to copy that file to the .ABOUT file target directory. </td>
+    <td>Optional. gen will look for the file name (if a directory is specified in the --reference option) to copy that file to the .ABOUT file target directory. </td>
   </tr>
   <tr>
     <td>license_url</td>
     <td>URL to the license text for the component</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>copyright</td>
+    <td>copyright statement for the component</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>notice_file</td>
+    <td>notice text file name</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>notice_url</td>
+    <td>URL to the notice text for the component</td> 
     <td>Optional</td>
   </tr>
   <tr>
@@ -167,23 +141,48 @@ among multiple licenses.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>modified</td>
-    <td>Yes/No.  Have the component been modified.</td>
-    <td>Optional</td>
-  </tr>
-  <tr>
     <td>track_changes</td>
     <td>Yes/No.  Does the component license require tracking changes made to the component.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>checksum_md5</td>
-    <td>MD5 value for the file</td>
+    <td>modified</td>
+    <td>Yes/No.  Have the component been modified.</td>
     <td>Optional</td>
   </tr>
   <tr>
-    <td>checksum_sha1</td>
-    <td>SHA1 value for the file</td>
+    <td>internal_use_only</td>
+    <td>Yes/No.  Is the component internal use only.</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>changelog_file</td>
+    <td>changelog text file name</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>owner</td>
+    <td>name of the organization or person that owns or provides the component</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>owner_url</td>
+    <td>URL to the owner for the component</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>contact</td>
+    <td>Contact information</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>author</td>
+    <td>author of the component</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>author_file</td>
+    <td>author text file name</td>
     <td>Optional</td>
   </tr>
   <tr>
@@ -215,26 +214,79 @@ among multiple licenses.</td>
     <td>vcs_revision</td>
     <td>Name of the version control revision.</td>
     <td>Optional</td>
+  <tr>
+    <td>checksum_md5</td>
+    <td>MD5 value for the file</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>checksum_sha1</td>
+    <td>SHA1 value for the file</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>checksum_sha256</td>
+    <td>SHA256 value for the file</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
+    <td>spec_version</td>
+    <td>The version of the ABOUT file format specification used for this file. </td>
+    <td>Optional</td>
+  </tr>
 </table>
 
 
-## <a name="OptionallyDefineCustomFieldsforgenwithMAPPING.CONFIG">Optionally Define Custom Fields for gen with MAPPING.CONFIG</a>
+## <a name="FieldsRenamingOptionalCustomFields">Fields Renaming and Optional Custom Fields</a>
 
-Optionally, you can control the generated label names and contents in your .ABOUT files using a MAPPING.CONFIG file. You can start with the default version provided at [https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/mapping.config](https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/mapping.config)  and you can customize a copy of that file to map the software provenance information that is important to you. When you are ready to run gen, you will want to specify the --mapping option to tell it to look for the MAPPING.CONFIG file and use it.
+Since your input's column name may not match with the AboutCode Toolkit standard field name, you can use the transform subcommand to do the transformation.
 
-You can customize your copy of MAPPING.CONFIG to recognize your own software inventory column names in order to map them to ABOUT File contents. This is especially useful if you prefer not to change some of the actual column names in your software inventory before running gen.  Note that the name on the right side (for example "Directory/Filename") is the name of the field in your software inventory spreadsheet, and the name on the left, followed by a colon, is the field label to go into the .ABOUT file.  Here is an example:
+A transform configuration file is used to describe which transformations and validations to apply to a source CSV file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
 
-        # Essential Fields
-        about_file_path: Directory/Filename
-        
-        # Optional Fields
-        name: Component
-        version: Confirmed Version
-        copyright: Confirmed Copyright
-        
-        # Custom Fields
-        audit_ref_nbr: audit_ref_nbr
-        confirmed_license: Confirmed License
+The attributes that can be set in a configuration file are:
+
+* column_renamings:
+An optional map of source CSV column name to target CSV new column name that
+is used to rename CSV columns.
+
+For instance with this configuration the columns "Directory/Location" will be
+renamed to "about_resource" and "foo" to "bar":
+
+    column_renamings:
+        'Directory/Location' : about_resource
+        foo : bar
+
+The renaming is always applied first before other transforms and checks. All
+other column names referenced below are these that exist AFTER the renaming
+have been applied to the existing column names.
+
+* required_columns:
+An optional list of required column names that must have a value, beyond the
+standard columns names. If a source CSV does not have such a column or a row is
+missing a value for a required column, an error is reported.
+
+For instance with this configuration an error will be reported if the columns
+"name" and "version" are missing or if any row does not have a value set for
+these columns:
+
+    required_columns:
+        - name
+        - version
+
+* column_filters:
+An optional list of column names that should be kept in the transformed CSV. If
+this list is provided, all the columns from the source CSV that should be kept
+in the target CSV must be listed be even if they are standard or required
+columns. If this list is not provided, all source CSV columns are kept in the
+transformed target CSV.
+
+For instance with this configuration the target CSV will only contains the "name"
+and "version" columns and no other column:
+
+    column_filters:
+        - name
+        - version
+
 
 ## <a name="RungentoGenerateAboutCodeToolkitFiles">Run gen to Generate AboutCode Toolkit Files</a>
 
@@ -244,15 +296,13 @@ When your software inventory is ready, you can save it as a .csv file, and use i
 
 Here is an example of a gen command: 
 
-about gen --fetch-license {{your license library api}} {{your license library api key}} --mapping --license-notice-text-location /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+about gen --fetch-license {{your license library api}} {{your license library api key}} --reference /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
 
 Note that this example gen command does the following: 
 
 * Activates the --fetch-license option to get license text.
 
-* Activates the --mapping option to use a custom MAPPING.CONFIG file.
-
-* Activates the --license-notice-text-location option to get license and notice text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
+* Activates the --reference option to get license and notice text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
 
 * Specifies the path of the software inventory to control the processing.
 
@@ -273,7 +323,7 @@ Review your generated AboutCode Toolkit files to determine if they meet your req
         owner: Red Hat
         redistribute: Y
 
-You can make the appropriate changes to your input software inventory and/or your MAPPING.CONFIG file and then run gen as often as necessary to replace the generated AboutCode Toolkit files with the improved output. (Note that you will want to delete or move your previously generated output before running gen again.)
+You can make the appropriate changes to your input software inventory and then run gen as often as necessary to replace the generated AboutCode Toolkit files with the improved output.
 
 # <a name="UsingattribtoGenerateaProductAttributionNoticePackage">Using attrib to Generate a Product Attribution Notice Package</a>
 
@@ -285,7 +335,16 @@ The Software Inventory that you prepared for gen most likely includes components
 
 * Components in your codebase under licenses that do not require attribution (e.g. proprietary packages, commercial products). 
 
-You should prepare a filtered version of your software inventory (the one that you used for gen) by removing the rows that identify components which should not be included in a product attribution notice package, and saving that filtered version as your Product BOM.  You should also order the rows in this Product BOM in the sequence that you would like them to appear in the product attribution notice package. 
+There are two options here:
+
+* Edit the jinja2 template to only include the one that your want to include in the attrib such as:
+
+    {% if about_object.attribute.value %}
+        ...
+
+* You should prepare a filtered version of your software inventory (the one that you used for gen) by removing the rows that identify components which should not be included in a product attribution notice package, and saving that filtered version as your Product BOM.
+
+You should also order the rows in this Product BOM in the sequence that you would like them to appear in the product attribution notice package. 
 
 ## <a name="PrepareanAttributionTemplatetoUseasInputtoattrib">Prepare an Attribution Template to Use as Input to attrib</a>
 
@@ -380,21 +439,17 @@ In summary, you can start with simple, cosmetic customizations to the default.ht
 
 ## <a name="RunattribtoGenerateaProductAttributionNoticePackage">Run attrib to Generate a Product Attribution Notice Package</a>
 
-When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run attrib to generate your product attribution notice package. Note that attrib will use the "about_file_path" column in your software inventory to get all the fields that it needs from your previously generated AboutCode Toolkit files. The official attrib parameters are defined here:
+When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run attrib to generate your product attribution notice package. The official attrib parameters are defined here:
 
 * [https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst) 
 
 Here is an example of a attrib command: 
 
-about attrib --template /Users/harrypotter/myAboutFiles/my_attribution_template_v1.html --mapping --inventory /Users/dclark1330/cipher/myProject-attribution-input.csv /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-attribution-document.html
+about attrib --template /Users/harrypotter/myAboutFiles/my_attribution_template_v1.html /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-attribution-document.html
 
 Note that this example attrib command does the following: 
 
-* Activates the --templaten option to specify a custom output template.
-
-* Activates the --mapping option to use a custom MAPPING.CONFIG file.
-
-* Activates the --inventory option to specifies the path of the filtered software inventory to control the processing.
+* Activates the --template option to specify a custom output template.
 
 * Specifies the path of the AboutCode Toolkit files needed to generate the output document.
 
@@ -404,7 +459,7 @@ A successful execution of attrib will create a .html (or .json depends on the te
 
 # <a name="UsinginventorytoGenerateaSoftwareInventory">Using inventory to Generate a Software Inventory</a>
 
-##<a name="GenerateaSoftwareInventoryofYourCodebasefromAboutCodeToolkitFiles"> Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files</a>
+##<a name="GenerateaSoftwareInventory"> Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files</a>
 
 One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually.  For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode Toolkit files manually.  
 
