@@ -1,3 +1,9 @@
+2019-xx-xx
+    Release 4.0.1
+
+    * Declare to follow SemVer for versioning schema
+
+
 2019-10-09
 
     Release 4.0.0

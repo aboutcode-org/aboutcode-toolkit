@@ -31,7 +31,7 @@ In addition, this tool is able to generate attribution notices and
 identify redistributable source code used in your project to help you comply
 with open source licenses conditions.
 
-This version of the AboutCode Toolkit follows the ABOUT specification version 3.0 at:
+This version of the AboutCode Toolkit follows the ABOUT specification version 3.1.4 at:
 https://github.com/nexB/aboutcode-toolkit/blob/develop/SPECIFICATION.rst
 
 
@@ -64,8 +64,18 @@ or on windows:
     configure
 
 
+VERSIONING SCHEMA
+-----------------
+Starting at AboutCode version 4.0.0, the AboutCode Toolkit will follow SemVer for the versioning schema.
+
+i.e. MAJOR.MINOR.PATCH format
+    1. MAJOR version when making incompatible API changes,
+    2. MINOR version when making functionality in a backwards compatible manner, and
+    3. PATCH version when making backwards compatible bug fixes.
+
+
 REFERENCE
------
+---------
 See https://github.com/nexB/aboutcode-toolkit/blob/master/REFERENCE.rst for reference
 on aboutcode-toolkit usage.
 
