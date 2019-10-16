@@ -2,7 +2,7 @@ about_resource: mtrace.c
 name: mtrace.c
 attribute: yes
 checksum_sha1: badc318b64d9485aa965fae4b5c2f954c5001e90
-copyright: |-
+copyright: |
     Copyright (C) 1991, 1992 Free Software Foundation, Inc.
     Written April 2, 1991 by John Gilmore of Cygnus Support.
     Based on mcheck.c by Mike Haertel.

@@ -1,6 +1,6 @@
 about_resource: alocal.m4
 name: alocal.m4
-copyright: >-
+copyright: |
     Copyright (c) 1995-2003 Free Software Foundation, Inc.
 license_expression: public-domain
 licenses:

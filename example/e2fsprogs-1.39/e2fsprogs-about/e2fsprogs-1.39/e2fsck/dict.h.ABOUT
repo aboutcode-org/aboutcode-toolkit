@@ -2,7 +2,7 @@ about_resource: dict.h
 name: dict.h
 attribute: yes
 checksum_sha1: 0f99603368345b82318e0fb186421cbaa3d8c3a2
-copyright: >-
+copyright: |
     Copyright (C) 1997 Kaz Kylheku <kaz@ashi.footprints.net>
 licenses:
     -   file: KazKylheku.LICENSE

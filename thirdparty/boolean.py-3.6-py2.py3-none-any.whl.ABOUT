@@ -4,9 +4,9 @@ version: '3.6'
 attribute: yes
 checksum_md5: da39999eb131b589e84ad935dc4ca642
 checksum_sha1: d31b55e7ad2ee917232b3213afe3ae9678156a9f
-copyright: >-
+copyright: |
     Copyright (c) 2009-2016 Sebastian Kraemer, basti.kr@gmail.com and others
-description: >-
+description: |
     Implements boolean algebra in one module.
 download_url: https://files.pythonhosted.org/packages/9b/27/d22062a221010e17935237ba4b574cd828238ea02e0765337c238466a512/boolean.py-3.6-py2.py3-none-any.whl
 homepage_url: https://github.com/bastikr/boolean.py

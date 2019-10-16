@@ -2,7 +2,7 @@ about_resource: profile.h
 name: profile.h
 attribute: yes
 checksum_sha1: c95dd8d01dc42096b40fa9ac0ee96ce56db61c38
-copyright: |-
+copyright: |
     Copyright (C) 2005 by Theodore Ts'o.
     Copyright (C) 1985-2005 by the Massachusetts Institute of Technology.
 license_expression: gpl-2.0

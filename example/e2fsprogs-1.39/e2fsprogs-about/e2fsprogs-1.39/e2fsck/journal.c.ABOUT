@@ -2,7 +2,7 @@ about_resource: journal.c
 name: journal.c
 attribute: yes
 checksum_sha1: 02ef021aec0bea6f3a7377ab72d43491c5866dc5
-copyright: |-
+copyright: |
     Copyright (C) 2000 Andreas Dilger
     Copyright (C) 2000 Theodore Ts'o
     Copyright (C) 1999 Red Hat Software

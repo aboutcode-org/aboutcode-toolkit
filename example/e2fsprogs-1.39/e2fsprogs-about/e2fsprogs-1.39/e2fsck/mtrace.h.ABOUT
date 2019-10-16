@@ -2,7 +2,7 @@ about_resource: mtrace.h
 name: mtrace.h
 attribute: yes
 checksum_sha1: 3fd39f30399e003b1de7772173597bdef2993df3
-copyright: |-
+copyright: |
     Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
     Written May 1989 by Mike Haertel.
 license_expression: lgpl-2.0

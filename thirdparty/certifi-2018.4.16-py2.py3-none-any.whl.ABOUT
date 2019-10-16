@@ -5,7 +5,7 @@ checksum_md5: 8280b65d50546025140b542904e86c3b
 checksum_sha1: 760c62185c36483f7f7b9db7788c699e9c735990
 contact: me@kennethreitz.com
 copyright: Kenneth Reitz
-description: >-
+description: |
     Certifi is a carefully curated collection of Root Certificates for validating
     the trustworthiness of SSL certificates while verifying the identity of TLS hosts.
     It has been extracted from the Requests project.

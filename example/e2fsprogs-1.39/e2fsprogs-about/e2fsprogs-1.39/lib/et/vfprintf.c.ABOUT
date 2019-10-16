@@ -2,7 +2,7 @@ about_resource: vfprintf.c
 name: vfprintf.c
 attribute: yes
 checksum_sha1: 01a03815e2550f01bbfe0b40c277e0621c52cec1
-copyright: >-
+copyright: |
     Copyright (c) 1988 Regents of the University of California
 license_expression: bsla
 licenses:

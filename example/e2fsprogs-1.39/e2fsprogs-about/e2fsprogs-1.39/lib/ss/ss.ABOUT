@@ -1,7 +1,7 @@
 about_resource: .
 name: ss
 attribute: yes
-copyright: >-
+copyright: |
     Copyright 2003 by MIT Student Information Processing Board
 licenses:
     -   file: kerberos.LICENSE

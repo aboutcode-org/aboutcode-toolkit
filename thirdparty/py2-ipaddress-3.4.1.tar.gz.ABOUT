@@ -6,7 +6,7 @@ checksum_md5: 47734313c841068e3d5386d048d01c3d
 checksum_sha1: 26d0737c3f4d11d831ffa02df4389a428bedf205
 contact: http://www.google.com/intl/en/contact/
 copyright: Copyright (c) Google Inc. and others
-description: >-
+description: |
     Python 2.7 backport of the Python 3.3 ipaddress module. Not all 3.3 functionality
     is supported, due to the lack of a distinct bytes type in Python 2.7. Nevertheless,
     it is quite useful if you're stuck with Python 2.7.
@@ -22,7 +22,7 @@ licenses:
         key: public-domain
         name: Public Domain
         url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
-notes: >-
+notes: |
     This is a Python 2.6 backport of the Python 3.4 ipaddress module.
 notice_file: py2-ipaddress-3.4.1.tar.gz.NOTICE
 owner: Google

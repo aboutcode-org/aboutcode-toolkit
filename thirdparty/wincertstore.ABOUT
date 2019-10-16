@@ -2,7 +2,7 @@ about_resource: wincertstore-0.2-py2.py3-none-any.whl
 name: wincertstore
 version: '0.2'
 contact: christian@python.org
-description: >-
+description: |
     Python module to extract CA and CRL certs from Windows' cert store (ctypes based).
 download_url: https://pypi.python.org/packages/2.7/w/wincertstore/wincertstore-0.2-py2.py3-none-any.whl
 homepage_url: https://bitbucket.org/tiran/wincertstore

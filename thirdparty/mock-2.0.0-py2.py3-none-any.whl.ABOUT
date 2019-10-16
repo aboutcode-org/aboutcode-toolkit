@@ -2,9 +2,9 @@ about_resource: mock-2.0.0-py2.py3-none-any.whl
 name: mock
 version: 2.0.0
 contact: http://lists.idyll.org/listinfo/testing-in-python
-copyright: >-
+copyright: |
     Copyright (c) 2003-2013, Michael Foord & the mock team
-description: >-
+description: |
     mock is a library for testing in Python. It allows you to replace parts of your
     system under test with mock objects and make assertions about how they have been
     used.
