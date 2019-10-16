@@ -2,6 +2,7 @@
     Release 4.0.1
 
     * Declare to follow SemVer for versioning schema
+    * Update REFERENCE.rst
 
 
 2019-10-09
