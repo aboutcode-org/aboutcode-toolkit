@@ -78,7 +78,7 @@ setup(
         'saneyaml',
 
         'boolean.py >= 3.5, < 4.0',
-        'license_expression >= 0.94, < 1.0',
+        'license_expression >= 0.94',
     ],
     extras_require={
         ":python_version < '3.6'": ['backports.csv'],
