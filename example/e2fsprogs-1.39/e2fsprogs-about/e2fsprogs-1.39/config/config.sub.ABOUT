@@ -2,7 +2,7 @@ about_resource: config.sub
 name: config.sub
 attribute: yes
 checksum_sha1: c6aba2045763f997fc81c1d881304755b09d2e02
-copyright: >-
+copyright: |
     Copyright (c) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
     2003, 2004, 2005 Free Software Foundation, Inc.
 license_expression: gpl-2.0-autoconf

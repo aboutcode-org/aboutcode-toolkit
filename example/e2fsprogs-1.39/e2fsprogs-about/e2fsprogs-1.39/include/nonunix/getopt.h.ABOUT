@@ -2,7 +2,7 @@ about_resource: getopt.h
 name: getopt.h
 attribute: yes
 checksum_sha1: 2fede7afd8211e66071476da4553a44029be67d5
-copyright: >-
+copyright: |
     Copyright (C) 1989,90,91,92,93,94,96,97 Free Software Foundation, Inc.
 download_url: http://stuff.mit.edu/afs/sipb.mit.edu/user/tytso/e2fsprogs/include/nonunix/getopt.h
 license_expression: lgpl-2.0

@@ -1,7 +1,7 @@
 about_resource: .
 name: e2p
 attribute: yes
-copyright: |-
+copyright: |
     Copyright (C) 1992, 1993, 1994  Remy Card
     Copyright (c) 1999 Theodore Ts
 license_expression: lgpl-2.0

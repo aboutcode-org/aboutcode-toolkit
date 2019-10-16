@@ -2,7 +2,7 @@ about_resource: config.guess
 name: config.guess
 attribute: yes
 checksum_sha1: 6bf255982f9104c1423347581c55b4a34336e933
-copyright: >-
+copyright: |
     Copyright (c) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
     2003, 2004, 2005 Free Software Foundation, Inc.
 license_expression: gpl-2.0-autoconf

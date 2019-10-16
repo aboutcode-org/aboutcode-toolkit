@@ -2,7 +2,7 @@ about_resource: com_right.c
 name: com_right.c
 attribute: yes
 checksum_sha1: 3d14b06ab31477a1fec4354d8b9f9c82b35896bb
-copyright: |-
+copyright: |
     Copyright (c) 2003 by Theodore Ts'o
     Copyright (c) 1997, 1998, 2001 Kungliga Tekniska Hgskolan
 license_expression: bsd-new

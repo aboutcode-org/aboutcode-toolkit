@@ -1,8 +1,7 @@
 about_resource: irc-notify.py
 name: irc-notify.py
 version: def54f8166089b733d166665fdabcad4cdc526d8
-copyright: >-
-    Copyright (C) 2015-2016 Christopher R. Wood
+copyright: Copyright (C) 2015-2016 Christopher R. Wood
 description: Quick and dirty IRC notification script.
 download_url: https://raw.githubusercontent.com/gridsync/gridsync/def54f8166089b733d166665fdabcad4cdc526d8/misc/irc-notify.py
 homepage_url: https://github.com/gridsync/gridsync

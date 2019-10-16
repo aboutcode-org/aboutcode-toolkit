@@ -1,7 +1,7 @@
 about_resource: .
 name: intl
 attribute: yes
-copyright: >-
+copyright: |
     Copyright (C) 1995-1997, 2000-2003 Free Software Foundation, Inc.
 license_expression: lgpl-2.0
 licenses:

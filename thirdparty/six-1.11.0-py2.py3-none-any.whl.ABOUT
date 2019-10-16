@@ -4,9 +4,9 @@ version: 1.11.0
 checksum_md5: 866ab722be6bdfed6830f3179af65468
 checksum_sha1: fa2683a24d4a7422add33400048fc375b2afe57b
 contact: benjamin@python.org
-copyright: >-
+copyright: |
     Copyright (c) 2010-2011 Benjamin Peterson
-description: >-
+description: |
     Six is a Python 2 and 3 compatibility library. It provides utility functions for
     smoothing over the differences between the Python versions with the goal of writing
     Python code that is compatible on both Python versions.

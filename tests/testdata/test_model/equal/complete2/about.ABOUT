@@ -15,7 +15,7 @@ homepage_url: http://dejacode.org
 vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 
-description: >
+description: |
     AboutCode is a tool to process ABOUT files.
     An ABOUT file is a file.
 

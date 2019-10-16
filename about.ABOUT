@@ -3,7 +3,7 @@ name: AboutCode-toolkit
 version: 4.0.0
 author: Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez
 copyright: Copyright (c) 2013-2019 nexB Inc.
-description: |-
+description: |
     AboutCode Toolkit is a tool to process ABOUT files. An ABOUT file
     provides a simple way to document the provenance (origin and license)
     'about' a software component. This is a small text file stored in the
