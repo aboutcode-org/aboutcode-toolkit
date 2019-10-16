@@ -41,13 +41,8 @@ attrib
 
 ::
 
-    --inventory PATH            Path to an inventory file.
-    --mapping                   Use for mapping between the input keys and the ABOUT field.
-                                names - mapping.config
-    --mapping-file              Use a custom mapping file with mapping between input
-                                keys and ABOUT field names.
     --template PATH             Path to a custom attribution template.
-    --vartext TEXT              Variable texts to the attribution template
+    --vartext <key>=<value>     Variable text as key=value for use in a custom attribution template.
     --verbose                   Show all the errors and warning.
     -q, --quiet                 Do not print any error/warning.
     -h, --help                  Show this message and exit.
@@ -63,7 +58,6 @@ Assume the following:
 
     '/home/about_files/'** contains all the ABOUT files [LOCATION]
     '/home/attribution/attribution.html' is the user's output path [OUTPUT]
-    '/home/project/component_list.csv' is the inventory that user want to be generated
 
 ::
 
@@ -73,24 +67,6 @@ Options
 -------
 
 ::
-
-    --inventory
-
-        This option allows you to define which ABOUT files should be used for attribution generation.
-        For instance,
-        '/home/project/component_list.csv' is the inventory that user want to be generated
-
-    $ about attrib --inventory /home/project/component_list.csv LOCATION OUTPUT
-
-    --mapping
-
-        See mapping.config for details
-
-    --mapping-file
-
-        Same behavior as `--mapping` but with custom mapping file
-
-    $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
 
     --template
 
@@ -175,11 +151,10 @@ gen
 
 ::
 
-    --fetch-license KEY                 Fetch licenses text from a DejaCode API. and
-                                        create <license>.LICENSE side-by-side
-                                        with the generated .ABOUT file using data
-                                        fetched from a DejaCode License Library. The
-                                        following additional options are required:
+    --fetch-license api_url api_key     Fetch licenses data from DejaCode License
+                                        Library and create <license>.LICENSE
+                                        side-by-side with the generated .ABOUT file.
+                                        The following additional options are required:
 
                                         api_url - URL to the DejaCode License Library
                                         API endpoint
@@ -188,12 +163,8 @@ gen
                                         Example syntax:
 
                                         about gen --fetch-license 'api_url' 'api_key'
-    --license-notice-text-location PATH Copy the 'license_file' from the directory to
-                                        the generated location.
-    --mapping                           Use for mapping between the input keys and
-                                        the ABOUT field names - mapping.config
-    --mapping-file                      Use a custom mapping file with mapping between input
-                                        keys and ABOUT field names.
+    --reference PATH                    Path to a directory with reference license
+                                        data and text files.
     --verbose                           Show all the errors and warning.
     -q, --quiet                         Do not print any error/warning.
     -h, --help                          Show this message and exit.
@@ -210,38 +181,28 @@ Options
     --fetch-license
 
         Fetch licenses text from a DejaCode API. and create <license>.LICENSE side-by-side
-        with the generated .ABOUT file using data fetched from a DejaCode License Library.
+        with the generated .ABOUT file using data fetched from the DejaCode License Library.
 
         This option requires 2 parameters:
-            api_url - URL to the DJE License Library
+            api_url - URL to the DJE License Library.
             api_key - Hash key to authenticate yourself in the API.
 
         In addition, the input needs to have the 'license_expression' field.
-        (Please contact nexB to get the api_* value to use for this feature)
+        (Please contact nexB to get the api_* value for this feature)
 
     $ about gen --fetch-license 'api_url' 'api_key' LOCATION OUTPUT
 
-    --license-notice-text-location
+    --reference
 
-        Copy the license files and notice files to the generated location based on the 
-        'license_file' and 'notice_file' value in the input from the directory
+        Copy the reference files such as 'license_files' and 'notice_files' to the
+        generated location from the specified directory.
 
         For instance,
-        the directory, /home/licenses_notices/, contains all the licenses and notices that you want:
-        /home/license/apache2.LICENSE
-        /home/license/jquery.js.NOTICE
+        the specified directory, /home/licenses_notices/, contains all the licenses and notices:
+        /home/licenses_notices/apache2.LICENSE
+        /home/licenses_notices/jquery.js.NOTICE
 
     $ about gen --license-notice-text-location /home/licenses_notices/ LOCATION OUTPUT
-
-    --mapping
-
-        See mapping.config for details
-
-    --mapping-file
-
-        Same behavior as `--mapping` but with custom mapping file
-
-    $ about attrib --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
 
     --verbose
 
@@ -265,13 +226,7 @@ inventory
 
 ::
 
-    --filter TEXT               Filter for the output inventory.
     -f, --format [json|csv]     Set OUTPUT file format.  [default: csv]
-    --mapping                   Use file mapping.config to collect the defined not supported fields in ABOUT files.
-    --mapping-file              Use a custom mapping file with mapping between input
-                                keys and ABOUT field names.
-    --mapping-output FILE       Use a custom mapping file with mapping between
-                                ABOUT field names and output keys
     --verbose                   Show all the errors and warning.
     -q, --quiet                 Do not print any error/warning.
     -h, --help                  Show this message and exit.
@@ -285,12 +240,6 @@ Options
 
 ::
 
-    -filter TEXT
- 
-        Filter for the output inventory.
-
-    $ about inventory --filter "license_expression=gpl-2.0" LOCATION OUTPUT
-
     The above command will only inventory the ABOUT files which have the "license_expression: gpl-2.0"
 
     -f, --format [json|csv]
@@ -298,28 +247,6 @@ Options
         Set OUTPUT file format.  [default: csv]
 
     $ about inventory -f json LOCATION OUTPUT
-
-    --mapping
-
-        See mapping.config for details
-
-    --mapping-file
-
-        Same behavior as `--mapping` but with custom mapping file
-
-    $ about inventory --mapping-file CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
-
-    --mapping-output
-
-        Same behavior as `--mapping-file` but with custom mapping file
-        In the custom mapping file, the left side is the custom key name where
-        the right side is the ABOUT field name. For instance,
-        Component: name
-        
-        The "Component" is a custom field name for the output
-        The "name" is one of the defaul ABOUT field name that user want to convert
-
-    $ about inventory --mapping-output CUSTOM_MAPPING_FILE_PATH LOCATION OUTPUT
 
     --verbose
 
@@ -408,4 +335,5 @@ Options
 
 Special Notes
 =============
-When using the `column_filters` configuration, all the standard required columns (`about_resource` and `name`) and the user definied `required_columns` need to be included.
+When using the `column_filters` configuration, all the standard required columns
+(`about_resource` and `name`) and the user defined `required_columns` need to be included.
