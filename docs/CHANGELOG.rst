@@ -1,8 +1,9 @@
-2019-xx-xx
+2019-10-17
     Release 4.0.1
 
     * Declare to follow SemVer for versioning schema
     * Update REFERENCE.rst and README.rst
+    * Update license-expression library
 
 
 2019-10-09
