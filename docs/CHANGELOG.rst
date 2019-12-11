@@ -1,3 +1,9 @@
+2019-xx-xx
+    Release 4.0.2
+
+    * Upgrade license-expression library to v1.2
+
+
 2019-10-17
     Release 4.0.1
 
