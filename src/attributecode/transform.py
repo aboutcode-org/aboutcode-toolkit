@@ -20,6 +20,7 @@ from __future__ import unicode_literals
 from collections import Counter
 from collections import OrderedDict
 import io
+import json
 
 import attr
 
@@ -40,7 +41,7 @@ else:  # pragma: nocover
 def transform_csv_to_csv(location, output, transformer):
     """
     Read a CSV file at `location` and write a new CSV file at `output`. Apply
-    transformations using the `transformer` Tranformer.
+    transformations using the `transformer` Transformer.
     Return a list of Error objects.
     """
     if not transformer:
@@ -48,7 +49,7 @@ def transform_csv_to_csv(location, output, transformer):
 
     rows = read_csv_rows(location)
 
-    column_names, data, errors = transform_data(rows, transformer)
+    column_names, data, errors = transform_csv(rows, transformer)
 
     if errors:
         return errors
@@ -56,11 +57,30 @@ def transform_csv_to_csv(location, output, transformer):
         write_csv(output, data, column_names)
         return []
 
+def transform_json_to_json(location, output, transformer):
+    """
+    Read a JSON file at `location` and write a new JSON file at `output`. Apply
+    transformations using the `transformer` Transformer.
+    Return a list of Error objects.
+    """
+    if not transformer:
+        raise ValueError('Cannot transform without Transformer')
 
-def transform_data(rows, transformer):
+    data = read_json(location)
+
+    new_data, errors = transform_json(data, transformer)
+
+    if errors:
+        return errors
+    else:
+        write_json(output, new_data)
+        return []
+
+
+def transform_csv(rows, transformer):
     """
     Read a list of list of CSV-like data `rows` and apply transformations using the
-    `transformer` Tranformer.
+    `transformer` Transformer.
     Return a tuple of:
        ([column names...], [transformed ordered dict...], [Error objects..])
     """
@@ -90,10 +110,52 @@ def transform_data(rows, transformer):
         column_names = [c for c in column_names if c in transformer.column_filters]
 
     errors = transformer.check_required_columns(data)
-    if errors:
-        return column_names, data, errors
 
     return column_names, data, errors
+
+
+def transform_json(data, transformer):
+    """
+    Read a dictionary and apply transformations using the
+    `transformer` Transformer.
+    Return a new list of dictionary.
+    """
+
+    if not transformer:
+        return data
+
+    errors = []
+    new_data = []
+    renamings = transformer.column_renamings
+    if isinstance(data, list):
+        for item in data:
+            element, err = process_json_keys(item, renamings, transformer)
+            for e in element:
+                new_data.append(e)
+            for e in err:
+                errors.append(e)
+    else: 
+        new_data, errors = process_json_keys(data, renamings, transformer)
+
+    return new_data, errors
+
+
+def process_json_keys(data, renamings, transformer):
+    o_dict = OrderedDict()
+    for k in data.keys():
+        if k in renamings.keys():
+            for r_key in renamings.keys():
+                if k == r_key:
+                    o_dict[renamings[r_key]] = data[k]
+        else:
+            o_dict[k] = data[k]
+        new_data = [o_dict]
+
+    if transformer.column_filters:
+        new_data = list(transformer.filter_columns(new_data))
+
+    errors = transformer.check_required_columns(new_data)
+    return new_data, errors
 
 
 tranformer_config_help = '''
@@ -266,6 +328,15 @@ def read_csv_rows(location):
             yield row
 
 
+def read_json(location):
+    """
+    Yield rows (as a list of values) from a CSV file at `location`.
+    """
+    with io.open(location, encoding='utf-8', errors='replace') as jsonfile:
+        data = json.load(jsonfile, object_pairs_hook=OrderedDict)
+        return data
+
+
 def write_csv(location, data, column_names):  # NOQA
     """
     Write a CSV file at `location` the `data` list of ordered dicts using the
@@ -275,3 +346,11 @@ def write_csv(location, data, column_names):  # NOQA
         writer = csv.DictWriter(csvfile, fieldnames=column_names)
         writer.writeheader()
         writer.writerows(data)
+
+
+def write_json(location, data):
+    """
+    Write a JSON file at `location` the `data` list of ordered dicts.
+    """
+    with open(location, 'w') as jsonfile:
+        json.dump(data, jsonfile, indent=3)

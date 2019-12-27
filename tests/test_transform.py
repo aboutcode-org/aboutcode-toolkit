@@ -30,7 +30,9 @@ from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import gen
 from attributecode.transform import read_csv_rows
-from attributecode.transform import transform_data
+from attributecode.transform import read_json
+from attributecode.transform import transform_csv
+from attributecode.transform import transform_json
 from attributecode.transform import Transformer
 
 
@@ -40,6 +42,30 @@ class TransformTest(unittest.TestCase):
         configuration = get_test_loc('test_transform/configuration')
         rows = read_csv_rows(test_file)
         transformer = Transformer.from_file(configuration)
-        col_name, data, err = transform_data(rows, transformer)
-        expect = [u'about_resource', u'name']
+        col_name, data, err = transform_csv(rows, transformer)
+        expect = [u'about_resource', u'name', u'version']
         assert col_name == expect
+
+    def test_transform_data_json(self):
+        test_file = get_test_loc('test_transform/input.json')
+        configuration = get_test_loc('test_transform/configuration')
+        json_data = read_json(test_file)
+        transformer = Transformer.from_file(configuration)
+        data, err = transform_json(json_data, transformer)
+        keys = []
+        for item in data:
+            keys = item.keys()
+        expect = [u'about_resource', u'name', u'version']
+        assert keys == expect
+
+    def test_transform_data_json_as_array(self):
+        test_file = get_test_loc('test_transform/input_as_array.json')
+        configuration = get_test_loc('test_transform/configuration')
+        json_data = read_json(test_file)
+        transformer = Transformer.from_file(configuration)
+        data, err = transform_json(json_data, transformer)
+        keys = []
+        for item in data:
+            keys = item.keys()
+        expect = [u'about_resource', u'name', u'version']
+        assert keys == expect

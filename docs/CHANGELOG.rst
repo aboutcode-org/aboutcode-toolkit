@@ -2,6 +2,7 @@
     Release 4.0.2
 
     * Upgrade license-expression library to v1.2
+    * Enhance the `transform` to also work with JSON file
 
 
 2019-10-17

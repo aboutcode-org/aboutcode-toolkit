@@ -1,3 +1,10 @@
 column_renamings:
     'Directory/Filename' : about_resource
     Component: name
+column_filters:
+    - about_resource
+    - name
+    - version
+required_columns:
+	- name
+	- version
