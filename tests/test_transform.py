@@ -54,7 +54,7 @@ class TransformTest(unittest.TestCase):
         data, err = transform_json(json_data, transformer)
         keys = []
         for item in data:
-            keys = item.keys()
+            keys = list(item.keys())
         expect = [u'about_resource', u'name', u'version']
         assert keys == expect
 
@@ -66,6 +66,6 @@ class TransformTest(unittest.TestCase):
         data, err = transform_json(json_data, transformer)
         keys = []
         for item in data:
-            keys = item.keys()
+            keys = list(item.keys())
         expect = [u'about_resource', u'name', u'version']
         assert keys == expect
