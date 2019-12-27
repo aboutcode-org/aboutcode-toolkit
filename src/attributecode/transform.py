@@ -153,6 +153,8 @@ def process_json_keys(data, renamings, transformer):
 
     if transformer.column_filters:
         new_data = list(transformer.filter_columns(new_data))
+    else:
+        new_data = list(new_data)
 
     errors = transformer.check_required_columns(new_data)
     return new_data, errors
