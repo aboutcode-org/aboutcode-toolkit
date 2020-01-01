@@ -211,7 +211,7 @@ def load_inventory(location, base_dir, reference_dir=None):
 def update_about_resource(self):
     pass
 
-def generate(location, base_dir, reference_dir=None, fetch_license=False):
+def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir. Return errors and about objects.
@@ -311,7 +311,7 @@ def generate(location, base_dir, reference_dir=None, fetch_license=False):
                         if about.license_name.value:
                             about.license_name.present = True
 
-            about.dump(dump_loc)
+            about.dump(dump_loc, android)
 
             for e in not_exist_errors:
                 errors.append(Error(INFO, e))

@@ -677,7 +677,7 @@ def validate_fields(fields, about_file_path, running_inventory, base_dir,
 def validate_field_name(name):
     if not is_valid_name(name):
         msg = ('Field name: %(name)r contains illegal name characters: '
-               '0 to 9, a to z, A to Z and _.')
+               '0 to 9, a to z, A to Z and _. (or empty spaces)')
         return Error(CRITICAL, msg % locals())
 
 
@@ -1066,7 +1066,7 @@ class About(object):
 
         return saneyaml.dump(data)
 
-    def dump(self, location):
+    def dump(self, location, android):
         """
         Write formatted ABOUT representation of self to location.
         """
@@ -1086,6 +1086,34 @@ class About(object):
 
         if on_windows:
             about_file_path = add_unc(about_file_path)
+
+        if android:
+            for lic_key in self.license_key.value:
+                # Make uppercase and with dash and spaces and dots replaced by underscore
+                # just to look similar and consistent.
+                name = 'MODULE_LICENSE_' + lic_key.replace('.', '_').replace('-', '_').replace(' ', '_').upper()
+                module_lic_path = os.path.join(os.path.dirname(about_file_path), name)
+                # Create an empty MODULE_LICESE_XXX file
+                open(module_lic_path, 'a').close()
+
+            # Create NOTICE file with the combination context of copyright,
+            # notice_file and license_file
+            notice_path = os.path.join(os.path.dirname(about_file_path), 'NOTICE')
+            notice_context = ''
+            if self.copyright.value:
+                notice_context += self.copyright.value
+            if self.notice_file.value:
+                notice_file_dict = self.notice_file.value
+                notice_file_key = notice_file_dict.keys()
+                for key in notice_file_key:
+                    notice_context += '\n\n' + notice_file_dict[key]
+            if self.license_file.value:
+                lic_file_dict = self.license_file.value
+                lic_file_key = lic_file_dict.keys()
+                for key in lic_file_key:
+                    notice_context += '\n\n' + lic_file_dict[key]
+            with io.open(notice_path, mode='w', encoding='utf-8') as dumped:
+                dumped.write(notice_context)
 
         with io.open(about_file_path, mode='w', encoding='utf-8') as dumped:
             dumped.write(genereated_tk_version)

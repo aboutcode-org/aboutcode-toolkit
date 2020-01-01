@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -46,7 +46,7 @@ from attributecode.util import filter_errors
 
 
 __copyright__ = """
-    Copyright (c) 2013-2019 nexB Inc and others. All rights reserved.
+    Copyright (c) 2013-2020 nexB Inc and others. All rights reserved.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -210,6 +210,11 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     metavar='OUTPUT',
     type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
 
+@click.option('--android',
+    is_flag=True,
+    help='Generate MODULE_LICENSE_XXX (XXX will be replaced by license key) and NOTICE '
+         'as the same design as from Android.')
+
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
 @click.option('--fetch-license',
     nargs=2,
@@ -233,7 +238,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, fetch_license, reference, quiet, verbose):
+def gen(location, output, android, fetch_license, reference, quiet, verbose):
     """
 Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
@@ -245,12 +250,14 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         print_version()
         click.echo('Generating .ABOUT files...')
 
+    #FIXME: This should be checked in the `click`
     if not location.endswith(('.csv', '.json',)):
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
 
     errors, abouts = generate_about_files(
         location=location,
         base_dir=output,
+        android=android,
         reference_dir=reference,
         fetch_license=fetch_license,
     )
