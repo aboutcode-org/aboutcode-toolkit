@@ -1,0 +1,17 @@
+# Generated with AboutCode Toolkit Version 4.0.1 
+
+about_resource: multi_license.c
+name: multi_license.c
+license_expression: bsd-new OR bsd-simplified
+copyright: |
+  Copyright (c) xyz
+  Copyright (c) Blah blah BlAh
+licenses:
+  - key: bsd-new
+    name: BSD-3-Clause
+    file: bsd-new.LICENSE
+    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new
+  - key: bsd-simplified
+    name: BSD-2-Clause
+    file: bsd-simplified.LICENSE
+    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-simplified

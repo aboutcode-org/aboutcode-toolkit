@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -1106,12 +1106,12 @@ class About(object):
         Create MODULE_LICENSE_XXX which the XXX is the value of license key.
         """
         for lic_key in self.license_key.value:
-                # Make uppercase and with dash and spaces and dots replaced by underscore
-                # just to look similar and consistent.
-                name = 'MODULE_LICENSE_' + lic_key.replace('.', '_').replace('-', '_').replace(' ', '_').upper()
-                module_lic_path = os.path.join(about_parent_path, name)
-                # Create an empty MODULE_LICESE_XXX file
-                open(module_lic_path, 'a').close()
+            # Make uppercase and with dash and spaces and dots replaced by underscore
+            # just to look similar and consistent.
+            name = 'MODULE_LICENSE_' + lic_key.replace('.', '_').replace('-', '_').replace(' ', '_').upper()
+            module_lic_path = os.path.join(about_parent_path, name)
+            # Create an empty MODULE_LICESE_XXX file
+            open(module_lic_path, 'a').close()
 
     def android_notice(self, about_parent_path):
         """
@@ -1128,12 +1128,14 @@ class About(object):
             notice_file_dict = self.notice_file.value
             notice_file_key = notice_file_dict.keys()
             for key in notice_file_key:
-                notice_context += '\n' + notice_file_dict[key] + '\n'
+                if notice_file_dict[key]:
+                    notice_context += '\n' + notice_file_dict[key] + '\n'
         if self.license_file.value:
             lic_file_dict = self.license_file.value
             lic_file_key = lic_file_dict.keys()
             for key in lic_file_key:
-                notice_context += '\n\n' + lic_file_dict[key] + '\n\n'
+                if lic_file_dict[key]:
+                    notice_context += '\n\n' + lic_file_dict[key] + '\n\n'
         return notice_path, notice_context
 
     def dump_lic(self, location, license_dict):

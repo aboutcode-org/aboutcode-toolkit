@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -21,6 +21,7 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 import io
 import json
+import os
 import posixpath
 import shutil
 import unittest
@@ -40,6 +41,7 @@ from attributecode.util import to_posix
 from attributecode.util import replace_tab_with_spaces
 
 from testing_utils import extract_test_loc
+from testing_utils import get_temp_dir
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
 
@@ -940,6 +942,41 @@ custom1: |
         expected = get_test_loc('test_model/expected.json')
         check_json(expected, result)
 
+    def test_android_module_license(self):
+        path = 'test_model/android/single_license.c.ABOUT'
+        test_file = get_test_loc(path)
+        abouts = model.About(location=test_file, about_file_path=path)
+
+        parent_dir = get_temp_dir()
+        abouts.android_module_license(parent_dir)
+        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_PUBLIC_DOMAIN'))
+
+    def test_android_module_multi_licenses(self):
+        path = 'test_model/android/multi_license.c.ABOUT'
+        test_file = get_test_loc(path)
+        abouts = model.About(location=test_file, about_file_path=path)
+
+        parent_dir = get_temp_dir()
+        abouts.android_module_license(parent_dir)
+        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_BSD_NEW'))
+        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_BSD_SIMPLIFIED'))
+
+    def test_android_notice(self):
+        path = 'test_model/android/single_license.c.ABOUT'
+        test_file = get_test_loc(path)
+        abouts = model.About(location=test_file, about_file_path=path)
+
+        parent_dir = get_temp_dir()
+        notice_path, notice_context = abouts.android_notice(parent_dir)
+        expected_path = os.path.join(parent_dir, 'NOTICE')
+        assert os.path.normpath(notice_path) == expected_path
+
+        expected_notice = '''Copyright (c) xyz
+
+This component is released to the public domain by the author.
+
+'''
+        assert notice_context == expected_notice
 
 class CollectorTest(unittest.TestCase):
 
