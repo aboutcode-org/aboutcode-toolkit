@@ -128,13 +128,15 @@ def transform_json(data, transformer):
     new_data = []
     renamings = transformer.column_renamings
     #if json is output of scancode-toolkit
-    if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
-        #only takes data inside "files"
-        data = data["files"]
-        #automatically renames path to about_resource
-        if("path" not in renamings.keys()):
-            renamings["path"] = "about_resource"
-
+    try:
+        if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
+            #only takes data inside "files"
+            data = data["files"]
+            #automatically renames path to about_resource
+            if("path" not in renamings.keys()):
+                renamings["path"] = "about_resource"
+    except:
+        pass
     if isinstance(data, list):
         for item in data:
             element, err = process_json_keys(item, renamings, transformer)

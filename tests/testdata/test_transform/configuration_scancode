@@ -6,6 +6,5 @@ column_filters:
 	- about_resource
 required_columns:
 	- name
-	- type
 
 
