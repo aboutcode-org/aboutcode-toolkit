@@ -127,15 +127,76 @@ def transform_json(data, transformer):
     errors = []
     new_data = []
     renamings = transformer.column_renamings
-    if isinstance(data, list):
-        for item in data:
-            element, err = process_json_keys(item, renamings, transformer)
-            for e in element:
-                new_data.append(e)
-            for e in err:
-                errors.append(e)
+    #if json is output of scancode-toolkit
+    if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
+        new_data, errors = process_json_keys_scancode(data, renamings, transformer)
+
+    elif isinstance(data, list):
+            for item in data:
+                element, err = process_json_keys(item, renamings, transformer)
+                for e in element:
+                    new_data.append(e)
+                for e in err:
+                    errors.append(e)
     else: 
         new_data, errors = process_json_keys(data, renamings, transformer)
+
+    return new_data, errors
+
+def process_json_keys_scancode(data, renamings, transformer):
+    o_dict = OrderedDict()
+    o_dict_headers_list = []
+    o_dict_files_list = []
+    new_data = []
+    
+    for item in data["headers"]:
+        o_dict_headers = OrderedDict()
+        for k in item.keys():
+            if k in renamings.keys():
+                for r_key in renamings.keys():
+                    if k == r_key:
+                        o_dict_headers[renamings[r_key]] = item[k]
+            else:
+                o_dict_headers[k] = item[k]
+        o_dict_headers_list.append(o_dict_headers)
+
+
+    for item in data["files"]:
+        o_dict_files = OrderedDict()
+        for k in item.keys():
+            if k in renamings.keys():
+                for r_key in renamings.keys():
+                    if k == r_key:
+                        o_dict_files[renamings[r_key]] = item[k]
+            else:
+                o_dict_files[k] = item[k]
+        o_dict_files_list.append(o_dict_files)
+
+
+    for k in data.keys():
+        if k in renamings.keys():
+            for r_key in renamings.keys():
+                if k == r_key:
+                    o_dict[renamings[r_key]] = data[k]
+        else:
+            o_dict[k] = data[k]
+    
+    if("files" in renamings.keys()):
+        o_dict[renamings["files"]] = o_dict_files_list
+    else:
+        o_dict["files"] = o_dict_files_list
+    if("headers" in renamings.keys()):
+        o_dict[renamings["headers"]] = o_dict_headers_list
+    else:
+        o_dict["headers"] = o_dict_headers_list
+    new_data = [o_dict]
+
+    if transformer.column_filters:
+        new_data = list(transformer.filter_columns(new_data))
+    else:
+        new_data = list(new_data)
+    
+    errors = transformer.check_required_columns(new_data, isFromScancode=True)
 
     return new_data, errors
 
@@ -254,13 +315,16 @@ class Transformer(object):
             column_filters=data.get('column_filters', []),
         )
 
-    def check_required_columns(self, data):
+    def check_required_columns(self, data, isFromScancode=False):
         """
         Return a list of Error for a `data` list of ordered dict where a
         dict is missing a value for a required column name.
         """
         errors = []
-        required = set(self.essential_columns + self.required_columns)
+        if(isFromScancode):
+            required = set(self.required_columns)
+        else:
+            required = set(self.essential_columns + self.required_columns)
         if not required:
             return []
 
