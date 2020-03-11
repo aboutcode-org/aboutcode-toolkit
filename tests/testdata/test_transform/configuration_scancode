@@ -1,10 +1,10 @@
-column_renamings:
+field_renamings:
 	extension : new_extension
-column_filters:
+field_filters:
 	- name
 	- new_extension
 	- about_resource
-required_columns:
+required_fields:
 	- name
 
 
