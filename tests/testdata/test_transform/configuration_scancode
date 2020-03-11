@@ -1,0 +1,11 @@
+column_renamings:
+	extension : new_extension
+column_filters:
+	- name
+	- new_extension
+	- about_resource
+required_columns:
+	- name
+	- type
+
+
