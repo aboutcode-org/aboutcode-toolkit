@@ -1,4 +1,3 @@
-
 A transform configuration file is used to describe which transformations and
 validations to apply to a source CSV file. This is a simple text file using YAML
 format, using the same format as an .ABOUT file.
@@ -6,41 +5,40 @@ format, using the same format as an .ABOUT file.
 The attributes that can be set in a configuration file are:
 
 * field_renamings:
-An optional map of source CSV column name to target CSV new column name that
-is used to rename CSV columns.
+An optional map of source CSV or JSON field name to target CSV/JSON new field name that
+is used to rename CSV fields.
 
-For instance with this configuration the columns "Directory/Location" will be
+For instance with this configuration the fields "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
     field_renamings:
         'Directory/Location' : about_resource
         foo : bar
 
 The renaming is always applied first before other transforms and checks. All
-other column names referenced below are these that exist AFTER the renamings
-have been applied to the existing column names.
+other field names referenced below are these that exist AFTER the renamings
+have been applied to the existing field names.
 
 * required_fields:
-An optional list of required column names that must have a value, beyond the
-standard columns names. If a source CSV does not have such a column or a row is
-missing a value for a required column, an error is reported.
+An optional list of required field names that must have a value, beyond the
+standard fields names. If a source CSV/JSON does not have such a field or a row is
+missing a value for a required field, an error is reported.
 
-For instance with this configuration an error will be reported if the columns
+For instance with this configuration an error will be reported if the fields
 "name" and "version" are missing or if any row does not have a value set for
-these columns:
+these fields:
     required_fields:
         - name
         - version
 
 * field_filters:
-An optional list of column names that should be kept in the transformed CSV. If
-this list is provided, all the columns from the source CSV that should be kept
-in the target CSV must be listed be even if they are standard or required
-columns. If this list is not provided, all source CSV columns are kept in the
-transformed target CSV.
+An optional list of field names that should be kept in the transformed CSV/JSON. If
+this list is provided, all the fields from the source CSV/JSON that should be kept
+in the target CSV/JSON must be listed be even if they are standard or required
+fields. If this list is not provided, all source CSV/JSON fields are kept in the
+transformed target CSV/JSON.
 
-For instance with this configuration the target CSV will only contains the "name"
-and "version" columns and no other column:
+For instance with this configuration the target CSV/JSON will only contains the "name"
+and "version" fields and no other field:
     field_filters:
         - name
         - version
-
