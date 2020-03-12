@@ -1,5 +1,6 @@
 field_renamings:
 	extension : new_extension
+	path : about_resource
 field_filters:
 	- name
 	- new_extension
