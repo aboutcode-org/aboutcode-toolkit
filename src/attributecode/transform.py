@@ -132,9 +132,6 @@ def transform_json(data, transformer):
         if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
             #only takes data inside "files"
             data = data["files"]
-            #automatically renames path to about_resource
-            if("path" not in renamings.keys()):
-                renamings["path"] = "about_resource"
     except:
         pass
     if isinstance(data, list):
