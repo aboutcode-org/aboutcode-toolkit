@@ -49,12 +49,12 @@ def transform_csv_to_csv(location, output, transformer):
 
     rows = read_csv_rows(location)
 
-    column_names, data, errors = transform_csv(rows, transformer)
+    field_names, data, errors = transform_csv(rows, transformer)
 
     if errors:
         return errors
     else:
-        write_csv(output, data, column_names)
+        write_csv(output, data, field_names)
         return []
 
 def transform_json_to_json(location, output, transformer):
@@ -82,7 +82,7 @@ def transform_csv(rows, transformer):
     Read a list of list of CSV-like data `rows` and apply transformations using the
     `transformer` Transformer.
     Return a tuple of:
-       ([column names...], [transformed ordered dict...], [Error objects..])
+       ([field names...], [transformed ordered dict...], [Error objects..])
     """
 
     if not transformer:
@@ -90,28 +90,28 @@ def transform_csv(rows, transformer):
 
     errors = []
     rows = iter(rows)
-    column_names = next(rows)
-    column_names = transformer.clean_columns(column_names)
+    field_names = next(rows)
+    field_names = transformer.clean_fields(field_names)
 
-    dupes = check_duplicate_columns(column_names)
+    dupes = check_duplicate_fields(field_names)
 
     if dupes:
-        msg = 'Duplicated column name: {name}'
+        msg = 'Duplicated field name: {name}'
         errors.extend(Error(CRITICAL, msg.format(name)) for name in dupes)
-        return column_names, [], errors
+        return field_names, [], errors
 
-    column_names = transformer.apply_renamings(column_names)
+    field_names = transformer.apply_renamings(field_names)
 
-    # convert to dicts using the renamed columns
-    data = [OrderedDict(zip_longest(column_names, row)) for row in rows]
+    # convert to dicts using the renamed fields
+    data = [OrderedDict(zip_longest(field_names, row)) for row in rows]
 
-    if transformer.column_filters:
-        data = list(transformer.filter_columns(data))
-        column_names = [c for c in column_names if c in transformer.column_filters]
+    if transformer.field_filters:
+        data = list(transformer.filter_fields(data))
+        field_names = [c for c in field_names if c in transformer.field_filters]
 
-    errors = transformer.check_required_columns(data)
+    errors = transformer.check_required_fields(data)
 
-    return column_names, data, errors
+    return field_names, data, errors
 
 
 def transform_json(data, transformer):
@@ -126,7 +126,14 @@ def transform_json(data, transformer):
 
     errors = []
     new_data = []
-    renamings = transformer.column_renamings
+    renamings = transformer.field_renamings
+    #if json is output of scancode-toolkit
+    try:
+        if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
+            #only takes data inside "files"
+            data = data["files"]
+    except:
+        pass
     if isinstance(data, list):
         for item in data:
             element, err = process_json_keys(item, renamings, transformer)
@@ -151,12 +158,12 @@ def process_json_keys(data, renamings, transformer):
             o_dict[k] = data[k]
         new_data = [o_dict]
 
-    if transformer.column_filters:
-        new_data = list(transformer.filter_columns(new_data))
+    if transformer.field_filters:
+        new_data = list(transformer.filter_fields(new_data))
     else:
         new_data = list(new_data)
 
-    errors = transformer.check_required_columns(new_data)
+    errors = transformer.check_required_fields(new_data)
     return new_data, errors
 
 
@@ -167,42 +174,42 @@ format, using the same format as an .ABOUT file.
 
 The attributes that can be set in a configuration file are:
 
-* column_renamings:
-An optional map of source CSV column name to target CSV new column name that
-is used to rename CSV columns.
+* field_renamings:
+An optional map of source CSV or JSON field name to target CSV/JSON new field name that
+is used to rename CSV fields.
 
-For instance with this configuration the columns "Directory/Location" will be
+For instance with this configuration the fields "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
-    column_renamings:
+    field_renamings:
         'Directory/Location' : about_resource
         foo : bar
 
 The renaming is always applied first before other transforms and checks. All
-other column names referenced below are these that exist AFTER the renamings
-have been applied to the existing column names.
+other field names referenced below are these that exist AFTER the renamings
+have been applied to the existing field names.
 
-* required_columns:
-An optional list of required column names that must have a value, beyond the
-standard columns names. If a source CSV does not have such a column or a row is
-missing a value for a required column, an error is reported.
+* required_fields:
+An optional list of required field names that must have a value, beyond the
+standard fields names. If a source CSV/JSON does not have such a field or a row is
+missing a value for a required field, an error is reported.
 
-For instance with this configuration an error will be reported if the columns
+For instance with this configuration an error will be reported if the fields
 "name" and "version" are missing or if any row does not have a value set for
-these columns:
-    required_columns:
+these fields:
+    required_fields:
         - name
         - version
 
-* column_filters:
-An optional list of column names that should be kept in the transformed CSV. If
-this list is provided, all the columns from the source CSV that should be kept
-in the target CSV must be listed be even if they are standard or required
-columns. If this list is not provided, all source CSV columns are kept in the
-transformed target CSV.
+* field_filters:
+An optional list of field names that should be kept in the transformed CSV/JSON. If
+this list is provided, all the fields from the source CSV/JSON that should be kept
+in the target CSV/JSON must be listed be even if they are standard or required
+fields. If this list is not provided, all source CSV/JSON fields are kept in the
+transformed target CSV/JSON.
 
-For instance with this configuration the target CSV will only contains the "name"
-and "version" columns and no other column:
-    column_filters:
+For instance with this configuration the target CSV/JSON will only contains the "name"
+and "version" fields and no other field:
+    field_filters:
         - name
         - version
 '''
@@ -212,22 +219,22 @@ and "version" columns and no other column:
 class Transformer(object):
     __doc__ = tranformer_config_help
 
-    column_renamings = attr.attrib(default=attr.Factory(dict))
-    required_columns = attr.attrib(default=attr.Factory(list))
-    column_filters = attr.attrib(default=attr.Factory(list))
+    field_renamings = attr.attrib(default=attr.Factory(dict))
+    required_fields = attr.attrib(default=attr.Factory(list))
+    field_filters = attr.attrib(default=attr.Factory(list))
 
-    # a list of all the standard columns from AboutCode toolkit
-    standard_columns = attr.attrib(default=attr.Factory(list), init=False)
-    # a list of the subset of standard columns that are essential and MUST be
+    # a list of all the standard fields from AboutCode toolkit
+    standard_fields = attr.attrib(default=attr.Factory(list), init=False)
+    # a list of the subset of standard fields that are essential and MUST be
     # present for AboutCode toolkit to work
-    essential_columns = attr.attrib(default=attr.Factory(list), init=False)
+    essential_fields = attr.attrib(default=attr.Factory(list), init=False)
 
     # called by attr after the __init__()
     def __attrs_post_init__(self, *args, **kwargs):
         from attributecode.model import About
         about = About()
-        self.essential_columns = list(about.required_fields)
-        self.standard_columns = [f.name for f in about.all_fields()]
+        self.essential_fields = list(about.required_fields)
+        self.standard_fields = [f.name for f in about.all_fields()]
 
     @classmethod
     def default(cls):
@@ -235,9 +242,9 @@ class Transformer(object):
         Return a default Transformer with built-in transforms.
         """
         return cls(
-            column_renamings={},
-            required_columns=[],
-            column_filters=[],
+            field_renamings={},
+            required_fields=[],
+            field_filters=[],
         )
 
     @classmethod
@@ -249,18 +256,18 @@ class Transformer(object):
         with io.open(location, encoding='utf-8') as conf:
             data = saneyaml.load(replace_tab_with_spaces(conf.read()))
         return cls(
-            column_renamings=data.get('column_renamings', {}),
-            required_columns=data.get('required_columns', []),
-            column_filters=data.get('column_filters', []),
+            field_renamings=data.get('field_renamings', {}),
+            required_fields=data.get('required_fields', []),
+            field_filters=data.get('field_filters', []),
         )
 
-    def check_required_columns(self, data):
+    def check_required_fields(self, data):
         """
         Return a list of Error for a `data` list of ordered dict where a
-        dict is missing a value for a required column name.
+        dict is missing a value for a required field name.
         """
         errors = []
-        required = set(self.essential_columns + self.required_columns)
+        required = set(self.essential_fields + self.required_fields)
         if not required:
             return []
 
@@ -270,54 +277,54 @@ class Transformer(object):
                 continue
 
             missings = ', '.join(missings)
-            msg = 'Row {rn} is missing required values for columns: {missings}'
+            msg = 'Row {rn} is missing required values for fields: {missings}'
             errors.append(Error(CRITICAL, msg.format(**locals())))
         return errors
 
-    def apply_renamings(self, column_names):
+    def apply_renamings(self, field_names):
         """
-        Return a tranformed list of `column_names` where columns are renamed
+        Return a tranformed list of `field_names` where fields are renamed
         based on this Transformer configuration.
         """
-        renamings = self.column_renamings
+        renamings = self.field_renamings
         if not renamings:
-            return column_names
+            return field_names
         renamings = {n.lower(): rn.lower() for n, rn in renamings.items()}
 
         renamed = []
-        for name in column_names:
+        for name in field_names:
             name = name.lower()
             new_name = renamings.get(name, name)
             renamed.append(new_name)
         return renamed
 
-    def clean_columns(self, column_names):
+    def clean_fields(self, field_names):
         """
-        Apply standard cleanups to a list of columns and return these.
+        Apply standard cleanups to a list of fields and return these.
         """
-        if not column_names:
-            return column_names
-        return [c.strip().lower() for c in column_names]
+        if not field_names:
+            return field_names
+        return [c.strip().lower() for c in field_names]
 
-    def filter_columns(self, data):
+    def filter_fields(self, data):
         """
         Yield transformed dicts from a `data` list of dicts keeping only
-        columns with a name in the `column_filters`of this Transformer.
-        Return the data unchanged if no `column_filters` exists.
+        fields with a name in the `field_filters`of this Transformer.
+        Return the data unchanged if no `field_filters` exists.
         """
-        column_filters = set(self.clean_columns(self.column_filters))
+        field_filters = set(self.clean_fields(self.field_filters))
         for entry in data:
-            items = ((k, v) for k, v in entry.items() if k in column_filters)
+            items = ((k, v) for k, v in entry.items() if k in field_filters)
             yield OrderedDict(items)
 
 
-def check_duplicate_columns(column_names):
+def check_duplicate_fields(field_names):
     """
-    Check that there are no duplicate in the `column_names` list of column name
-    strings, ignoring case. Return a list of unique duplicated column names.
+    Check that there are no duplicate in the `field_names` list of field name
+    strings, ignoring case. Return a list of unique duplicated field names.
     """
-    counted = Counter(c.lower() for c in column_names)
-    return [column for column, count in sorted(counted.items()) if count > 1]
+    counted = Counter(c.lower() for c in field_names)
+    return [field for field, count in sorted(counted.items()) if count > 1]
 
 
 def read_csv_rows(location):
@@ -339,13 +346,13 @@ def read_json(location):
         return data
 
 
-def write_csv(location, data, column_names):  # NOQA
+def write_csv(location, data, field_names):  # NOQA
     """
     Write a CSV file at `location` the `data` list of ordered dicts using the
-    `column_names`.
+    `field_names`.
     """
     with io.open(location, 'w', encoding='utf-8', newline='\n') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=column_names)
+        writer = csv.DictWriter(csvfile, fieldnames=field_names)
         writer.writeheader()
         writer.writerows(data)
 

@@ -69,3 +69,16 @@ class TransformTest(unittest.TestCase):
             keys = list(item.keys())
         expect = [u'about_resource', u'name', u'version']
         assert keys == expect
+
+    def test_transform_data_json_scancode(self):
+        test_file = get_test_loc('test_transform/input_scancode.json')
+        configuration = get_test_loc('test_transform/configuration_scancode')
+        json_data = read_json(test_file)
+        transformer = Transformer.from_file(configuration)
+        data, err = transform_json(json_data, transformer)
+        keys = []
+        for item in data:
+            keys = list(item.keys())
+        expect = [u'about_resource', u'name', u'new_extension']
+        assert keys == expect
+
