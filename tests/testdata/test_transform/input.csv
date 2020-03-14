@@ -1,2 +1,2 @@
-Directory/Filename,Component,version,notes
-/tmp/test.c, test.c,1,test
+Directory/Filename,Component,version,notes,temp
+/tmp/test.c, test.c,1,test,foo

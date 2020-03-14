@@ -109,6 +109,10 @@ def transform_csv(rows, transformer):
         data = list(transformer.filter_fields(data))
         field_names = [c for c in field_names if c in transformer.field_filters]
 
+    if transformer.exclude_fields:
+        data = list(transformer.filter_excluded(data))
+        field_names = [c for c in field_names if c not in transformer.exclude_fields]
+
     errors = transformer.check_required_fields(data)
 
     return field_names, data, errors
@@ -162,6 +166,11 @@ def process_json_keys(data, renamings, transformer):
         new_data = list(transformer.filter_fields(new_data))
     else:
         new_data = list(new_data)
+    
+    if transformer.exclude_fields:
+        new_data = list(transformer.filter_excluded(new_data))
+    else:
+        new_data = list(new_data)
 
     errors = transformer.check_required_fields(new_data)
     return new_data, errors
@@ -212,6 +221,19 @@ and "version" fields and no other field:
     field_filters:
         - name
         - version
+
+* exclude_fields:
+An optional list of field names that should be excluded in the transformed CSV/JSON. If
+this list is provided, all the fields from the source CSV/JSON that should be excluded
+in the target CSV/JSON must be listed. Excluding standard or required fields will cause
+an error. If this list is not provided, all source CSV/JSON fields are kept in the
+transformed target CSV/JSON.
+
+For instance with this configuration the target CSV/JSON will not contain the "type"
+and "temp" fields:
+    exclude_fields:
+        - type
+        - temp
 '''
 
 
@@ -222,6 +244,7 @@ class Transformer(object):
     field_renamings = attr.attrib(default=attr.Factory(dict))
     required_fields = attr.attrib(default=attr.Factory(list))
     field_filters = attr.attrib(default=attr.Factory(list))
+    exclude_fields = attr.attrib(default=attr.Factory(list))
 
     # a list of all the standard fields from AboutCode toolkit
     standard_fields = attr.attrib(default=attr.Factory(list), init=False)
@@ -245,6 +268,7 @@ class Transformer(object):
             field_renamings={},
             required_fields=[],
             field_filters=[],
+            exclude_fields=[],
         )
 
     @classmethod
@@ -259,6 +283,7 @@ class Transformer(object):
             field_renamings=data.get('field_renamings', {}),
             required_fields=data.get('required_fields', []),
             field_filters=data.get('field_filters', []),
+            exclude_fields=data.get('exclude_fields', []),
         )
 
     def check_required_fields(self, data):
@@ -315,6 +340,17 @@ class Transformer(object):
         field_filters = set(self.clean_fields(self.field_filters))
         for entry in data:
             items = ((k, v) for k, v in entry.items() if k in field_filters)
+            yield OrderedDict(items)
+
+    def filter_excluded(self, data):
+        """
+        Yield transformed dicts from a `data` list of dicts excluding 
+        fields with names in the `exclude_fields`of this Transformer.
+        Return the data unchanged if no `exclude_fields` exists.
+        """
+        exclude_fields = set(self.clean_fields(self.exclude_fields))
+        for entry in data:
+            items = ((k, v) for k, v in entry.items() if k not in exclude_fields)
             yield OrderedDict(items)
 
 
