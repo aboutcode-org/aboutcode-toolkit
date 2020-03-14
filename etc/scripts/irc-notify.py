@@ -139,7 +139,7 @@ if __name__ == '__main__':
         response = line.split()
 
         if response[0] == 'PING':
-            irc_file.send('PONG {}\r\n'.format(reponse[1]).encode())
+            irc_file.send('PONG {}\r\n'.format(response[1]).encode())
 
         elif response[1] == '433':
             irc_sock.send('NICK {}\r\n'.format(irc_nick).encode())
