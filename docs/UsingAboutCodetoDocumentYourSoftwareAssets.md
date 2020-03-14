@@ -287,6 +287,19 @@ and "version" columns and no other column:
         - name
         - version
 
+* exclude_fields:
+An optional list of field names that should be excluded in the transformed CSV/JSON. If
+this list is provided, all the fields from the source CSV/JSON that should be excluded
+in the target CSV/JSON must be listed. Excluding standard or required fields will cause
+an error. If this list is not provided, all source CSV/JSON fields are kept in the
+transformed target CSV/JSON.
+
+For instance with this configuration the target CSV/JSON will not contain the "type"
+and "temp" fields:
+    exclude_fields:
+        - type
+        - temp
+
 
 ## <a name="RungentoGenerateAboutCodeToolkitFiles">Run gen to Generate AboutCode Toolkit Files</a>
 

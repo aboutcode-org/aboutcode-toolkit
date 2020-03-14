@@ -5,7 +5,9 @@ field_filters:
 	- name
 	- new_extension
 	- about_resource
+	- type
 required_fields:
 	- name
-
+exclude_fields:
+	- type
 
