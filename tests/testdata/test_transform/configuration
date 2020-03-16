@@ -5,6 +5,9 @@ field_filters:
     - about_resource
     - name
     - version
+    - temp
 required_fields:
 	- name
 	- version
+exclude_fields:
+    - temp

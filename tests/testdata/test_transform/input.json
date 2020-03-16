@@ -2,5 +2,6 @@
     "Directory/Filename": "/aboutcode-toolkit/",
 	"Component": "AboutCode-toolkit",
 	"version": "1.2.3",
-	"note": "test"
+	"note": "test",
+	"temp": "foo"
 }
