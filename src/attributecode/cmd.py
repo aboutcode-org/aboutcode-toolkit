@@ -107,7 +107,7 @@ Use about <command> --help for help on a command.
 
 def validate_key_values(ctx, param, value):
     """
-    Return the a dict of {key: [values,...] if valid or raise a UsageError
+    Return the a dict of {key: value} if valid or raise a UsageError
     otherwise.
     """
     if not value:
@@ -523,7 +523,7 @@ def get_error_messages(errors, quiet=False, verbose=False):
 def parse_key_values(key_values):
     """
     Given a list of "key=value" strings, return:
-    - a dict {key: [value, value, ...]}
+    - a dict {key: value}
     - a sorted list of unique error messages for invalid entries where there is
       a missing a key or value.
     """
@@ -545,9 +545,7 @@ def parse_key_values(key_values):
             errors.add('missing <value> in "{key_value}".'.format(**locals()))
             continue
 
-        values = parsed_key_values[key]
-        if value not in values:
-            parsed_key_values[key].append(value)
+        parsed_key_values[key] = value
 
     return dict(parsed_key_values), sorted(errors)
 
