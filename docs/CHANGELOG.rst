@@ -1,7 +1,9 @@
-2019-xx-xx
+2020-05-05
     Release 4.0.2
 
     * Upgrade license-expression library to v1.2
+    * Fix the missing `multi_sort` filter for Jinja2
+    * Update help text for `--vartext`
 
 
 2019-10-17
