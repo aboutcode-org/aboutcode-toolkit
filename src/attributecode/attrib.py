@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -32,13 +32,14 @@ from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
 from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
+from attributecode.attrib_util import multi_sort
 
 
 DEFAULT_TEMPLATE_FILE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), '../../templates', 'default_html.template')
 
 
-def generate(abouts, template=None, vartext_dict=None):
+def generate(abouts, template=None, variables=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template` template text and a `variables` optional dict of extra
@@ -125,7 +126,7 @@ def generate(abouts, template=None, vartext_dict=None):
             license_name_to_license_key=license_name_to_license_key,
             utcnow=utcnow,
             tkversion=__version__,
-            vartext_dict=vartext_dict
+            variables=variables
         )
     except Exception as e:
         lineno = getattr(e, 'lineno', '') or ''
@@ -145,12 +146,13 @@ def check_template(template_string):
     message) if the template is invalid or None if it is valid.
     """
     try:
+        jinja2.filters.FILTERS['multi_sort'] = multi_sort
         jinja2.Template(template_string)
     except (jinja2.TemplateSyntaxError, jinja2.TemplateAssertionError) as e:
         return e.lineno, e.message
 
 
-def generate_from_file(abouts, template_loc=DEFAULT_TEMPLATE_FILE, vartext_dict=None):
+def generate_from_file(abouts, template_loc=DEFAULT_TEMPLATE_FILE, variables=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template_loc` template file location and a `variables` optional
@@ -163,7 +165,7 @@ def generate_from_file(abouts, template_loc=DEFAULT_TEMPLATE_FILE, vartext_dict=
     template_loc = add_unc(template_loc)
     with io.open(template_loc, encoding='utf-8') as tplf:
         tpls = tplf.read()
-    return generate(abouts, template=tpls, vartext_dict=vartext_dict)
+    return generate(abouts, template=tpls, variables=variables)
 
 
 def generate_and_save(abouts, output_location, template_loc=None, variables=None):
@@ -186,16 +188,10 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
                    str(special_char_in_expression))
             errors.append(Error(ERROR, msg))
 
-    vartext_dict = {}
-    if variables:
-        keys = variables.keys()
-        for k in keys:
-            vartext_dict[k] = (variables[k])[0]
-
     rendering_error, rendered = generate_from_file(
         abouts,
         template_loc=template_loc,
-        vartext_dict=vartext_dict
+        variables=variables
     )
 
     if rendering_error:

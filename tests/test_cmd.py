@@ -307,8 +307,8 @@ class TestParseKeyValues(unittest.TestCase):
             'keY=bar',
         ]
         expected = {
-            'key': ['value', 'bar'],
-            'this': ['THat']
+            'key': 'bar',
+            'this': 'THat'
             }
         keyvals, errors = cmd.parse_key_values(test)
         assert expected == keyvals
@@ -323,7 +323,7 @@ class TestParseKeyValues(unittest.TestCase):
             'FOO=bar'
         ]
         expected = {
-            'foo': ['bar'],
+            'foo': 'bar',
         }
         keyvals, errors = cmd.parse_key_values(test)
         assert expected == keyvals
