@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -35,11 +35,24 @@ from attributecode.transform import Transformer
 
 
 class TransformTest(unittest.TestCase):
-    def test_transform_data(self):
+    def test_transform_data1(self):
         test_file = get_test_loc('test_transform/input.csv')
         configuration = get_test_loc('test_transform/configuration')
         rows = read_csv_rows(test_file)
         transformer = Transformer.from_file(configuration)
         col_name, data, err = transform_data(rows, transformer)
-        expect = [u'about_resource', u'name']
-        assert col_name == expect
+        expect_col = [u'about_resource', u'name']
+        expected_data = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c')])]
+        assert col_name == expect_col
+        assert data == expected_data
+
+    def test_transform_data_new_col(self):
+        test_file = get_test_loc('test_transform/input.csv')
+        configuration = get_test_loc('test_transform/configuration_new_cols')
+        rows = read_csv_rows(test_file)
+        transformer = Transformer.from_file(configuration)
+        col_name, data, err = transform_data(rows, transformer)
+        expect_col = [u'path', u'about_resource', u'name']
+        expected_data = [OrderedDict([(u'path', u'/tmp/test.c'), (u'about_resource', u'/tmp/test.c'), (u'name', u'test.c')])]
+        assert col_name == expect_col
+        assert data == expected_data

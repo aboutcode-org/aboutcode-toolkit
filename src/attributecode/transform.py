@@ -29,6 +29,7 @@ from attributecode import saneyaml
 from attributecode.util import csv
 from attributecode.util import python2
 from attributecode.util import replace_tab_with_spaces
+from __builtin__ import True
 
 
 if python2:  # pragma: nocover
@@ -76,24 +77,28 @@ def transform_data(rows, transformer):
     dupes = check_duplicate_columns(column_names)
 
     if dupes:
-        msg = 'Duplicated column name: {name}'
-        errors.extend(Error(CRITICAL, msg.format(name)) for name in dupes)
+        msg = u'Duplicated column name: %(name)s'
+        for name in dupes:
+            errors.append(Error(CRITICAL, msg % locals()))
         return column_names, [], errors
 
-    column_names = transformer.apply_renamings(column_names)
-
-    # convert to dicts using the renamed columns
+    # Convert to dicts
     data = [OrderedDict(zip_longest(column_names, row)) for row in rows]
+    
+    #column_names = transformer.apply_renamings(column_names)
+    renamed_column_data = transformer.apply_renamings(data)
+
+    column_names = renamed_column_data[0].keys()
 
     if transformer.column_filters:
-        data = list(transformer.filter_columns(data))
+        renamed_column_data = list(transformer.filter_columns(renamed_column_data))
         column_names = [c for c in column_names if c in transformer.column_filters]
 
-    errors = transformer.check_required_columns(data)
+    errors = transformer.check_required_columns(renamed_column_data)
     if errors:
         return column_names, data, errors
 
-    return column_names, data, errors
+    return column_names, renamed_column_data, errors
 
 
 tranformer_config_help = '''
@@ -210,22 +215,29 @@ class Transformer(object):
             errors.append(Error(CRITICAL, msg.format(**locals())))
         return errors
 
-    def apply_renamings(self, column_names):
+    def apply_renamings(self, data):
         """
-        Return a tranformed list of `column_names` where columns are renamed
+        Return a transformed dictionary list where columns are renamed
         based on this Transformer configuration.
         """
         renamings = self.column_renamings
         if not renamings:
-            return column_names
-        renamings = {n.lower(): rn.lower() for n, rn in renamings.items()}
+            return data
+        renamings = {n.lower(): rn.lower() for n,rn in renamings.items()}
 
-        renamed = []
-        for name in column_names:
-            name = name.lower()
-            new_name = renamings.get(name, name)
-            renamed.append(new_name)
-        return renamed
+        renamed_list = []
+        for row in data:
+            renamed = OrderedDict()
+            for key in row:
+                matched = False
+                for renamed_key in renamings:
+                    if key == renamings[renamed_key]:
+                        renamed[renamed_key] = row[key]
+                        matched = True
+                if not matched:
+                    renamed[key] = row[key]
+            renamed_list.append(renamed)
+        return renamed_list
 
     def clean_columns(self, column_names):
         """
