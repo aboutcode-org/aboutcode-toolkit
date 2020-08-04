@@ -35,7 +35,7 @@ from attributecode.transform import Transformer
 
 
 class TransformTest(unittest.TestCase):
-    def test_transform_data1(self):
+    def test_transform_data(self):
         test_file = get_test_loc('test_transform/input.csv')
         configuration = get_test_loc('test_transform/configuration')
         rows = read_csv_rows(test_file)
@@ -54,5 +54,17 @@ class TransformTest(unittest.TestCase):
         col_name, data, err = transform_data(rows, transformer)
         expect_col = [u'path', u'about_resource', u'name']
         expected_data = [OrderedDict([(u'path', u'/tmp/test.c'), (u'about_resource', u'/tmp/test.c'), (u'name', u'test.c')])]
+        assert col_name == expect_col
+        assert data == expected_data
+
+    def test_transform_data_multi_row(self):
+        test_file = get_test_loc('test_transform/input2.csv')
+        configuration = get_test_loc('test_transform/configuration')
+        rows = read_csv_rows(test_file)
+        transformer = Transformer.from_file(configuration)
+        col_name, data, err = transform_data(rows, transformer)
+        expect_col = [u'about_resource', u'name', u'version']
+        expected_data = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'),(u'version', u'v0.01')]),
+                         OrderedDict([(u'about_resource', u'/tmp/tmp.h'), (u'name', u'tmp.h'),(u'version', None)])]
         assert col_name == expect_col
         assert data == expected_data

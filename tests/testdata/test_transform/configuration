@@ -1,3 +1,4 @@
 column_renamings:
     about_resource: 'Directory/Filename'
     name: Component
+    version: 'Confirmed Version'
