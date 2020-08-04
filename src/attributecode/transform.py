@@ -29,7 +29,6 @@ from attributecode import saneyaml
 from attributecode.util import csv
 from attributecode.util import python2
 from attributecode.util import replace_tab_with_spaces
-from __builtin__ import True
 
 
 if python2:  # pragma: nocover
