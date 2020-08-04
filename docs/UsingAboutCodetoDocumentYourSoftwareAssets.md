@@ -253,8 +253,8 @@ For instance with this configuration the columns "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
 
     column_renamings:
-        'Directory/Location' : about_resource
-        foo : bar
+        about_resource : 'Directory/Location'
+        bar : foo
 
 The renaming is always applied first before other transforms and checks. All
 other column names referenced below are these that exist AFTER the renaming

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -115,8 +115,8 @@ is used to rename CSV columns.
 For instance with this configuration the columns "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
     column_renamings:
-        'Directory/Location' : about_resource
-        foo : bar
+        about_resource : 'Directory/Location'
+        bar : foo
 
 The renaming is always applied first before other transforms and checks. All
 other column names referenced below are these that exist AFTER the renamings
