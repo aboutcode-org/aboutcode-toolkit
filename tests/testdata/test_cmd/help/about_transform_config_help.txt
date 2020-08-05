@@ -12,8 +12,8 @@ is used to rename CSV fields.
 For instance with this configuration the fields "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
     field_renamings:
-        'Directory/Location' : about_resource
-        foo : bar
+        about_resource : 'Directory/Location'
+        bar : foo
 
 The renaming is always applied first before other transforms and checks. All
 other field names referenced below are these that exist AFTER the renamings

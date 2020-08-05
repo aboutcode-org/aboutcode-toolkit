@@ -1,8 +1,14 @@
-2019-xx-xx
+2020-xx-xx
+    Release 5.0.0
+
+    * Update transform code (See #427 and #428)
+
+2020-05-05
     Release 4.0.2
 
     * Upgrade license-expression library to v1.2
-    * Enhance the `transform` to also work with JSON file
+    * Fix the missing `multi_sort` filter for Jinja2
+    * Update help text for `--vartext`
 
 
 2019-10-17

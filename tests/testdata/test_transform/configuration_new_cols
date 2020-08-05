@@ -1,0 +1,4 @@
+field_renamings:
+    about_resource: 'Directory/Filename'
+    name: Component
+    path: 'Directory/Filename'

@@ -1,6 +1,6 @@
 field_renamings:
-    'Directory/Filename' : about_resource
-    Component: name
+    about_resource : 'Directory/Filename'
+    name : Component
 field_filters:
     - about_resource
     - name

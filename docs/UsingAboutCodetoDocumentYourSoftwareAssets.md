@@ -253,8 +253,8 @@ For instance with this configuration the columns "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
 
     field_renamings:
-        'Directory/Location' : about_resource
-        foo : bar
+        about_resource : 'Directory/Location'
+        bar : foo
 
 The renaming is always applied first before other transforms and checks. All
 other column names referenced below are these that exist AFTER the renaming
@@ -296,6 +296,7 @@ transformed target CSV/JSON.
 
 For instance with this configuration the target CSV/JSON will not contain the "type"
 and "temp" fields:
+
     exclude_fields:
         - type
         - temp

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -49,13 +49,29 @@ def transform_csv_to_csv(location, output, transformer):
 
     rows = read_csv_rows(location)
 
-    field_names, data, errors = transform_csv(rows, transformer)
+    errors = []
+    data = iter(rows)
+    field_names = next(rows)
+
+    dupes = check_duplicate_fields(field_names)
+
+    if dupes:
+        msg = u'Duplicated field name: %(name)s'
+        for name in dupes:
+            errors.append(Error(CRITICAL, msg % locals()))
+        return field_names, [], errors
+
+    # Convert to dicts
+    new_data = [OrderedDict(zip_longest(field_names, item)) for item in data]
+
+    field_names, updated_data, errors = transform_data(new_data, transformer)
 
     if errors:
         return errors
     else:
-        write_csv(output, data, field_names)
+        write_csv(output, updated_data, field_names)
         return []
+
 
 def transform_json_to_json(location, output, transformer):
     """
@@ -67,113 +83,61 @@ def transform_json_to_json(location, output, transformer):
         raise ValueError('Cannot transform without Transformer')
 
     data = read_json(location)
+    new_data = normalize_dict_data(data)
 
-    new_data, errors = transform_json(data, transformer)
+    field_names, updated_data, errors = transform_data(new_data, transformer)
 
     if errors:
         return errors
     else:
-        write_json(output, new_data)
+        write_json(output, updated_data)
         return []
 
 
-def transform_csv(rows, transformer):
+def normalize_dict_data(data):
     """
-    Read a list of list of CSV-like data `rows` and apply transformations using the
+    Check if the input data from scancode-toolkit and normalize to a normal
+    dictionary if it is.
+    Return a list type of normalized dictionary.
+    """
+    try:
+        # Check if this is a JSON output from scancode-toolkit
+        if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
+            #only takes data inside "files"
+            new_data = data["files"]
+    except:
+        new_data = data
+    if not isinstance(new_data, list):
+        new_data = [new_data]
+    return new_data
+
+
+def transform_data(data, transformer):
+    """
+    Read a dictionary and apply transformations using the
     `transformer` Transformer.
     Return a tuple of:
        ([field names...], [transformed ordered dict...], [Error objects..])
     """
-
-    if not transformer:
-        return rows
-
-    errors = []
-    rows = iter(rows)
-    field_names = next(rows)
-    field_names = transformer.clean_fields(field_names)
-
-    dupes = check_duplicate_fields(field_names)
-
-    if dupes:
-        msg = 'Duplicated field name: {name}'
-        errors.extend(Error(CRITICAL, msg.format(name)) for name in dupes)
-        return field_names, [], errors
-
-    field_names = transformer.apply_renamings(field_names)
-
-    # convert to dicts using the renamed fields
-    data = [OrderedDict(zip_longest(field_names, row)) for row in rows]
-
-    if transformer.field_filters:
-        data = list(transformer.filter_fields(data))
-        field_names = [c for c in field_names if c in transformer.field_filters]
-
-    if transformer.exclude_fields:
-        data = list(transformer.filter_excluded(data))
-        field_names = [c for c in field_names if c not in transformer.exclude_fields]
-
-    errors = transformer.check_required_fields(data)
-
-    return field_names, data, errors
-
-
-def transform_json(data, transformer):
-    """
-    Read a dictionary and apply transformations using the
-    `transformer` Transformer.
-    Return a new list of dictionary.
-    """
-
     if not transformer:
         return data
 
-    errors = []
-    new_data = []
-    renamings = transformer.field_renamings
-    #if json is output of scancode-toolkit
-    try:
-        if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
-            #only takes data inside "files"
-            data = data["files"]
-    except:
-        pass
-    if isinstance(data, list):
-        for item in data:
-            element, err = process_json_keys(item, renamings, transformer)
-            for e in element:
-                new_data.append(e)
-            for e in err:
-                errors.append(e)
-    else: 
-        new_data, errors = process_json_keys(data, renamings, transformer)
+    renamed_field_data = transformer.apply_renamings(data)
 
-    return new_data, errors
-
-
-def process_json_keys(data, renamings, transformer):
-    o_dict = OrderedDict()
-    for k in data.keys():
-        if k in renamings.keys():
-            for r_key in renamings.keys():
-                if k == r_key:
-                    o_dict[renamings[r_key]] = data[k]
-        else:
-            o_dict[k] = data[k]
-        new_data = [o_dict]
+    field_names = renamed_field_data[0].keys()
 
     if transformer.field_filters:
-        new_data = list(transformer.filter_fields(new_data))
-    else:
-        new_data = list(new_data)
-    
-    if transformer.exclude_fields:
-        new_data = list(transformer.filter_excluded(new_data))
-    else:
-        new_data = list(new_data)
+        renamed_field_data = list(transformer.filter_fields(renamed_field_data))
+        field_names = [c for c in field_names if c in transformer.field_filters]
 
-    errors = transformer.check_required_fields(new_data)
-    return new_data, errors
+    if transformer.exclude_fields:
+        renamed_field_data = list(transformer.filter_excluded(renamed_field_data))
+        field_names = [c for c in field_names if c not in transformer.exclude_fields]
+
+    errors = transformer.check_required_fields(renamed_field_data)
+    if errors:
+        return field_names, data, errors
+    return field_names, renamed_field_data, errors
 
 
 tranformer_config_help = '''
@@ -190,8 +154,8 @@ is used to rename CSV fields.
 For instance with this configuration the fields "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
     field_renamings:
-        'Directory/Location' : about_resource
-        foo : bar
+        about_resource : 'Directory/Location'
+        bar : foo
 
 The renaming is always applied first before other transforms and checks. All
 other field names referenced below are these that exist AFTER the renamings
@@ -306,38 +270,47 @@ class Transformer(object):
             errors.append(Error(CRITICAL, msg.format(**locals())))
         return errors
 
-    def apply_renamings(self, field_names):
+    def apply_renamings(self, data):
         """
         Return a tranformed list of `field_names` where fields are renamed
         based on this Transformer configuration.
         """
         renamings = self.field_renamings
         if not renamings:
-            return field_names
-        renamings = {n.lower(): rn.lower() for n, rn in renamings.items()}
+            return data
+        renamings = {n: rn for n, rn in renamings.items()}
 
-        renamed = []
-        for name in field_names:
-            name = name.lower()
-            new_name = renamings.get(name, name)
-            renamed.append(new_name)
-        return renamed
+        renamed_list = []
+        for row in data:
+            renamed = OrderedDict()
+            for key in row:
+                matched = False
+                for renamed_key in renamings:
+                    if key == renamings[renamed_key]:
+                        renamed[renamed_key] = row[key]
+                        matched = True
+                if not matched:
+                    renamed[key] = row[key]
+            renamed_list.append(renamed)
+        return renamed_list
 
+    """
     def clean_fields(self, field_names):
-        """
+
         Apply standard cleanups to a list of fields and return these.
-        """
+
         if not field_names:
             return field_names
         return [c.strip().lower() for c in field_names]
-
+    """
     def filter_fields(self, data):
         """
         Yield transformed dicts from a `data` list of dicts keeping only
         fields with a name in the `field_filters`of this Transformer.
         Return the data unchanged if no `field_filters` exists.
         """
-        field_filters = set(self.clean_fields(self.field_filters))
+        #field_filters = set(self.clean_fields(self.field_filters))
+        field_filters = set(self.field_filters)
         for entry in data:
             items = ((k, v) for k, v in entry.items() if k in field_filters)
             yield OrderedDict(items)
@@ -348,7 +321,8 @@ class Transformer(object):
         fields with names in the `exclude_fields`of this Transformer.
         Return the data unchanged if no `exclude_fields` exists.
         """
-        exclude_fields = set(self.clean_fields(self.exclude_fields))
+        #exclude_fields = set(self.clean_fields(self.exclude_fields))
+        exclude_fields = set(self.exclude_fields)
         for entry in data:
             items = ((k, v) for k, v in entry.items() if k not in exclude_fields)
             yield OrderedDict(items)

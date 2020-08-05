@@ -10,7 +10,6 @@ third-party software components that you use in your project.
 You start by storing ABOUT files (a small YAML formatted text file with field/value pairs)
 side-by-side with each of the third-party software components you use.
 Each ABOUT file documents origin and license for one software.
-For more information on the ABOUT file format, visit http://www.dejacode.org
 There are many examples of ABOUT files (valid or invalid) in the testdata/
 directory of the whole repository.
 

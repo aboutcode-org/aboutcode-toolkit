@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -32,6 +32,7 @@ from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
 from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
+from attributecode.attrib_util import multi_sort
 
 
 DEFAULT_TEMPLATE_FILE = os.path.join(
@@ -145,6 +146,7 @@ def check_template(template_string):
     message) if the template is invalid or None if it is valid.
     """
     try:
+        jinja2.filters.FILTERS['multi_sort'] = multi_sort
         jinja2.Template(template_string)
     except (jinja2.TemplateSyntaxError, jinja2.TemplateAssertionError) as e:
         return e.lineno, e.message

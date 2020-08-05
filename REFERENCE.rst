@@ -83,8 +83,8 @@ Options
     $ about attrib --vartext "title=Attribution Notice" --vartext "header=Product 101" LOCATION OUTPUT
 
         Users can use the following in the template to get the vartext:
-        {{ vartext_dict['title'] }}
-        {{ vartext_dict['header'] }} 
+        {{ variables['title'] }}
+        {{ variables['header'] }} 
 
     --verbose
 

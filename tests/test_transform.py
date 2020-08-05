@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -29,56 +29,120 @@ from attributecode import INFO
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import gen
-from attributecode.transform import read_csv_rows
+
+from attributecode.transform import check_duplicate_fields
 from attributecode.transform import read_json
-from attributecode.transform import transform_csv
-from attributecode.transform import transform_json
+from attributecode.transform import transform_data
+from attributecode.transform import normalize_dict_data
 from attributecode.transform import Transformer
 
+from attributecode.util import python2
+
+if python2:  # pragma: nocover
+    from itertools import izip_longest as zip_longest  # NOQA
+else:  # pragma: nocover
+    from itertools import zip_longest  # NOQA
 
 class TransformTest(unittest.TestCase):
+    def test_transform_data_new_col(self):
+        data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'), (u'Component', u'test.c'),
+                             (u'version', '1'), (u'notes', u'test'), (u'temp', u'foo')])]
+        configuration = get_test_loc('test_transform/configuration_new_cols')
+        transformer = Transformer.from_file(configuration)
+
+        field_name, data, err = transform_data(data, transformer)
+
+        expect_col = [u'path',u'about_resource', u'name',u'version',u'notes',u'temp']
+        expected_data = [OrderedDict([(u'path', u'/tmp/test.c'), (u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'),
+                                      (u'version', u'1'),(u'notes', u'test'),(u'temp', u'foo')])]
+        assert field_name == expect_col
+        assert data == expected_data
+
     def test_transform_data(self):
-        test_file = get_test_loc('test_transform/input.csv')
+        data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'),
+                             (u'Component', u'test.c'), (u'version', u'1'),
+                             (u'notes', u'test'), (u'temp', u'foo')])]
         configuration = get_test_loc('test_transform/configuration')
-        rows = read_csv_rows(test_file)
         transformer = Transformer.from_file(configuration)
-        col_name, data, err = transform_csv(rows, transformer)
-        expect = [u'about_resource', u'name', u'version']
-        assert col_name == expect
 
-    def test_transform_data_json(self):
-        test_file = get_test_loc('test_transform/input.json')
-        configuration = get_test_loc('test_transform/configuration')
-        json_data = read_json(test_file)
+        col_name, data, err = transform_data(data, transformer)
+
+        expect_col = [u'about_resource', u'name', u'version']
+        expected_data = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'1')])]
+
+        assert col_name == expect_col
+        assert data == expected_data
+
+    def test_transform_data_mutli_rows(self):
+        data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'), (u'Component', u'test.c'), (u'Confirmed Version', u'v0.01')]),
+                OrderedDict([(u'Directory/Filename', u'/tmp/tmp.h'), (u'Component', u'tmp.h'), (u'Confirmed Version', None)])]
+        configuration = get_test_loc('test_transform/configuration2')
         transformer = Transformer.from_file(configuration)
-        data, err = transform_json(json_data, transformer)
-        keys = []
-        for item in data:
-            keys = list(item.keys())
-        expect = [u'about_resource', u'name', u'version']
-        assert keys == expect
 
-    def test_transform_data_json_as_array(self):
-        test_file = get_test_loc('test_transform/input_as_array.json')
-        configuration = get_test_loc('test_transform/configuration')
-        json_data = read_json(test_file)
-        transformer = Transformer.from_file(configuration)
-        data, err = transform_json(json_data, transformer)
-        keys = []
-        for item in data:
-            keys = list(item.keys())
-        expect = [u'about_resource', u'name', u'version']
-        assert keys == expect
+        col_name, data, err = transform_data(data, transformer)
 
-    def test_transform_data_json_scancode(self):
+        expect_col = [u'about_resource', u'name', u'version']
+        expected_data = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'v0.01')]),
+                         OrderedDict([(u'about_resource', u'/tmp/tmp.h'), (u'name', u'tmp.h'), (u'version', None)])]
+
+        assert col_name == expect_col
+        assert data == expected_data
+
+    def test_normalize_dict_data_scancode(self):
         test_file = get_test_loc('test_transform/input_scancode.json')
-        configuration = get_test_loc('test_transform/configuration_scancode')
         json_data = read_json(test_file)
-        transformer = Transformer.from_file(configuration)
-        data, err = transform_json(json_data, transformer)
-        keys = []
-        for item in data:
-            keys = list(item.keys())
-        expect = [u'about_resource', u'name', u'new_extension']
-        assert keys == expect
+        data = normalize_dict_data(json_data)
+        expected_data = [OrderedDict([(u'path', u'samples'),
+                                 (u'type', u'directory'),
+                                 (u'name', u'samples'),
+                                 (u'base_name', u'samples'),
+                                 (u'extension', u''), (u'size', 0),
+                                 (u'date', None),(u'sha1', None), (u'md5', None),
+                                 (u'mime_type', None), (u'file_type', None),
+                                 (u'programming_language', None),
+                                 (u'is_binary', False), (u'is_text', False),
+                                 (u'is_archive', False), (u'is_media', False),
+                                 (u'is_source', False), (u'is_script', False),
+                                 (u'licenses', []), (u'license_expressions', []),
+                                 (u'copyrights', []), (u'holders', []),
+                                 (u'authors', []), (u'packages', []),
+                                 (u'emails', []), (u'urls', []),
+                                 (u'files_count', 33), (u'dirs_count', 10),
+                                 (u'size_count', 1161083), (u'scan_errors', [])])]
+        assert data == expected_data
+
+    def test_normalize_dict_data_json(self):
+        json_data = OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit/'),
+                                 (u'Component', u'AboutCode-toolkit'),
+                                 (u'version', u'1.2.3'), (u'note', u'test'),
+                                 (u'temp', u'foo')])
+        data = normalize_dict_data(json_data)
+        expected_data = [OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit/'),
+                                      (u'Component', u'AboutCode-toolkit'),
+                                      (u'version', u'1.2.3'), (u'note', u'test'),
+                                      (u'temp', u'foo')])]
+        assert data == expected_data
+
+    def test_normalize_dict_data_json_array(self):
+        json_data = [OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit/'),
+                    (u'Component', u'AboutCode-toolkit'),
+                    (u'version', u'1.0'), (u'temp', u'fpp')]),
+                    OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit1/'),
+                    (u'Component', u'AboutCode-toolkit1'),
+                    (u'version', u'1.1'), (u'temp', u'foo')])]
+        data = normalize_dict_data(json_data)
+        expected_data = [OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit/'),
+                        (u'Component', u'AboutCode-toolkit'),
+                        (u'version', u'1.0'), (u'temp', u'fpp')]),
+                        OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit1/'),
+                        (u'Component', u'AboutCode-toolkit1'),
+                        (u'version', u'1.1'),
+                        (u'temp', u'foo')])]
+        assert data == expected_data
+
+    def test_check_duplicate_fields(self):
+        field_name = ['path', 'name', 'path', 'version']
+        expected = ['path']
+        dups = check_duplicate_fields(field_name)
+        assert dups == expected
 
