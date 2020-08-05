@@ -69,7 +69,7 @@ setup(
     install_requires=[
         'jinja2 >= 2.9, < 3.0',
 
-        'click >= 6.7, < 7.0',
+        'click',
 
         "backports.csv ; python_version<'3.6'",
 
