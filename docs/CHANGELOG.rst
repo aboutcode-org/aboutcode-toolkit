@@ -1,6 +1,7 @@
 2020-xx-xx
     Release 5.0.0
 
+	* Enhance the `transform` to also work with JSON file
     * Update transform code (See #427 and #428)
 
 2020-05-05
