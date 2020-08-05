@@ -53,14 +53,16 @@ class TransformTest(unittest.TestCase):
         field_name, data, err = transform_data(data, transformer)
 
         expect_name = [u'path',u'about_resource', u'name',u'version',u'notes',u'temp']
-        expected_data = [OrderedDict([(u'path', u'/tmp/test.c'), (u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'),
-                                      (u'version', u'1'),(u'notes', u'test'),(u'temp', u'foo')])]
+        expected_data = [dict(OrderedDict([(u'path', u'/tmp/test.c'),
+                                           (u'about_resource', u'/tmp/test.c'),
+                                           (u'name', u'test.c'), (u'version', u'1'),
+                                           (u'notes', u'test'),(u'temp', u'foo')]))]
         assert len(field_name) == len(expect_name)
         for name in field_name:
             assert name in expect_name
         assert len(data) == len(expected_data)
         for d in data:
-            assert d in expected_data
+            assert dict(d) in expected_data
 
     def test_transform_data(self):
         data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'),
@@ -72,14 +74,14 @@ class TransformTest(unittest.TestCase):
         field_name, data, err = transform_data(data, transformer)
 
         expect_name = [u'about_resource', u'name', u'version']
-        expected_data = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'1')])]
+        expected_data = [dict(OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'1')]))]
 
         assert len(field_name) == len(expect_name)
         for name in field_name:
             assert name in expect_name
         assert len(data) == len(expected_data)
         for d in data:
-            assert d in expected_data
+            assert dict(d) in expected_data
 
     def test_transform_data_mutli_rows(self):
         data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'), (u'Component', u'test.c'), (u'Confirmed Version', u'v0.01')]),
@@ -90,15 +92,15 @@ class TransformTest(unittest.TestCase):
         field_name, data, err = transform_data(data, transformer)
 
         expect_name = [u'about_resource', u'name', u'version']
-        expected_data = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'v0.01')]),
-                         OrderedDict([(u'about_resource', u'/tmp/tmp.h'), (u'name', u'tmp.h'), (u'version', None)])]
+        expected_data = [dict(OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'v0.01')])),
+                         dict(OrderedDict([(u'about_resource', u'/tmp/tmp.h'), (u'name', u'tmp.h'), (u'version', None)]))]
 
         assert len(field_name) == len(expect_name)
         for name in field_name:
             assert name in expect_name
         assert len(data) == len(expected_data)
         for d in data:
-            assert d in expected_data
+            assert dict(d) in expected_data
 
     def test_normalize_dict_data_scancode(self):
         test_file = get_test_loc('test_transform/input_scancode.json')
