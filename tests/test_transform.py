@@ -58,7 +58,9 @@ class TransformTest(unittest.TestCase):
         assert len(field_name) == len(expect_name)
         for name in field_name:
             assert name in expect_name
-        assert data == expected_data
+        assert len(data) == len(expected_data)
+        for d in data:
+            assert d in expected_data
 
     def test_transform_data(self):
         data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'),
@@ -75,7 +77,9 @@ class TransformTest(unittest.TestCase):
         assert len(field_name) == len(expect_name)
         for name in field_name:
             assert name in expect_name
-        assert data == expected_data
+        assert len(data) == len(expected_data)
+        for d in data:
+            assert d in expected_data
 
     def test_transform_data_mutli_rows(self):
         data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'), (u'Component', u'test.c'), (u'Confirmed Version', u'v0.01')]),
@@ -92,7 +96,9 @@ class TransformTest(unittest.TestCase):
         assert len(field_name) == len(expect_name)
         for name in field_name:
             assert name in expect_name
-        assert data == expected_data
+        assert len(data) == len(expected_data)
+        for d in data:
+            assert d in expected_data
 
     def test_normalize_dict_data_scancode(self):
         test_file = get_test_loc('test_transform/input_scancode.json')
