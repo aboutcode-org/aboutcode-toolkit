@@ -52,10 +52,12 @@ class TransformTest(unittest.TestCase):
 
         field_name, data, err = transform_data(data, transformer)
 
-        expect_col = [u'path',u'about_resource', u'name',u'version',u'notes',u'temp']
+        expect_name = [u'path',u'about_resource', u'name',u'version',u'notes',u'temp']
         expected_data = [OrderedDict([(u'path', u'/tmp/test.c'), (u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'),
                                       (u'version', u'1'),(u'notes', u'test'),(u'temp', u'foo')])]
-        assert field_name == expect_col
+        assert len(field_name) == len(expect_name)
+        for name in field_name:
+            assert name in expect_name
         assert data == expected_data
 
     def test_transform_data(self):
@@ -65,12 +67,14 @@ class TransformTest(unittest.TestCase):
         configuration = get_test_loc('test_transform/configuration')
         transformer = Transformer.from_file(configuration)
 
-        col_name, data, err = transform_data(data, transformer)
+        field_name, data, err = transform_data(data, transformer)
 
-        expect_col = [u'about_resource', u'name', u'version']
+        expect_name = [u'about_resource', u'name', u'version']
         expected_data = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'1')])]
 
-        assert col_name == expect_col
+        assert len(field_name) == len(expect_name)
+        for name in field_name:
+            assert name in expect_name
         assert data == expected_data
 
     def test_transform_data_mutli_rows(self):
@@ -79,13 +83,15 @@ class TransformTest(unittest.TestCase):
         configuration = get_test_loc('test_transform/configuration2')
         transformer = Transformer.from_file(configuration)
 
-        col_name, data, err = transform_data(data, transformer)
+        field_name, data, err = transform_data(data, transformer)
 
-        expect_col = [u'about_resource', u'name', u'version']
+        expect_name = [u'about_resource', u'name', u'version']
         expected_data = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'v0.01')]),
                          OrderedDict([(u'about_resource', u'/tmp/tmp.h'), (u'name', u'tmp.h'), (u'version', None)])]
 
-        assert col_name == expect_col
+        assert len(field_name) == len(expect_name)
+        for name in field_name:
+            assert name in expect_name
         assert data == expected_data
 
     def test_normalize_dict_data_scancode(self):
