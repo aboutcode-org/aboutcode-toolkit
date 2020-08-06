@@ -432,14 +432,16 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
     where reference license an notice files are stored and the `afp`
     about_file_path value, this function will copy to the base_dir the
     license_file or notice_file if found in the reference_dir
-
     """
-    lic_name = ''
+    copy_file_name = ''
     for key, value in fields:
         if key == 'license_file' or key == 'notice_file':
-            lic_name = value
+            if value:
+                copy_file_name = value
+            else:
+                continue
 
-            from_lic_path = posixpath.join(to_posix(reference_dir), lic_name)
+            from_lic_path = posixpath.join(to_posix(reference_dir), copy_file_name)
             about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
             to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
 
