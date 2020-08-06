@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -48,8 +48,7 @@ def check_duplicated_columns(location):
     at location.
     """
     location = add_unc(location)
-    # FIXME: why errors=ignore?
-    with codecs.open(location, 'rb', encoding='utf-8', errors='ignore') as csvfile:
+    with codecs.open(location, 'rb', encoding='utf-8-sig', errors='replace') as csvfile:
         reader = csv.reader(csvfile)
         columns = next(reader)
         columns = [col for col in columns]

@@ -272,7 +272,7 @@ def load_csv(location):
     """
     results = []
     # FIXME: why ignore encoding errors here?
-    with codecs.open(location, mode='rb', encoding='utf-8',
+    with codecs.open(location, mode='rb', encoding='utf-8-sig',
                      errors='ignore') as csvfile:
         for row in csv.DictReader(csvfile):
             # convert all the column keys to lower case

@@ -352,6 +352,17 @@ class TestCsv(unittest.TestCase):
         output = util.format_about_dict_for_csv_output(about)
         assert output == expected
 
+    def test_load_csv_microsoft_utf_8(self):
+        test_file = get_test_loc('test_util/csv/test_ms_utf8.csv')
+        expected = [OrderedDict([(u'about_resource', u'/myFile'), (u'name', u'myName')])]
+        result = util.load_csv(test_file)
+        assert expected == result
+
+    def test_load_csv_utf_8(self):
+        test_file = get_test_loc('test_util/csv/test_utf8.csv')
+        expected = [OrderedDict([(u'about_resource', u'/myFile'), (u'name', u'\u540d')])]
+        result = util.load_csv(test_file)
+        assert expected == result
 
 class TestJson(unittest.TestCase):
 
