@@ -98,7 +98,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>license_key</td>
     <td>DejaCode Enterprise license key for the component.</td>
-    <td>Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory. This key is also used to consolidate multiple copies of the same licenses. If you want this consolidation to work with a custom license key, than you need to add it to aboutcode-toolkit\src\attributecode\licenses.py </td>
+    <td>Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.</td>
   </tr>
   <tr>
     <td>license_name</td>
@@ -470,6 +470,8 @@ Note that this example attrib command does the following:
 * Specifies the full path (include file name) of the output document to be generated.
 
 A successful execution of attrib will create a .html (or .json depends on the template) file that is ready to use to meet your attribution requirements.
+
+The license key is also used to consolidate multiple copies of the same licenses. If you want this consolidation to work with a custom license key, than you need to add it to aboutcode-toolkit\src\attributecode\licenses.py. If your custome license key is named, for example, myCustom-1.0 then the license file must be named myCustom-1.0.LICENSE
 
 # <a name="UsinginventorytoGenerateaSoftwareInventory">Using inventory to Generate a Software Inventory</a>
 
