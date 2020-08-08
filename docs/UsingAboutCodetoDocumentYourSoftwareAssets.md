@@ -98,7 +98,7 @@ You should start with a software inventory of your codebase in spreadsheet forma
   <tr>
     <td>license_key</td>
     <td>DejaCode Enterprise license key for the component.</td>
-    <td>Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.</td>
+    <td>Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory. This key is also used to consolidate multiple copies of the same licenses. If you want this consolidation to work with a custom license key, than you need to add it to aboutcode-toolkit\src\attributecode\licenses.py </td>
   </tr>
   <tr>
     <td>license_name</td>
