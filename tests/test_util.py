@@ -26,6 +26,7 @@ import saneyaml
 
 from testing_utils import extract_test_loc
 from testing_utils import get_test_loc
+from testing_utils import get_temp_dir
 from testing_utils import on_posix
 from testing_utils import on_windows
 
@@ -611,3 +612,19 @@ description: sample
         abouts = [a, b]
         results = util.unique(abouts)
         assert [a] == results
+
+    def test_copy_license_notice_files(self):
+        base_dir = get_temp_dir()
+        reference_dir = get_test_loc('test_util/licenses')
+        fields = [(u'license_expression', u'mit or public-domain'),
+                  (u'about_resource', u'.'),
+                  (u'name', u'test'),
+                  (u'license_key', [u'mit', u'public-domain']),
+                  (u'license_file', [u'mit.LICENSE, mit2.LICENSE', u'public-domain.LICENSE'])]
+        util.copy_license_notice_files(fields, base_dir, reference_dir, '')
+        licenses = ['mit.LICENSE', 'mit2.LICENSE', 'public-domain.LICENSE']
+        from os import listdir
+        copied_files = listdir(base_dir)
+        assert len(licenses) == len(copied_files)
+        for license in licenses:
+            assert license in copied_files
