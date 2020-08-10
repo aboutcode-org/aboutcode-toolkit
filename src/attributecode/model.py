@@ -990,7 +990,6 @@ class About(object):
                 # 'Field licenses is a custom field.'
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
-
         errors = self.process(
             fields=fields,
             about_file_path=self.about_file_path,
@@ -1033,7 +1032,12 @@ class About(object):
                 # Restore the original_value as it was parsed for
                 # validation purpose
                 if field.original_value:
-                    license_file = field.original_value.split('\n')
+                    # This line break is for the components that have multiple license
+                    # values in CSV format.
+                    if '\n' in field.original_value:
+                        license_file = field.original_value.split('\n')
+                    else:
+                        license_file = field.value.keys()
                 else:
                     license_file = field.value.keys()
             elif field.name == 'license_url' and field.value:

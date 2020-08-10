@@ -676,6 +676,37 @@ this software and releases the component to Public Domain.
         result = model.get_field_names(abouts)
         assert expected == result
 
+    def test_load_dict_issue_433(self):
+        package_data = {
+            'about_resource': 'package1.zip',
+            'name': 'package',
+            'version': '1.0',
+            'copyright': 'copyright on package',
+            'license_expression': 'license1 AND license2',
+            'notice_file': 'package1.zip.NOTICE',
+            'licenses': [
+                {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE'},
+                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE'},
+            ],
+        }
+        about = model.About()
+        about.load_dict(package_data, base_dir='')
+        as_dict = about.as_dict()
+        expected = '''about_resource: package1.zip
+name: package
+version: '1.0'
+license_expression: license1 AND license2
+copyright: copyright on package
+notice_file: package1.zip.NOTICE
+licenses:
+  - key: license1
+    name: License1
+    file: license1.LICENSE
+  - key: license2
+    name: License2
+    file: license2.LICENSE
+'''
+        assert about.dumps() == expected
 
 class SerializationTest(unittest.TestCase):
     def test_About_dumps(self):
