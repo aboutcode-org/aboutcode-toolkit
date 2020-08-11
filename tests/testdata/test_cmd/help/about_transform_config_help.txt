@@ -34,7 +34,7 @@ these fields:
 * field_filters:
 An optional list of field names that should be kept in the transformed CSV/JSON. If
 this list is provided, all the fields from the source CSV/JSON that should be kept
-in the target CSV/JSON must be listed be even if they are standard or required
+in the target CSV/JSON must be listed regardless of  either standard or required
 fields. If this list is not provided, all source CSV/JSON fields are kept in the
 transformed target CSV/JSON.
 
