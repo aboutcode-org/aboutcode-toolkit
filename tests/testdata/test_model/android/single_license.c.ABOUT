@@ -1,0 +1,11 @@
+# Generated with AboutCode Toolkit Version 4.0.1 
+
+about_resource: single_license.c
+name: single_license.c
+license_expression: public-domain
+copyright: Copyright (c) xyz
+licenses:
+  - key: public-domain
+    name: Public Domain
+    file: public-domain.LICENSE
+    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain

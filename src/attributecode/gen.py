@@ -210,12 +210,13 @@ def load_inventory(location, base_dir, reference_dir=None):
 def update_about_resource(self):
     pass
 
-def generate(location, base_dir, reference_dir=None, fetch_license=False):
+def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir. Return errors and about objects.
     """
     not_exist_errors = []
+    notice_dict = {}
     api_url = ''
     api_key = ''
     gen_license = False
@@ -312,6 +313,21 @@ def generate(location, base_dir, reference_dir=None, fetch_license=False):
 
             about.dump(dump_loc)
 
+            if android:
+                """
+                Create MODULE_LICENSE_XXX and get context to create NOTICE file
+                follow the standard from Android Open Source Project
+                """
+                import os
+                parent_path = os.path.dirname(util.to_posix(dump_loc))
+
+                about.android_module_license(parent_path)
+                notice_path, notice_context = about.android_notice(parent_path)
+                if notice_path in notice_dict.keys():
+                    notice_dict[notice_path] += '\n\n' + notice_context
+                else:
+                    notice_dict[notice_path] = notice_context
+
             for e in not_exist_errors:
                 errors.append(Error(INFO, e))
 
@@ -323,4 +339,14 @@ def generate(location, base_dir, reference_dir=None, fetch_license=False):
                    u'%(dump_loc)s '
                    u'with error: %(emsg)s' % locals())
             errors.append(Error(ERROR, msg))
+
+    if android:
+        # Check if there is already a NOTICE file present
+        for path in notice_dict.keys():
+            if os.path.exists(path):
+                msg = (u'NOTICE file already exist at: %s' % path)
+                errors.append(Error(ERROR, msg))
+            else:
+                about.dump_android_notice(path, notice_dict[path])
+
     return unique(errors), abouts
