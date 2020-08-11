@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name='aboutcode-toolkit',
-    version='4.0.2',
+    version='5.0.0',
     license='Apache-2.0',
     description=(
         'AboutCode-toolkit is a tool to document the provenance (origin and license) of '
@@ -69,7 +69,7 @@ setup(
     install_requires=[
         'jinja2 >= 2.9, < 3.0',
 
-        'click >= 6.7, < 7.0',
+        'click',
 
         "backports.csv ; python_version<'3.6'",
 

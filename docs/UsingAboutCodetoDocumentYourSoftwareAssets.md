@@ -245,22 +245,22 @@ A transform configuration file is used to describe which transformations and val
 
 The attributes that can be set in a configuration file are:
 
-* column_renamings:
+* field_renamings:
 An optional map of source CSV column name to target CSV new column name that
 is used to rename CSV columns.
 
 For instance with this configuration the columns "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
 
-    column_renamings:
-        'Directory/Location' : about_resource
-        foo : bar
+    field_renamings:
+        about_resource : 'Directory/Location'
+        bar : foo
 
 The renaming is always applied first before other transforms and checks. All
 other column names referenced below are these that exist AFTER the renaming
 have been applied to the existing column names.
 
-* required_columns:
+* required_fields:
 An optional list of required column names that must have a value, beyond the
 standard columns names. If a source CSV does not have such a column or a row is
 missing a value for a required column, an error is reported.
@@ -269,11 +269,11 @@ For instance with this configuration an error will be reported if the columns
 "name" and "version" are missing or if any row does not have a value set for
 these columns:
 
-    required_columns:
+    required_fields:
         - name
         - version
 
-* column_filters:
+* field_filters:
 An optional list of column names that should be kept in the transformed CSV. If
 this list is provided, all the columns from the source CSV that should be kept
 in the target CSV must be listed be even if they are standard or required
@@ -283,9 +283,23 @@ transformed target CSV.
 For instance with this configuration the target CSV will only contains the "name"
 and "version" columns and no other column:
 
-    column_filters:
+    field_filters:
         - name
         - version
+
+* exclude_fields:
+An optional list of field names that should be excluded in the transformed CSV/JSON. If
+this list is provided, all the fields from the source CSV/JSON that should be excluded
+in the target CSV/JSON must be listed. Excluding standard or required fields will cause
+an error. If this list is not provided, all source CSV/JSON fields are kept in the
+transformed target CSV/JSON.
+
+For instance with this configuration the target CSV/JSON will not contain the "type"
+and "temp" fields:
+
+    exclude_fields:
+        - type
+        - temp
 
 
 ## <a name="RungentoGenerateAboutCodeToolkitFiles">Run gen to Generate AboutCode Toolkit Files</a>

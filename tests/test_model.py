@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2014-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -21,6 +21,7 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 import io
 import json
+import os
 import posixpath
 import shutil
 import unittest
@@ -40,6 +41,7 @@ from attributecode.util import to_posix
 from attributecode.util import replace_tab_with_spaces
 
 from testing_utils import extract_test_loc
+from testing_utils import get_temp_dir
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
 
@@ -582,7 +584,7 @@ this software and releases the component to Public Domain.
         test_file = get_test_loc('test_model/parse/non_ascii_field_name_value.about')
         a = model.About(test_file)
         expected = [
-            Error(CRITICAL, "Field name: 'mat\xedas' contains illegal name characters: 0 to 9, a to z, A to Z and _.")
+            Error(CRITICAL, "Field name: 'mat\xedas' contains illegal name characters: 0 to 9, a to z, A to Z and _. (or empty spaces)")
         ]
         assert expected == a.errors
 
@@ -676,6 +678,37 @@ this software and releases the component to Public Domain.
         result = model.get_field_names(abouts)
         assert expected == result
 
+    def test_load_dict_issue_433(self):
+        package_data = {
+            'about_resource': 'package1.zip',
+            'name': 'package',
+            'version': '1.0',
+            'copyright': 'copyright on package',
+            'license_expression': 'license1 AND license2',
+            'notice_file': 'package1.zip.NOTICE',
+            'licenses': [
+                {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE'},
+                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE'},
+            ],
+        }
+        about = model.About()
+        about.load_dict(package_data, base_dir='')
+        as_dict = about.as_dict()
+        expected = '''about_resource: package1.zip
+name: package
+version: '1.0'
+license_expression: license1 AND license2
+copyright: copyright on package
+notice_file: package1.zip.NOTICE
+licenses:
+  - key: license1
+    name: License1
+    file: license1.LICENSE
+  - key: license2
+    name: License2
+    file: license2.LICENSE
+'''
+        assert about.dumps() == expected
 
 class SerializationTest(unittest.TestCase):
     def test_About_dumps(self):
@@ -940,6 +973,41 @@ custom1: |
         expected = get_test_loc('test_model/expected.json')
         check_json(expected, result)
 
+    def test_android_module_license(self):
+        path = 'test_model/android/single_license.c.ABOUT'
+        test_file = get_test_loc(path)
+        abouts = model.About(location=test_file, about_file_path=path)
+
+        parent_dir = get_temp_dir()
+        abouts.android_module_license(parent_dir)
+        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_PUBLIC_DOMAIN'))
+
+    def test_android_module_multi_licenses(self):
+        path = 'test_model/android/multi_license.c.ABOUT'
+        test_file = get_test_loc(path)
+        abouts = model.About(location=test_file, about_file_path=path)
+
+        parent_dir = get_temp_dir()
+        abouts.android_module_license(parent_dir)
+        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_BSD_NEW'))
+        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_BSD_SIMPLIFIED'))
+
+    def test_android_notice(self):
+        path = 'test_model/android/single_license.c.ABOUT'
+        test_file = get_test_loc(path)
+        abouts = model.About(location=test_file, about_file_path=path)
+
+        parent_dir = get_temp_dir()
+        notice_path, notice_context = abouts.android_notice(parent_dir)
+        expected_path = os.path.join(parent_dir, 'NOTICE')
+        assert os.path.normpath(notice_path) == expected_path
+
+        expected_notice = '''Copyright (c) xyz
+
+This component is released to the public domain by the author.
+
+'''
+        assert notice_context == expected_notice
 
 class CollectorTest(unittest.TestCase):
 

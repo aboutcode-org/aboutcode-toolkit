@@ -1,3 +1,14 @@
+2020-08-11
+    Release 5.0.0
+
+	* Enhance the `transform` to also work with JSON file
+    * Update transform code (See #427 and #428)
+    * Fixed #431 - Error handling for empty "_file" fields
+    * Fixed #432 - Handled UTF-8 variant invented by Microsoft
+    * Fixed #433 - problem was caused by the different multi-lic file format between json and CSV (CSV with '\n' line break)
+    * Fixed #436 - issue about copy with the `--reference` option
+    * Fixed #396 - support for alternative output for Android
+
 2020-05-05
     Release 4.0.2
 

@@ -151,6 +151,10 @@ gen
 
 ::
 
+    --android                           Generate MODULE_LICENSE_XXX (XXX will be
+                                        replaced by license key) and NOTICE as the same
+                                        design as from Android.
+
     --fetch-license api_url api_key     Fetch licenses data from DejaCode License
                                         Library and create <license>.LICENSE
                                         side-by-side with the generated .ABOUT file.
@@ -177,6 +181,17 @@ Options
 -------
 
 ::
+
+    --android
+
+        Create an empty file named `MODULE_LICENSE_XXX` where `XXX` is the license
+        key and create a NOTICE file which these two files follow the design from
+        Android Open Source Project.
+
+        The input **must** have the license key information as this is needed to
+        create the empty MODULE_LICENSE_XXX
+
+    $ about gen --android LOCATION OUTPUT
 
     --fetch-license
 
@@ -324,7 +339,7 @@ Options
         Show configuration file format help and exit.
         This option will print out examples of the the YAML configuration file.
         
-        Keys configuration are: `column_renamings`, `required_columns` and `column_filters`
+        Keys configuration are: `field_renamings`, `required_fields` and `field_filters`
 
     $ about transform --help-format
 
@@ -335,5 +350,5 @@ Options
 
 Special Notes
 =============
-When using the `column_filters` configuration, all the standard required columns
-(`about_resource` and `name`) and the user defined `required_columns` need to be included.
+When using the `field_filters` configuration, all the standard required columns
+(`about_resource` and `name`) and the user defined `required_fields` need to be included.

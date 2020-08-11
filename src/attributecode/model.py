@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -677,7 +677,7 @@ def validate_fields(fields, about_file_path, running_inventory, base_dir,
 def validate_field_name(name):
     if not is_valid_name(name):
         msg = ('Field name: %(name)r contains illegal name characters: '
-               '0 to 9, a to z, A to Z and _.')
+               '0 to 9, a to z, A to Z and _. (or empty spaces)')
         return Error(CRITICAL, msg % locals())
 
 
@@ -990,7 +990,6 @@ class About(object):
                 # 'Field licenses is a custom field.'
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
-
         errors = self.process(
             fields=fields,
             about_file_path=self.about_file_path,
@@ -1033,7 +1032,12 @@ class About(object):
                 # Restore the original_value as it was parsed for
                 # validation purpose
                 if field.original_value:
-                    license_file = field.original_value.split('\n')
+                    # This line break is for the components that have multiple license
+                    # values in CSV format.
+                    if '\n' in field.original_value:
+                        license_file = field.original_value.split('\n')
+                    else:
+                        license_file = field.value.keys()
                 else:
                     license_file = field.value.keys()
             elif field.name == 'license_url' and field.value:
@@ -1090,6 +1094,53 @@ class About(object):
         with io.open(about_file_path, mode='w', encoding='utf-8') as dumped:
             dumped.write(genereated_tk_version)
             dumped.write(self.dumps())
+
+    def dump_android_notice(self, path, context):
+        """
+        Write the NOITCE file consist of copyright, notice and license
+        """
+        if on_windows:
+            path = add_unc(path)
+
+        with io.open(path, mode='w', encoding='utf-8') as dumped:
+            dumped.write(context)
+
+    def android_module_license(self, about_parent_path):
+        """
+        Create MODULE_LICENSE_XXX which the XXX is the value of license key.
+        """
+        for lic_key in self.license_key.value:
+            # Make uppercase and with dash and spaces and dots replaced by underscore
+            # just to look similar and consistent.
+            name = 'MODULE_LICENSE_' + lic_key.replace('.', '_').replace('-', '_').replace(' ', '_').upper()
+            module_lic_path = os.path.join(about_parent_path, name)
+            # Create an empty MODULE_LICESE_XXX file
+            open(module_lic_path, 'a').close()
+
+    def android_notice(self, about_parent_path):
+        """
+        Return a notice dictionary which the path of the notice file going
+        to create will be the key and its context will be the value of the dict.
+        """
+        # Create NOTICE file with the combination context of copyright,
+        # notice_file and license_file
+        notice_path = posixpath.join(about_parent_path, 'NOTICE')
+        notice_context = ''
+        if self.copyright.value:
+            notice_context += self.copyright.value
+        if self.notice_file.value:
+            notice_file_dict = self.notice_file.value
+            notice_file_key = notice_file_dict.keys()
+            for key in notice_file_key:
+                if notice_file_dict[key]:
+                    notice_context += '\n' + notice_file_dict[key] + '\n'
+        if self.license_file.value:
+            lic_file_dict = self.license_file.value
+            lic_file_key = lic_file_dict.keys()
+            for key in lic_file_key:
+                if lic_file_dict[key]:
+                    notice_context += '\n\n' + lic_file_dict[key] + '\n\n'
+        return notice_path, notice_context
 
     def dump_lic(self, location, license_dict):
         """

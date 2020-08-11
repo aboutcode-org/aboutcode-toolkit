@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -46,7 +46,7 @@ from attributecode.util import filter_errors
 
 
 __copyright__ = """
-    Copyright (c) 2013-2019 nexB Inc and others. All rights reserved.
+    Copyright (c) 2013-2020 nexB Inc and others. All rights reserved.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -210,6 +210,11 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     metavar='OUTPUT',
     type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
 
+@click.option('--android',
+    is_flag=True,
+    help='Generate MODULE_LICENSE_XXX (XXX will be replaced by license key) and NOTICE '
+         'as the same design as from Android.')
+
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
 @click.option('--fetch-license',
     nargs=2,
@@ -233,7 +238,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 @click.help_option('-h', '--help')
 
-def gen(location, output, fetch_license, reference, quiet, verbose):
+def gen(location, output, android, fetch_license, reference, quiet, verbose):
     """
 Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
 
@@ -245,12 +250,14 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         print_version()
         click.echo('Generating .ABOUT files...')
 
+    #FIXME: This should be checked in the `click`
     if not location.endswith(('.csv', '.json',)):
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
 
     errors, abouts = generate_about_files(
         location=location,
         base_dir=output,
+        android=android,
         reference_dir=reference,
         fetch_license=fetch_license,
     )
@@ -401,17 +408,17 @@ def print_config_help(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Transform a CSV by applying renamings, filters and checks.')
+    short_help='Transform a CSV/JSON by applying renamings, filters and checks.')
 
 @click.argument('location',
     required=True,
-    callback=partial(validate_extensions, extensions=('.csv',)),
+    callback=partial(validate_extensions, extensions=('.csv', '.json',)),
     metavar='LOCATION',
     type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
-    callback=partial(validate_extensions, extensions=('.csv',)),
+    callback=partial(validate_extensions, extensions=('.csv', '.json',)),
     metavar='OUTPUT',
     type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
@@ -438,30 +445,39 @@ def print_config_help(ctx, param, value):
 
 def transform(location, output, configuration, quiet, verbose):  # NOQA
     """
-Transform the CSV file at LOCATION by applying renamings, filters and checks
-and write a new CSV to OUTPUT.
+Transform the CSV/JSON file at LOCATION by applying renamings, filters and checks
+and write a new CSV/JSON to OUTPUT.
 
-LOCATION: Path to a CSV file.
+LOCATION: Path to a CSV/JSON file.
 
-OUTPUT: Path to CSV inventory file to create.
+OUTPUT: Path to CSV/JSON inventory file to create.
     """
     from attributecode.transform import transform_csv_to_csv
+    from attributecode.transform import transform_json_to_json
     from attributecode.transform import Transformer
 
-    if not quiet:
-        print_version()
-        click.echo('Transforming CSV...')
 
     if not configuration:
         transformer = Transformer.default()
     else:
         transformer = Transformer.from_file(configuration)
 
-    errors = transform_csv_to_csv(location, output, transformer)
+    if location.endswith('.csv') and output.endswith('.csv'):
+        errors = transform_csv_to_csv(location, output, transformer)
+    elif location.endswith('.json') and output.endswith('.json'):
+        errors = transform_json_to_json(location, output, transformer)
+    else:
+        msg = 'Extension for the input and output need to be the same.'
+        click.echo(msg)
+        sys.exit()
+
+    if not quiet:
+        print_version()
+        click.echo('Transforming...')
 
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet and not errors:
-        msg = 'Transformed CSV written to {output}.'.format(**locals())
+        msg = 'Transformed file written to {output}.'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
 

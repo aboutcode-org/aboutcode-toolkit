@@ -272,7 +272,7 @@ def load_csv(location):
     """
     results = []
     # FIXME: why ignore encoding errors here?
-    with codecs.open(location, mode='rb', encoding='utf-8',
+    with codecs.open(location, mode='rb', encoding='utf-8-sig',
                      errors='ignore') as csvfile:
         for row in csv.DictReader(csvfile):
             # convert all the column keys to lower case
@@ -432,36 +432,60 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
     where reference license an notice files are stored and the `afp`
     about_file_path value, this function will copy to the base_dir the
     license_file or notice_file if found in the reference_dir
-
     """
-    lic_name = ''
+    copy_file_name = ''
     for key, value in fields:
         if key == 'license_file' or key == 'notice_file':
-            lic_name = value
-
-            from_lic_path = posixpath.join(to_posix(reference_dir), lic_name)
-            about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
-            to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
-
-            if on_windows:
-                from_lic_path = add_unc(from_lic_path)
-                to_lic_path = add_unc(to_lic_path)
-
-            # Strip the white spaces
-            from_lic_path = from_lic_path.strip()
-            to_lic_path = to_lic_path.strip()
-
-            # Errors will be captured when doing the validation
-            if not posixpath.exists(from_lic_path):
+            if value:
+                # This is to handle multiple license_file value in CSV format
+                # The following code will construct a list to contain the
+                # license file(s) that need to be copied. 
+                # Note that *ONLY* license_file field allows \n. Others file
+                # fields that have \n will prompts error at validation stage 
+                file_list = []
+                if '\n' in value:
+                    f_list = value.split('\n')
+                else:
+                    if not isinstance(value, list):
+                        f_list = [value]
+                    else:
+                        f_list = value
+                # The following code is to adopt the approach from #404
+                # to use comma for multiple files which refer the same license
+                for item in f_list:
+                    if ',' in item:
+                        item_list = item.split(',')
+                        for i in item_list:
+                            file_list.append(i.strip())
+                    else:
+                        file_list.append(item)
+            else:
                 continue
 
-            if not posixpath.exists(to_lic_path):
-                os.makedirs(to_lic_path)
-            try:
-                shutil.copy2(from_lic_path, to_lic_path)
-            except Exception as e:
-                print(repr(e))
-                print('Cannot copy file at %(from_lic_path)r.' % locals())
+            for copy_file_name in file_list:
+                from_lic_path = posixpath.join(to_posix(reference_dir), copy_file_name)
+                about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
+                to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
+    
+                if on_windows:
+                    from_lic_path = add_unc(from_lic_path)
+                    to_lic_path = add_unc(to_lic_path)
+    
+                # Strip the white spaces
+                from_lic_path = from_lic_path.strip()
+                to_lic_path = to_lic_path.strip()
+    
+                # Errors will be captured when doing the validation
+                if not posixpath.exists(from_lic_path):
+                    continue
+    
+                if not posixpath.exists(to_lic_path):
+                    os.makedirs(to_lic_path)
+                try:
+                    shutil.copy2(from_lic_path, to_lic_path)
+                except Exception as e:
+                    print(repr(e))
+                    print('Cannot copy file at %(from_lic_path)r.' % locals())
 
 
 # FIXME: we should use a license object instead
