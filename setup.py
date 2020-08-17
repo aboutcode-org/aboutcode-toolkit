@@ -79,6 +79,7 @@ setup(
 
         'boolean.py >= 3.5, < 4.0',
         'license_expression >= 0.94',
+        'packageurl_python >= 0.9.0',
     ],
     extras_require={
         ":python_version < '3.6'": ['backports.csv'],

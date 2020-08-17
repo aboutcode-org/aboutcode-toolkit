@@ -118,6 +118,7 @@ class FieldTest(unittest.TestCase):
         model.BooleanField()
         model.PathField()
         model.FileTextField()
+        model.PackageUrlField()
 
     def test_empty_Field_has_no_content(self):
         field = model.Field()
@@ -166,6 +167,12 @@ class FieldTest(unittest.TestCase):
 
         expected = {'license.LICENSE': 'some license text'}
         assert expected == field.value
+
+    def test_PackageUrlField_is_valid_url(self):
+        assert model.PackageUrlField.is_valid_purl('pkg:pypi/saneyaml@0.1')
+
+    def test_PackageUrlField_is_valid_url_no_version(self):
+        assert model.PackageUrlField.is_valid_purl('pkg:pypi/saneyaml')
 
     def test_UrlField_is_valid_url(self):
         assert model.UrlField.is_valid_url('http://www.google.com')

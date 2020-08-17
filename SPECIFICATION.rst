@@ -1,4 +1,4 @@
-ABOUT File Specification v3.1.4
+ABOUT File Specification v3.1.5
 
 
 Purpose
@@ -283,6 +283,8 @@ Optional Information fields
 - homepage_url: URL to the homepage for this component.
 
 - changelog_file: Changelog file for the component.
+
+- package_url: Package URL for the package.
 
 - notes: Notes and comments about the component.
 

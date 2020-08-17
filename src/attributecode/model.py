@@ -74,6 +74,8 @@ from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
 from attributecode.util import unique
 
+from packageurl import PackageURL
+
 genereated_tk_version = "# Generated with AboutCode Toolkit Version %s \n\n" % __version__
 
 class Field(object):
@@ -350,6 +352,32 @@ class ListField(StringField):
 
         if sval == oval:
             return True
+
+class PackageUrlField(StringField):
+    """
+    A Package URL field. The validated value is a purl.
+    """
+    def _validate(self, *args, **kwargs):
+        """
+        Check that Package URL is valid. Return a list of errors.
+        """
+        errors = super(PackageUrlField, self)._validate(*args, ** kwargs)
+        name = self.name
+        val = self.value
+        if not self.is_valid_purl(val):
+            msg = (u'Field %(name)s: Invalid Package URL: %(val)s' % locals())
+            errors.append(Error(WARNING, msg))
+        return errors
+
+    @staticmethod
+    def is_valid_purl(purl):
+        """
+        Return True if a Package URL is valid.
+        """
+        try:
+            return bool(PackageURL.from_string(purl))
+        except:
+            return False
 
 class UrlListField(ListField):
     """
@@ -717,6 +745,7 @@ class About(object):
             ('download_url', UrlField()),
             ('description', StringField()),
             ('homepage_url', UrlField()),
+            ('package_url', PackageUrlField()),
             ('notes', StringField()),
 
             ('license_expression', StringField()),

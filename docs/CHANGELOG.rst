@@ -1,3 +1,8 @@
+2020-xx-xx
+    Release 5.1.0
+
+    * Add support for `package_url` #396
+
 2020-08-11
     Release 5.0.0
 
@@ -15,7 +20,6 @@
     * Upgrade license-expression library to v1.2
     * Fix the missing `multi_sort` filter for Jinja2
     * Update help text for `--vartext`
-
 
 2019-10-17
     Release 4.0.1

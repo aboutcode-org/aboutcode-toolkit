@@ -86,6 +86,11 @@ You should start with a software inventory of your codebase in spreadsheet forma
     <td>Optional</td>
   </tr>
   <tr>
+    <td>package_url</td>
+    <td>Package URL for this component (See https://github.com/package-url/purl-spec for SPEC)</td>
+    <td>Optional</td>
+  </tr>
+  <tr>
     <td>notes</td>
     <td>notes text</td>
     <td>Optional</td>
