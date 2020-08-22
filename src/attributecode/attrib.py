@@ -30,6 +30,7 @@ from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
+from attributecode.licenses import COMMON_SPDX_LICENSES
 from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
 from attributecode.attrib_util import multi_sort
@@ -120,6 +121,7 @@ def generate(abouts, template=None, variables=None):
         utcnow = datetime.datetime.utcnow()
         rendered = template.render(
             abouts=abouts, common_licenses=COMMON_LICENSES,
+            common_spdx_licenses=COMMON_SPDX_LICENSES,            
             license_key_and_context=sorted_license_key_and_context,
             license_file_name_and_key=license_file_name_and_key,
             license_key_to_license_name=license_key_to_license_name,
