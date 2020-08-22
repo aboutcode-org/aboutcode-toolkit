@@ -80,7 +80,7 @@ def generate(abouts, template=None, variables=None):
                     if not license_text_name in captured_license:
                         captured_license.append(license_text_name)
                         if license_text_name.endswith('.LICENSE'):
-                            license_key = license_text_name.strip('.LICENSE')
+                            license_key = license_text_name.rsplit('.', 1)[0]
                         else:
                             license_key = license_text_name
                         license_key_and_context[license_key] = about.license_file.value[license_text_name]
