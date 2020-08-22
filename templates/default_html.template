@@ -44,7 +44,7 @@
             {% endif %}
             {% if about_object.license_key.value %}
                 {% for license_key in about_object.license_key.value %}
-                    {% if license_key in common_licenses %}
+                    {% if (license_key in common_licenses) or (license_key in common_spdx_licenses) %}
                         <p>Full text of
                             <a class="{{ license_key }}" href="#component-license-{{ license_key }}">
                             {{ license_key }}
@@ -54,7 +54,7 @@
                  {% endfor %}
                 {% if about_object.license_file.value %}
                     {% for lic_file_name in about_object.license_file.value %}
-                        {% if not license_file_name_and_key[lic_file_name] in common_licenses %}
+                        {% if not ((license_file_name_and_key[lic_file_name] in common_licenses) or (license_file_name_and_key[lic_file_name] in common_spdx_licenses)) %}
                             <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
                         {% endif %}
                     {% endfor %}
@@ -74,7 +74,7 @@
     <h3>Common Licenses Used in This Product</h3>
 
     {% for key in license_key_and_context %}
-        {% if key in common_licenses %}
+        {% if (key in common_licenses) or (key in common_spdx_licenses) %}
             <h3 id="component-license-{{ key }}">{{ key }}</h3>
             <pre>{{ license_key_and_context[key]|e }}</pre>
         {% endif %}
