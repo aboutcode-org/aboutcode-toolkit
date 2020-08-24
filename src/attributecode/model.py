@@ -36,7 +36,7 @@ import os
 import posixpath
 import traceback
 
-from attributecode.util import python2
+from attributecode.util import python2, to_posix
 
 if python2:  # pragma: nocover
     from itertools import izip_longest as zip_longest  # NOQA
@@ -69,6 +69,7 @@ from attributecode.util import file_fields
 from attributecode.util import filter_errors
 from attributecode.util import is_valid_name
 from attributecode.util import on_windows
+from attributecode.util import norm
 from attributecode.util import replace_tab_with_spaces
 from attributecode.util import wrap_boolean_value
 from attributecode.util import UNC_PREFIX
@@ -1284,7 +1285,14 @@ def copy_redist_src(abouts, location, output):
                     continue
             for k in about.about_resource.value:
                 from_path = about.about_resource.value.get(k)
-                copy_file(from_path, output)
+                norm_from_path = norm(from_path)
+                relative_from_path = norm_from_path.partition(util.norm(location))[2]
+                # Need to strip the '/' to use the join
+                if relative_from_path.startswith('/'):
+                    relative_from_path = relative_from_path.partition('/')[2]
+                # Get the directory name of the output path
+                output_dir = os.path.dirname(os.path.join(output, util.norm(relative_from_path)))
+                copy_file(from_path, output_dir)
     return errors
 
 

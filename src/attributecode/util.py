@@ -191,6 +191,17 @@ def get_about_locations(location):
         if is_about_file(loc):
             yield loc
 
+def norm(p):
+    """
+    Normalize the path
+    """
+    if p.startswith(UNC_PREFIX) or p.startswith(to_posix(UNC_PREFIX)):
+        p = p.strip(UNC_PREFIX).strip(to_posix(UNC_PREFIX))
+    p = to_posix(p)
+    p = p.strip(posixpath.sep)
+    p = posixpath.normpath(p)
+    return p
+
 
 def get_relative_path(base_loc, full_loc):
     """
@@ -198,14 +209,6 @@ def get_relative_path(base_loc, full_loc):
     The first segment of the different between full_loc and base_loc will become
     the first segment of the returned path.
     """
-    def norm(p):
-        if p.startswith(UNC_PREFIX) or p.startswith(to_posix(UNC_PREFIX)):
-            p = p.strip(UNC_PREFIX).strip(to_posix(UNC_PREFIX))
-        p = to_posix(p)
-        p = p.strip(posixpath.sep)
-        p = posixpath.normpath(p)
-        return p
-
     base = norm(base_loc)
     path = norm(full_loc)
 
@@ -476,8 +479,10 @@ def copy_file(from_path, to_path):
         return
 
     if on_windows:
-        from_path = add_unc(from_path)
-        to_path = add_unc(to_path)
+        if not from_path.startswith(UNC_PREFIXES):
+            from_path = add_unc(from_path)
+        if not to_path.startswith(UNC_PREFIXES):
+            to_path = add_unc(to_path)
 
     # Strip the white spaces
     from_path = from_path.strip()
@@ -491,9 +496,14 @@ def copy_file(from_path, to_path):
         os.makedirs(to_path)
     try:
         if os.path.isdir(from_path):
-            print("#############################")
-            from distutils.dir_util import copy_tree
-            copy_tree(from_path, to_path)
+            # Copy the whole directory structure
+            folder_name = os.path.basename(from_path)
+            to_path = os.path.join(to_path, folder_name)
+            # Since we need to copy everything along with the directory structure,
+            # making sure the directory does not exist will not hurt.
+            shutil.rmtree(to_path)
+            # Copy the directory recursively along with its structure 
+            shutil.copytree(from_path, to_path)
         else:
             shutil.copy2(from_path, to_path)
     except Exception as e:

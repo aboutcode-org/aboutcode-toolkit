@@ -411,7 +411,7 @@ OUTPUT: Path to a directory where sources will be copied to.
     errors.extend(copy_errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
-        msg = 'Inventory collected in {output}.'.format(**locals())
+        msg = 'Redistributed sources are copied to {output}.'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
 
