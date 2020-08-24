@@ -63,6 +63,7 @@ from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import boolean_fields
 from attributecode.util import copy_license_notice_files
+from attributecode.util import copy_file
 from attributecode.util import csv
 from attributecode.util import file_fields
 from attributecode.util import filter_errors
@@ -867,7 +868,7 @@ class About(object):
                 # this is a special attribute, skip entirely
                 continue
 
-            # A field that has been alredy processed ... and has a value
+            # A field that has been already processed ... and has a value
             previous_value = seen_fields.get(name)
             if previous_value:
                 if value != previous_value:
@@ -1266,6 +1267,25 @@ def get_field_names(abouts):
     fields.extend(customs)
 
     return fields
+
+
+def copy_redist_src(abouts, location, output):
+    """
+    Given a list of About objects, copy the referenced source (file or directory)
+    to the output location if the 'redistribute' field is set to True. 
+    """
+    errors = []
+    for about in abouts:
+        if about.redistribute.value:
+            for e in about.errors:
+                if 'Field about_resource' in e.message and 'not found' in e.message:
+                    msg = e.message + u' and cannot be copied.'
+                    errors.append(Error(CRITICAL, msg))
+                    continue
+            for k in about.about_resource.value:
+                from_path = about.about_resource.value.get(k)
+                copy_file(from_path, output)
+    return errors
 
 
 def about_object_to_list_of_dictionary(abouts):

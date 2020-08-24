@@ -466,26 +466,39 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
                 from_lic_path = posixpath.join(to_posix(reference_dir), copy_file_name)
                 about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
                 to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
-    
-                if on_windows:
-                    from_lic_path = add_unc(from_lic_path)
-                    to_lic_path = add_unc(to_lic_path)
-    
-                # Strip the white spaces
-                from_lic_path = from_lic_path.strip()
-                to_lic_path = to_lic_path.strip()
-    
-                # Errors will be captured when doing the validation
-                if not posixpath.exists(from_lic_path):
-                    continue
-    
-                if not posixpath.exists(to_lic_path):
-                    os.makedirs(to_lic_path)
-                try:
-                    shutil.copy2(from_lic_path, to_lic_path)
-                except Exception as e:
-                    print(repr(e))
-                    print('Cannot copy file at %(from_lic_path)r.' % locals())
+
+                copy_file(from_lic_path, to_lic_path)
+
+
+def copy_file(from_path, to_path):
+    # Return if the from_path is empty or None.
+    if not from_path:
+        return
+
+    if on_windows:
+        from_path = add_unc(from_path)
+        to_path = add_unc(to_path)
+
+    # Strip the white spaces
+    from_path = from_path.strip()
+    to_path = to_path.strip()
+
+    # Errors will be captured when doing the validation
+    if not posixpath.exists(from_path):
+        return
+
+    if not posixpath.exists(to_path):
+        os.makedirs(to_path)
+    try:
+        if os.path.isdir(from_path):
+            print("#############################")
+            from distutils.dir_util import copy_tree
+            copy_tree(from_path, to_path)
+        else:
+            shutil.copy2(from_path, to_path)
+    except Exception as e:
+        print(repr(e))
+        print('Cannot copy file at %(from_path)r.' % locals())
 
 
 # FIXME: we should use a license object instead

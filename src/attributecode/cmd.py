@@ -40,6 +40,7 @@ from attributecode.attrib import DEFAULT_TEMPLATE_FILE
 from attributecode.attrib import generate_and_save as generate_attribution_doc
 from attributecode.gen import generate as generate_about_files
 from attributecode.model import collect_inventory
+from attributecode.model import copy_redist_src
 from attributecode.model import write_output
 from attributecode.util import extract_zip
 from attributecode.util import filter_errors
@@ -356,6 +357,61 @@ OUTPUT: Path where to write the attribution document.
 
     if not quiet:
         msg = 'Attribution generated in: {output}'.format(**locals())
+        click.echo(msg)
+    sys.exit(errors_count)
+
+
+######################################################################
+# collect_redist_src subcommand
+######################################################################
+
+@about.command(cls=AboutCommand,
+    short_help='Collect redistributable sources.')
+
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
+
+@click.argument('output',
+    required=True,
+    metavar='OUTPUT',
+    type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
+
+@click.option('-q', '--quiet',
+    is_flag=True,
+    help='Do not print error or warning messages.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
+
+@click.help_option('-h', '--help')
+
+def collect_redist_src(location, output, quiet, verbose):
+    """
+Collect sources that have 'redistribute' flagged to the output location.
+
+LOCATION: Path to a file or directory containing .ABOUT files.
+
+OUTPUT: Path to a directory where sources will be copied to.
+    """
+    if not quiet:
+        print_version()
+        click.echo('Collecting inventory from ABOUT files...')
+
+    if location.lower().endswith('.zip'):
+        # accept zipped ABOUT files as input
+        location = extract_zip(location)
+
+    errors, abouts = collect_inventory(location)
+    copy_errors = copy_redist_src(abouts, location, output)
+
+    errors.extend(copy_errors)
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    if not quiet:
+        msg = 'Inventory collected in {output}.'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
 
