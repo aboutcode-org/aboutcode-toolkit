@@ -2,6 +2,7 @@
     Release 5.1.0
 
     * Add support for `package_url` #396
+    * Add support to collect redistributable sources #22
 
 2020-08-11
     Release 5.0.0

@@ -436,6 +436,7 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
     about_file_path value, this function will copy to the base_dir the
     license_file or notice_file if found in the reference_dir
     """
+    errors = []
     copy_file_name = ''
     for key, value in fields:
         if key == 'license_file' or key == 'notice_file':
@@ -470,13 +471,16 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
                 about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
                 to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
 
-                copy_file(from_lic_path, to_lic_path)
+                err = copy_file(from_lic_path, to_lic_path)
+                if err:
+                    errors.append(err)
+    return errors
 
 
 def copy_file(from_path, to_path):
     # Return if the from_path is empty or None.
     if not from_path:
-        return
+        return []
 
     if on_windows:
         if not from_path.startswith(UNC_PREFIXES):
@@ -490,7 +494,7 @@ def copy_file(from_path, to_path):
 
     # Errors will be captured when doing the validation
     if not posixpath.exists(from_path):
-        return
+        return []
 
     if not posixpath.exists(to_path):
         os.makedirs(to_path)
@@ -501,14 +505,17 @@ def copy_file(from_path, to_path):
             to_path = os.path.join(to_path, folder_name)
             # Since we need to copy everything along with the directory structure,
             # making sure the directory does not exist will not hurt.
-            shutil.rmtree(to_path)
+            if os.path.exists(to_path):
+                shutil.rmtree(to_path)
             # Copy the directory recursively along with its structure 
             shutil.copytree(from_path, to_path)
         else:
             shutil.copy2(from_path, to_path)
+        return []
     except Exception as e:
-        print(repr(e))
-        print('Cannot copy file at %(from_path)r.' % locals())
+        msg = 'Cannot copy file at %(from_path)r.' % locals()
+        error = [Error(CRITICAL, msg)]
+        return error
 
 
 # FIXME: we should use a license object instead

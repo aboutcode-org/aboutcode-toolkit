@@ -935,8 +935,9 @@ class About(object):
         errors = self.hydrate(fields)
         # We want to copy the license_files before the validation
         if reference_dir:
-            copy_license_notice_files(
+            copy_err = copy_license_notice_files(
                 fields, base_dir, reference_dir, afp)
+            errors.extend(copy_err)
 
         # TODO: why? we validate all fields, not only these hydrated
         validation_errors = validate_fields(
@@ -1278,21 +1279,26 @@ def copy_redist_src(abouts, location, output):
     errors = []
     for about in abouts:
         if about.redistribute.value:
+            file_exist = True
             for e in about.errors:
                 if 'Field about_resource' in e.message and 'not found' in e.message:
                     msg = e.message + u' and cannot be copied.'
                     errors.append(Error(CRITICAL, msg))
+                    file_exist = False
                     continue
-            for k in about.about_resource.value:
-                from_path = about.about_resource.value.get(k)
-                norm_from_path = norm(from_path)
-                relative_from_path = norm_from_path.partition(util.norm(location))[2]
-                # Need to strip the '/' to use the join
-                if relative_from_path.startswith('/'):
-                    relative_from_path = relative_from_path.partition('/')[2]
-                # Get the directory name of the output path
-                output_dir = os.path.dirname(os.path.join(output, util.norm(relative_from_path)))
-                copy_file(from_path, output_dir)
+            if file_exist:
+                for k in about.about_resource.value:
+                    from_path = about.about_resource.value.get(k)
+                    norm_from_path = norm(from_path)
+                    relative_from_path = norm_from_path.partition(util.norm(location))[2]
+                    # Need to strip the '/' to use the join
+                    if relative_from_path.startswith('/'):
+                        relative_from_path = relative_from_path.partition('/')[2]
+                    # Get the directory name of the output path
+                    output_dir = os.path.dirname(os.path.join(output, util.norm(relative_from_path)))
+                    err = copy_file(from_path, output_dir)
+                    if err:
+                        errors.extend(err)
     return errors
 
 

@@ -1210,6 +1210,21 @@ class CollectorTest(unittest.TestCase):
         expected = get_test_loc('test_model/crlf/expected.csv')
         check_csv(expected, result, fix_cell_linesep=True, regen=False)
 
+    def test_copy_redist_src(self):
+        test_loc = get_test_loc('test_model/redistribution')
+        output = get_temp_dir()
+        errors, abouts = model.collect_inventory(test_loc)
+        expected_file = ['this.c']
+
+        err = model.copy_redist_src(abouts, test_loc, output)
+        assert err == []
+
+        from os import listdir
+        copied_files = listdir(output)
+        assert len(expected_file) == len(copied_files)
+        assert err == []
+        for file in expected_file:
+            assert file in copied_files
 
 class FetchLicenseTest(unittest.TestCase):
 
