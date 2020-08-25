@@ -658,7 +658,7 @@ description: sample
             for f in files:
                 files_list.append(f)
 
-        assert dir_list == [u'licenses']
+        #assert dir_list == [u'licenses']
         assert len(licenses) == len(files_list)
         for license in licenses:
             assert license in files_list
