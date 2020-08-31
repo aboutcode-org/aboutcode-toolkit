@@ -296,16 +296,18 @@ The multiple licenses support format for ABOUT files are by "grouping" with the 
             file: mit.LICENSE
 
 
-License with multiple license files
------------------------------------
-If a license has multiple license_file values, the correct format is to separate it by comma
+Multiple license_file support 
+-----------------------------
+To support multiple license file for a license, the correct format is to separate by comma
 
 +----------------+------+-----------------+----------------------+
 | about_resource | name | license_key     | license_file         |
 +----------------+------+-----------------+----------------------+
-| test.tar.xz    | test | | gpl-2.0       | COPYING, COPYING.v2  |
-|                |      | | mit           | mit.LICENSE          |
+| test.tar.xz    | test | gpl-2.0         | COPYING, COPYINGv2   |
+|                |      |                 |                      |
+|                |      | mit             | mit.LICENSE          |
 +----------------+------+-----------------+----------------------+
+
 
 ::
 
