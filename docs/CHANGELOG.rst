@@ -2,7 +2,7 @@
     Release 5.1.0
 
     * Add support for `package_url` #396
-    * Fixed #443 strip carriage return character
+    * Fixed #443 and #444 issue with multiple licenses/license_files
 
 2020-08-11
     Release 5.0.0

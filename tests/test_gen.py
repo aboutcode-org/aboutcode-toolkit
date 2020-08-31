@@ -215,6 +215,23 @@ licenses:
         )
         assert expected == result
 
+    def test_generate_multi_lic_issue_444(self):
+        location = get_test_loc('test_gen/multi_lic_issue_444/test1.csv')
+        base_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location, base_dir)
+
+        result = [a.dumps() for a in abouts][0]
+        expected = (
+'''about_resource: test.c
+name: test.c
+licenses:
+  - key: License1
+    file: LIC1.LICENSE, LIC2.LICENSE
+'''
+        )
+        assert expected == result
+
     @skip('FIXME: this test is making a failed, live API call')
     def test_generate_not_overwrite_original_license_file(self):
         location = get_test_loc('test_gen/inv5.csv')

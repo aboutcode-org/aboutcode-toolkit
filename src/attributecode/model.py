@@ -1073,11 +1073,14 @@ class About(object):
                             else:
                                 license_file.append(lic)
                     else:
-                        license_file = field.value.keys()
+                        if isinstance(field.original_value, list):
+                            license_file = field.value.keys()
+                        else:
+                            # Restore the original license_file value
+                            # See #444
+                            license_file = [field.original_value]
                 else:
                     license_file = field.value.keys()
-                # Strip carriage See #433
-                
             elif field.name == 'license_url' and field.value:
                 license_url = field.value
 
