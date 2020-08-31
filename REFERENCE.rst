@@ -291,9 +291,31 @@ The multiple licenses support format for ABOUT files are by "grouping" with the 
     name: test
     licenses:
         -   key: apache 2.0
-            name: apache-2.0.LICENSE
+            file: apache-2.0.LICENSE
         -   key: mit
-            name: mit.LICENSE
+            file: mit.LICENSE
+
+
+License with multiple license files
+-----------------------------------
+If a license has multiple license_file values, the correct format is to separate it by comma
+
++----------------+------+-----------------+----------------------+
+| about_resource | name | license_key     | license_file         |
++----------------+------+-----------------+----------------------+
+| test.tar.xz    | test | | gpl-2.0       | COPYING, COPYING.v2  |
+|                |      | | mit           | mit.LICENSE          |
++----------------+------+-----------------+----------------------+
+
+::
+
+    about_resource: test.tar.xz
+    name: test
+    licenses:
+        -   key: gpl-2.0
+            file: COPYING, COPYING.v2
+        -   key: mit
+            file: mit.LICENSE
 
 
 transform
