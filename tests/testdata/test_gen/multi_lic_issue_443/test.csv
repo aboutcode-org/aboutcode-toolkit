@@ -1,0 +1,6 @@
+about_resource,name,version,license_key,license_file
+3rdParty/test,test,1.5,"License1
+License2
+License3","LIC1.LICENSE
+LIC2.LICENSE
+LIC3.LICENSE"

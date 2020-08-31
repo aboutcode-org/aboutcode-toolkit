@@ -1064,11 +1064,20 @@ class About(object):
                     # This line break is for the components that have multiple license
                     # values in CSV format.
                     if '\n' in field.original_value:
-                        license_file = field.original_value.split('\n')
+                        license_file_list = field.original_value.split('\n')
+                        license_file = []
+                        # Strip the carriage return character '\r' See #443
+                        for lic in license_file_list:
+                            if '\r' in lic:
+                                license_file.append(lic.strip('\r'))
+                            else:
+                                license_file.append(lic)
                     else:
                         license_file = field.value.keys()
                 else:
                     license_file = field.value.keys()
+                # Strip carriage See #433
+                
             elif field.name == 'license_url' and field.value:
                 license_url = field.value
 
