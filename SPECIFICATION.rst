@@ -1,4 +1,4 @@
-ABOUT File Specification v3.1.5
+ABOUT File Specification v3.2.0
 
 
 Purpose
@@ -323,11 +323,11 @@ Optional Licensing fields
 - license_expression: The DejaCode license expression that apply to the component. You
   can separate each identifier using " or " and " and " to document the
   relationship between multiple license identifiers, such as a choice among
-  multiple licenses.
+  multiple licenses (No special characters are allowed).
 
-- license_name: The DejaCode license short name for the license.
+- license_name: The DejaCode license short name for the license (No special characters are allowed).
 
-- license_key: The DejaCode license key(s) for the component.
+- license_key: The DejaCode license key(s) for the component (No special characters are allowed).
 
 
 Optional Boolean flag fields

@@ -239,6 +239,15 @@ class StringField(Field):
     """
     def _validate(self, *args, **kwargs):
         errors = super(StringField, self)._validate(*args, ** kwargs)
+        no_special_char_field = ['license_expression', 'license_key', 'license_name']
+        name = self.name
+        if name in no_special_char_field:
+            val = self.value
+            special_char = detect_special_char(val)
+            if special_char:
+                msg = (u'The following character(s) cannot be in the %(name)s: '
+                       '%(special_char)r' % locals())
+                errors.append(Error(ERROR, msg))
         return errors
 
     def _serialized_value(self):
@@ -1388,7 +1397,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
         if about.license_expression.present:
             special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
             if special_char_in_expression:
-                msg = (u"The following character(s) cannot be in the licesne_expression: " +
+                msg = (u"The following character(s) cannot be in the license_expression: " +
                        str(special_char_in_expression))
                 errors.append(Error(ERROR, msg))
             else:
@@ -1412,20 +1421,20 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
 def parse_license_expression(lic_expression):
     licensing = Licensing()
     lic_list = []
-    special_char = special_char_in_license_expresion(lic_expression)
+    special_char = detect_special_char(lic_expression)
     if not special_char:
         # Parse the license expression and save it into a list
         lic_list = licensing.license_keys(lic_expression)
     return special_char, lic_list
 
 
-def special_char_in_license_expresion(lic_expression):
+def detect_special_char(expression):
     not_support_char = [
         '!', '@', '#', '$', '%', '^', '&', '*', '=', '{', '}',
         '|', '[', ']', '\\', ':', ';', '<', '>', '?', ',', '/']
     special_character = []
     for char in not_support_char:
-        if char in lic_expression:
+        if char in expression:
             special_character.append(char)
     return special_character
 

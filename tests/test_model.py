@@ -685,6 +685,12 @@ this software and releases the component to Public Domain.
         result = model.get_field_names(abouts)
         assert expected == result
 
+    def test_comma_in_license(self):
+        test_file = get_test_loc('test_model/special_char/about.ABOUT')
+        a = model.About(test_file)
+        expected = Error(ERROR,  "The following character(s) cannot be in the license_key: [',']")
+        assert a.errors[0] == expected
+
     def test_load_dict_issue_433(self):
         package_data = {
             'about_resource': 'package1.zip',

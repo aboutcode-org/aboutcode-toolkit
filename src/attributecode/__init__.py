@@ -33,7 +33,7 @@ import saneyaml
 
 __version__ = '5.0.0'
 
-__about_spec_version__ = '3.1.4'
+__about_spec_version__ = '3.2.0'
 
 __copyright__ = """
 Copyright (c) 2013-2020 nexB Inc. All rights reserved. http://dejacode.org

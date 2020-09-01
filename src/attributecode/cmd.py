@@ -185,6 +185,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     errors, abouts = collect_inventory(location)
     write_errors = write_output(abouts=abouts, location=output, format=format)
     errors.extend(write_errors)
+    errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         msg = 'Inventory collected in {output}.'.format(**locals())
@@ -262,6 +263,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         fetch_license=fetch_license,
     )
 
+    errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         abouts_count = len(abouts)
@@ -351,7 +353,7 @@ OUTPUT: Path where to write the attribution document.
         variables=vartext,
     )
     errors.extend(attrib_errors)
-
+    errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
 
     if not quiet:
@@ -391,6 +393,7 @@ LOCATION: Path to a file or directory containing .ABOUT files.
     print_version()
     click.echo('Checking ABOUT files...')
     errors, _abouts = collect_inventory(location)
+    errors = unique(errors)
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
     sys.exit(severe_errors_count)
 
@@ -475,6 +478,7 @@ OUTPUT: Path to CSV/JSON inventory file to create.
         print_version()
         click.echo('Transforming...')
 
+    errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet and not errors:
         msg = 'Transformed file written to {output}.'.format(**locals())
