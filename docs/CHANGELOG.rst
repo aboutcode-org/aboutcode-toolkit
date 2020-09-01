@@ -1,4 +1,4 @@
-2020-xx-xx
+2020-09-01
     Release 5.1.0
 
     * Add support for `package_url` #396
