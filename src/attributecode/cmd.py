@@ -346,7 +346,7 @@ OUTPUT: Path where to write the attribution document.
 
     errors, abouts = collect_inventory(location)
 
-    attrib_errors = generate_attribution_doc(
+    attrib_errors, rendered = generate_attribution_doc(
         abouts=abouts,
         output_location=output,
         template_loc=template,
@@ -357,8 +357,12 @@ OUTPUT: Path where to write the attribution document.
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
 
     if not quiet:
-        msg = 'Attribution generated in: {output}'.format(**locals())
-        click.echo(msg)
+        if rendered:
+            msg = 'Attribution generated in: {output}'.format(**locals())
+            click.echo(msg)
+        else:
+            msg = 'Attribution generation failed.'
+            click.echo(msg)
     sys.exit(errors_count)
 
 

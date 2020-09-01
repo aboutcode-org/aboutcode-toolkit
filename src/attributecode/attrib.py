@@ -30,7 +30,7 @@ from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
-from attributecode.model import parse_license_expression
+from attributecode.model import detect_special_char, parse_license_expression
 from attributecode.util import add_unc
 from attributecode.attrib_util import multi_sort
 
@@ -88,9 +88,22 @@ def generate(abouts, template=None, variables=None):
                         sorted_license_key_and_context = collections.OrderedDict(sorted(license_key_and_context.items()))
                         license_file_name_and_key[license_text_name] = license_key
 
-            # Convert/map the key in license expression to license name
-            if about.license_expression.value and about.license_name.value:
-                special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+            # Convert/map the key to name
+            if (about.license_expression.value or about.license_key.value) and about.license_name.value:
+                if about.license_expression.value:
+                    special_char, lic_list = parse_license_expression(about.license_expression.value)
+                else:
+                    lic_list = about.license_key.value
+                    special_char = []
+                    for lic in lic_list:
+                        special_char_list = detect_special_char(lic)
+                        if special_char_list:
+                            for char in special_char_list:
+                                special_char.append(char)
+                if special_char:
+                    error = Error(CRITICAL, 'Special character(s) are not allowed in '
+                                  'license_expression or license_key: %s' % special_char)
+                    return error, ''
                 lic_name_list = about.license_name.value
                 lic_name_expression_list = []
 
@@ -204,4 +217,4 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
         with io.open(output_location, 'w', encoding='utf-8') as of:
             of.write(rendered)
 
-    return errors
+    return errors, rendered
