@@ -283,6 +283,15 @@ The multiple licenses support format for CSV files are separated by line break
 +----------------+------+-----------------+----------------------+
 
 
+The cell with the line break must be quoted with double quotes, otherwise there will be errors due to misalignment of the columns. The example above as .csv file will be:
+
+::
+
+    about_resource,name,license_key,license_file
+    test.tar.xz,test,apache-2.0,"apache-2.0.LICENSE
+    mit","apache-2.0.LICENSE
+    mit.LICENSE"
+    
 The multiple licenses support format for ABOUT files are by "grouping" with the keyword "licenses"
 
 ::
