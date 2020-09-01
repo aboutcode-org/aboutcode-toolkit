@@ -3,6 +3,7 @@
 
     * Add support for `package_url` #396
     * Fixed #443 and #444 issue with multiple licenses/license_files
+    * Fixed #442 no special characters allowed for `license_key`, `license_name` and `license_expression`
 
 2020-08-11
     Release 5.0.0
