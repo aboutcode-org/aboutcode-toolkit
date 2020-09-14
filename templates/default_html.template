@@ -1,4 +1,25 @@
-<!doctype html>
+{#
+Some dictionary are provided for flexible usage. Those are
+
+    license_file_key_and_context
+    license_file_key_and_license_key
+    license_key_and_license_name
+    license_key_and_license_file_name
+    license_file_name_and_license_file_key
+    license_name_and_license_key
+
+The dictionary format consist of 2 variable parts.
+The first variable as a key, and the second variable as value.
+For instance,
+license_key_and_license_name looks like:
+{'gpl-2.0': 'GPL 2.0', 'apache-2.0': 'Apache 2.0'}
+license_key_and_license_file_name
+{'gpl-2.0': 'gpl-2.0.LICENSE', 'apache-2.0': 'apache-2.0.LICENSE'}
+
+Note that the license_file_key is usually the same as the license_key (for non-custom license)
+See "get_license_file_key" in `attrib.py` for more information
+
+#}<!doctype html>
 <html>
   <head>
     <style type="text/css">
@@ -54,7 +75,7 @@
                  {% endfor %}
                 {% if about_object.license_file.value %}
                     {% for lic_file_name in about_object.license_file.value %}
-                        {% if not license_file_name_and_key[lic_file_name] in common_licenses %}
+                        {% if not license_file_key_and_license_key[license_file_name_and_license_file_key[lic_file_name]] in common_licenses %}
                             <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
                         {% endif %}
                     {% endfor %}

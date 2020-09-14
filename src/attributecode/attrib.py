@@ -72,21 +72,21 @@ def generate(abouts, template=None, variables=None):
         license_file_key_and_license_key = {}
         # FIXME: This need to be simplified
         for about in abouts:
-            # about.license_file.value is a OrderDict with license_text_name as
+            # about.license_file.value is a OrderDict with license_file_name as
             # the key and the license text as the value
             if about.license_file:
-                # We want to create a dictionary which have the license name as
+                # We want to create a dictionary which have the license file name as
                 # the key and license text as the value
                 # The reason we want to use license file name as the key instead of the
                 # license key is because there is a scenario such that the input only provide
                 # license_file but not license_key
-                for license_text_name in about.license_file.value:
-                    if not license_text_name in captured_license:
-                        captured_license.append(license_text_name)
-                        license_file_key = get_license_file_key(license_text_name)
-                        license_file_key_and_context[license_file_key] = about.license_file.value[license_text_name]
+                for license_file_name in about.license_file.value:
+                    if not license_file_name in captured_license:
+                        captured_license.append(license_file_name)
+                        license_file_key = get_license_file_key(license_file_name)
+                        license_file_key_and_context[license_file_key] = about.license_file.value[license_file_name]
                         sorted_license_file_key_and_context = collections.OrderedDict(sorted(license_file_key_and_context.items()))
-                        license_file_name_and_license_file_key[license_text_name] = license_file_key
+                        license_file_name_and_license_file_key[license_file_name] = license_file_key
 
             lic_list = []
             lic_name_list = []
@@ -114,12 +114,12 @@ def generate(abouts, template=None, variables=None):
                     # linking feature in the jinja2 template
                     about.license_key.value = about.license_file.value.keys()
                     lic_list = about.license_file.value.keys()
-                    
+
                 lic_name_list = about.license_name.value
 
                 # The order of the license_name and key should be the same
                 # The length for both list should be the same
-                assert len(lic_name_list) == len(lic_list)                    
+                assert len(lic_name_list) == len(lic_list)
 
                 # Map the license key to license name
                 index_for_license_name_list = 0
@@ -142,18 +142,18 @@ def generate(abouts, template=None, variables=None):
                 lic_name_expression = ' '.join(lic_name_expression_list)
     
                 # Add the license name expression string into the about object
-            about.license_name_expression = lic_name_expression
+                about.license_name_expression = lic_name_expression
 
         # Get the current UTC time
         utcnow = datetime.datetime.utcnow()
         rendered = template.render(
             abouts=abouts, common_licenses=COMMON_LICENSES,
             license_file_key_and_context=sorted_license_file_key_and_context,
+            license_file_key_and_license_key=license_file_key_and_license_key,
             license_file_name_and_license_file_key=license_file_name_and_license_file_key,
+            license_key_and_license_file_name=license_key_and_license_file_name,
             license_key_and_license_name=license_key_and_license_name,
             license_name_and_license_key=license_name_and_license_key,
-            license_key_and_license_file_name=license_key_and_license_file_name,
-            license_file_key_and_license_key=license_file_key_and_license_key,
             utcnow=utcnow,
             tkversion=__version__,
             variables=variables
