@@ -19,7 +19,8 @@ license_key_and_license_file_name
 Note that the license_file_key is usually the same as the license_key (for non-custom license)
 See "get_license_file_key" in `attrib.py` for more information
 
-#}<!doctype html>
+#}
+<!doctype html>
 <html>
   <head>
     <style type="text/css">
