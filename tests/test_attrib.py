@@ -118,9 +118,9 @@ class GenerateTest(unittest.TestCase):
         errors, abouts = model.collect_inventory(test_file)
         attrib.generate_and_save(abouts, output_file, template_loc)
 
-        with open(output_file, 'r') as of:
+        with open(output_file) as of:
             f1 = '\n'.join(of.readlines(False))
-        with open(expected, 'r') as ef:
+        with open(expected) as ef:
             f2 = '\n'.join(ef.readlines(False))
 
         assert f1 == f2

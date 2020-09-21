@@ -124,13 +124,13 @@ def generate(abouts, template=None, variables=None):
                 # Map the license key to license name
                 index_for_license_name_list = 0
                 for key in lic_list:
-                    license_key_and_license_file_name[key] = about.license_file.value.keys()[index_for_license_name_list]
+                    license_key_and_license_file_name[key] = list(about.license_file.value.keys())[index_for_license_name_list]
                     license_key_and_license_name[key] = lic_name_list[index_for_license_name_list]
                     license_name_and_license_key[lic_name_list[index_for_license_name_list]] = key
                     license_file_key = license_file_name_and_license_file_key[license_key_and_license_file_name[key]]
                     license_file_key_and_license_key[license_file_key] = key
                     index_for_license_name_list = index_for_license_name_list + 1
-    
+
                 # Create a license expression with license name instead of key
                 for segment in about.license_expression.value.split():
                     if segment in license_key_and_license_name:
@@ -163,9 +163,13 @@ def generate(abouts, template=None, variables=None):
         if lineno:
             lineno = ' at line: {}'.format(lineno)
         err = getattr(e, 'message', '') or ''
+#        error = Error(
+#            CRITICAL,
+#            'Template processing error {lineno}: {err}'.format(**locals()),
+#        )
         error = Error(
             CRITICAL,
-            'Template processing error {lineno}: {err}'.format(**locals()),
+            'Template processing error:' + str(e),
         )
     return error, rendered
 
@@ -232,6 +236,9 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
         variables=variables
     )
 
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(rendering_error)
+    print(rendered)
     if rendering_error:
         errors.append(rendering_error)
 
