@@ -46,27 +46,38 @@ class GenTest(unittest.TestCase):
         assert expected == result
 
     def test_check_duplicated_about_resource(self):
-        test_dict = [
-            {'about_resource': '/test/test.c', 'version': '1.03', 'name': 'test.c'},
-            {'about_resource': '/test/abc/', 'version': '1.0', 'name': 'abc'},
-            {'about_resource': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
-        expected = [
-            Error(CRITICAL,
-                  "The input has duplicated values in 'about_resource' field: /test/test.c")]
-        result = gen.check_duplicated_about_resource(test_dict)
-        assert expected == result
+        arp_list = ['/test/test.c', 'test/test1.h']
+        arp1 = '/test/test.c'
+        arp2 = '/test/tmp/test.c'
+        expected = Error(CRITICAL,
+                  "The input has duplicated values in 'about_resource' field: " + arp1)
+        result1 = gen.check_duplicated_about_resource(arp1, arp_list)
+        result2 = gen.check_duplicated_about_resource(arp2, arp_list)
+        assert result1 == expected
+        assert result2 == ''
 
     def test_check_newline_in_file_field(self):
-        test_dict = [
-            {'about_resource': '/test/test.c', 'name': 'test.c', 'notice_file': 'NOTICE\nNOTICE2'},
-            {'about_resource': '/test/abc/', 'version': '1.0', 'name': 'abc'},
-            {'about_resource': '/test/test.c', 'version': '1.04', 'name': 'test1.c'}]
+        test_dict1 = {'about_resource': '/test/test.c', 'name': 'test.c', 'notice_file': 'NOTICE\nNOTICE2'}
+        test_dict2 = {'about_resource': '/test/test.c', 'name': 'test.c', 'notice_file': 'NOTICE, NOTICE2'}
         expected = [
             Error(CRITICAL,
                   "New line character detected in 'notice_file' for '/test/test.c' which is not supported."
                   "\nPlease use ',' to declare multiple files.")]
-        result = gen.check_newline_in_file_field(test_dict)
-        assert expected == result
+        result1 = gen.check_newline_in_file_field(test_dict1)
+        result2 = gen.check_newline_in_file_field(test_dict2)
+        assert result1 == expected
+        assert result2 == []
+
+    def test_check_about_resource_filename(self):
+        arp1 = '/test/t@est.c'
+        arp2 = '/test/t!est.c'
+        msg = ("Invalid characters present in 'about_resource' "
+                   "field: " + arp2)
+        expected2 = Error(CRITICAL, msg)
+        result1 = gen.check_about_resource_filename(arp1)
+        result2 = gen.check_about_resource_filename(arp2)
+        assert result1 == ''
+        assert result2 == expected2
 
     def test_load_inventory(self):
         location = get_test_loc('test_gen/inv.csv')

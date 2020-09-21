@@ -37,6 +37,7 @@ from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import csv
 from attributecode.util import file_fields
+from attributecode.util import invalid_chars
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import unique
@@ -77,42 +78,42 @@ def check_duplicated_columns(location):
         errors.append(Error(ERROR, msg))
     return unique(errors)
 
-
-def check_duplicated_about_resource(inventory_dict):
+def check_duplicated_about_resource(arp, arp_list):
     """
     Return a list of errors for duplicated about_resource in a CSV file at location.
     """
-    arp_list = []
-    errors = []
-    for component in inventory_dict:
-        # Ignore all the empty path
-        if component['about_resource']:
-            if component['about_resource'] in arp_list:
-                msg = ("The input has duplicated values in 'about_resource' "
-                       "field: " + component['about_resource'])
-                errors.append(Error(CRITICAL, msg))
-            else:
-                arp_list.append(component['about_resource'])
-    return errors
+    if arp in arp_list:
+        msg = ("The input has duplicated values in 'about_resource' "
+               "field: " + arp)
+        return Error(CRITICAL, msg)
+    return ''
 
-
-def check_newline_in_file_field(inventory_dict):
+def check_newline_in_file_field(component):
     """
     Return a list of errors for newline characters detected in *_file fields.
     """
     errors = []
-    for component in inventory_dict:
-        for k in component.keys():
-            if k in file_fields:
-                try:
-                    if '\n' in component[k]:
-                        msg = ("New line character detected in '%s' for '%s' which is not supported."
-                                "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
-                        errors.append(Error(CRITICAL, msg))
-                except:
-                    pass
+    for k in component.keys():
+        if k in file_fields:
+            try:
+                if '\n' in component[k]:
+                    msg = ("New line character detected in '%s' for '%s' which is not supported."
+                            "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
+                    errors.append(Error(CRITICAL, msg))
+            except:
+                pass
     return errors
 
+def check_about_resource_filename(arp):
+    """
+    Return error for invalid/non-support about_resource's filename or
+    empty string if no error is found. 
+    """
+    if invalid_chars(arp):
+        msg = ("Invalid characters present in 'about_resource' "
+                   "field: " + arp)
+        return (Error(CRITICAL, msg))
+    return ''
 
 # TODO: this should be either the CSV or the ABOUT files but not both???
 def load_inventory(location, base_dir, reference_dir=None):
@@ -139,15 +140,26 @@ def load_inventory(location, base_dir, reference_dir=None):
         inventory = util.load_json(location)
 
     try:
-        # FIXME: this should not be done here.
-        dup_about_resource_err = check_duplicated_about_resource(inventory)
-        if dup_about_resource_err:
-            errors.extend(dup_about_resource_err)
+        arp_list = []
+        errors = []
+        for component in inventory:
+            arp = component['about_resource']
+            dup_err = check_duplicated_about_resource(arp, arp_list)
+            if dup_err:
+                errors.append(dup_err)
+            else:
+                arp_list.append(arp)
+
+            newline_in_file_err = check_newline_in_file_field(component)
+            for err in newline_in_file_err:
+                errors.append(err)
+
+            invalid_about_filename = check_about_resource_filename(arp)
+            if invalid_about_filename:
+                errors.append(invalid_about_filename)
+        if errors:
             return errors, abouts
-        newline_in_file = check_newline_in_file_field(inventory)
-        if newline_in_file:
-            errors.extend(newline_in_file)
-            return errors, abouts
+
     except Exception as e:
         # TODO: why catch ALL Exception
         msg = "The essential field 'about_resource' is not found in the <input>"

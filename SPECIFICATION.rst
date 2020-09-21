@@ -1,4 +1,4 @@
-ABOUT File Specification v3.2.0
+ABOUT File Specification v3.2.1
 
 
 Purpose
@@ -74,7 +74,7 @@ A file name can contain only these US-ASCII characters:
 
 - digits from 0 to 9
 - uppercase and lowercase letters from A to Z
-- the following symbols: "_", "-", "+", ".", "(", ")", "~", "[", "]", "{", "}"
+- the following symbols: "_", "-", "+", ".", "(", ")", "~", "[", "]", "{", "}", "@"
 
 - The case of a file name is not significant. On case-sensitive file systems
   (such as on Linux), a tool must report an error if two ABOUT files stored in
