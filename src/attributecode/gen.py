@@ -80,7 +80,7 @@ def check_duplicated_columns(location):
 
 def check_duplicated_about_resource(arp, arp_list):
     """
-    Return a list of errors for duplicated about_resource in a CSV file at location.
+    Return error for duplicated about_resource.
     """
     if arp in arp_list:
         msg = ("The input has duplicated values in 'about_resource' "
