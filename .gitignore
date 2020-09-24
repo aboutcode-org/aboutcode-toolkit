@@ -49,3 +49,4 @@ docs/_build
 /tcl/
 /.python-version
 /.tox/
+/.pytest_cache/

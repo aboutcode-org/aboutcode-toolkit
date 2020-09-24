@@ -28,6 +28,8 @@ import shutil
 import string
 import sys
 
+from distutils.dir_util import copy_tree
+
 from attributecode import CRITICAL
 from attributecode import WARNING
 from attributecode import Error
@@ -478,6 +480,7 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
 
 
 def copy_file(from_path, to_path):
+    error = []
     # Return if the from_path is empty or None.
     if not from_path:
         return []
@@ -489,11 +492,10 @@ def copy_file(from_path, to_path):
             to_path = add_unc(to_path)
 
     # Strip the white spaces
-    from_path = from_path.strip()
+    from_path = norm(from_path.strip())
     to_path = to_path.strip()
-
     # Errors will be captured when doing the validation
-    if not posixpath.exists(from_path):
+    if not os.path.exists(from_path):
         return []
 
     if not posixpath.exists(to_path):
@@ -503,18 +505,21 @@ def copy_file(from_path, to_path):
             # Copy the whole directory structure
             folder_name = os.path.basename(from_path)
             to_path = os.path.join(to_path, folder_name)
-            # Since we need to copy everything along with the directory structure,
-            # making sure the directory does not exist will not hurt.
             if os.path.exists(to_path):
-                shutil.rmtree(to_path)
-            # Copy the directory recursively along with its structure 
-            shutil.copytree(from_path, to_path)
+                msg = norm(to_path)+ ' is already existed and is replaced by ' + norm(from_path)
+                error.append(Error(WARNING, msg))
+            copy_tree(from_path, to_path)
         else:
+            file_name = os.path.basename(from_path)
+            to_file_path = os.path.join(to_path, file_name)
+            if os.path.exists(to_file_path):
+                msg = norm(to_file_path)+ ' is already existed and is replaced by ' + norm(from_path)
+                error.append(Error(WARNING, msg))
             shutil.copy2(from_path, to_path)
-        return []
+        return error
     except Exception as e:
         msg = 'Cannot copy file at %(from_path)r.' % locals()
-        error = [Error(CRITICAL, msg)]
+        error.append(Error(CRITICAL, msg))
         return error
 
 
@@ -626,6 +631,44 @@ def filter_errors(errors, minimum_severity=WARNING):
     severity below `minimum_severity`.
     """
     return unique([e for e in errors if e.severity >= minimum_severity])
+
+
+def create_dir(location):
+    """
+    Create directory or directory tree at location, ensuring it is readable
+    and writeable.
+    """
+    import stat
+    if not os.path.exists(location):
+        os.makedirs(location)
+        os.chmod(location, stat.S_IRWXU | stat.S_IRWXG
+                 | stat.S_IROTH | stat.S_IXOTH)
+
+
+def get_temp_dir(sub_dir_path=None):
+    """
+    Create a unique new temporary directory location. Create directories
+    identified by sub_dir_path if provided in this temporary directory.
+    Return the location for this unique directory joined with the
+    sub_dir_path if any.
+    """
+    new_temp_dir = build_temp_dir()
+
+    if sub_dir_path:
+        # create a sub directory hierarchy if requested
+        new_temp_dir = os.path.join(new_temp_dir, sub_dir_path)
+        create_dir(new_temp_dir)
+    return new_temp_dir
+
+
+def build_temp_dir(prefix='attributecode-'):
+    """
+    Create and return a new unique empty directory created in base_dir.
+    """
+    import tempfile
+    location = tempfile.mkdtemp(prefix=prefix)
+    create_dir(location)
+    return location
 
 
 """
