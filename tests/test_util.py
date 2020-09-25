@@ -628,3 +628,37 @@ description: sample
         assert len(licenses) == len(copied_files)
         for license in licenses:
             assert license in copied_files
+
+    def test_copy_file(self):
+        des = get_temp_dir()
+        test_file = get_test_loc('test_util/licenses/mit.LICENSE')
+        licenses = ['mit.LICENSE']
+        err = util.copy_file(test_file, des)
+        from os import listdir
+        copied_files = listdir(des)
+        assert len(licenses) == len(copied_files)
+        assert err == []
+        for license in licenses:
+            assert license in copied_files
+
+    def test_copy_file_with_dir(self):
+        des = get_temp_dir()
+        test_dir = get_test_loc('test_util/licenses/')
+        licenses = ['mit.LICENSE', 'mit2.LICENSE', 'public-domain.LICENSE']
+        err = util.copy_file(test_dir, des)
+        assert err == []
+
+        import os
+        files_list = []
+        dir_list = []
+        # Get the directories and files in the 'des' recursively
+        for root, dir, files in os.walk(des):
+            for d in dir:
+                dir_list.append(d)
+            for f in files:
+                files_list.append(f)
+
+        #assert dir_list == [u'licenses']
+        assert len(licenses) == len(files_list)
+        for license in licenses:
+            assert license in files_list

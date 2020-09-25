@@ -28,6 +28,8 @@ import shutil
 import string
 import sys
 
+from distutils.dir_util import copy_tree
+
 from attributecode import CRITICAL
 from attributecode import WARNING
 from attributecode import Error
@@ -191,6 +193,17 @@ def get_about_locations(location):
         if is_about_file(loc):
             yield loc
 
+def norm(p):
+    """
+    Normalize the path
+    """
+    if p.startswith(UNC_PREFIX) or p.startswith(to_posix(UNC_PREFIX)):
+        p = p.strip(UNC_PREFIX).strip(to_posix(UNC_PREFIX))
+    p = to_posix(p)
+    p = p.strip(posixpath.sep)
+    p = posixpath.normpath(p)
+    return p
+
 
 def get_relative_path(base_loc, full_loc):
     """
@@ -198,14 +211,6 @@ def get_relative_path(base_loc, full_loc):
     The first segment of the different between full_loc and base_loc will become
     the first segment of the returned path.
     """
-    def norm(p):
-        if p.startswith(UNC_PREFIX) or p.startswith(to_posix(UNC_PREFIX)):
-            p = p.strip(UNC_PREFIX).strip(to_posix(UNC_PREFIX))
-        p = to_posix(p)
-        p = p.strip(posixpath.sep)
-        p = posixpath.normpath(p)
-        return p
-
     base = norm(base_loc)
     path = norm(full_loc)
 
@@ -433,6 +438,7 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
     about_file_path value, this function will copy to the base_dir the
     license_file or notice_file if found in the reference_dir
     """
+    errors = []
     copy_file_name = ''
     for key, value in fields:
         if key == 'license_file' or key == 'notice_file':
@@ -466,26 +472,57 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
                 from_lic_path = posixpath.join(to_posix(reference_dir), copy_file_name)
                 about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
                 to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
-    
-                if on_windows:
-                    from_lic_path = add_unc(from_lic_path)
-                    to_lic_path = add_unc(to_lic_path)
-    
-                # Strip the white spaces
-                from_lic_path = from_lic_path.strip()
-                to_lic_path = to_lic_path.strip()
-    
-                # Errors will be captured when doing the validation
-                if not posixpath.exists(from_lic_path):
-                    continue
-    
-                if not posixpath.exists(to_lic_path):
-                    os.makedirs(to_lic_path)
-                try:
-                    shutil.copy2(from_lic_path, to_lic_path)
-                except Exception as e:
-                    print(repr(e))
-                    print('Cannot copy file at %(from_lic_path)r.' % locals())
+
+                err = copy_file(from_lic_path, to_lic_path)
+                if err:
+                    errors.append(err)
+    return errors
+
+
+def copy_file(from_path, to_path):
+    error = []
+    # Return if the from_path is empty or None.
+    if not from_path:
+        return []
+
+    if on_windows:
+        if not from_path.startswith(UNC_PREFIXES):
+            from_path = add_unc(from_path)
+        if not to_path.startswith(UNC_PREFIXES):
+            to_path = add_unc(to_path)
+
+    # Strip the white spaces
+    from_path = from_path.strip()
+    to_path = to_path.strip()
+    # Errors will be captured when doing the validation
+    if not os.path.exists(from_path):
+        return []
+
+    if not posixpath.exists(to_path):
+        os.makedirs(to_path)
+    try:
+        if os.path.isdir(from_path):
+            # Copy the whole directory structure
+            if from_path.endswith('/'):
+                from_path = from_path.rpartition('/')[0]
+            folder_name = os.path.basename(from_path)
+            to_path = os.path.join(to_path, folder_name)
+            if os.path.exists(to_path):
+                msg = to_path + ' is already existed and is replaced by ' + from_path
+                error.append(Error(WARNING, msg))
+            copy_tree(from_path, to_path)
+        else:
+            file_name = os.path.basename(from_path)
+            to_file_path = os.path.join(to_path, file_name)
+            if os.path.exists(to_file_path):
+                msg = to_file_path + ' is already existed and is replaced by ' + from_path
+                error.append(Error(WARNING, msg))
+            shutil.copy2(from_path, to_path)
+        return error
+    except Exception as e:
+        msg = 'Cannot copy file at %(from_path)r.' % locals()
+        error.append(Error(CRITICAL, msg))
+        return error
 
 
 # FIXME: we should use a license object instead
@@ -596,6 +633,44 @@ def filter_errors(errors, minimum_severity=WARNING):
     severity below `minimum_severity`.
     """
     return unique([e for e in errors if e.severity >= minimum_severity])
+
+
+def create_dir(location):
+    """
+    Create directory or directory tree at location, ensuring it is readable
+    and writeable.
+    """
+    import stat
+    if not os.path.exists(location):
+        os.makedirs(location)
+        os.chmod(location, stat.S_IRWXU | stat.S_IRWXG
+                 | stat.S_IROTH | stat.S_IXOTH)
+
+
+def get_temp_dir(sub_dir_path=None):
+    """
+    Create a unique new temporary directory location. Create directories
+    identified by sub_dir_path if provided in this temporary directory.
+    Return the location for this unique directory joined with the
+    sub_dir_path if any.
+    """
+    new_temp_dir = build_temp_dir()
+
+    if sub_dir_path:
+        # create a sub directory hierarchy if requested
+        new_temp_dir = os.path.join(new_temp_dir, sub_dir_path)
+        create_dir(new_temp_dir)
+    return new_temp_dir
+
+
+def build_temp_dir(prefix='attributecode-'):
+    """
+    Create and return a new unique empty directory created in base_dir.
+    """
+    import tempfile
+    location = tempfile.mkdtemp(prefix=prefix)
+    create_dir(location)
+    return location
 
 
 """

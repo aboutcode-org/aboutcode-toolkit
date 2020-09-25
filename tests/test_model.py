@@ -35,7 +35,7 @@ from attributecode import INFO
 from attributecode import WARNING
 from attributecode import Error
 from attributecode import model
-from attributecode.util import add_unc
+from attributecode.util import add_unc, norm, on_windows
 from attributecode.util import load_csv
 from attributecode.util import to_posix
 from attributecode.util import replace_tab_with_spaces
@@ -1216,6 +1216,58 @@ class CollectorTest(unittest.TestCase):
         expected = get_test_loc('test_model/crlf/expected.csv')
         check_csv(expected, result, fix_cell_linesep=True, regen=False)
 
+    def test_copy_redist_src_no_structure(self):
+        test_loc = get_test_loc('test_model/redistribution/')
+        copy_list = [get_test_loc('test_model/redistribution/this.c'), get_test_loc('test_model/redistribution/test/subdir')]
+        output = get_temp_dir()
+
+        expected_file = ['this.c', 'subdir']
+
+        with_structure = False
+        err = model.copy_redist_src(copy_list, test_loc, output, with_structure)
+        
+        assert err == []
+
+        from os import listdir
+        copied_files = listdir(output)
+        assert len(expected_file) == len(copied_files)
+        assert err == []
+        for file in expected_file:
+            assert file in copied_files
+
+    def test_copy_redist_src_with_structure(self):
+        test_loc = get_test_loc('test_model/redistribution/')
+        copy_list = [get_test_loc('test_model/redistribution/this.c'), get_test_loc('test_model/redistribution/test/subdir')]
+        output = get_temp_dir()
+
+        expected_file = ['this.c', 'test']
+
+        with_structure = True
+        err = model.copy_redist_src(copy_list, test_loc, output, with_structure)
+
+        assert err == []
+
+        from os import listdir
+        copied_files = listdir(output)
+        assert len(expected_file) == len(copied_files)
+        assert err == []
+        for file in expected_file:
+            assert file in copied_files
+
+    def test_get_copy_list(self):
+        location = get_test_loc('test_model/redistribution/')
+        result = get_temp_file()
+        errors, abouts = model.collect_inventory(location)
+        copy_list, err = model.get_copy_list(abouts, location)
+        assert err == []
+        expected = [os.path.join(location, 'this.c'), os.path.join(location, 'test/subdir')]
+        if on_windows:
+            norm_list = []
+            for c in copy_list:
+                norm_list.append(norm(c))
+            assert norm_list == expected
+        else:
+            assert copy_list == expected
 
 class FetchLicenseTest(unittest.TestCase):
 
