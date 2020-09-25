@@ -51,8 +51,8 @@ def transform_csv_to_csv(location, output, transformer):
 
     errors = []
     data = iter(rows)
-    field_names = next(rows)
-
+    names = next(rows)
+    field_names = strip_trailing_fields_csv(names)
     dupes = check_duplicate_fields(field_names)
 
     if dupes:
@@ -82,7 +82,8 @@ def transform_json_to_json(location, output, transformer):
     if not transformer:
         raise ValueError('Cannot transform without Transformer')
 
-    data = read_json(location)
+    items = read_json(location)
+    data = strip_trailing_fields_json(items)
     new_data = normalize_dict_data(data)
 
     field_names, updated_data, errors = transform_data(new_data, transformer)
@@ -93,6 +94,28 @@ def transform_json_to_json(location, output, transformer):
         write_json(output, updated_data)
         return []
 
+def strip_trailing_fields_csv(names):
+    """
+    Strip trailing spaces for field names #456
+    """
+    field_names = []
+    for name in names:
+        field_names.append(name.strip())
+    return field_names
+
+
+def strip_trailing_fields_json(items):
+    """
+    Strip trailing spaces for field name #456
+    """
+    data = []
+    od = OrderedDict()
+    for item in items:
+        for field in item:
+            stripped_field_name = field.strip()
+            od[stripped_field_name] = item[field]
+        data.append(od)
+    return data
 
 def normalize_dict_data(data):
     """

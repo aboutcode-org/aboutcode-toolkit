@@ -578,7 +578,7 @@ OUTPUT: Path to CSV/JSON inventory file to create.
     errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet and not errors:
-        msg = 'Transformed file written to {output}.'.format(**locals())
+        msg = 'Transformed file is written to {output}.'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
 

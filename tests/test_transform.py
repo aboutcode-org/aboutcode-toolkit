@@ -34,6 +34,8 @@ from attributecode.transform import check_duplicate_fields
 from attributecode.transform import read_json
 from attributecode.transform import transform_data
 from attributecode.transform import normalize_dict_data
+from attributecode.transform import strip_trailing_fields_csv
+from attributecode.transform import strip_trailing_fields_json
 from attributecode.transform import Transformer
 
 from attributecode.util import python2
@@ -160,3 +162,14 @@ class TransformTest(unittest.TestCase):
         dups = check_duplicate_fields(field_name)
         assert dups == expected
 
+    def test_strip_trailing_fields_csv(self):
+        test = [u'about_resource', u'name ', u' version ']
+        expected = [u'about_resource', u'name', u'version']
+        result = strip_trailing_fields_csv(test)
+        assert result == expected
+
+    def test_strip_trailing_fields_json(self):
+        test = [OrderedDict([(u'about_resource', u'/this.c'), (u'name ', u'this.c'), (u' version ', u'0.11.0')])]
+        expected = [OrderedDict([(u'about_resource', u'/this.c'), (u'name', u'this.c'), (u'version', u'0.11.0')])]
+        result = strip_trailing_fields_json(test)
+        assert result == expected
