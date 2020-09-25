@@ -236,9 +236,6 @@ def generate_and_save(abouts, output_location, template_loc=None, variables=None
         variables=variables
     )
 
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(rendering_error)
-    print(rendered)
     if rendering_error:
         errors.append(rendering_error)
 
