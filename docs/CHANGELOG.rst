@@ -5,6 +5,7 @@
     * Fixed #443 and #444 issue with multiple licenses/license_files
     * Fixed #442 no special characters allowed for `license_key`, `license_name` and `license_expression`
     * Fixed #446 Better error handling
+    * Add support to collect redistributable sources #22
 
 2020-08-11
     Release 5.0.0
