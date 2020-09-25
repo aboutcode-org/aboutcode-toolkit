@@ -36,7 +36,7 @@ import os
 import posixpath
 import traceback
 
-from attributecode.util import python2
+from attributecode.util import python2, to_posix
 
 if python2:  # pragma: nocover
     from itertools import izip_longest as zip_longest  # NOQA
@@ -63,11 +63,13 @@ from attributecode import util
 from attributecode.util import add_unc
 from attributecode.util import boolean_fields
 from attributecode.util import copy_license_notice_files
+from attributecode.util import copy_file
 from attributecode.util import csv
 from attributecode.util import file_fields
 from attributecode.util import filter_errors
 from attributecode.util import is_valid_name
 from attributecode.util import on_windows
+from attributecode.util import norm
 from attributecode.util import replace_tab_with_spaces
 from attributecode.util import wrap_boolean_value
 from attributecode.util import UNC_PREFIX
@@ -876,7 +878,7 @@ class About(object):
                 # this is a special attribute, skip entirely
                 continue
 
-            # A field that has been alredy processed ... and has a value
+            # A field that has been already processed ... and has a value
             previous_value = seen_fields.get(name)
             if previous_value:
                 if value != previous_value:
@@ -942,8 +944,9 @@ class About(object):
         errors = self.hydrate(fields)
         # We want to copy the license_files before the validation
         if reference_dir:
-            copy_license_notice_files(
+            copy_err = copy_license_notice_files(
                 fields, base_dir, reference_dir, afp)
+            errors.extend(copy_err)
 
         # TODO: why? we validate all fields, not only these hydrated
         validation_errors = validate_fields(
@@ -1288,6 +1291,113 @@ def get_field_names(abouts):
 
     return fields
 
+
+def copy_redist_src(copy_list, location, output, with_structure):
+    """
+    Given a list of files/directories and copy to the destination
+    """
+    errors = []
+    for from_path in copy_list:
+        norm_from_path = norm(from_path)
+        relative_from_path = norm_from_path.partition(util.norm(location))[2]
+        # Need to strip the '/' to use the join
+        if relative_from_path.startswith('/'):
+            relative_from_path = relative_from_path.partition('/')[2]
+        # Get the directory name of the output path
+        if with_structure:
+            output_dir = os.path.dirname(os.path.join(output, util.norm(relative_from_path)))
+        else:
+            output_dir = output
+        err = copy_file(from_path, output_dir)
+        if err:
+            errors.extend(err)
+    return errors
+
+
+def get_copy_list(abouts, location):
+    """
+    Return a list of files/directories that need to be copied (and error if any)
+    This is a summary list in a sense that if a directory is already in the list,
+    its children directories/files will not be included in the list regardless if
+    they have 'redistribute' flagged. The reason for this is we want to capture 
+    the error/warning if existence files/directories already exist. However, if
+    we don't have this "summarized" list, and we've copied a file (with directory structure)
+    and then later on this file's parent directory also need to be copied, then
+    it will prompt warning as the directory that need to be copied is already exist.
+    Technically, this is correct, but it leads to confusion. Therefore, we want to
+    create a summarized list to avoid this kind of confusion.
+    """
+    errors = []
+    copy_list = []
+    dir_list = []
+    file_list = []
+    for about in abouts:
+        if about.redistribute.value:
+            file_exist = True
+            for e in about.errors:
+                if 'Field about_resource' in e.message and 'not found' in e.message:
+                    msg = e.message + u' and cannot be copied.'
+                    errors.append(Error(CRITICAL, msg))
+                    file_exist = False
+                    continue
+            if file_exist:
+                for k in about.about_resource.value:
+                    from_path = about.about_resource.value.get(k)
+                    if on_windows:
+                        norm_from_path = norm(from_path)
+                    else:
+                        norm_from_path = os.path.normpath(from_path)
+                    # Get the relative path
+                    relative_from_path = norm_from_path.partition(util.norm(location))[2]
+                    if os.path.isdir(from_path):
+                        if not dir_list:
+                            dir_list.append(relative_from_path)
+                        else:
+                            handled = False
+                            for dir in dir_list:
+                                # The dir is a parent of the relative_from_path
+                                if dir in relative_from_path:
+                                    handled = True
+                                    continue
+                                # The relative_from_path is the parent of the dir
+                                # We need to update the dir_list
+                                if relative_from_path in dir:
+                                    dir_list.remove(dir)
+                                    dir_list.append(relative_from_path)
+                                    handled = True
+                                    continue
+                            if not handled:
+                                dir_list.append(relative_from_path)
+                    else:
+                        # Check if the file is from "root"
+                        # If the file is at root level, it'll add to the copy_list
+                        if not os.path.dirname(relative_from_path) == '/':
+                            file_list.append(relative_from_path)
+                        else:
+                            copy_list.append(from_path)
+
+    for dir in dir_list:
+        for f in file_list:
+            # The file is already in one of copied directories
+            if dir in f:
+                file_list.remove(f)
+                continue
+        if dir.startswith('/'):
+            dir = dir.partition('/')[2]
+        absolute_path = os.path.join(location, dir)
+        if on_windows:
+            absolute_path = add_unc(absolute_path)
+        copy_list.append(absolute_path)
+
+    for f in file_list:
+        if f.startswith('/'):
+            f = f.partition('/')[2]
+        absolute_path = os.path.join(location, f)
+        if on_windows:
+            absolute_path = add_unc(absolute_path)
+        copy_list.append(absolute_path)
+
+    return copy_list, errors
 
 def about_object_to_list_of_dictionary(abouts):
     """

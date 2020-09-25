@@ -38,11 +38,13 @@ from attributecode import severities
 from attributecode.attrib import check_template
 from attributecode.attrib import DEFAULT_TEMPLATE_FILE
 from attributecode.attrib import generate_and_save as generate_attribution_doc
-from attributecode.gen import generate as generate_about_files
-from attributecode.model import collect_inventory
+from attributecode.gen import generate as generate_about_files, load_inventory
+from attributecode.model import collect_inventory, get_copy_list
+from attributecode.model import copy_redist_src
 from attributecode.model import write_output
 from attributecode.util import extract_zip
 from attributecode.util import filter_errors
+from attributecode.util import get_temp_dir
 
 
 __copyright__ = """
@@ -363,6 +365,97 @@ OUTPUT: Path where to write the attribution document.
         else:
             msg = 'Attribution generation failed.'
             click.echo(msg)
+    sys.exit(errors_count)
+
+
+######################################################################
+# collect_redist_src subcommand
+######################################################################
+
+@about.command(cls=AboutCommand,
+    short_help='Collect redistributable sources.')
+
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
+
+@click.argument('output',
+    required=True,
+    metavar='OUTPUT')
+
+@click.option('--from-inventory',
+    metavar='FILE',
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help='Path to an inventory CSV/JSON file as the base list for files/directories ' 
+         'that need to be copied which have the \'redistribute\' flagged.')
+
+@click.option('--with-structures',
+    is_flag=True,
+    help='Copy sources with directory structure.')
+
+@click.option('--zip',
+    is_flag=True,
+    help='Zip the copied sources to the output location.')
+
+@click.option('-q', '--quiet',
+    is_flag=True,
+    help='Do not print error or warning messages.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
+
+@click.help_option('-h', '--help')
+
+def collect_redist_src(location, output, from_inventory, with_structures, zip, quiet, verbose):
+    """
+Collect sources that have 'redistribute' flagged in .ABOUT files or inventory
+to the output location.
+
+LOCATION: Path to a directory containing sources that need to be copied
+(and containing ABOUT files if `inventory` is not provided)
+
+OUTPUT: Path to a directory or a zip file where sources will be copied to.
+    """
+    if zip:
+        if not output.endswith('.zip'):
+            click.echo('The output needs to be a zip file.')
+            sys.exit()
+
+    if not quiet:
+        print_version()
+        click.echo('Collecting inventory from ABOUT files...')
+
+    if location.lower().endswith('.zip'):
+        # accept zipped ABOUT files as input
+        location = extract_zip(location)
+
+    if from_inventory:
+        errors, abouts = load_inventory(from_inventory, location)
+    else:
+        errors, abouts = collect_inventory(location)
+
+    if zip:
+        # Copy to a temp location and the zip to the ouput location
+        output_location = get_temp_dir()
+    else:
+        output_location = output
+
+    copy_list, copy_list_errors = get_copy_list(abouts, location)
+    copy_errors = copy_redist_src(copy_list, location, output_location, with_structures)
+
+    if zip:
+        import shutil
+        shutil.make_archive(output, 'zip', output_location)
+
+    errors.extend(copy_list_errors)
+    errors.extend(copy_errors)
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    if not quiet:
+        msg = 'Redistributed sources are copied to {output}.'.format(**locals())
+        click.echo(msg)
     sys.exit(errors_count)
 
 
