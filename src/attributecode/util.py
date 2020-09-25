@@ -492,7 +492,7 @@ def copy_file(from_path, to_path):
             to_path = add_unc(to_path)
 
     # Strip the white spaces
-    from_path = norm(from_path.strip())
+    from_path = from_path.strip()
     to_path = to_path.strip()
     # Errors will be captured when doing the validation
     if not os.path.exists(from_path):
@@ -503,17 +503,19 @@ def copy_file(from_path, to_path):
     try:
         if os.path.isdir(from_path):
             # Copy the whole directory structure
+            if from_path.endswith('/'):
+                from_path = from_path.rpartition('/')[0]
             folder_name = os.path.basename(from_path)
             to_path = os.path.join(to_path, folder_name)
             if os.path.exists(to_path):
-                msg = norm(to_path)+ ' is already existed and is replaced by ' + norm(from_path)
+                msg = to_path + ' is already existed and is replaced by ' + from_path
                 error.append(Error(WARNING, msg))
             copy_tree(from_path, to_path)
         else:
             file_name = os.path.basename(from_path)
             to_file_path = os.path.join(to_path, file_name)
             if os.path.exists(to_file_path):
-                msg = norm(to_file_path)+ ' is already existed and is replaced by ' + norm(from_path)
+                msg = to_file_path + ' is already existed and is replaced by ' + from_path
                 error.append(Error(WARNING, msg))
             shutil.copy2(from_path, to_path)
         return error

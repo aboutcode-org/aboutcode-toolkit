@@ -1322,7 +1322,10 @@ def get_copy_list(abouts, location):
             if file_exist:
                 for k in about.about_resource.value:
                     from_path = about.about_resource.value.get(k)
-                    norm_from_path = norm(from_path)
+                    if on_windows:
+                        norm_from_path = norm(from_path)
+                    else:
+                        norm_from_path = os.path.normpath(from_path)
                     # Get the relative path
                     relative_from_path = norm_from_path.partition(util.norm(location))[2]
                     if os.path.isdir(from_path):

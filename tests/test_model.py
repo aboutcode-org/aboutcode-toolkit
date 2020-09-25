@@ -1254,11 +1254,14 @@ class CollectorTest(unittest.TestCase):
         errors, abouts = model.collect_inventory(location)
         copy_list, err = model.get_copy_list(abouts, location)
         assert err == []
-        norm_list = []
-        for c in copy_list:
-            norm_list.append(norm(c))
         expected = [os.path.join(location, 'this.c'), os.path.join(location, 'test/subdir')]
-        assert norm_list == expected
+        if on_windows:
+            norm_list = []
+            for c in copy_list:
+                norm_list.append(norm(c))
+            assert norm_list == expected
+        else:
+            assert copy_list == expected
 
 class FetchLicenseTest(unittest.TestCase):
 
