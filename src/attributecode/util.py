@@ -472,10 +472,10 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
                 from_lic_path = posixpath.join(to_posix(reference_dir), copy_file_name)
                 about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
                 to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
-
-                err = copy_file(from_lic_path, to_lic_path)
-                if err:
-                    errors.append(err)
+                if not os.path.exists(posixpath.join(to_lic_path, copy_file_name)):
+                    err = copy_file(from_lic_path, to_lic_path)
+                    if err:
+                        errors.append(err)
     return errors
 
 
