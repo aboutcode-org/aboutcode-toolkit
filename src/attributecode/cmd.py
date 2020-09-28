@@ -348,6 +348,10 @@ OUTPUT: Path where to write the attribution document.
 
     errors, abouts = collect_inventory(location)
 
+    if not abouts:
+        msg = 'No ABOUT file is found. Attribution generation halted.'
+        click.echo(msg)
+        sys.exit(1)
     attrib_errors, rendered = generate_attribution_doc(
         abouts=abouts,
         output_location=output,
