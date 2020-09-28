@@ -480,10 +480,10 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
 
 
 def copy_file(from_path, to_path):
-    error = []
+    error = ''
     # Return if the from_path is empty or None.
     if not from_path:
-        return []
+        return
 
     if on_windows:
         if not from_path.startswith(UNC_PREFIXES):
@@ -496,7 +496,7 @@ def copy_file(from_path, to_path):
     to_path = to_path.strip()
     # Errors will be captured when doing the validation
     if not os.path.exists(from_path):
-        return []
+        return ''
 
     if not posixpath.exists(to_path):
         os.makedirs(to_path)
@@ -509,19 +509,19 @@ def copy_file(from_path, to_path):
             to_path = os.path.join(to_path, folder_name)
             if os.path.exists(to_path):
                 msg = to_path + ' is already existed and is replaced by ' + from_path
-                error.append(Error(WARNING, msg))
+                error = Error(WARNING, msg)
             copy_tree(from_path, to_path)
         else:
             file_name = os.path.basename(from_path)
             to_file_path = os.path.join(to_path, file_name)
             if os.path.exists(to_file_path):
                 msg = to_file_path + ' is already existed and is replaced by ' + from_path
-                error.append(Error(WARNING, msg))
+                error = Error(WARNING, msg)
             shutil.copy2(from_path, to_path)
         return error
     except Exception as e:
         msg = 'Cannot copy file at %(from_path)r.' % locals()
-        error.append(Error(CRITICAL, msg))
+        error = Error(CRITICAL, msg)
         return error
 
 

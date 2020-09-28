@@ -637,7 +637,7 @@ description: sample
         from os import listdir
         copied_files = listdir(des)
         assert len(licenses) == len(copied_files)
-        assert err == []
+        assert err == ''
         for license in licenses:
             assert license in copied_files
 
@@ -646,7 +646,7 @@ description: sample
         test_dir = get_test_loc('test_util/licenses/')
         licenses = ['mit.LICENSE', 'mit2.LICENSE', 'public-domain.LICENSE']
         err = util.copy_file(test_dir, des)
-        assert err == []
+        assert err == ''
 
         import os
         files_list = []
