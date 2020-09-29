@@ -700,8 +700,8 @@ this software and releases the component to Public Domain.
             'license_expression': 'license1 AND license2',
             'notice_file': 'package1.zip.NOTICE',
             'licenses': [
-                {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE'},
-                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE'},
+                {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE', 'url': 'some_url'},
+                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE','url': 'some_url'},
             ],
         }
         about = model.About()
@@ -717,11 +717,14 @@ licenses:
   - key: license1
     name: License1
     file: license1.LICENSE
+    url: some_url
   - key: license2
     name: License2
     file: license2.LICENSE
+    url: some_url
 '''
-        assert about.dumps() == expected
+        lic_dict = {u'license1': [u'License1', u'', u'some_url'], u'license2' : [u'License2', u'', u'some_url']}
+        assert about.dumps(lic_dict) == expected
 
 class SerializationTest(unittest.TestCase):
     def test_About_dumps(self):

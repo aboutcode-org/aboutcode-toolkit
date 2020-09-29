@@ -303,27 +303,28 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                            u'does not exist' % locals())
                     not_exist_errors.append(msg)
 
+            licenses_dict = {}
             if gen_license:
                 # Write generated LICENSE file
                 license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
-                    # use value not "presence"
-                    if not about.license_file.present:
-                        about.license_file.value = OrderedDict()
-                        for lic_key, lic_name, lic_context, lic_url in license_key_name_context_url_list:
-                            gen_license_name = lic_key + u'.LICENSE'
-                            about.license_file.value[gen_license_name] = lic_context
-                            about.license_file.present = True
-                            if not about.license_name.present:
-                                about.license_name.value.append(lic_name)
-                            if not about.license_url.present:
-                                about.license_url.value.append(lic_url)
-                        if about.license_url.value:
-                            about.license_url.present = True
+                    for lic_key, lic_name, lic_context, lic_url in license_key_name_context_url_list:
+                        licenses_dict[lic_key] = [lic_name, lic_context, lic_url]
+                        gen_license_name = lic_key + u'.LICENSE'
+                        if not lic_name in about.license_name.value:
+                            about.license_name.value.append(lic_name)
+                        about.license_file.value[gen_license_name] = license_dict[lic_key][1]
+                        if not lic_url in about.license_url.value:
+                            about.license_url.value.append(lic_url)
+
                         if about.license_name.value:
                             about.license_name.present = True
+                        if about.license_file.value:
+                            about.license_file.present = True
+                        if about.license_url.value:
+                            about.license_url.present = True
 
-            about.dump(dump_loc)
+            about.dump(dump_loc, licenses_dict)
 
             if android:
                 """
