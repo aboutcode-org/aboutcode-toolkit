@@ -77,14 +77,18 @@ See "get_license_file_key" in `attrib.py` for more information
                 {% if about_object.license_file.value %}
                     {% for lic_file_name in about_object.license_file.value %}
                         {% if not license_file_key_and_license_key[license_file_name_and_license_file_key[lic_file_name]] in common_licenses %}
-                            <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
+                            {% if about_object.license_file.value[lic_file_name] %}
+                                <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 {% endif %}
             {% else %}
                 {% if about_object.license_file.value %}
                     {% for lic_file_name in about_object.license_file.value %}
-                        <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
+                        {% if about_object.license_file.value[lic_file_name] %}
+                            <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
             {% endif %}
