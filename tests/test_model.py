@@ -749,6 +749,7 @@ vcs_tool: git
 vcs_repository: https://github.com/dejacode/about-code-tool.git
 licenses:
   - key: apache-2.0
+    name: Apache 2.0
     file: apache-2.0.LICENSE
 '''
         result = a.dumps()

@@ -96,6 +96,7 @@ def generate(abouts, template=None, variables=None):
                 if about.license_expression.value or about.license_key.value:
                     if about.license_expression.value:
                         special_char, lic_list = parse_license_expression(about.license_expression.value)
+                        about.license_key.value = lic_list
                     else:
                         lic_list = about.license_key.value
                         special_char = []
@@ -109,9 +110,8 @@ def generate(abouts, template=None, variables=None):
                                       'license_expression or license_key: %s' % special_char)
                         return error, ''
                 else:
-                    # No license_key or license_expression present. We will use
-                    # the license_file_name as the license_key as needed for the
-                    # linking feature in the jinja2 template
+                    # No license_key or license_expression present. We will put
+                    # None as the value of license key
                     about.license_key.value = about.license_file.value.keys()
                     lic_list = about.license_file.value.keys()
 

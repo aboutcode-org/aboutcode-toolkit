@@ -1085,13 +1085,13 @@ class About(object):
                                 license_file.append(lic)
                     else:
                         if isinstance(field.original_value, list):
-                            license_file = field.value.keys()
+                            license_file = list(field.value.keys())
                         else:
                             # Restore the original license_file value
                             # See #444
                             license_file = [field.original_value]
                 else:
-                    license_file = field.value.keys()
+                    license_file = list(field.value.keys())
             elif field.name == 'license_url' and field.value:
                 license_url = field.value
             elif field.name in file_fields and field.value:
@@ -1105,10 +1105,10 @@ class About(object):
         # Group the same license information in a list
         # This `licenses_dict` is a dictionary with license key as the key and the 
         # value is the list of [license_name, license_context, license_url]
-        lic_key_dup = license_key[:]
+        lic_key_copy = license_key[:]
+        lic_dict_list = []
         for lic_key in license_key:
             lic_dict = OrderedDict()
-
             if licenses_dict and lic_key in licenses_dict:
                 lic_dict['key'] = lic_key
                 lic_name = licenses_dict[lic_key][0]
@@ -1120,30 +1120,43 @@ class About(object):
                 lic_dict['url'] = lic_url
     
                 # Remove the license information if it has been handled
-                #license_key.remove(lic_key)
-                #print(license_key)
-                lic_key_dup.remove(lic_key)
+                lic_key_copy.remove(lic_key)
                 if lic_name in license_name:
                     license_name.remove(lic_name)
                 if lic_url in license_url:
                     license_url.remove(lic_url)
                 if lic_file in license_file:
                     license_file.remove(lic_file)
-                data.setdefault('licenses', []).append(lic_dict)
+                lic_dict_list.append(lic_dict)
 
         # Handle license information that have not been handled.
-        license_group = list(zip_longest(lic_key_dup, license_name, license_file, license_url))
+        license_group = list(zip_longest(lic_key_copy, license_name, license_file, license_url))
         for lic_group in license_group:
             lic_dict = OrderedDict()
             if lic_group[0]:
                 lic_dict['key'] = lic_group[0]
             if lic_group[1]:
                 lic_dict['name'] = lic_group[1]
+            else:
+                # If no name is given, treat the key as the name
+                if lic_group[0]:
+                    lic_dict['name'] = lic_group[0]
             if lic_group[2]:
                 lic_dict['file'] = lic_group[2]
             if lic_group[3]:
                 lic_dict['url'] = lic_group[3]
-            data.setdefault('licenses', []).append(lic_dict)
+            lic_dict_list.append(lic_dict)
+
+        # Format the license information in the same order of the license expression
+        if license_key:
+            for key in license_key:
+                for lic_dict in lic_dict_list:
+                    if key == lic_dict['key']:
+                        data.setdefault('licenses', []).append(lic_dict)
+                        break
+        else:
+            for lic_dict in lic_dict_list:
+                data.setdefault('licenses', []).append(lic_dict)
 
         return saneyaml.dump(data)
 
@@ -1234,13 +1247,16 @@ class About(object):
 
         if self.license_expression.present:
             special_char_in_expression, lic_list = parse_license_expression(self.license_expression.value)
+            self.license_key.value = lic_list
             self.license_key.present = True
             if not special_char_in_expression:
                 for lic_key in lic_list:
                     try:
                         if license_dict[lic_key]:
+                            """
                             if not lic_key in self.license_key.value:
                                 self.license_key.value.append(lic_key)
+                            """
                             license_path = posixpath.join(parent, lic_key)
                             license_path += u'.LICENSE'
                             license_path = add_unc(license_path)

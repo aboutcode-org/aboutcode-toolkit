@@ -95,10 +95,10 @@ See "get_license_file_key" in `attrib.py` for more information
 
     <h3>Common Licenses Used in This Product</h3>
 
-    {% for key in license_key_and_context %}
+    {% for key in license_file_key_and_context %}
         {% if key in common_licenses %}
             <h3 id="component-license-{{ key }}">{{ key }}</h3>
-            <pre>{{ license_key_and_context[key]|e }}</pre>
+            <pre>{{ license_file_key_and_context[key]|e }}</pre>
         {% endif %}
     {% endfor %}
 

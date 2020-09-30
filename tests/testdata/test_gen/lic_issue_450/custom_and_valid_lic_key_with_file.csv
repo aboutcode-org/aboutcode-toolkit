@@ -1,0 +1,3 @@
+about_resource,name,license_expression,license_file
+test.c,test.c,public-domain AND custom,custom.txt
+test.h,test.h,custom AND public-domain,custom.txt

@@ -217,10 +217,13 @@ name: test
 version: '1.5'
 licenses:
   - key: License1
+    name: License1
     file: LIC1.LICENSE
   - key: License2
+    name: License2
     file: LIC2.LICENSE
   - key: License3
+    name: License3
     file: LIC3.LICENSE
 '''
         )
@@ -238,10 +241,112 @@ licenses:
 name: test.c
 licenses:
   - key: License1
+    name: License1
     file: LIC1.LICENSE, LIC2.LICENSE
 '''
         )
         assert expected == result
+
+    def test_generate_license_key_with_custom_file_450_no_fetch(self):
+        location = get_test_loc('test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
+        base_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location, base_dir)
+
+        result = [a.dumps() for a in abouts][0]
+        expected = (
+'''about_resource: test.c
+name: test.c
+license_expression: public-domain AND custom
+licenses:
+  - file: custom.txt
+'''
+        )
+        assert expected == result
+
+    def test_generate_license_key_with_custom_file_450_with_fetch(self):
+        location = get_test_loc('test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
+        base_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location, base_dir)
+
+        lic_dict = {u'public-domain': [u'Public Domain',
+                                       u'This component is released to the public domain by the author.',
+                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain'
+                                       ]}
+        a = abouts[0]
+        a.license_key.value.append('public-domain')
+        a.license_key.value.append('custom')
+        result = a.dumps(lic_dict)
+        expected = (
+'''about_resource: test.c
+name: test.c
+license_expression: public-domain AND custom
+licenses:
+  - key: public-domain
+    name: Public Domain
+    file: public-domain.LICENSE
+    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
+  - key: custom
+    name: custom
+    file: custom.txt
+'''
+        )
+        assert expected == result
+
+
+    def test_generate_license_key_with_custom_file_450_with_fetch_with_order(self):
+        location = get_test_loc('test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
+        base_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location, base_dir)
+
+        lic_dict = {u'public-domain': [u'Public Domain',
+                                       u'This component is released to the public domain by the author.',
+                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain'
+                                       ]}
+        # The first row from the test file
+        a = abouts[0]
+        a.license_key.value.append('public-domain')
+        a.license_key.value.append('custom')
+        result1 = a.dumps(lic_dict)
+        # The second row from the test file
+        b = abouts[1]
+        b.license_key.value.append('custom')
+        b.license_key.value.append('public-domain')
+        result2 = b.dumps(lic_dict)
+
+        expected1 = (
+'''about_resource: test.c
+name: test.c
+license_expression: public-domain AND custom
+licenses:
+  - key: public-domain
+    name: Public Domain
+    file: public-domain.LICENSE
+    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
+  - key: custom
+    name: custom
+    file: custom.txt
+'''
+        )
+
+        expected2 = (
+'''about_resource: test.h
+name: test.h
+license_expression: custom AND public-domain
+licenses:
+  - key: custom
+    name: custom
+    file: custom.txt
+  - key: public-domain
+    name: Public Domain
+    file: public-domain.LICENSE
+    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
+'''
+        )
+        assert expected1 == result1
+        assert expected2 == result2
 
     @skip('FIXME: this test is making a failed, live API call')
     def test_generate_not_overwrite_original_license_file(self):

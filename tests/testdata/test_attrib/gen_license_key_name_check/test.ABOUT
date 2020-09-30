@@ -1,6 +1,6 @@
 about_resource: .
 name: test
-license_expression: LGPL-3.0-or-later OR Apache-2.0
+license_expression: Apache-2.0 OR LGPL-3.0-or-later
 licenses:
   - key: Apache-2.0
     name: Apache License 2.0
