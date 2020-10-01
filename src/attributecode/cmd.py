@@ -171,9 +171,9 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 
 def inventory(location, output, format, quiet, verbose):  # NOQA
     """
-Collect the inventory of .ABOUT file data as CSV or JSON.
+Collect the inventory of ABOUT file data as CSV or JSON.
 
-LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
+LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
 OUTPUT: Path to the JSON or CSV inventory file to create.
     """
@@ -243,7 +243,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 def gen(location, output, android, fetch_license, reference, quiet, verbose):
     """
-Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at LOCATION.
+Given a CSV/JSON inventory, generate ABOUT files in the output location.
 
 LOCATION: Path to a JSON or CSV inventory file.
 
@@ -415,7 +415,7 @@ OUTPUT: Path where to write the attribution document.
 
 def collect_redist_src(location, output, from_inventory, with_structures, zip, quiet, verbose):
     """
-Collect sources that have 'redistribute' flagged in .ABOUT files or inventory
+Collect sources that have 'redistribute' flagged as 'True' in .ABOUT files or inventory
 to the output location.
 
 LOCATION: Path to a directory containing sources that need to be copied
@@ -442,7 +442,7 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
         errors, abouts = collect_inventory(location)
 
     if zip:
-        # Copy to a temp location and the zip to the ouput location
+        # Copy to a temp location and the zip to the output location
         output_location = get_temp_dir()
     else:
         output_location = output
@@ -452,7 +452,10 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
 
     if zip:
         import shutil
-        shutil.make_archive(output, 'zip', output_location)
+        # Stripped the .zip extension as the `shutil.make_archive` will
+        # append the .zip extension
+        output_no_extension = output.rsplit('.', 1)[0]
+        shutil.make_archive(output_no_extension, 'zip', output_location)
 
     errors.extend(copy_list_errors)
     errors.extend(copy_errors)
@@ -489,7 +492,7 @@ def check(location, verbose):
     """
 Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
-LOCATION: Path to a file or directory containing .ABOUT files.
+LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     """
     print_version()
     click.echo('Checking ABOUT files...')
@@ -550,7 +553,8 @@ def print_config_help(ctx, param, value):
 def transform(location, output, configuration, quiet, verbose):  # NOQA
     """
 Transform the CSV/JSON file at LOCATION by applying renamings, filters and checks
-and write a new CSV/JSON to OUTPUT.
+and then write a new CSV/JSON to OUTPUT (Format for input and output need to be
+the same).
 
 LOCATION: Path to a CSV/JSON file.
 
