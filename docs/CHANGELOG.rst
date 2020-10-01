@@ -1,3 +1,13 @@
+2020-xx-xx
+    Release 6.0.0
+
+    * Add '@' as a support character for filename #451
+    * Add support to collect redistributable sources #22
+    * Handle trailing spaces in field names during `transform` #456
+    * Documentation updated
+    * Code enhancement
+
+
 2020-09-01
     Release 5.1.0
 
@@ -5,8 +15,6 @@
     * Fixed #443 and #444 issue with multiple licenses/license_files
     * Fixed #442 no special characters allowed for `license_key`, `license_name` and `license_expression`
     * Fixed #446 Better error handling
-    * Add support to collect redistributable sources #22
-    * Handle trailing spaces in field names during `transform` #456
 
 2020-08-11
     Release 5.0.0
