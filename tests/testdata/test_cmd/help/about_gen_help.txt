@@ -1,7 +1,6 @@
 Usage: about gen [OPTIONS] LOCATION OUTPUT
 
-  Generate .ABOUT files in OUTPUT from an inventory of .ABOUT files at
-  LOCATION.
+  Given a CSV/JSON inventory, generate ABOUT files in the output location.
 
   LOCATION: Path to a JSON or CSV inventory file.
 

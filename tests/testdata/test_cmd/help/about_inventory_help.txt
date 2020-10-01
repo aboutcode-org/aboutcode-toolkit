@@ -1,8 +1,8 @@
 Usage: about inventory [OPTIONS] LOCATION OUTPUT
 
-  Collect the inventory of .ABOUT file data as CSV or JSON.
+  Collect the inventory of ABOUT file data as CSV or JSON.
 
-  LOCATION: Path to an .ABOUT file or a directory with .ABOUT files.
+  LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
   OUTPUT: Path to the JSON or CSV inventory file to create.
 

@@ -1,5 +1,8 @@
+Reference
+=========
+
 about
-=====
+-----
 
 **Syntax**
 
@@ -18,15 +21,19 @@ about
 
 ::
 
-  attrib     LOCATION: directory, OUTPUT: output file
-  check      LOCATION: directory
-  gen        LOCATION: input file, OUTPUT: directory
-  inventory  LOCATION: directory, OUTPUT: csv file
-  transform  LOCATION: csv file, OUTPUT: csv file
+  attrib              Generate an attribution document from .ABOUT files.
+  check               Validate that the format of .ABOUT files is correct and
+                      report errors and warnings.
+  collect_redist_src  Collect redistributable sources.
+  gen                 Generate .ABOUT files from an inventory as CSV or JSON.
+  inventory           Collect the inventory of .ABOUT files to a CSV or JSON
+                      file.
+  transform           Transform a CSV/JSON by applying renamings, filters and
+                      checks.
 
 
 attrib
-======
+------
 
 **Syntax**
 
@@ -34,21 +41,26 @@ attrib
 
     about attrib [OPTIONS] LOCATION OUTPUT
 
-    LOCATION: Path to an ABOUT file or a directory containing ABOUT files.
-    OUTPUT: Path to output file to write the attribution to.
+  LOCATION: Path to a file, directory or .zip archive containing .ABOUT
+  files.
+
+  OUTPUT: Path where to write the attribution document.
 
 **Options:**
 
 ::
 
-    --template PATH             Path to a custom attribution template.
-    --vartext <key>=<value>     Variable text as key=value for use in a custom attribution template.
-    --verbose                   Show all the errors and warning.
-    -q, --quiet                 Do not print any error/warning.
-    -h, --help                  Show this message and exit.
+  --template FILE          Path to an optional custom attribution template to
+                           generate the attribution document. If not provided
+                           the default built-in template is used.
+  --vartext <key>=<value>  Add variable text as key=value for use in a custom
+                           attribution template.
+  -q, --quiet              Do not print error or warning messages.
+  --verbose                Show all error and warning messages.
+  -h, --help               Show this message and exit.
 
 Purpose
--------
+^^^^^^^
 Generate an attribution file which contains the all license information
 from the LOCATION along with the license text.
 
@@ -64,7 +76,7 @@ Assume the following:
     $ about attrib /home/about_files/ /home/attribution/attribution.html
 
 Options
--------
+^^^^^^^
 
 ::
 
@@ -84,7 +96,7 @@ Options
 
         Users can use the following in the template to get the vartext:
         {{ variables['title'] }}
-        {{ variables['header'] }} 
+        {{ variables['header'] }}
 
     --verbose
 
@@ -95,13 +107,23 @@ Options
 The following data are passed to jinja2 and, therefore, can be used for a custom template:
  * about object: the about objects
  * common_licenses: a common license keys list in licenses.py
- * license_key_and_context: a dictionary list with license_key as a key and license text as the value
- * license_file_name_and_key: a dictionary list with license file name as a key and license key as the value
- * license_key_to_license_name: a dictionary list with license key as a key and license file name as the value
+ * license_file_key_and_context: a dictionary with license_file_key (It's basically
+   a license_key if it's not a custom license or license file name otherwise) as a key
+   and license text as the value
+ * license_file_key_and_license_key: a dictionary with license file key as a key
+   and license key as the value 
+ * license_file_name_and_license_file_key: a dictionary with license file name as
+   a key and license file key as the value
+ * license_key_and_license_file_name: a dictionary with license key as a key
+   and license file name as the value
+ * license_key_and_license_name: a dictionary with license key as a key and
+   license name as the value
+ * license_name_and_license_key: a dictionary with license name as a key and
+   license key as the value
 
 
 check
-=====
+-----
 
 **Syntax**
 
@@ -119,11 +141,11 @@ check
     -h, --help               Show this message and exit.
 
 Purpose
--------
+^^^^^^^
 Validating ABOUT files at LOCATION.
 
 Options
--------
+^^^^^^^
 
 ::
 
@@ -135,8 +157,80 @@ Options
     $ about check --verbose /home/project/about_files/
 
 
+collect_redist_src
+------------------
+
+**Syntax**
+
+::
+
+    about collect_redist_src [OPTIONS] LOCATION OUTPUT
+
+    LOCATION: Path to a directory containing sources that need to be copied
+    (and containing ABOUT files if `inventory` is not provided)
+
+    OUTPUT: Path to a directory or a zip file where sources will be copied to.
+
+**Options:**
+
+::
+
+  --from-inventory FILE  Path to an inventory CSV/JSON file as the base list
+                         for files/directories that need to be copied which
+                         have the 'redistribute' flagged.
+  --with-structures      Copy sources with directory structure.
+  --zip                  Zip the copied sources to the output location.
+  -q, --quiet            Do not print error or warning messages.
+  --verbose              Show all error and warning messages.
+  -h, --help             Show this message and exit.
+
+Purpose
+^^^^^^^
+Collect sources that have 'redistribute' flagged as 'True' in .ABOUT files or inventory to the output location.
+
+Options
+^^^^^^^
+
+::
+
+    --from-inventory
+
+        Provide an inventory CSV/JSON file with the 'redistribute' field filled as
+        the indication of which files/sources need to be copied.
+
+    $ about collect_redist_src --from-inventory 'path to the inventory' LOCATION OUTPUT
+
+    --with-structures
+
+        Copy the file(s) along with its parent directories
+
+        For instance, assuming we want to copy the following file:
+        /project/work/hello/foo.c
+
+        OUTPUT: /output/
+
+    $ about collect_redist_src --with-structure /project/ /output/
+
+        OUTPUT: /output/work/hello/foo.c
+
+    $ about collect_redist_src /project/ /output/
+
+        OUTPUT: /output/foo.c
+
+    --zip
+
+        Zip the copied sources to the output location
+
+    $ about collect_redist_src --zip /project/ /output/output.zip
+
+    --verbose
+
+        This option tells the tool to show all errors found.
+        The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
+
+
 gen
-===
+---
 
 **Syntax**
 
@@ -169,16 +263,16 @@ gen
                                         about gen --fetch-license 'api_url' 'api_key'
     --reference PATH                    Path to a directory with reference license
                                         data and text files.
-    --verbose                           Show all the errors and warning.
     -q, --quiet                         Do not print any error/warning.
+    --verbose                           Show all the errors and warning.
     -h, --help                          Show this message and exit.
 
 Purpose
--------
-Given an inventory of ABOUT files at location, generate ABOUT files in base directory.
+^^^^^^^
+Given a CSV/JSON inventory, generate ABOUT files in the output location.
 
 Options
--------
+^^^^^^^
 
 ::
 
@@ -195,8 +289,8 @@ Options
 
     --fetch-license
 
-        Fetch licenses text from a DejaCode API. and create <license>.LICENSE side-by-side
-        with the generated .ABOUT file using data fetched from the DejaCode License Library.
+        Fetch licenses text from a DejaCode API, and create <license>.LICENSE side-by-side
+        with the generated .ABOUT file using the data fetched from the DejaCode License Library.
 
         This option requires 2 parameters:
             api_url - URL to the DJE License Library.
@@ -217,7 +311,7 @@ Options
         /home/licenses_notices/apache2.LICENSE
         /home/licenses_notices/jquery.js.NOTICE
 
-    $ about gen --license-notice-text-location /home/licenses_notices/ LOCATION OUTPUT
+    $ about gen --reference /home/licenses_notices/ LOCATION OUTPUT
 
     --verbose
 
@@ -226,7 +320,7 @@ Options
 
 
 inventory
-=========
+---------
 
 **Syntax**
 
@@ -242,23 +336,21 @@ inventory
 ::
 
     -f, --format [json|csv]     Set OUTPUT file format.  [default: csv]
-    --verbose                   Show all the errors and warning.
     -q, --quiet                 Do not print any error/warning.
+    --verbose                   Show all the errors and warning.
     -h, --help                  Show this message and exit.
 
 Purpose
--------
-Collect a JSON or CSV inventory of components from ABOUT files.
+^^^^^^^
+Create a JSON or CSV inventory of components from ABOUT files.
 
 Options
--------
+^^^^^^^
 
 ::
 
-    The above command will only inventory the ABOUT files which have the "license_expression: gpl-2.0"
-
     -f, --format [json|csv]
- 
+
         Set OUTPUT file format.  [default: csv]
 
     $ about inventory -f json LOCATION OUTPUT
@@ -270,17 +362,17 @@ Options
 
 
 Special Notes
-=============
+-------------
 Multiple licenses support format
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The multiple licenses support format for CSV files are separated by line break
 
-+----------------+------+-----------------+----------------------+
-| about_resource | name | license_key     | license_file         |
-+----------------+------+-----------------+----------------------+
-| test.tar.xz    | test | | apache-2.0    | | apache-2.0.LICENSE |
-|                |      | | mit           | | mit.LICENSE        |
-+----------------+------+-----------------+----------------------+
++----------------+------+---------------+---------------+----------------------+
+| about_resource | name | license_key   | license_name  | license_file         |
++----------------+------+---------------+---------------+----------------------+
+| test.tar.xz    | test | | apache-2.0  | | Apache 2.0  | | apache-2.0.LICENSE |
+|                |      | | mit         | | MIT License | | mit.LICENSE        |
++----------------+------+---------------+---------------+----------------------+
 
 
 The multiple licenses support format for ABOUT files are by "grouping" with the keyword "licenses"
@@ -291,13 +383,15 @@ The multiple licenses support format for ABOUT files are by "grouping" with the 
     name: test
     licenses:
         -   key: apache 2.0
+            name: Apache 2.0
             file: apache-2.0.LICENSE
         -   key: mit
+            name: MIT License
             file: mit.LICENSE
 
 
-Multiple license_file support 
------------------------------
+Multiple license_file support
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To support multiple license file for a license, the correct format is to separate by comma
 
 +----------------+------+-----------------+----------------------+
@@ -315,13 +409,17 @@ To support multiple license file for a license, the correct format is to separat
     name: test
     licenses:
         -   key: gpl-2.0
+            name: gpl-2.0
             file: COPYING, COPYING.v2
         -   key: mit
+            name: mit
             file: mit.LICENSE
 
+Note that if `license_name` is not provided, the license key will be used as the
+license name.
 
 transform
-=========
+---------
 
 **Syntax**
 
@@ -329,8 +427,8 @@ transform
 
     about transform [OPTIONS] LOCATION OUTPUT
 
-    LOCATION: Path to a CSV file.
-    OUTPUT: Path to CSV inventory file to create.
+    LOCATION: Path to a CSV/JSON file.
+    OUTPUT: Path to CSV/JSON inventory file to create.
 
 **Options:**
 
@@ -344,11 +442,13 @@ transform
   -h, --help                Show this message and exit.
 
 Purpose
--------
-Transform the CSV file at LOCATION by applying renamings, filters and checks and write a new CSV to OUTPUT.
+^^^^^^^
+Transform the CSV/JSON file at LOCATION by applying renamings, filters and checks
+and then write a new CSV/JSON to OUTPUT (Format for input and output need to be
+the same).
 
 Options
--------
+^^^^^^^
 
 ::
 
@@ -362,7 +462,7 @@ Options
 
         Show configuration file format help and exit.
         This option will print out examples of the the YAML configuration file.
-        
+
         Keys configuration are: `field_renamings`, `required_fields` and `field_filters`
 
     $ about transform --help-format
@@ -373,6 +473,6 @@ Options
         The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
 Special Notes
-=============
+-------------
 When using the `field_filters` configuration, all the standard required columns
 (`about_resource` and `name`) and the user defined `required_fields` need to be included.

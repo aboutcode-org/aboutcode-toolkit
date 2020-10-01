@@ -1,7 +1,8 @@
 Usage: about transform [OPTIONS] LOCATION OUTPUT
 
   Transform the CSV/JSON file at LOCATION by applying renamings, filters and
-  checks and write a new CSV/JSON to OUTPUT.
+  checks and then write a new CSV/JSON to OUTPUT (Format for input and output
+  need to be the same).
 
   LOCATION: Path to a CSV/JSON file.
 

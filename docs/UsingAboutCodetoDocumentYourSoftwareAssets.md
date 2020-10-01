@@ -1,10 +1,10 @@
-#<a name="UsingAboutCodeToolkittoDocumentYourSoftwareAssets">**Using AboutCode Toolkit to Document Your Software Assets**</a>
+# <a name="UsingAboutCodeToolkittoDocumentYourSoftwareAssets">**Using AboutCode Toolkit to Document Your Software Assets**</a>
 
 [Using AboutCode Toolkit to Document Your Software Assets](#UsingAboutCodeToolkittoDocumentYourSoftwareAssets)  
 [AboutCode Toolkit Defined](#AboutCodeToolkitDefined)  
 [Key Terminology](#KeyTerminology)  
 [Using gen to Generate AboutCode Toolkit Files](#UsinggentoGenerateAboutCodeToolkitFiles)
-* [Prepare Your Software Inventory for gen Standard Column Names](#PrepareYourSoftwareInventoryforgenStandardColumnNames)  
+* [Prepare Your Software Inventory for gen Standard Field Names](#PrepareYourSoftwareInventoryforgenStandardFieldNames)  
 * [Fields Renaming and Optional Custom Fields](#FieldsRenamingOptionalCustomFields)  
 * [Run gen to Generate AboutCode Toolkit Files](#RungentoGenerateAboutCodeToolkitFiles)  
 [Using attrib to Generate a Product Attribution Notice Package](#UsingattribtoGenerateaProductAttributionNoticePackage)  
@@ -15,19 +15,21 @@
 [Using inventory to Generate a Software Inventory](#UsinginventorytoGenerateaSoftwareInventory)  
 * [Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files](#GenerateaSoftwareInventory)  
 
-#<a name="AboutCodeToolkitDefined">AboutCode Toolkit Defined</a>
+# <a name="AboutCodeToolkitDefined">AboutCode Toolkit Defined</a>
 
 AboutCode Toolkit is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. AboutCode Toolkit files have a simple, standard format that identifies components and their associated licenses. The current AboutCode Toolkit subcommands are: 
 
-* **attrib**: Generate a Product Attribution notice document (HTML format) from your AboutCode Toolkit files. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your .html template. 
+* **attrib**: Generate a Product Attribution notice document (HTML format) from your AboutCode Toolkit files. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template. 
 
 * **check**: A simple command to validate the AboutCode Toolkit files and output errors/warnings if any on the terminal.
+
+* **collect_redist_src**: A command to collect and copy sources that have 'redistribute' flagged as 'True' in AboutCode Toolkit files or from an inventory.
 
 * **gen**: Create AboutCode Toolkit files from a Software Inventory file (.csv or .json format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase.  You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes. 
 
 * **inventory**: Generate a Software Inventory list (.csv or .json format) from your codebase based on your AboutCode Toolkit files. Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
 
-* **transform**: A command to transform an input CSV by applying renaming and filters and then output to a new CSV.
+* **transform**: A command to transform an input CSV/JSON by applying renaming and/or filtering and then output to a new CSV/JSON file.
 
 Additional AboutCode Toolkit information is available at:  
 
@@ -45,13 +47,13 @@ Some key terminology that applies to AboutCode Toolkit tool usage:
 
 # <a name="UsinggentoGenerateAboutCodeToolkitFiles">Using gen to Generate AboutCode Toolkit Files</a>
 
-## <a name="PrepareYourSoftwareInventoryforgenStandardColumnNames">Prepare Your Software Inventory for gen Standard Column Names</a>
+## <a name="PrepareYourSoftwareInventoryforgenStandardFieldNames">Prepare Your Software Inventory for gen Standard Field Names</a>
 
-You should start with a software inventory of your codebase in spreadsheet format. You need to prepare a version of it that will identify the column values that you want to appear in your .ABOUT files. Note the following standard column names (defined in the ABOUT File Specification), which gen will use to look for the values that it will store in your generated .ABOUT files, as well as any additional text files that you identify, which it will copy and store next to the .ABOUT files. 
+You should start with a software inventory of your codebase in spreadsheet or JSON format. You need to prepare a version of it that will identify the field values that you want to appear in your .ABOUT files. Note the following standard field names (defined in the ABOUT File Specification), which gen will use to look for the values that it will store in your generated .ABOUT files, as well as any additional text files that you identify, which it will copy and store next to the .ABOUT files. 
 
 <table>
   <tr>
-    <td>Standard Column Name</td>
+    <td>Standard Field Name</td>
     <td>Description</td>
     <td>Notes</td>
   </tr>
@@ -244,17 +246,17 @@ You should start with a software inventory of your codebase in spreadsheet forma
 
 ## <a name="FieldsRenamingOptionalCustomFields">Fields Renaming and Optional Custom Fields</a>
 
-Since your input's column name may not match with the AboutCode Toolkit standard field name, you can use the transform subcommand to do the transformation.
+Since your input's field name may not match with the AboutCode Toolkit standard field name, you can use the transform subcommand to do the transformation.
 
-A transform configuration file is used to describe which transformations and validations to apply to a source CSV file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
+A transform configuration file is used to describe which transformations and validations to apply to a source CSV/JSON file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
 
 The attributes that can be set in a configuration file are:
 
 * field_renamings:
-An optional map of source CSV column name to target CSV new column name that
-is used to rename CSV columns.
+An optional map of source field name to target new field name that is used to
+rename CSV/JSON fields.
 
-For instance with this configuration the columns "Directory/Location" will be
+For instance with this configuration, the field "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
 
     field_renamings:
@@ -262,44 +264,43 @@ renamed to "about_resource" and "foo" to "bar":
         bar : foo
 
 The renaming is always applied first before other transforms and checks. All
-other column names referenced below are these that exist AFTER the renaming
-have been applied to the existing column names.
+other field names referenced below are AFTER the renaming have been applied.
 
 * required_fields:
-An optional list of required column names that must have a value, beyond the
-standard columns names. If a source CSV does not have such a column or a row is
-missing a value for a required column, an error is reported.
+An optional list of required field names that must have a value, beyond the
+standard field names. If a source CSV/JSON does not have such a field or an
+entry is missing a value for a required field, an error is reported.
 
-For instance with this configuration an error will be reported if the columns
-"name" and "version" are missing or if any row does not have a value set for
-these columns:
+For instance with this configuration, an error will be reported if the fields
+"name" and "version" are missing, or if any entry does not have a value set for
+these fields:
 
     required_fields:
         - name
         - version
 
 * field_filters:
-An optional list of column names that should be kept in the transformed CSV. If
-this list is provided, all the columns from the source CSV that should be kept
-in the target CSV must be listed be even if they are standard or required
-columns. If this list is not provided, all source CSV columns are kept in the
-transformed target CSV.
+An optional list of fields that should be kept in the transformed file. If
+this list is provided, only the fields that are in the list will be kept. All
+others will be filtered out even if they are AboutCode Toolkit standard fields.
+If this list is not provided, all source fields are kept in the transformed target
+file.
 
-For instance with this configuration the target CSV will only contains the "name"
-and "version" columns and no other column:
+For instance with this configuration, the target file will only contains the "name"
+and "version" fields:
 
     field_filters:
         - name
         - version
 
 * exclude_fields:
-An optional list of field names that should be excluded in the transformed CSV/JSON. If
-this list is provided, all the fields from the source CSV/JSON that should be excluded
-in the target CSV/JSON must be listed. Excluding standard or required fields will cause
-an error. If this list is not provided, all source CSV/JSON fields are kept in the
-transformed target CSV/JSON.
+An optional list of field names that should be excluded in the transformed file. If
+this list is provided, all the fields from the source file that should be excluded
+in the target file must be listed. Excluding required fields will cause
+an error. If this list is not provided, all source fields are kept in the
+transformed target file.
 
-For instance with this configuration the target CSV/JSON will not contain the "type"
+For instance with this configuration, the target file will not contain the "type"
 and "temp" fields:
 
     exclude_fields:
@@ -309,7 +310,7 @@ and "temp" fields:
 
 ## <a name="RungentoGenerateAboutCodeToolkitFiles">Run gen to Generate AboutCode Toolkit Files</a>
 
-When your software inventory is ready, you can save it as a .csv file, and use it as input to run gen to generate your AboutCode Toolkit files. The official gen parameters are defined here:
+When your software inventory is ready, you can save it as a .csv or .json file, and use it as input to run gen to generate your AboutCode Toolkit files. The official gen parameters are defined here:
 
 * [https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst) 
 
@@ -321,7 +322,7 @@ Note that this example gen command does the following:
 
 * Activates the --fetch-license option to get license text.
 
-* Activates the --reference option to get license and notice text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
+* Activates the --reference option to get license text files and notice text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
 
 * Specifies the path of the software inventory to control the processing.
 
@@ -348,7 +349,7 @@ You can make the appropriate changes to your input software inventory and then r
 
 ## <a name="PrepareaFilteredProductBOMtoUseasInputtoattrib">Prepare a Filtered Product BOM to Use as Input to attrib</a>
 
-The Software Inventory that you prepared for gen most likely includes components that do not need to appear in a product attribution notice package; for example:   
+The Software Inventory that you prepared for gen most likely includes components that do not need to appear in a product attribution notice package; for example:  
 
 * Components in your codebase that are not Deployed on the final product (e.g. build tools, testing tools, internal documentation). 
 
@@ -356,28 +357,26 @@ The Software Inventory that you prepared for gen most likely includes components
 
 There are two options here:
 
-* Edit the jinja2 template to only include the one that your want to include in the attrib such as:
+* Edit the jinja2 template to only include the one that have value in attribute field such as:
 
     {% if about_object.attribute.value %}
         ...
 
 * You should prepare a filtered version of your software inventory (the one that you used for gen) by removing the rows that identify components which should not be included in a product attribution notice package, and saving that filtered version as your Product BOM.
 
-You should also order the rows in this Product BOM in the sequence that you would like them to appear in the product attribution notice package. 
-
 ## <a name="PrepareanAttributionTemplatetoUseasInputtoattrib">Prepare an Attribution Template to Use as Input to attrib</a>
 
-You can run attrib using the default_html.template (or default_json.template if want JSON output) provided with the AboutCode Toolkit tools:   
+You can run attrib using the default_html.template (or default_json.template if want JSON output) provided with the AboutCode Toolkit tools:  
 
 [https://github.com/nexB/aboutcode-toolkit/blob/develop/templates/default_html.template](https://github.com/nexB/aboutcode-toolkit/blob/develop/templates/default_html.template) 
 
-If you choose to do that, you will most likely want to edit the generated .html file to provide header information about your own organization and product. 
+If you choose to do that, you will most likely want to edit the generated .html file to provide header information about your own organization and product.
 
 Running attrib with the default_html.template file is probably your best choice when you are still testing your AboutCode Toolkit process. Once you have a good understanding of the generated output, you can customize the template to provide the standard text that you want to see whenever you generate product attribution for your organization.  You can also create alternative versions of the template to use attrib to generate other kinds of documents, such as a License Reference.
 
 ### <a name="Usejinja2FeaturestoCustomizeYourAttributionTemplate">Use jinja2 Features to Customize Your Attribution Template</a>
 
-The attrib tool makes use of the open source python library **jinja2** ([http://jinja.pocoo.org/docs/dev/templates/](http://jinja.pocoo.org/docs/dev/templates/)) in order to extend .html capabilities and transform AboutCode Toolkit input data into the final format of the generated attribution file. The **default.html **file contains text that complies with jinja2 syntax specifications in order to support grouping, ordering, formatting and presentation of your AboutCode Toolkit data. If your attribution requirements are complex, you may wish to study the jinja2 documentation to modify the default.html logic; alternatively, here are a few relatively simple concepts that relate to the attribution document domain. 
+The attrib tool makes use of the open source python library **jinja2** ([http://jinja.pocoo.org/docs/dev/templates/](http://jinja.pocoo.org/docs/dev/templates/)) in order to extend .html capabilities and transform AboutCode Toolkit input data into the final format of the generated attribution file. The **default_html.template **file contains text that complies with jinja2 syntax specifications in order to support grouping, ordering, formatting and presentation of your AboutCode Toolkit data. If your attribution requirements are complex, you may wish to study the jinja2 documentation to modify the default_html.template logic or create your own template; alternatively, here are a few relatively simple concepts that relate to the attribution document domain. 
 
 The simplest modifications to the default_html.template file involve the labels and standard text. For example, here is the default template text for the Table of Contents: 
 
@@ -418,11 +417,11 @@ After the table of contents, this example customized template continues with the
 
         {% for group in abouts | groupby('confirmed_license') %}
             {% for confirmed_license in group.grouper.value %}
-            
+
             <div id="group_{{ loop.index0 }}">
             <h3>{{ confirmed_license }}</h3>
             <p>This product contains the following open source software packages licensed under the terms of the license: {{confirmed_license}}</p>
-            
+
             <div class="oss-component" id="component_{{ loop.index0 }}">
                 {%for about_object in group.list %}         
                     {% if loop.first %}
@@ -454,11 +453,11 @@ After the table of contents, this example customized template continues with the
         <hr>
 
 
-In summary, you can start with simple, cosmetic customizations to the default.html template, and gradually introduce a more complex structure to the attrib output to meet varying business requirements.
+In summary, you can start with simple, cosmetic customizations to the default_html.template, and gradually introduce a more complex structure to the attrib output to meet varying business requirements.
 
 ## <a name="RunattribtoGenerateaProductAttributionNoticePackage">Run attrib to Generate a Product Attribution Notice Package</a>
 
-When your Product BOM (your filtered software inventory) is ready, you can save it as a .csv file, and use it as input to run attrib to generate your product attribution notice package. The official attrib parameters are defined here:
+When you have generated the AboutCode Toolkit files by gen, you can then run attrib to generate your product attribution notice package. The official attrib parameters are defined here:
 
 * [https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst](https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst) 
 
@@ -480,7 +479,7 @@ A successful execution of attrib will create a .html (or .json depends on the te
 
 ##<a name="GenerateaSoftwareInventory"> Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files</a>
 
-One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually.  For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode Toolkit files manually.  
+One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually.  For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode Toolkit files manually.
 
 If your organization adopts the practice of manually creating and maintaining AboutCode Toolkit files, you can easily re-create your software inventory from your codebase using inventory. The official inventory parameters are defined here:
 

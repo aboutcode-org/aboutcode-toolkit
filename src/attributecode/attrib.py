@@ -75,11 +75,15 @@ def generate(abouts, template=None, variables=None):
             # about.license_file.value is a OrderDict with license_file_name as
             # the key and the license text as the value
             if about.license_file:
-                # We want to create a dictionary which have the license file name as
+                # We want to create a dictionary which have the license file key as
                 # the key and license text as the value
-                # The reason we want to use license file name as the key instead of the
+                # The reason we want to use license file key as the key instead of the
                 # license key is because there is a scenario such that the input only provide
                 # license_file but not license_key
+                # The license file key is bascially a license_key or a license file
+                # name if it's not generated from DJE. The reason for not using
+                # license file name as the key at the first place is because
+                # we need the license_key to match with the common license list
                 for license_file_name in about.license_file.value:
                     if not license_file_name in captured_license:
                         captured_license.append(license_file_name)
