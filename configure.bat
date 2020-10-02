@@ -1,64 +1,127 @@
 @echo OFF
-
-@rem Copyright (c) 2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+@setlocal
+@rem Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 
 @rem ################################
-@rem # change these variables to customize this script locally
+@rem # A configuration script for Windows
+@rem #
+@rem # The options and (optional) arguments are:
+@rem #  --clean : this is exclusive of anything else and cleans the environment
+@rem #    from built and installed files
+@rem #
+@rem #  --python < path to python.exe> : this must be the first argument and set
+@rem #    the path to the Python executable to use. If < path to python.exe> is
+@rem #    set to "path", then the executable will be the python.exe available
+@rem #    in the PATH.
+@rem #
+@rem #  <some conf path> : this must be the last argument and sets the path to a
+@rem #    configuration directory to use.
 @rem ################################
-@rem # you can define one or more thirdparty dirs, each prefixed with TPP_DIR
-set TPP_DIR=thirdparty
 
+@rem ################################
+@rem # Defaults. Change these variables to customize this script locally
+@rem ################################
+@rem # you can define one or more thirdparty dirs, each where the varibale name
+@rem # is prefixed with TPP_DIR
+set "TPP_DIR=thirdparty"
 
 @rem # default configurations
-set CONF_DEFAULT="etc/conf"
+set "CONF_DEFAULT=etc/conf"
+
+@rem # default supported version for Python 3 
+set SUPPORTED_PYTHON3=3.6
+
 @rem #################################
 
-set ABOUT_ROOT_DIR=%~dp0
-@rem !!!!!!!!!!! ATTENTION !!!!!
-@rem there is a space at the end of the set SCANCODE_CLI_ARGS=  line ... 
-@rem NEVER remove this!
-@rem otherwise, this script and scancode do not work.  
+@rem python --version
+@rem python -c "import sys;print(sys.executable)"
 
-set ABOUT_CLI_ARGS= 
-@rem Collect/Slurp all command line arguments in a variable
-:collectarg
- if ""%1""=="""" (
-    goto continue
- )
- call set ABOUT_CLI_ARGS=%ABOUT_CLI_ARGS% %1
- shift
- goto collectarg
 
-:continue
+@rem Current directory where this .bat files lives
+set CFG_ROOT_DIR=%~dp0
 
-@rem default configuration when no args are passed
-if "%ABOUT_CLI_ARGS%"==" " (
-    set ABOUT_CLI_ARGS="%CONF_DEFAULT%"
-    goto configure
+@rem path where a configured Python should live in the current virtualenv if installed
+set CONFIGURED_PYTHON=%CFG_ROOT_DIR%Scripts\python.exe
+
+set PYTHON_EXECUTABLE=
+
+@rem parse command line options and arguments 
+:collectopts
+if "%1" EQU "--help" (goto cli_help)
+if "%1" EQU "--clean" (set CFG_CMD_LINE_ARGS=--clean) && goto find_python
+if "%1" EQU "--python" (set PROVIDED_PYTHON=%~2) && shift && shift && goto collectopts
+
+@rem We are not cleaning: Either we have a provided configure config path or we use a default.
+if ""%1""=="""" (
+    set CFG_CMD_LINE_ARGS=%CONF_DEFAULT%
+) else (
+    set CFG_CMD_LINE_ARGS=%1
 )
 
-:configure
-if not exist "c:\python27\python.exe" (
-    echo(
-    echo On Windows, AboutCode requires Python 2.7.x 32 bits to be installed first.
-    echo(
-    echo Please download and install Python 2.7 ^(Windows x86 MSI installer^) version 2.7.10.
-    echo Install Python on the c: drive and use all default installer options.
-    echo Do NOT install Python v3 or any 64 bits edition.
-    echo Instead download Python from this url and see the README.rst file for more details:
-    echo(
-    echo    https://www.python.org/ftp/python/2.7.15/python-2.7.15.msi
-    echo(
-    exit /b 1
+@rem If we have a pre-configured Python in our virtualenv, reuse this as-is and run
+if exist ""%CONFIGURED_PYTHON%"" (
+    set PYTHON_EXECUTABLE=%CONFIGURED_PYTHON%
+    goto run
 )
 
-call c:\python27\python.exe "%ABOUT_ROOT_DIR%etc\configure.py" %ABOUT_CLI_ARGS%
-if %errorlevel% neq 0 (
-    exit /b %errorlevel%
+@rem If we have a command arg for Python use this as-is
+if ""%PROVIDED_PYTHON%""==""path"" (
+    @rem use a bare python available in the PATH
+    set PYTHON_EXECUTABLE=python
+    goto run
 )
-if exist "%SCANCODE_ROOT_DIR%bin\activate" (
-    "%SCANCODE_ROOT_DIR%bin\activate"
+if exist ""%PROVIDED_PYTHON%"" (
+    set PYTHON_EXECUTABLE=%PROVIDED_PYTHON%
+    goto run
 )
-goto EOS
 
-:EOS
+
+@rem otherwise we search for a suitable Python interpreter
+:find_python
+
+@rem First check the existence of the "py" launcher (available in Python 3)
+@rem if we have it, check if we have a py -3 installed with the good version or a py 2.7
+@rem if not, check if we have an old py 2.7
+@rem exist if all fails
+
+where py >nul 2>nul
+if %ERRORLEVEL% == 0 (
+    @rem we have a py launcher, check for the availability of our required Python 3 version
+    py -3.6 --version >nul 2>nul
+    if %ERRORLEVEL% == 0 (
+        set PYTHON_EXECUTABLE=py -3.6
+    ) else (
+        @rem we have no required python 3, let's try python 2:
+        py -2 --version >nul 2>nul
+        if %ERRORLEVEL% == 0 (
+            set PYTHON_EXECUTABLE=py -2
+        ) else (
+            @rem we have py and no python 3 and 2, exit
+            echo * Unable to find an installation of Python.
+            exit /b 1
+        )
+    )
+) else (
+    @rem we have no py launcher, check for a default Python 2 installation
+    if not exist ""%DEFAULT_PYTHON2%"" (
+       echo * Unable to find an installation of Python.
+       exit /b 1
+    ) else (
+        set PYTHON_EXECUTABLE=%DEFAULT_PYTHON2%
+    )
+)
+
+:run
+
+@rem without this things may not always work on Windows 10, but this makes things slower
+set PYTHONDONTWRITEBYTECODE=1
+
+call %PYTHON_EXECUTABLE% "%CFG_ROOT_DIR%etc\configure.py" %CFG_CMD_LINE_ARGS%
+
+
+@rem Return a proper return code on failure
+if %ERRORLEVEL% neq 0 (
+    exit /b %ERRORLEVEL%
+)
+endlocal
+

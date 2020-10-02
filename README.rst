@@ -65,6 +65,20 @@ or on windows:
     configure
 
 
+Activate the virtualenv
+-----------------------
+To activate the virtualenv, run (on posix):
+    source bin/activate
+or on windows:
+    bin\activate
+
+
+Deactivate the virtualenv
+-------------------------
+To deactivate the virtualenv, run (on both posix and windows):
+    deactivate
+
+
 VERSIONING SCHEMA
 -----------------
 Starting at AboutCode version 4.0.0, the AboutCode Toolkit will follow SemVer for the versioning schema.
