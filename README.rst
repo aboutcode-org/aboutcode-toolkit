@@ -70,7 +70,7 @@ Activate the virtualenv
 To activate the virtualenv, run (on posix):
     source bin/activate
 or on windows:
-    bin\activate
+    bin\\activate
 
 
 Deactivate the virtualenv
