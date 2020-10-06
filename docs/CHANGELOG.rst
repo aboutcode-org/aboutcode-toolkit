@@ -4,6 +4,7 @@
     * Add '@' as a support character for filename #451
     * Add support to collect redistributable sources #22
     * Handle trailing spaces in field names during `transform` #456
+    * Remove restriction of python27 only on windows #453
     * Documentation updated
     * Code enhancement
 
