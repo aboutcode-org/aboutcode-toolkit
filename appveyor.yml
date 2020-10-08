@@ -7,6 +7,7 @@ build: off
 
 test_script:
     - set
+    - source bin/activate
     - pytest -vvs tests
 
 on_success:
