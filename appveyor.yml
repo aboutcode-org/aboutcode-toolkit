@@ -7,7 +7,7 @@ build: off
 
 test_script:
     - set
-    - . bin/activate
+    - bin/activate
     - pytest -vvs tests
 
 on_success:
