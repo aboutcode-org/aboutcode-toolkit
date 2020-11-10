@@ -83,8 +83,8 @@ def transform_json_to_json(location, output, transformer):
         raise ValueError('Cannot transform without Transformer')
 
     items = read_json(location)
-    data = strip_trailing_fields_json(items)
-    new_data = normalize_dict_data(data)
+    data = normalize_dict_data(items)
+    new_data = strip_trailing_fields_json(data)
 
     field_names, updated_data, errors = transform_data(new_data, transformer)
 
@@ -109,8 +109,8 @@ def strip_trailing_fields_json(items):
     Strip trailing spaces for field name #456
     """
     data = []
-    od = OrderedDict()
     for item in items:
+        od = OrderedDict()
         for field in item:
             stripped_field_name = field.strip()
             od[stripped_field_name] = item[field]
