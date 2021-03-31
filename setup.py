@@ -67,7 +67,7 @@ setup(
     install_requires=[
         'jinja2',
         'click',
-        'saneyaml',
+        'saneyaml >= 0.5.2',
         'boolean.py >= 3.5, < 4.0',
         'license_expression >= 0.94',
         'packageurl_python >= 0.9.0',
