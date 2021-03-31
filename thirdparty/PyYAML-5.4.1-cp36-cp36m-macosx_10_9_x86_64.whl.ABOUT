@@ -1,0 +1,18 @@
+about_resource: PyYAML-5.4.1-cp36-cp36m-macosx_10_9_x86_64.whl
+attribute: yes
+checksum_md5: e550469eb0bf4691f01294d0de7b3e2c
+checksum_sha1: f0ddcc0b842b02a68b732d5d774195bb35ed8fe4
+copyright: Copyright (c) 2006 Kirill Simonov
+description: YAML parser and emitter for Python
+download_url: https://files.pythonhosted.org/packages/ef/e9/d62912119552b157ed66dc8297ae6ac08629d7d5c497d4faa26b0c3a4efe/PyYAML-5.4.1-cp36-cp36m-macosx_10_9_x86_64.whl
+homepage_url: http://pyyaml.org/wiki/PyYAML
+license_expression: mit
+name: PyYAML
+notice_file: PyYAML-5.4.1-cp36-cp36m-macosx_10_9_x86_64.whl.NOTICE
+notice_url: http://svn.pyyaml.org/pyyaml/trunk/LICENSE
+owner: Kirill Simonov
+owner_url: http://www.yaml.org/
+package_url: pkg:pypi/pyyaml@5.4.1
+primary_language: Python
+type: pypi
+version: 5.4.1
