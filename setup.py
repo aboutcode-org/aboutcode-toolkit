@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
-
-from glob import glob
 import io
+from glob import glob
 from os.path import basename
 from os.path import dirname
 from os.path import join
@@ -24,7 +21,7 @@ def read(*names, **kwargs):
 
 setup(
     name='aboutcode-toolkit',
-    version='5.2.0',
+    version='6.0.0',
     license='Apache-2.0',
     description=(
         'AboutCode-toolkit is a tool to document the provenance (origin and license) of '
@@ -49,10 +46,11 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
@@ -67,22 +65,13 @@ setup(
         'attribution', 'software', 'inventory',
     ],
     install_requires=[
-        'jinja2 >= 2.9, < 3.0',
-
+        'jinja2',
         'click',
-
-        "backports.csv ; python_version<'3.6'",
-
-        # required by saneyaml
         'saneyaml',
-
         'boolean.py >= 3.5, < 4.0',
         'license_expression >= 0.94',
         'packageurl_python >= 0.9.0',
     ],
-    extras_require={
-        ":python_version < '3.6'": ['backports.csv'],
-    },
     entry_points={
         'console_scripts': [
             'about=attributecode.cmd:about',

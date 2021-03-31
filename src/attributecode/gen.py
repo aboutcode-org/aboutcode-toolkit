@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,14 +14,8 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import codecs
-from collections import OrderedDict
 
-# FIXME: why posipath???
 from posixpath import basename
 from posixpath import dirname
 from posixpath import exists
@@ -55,7 +49,7 @@ def check_duplicated_columns(location):
         columns = [col for col in columns]
 
     seen = set()
-    dupes = OrderedDict()
+    dupes = dict()
     for col in columns:
         c = col.lower()
         if c in seen:
@@ -78,6 +72,7 @@ def check_duplicated_columns(location):
         errors.append(Error(ERROR, msg))
     return unique(errors)
 
+
 def check_duplicated_about_resource(arp, arp_list):
     """
     Return error for duplicated about_resource.
@@ -87,6 +82,7 @@ def check_duplicated_about_resource(arp, arp_list):
                "field: " + arp)
         return Error(CRITICAL, msg)
     return ''
+
 
 def check_newline_in_file_field(component):
     """
@@ -104,16 +100,18 @@ def check_newline_in_file_field(component):
                 pass
     return errors
 
+
 def check_about_resource_filename(arp):
     """
     Return error for invalid/non-support about_resource's filename or
-    empty string if no error is found. 
+    empty string if no error is found.
     """
     if invalid_chars(arp):
         msg = ("Invalid characters present in 'about_resource' "
                    "field: " + arp)
         return (Error(CRITICAL, msg))
     return ''
+
 
 # TODO: this should be either the CSV or the ABOUT files but not both???
 def load_inventory(location, base_dir, reference_dir=None):
@@ -219,8 +217,10 @@ def load_inventory(location, base_dir, reference_dir=None):
 
     return unique(errors), abouts
 
+
 def update_about_resource(self):
     pass
+
 
 def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False):
     """
@@ -281,7 +281,7 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
         try:
             # Generate value for 'about_resource' if it does not exist
             if not about.about_resource.value:
-                about.about_resource.value = OrderedDict()
+                about.about_resource.value = dict()
                 about_resource_value = ''
                 if about.about_file_path.endswith('/'):
                     about_resource_value = u'.'

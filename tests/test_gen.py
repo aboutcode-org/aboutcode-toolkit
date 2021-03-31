@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,11 +14,6 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
-from collections import OrderedDict
 import unittest
 
 from testing_utils import get_temp_dir
@@ -33,6 +28,7 @@ from unittest.case import skip
 
 
 class GenTest(unittest.TestCase):
+
     def test_check_duplicated_columns(self):
         test_file = get_test_loc('test_gen/dup_keys.csv')
         expected = [Error(ERROR, 'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
@@ -152,7 +148,7 @@ custom1: |
         location = get_test_loc('test_gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([('.', None)])
+        expected = dict([('.', None)])
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
 
@@ -161,7 +157,7 @@ custom1: |
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([('test.tar.gz', None)])
+        expected = dict([('test.tar.gz', None)])
 
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
@@ -173,7 +169,7 @@ custom1: |
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        expected = OrderedDict([('test.tar.gz', None)])
+        expected = dict([('test.tar.gz', None)])
 
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
@@ -293,7 +289,6 @@ licenses:
 '''
         )
         assert expected == result
-
 
     def test_generate_license_key_with_custom_file_450_with_fetch_with_order(self):
         location = get_test_loc('test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')

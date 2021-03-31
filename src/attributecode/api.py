@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2017 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,30 +14,16 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import json
+
+from urllib.parse import quote
+from urllib.parse import urlencode
+from urllib.request import Request
+from urllib.request import urlopen
+from urllib.error import HTTPError
 
 from attributecode import ERROR
 from attributecode import Error
-from attributecode.util import python2
-
-
-if python2:  # pragma: nocover
-    from urllib import quote  # NOQA
-    from urllib import urlencode  # NOQA
-    from urllib2 import HTTPError  # NOQA
-    from urllib2 import Request  # NOQA
-    from urllib2 import urlopen  # NOQA
-else:  # pragma: nocover
-    from urllib.parse import quote  # NOQA
-    from urllib.parse import urlencode  # NOQA
-    from urllib.request import Request  # NOQA
-    from urllib.request import urlopen  # NOQA
-    from urllib.error import HTTPError  # NOQA
-
 
 """
 API call helpers

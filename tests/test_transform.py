@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,21 +14,10 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from collections import OrderedDict
 import unittest
 
-from testing_utils import get_temp_dir
 from testing_utils import get_test_loc
-
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import CRITICAL
-from attributecode import Error
-from attributecode import gen
 
 from attributecode.transform import check_duplicate_fields
 from attributecode.transform import read_json
@@ -38,14 +27,9 @@ from attributecode.transform import strip_trailing_fields_csv
 from attributecode.transform import strip_trailing_fields_json
 from attributecode.transform import Transformer
 
-from attributecode.util import python2
-
-if python2:  # pragma: nocover
-    from itertools import izip_longest as zip_longest  # NOQA
-else:  # pragma: nocover
-    from itertools import zip_longest  # NOQA
 
 class TransformTest(unittest.TestCase):
+
     def test_transform_data_new_col(self):
         data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'), (u'Component', u'test.c'),
                              (u'version', '1'), (u'notes', u'test'), (u'temp', u'foo')])]
@@ -54,11 +38,11 @@ class TransformTest(unittest.TestCase):
 
         field_name, data, err = transform_data(data, transformer)
 
-        expect_name = [u'path',u'about_resource', u'name',u'version',u'notes',u'temp']
+        expect_name = [u'path', u'about_resource', u'name', u'version', u'notes', u'temp']
         expected_data = [dict(OrderedDict([(u'path', u'/tmp/test.c'),
                                            (u'about_resource', u'/tmp/test.c'),
                                            (u'name', u'test.c'), (u'version', u'1'),
-                                           (u'notes', u'test'),(u'temp', u'foo')]))]
+                                           (u'notes', u'test'), (u'temp', u'foo')]))]
         assert len(field_name) == len(expect_name)
         for name in field_name:
             assert name in expect_name
@@ -113,7 +97,7 @@ class TransformTest(unittest.TestCase):
                                  (u'name', u'samples'),
                                  (u'base_name', u'samples'),
                                  (u'extension', u''), (u'size', 0),
-                                 (u'date', None),(u'sha1', None), (u'md5', None),
+                                 (u'date', None), (u'sha1', None), (u'md5', None),
                                  (u'mime_type', None), (u'file_type', None),
                                  (u'programming_language', None),
                                  (u'is_binary', False), (u'is_text', False),

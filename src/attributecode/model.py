@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -24,32 +24,20 @@ AboutCode toolkit reads and validates ABOUT files and collect software
 components inventories.
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
-from collections import OrderedDict
 import io
 import json
 import os
-# FIXME: why posixpath???
 import posixpath
 import traceback
-
-from attributecode.util import python2, to_posix
-
-if python2:  # pragma: nocover
-    from itertools import izip_longest as zip_longest  # NOQA
-    from urlparse import urljoin, urlparse  # NOQA
-    from urllib2 import urlopen, Request, HTTPError  # NOQA
-else:  # pragma: nocover
-    basestring = str  # NOQA
-    from itertools import zip_longest  # NOQA
-    from urllib.parse import urljoin, urlparse  # NOQA
-    from urllib.request import urlopen, Request  # NOQA
-    from urllib.error import HTTPError  # NOQA
+from itertools import zip_longest
+from urllib.parse import urljoin
+from urllib.parse import urlparse
+from urllib.request import urlopen
+from urllib.request import Request
+from urllib.error import HTTPError
 
 from license_expression import Licensing
+from packageurl import PackageURL
 
 from attributecode import __version__
 from attributecode import CRITICAL
@@ -76,9 +64,8 @@ from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
 from attributecode.util import unique
 
-from packageurl import PackageURL
-
 genereated_tk_version = "# Generated with AboutCode Toolkit Version %s \n\n" % __version__
+
 
 class Field(object):
     """
@@ -90,7 +77,7 @@ class Field(object):
         # normalized names are lowercased per specification
         self.name = name
         # save this and do not mutate it afterwards
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             self.original_value = value
         elif value:
             self.original_value = repr(value)
@@ -139,7 +126,7 @@ class Field(object):
             else:
                 # present fields with content go through validation...
                 # first trim any trailing spaces on each line
-                if isinstance(self.original_value, basestring):
+                if isinstance(self.original_value, str):
                     value = '\n'.join(s.rstrip() for s
                                       in self.original_value.splitlines(False))
                     # then strip leading and trailing spaces
@@ -239,6 +226,7 @@ class StringField(Field):
     A field containing a string value possibly on multiple lines.
     The validated value is a string.
     """
+
     def _validate(self, *args, **kwargs):
         errors = super(StringField, self)._validate(*args, ** kwargs)
         no_special_char_field = ['license_expression', 'license_key', 'license_name']
@@ -286,9 +274,10 @@ class SingleLineField(StringField):
     A field containing a string value on a single line. The validated value is
     a string.
     """
+
     def _validate(self, *args, **kwargs):
         errors = super(SingleLineField, self)._validate(*args, ** kwargs)
-        if self.value and isinstance(self.value, basestring) and '\n' in self.value:
+        if self.value and isinstance(self.value, str) and '\n' in self.value:
             name = self.name
             value = self.original_value
             msg = (u'Field %(name)s: Cannot span multiple lines: %(value)s'
@@ -302,6 +291,7 @@ class ListField(StringField):
     A field containing a list of string values, one per line. The validated
     value is a list.
     """
+
     def default_value(self):
         return []
 
@@ -311,7 +301,7 @@ class ListField(StringField):
         # reset
         self.value = []
 
-        if isinstance(self.original_value, basestring):
+        if isinstance(self.original_value, str):
             values = self.original_value.splitlines(False)
         elif isinstance(self.original_value, list):
             values = self.original_value
@@ -319,7 +309,7 @@ class ListField(StringField):
             values = [repr(self.original_value)]
 
         for val in values:
-            if isinstance(val, basestring):
+            if isinstance(val, str):
                 val = val.strip()
             if not val:
                 name = self.name
@@ -364,10 +354,12 @@ class ListField(StringField):
         if sval == oval:
             return True
 
+
 class PackageUrlField(StringField):
     """
     A Package URL field. The validated value is a purl.
     """
+
     def _validate(self, *args, **kwargs):
         """
         Check that Package URL is valid. Return a list of errors.
@@ -390,10 +382,12 @@ class PackageUrlField(StringField):
         except:
             return False
 
+
 class UrlListField(ListField):
     """
     A URL field. The validated value is a list of URLs.
     """
+
     def _validate(self, *args, **kwargs):
         """
         Check that URLs are valid. Return a list of errors.
@@ -421,6 +415,7 @@ class UrlField(StringField):
     """
     A URL field. The validated value is a URL.
     """
+
     def _validate(self, *args, **kwargs):
         """
         Check that URL is valid. Return a list of errors.
@@ -449,6 +444,7 @@ class PathField(ListField):
     The validated value is an ordered dict of path->location or None.
     The paths can also be resolved
     """
+
     def default_value(self):
         return {}
 
@@ -471,12 +467,12 @@ class PathField(ListField):
 
         name = self.name
 
-        # Why is the PathField an ordered dict?
-        # Ans: The reason why the PathField use an ordered dict is because
-        # for the FileTextField, the key is used as the path to the file and 
-        # the value is used as the context of the file 
+        # Why are paths a dict?
+        # Ans: The reason why the PathField use a dict is because
+        # for the FileTextField, the key is used as the path to the file and
+        # the value is used as the context of the file
         # dict of normalized paths to a location or None
-        paths = OrderedDict()
+        paths = {}
 
         for path_value in self.value:
             p = path_value.split(',')
@@ -488,11 +484,11 @@ class PathField(ListField):
                 # and a succession of one or more ////// to . too
                 if path.strip() and not path.strip(posixpath.sep):
                     path = '.'
-        
+
                 # removing leading and trailing path separator
                 # path are always relative
                 path = path.strip(posixpath.sep)
-        
+
                 # the license files, if need to be copied, are located under the path
                 # set from the 'license-text-location' option, so the tool should check
                 # at the 'license-text-location' instead of the 'base_dir'
@@ -503,7 +499,7 @@ class PathField(ListField):
                     location = None
                     paths[path] = location
                     continue
-        
+
                 if self.reference_dir:
                     location = posixpath.join(self.reference_dir, path)
                 else:
@@ -512,7 +508,7 @@ class PathField(ListField):
                     if not self.running_inventory and self.about_file_path:
                         # Get the parent directory of the 'about_file_path'
                         afp_parent = posixpath.dirname(self.about_file_path)
-        
+
                         # Create a relative 'about_resource' path by joining the
                         # parent of the 'about_file_path' with the value of the
                         # 'about_resource'
@@ -521,12 +517,12 @@ class PathField(ListField):
                         location = posixpath.join(self.base_dir, normalized_arp)
                     else:
                         location = posixpath.join(self.base_dir, path)
-        
+
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
                 location = util.to_posix(location)
                 location = add_unc(location)
-        
+
                 if not os.path.exists(location):
                     # We don't want to show the UNC_PREFIX in the error message
                     location = util.to_posix(location.strip(UNC_PREFIX))
@@ -538,7 +534,7 @@ class PathField(ListField):
                     else:
                         errors.append(Error(CRITICAL, msg))
                     location = None
-        
+
                 paths[path] = location
 
         self.value = paths
@@ -550,6 +546,7 @@ class AboutResourceField(PathField):
     Special field for about_resource. self.resolved_paths contains a list of
     the paths resolved relative to the about file path.
     """
+
     def __init__(self, *args, ** kwargs):
         super(AboutResourceField, self).__init__(*args, ** kwargs)
         self.resolved_paths = []
@@ -558,12 +555,14 @@ class AboutResourceField(PathField):
         errors = super(AboutResourceField, self)._validate(*args, ** kwargs)
         return errors
 
+
 class FileTextField(PathField):
     """
     A path field pointing to one or more text files such as license files.
     The validated value is an ordered dict of path->Text or None if no
     location or text could not be loaded.
     """
+
     def _validate(self, *args, **kwargs):
         """
         Load and validate the texts referenced by paths fields. Return a list
@@ -598,10 +597,12 @@ class FileTextField(PathField):
         self.errors = errors
         return errors
 
+
 class BooleanField(SingleLineField):
     """
     An flag field with a boolean value. Validated value is False, True or None.
     """
+
     def default_value(self):
         return None
 
@@ -650,7 +651,7 @@ class BooleanField(SingleLineField):
         if isinstance(value, bool):
             return value
         else:
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 value = value.strip()
                 if not value:
                     return None
@@ -732,9 +733,9 @@ class About(object):
 
     # name of the attribute containing the resolved relative Resources paths
     about_resource_path_attr = 'about_resource_path'
-    
+
     # name of the attribute containing the resolved relative Resources paths
-    ABOUT_RESOURCE_ATTR = 'about_resource'    
+    ABOUT_RESOURCE_ATTR = 'about_resource'
 
     # Required fields
     required_fields = ['name', ABOUT_RESOURCE_ATTR]
@@ -748,7 +749,7 @@ class About(object):
         could use a metaclass to track ordering django-like but this approach
         is simpler.
         """
-        self.fields = OrderedDict([
+        self.fields = dict([
             ('about_resource', AboutResourceField(required=True)),
             ('name', SingleLineField(required=True)),
             ('version', SingleLineField()),
@@ -808,7 +809,7 @@ class About(object):
         attribute contains the errors.
         """
         self.set_standard_fields()
-        self.custom_fields = OrderedDict()
+        self.custom_fields = {}
 
         self.errors = []
 
@@ -848,7 +849,7 @@ class About(object):
         Return all the standard fields and customer-defined fields of this
         About object in an ordered dict.
         """
-        data = OrderedDict()
+        data = {}
         data[self.ABOUT_FILE_PATH_ATTR] = self.about_file_path
         with_values = ((fld.name, fld.serialized_value()) for fld in self.all_fields())
         non_empty = ((name, value) for name, value in with_values if value)
@@ -862,7 +863,7 @@ class About(object):
         Return a list of errors.
         """
         errors = []
-        seen_fields = OrderedDict()
+        seen_fields = {}
 
         for name, value in fields:
             orig_name = name
@@ -1054,7 +1055,7 @@ class About(object):
         """
         Return self as a formatted ABOUT string.
         """
-        data = OrderedDict()
+        data = {}
         # Group the same license information (name, url, file) together
         license_key = []
         license_name = []
@@ -1103,12 +1104,12 @@ class About(object):
                     data[field.name] = field.value
 
         # Group the same license information in a list
-        # This `licenses_dict` is a dictionary with license key as the key and the 
+        # This `licenses_dict` is a dictionary with license key as the key and the
         # value is the list of [license_name, license_context, license_url]
         lic_key_copy = license_key[:]
         lic_dict_list = []
         for lic_key in license_key:
-            lic_dict = OrderedDict()
+            lic_dict = {}
             if licenses_dict and lic_key in licenses_dict:
                 lic_dict['key'] = lic_key
                 lic_name = licenses_dict[lic_key][0]
@@ -1118,7 +1119,7 @@ class About(object):
                 lic_dict['name'] = lic_name
                 lic_dict['file'] = lic_file
                 lic_dict['url'] = lic_url
-    
+
                 # Remove the license information if it has been handled
                 lic_key_copy.remove(lic_key)
                 if lic_name in license_name:
@@ -1132,7 +1133,7 @@ class About(object):
         # Handle license information that have not been handled.
         license_group = list(zip_longest(lic_key_copy, license_name, license_file, license_url))
         for lic_group in license_group:
-            lic_dict = OrderedDict()
+            lic_dict = {}
             if lic_group[0]:
                 lic_dict['key'] = lic_group[0]
             if lic_group[1]:
@@ -1360,7 +1361,7 @@ def get_copy_list(abouts, location):
     Return a list of files/directories that need to be copied (and error if any)
     This is a summary list in a sense that if a directory is already in the list,
     its children directories/files will not be included in the list regardless if
-    they have 'redistribute' flagged. The reason for this is we want to capture 
+    they have 'redistribute' flagged. The reason for this is we want to capture
     the error/warning if existence files/directories already exist. However, if
     we don't have this "summarized" list, and we've copied a file (with directory structure)
     and then later on this file's parent directory also need to be copied, then
@@ -1440,6 +1441,7 @@ def get_copy_list(abouts, location):
 
     return copy_list, errors
 
+
 def about_object_to_list_of_dictionary(abouts):
     """
     Convert About objects to a list of dictionaries
@@ -1448,9 +1450,9 @@ def about_object_to_list_of_dictionary(abouts):
     for about in abouts:
         # Restore the *_file value to the original value
         # The *_file's original_value may be parsed (i.e. split(',))
-        # for validation purpose.  
+        # for validation purpose.
         about.license_file.value = about.license_file.original_value
-        about.notice_file.value = about.notice_file.original_value 
+        about.notice_file.value = about.notice_file.original_value
         about.changelog_file.value = about.changelog_file.original_value
         about.author_file.value = about.author_file.original_value
 
@@ -1469,9 +1471,9 @@ def about_object_to_list_of_dictionary(abouts):
                     for resource in about_resource:
                         updated_about_resource = posixpath.normpath(posixpath.join(afp_parent, resource))
                         if resource == u'.':
-                            if not updated_about_resource == '/': 
+                            if not updated_about_resource == '/':
                                 updated_about_resource = updated_about_resource + '/'
-                    ad['about_resource'] = OrderedDict([(updated_about_resource, None)])
+                    ad['about_resource'] = dict([(updated_about_resource, None)])
                     del ad['about_file_path']
                 serialized.append(ad)
         except Exception as e:
@@ -1496,10 +1498,7 @@ def write_output(abouts, location, format):  # NOQA
 
 
 def save_as_json(location, about_dicts):
-    mode = 'w'
-    if python2:
-        mode = 'wb'
-    with io.open(location, mode=mode) as output_file:
+    with io.open(location, mode='w') as output_file:
         data = util.format_about_dict_for_json_output(about_dicts)
         output_file.write(json.dumps(data, indent=2))
     return []

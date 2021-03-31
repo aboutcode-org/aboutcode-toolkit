@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,11 +14,6 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import os
 
 from testing_utils import run_about_command_test
@@ -26,7 +21,6 @@ from testing_utils import run_about_command_test
 """
 Common and global checks such as codestyle and check own ABOUT files.
 """
-
 
 root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 

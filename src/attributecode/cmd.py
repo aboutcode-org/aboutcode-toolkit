@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,10 +14,6 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from collections import defaultdict
 from functools import partial
 import io
@@ -26,8 +22,6 @@ import os
 import sys
 
 import click
-# silence unicode literals warnings
-click.disable_unicode_literals_warning = True
 
 from attributecode import WARNING
 from attributecode.util import unique
@@ -46,9 +40,8 @@ from attributecode.util import extract_zip
 from attributecode.util import filter_errors
 from attributecode.util import get_temp_dir
 
-
 __copyright__ = """
-    Copyright (c) 2013-2020 nexB Inc and others. All rights reserved.
+    Copyright (c) nexB Inc and others. All rights reserved.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -59,16 +52,13 @@ __copyright__ = """
     See the License for the specific language governing permissions and
     limitations under the License."""
 
-
 prog_name = 'AboutCode-toolkit'
-
 
 intro = '''%(prog_name)s version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s
 https://aboutcode.org
 %(__copyright__)s
 ''' % locals()
-
 
 
 def print_version():
@@ -79,6 +69,7 @@ class AboutCommand(click.Command):
     """
     An enhanced click Command working around some Click quirk.
     """
+
     def main(self, args=None, prog_name=None, complete_var=None,
              standalone_mode=True, **extra):
         """
@@ -102,10 +93,10 @@ Read, write and collect provenance and license inventories from .ABOUT files to 
 Use about <command> --help for help on a command.
     """
 
-
 ######################################################################
 # option validators
 ######################################################################
+
 
 def validate_key_values(ctx, param, value):
     """
@@ -133,10 +124,10 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
             'Invalid {param} file extension: must be one of: {msg}'.format(**locals()))
     return value
 
-
 ######################################################################
 # inventory subcommand
 ######################################################################
+
 
 @about.command(cls=AboutCommand,
     short_help='Collect the inventory of .ABOUT files to a CSV or JSON file.')
@@ -168,7 +159,6 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-
 def inventory(location, output, format, quiet, verbose):  # NOQA
     """
 Collect the inventory of ABOUT file data as CSV or JSON.
@@ -194,10 +184,10 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         click.echo(msg)
     sys.exit(errors_count)
 
-
 ######################################################################
 # gen subcommand
 ######################################################################
+
 
 @about.command(cls=AboutCommand,
     short_help='Generate .ABOUT files from an inventory as CSV or JSON.')
@@ -240,7 +230,6 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-
 def gen(location, output, android, fetch_license, reference, quiet, verbose):
     """
 Given a CSV/JSON inventory, generate ABOUT files in the output location.
@@ -253,7 +242,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         print_version()
         click.echo('Generating .ABOUT files...')
 
-    #FIXME: This should be checked in the `click`
+    # FIXME: This should be checked in the `click`
     if not location.endswith(('.csv', '.json',)):
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
 
@@ -273,10 +262,10 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         click.echo(msg)
     sys.exit(errors_count)
 
-
 ######################################################################
 # attrib subcommand
 ######################################################################
+
 
 def validate_template(ctx, param, value):
     if not value:
@@ -329,7 +318,6 @@ def validate_template(ctx, param, value):
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-
 def attrib(location, output, template, vartext, quiet, verbose):
     """
 Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
@@ -371,10 +359,10 @@ OUTPUT: Path where to write the attribution document.
             click.echo(msg)
     sys.exit(errors_count)
 
-
 ######################################################################
 # collect_redist_src subcommand
 ######################################################################
+
 
 @about.command(cls=AboutCommand,
     short_help='Collect redistributable sources.')
@@ -392,7 +380,7 @@ OUTPUT: Path where to write the attribution document.
 @click.option('--from-inventory',
     metavar='FILE',
     type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an inventory CSV/JSON file as the base list for files/directories ' 
+    help='Path to an inventory CSV/JSON file as the base list for files/directories '
          'that need to be copied which have the \'redistribute\' flagged.')
 
 @click.option('--with-structures',
@@ -412,7 +400,6 @@ OUTPUT: Path where to write the attribution document.
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-
 def collect_redist_src(location, output, from_inventory, with_structures, zip, quiet, verbose):
     """
 Collect sources that have 'redistribute' flagged as 'True' in .ABOUT files or inventory
@@ -465,12 +452,12 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
         click.echo(msg)
     sys.exit(errors_count)
 
-
 ######################################################################
 # check subcommand
 ######################################################################
 
 # FIXME: This is really only a dupe of the Inventory command
+
 
 @about.command(cls=AboutCommand,
     short_help='Validate that the format of .ABOUT files is correct and report '
@@ -487,7 +474,6 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-
 def check(location, verbose):
     """
 Check .ABOUT file(s) at LOCATION for validity and print error messages.
@@ -501,10 +487,10 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
     sys.exit(severe_errors_count)
 
-
 ######################################################################
 # transform subcommand
 ######################################################################
+
 
 def print_config_help(ctx, param, value):
     if not value or ctx.resilient_parsing:
@@ -549,7 +535,6 @@ def print_config_help(ctx, param, value):
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-
 def transform(location, output, configuration, quiet, verbose):  # NOQA
     """
 Transform the CSV/JSON file at LOCATION by applying renamings, filters and checks
@@ -563,7 +548,6 @@ OUTPUT: Path to CSV/JSON inventory file to create.
     from attributecode.transform import transform_csv_to_csv
     from attributecode.transform import transform_json_to_json
     from attributecode.transform import Transformer
-
 
     if not configuration:
         transformer = Transformer.default()
@@ -590,10 +574,10 @@ OUTPUT: Path to CSV/JSON inventory file to create.
         click.echo(msg)
     sys.exit(errors_count)
 
-
 ######################################################################
 # Error management
 ######################################################################
+
 
 def report_errors(errors, quiet, verbose, log_file_loc=None):
     """
@@ -644,6 +628,7 @@ def get_error_messages(errors, quiet=False, verbose=False):
 ######################################################################
 # Misc
 ######################################################################
+
 
 def parse_key_values(key_values):
     """

@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -13,10 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ============================================================================
-
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import collections
 import datetime
@@ -30,10 +26,10 @@ from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
-from attributecode.model import detect_special_char, parse_license_expression
+from attributecode.model import detect_special_char
+from attributecode.model import parse_license_expression
 from attributecode.util import add_unc
 from attributecode.attrib_util import multi_sort
-
 
 DEFAULT_TEMPLATE_FILE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), '../../templates', 'default_html.template')
@@ -141,10 +137,10 @@ def generate(abouts, template=None, variables=None):
                         lic_name_expression_list.append(license_key_and_license_name[segment])
                     else:
                         lic_name_expression_list.append(segment)
-    
+
                 # Join the license name expression into a single string
                 lic_name_expression = ' '.join(lic_name_expression_list)
-    
+
                 # Add the license name expression string into the about object
                 about.license_name_expression = lic_name_expression
 
@@ -185,6 +181,7 @@ def get_license_file_key(license_text_name):
         return license_text_name.rsplit('.', 1)[0]
     else:
         return license_text_name
+
 
 def check_template(template_string):
     """

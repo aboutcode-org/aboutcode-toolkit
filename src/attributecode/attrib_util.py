@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,16 +14,11 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from jinja2 import Environment
 from jinja2.filters import environmentfilter
 from jinja2.filters import make_attrgetter
 from jinja2.filters import ignore_case
 from jinja2.filters import FilterArgumentError
-
 
 """
 Extra JINJA2 custom filters and other template utilities.

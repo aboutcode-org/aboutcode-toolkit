@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -13,14 +13,10 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
-from collections import Counter
-from collections import OrderedDict
 import io
 import json
+from collections import Counter
+from itertools import zip_longest
 
 import attr
 
@@ -28,14 +24,7 @@ from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import saneyaml
 from attributecode.util import csv
-from attributecode.util import python2
 from attributecode.util import replace_tab_with_spaces
-
-
-if python2:  # pragma: nocover
-    from itertools import izip_longest as zip_longest  # NOQA
-else:  # pragma: nocover
-    from itertools import zip_longest  # NOQA
 
 
 def transform_csv_to_csv(location, output, transformer):
@@ -62,7 +51,7 @@ def transform_csv_to_csv(location, output, transformer):
         return field_names, [], errors
 
     # Convert to dicts
-    new_data = [OrderedDict(zip_longest(field_names, item)) for item in data]
+    new_data = [dict(zip_longest(field_names, item)) for item in data]
 
     field_names, updated_data, errors = transform_data(new_data, transformer)
 
@@ -86,13 +75,14 @@ def transform_json_to_json(location, output, transformer):
     data = normalize_dict_data(items)
     new_data = strip_trailing_fields_json(data)
 
-    field_names, updated_data, errors = transform_data(new_data, transformer)
+    _field_names, updated_data, errors = transform_data(new_data, transformer)
 
     if errors:
         return errors
     else:
         write_json(output, updated_data)
         return []
+
 
 def strip_trailing_fields_csv(names):
     """
@@ -110,12 +100,13 @@ def strip_trailing_fields_json(items):
     """
     data = []
     for item in items:
-        od = OrderedDict()
+        od = {}
         for field in item:
             stripped_field_name = field.strip()
             od[stripped_field_name] = item[field]
         data.append(od)
     return data
+
 
 def normalize_dict_data(data):
     """
@@ -126,7 +117,7 @@ def normalize_dict_data(data):
     try:
         # Check if this is a JSON output from scancode-toolkit
         if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
-            #only takes data inside "files"
+            # only takes data inside "files"
             new_data = data["files"]
     except:
         new_data = data
@@ -305,7 +296,7 @@ class Transformer(object):
 
         renamed_list = []
         for row in data:
-            renamed = OrderedDict()
+            renamed = {}
             for key in row:
                 matched = False
                 for renamed_key in renamings:
@@ -326,29 +317,28 @@ class Transformer(object):
             return field_names
         return [c.strip().lower() for c in field_names]
     """
+
     def filter_fields(self, data):
         """
         Yield transformed dicts from a `data` list of dicts keeping only
         fields with a name in the `field_filters`of this Transformer.
         Return the data unchanged if no `field_filters` exists.
         """
-        #field_filters = set(self.clean_fields(self.field_filters))
+        # field_filters = set(self.clean_fields(self.field_filters))
         field_filters = set(self.field_filters)
         for entry in data:
-            items = ((k, v) for k, v in entry.items() if k in field_filters)
-            yield OrderedDict(items)
+            yield {k: v for k, v in entry.items() if k in field_filters}
 
     def filter_excluded(self, data):
         """
-        Yield transformed dicts from a `data` list of dicts excluding 
+        Yield transformed dicts from a `data` list of dicts excluding
         fields with names in the `exclude_fields`of this Transformer.
         Return the data unchanged if no `exclude_fields` exists.
         """
-        #exclude_fields = set(self.clean_fields(self.exclude_fields))
+        # exclude_fields = set(self.clean_fields(self.exclude_fields))
         exclude_fields = set(self.exclude_fields)
         for entry in data:
-            items = ((k, v) for k, v in entry.items() if k not in exclude_fields)
-            yield OrderedDict(items)
+            yield {k: v for k, v in entry.items() if k not in exclude_fields}
 
 
 def check_duplicate_fields(field_names):
@@ -375,8 +365,7 @@ def read_json(location):
     Yield rows (as a list of values) from a CSV file at `location`.
     """
     with io.open(location, encoding='utf-8', errors='replace') as jsonfile:
-        data = json.load(jsonfile, object_pairs_hook=OrderedDict)
-        return data
+        return json.load(jsonfile)
 
 
 def write_csv(location, data, field_names):  # NOQA

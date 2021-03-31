@@ -1,5 +1,5 @@
 @echo OFF
-@rem  Copyright (c) 2014 nexB Inc. http://www.nexb.com/ - All rights reserved.
+@rem  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 @rem  
 
 

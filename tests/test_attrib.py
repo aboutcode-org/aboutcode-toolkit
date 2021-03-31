@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,10 +14,6 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import io
 import os
 import unittest
@@ -27,6 +23,7 @@ from testing_utils import get_temp_file
 
 from attributecode import attrib
 from attributecode import model
+
 
 class TemplateTest(unittest.TestCase):
 
@@ -124,6 +121,7 @@ class GenerateTest(unittest.TestCase):
             f2 = '\n'.join(ef.readlines(False))
 
         assert f1 == f2
+
 
 def remove_timestamp(html_text):
     """

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Copyright (c) 2018 nexB Inc. http://www.nexb.com/ - All rights reserved.
+# Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 
 """
 This script is a configuration helper to select pip requirement files to install

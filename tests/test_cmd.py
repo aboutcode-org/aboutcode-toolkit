@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -13,10 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ============================================================================
-
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import io
 import unittest
@@ -35,8 +31,8 @@ from testing_utils import get_test_loc
 from testing_utils import get_temp_dir
 from testing_utils import get_temp_file
 
-
 # NB: the test_report_errors* tests depend on py.test stdout/err capture capabilities
+
 
 def test_report_errors(capsys):
     errors = [
@@ -116,6 +112,7 @@ def test_report_errors_with_quiet_ignores_verbose_flag2(capsys):
     out, err = capsys.readouterr()
     assert '' == out
     assert '' == err
+
 
 def test_report_errors_with_verbose_flag(capsys):
     errors = [
@@ -248,6 +245,7 @@ def test_get_error_messages_verbose():
 
 
 class TestFilterError(unittest.TestCase):
+
     def test_filter_errors_default(self):
         errors = [
             Error(CRITICAL, 'msg1'),
@@ -264,7 +262,6 @@ class TestFilterError(unittest.TestCase):
         ]
         assert expected == cmd.filter_errors(errors)
 
-
     def test_filter_errors_with_min(self):
         errors = [
             Error(CRITICAL, 'msg1'),
@@ -279,7 +276,6 @@ class TestFilterError(unittest.TestCase):
         ]
         assert expected == cmd.filter_errors(errors, CRITICAL)
 
-
     def test_filter_errors_no_errors(self):
         errors = [
             Error(INFO, 'msg3'),
@@ -287,7 +283,6 @@ class TestFilterError(unittest.TestCase):
             Error(NOTSET, 'msg4'),
         ]
         assert [] == cmd.filter_errors(errors)
-
 
     def test_filter_errors_none(self):
         assert [] == cmd.filter_errors([])
@@ -298,7 +293,6 @@ class TestParseKeyValues(unittest.TestCase):
     def test_parse_key_values_empty(self):
         assert ({}, []) == cmd.parse_key_values([])
         assert ({}, []) == cmd.parse_key_values(None)
-
 
     def test_parse_key_values_simple(self):
         test = [
@@ -313,7 +307,6 @@ class TestParseKeyValues(unittest.TestCase):
         keyvals, errors = cmd.parse_key_values(test)
         assert expected == keyvals
         assert not errors
-
 
     def test_parse_key_values_with_errors(self):
         test = [
@@ -334,10 +327,10 @@ class TestParseKeyValues(unittest.TestCase):
         ]
         assert expected == errors
 
-
 ###############################################################################
 # Run full cli command
 ###############################################################################
+
 
 def check_about_stdout(options, expected_loc, regen=False):
     """

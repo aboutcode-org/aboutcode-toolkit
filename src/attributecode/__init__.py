@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2013-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,29 +14,18 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from collections import namedtuple
 import logging
 import os
 
-try:
-    # Python 2
-    unicode  # NOQA
-except NameError:  # pragma: nocover
-    # Python 3
-    unicode = str  # NOQA
-
 import saneyaml
 
-__version__ = '5.1.0'
+__version__ = '6.0.0'
 
-__about_spec_version__ = '3.2.0'
+__about_spec_version__ = '3.2.1'
 
 __copyright__ = """
-Copyright (c) 2013-2020 nexB Inc. All rights reserved. http://dejacode.org
+Copyright (c) nexB Inc. All rights reserved. http://dejacode.org
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -53,12 +42,13 @@ class Error(namedtuple('Error', ['severity', 'message'])):
     """
     An Error data with a severity and message.
     """
+
     def __new__(self, severity, message):
         if message:
-            if isinstance(message, unicode):
+            if isinstance(message, str):
                 message = self._clean_string(message)
             else:
-                message = self._clean_string(unicode(repr(message), encoding='utf-8'))
+                message = self._clean_string(repr(message))
                 message = message.strip('"')
 
         return super(Error, self).__new__(
@@ -115,7 +105,6 @@ WARNING = 30
 INFO = 20
 DEBUG = 10
 NOTSET = 0
-
 
 severities = {
     CRITICAL : 'CRITICAL',

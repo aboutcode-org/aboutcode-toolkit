@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) 2013-2019 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -13,12 +13,8 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import codecs
-from collections import OrderedDict
+import csv
 import json
 import ntpath
 import os
@@ -27,35 +23,19 @@ import re
 import shutil
 import string
 import sys
-
 from distutils.dir_util import copy_tree
+from itertools import zip_longest
 
 from attributecode import CRITICAL
 from attributecode import WARNING
 from attributecode import Error
-
-
-python2 = sys.version_info[0] < 3
-
-if python2:  # pragma: nocover
-    from itertools import izip_longest as zip_longest  # NOQA
-else:  # pragma: nocover
-    from itertools import zip_longest  # NOQA
-
-if python2:  # pragma: nocover
-    from backports import csv  # NOQA
-    # monkey patch backports.csv until bug is fixed
-    # https://github.com/ryanhiebert/backports.csv/issues/30
-    csv.dict = OrderedDict
-else:  # pragma: nocover
-    import csv  # NOQA
-
 
 on_windows = 'win32' in sys.platform
 
 # boolean field name
 boolean_fields = ['redistribute', 'attribute', 'track_change', 'modified', 'internal_use_only']
 file_fields = ['about_resource', 'notice_file', 'changelog_file', 'author_file']
+
 
 def to_posix(path):
     """
@@ -128,6 +108,7 @@ def check_file_names(paths):
             seen[path] = orig_path
     return errors
 
+
 def wrap_boolean_value(context):
     updated_context = ''
     for line in context.splitlines():
@@ -143,6 +124,7 @@ def wrap_boolean_value(context):
             updated_context += line + '\n'
     return updated_context
 
+
 def replace_tab_with_spaces(context):
     updated_context = ''
     for line in context.splitlines():
@@ -151,6 +133,7 @@ def replace_tab_with_spaces(context):
         """
         updated_context += line.replace('\t', '    ') + '\n'
     return updated_context
+
 
 # TODO: rename to normalize_path
 def get_absolute(location):
@@ -192,6 +175,7 @@ def get_about_locations(location):
     for loc in get_locations(location):
         if is_about_file(loc):
             yield loc
+
 
 def norm(p):
     """
@@ -269,7 +253,6 @@ def resource_name(path):
     return right.strip()
 
 
-
 def load_csv(location):
     """
     Read CSV at `location`, return a list of ordered dictionaries, one
@@ -281,9 +264,7 @@ def load_csv(location):
                      errors='ignore') as csvfile:
         for row in csv.DictReader(csvfile):
             # convert all the column keys to lower case
-            updated_row = OrderedDict(
-                [(key.lower(), value) for key, value in row.items()]
-            )
+            updated_row = {key.lower(): value for key, value in row.items()}
             results.append(updated_row)
     return results
 
@@ -293,52 +274,9 @@ def load_json(location):
     Read JSON file at `location` and return a list of ordered dicts, one for
     each entry.
     """
-    # FIXME: IMHO we should know where the JSON is from and its shape
-    # FIXME use: object_pairs_hook=OrderedDict
     with open(location) as json_file:
         results = json.load(json_file)
 
-    # If the loaded JSON is not a list,
-    # - JSON output from AboutCode Manager:
-    # look for the "components" field as it is the field
-    # that contain everything the tool needs and ignore other fields.
-    # For instance,
-    # {
-    #    "aboutcode_manager_notice":"xyz",
-    #    "aboutcode_manager_version":"xxx",
-    #    "components":
-    #    [{
-    #        "license_expression":"apache-2.0",
-    #        "copyright":"Copyright (c) 2017 nexB Inc.",
-    #        "path":"ScanCode",
-    #        ...
-    #    }]
-    # }
-    #
-    # - JSON output from ScanCode:
-    # look for the "files" field as it is the field
-    # that contain everything the tool needs and ignore other fields:
-    # For instance,
-    # {
-    #    "scancode_notice":"xyz",
-    #    "scancode_version":"xxx",
-    #    "files":
-    #    [{
-    #        "path": "test",
-    #        "type": "directory",
-    #        "name": "test",
-    #        ...
-    #    }]
-    # }
-    #
-    # - JSON file that is not produced by scancode or aboutcode toolkit
-    # For instance,
-    # {
-    #    "path": "test",
-    #    "type": "directory",
-    #    "name": "test",
-    #    ...
-    # }
     # FIXME: this is too clever and complex... IMHO we should not try to guess the format.
     # instead a command line option should be provided explictly to say what is the format
     if isinstance(results, list):
@@ -359,10 +297,7 @@ def have_network_connection():
     Return True if an HTTP connection to some public web site is possible.
     """
     import socket
-    if python2:
-        import httplib  # NOQA
-    else:
-        import http.client as httplib  # NOQA
+    import http.client as httplib
 
     http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)  # NOQA
     try:
@@ -445,9 +380,9 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
             if value:
                 # This is to handle multiple license_file value in CSV format
                 # The following code will construct a list to contain the
-                # license file(s) that need to be copied. 
+                # license file(s) that need to be copied.
                 # Note that *ONLY* license_file field allows \n. Others file
-                # fields that have \n will prompts error at validation stage 
+                # fields that have \n will prompts error at validation stage
                 file_list = []
                 if '\n' in value:
                     f_list = value.split('\n')
@@ -550,7 +485,7 @@ def ungroup_licenses(licenses):
 def format_about_dict_for_csv_output(about_dictionary_list):
     csv_formatted_list = []
     for element in about_dictionary_list:
-        row_list = OrderedDict()
+        row_list = dict()
         for key in element:
             if element[key]:
                 if isinstance(element[key], list):
@@ -568,7 +503,7 @@ def format_about_dict_for_json_output(about_dictionary_list):
     licenses = ['license_key', 'license_name', 'license_file', 'license_url']
     json_formatted_list = []
     for element in about_dictionary_list:
-        row_list = OrderedDict()
+        row_list = dict()
         # FIXME: aboid using parallel list... use an object instead
         license_key = []
         license_name = []
@@ -597,7 +532,7 @@ def format_about_dict_for_json_output(about_dictionary_list):
         if license_group:
             licenses_list = []
             for lic_group in license_group:
-                lic_dict = OrderedDict()
+                lic_dict = dict()
                 if lic_group[0]:
                     lic_dict['key'] = lic_group[0]
                 if lic_group[1]:
@@ -671,7 +606,6 @@ def build_temp_dir(prefix='attributecode-'):
     location = tempfile.mkdtemp(prefix=prefix)
     create_dir(location)
     return location
-
 
 """
 Return True if a string s  name is safe to use as an attribute name.

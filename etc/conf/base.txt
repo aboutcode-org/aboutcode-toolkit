@@ -6,15 +6,15 @@ pip
 wincertstore
 
 # used for templating
-jinja2>=2.9.6
-MarkupSafe>=1.0.0
+jinja2
+MarkupSafe
 
-click==6.7
+click
 
 # used by schematics
 six
 
-PyYAML >= 3.0, < 4.0
+saneyaml
 attrs
 
 # license expression support

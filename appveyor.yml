@@ -9,9 +9,3 @@ test_script:
     - set
     - bin/activate
     - pytest -vvs tests
-
-on_success:
-  - "python etc/scripts/irc-notify.py aboutcode [{project_name}:{branch}] {short_commit}: \"{message}\" ({author}) {color_green}Succeeded,Details: {build_url},Commit: {commit_url}"
-
-on_failure:
-  - "python etc/scripts/irc-notify.py aboutcode [{project_name}:{branch}] {short_commit}: \"{message}\" ({author}) {color_red}Failed,Details: {build_url},Commit: {commit_url}"

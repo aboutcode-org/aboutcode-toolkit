@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) 2014-2020 nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,11 +14,6 @@
 #  limitations under the License.
 # ============================================================================
 
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
-from collections import OrderedDict
 import io
 import json
 import os
@@ -44,13 +39,6 @@ from testing_utils import extract_test_loc
 from testing_utils import get_temp_dir
 from testing_utils import get_temp_file
 from testing_utils import get_test_loc
-
-try:
-    # Python 2
-    unicode  # NOQA
-except NameError:  # pragma: nocover
-    # Python 3
-    unicode = str  # NOQA
 
 
 def check_csv(expected, result, regen=False, fix_cell_linesep=False):
@@ -78,7 +66,7 @@ def fix_crlf(items):
     This is fixing this until we find can why
     """
     for key, value in items:
-        if isinstance(value, unicode) and '\r\n' in value:
+        if isinstance(value, str) and '\r\n' in value:
             value = value.replace('\r\n', '\n')
         yield key, value
 
@@ -88,9 +76,9 @@ def check_json(expected, result):
     Assert that the contents of two JSON files are equal.
     """
     with open(expected) as e:
-        expected = json.load(e, object_pairs_hook=OrderedDict)
+        expected = json.load(e, object_pairs_hook=dict)
     with open(result) as r:
-        result = json.load(r, object_pairs_hook=OrderedDict)
+        result = json.load(r, object_pairs_hook=dict)
     assert expected == result
 
 
@@ -110,6 +98,7 @@ def get_unicode_content(location):
 
 
 class FieldTest(unittest.TestCase):
+
     def test_Field_init(self):
         model.Field()
         model.StringField()
@@ -237,7 +226,7 @@ class FieldTest(unittest.TestCase):
     def test_PathField_contains_dict_after_validate(self):
         value = 'string'
         field_class = model.PathField
-        expected = OrderedDict([('string', None)])
+        expected = dict([('string', None)])
         expected_errors = [
             Error(ERROR, 'Field s: Unable to verify path: string: No base directory provided')
                           ]
@@ -254,6 +243,7 @@ class FieldTest(unittest.TestCase):
 
 class YamlParseTest(unittest.TestCase):
     maxDiff = None
+
     def test_saneyaml_load_can_parse_simple_fields(self):
         test = get_test_content('test_model/parse/basic.about')
         result = saneyaml.load(test)
@@ -388,6 +378,7 @@ test with no colon
         except Exception:
             pass
 
+
 class AboutTest(unittest.TestCase):
 
     def test_About_load_ignores_original_field_order_and_uses_standard_predefined_order(self):
@@ -410,7 +401,6 @@ class AboutTest(unittest.TestCase):
             Error(WARNING, 'Field About_Resource is a duplicate. Original value: "." replaced with: "new value"'),
             Error(WARNING, 'Field Name is a duplicate. Original value: "old" replaced with: "new"')
         ]
-
 
         result = a.errors
         assert sorted(expected) == sorted(result)
@@ -688,7 +678,7 @@ this software and releases the component to Public Domain.
     def test_comma_in_license(self):
         test_file = get_test_loc('test_model/special_char/about.ABOUT')
         a = model.About(test_file)
-        expected = Error(ERROR,  "The following character(s) cannot be in the license_key: [',']")
+        expected = Error(ERROR, "The following character(s) cannot be in the license_key: [',']")
         assert a.errors[0] == expected
 
     def test_load_dict_issue_433(self):
@@ -701,7 +691,7 @@ this software and releases the component to Public Domain.
             'notice_file': 'package1.zip.NOTICE',
             'licenses': [
                 {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE', 'url': 'some_url'},
-                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE','url': 'some_url'},
+                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE', 'url': 'some_url'},
             ],
         }
         about = model.About()
@@ -726,7 +716,9 @@ licenses:
         lic_dict = {u'license1': [u'License1', u'', u'some_url'], u'license2' : [u'License2', u'', u'some_url']}
         assert about.dumps(lic_dict) == expected
 
+
 class SerializationTest(unittest.TestCase):
+
     def test_About_dumps(self):
         test_file = get_test_loc('test_model/dumps/about.ABOUT')
         a = model.About(test_file)
@@ -881,7 +873,7 @@ custom1: |
 
         expected = {
             'about_file_path': None,
-            'about_resource': OrderedDict([('.', None)]),
+            'about_resource': dict([('.', None)]),
             'copyright': 'Copyright (c) 2013-2014 nexB Inc.',
             'custom1': 'some custom',
             'description': 'AboutCode is a tool\nfor files.',
@@ -917,7 +909,7 @@ custom1: |
 
         expected = {
             'about_file_path': None,
-            'about_resource': OrderedDict([('.', None)]),
+            'about_resource': dict([('.', None)]),
             'attribute': 'yes',
             'author': 'Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez',
             'copyright': 'Copyright (c) 2013-2014 nexB Inc.',
@@ -953,7 +945,7 @@ custom1: |
 
         about_data.update({
             'about_file_path': None,
-            'about_resource': OrderedDict([('.', None)]),
+            'about_resource': dict([('.', None)]),
         })
         assert about_data == about.as_dict()
 
@@ -1025,6 +1017,7 @@ This component is released to the public domain by the author.
 
 '''
         assert notice_context == expected_notice
+
 
 class CollectorTest(unittest.TestCase):
 
@@ -1229,7 +1222,7 @@ class CollectorTest(unittest.TestCase):
 
         with_structure = False
         err = model.copy_redist_src(copy_list, test_loc, output, with_structure)
-        
+
         assert err == []
 
         from os import listdir
@@ -1272,6 +1265,7 @@ class CollectorTest(unittest.TestCase):
             assert norm_list == expected
         else:
             assert copy_list == expected
+
 
 class FetchLicenseTest(unittest.TestCase):
 
