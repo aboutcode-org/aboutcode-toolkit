@@ -477,7 +477,7 @@ A successful execution of attrib will create a .html (or .json depends on the te
 
 # <a name="UsinginventorytoGenerateaSoftwareInventory">Using inventory to Generate a Software Inventory</a>
 
-##<a name="GenerateaSoftwareInventory"> Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files</a>
+## <a name="GenerateaSoftwareInventory"> Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files</a>
 
 One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually.  For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode Toolkit files manually.
 
