@@ -1,22 +1,12 @@
-.. aboutcode-toolkit documentation master file, created by
-   sphinx-quickstart on Fri Jun 25 09:09:30 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+=================================
+AboutCode Toolkit's Documentation
+=================================
 
-Welcome to aboutcode-toolkit's documentation!
-=============================================
-
-TESTING!!!!
+Welcome to the AboutCode Toolkit's Documentation.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 4
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   General <general>
+   Specification <specification>
+   Reference <reference>
