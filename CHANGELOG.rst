@@ -1,6 +1,5 @@
-<<<<<<< HEAD
-2020-xx-xx
-    Release 6.0.0
+2021-xx-xx
+    Release 7.0.0
 
     * Add '@' as a support character for filename #451
     * Add support to collect redistributable sources #22
@@ -8,7 +7,15 @@
     * Remove restriction of python27 only on windows #453
     * Documentation updated
     * Code enhancement
+    * Remove thirdparty/
+    * Update configuration scripts
+    * Use readthedocs for documentation
 
+2021-04-02
+    Release 6.0.0
+
+    * This new release has no feature changes.
+    * It has relaxed PyYAML dependencies and drop Python 2 support
 
 2020-09-01
     Release 5.1.0
@@ -289,13 +296,3 @@
 
     * Initial release with minimal capabilities to read and validate 
       ABOUT files format 0.8.0 and output a CSV inventory.
-=======
-Changelog
-=========
-
-
-v0.0.0
-------
-
-*xxxx-xx-xx* -- Initial release.
->>>>>>> refs/remotes/skeleton/main

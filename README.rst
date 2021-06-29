@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 AboutCode Toolkit
 =================
 
@@ -69,9 +68,9 @@ or on windows:
 Activate the virtualenv
 -----------------------
 To activate the virtualenv, run (on posix):
-    source bin/activate
+    source tmp/bin/activate
 or on windows:
-    bin\\activate
+    tmp\\bin\\activate
 
 
 Deactivate the virtualenv
@@ -92,19 +91,19 @@ i.e. MAJOR.MINOR.PATCH format
 
 REFERENCE
 ---------
-See https://github.com/nexB/aboutcode-toolkit/blob/master/REFERENCE.rst for reference
+See https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference
 on aboutcode-toolkit usage.
 
 
 TESTS and DEVELOPMENT
 ---------------------
 To install all the needed development dependencies, run (on posix):
-    source configure etc/conf/dev
+    source configure --dev
 or on windows:
-    configure etc/conf/dev
+    configure --dev
 
 To verify that everything works fine you can run the test suite with:
-    py.test
+    pytest
 
 
 HELP and SUPPORT
@@ -149,55 +148,3 @@ See (of course) the about.ABOUT file for details.
 .. |devel-win| image:: https://ci.appveyor.com/api/projects/status/uwj2gh8i9ga1mqwn/branch/develop?png=true
     :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit
     :alt: Windows Develop branch tests status
-=======
-A Simple Python Project Skeleton
-================================
-This repo attempts to standardize our python repositories using modern python
-packaging and configuration techniques. Using this `blog post`_ as inspiration, this
-repository will serve as the base for all new python projects and will be adopted to all 
-our existing ones as well.
-
-.. _blog post: https://blog.jaraco.com/a-project-skeleton-for-python-projects/
-
-Usage
-=====
-A brand new project
--------------------
-.. code-block:: bash
-
-    git init my-new-repo
-    cd my-new-repo
-    git pull git@github.com:nexB/skeleton
-
-    # Create the new repo on GitHub, then update your remote
-    git remote set-url origin git@github.com:nexB/your-new-repo.git
-
-From here, you can make the appropriate changes to the files for your specific project.
-
-Update an existing project
----------------------------
-.. code-block:: bash
-
-    cd my-existing-project
-    git remote add skeleton git@github.com:nexB/skeleton
-    git fetch skeleton
-    git merge skeleton/main --allow-unrelated-histories
-
-This is also the workflow to use when updating the skeleton files in any given repository.
-
-
-Customizing
------------
-
-You typically want to perform these customizations:
-
-- remove or update the src/README.rst and tests/README.rst files
-- check the configure and configure.bat defaults
-
-
-Release Notes
--------------
-
-- 2021-05-11: adopt new configure scripts from ScanCode TK that allows correct
-  configuration of which Python version is used.
->>>>>>> refs/remotes/skeleton/main
