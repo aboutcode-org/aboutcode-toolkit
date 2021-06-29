@@ -26,7 +26,7 @@ AboutCode Toolkit is a tool for your software development team to document your 
 
 Additional AboutCode Toolkit information is available at:
 
-- http://www.aboutcode.org/ for an overview and a link to the ABOUT File specification.
+- See :ref:`specification` for an overview and a link to the ABOUT File specification.
 
 - https://github.com/nexB/aboutcode-toolkit/ for the AboutCode Toolkit tools.
 
@@ -220,15 +220,15 @@ For instance with this configuration, the target file will not contain the "type
 Run gen to Generate AboutCode Toolkit Files
 -------------------------------------------
 
-When your software inventory is ready, you can save it as a .csv or .json file, and use it as input to run gen to generate your AboutCode Toolkit files. The official gen parameters are defined here:
-
--   https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst
+When your software inventory is ready, you can save it as a .csv or .json file, and use it as input to run gen to generate your AboutCode Toolkit files. The official gen parameters are defined here: :ref:`reference`
 
 Here is an example of a gen command:
 
-about gen --fetch-license {{your license library api}} {{your license library api key}} --reference /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+        ..  code-block:: none
 
-Note that this example gen command does the following:
+                about gen --fetch-license {{your license library api key}} --reference /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+
+This gen example command does the following:
 
 -   Activates the --fetch-license option to get license text.
 
@@ -378,9 +378,7 @@ In summary, you can start with simple, cosmetic customizations to the default_ht
 Run attrib to Generate a Product Attribution Notice Package
 -----------------------------------------------------------
 
-When you have generated the AboutCode Toolkit files by gen, you can then run attrib to generate your product attribution notice package. The official attrib parameters are defined here:
-
-https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst
+When you have generated the AboutCode Toolkit files by gen, you can then run attrib to generate your product attribution notice package. The official attrib parameters are defined here: :ref:`reference`
 
 Here is an example of a attrib command:
 
@@ -404,9 +402,7 @@ Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files
 
 One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually. For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode Toolkit files manually.
 
-If your organization adopts the practice of manually creating and maintaining AboutCode Toolkit files, you can easily re-create your software inventory from your codebase using inventory. The official inventory parameters are defined here:
-
-https://github.com/nexB/aboutcode-toolkit/blob/develop/REFERENCE.rst
+If your organization adopts the practice of manually creating and maintaining AboutCode Toolkit files, you can easily re-create your software inventory from your codebase using inventory. The official inventory parameters are defined here: :ref:`reference`
 
 A successful execution of inventory will create a complete software inventory in .csv format or .json format based on defined format.
 
