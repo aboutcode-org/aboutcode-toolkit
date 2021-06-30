@@ -28,10 +28,10 @@ set "REQUIREMENTS=--editable ."
 set "DEV_REQUIREMENTS=--editable .[testing]"
 
 @rem # where we create a virtualenv
-set "VIRTUALENV_DIR=tmp"
+set "VIRTUALENV_DIR=."
 
 @rem # Cleanable files and directories to delete with the --clean option
-set "CLEANABLE=build tmp"
+set "CLEANABLE=build tmp bin Lib Scripts include"
 
 @rem # extra  arguments passed to pip
 set "PIP_EXTRA_ARGS= "

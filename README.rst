@@ -68,9 +68,9 @@ or on windows:
 Activate the virtualenv
 -----------------------
 To activate the virtualenv, run (on posix):
-    source tmp/bin/activate
+    source bin/activate
 or on windows:
-    tmp\\bin\\activate
+    bin\\activate
 
 
 Deactivate the virtualenv

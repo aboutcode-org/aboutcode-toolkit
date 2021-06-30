@@ -30,12 +30,16 @@ REQUIREMENTS="--editable ."
 DEV_REQUIREMENTS="--editable .[testing]"
 
 # where we create a virtualenv
-VIRTUALENV_DIR=tmp
+VIRTUALENV_DIR=.
 
 # Cleanable files and directories with the --clean option
 CLEANABLE="
     build
-	tmp"
+	tmp
+	bin
+	Lib
+	Scripts
+	include"
 
 # extra  arguments passed to pip
 PIP_EXTRA_ARGS=" "
