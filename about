@@ -7,13 +7,13 @@
 ABOUT_ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$ABOUT_ROOT_DIR"
 
-CONFIGURED_PYTHON=$ABOUT_ROOT_DIR/bin/python
+CONFIGURED_PYTHON=$ABOUT_ROOT_DIR/tmp/bin/python
 
 if [ ! -f "$CONFIGURED_PYTHON" ]; then
     echo "* Configuring AboutCode ..."
     source $ABOUT_ROOT_DIR/configure
 fi
 
-source $ABOUT_ROOT_DIR/bin/activate
+source $ABOUT_ROOT_DIR/tmp/bin/activate
 
 $ABOUT_ROOT_DIR/bin/about "$@"

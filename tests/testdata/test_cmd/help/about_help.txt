@@ -16,7 +16,7 @@ Commands:
   attrib              Generate an attribution document from .ABOUT files.
   check               Validate that the format of .ABOUT files is correct and
                       report errors and warnings.
-  collect_redist_src  Collect redistributable sources.
+  collect-redist-src  Collect redistributable sources.
   gen                 Generate .ABOUT files from an inventory as CSV or JSON.
   inventory           Collect the inventory of .ABOUT files to a CSV or JSON
                       file.
