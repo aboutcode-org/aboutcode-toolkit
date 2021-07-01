@@ -1,6 +1,0 @@
-# for tests
-pytest
-colorama
-py
-mock
-
