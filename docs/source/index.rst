@@ -8,5 +8,5 @@ Welcome to the AboutCode Toolkit's Documentation.
    :maxdepth: 2
 
    General <general.rst>
-   Specification <specificaltion.rst>
+   Specification <specification.rst>
    Reference <reference.rst>
