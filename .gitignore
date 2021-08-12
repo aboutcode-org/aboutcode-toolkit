@@ -1,3 +1,4 @@
+# Python compiled files
 *.py[cod]
 
 # virtualenv and other misc bits
@@ -15,7 +16,11 @@
 /include
 /Include
 /local
-/man/
+*/local/*
+/local/
+/share/
+/tcl/
+/.eggs/
 
 # Installer logs
 pip-log.txt
@@ -34,10 +39,20 @@ htmlcov
 .project
 .pydevproject
 .idea
+org.eclipse.core.resources.prefs
+.vscode
+.vs
 
 # Sphinx
 docs/_build
+docs/bin
+docs/build
+docs/include
+docs/Lib
+doc/pyvenv.cfg
+pyvenv.cfg
 
+# Various junk and temp files
 .DS_Store
 *~
 .*.sw[po]
@@ -45,8 +60,13 @@ docs/_build
 .ve
 *.bak
 /.cache/
-/.settings/
-/tcl/
+
+# pyenv
 /.python-version
-/.tox/
+/man/
 /.pytest_cache/
+lib64
+tcl
+
+# Ignore Jupyter Notebook related temp files
+.ipynb_checkpoints/
