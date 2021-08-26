@@ -53,8 +53,7 @@ See "get_license_file_key" in `attrib.py` for more information
                 {% if about_object.version.value %}{{ about_object.version.value }}{% endif %}
             </h3>
             {% if about_object.license_expression.value %}
-                <p>This component is licensed under 
-                {{ about_object.license_expression.value }}
+                <p>This component is licensed under {{ about_object.license_expression.value }}</p>
             {% endif %}
             {% if about_object.copyright.value %}
                 <pre>{{about_object.copyright.value}}</pre>
