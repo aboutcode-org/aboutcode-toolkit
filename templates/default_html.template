@@ -30,84 +30,74 @@ See "get_license_file_key" in `attrib.py` for more information
     </style>
     <title>Open Source Software Information</title>
   </head>
-
   <body>
     <h1>OPEN SOURCE SOFTWARE INFORMATION</h1>
-    <div>
-      <p>Licenses, acknowledgments and required copyright notices for 
-      open source components:</p>
+    <div> <p>Licenses, acknowledgments and required copyright notices for open source components:</p> </div>
+    <div class="oss-table-of-contents">
+{% for about_object in abouts %}
+      <p><a href="#component_{{ loop.index0 }}">{{ about_object.name.value }}{% if about_object.version.value %} {{ about_object.version.value }}{% endif %}</a></p>
+{% endfor %}
     </div>
-    
-        <div class="oss-table-of-contents">
-            {% for about_object in abouts %}
-                <p><a href="#component_{{ loop.index0 }}">{{ about_object.name.value }}{% if about_object.version.value %} {{ about_object.version.value }}{% endif %}</a></p>
-            {% endfor %}
-        </div>
-
-    <hr/>
-
-
-    {% for about_object in abouts %}
-        <div class="oss-component" id="component_{{ loop.index0 }}">
-            <h3 class="component-name">{{ about_object.name.value }}
-                {% if about_object.version.value %}{{ about_object.version.value }}{% endif %}
-            </h3>
-            {% if about_object.license_expression.value %}
-                <p>This component is licensed under 
-                {{ about_object.license_expression.value }}
-            {% endif %}
-            {% if about_object.copyright.value %}
-                <pre>{{about_object.copyright.value}}</pre>
-            {% endif %}
-            {% if about_object.notice_file.value %}
-                {% for notice in about_object.notice_file.value %}
-                    <pre class="component-notice">{{ about_object.notice_file.value[notice] }}</pre>
-                {% endfor %}
-            {% endif %}
-            {% if about_object.license_key.value %}
-                {% for license_key in about_object.license_key.value %}
-                    {% if license_key in common_licenses %}
-                        <p>Full text of
-                            <a class="{{ license_key }}" href="#component-license-{{ license_key }}">
-                            {{ license_key }}
-                            </a>
-                            is available at the end of this document.</p>
-                    {% endif %}
-                 {% endfor %}
-                {% if about_object.license_file.value %}
-                    {% for lic_file_name in about_object.license_file.value %}
-                        {% if not license_file_key_and_license_key[license_file_name_and_license_file_key[lic_file_name]] in common_licenses %}
-                            {% if about_object.license_file.value[lic_file_name] %}
-                                <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            {% else %}
-                {% if about_object.license_file.value %}
-                    {% for lic_file_name in about_object.license_file.value %}
-                        {% if about_object.license_file.value[lic_file_name] %}
-                            <pre>{{ about_object.license_file.value[lic_file_name] | e}}</pre>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            {% endif %}
-        </div>
-    {% endfor %}
-
-    <hr/>
-
-    <h3>Common Licenses Used in This Product</h3>
-
-    {% for key in license_file_key_and_context %}
-        {% if key in common_licenses %}
-            <h3 id="component-license-{{ key }}">{{ key }}</h3>
-            <pre>{{ license_file_key_and_context[key]|e }}</pre>
-        {% endif %}
-    {% endfor %}
-
-    <h3><a id="End">End</a></h3>
-    <i>This file was generated with AboutCode Toolkit version: {{ tkversion }} on: {{ utcnow }} (UTC)</i>
-    </body>
+  <hr/>
+{% for about_object in abouts %}
+  <div class="oss-component" id="component_{{ loop.index0 }}">
+    <h3 class="component-name">{{ about_object.name.value }} {% if about_object.version.value %}{{ about_object.version.value }}{% endif %} </h3>
+{%   if about_object.license_expression.value %}
+    <p>This component is licensed under {{ about_object.license_expression.value }}</p>
+{%   endif %}
+{%   if about_object.copyright.value %}
+    <pre>
+{{about_object.copyright.value}}
+    </pre>
+{%   endif %}
+{%   if about_object.notice_file.value %}
+{%    for notice in about_object.notice_file.value %}
+    <pre class="component-notice">
+{{ about_object.notice_file.value[notice] }}
+    </pre>
+{%    endfor %}
+{%   endif %}
+{%   if about_object.license_key.value %}
+{%     for license_key in about_object.license_key.value %}
+{%       if license_key in common_licenses %}
+    <p>Full text of <a class="{{ license_key }}" href="#component-license-{{ license_key }}"> {{ license_key }}</a> is available at the end of this document.</p>
+{%       endif %}
+{%     endfor %}
+{%     if about_object.license_file.value %}
+{%       for lic_file_name in about_object.license_file.value %}
+{%         if not license_file_key_and_license_key[license_file_name_and_license_file_key[lic_file_name]] in common_licenses %}
+{%           if about_object.license_file.value[lic_file_name] %}
+    <pre>
+{{ about_object.license_file.value[lic_file_name] | e}}
+    </pre>
+{%           endif %}
+{%         endif %}
+{%       endfor %}
+{%     endif %}
+{%   else %}
+{%     if about_object.license_file.value %}
+{%       for lic_file_name in about_object.license_file.value %}
+{%         if about_object.license_file.value[lic_file_name] %}
+    <pre>
+{{ about_object.license_file.value[lic_file_name] | e}}
+    </pre>
+{%         endif %}
+{%       endfor %}
+{%     endif %}
+{%   endif %}
+  </div>
+{% endfor %}
+  <hr/>
+  <h3>Common Licenses Used in This Product</h3>
+{% for key in license_file_key_and_context %}
+{%   if key in common_licenses %}
+  <h3 id="component-license-{{ key }}">{{ key }}</h3>
+  <pre>
+{{ license_file_key_and_context[key]|e }}
+  </pre>
+{%   endif %}
+{% endfor %}
+  <h3><a id="End">End</a></h3>
+  <i>This file was generated with AboutCode Toolkit version: {{ tkversion }} on: {{ utcnow }} (UTC)</i>
+  </body>
 </html>
-
