@@ -7,6 +7,7 @@
     * Remove restriction of python27 only on windows #453
     * Documentation updated
     * Code enhancement
+    * Add Dockerfile to run aboutcode with docker
 
 
 2020-09-01

@@ -21,8 +21,7 @@ identify redistributable source code used in your project to help you comply
 with open source licenses conditions.
 
 This version of the AboutCode Toolkit follows the ABOUT specification version 3.2.1 at:
-https://github.com/nexB/aboutcode-toolkit/blob/develop/SPECIFICATION.rst
-
+https://github.com/nexB/aboutcode-toolkit/blob/develop/docs/source/specification.rst
 
 Build and tests status
 ----------------------
@@ -38,7 +37,7 @@ Build and tests status
 
 REQUIREMENTS
 ------------
-The AboutCode Toolkit is tested with Python 3 only on Linux, Mac and Windows.
+The AboutCode Toolkit is tested with Python 3.6.2 or above only on Linux, Mac and Windows.
 You will need to install a Python interpreter if you do not have one already
 installed.
 
