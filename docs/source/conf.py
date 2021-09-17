@@ -52,12 +52,13 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',  # override wide tables in RTD theme
-        ],
     "display_github": True,
     "github_user": "nexB",
-    "github_repo": "nexb-skeleton",
+    "github_repo": "aboutcode-toolkit",
     "github_version": "develop",  # branch
     "conf_py_path": "/docs/source/",  # path in the checkout to the docs root
     }
+
+html_css_files = [
+    '_static/theme_overrides.css'
+    ]

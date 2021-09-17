@@ -16,21 +16,14 @@ p {
     margin-bottom: 10px;
 }
 
-.custom_header_01 {
-    color: #cc0000;
-    font-size: 22px;
-    font-weight: bold;
-    line-height: 50px;
-}
-
 h1, h2, h3, h4, h5, h6 {
     margin-bottom: 10px;
 }
 
-/* h2, h3, h4, h5, h6 {
+h2, h3, h4, h5, h6 {
     margin-top: 20px;
     margin-top: 30px;
-} */
+}
 
 h5 {
     font-size: 17px;
@@ -43,19 +36,17 @@ h5 {
 
 h6 {
     font-size: 16px;
-    font-size: 15px;
     color: #666666;
-    color: #000000;
-    /* color: #999999; */
-    /* color: #778899; */
-    /* color: #009999;
+    color: #999999;
+    color: #778899;
+    color: #009999;
     color: #006666;
     color: #996633;
     color: #009933;
-    color: #661aff; */
+    color: #661aff;
     /* color: #666699; */
 
-    font-style: italic;
+    /* font-style: italic; */
     /* font-weight: normal; */
     margin-bottom: 10px;
 }
@@ -302,9 +293,7 @@ div.rst-content {
     /* line-height: 1.5; */
     overflow: visible;
     white-space: pre-wrap;
-    color: #e74c3c;
-    color: #cc0000;
-    /* color: #000000; */
+    /* color: #e74c3c; */
 }
 
 .rst-content pre.literal-block, .rst-content div[class^='highlight'] {
@@ -332,12 +321,10 @@ code, .rst-content tt, .rst-content code {
 }
 
 /* change color of inline code block */
-span.pre {
+/* span.pre {
     color: #e74c3c;
-    color: #cc0000;
-    /* color: #e01e5a; */
-    /* color: #000000; */
-}
+    color: #e01e5a;
+} */
 
 .wy-body-for-nav blockquote {
     margin: 1em 0;
