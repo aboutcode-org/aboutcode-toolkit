@@ -4,9 +4,6 @@
 ABOUT File Specification v3.2.1
 ===============================
 
-.. contents::
-   :depth: 3
-
 Purpose
 =======
 

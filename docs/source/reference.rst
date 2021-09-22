@@ -4,9 +4,6 @@
 Reference
 =========
 
-.. contents::
-   :depth: 3
-
 about
 =====
 
@@ -110,16 +107,15 @@ Details
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
-*The following data are passed to jinja2 and, therefore, can be used for a custom template:*
-
--   about object: the about objects
--   common_licenses: a common license keys list in licenses.py
--   license_file_key_and_context: a dictionary with license_file_key (It's basically a license_key if it's not a custom license or license file name otherwise) as a key and license text as the value
--   license_file_key_and_license_key: a dictionary with license file key as a key and license key as the value
--   license_file_name_and_license_file_key: a dictionary with license file name as a key and license file key as the value
--   license_key_and_license_file_name: a dictionary with license key as a key and license file name as the value
--   license_key_and_license_name: a dictionary with license key as a key and license name as the value
--   license_name_and_license_key: a dictionary with license name as a key and license key as the value
+The following data are passed to jinja2 and, therefore, can be used for a custom template:
+ * about object: the about objects
+ * common_licenses: a common license keys list in licenses.py
+ * license_file_key_and_context: a dictionary with license_file_key (It's basically a license_key if it's not a custom license or license file name otherwise) as a key and license text as the value
+ * license_file_key_and_license_key: a dictionary with license file key as a key and license key as the value
+ * license_file_name_and_license_file_key: a dictionary with license file name as a key and license file key as the value
+ * license_key_and_license_file_name: a dictionary with license key as a key and license file name as the value
+ * license_key_and_license_name: a dictionary with license key as a key and license name as the value
+ * license_name_and_license_key: a dictionary with license name as a key and license key as the value
 
 check
 =====
