@@ -1,5 +1,5 @@
-2020-xx-xx
-    Release 6.0.0
+2021-xx-xx
+    Release x.x.x
 
     * Add '@' as a support character for filename #451
     * Add support to collect redistributable sources #22
@@ -8,6 +8,7 @@
     * Documentation updated
     * Code enhancement
     * Add Dockerfile to run aboutcode with docker
+    * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library 
 
 
 2020-09-01

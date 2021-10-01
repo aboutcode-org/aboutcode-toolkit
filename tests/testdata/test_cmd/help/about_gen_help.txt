@@ -7,13 +7,17 @@ Usage: about gen [OPTIONS] LOCATION OUTPUT
   OUTPUT: Path to a directory where ABOUT files are generated.
 
 Options:
-  --android                Generate MODULE_LICENSE_XXX (XXX will be replaced by
-                           license key) and NOTICE as the same design as from
-                           Android.
-  --fetch-license URL KEY  Fetch license data and text files from a DejaCode
-                           License Library API URL using the API KEY.
-  --reference DIR          Path to a directory with reference license data and
-                           text files.
-  -q, --quiet              Do not print error or warning messages.
-  --verbose                Show all error and warning messages.
-  -h, --help               Show this message and exit.
+  --android                       Generate MODULE_LICENSE_XXX (XXX will be
+                                  replaced by license key) and NOTICE as the
+                                  same design as from Android.
+  --fetch-license                 Fetch license data and text files from the
+                                  ScanCode LicenseDB.
+  --fetch-license-djc api_url api_key
+                                  Fetch license data and text files from a
+                                  DejaCode License Library API URL using the API
+                                  KEY.
+  --reference DIR                 Path to a directory with reference license
+                                  data and text files.
+  -q, --quiet                     Do not print error or warning messages.
+  --verbose                       Show all error and warning messages.
+  -h, --help                      Show this message and exit.

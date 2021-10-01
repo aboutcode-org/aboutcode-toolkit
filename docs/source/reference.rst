@@ -134,6 +134,8 @@ Options
 
         ..  code-block:: none
 
+                --djc api_url api_key  Validate license_expression from a DejaCode License
+                                         Library API URL using the API KEY.
                 --verbose                Show all the errors and warning
                 -h, --help               Show this message and exit.
 
@@ -153,6 +155,11 @@ Details
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
                 
                 $ about check --verbose /home/project/about_files/
+
+Special Notes
+-------------
+If no `--djc` option is set, the tool will default to check license_expression from
+ScanCode LicenseDB.
 
 collect_redist_src
 ==================
@@ -249,19 +256,20 @@ Options
                 --android                           Generate MODULE_LICENSE_XXX (XXX will be
                                                     replaced by license key) and NOTICE as the same
                                                     design as from Android.
-                
-                --fetch-license api_url api_key     Fetch licenses data from DejaCode License
+                --fetch-license                     Fetch license data and text files from the
+                                                    ScanCode LicenseDB.
+                --fetch-license-djc api_url api_key Fetch licenses data from DejaCode License
                                                     Library and create <license>.LICENSE
                                                     side-by-side with the generated .ABOUT file.
                                                     The following additional options are required:
-                
+
                                                     api_url - URL to the DejaCode License Library
                                                     API endpoint
-                
+
                                                     api_key - DejaCode API key
                                                     Example syntax:
-                
-                                                    about gen --fetch-license 'api_url' 'api_key'
+
+                                                    about gen --fetch-license-djc URL KEY
                 --reference PATH                    Path to a directory with reference license
                                                     data and text files.
                 -q, --quiet                         Do not print any error/warning.
@@ -279,44 +287,53 @@ Details
         ..  code-block:: none
 
                 --android
-                
+
                     Create an empty file named `MODULE_LICENSE_XXX` where `XXX` is the license
                     key and create a NOTICE file which these two files follow the design from
                     Android Open Source Project.
-                
+
                     The input **must** have the license key information as this is needed to
                     create the empty MODULE_LICENSE_XXX
-                
+
                 $ about gen --android LOCATION OUTPUT
-                
+
                 --fetch-license
-                
+
+                    Fetch licenses text and create <license>.LICENSE side-by-side
+                    with the generated .ABOUT file using the data fetched from the the ScanCode LicenseDB.
+
+                    The input needs to have the 'license_expression' field.
+
+                $ about gen --fetch-license LOCATION OUTPUT
+
+                --fetch-license-djc
+
                     Fetch licenses text from a DejaCode API, and create <license>.LICENSE side-by-side
                     with the generated .ABOUT file using the data fetched from the DejaCode License Library.
-                
+
                     This option requires 2 parameters:
                         api_url - URL to the DJE License Library.
                         api_key - Hash key to authenticate yourself in the API.
-                
+
                     In addition, the input needs to have the 'license_expression' field.
                     (Please contact nexB to get the api_* value for this feature)
-                
-                $ about gen --fetch-license 'api_url' 'api_key' LOCATION OUTPUT
-                
+
+                $ about gen --fetch-license-djc 'api_url' 'api_key' LOCATION OUTPUT
+
                 --reference
-                
+
                     Copy the reference files such as 'license_files' and 'notice_files' to the
                     generated location from the specified directory.
-                
+
                     For instance,
                     the specified directory, /home/licenses_notices/, contains all the licenses and notices:
                     /home/licenses_notices/apache2.LICENSE
                     /home/licenses_notices/jquery.js.NOTICE
-                
+
                 $ about gen --reference /home/licenses_notices/ LOCATION OUTPUT
-                
+
                 --verbose
-                
+
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 

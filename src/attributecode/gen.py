@@ -222,7 +222,7 @@ def update_about_resource(self):
     pass
 
 
-def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False):
+def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False, fetch_license_djc=False):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir. Return errors and about objects.
@@ -234,10 +234,13 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
     gen_license = False
     # FIXME: use two different arguments: key and url
     # Check if the fetch_license contains valid argument
-    if fetch_license:
+    if fetch_license_djc:
         # Strip the ' and " for api_url, and api_key from input
-        api_url = fetch_license[0].strip("'").strip('"')
-        api_key = fetch_license[1].strip("'").strip('"')
+        api_url = fetch_license_djc[0].strip("'").strip('"')
+        api_key = fetch_license_djc[1].strip("'").strip('"')
+        gen_license = True
+
+    if fetch_license:
         gen_license = True
 
     # TODO: WHY use posix??
