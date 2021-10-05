@@ -269,7 +269,7 @@ Options
                                                     api_key - DejaCode API key
                                                     Example syntax:
 
-                                                    about gen --fetch-license-djc URL KEY
+                                                    about gen --fetch-license-djc api_url api_key
                 --reference PATH                    Path to a directory with reference license
                                                     data and text files.
                 -q, --quiet                         Do not print any error/warning.
