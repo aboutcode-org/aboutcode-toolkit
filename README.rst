@@ -91,7 +91,7 @@ i.e. MAJOR.MINOR.PATCH format
 
 DOCUMENTATION and REFERENCE
 ---------------------------
-See https://aboutcode-toolkit.readthedocs.io/en/latest/ or documentation and
+See https://aboutcode-toolkit.readthedocs.io/en/latest/ for documentation and
 https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference
 on aboutcode-toolkit usage.
 
