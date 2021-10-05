@@ -21,7 +21,7 @@ identify redistributable source code used in your project to help you comply
 with open source licenses conditions.
 
 This version of the AboutCode Toolkit follows the ABOUT specification version 3.2.1 at:
-https://github.com/nexB/aboutcode-toolkit/blob/develop/SPECIFICATION.rst
+https://aboutcode-toolkit.readthedocs.io/en/latest/specification.html
 
 
 Build and tests status
@@ -68,9 +68,9 @@ or on windows:
 Activate the virtualenv
 -----------------------
 To activate the virtualenv, run (on posix):
-    source bin/activate
+    source venv/bin/activate
 or on windows:
-    bin\\activate
+    venv\\bin\\activate
 
 
 Deactivate the virtualenv
@@ -89,9 +89,10 @@ i.e. MAJOR.MINOR.PATCH format
     3. PATCH version when making backwards compatible bug fixes.
 
 
-REFERENCE
----------
-See https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference
+DOCUMENTATION and REFERENCE
+---------------------------
+See https://aboutcode-toolkit.readthedocs.io/en/latest/ or documentation and
+https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference
 on aboutcode-toolkit usage.
 
 

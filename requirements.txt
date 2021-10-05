@@ -1,0 +1,15 @@
+boolean.py==3.8
+click==8.0.1
+colorama==0.4.4
+importlib-metadata==4.8.1
+Jinja2==3.0.1
+license-expression==21.6.14
+MarkupSafe==2.0.1
+packageurl-python==0.9.4
+pip==21.2.4
+PyYAML==5.4.1
+saneyaml==0.5.2
+setuptools==58.1.0
+typing-extensions==3.10.0.2
+wheel==0.37.0
+zipp==3.5.0
