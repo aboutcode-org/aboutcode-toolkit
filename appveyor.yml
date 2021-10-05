@@ -7,5 +7,5 @@ build: off
 
 test_script:
     - set
-    - bin/activate
+    - venv/bin/activate
     - pytest -vvs tests
