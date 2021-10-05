@@ -8,5 +8,4 @@ homepage_url: https://pypi.python.org/pypi/appdirs
 copyright: Copyright (c) 2010 ActiveState Software Inc.
 
 license_expression: mit
-license_text_file: 
-    - appdirs.LICENSE
+license_text_file: appdirs.LICENSE

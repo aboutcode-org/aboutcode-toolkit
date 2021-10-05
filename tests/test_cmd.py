@@ -341,14 +341,14 @@ def check_about_stdout(options, expected_loc, regen=False):
     result = run_about_command_test_click(options)
     if regen:
         expected_file = get_test_loc(expected_loc, must_exists=False)
-        with open(expected_file, 'wb') as ef:
-            ef.write(result.output_bytes)
+        with open(expected_file, 'w') as ef:
+            ef.write(result.output)
 
     expected_file = get_test_loc(expected_loc, must_exists=True)
-    with open(expected_file, 'rb') as ef:
+    with open(expected_file, 'r') as ef:
         expected = ef.read()
 
-    assert expected.splitlines(False) == result.output_bytes.splitlines(False)
+    assert expected.splitlines(False) == result.output.splitlines(False)
 
 
 def test_about_help_text():
@@ -382,7 +382,7 @@ def test_about_attrib_help_text():
 def test_about_command_fails_with_an_unknown_subcommand():
     test_dir = get_temp_dir()
     result = run_about_command_test_click(['foo', test_dir], expected_rc=2)
-    assert b'Error: No such command "foo".' in result.output_bytes
+    assert 'Error: No such command \'foo\'.' in result.output
 
 
 def test_about_inventory_command_can_run_minimally_without_error():
