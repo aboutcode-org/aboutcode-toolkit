@@ -1,5 +1,9 @@
 2021-xx-xx
+<<<<<<< HEAD
     Release 7.0.0
+=======
+    Release x.x.x
+>>>>>>> refs/heads/337_enhance_check_command
 
     * Add '@' as a support character for filename #451
     * Add support to collect redistributable sources #22
@@ -11,6 +15,7 @@
     * Update configuration scripts
     * Use readthedocs for documentation
     * Add Dockerfile to run aboutcode with docker
+    * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library 
 
 2021-04-02
     Release 6.0.0

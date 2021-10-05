@@ -30,6 +30,7 @@ import os
 import posixpath
 import traceback
 from itertools import zip_longest
+import urllib
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -1523,48 +1524,69 @@ def save_as_csv(location, about_dicts, field_names):
 def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
     """
     Modify a list of About data dictionaries by adding license information
-    fetched from the DejaCode API.
+    fetched from the ScanCode LicenseDB or DejaCode API.
     """
-    dje_uri = urlparse(api_url)
-    domain = '{uri.scheme}://{uri.netloc}/'.format(uri=dje_uri)
-    dje_lic_urn = urljoin(domain, 'urn/?urn=urn:dje:license:')
     key_text_dict = {}
     captured_license = []
     errors = []
+    if api_url:
+        dje_uri = urlparse(api_url)
+        domain = '{uri.scheme}://{uri.netloc}/'.format(uri=dje_uri)
+        lic_urn = urljoin(domain, 'urn/?urn=urn:dje:license:')
+        url = api_url
+    else:
+        url = 'https://scancode-licensedb.aboutcode.org/'
     if util.have_network_connection():
-        if not valid_api_url(api_url):
-            msg = u"URL not reachable. Invalid '--api_url'. License generation is skipped."
+        if not valid_api_url(url):
+            msg = u"URL not reachable. Invalid 'URL'. License generation is skipped."
             errors.append(Error(ERROR, msg))
     else:
         msg = u'Network problem. Please check your Internet connection. License generation is skipped.'
         errors.append(Error(ERROR, msg))
+
+    if errors:
+        return key_text_dict, errors
+    
     for about in abouts:
-        # No need to go through all the about objects for license extraction if we detected
-        # invalid '--api_key'
+        # No need to go through all the about objects if '--api_key' is invalid
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
         if about.license_expression.present:
             special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
             if special_char_in_expression:
-                msg = (u"The following character(s) cannot be in the license_expression: " +
+                msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
                        str(special_char_in_expression))
                 errors.append(Error(ERROR, msg))
             else:
                 for lic_key in lic_list:
                     if not lic_key in captured_license:
+                        lic_url = ''
+                        license_text = ''
                         detail_list = []
-                        license_name, license_key, license_text, errs = api.get_license_details_from_api(api_url, api_key, lic_key)
-                        for e in errs:
-                            if e not in errors:
-                                errors.append(e)
-                        if license_key:
-                            captured_license.append(lic_key)
-                            dje_lic_url = dje_lic_urn + license_key
-                            detail_list.append(license_name)
-                            detail_list.append(license_text)
-                            detail_list.append(dje_lic_url)
-                            key_text_dict[license_key] = detail_list
+                        if api_key:
+                            license_name, _license_key, license_text, errs = api.get_license_details_from_api(url, api_key, lic_key)
+                            for severity, message in errs: 
+                                msg = (about.about_file_path + ": " + message)
+                                errors.append(Error(severity, msg))
+                            lic_url = lic_urn + lic_key
+                        else:
+                            license_url = url + lic_key + '.json'
+                            license_text_url = url + lic_key + '.LICENSE'
+                            try:
+                                json_url = urlopen(license_url)
+                                data = json.loads(json_url.read())
+                                license_name = data['name']
+                                license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
+                                lic_url = url + data['key'] + '.LICENSE'
+                            except:
+                                msg = about.about_file_path + u" : Invalid 'license': " + lic_key
+                                errors.append(Error(ERROR, msg))
+                        captured_license.append(lic_key)
+                        detail_list.append(license_name)
+                        detail_list.append(license_text)
+                        detail_list.append(lic_url)
+                        key_text_dict[lic_key] = detail_list
     return key_text_dict, errors
 
 
@@ -1595,6 +1617,7 @@ def valid_api_url(api_url):
         # This will always goes to exception as no key are provided.
         # The purpose of this code is to validate the provided api_url is correct
         urlopen(request)
+        return True
     except HTTPError as http_e:
         # The 403 error code is refer to "Authentication credentials were not provided.".
         # This is correct as no key are provided.

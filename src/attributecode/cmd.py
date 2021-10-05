@@ -35,6 +35,7 @@ from attributecode.attrib import generate_and_save as generate_attribution_doc
 from attributecode.gen import generate as generate_about_files, load_inventory
 from attributecode.model import collect_inventory, get_copy_list
 from attributecode.model import copy_redist_src
+from attributecode.model import pre_process_and_fetch_license_dict
 from attributecode.model import write_output
 from attributecode.util import extract_zip
 from attributecode.util import filter_errors
@@ -210,9 +211,13 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
 @click.option('--fetch-license',
+    is_flag=True,
+    help='Fetch license data and text files from the ScanCode LicenseDB.')
+
+@click.option('--fetch-license-djc',
     nargs=2,
     type=str,
-    metavar='URL KEY',
+    metavar='api_url api_key',
     help='Fetch license data and text files from a DejaCode License Library '
          'API URL using the API KEY.')
 
@@ -230,7 +235,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def gen(location, output, android, fetch_license, reference, quiet, verbose):
+def gen(location, output, android, fetch_license, fetch_license_djc, reference, quiet, verbose):
     """
 Given a CSV/JSON inventory, generate ABOUT files in the output location.
 
@@ -252,6 +257,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         android=android,
         reference_dir=reference,
         fetch_license=fetch_license,
+        fetch_license_djc=fetch_license_djc,
     )
 
     errors = unique(errors)
@@ -469,20 +475,40 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
     type=click.Path(
         exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
+@click.option('--djc',
+    nargs=2,
+    type=str,
+    metavar='api_url api_key',
+    help='Validate license_expression from a DejaCode License Library '
+         'API URL using the API KEY.')
+
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def check(location, verbose):
+def check(location, djc, verbose):
     """
 Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     """
     print_version()
+    api_url = ''
+    api_key = ''
+    if djc:
+        # Strip the ' and " for api_url, and api_key from input
+        api_url = djc[0].strip("'").strip('"')
+        api_key = djc[1].strip("'").strip('"')
     click.echo('Checking ABOUT files...')
-    errors, _abouts = collect_inventory(location)
+    errors, abouts = collect_inventory(location)
+
+
+    # Validate license_expression
+    key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, api_url, api_key)
+    for e in errs:
+        errors.append(e)
+
     errors = unique(errors)
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
     sys.exit(severe_errors_count)

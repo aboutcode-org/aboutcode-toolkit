@@ -79,10 +79,10 @@ You should start with a software inventory of your codebase in spreadsheet or JS
       - Optional. You can separate each identifier using " OR " and " AND " to document the relationship between multiple license identifiers, such as a choice among multiple licenses.
     * - license_key
       - ScanCode license key for the component.
-      - Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.
+      - Optional. gen will obtain license information from ScanCode LicenseDB or DejaCode Enterprise if the --fetch-license or --fetch-license-djc option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.
     * - license_name
       - License name for the component.
-      - Optional. This field will be generated if the --fetch-license option is set.
+      - Optional. This field will be generated if the --fetch-license or --fetch-license-djc option is set.
     * - license file
       - license file name   
       - Optional. gen will look for the file name (if a directory is specified in the --reference option) to copy that file to the .ABOUT file target directory.
@@ -223,11 +223,11 @@ Here is an example of a gen command:
 
         ..  code-block:: none
 
-                about gen --fetch-license {{your license library api key}} --reference /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+                about gen --fetch-license --reference /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
 
 This gen example command does the following:
 
--   Activates the --fetch-license option to get license text.
+-   Activates the --fetch-license option to get license information.
 
 -   Activates the --reference option to get license text files and notice text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
 
