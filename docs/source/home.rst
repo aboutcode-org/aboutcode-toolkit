@@ -63,7 +63,7 @@ Checkout or download and extract the AboutCode Toolkit from:
     https://github.com/nexB/aboutcode-toolkit/
 
 To install all the needed dependencies in a virtualenv, run (on posix):
-    source configure
+    ./configure
 or on windows:
     configure
 
