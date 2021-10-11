@@ -722,6 +722,16 @@ def validate_field_name(name):
         return Error(CRITICAL, msg % locals())
 
 
+class License:
+    """
+    Represent a License object
+    """
+    def __init__(self, key, name, url, text):
+        self.key = key
+        self.name = name
+        self.url = url
+        self.text = text
+
 class About(object):
     """
     Represent an ABOUT file and functions to parse and validate a file.
@@ -934,7 +944,7 @@ class About(object):
         return errors
 
     def process(self, fields, about_file_path, running_inventory=False,
-                base_dir=None, reference_dir=None):
+                base_dir=None, from_attrib=False, reference_dir=None):
         """
         Validate and set as attributes on this About object a sequence of
         `fields` name/value tuples. Return a list of errors.
@@ -945,7 +955,7 @@ class About(object):
 
         errors = self.hydrate(fields)
         # We want to copy the license_files before the validation
-        if reference_dir:
+        if reference_dir and not from_attrib:
             copy_err = copy_license_notice_files(
                 fields, base_dir, reference_dir, afp)
             errors.extend(copy_err)
@@ -1005,7 +1015,7 @@ class About(object):
 
     # FIXME: should be a from_dict class factory instead
     # FIXME: running_inventory: remove this : this should be done in the commands, not here
-    def load_dict(self, fields_dict, base_dir, running_inventory=False, reference_dir=None,):
+    def load_dict(self, fields_dict, base_dir, from_attrib=False, running_inventory=False, reference_dir=None,):
         """
         Load this About object file from a `fields_dict` name/value dict.
         Return a list of errors.
@@ -1038,6 +1048,7 @@ class About(object):
             about_file_path=self.about_file_path,
             running_inventory=running_inventory,
             base_dir=base_dir,
+            from_attrib=from_attrib,
             reference_dir=reference_dir,
         )
         self.errors = errors
@@ -1521,9 +1532,9 @@ def save_as_csv(location, about_dicts, field_names):
     return errors
 
 
-def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
+def pre_process_and_fetch_license_dict(abouts, api_url, api_key, djc, scancode, reference=None):
     """
-    Modify a list of About data dictionaries by adding license information
+    Return a dictionary containing the license information (key, name, text, url)
     fetched from the ScanCode LicenseDB or DejaCode API.
     """
     key_text_dict = {}
@@ -1546,47 +1557,49 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
 
     if errors:
         return key_text_dict, errors
-    
+
     for about in abouts:
         # No need to go through all the about objects if '--api_key' is invalid
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
-        if about.license_expression.present:
-            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
-            if special_char_in_expression:
-                msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
-                       str(special_char_in_expression))
-                errors.append(Error(ERROR, msg))
-            else:
-                for lic_key in lic_list:
-                    if not lic_key in captured_license:
-                        lic_url = ''
-                        license_text = ''
-                        detail_list = []
-                        if api_key:
-                            license_name, _license_key, license_text, errs = api.get_license_details_from_api(url, api_key, lic_key)
-                            for severity, message in errs: 
-                                msg = (about.about_file_path + ": " + message)
-                                errors.append(Error(severity, msg))
-                            lic_url = lic_urn + lic_key
-                        else:
-                            license_url = url + lic_key + '.json'
-                            license_text_url = url + lic_key + '.LICENSE'
-                            try:
-                                json_url = urlopen(license_url)
-                                data = json.loads(json_url.read())
-                                license_name = data['name']
-                                license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
-                                lic_url = url + data['key'] + '.LICENSE'
-                            except:
-                                msg = about.about_file_path + u" : Invalid 'license': " + lic_key
-                                errors.append(Error(ERROR, msg))
-                        captured_license.append(lic_key)
-                        detail_list.append(license_name)
-                        detail_list.append(license_text)
-                        detail_list.append(lic_url)
-                        key_text_dict[lic_key] = detail_list
+        if not about.license_file.present:
+            if about.license_expression.present:
+                special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+                if special_char_in_expression:
+                    msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
+                           str(special_char_in_expression))
+                    errors.append(Error(ERROR, msg))
+                else:
+                    for lic_key in lic_list:
+                        if not lic_key in captured_license:
+                            lic_url = ''
+                            license_name = ''
+                            license_text = ''
+                            detail_list = []
+                            if api_key:
+                                license_name, _license_key, license_text, errs = api.get_license_details_from_api(url, api_key, lic_key)
+                                for severity, message in errs: 
+                                    msg = (about.about_file_path + ": " + message)
+                                    errors.append(Error(severity, msg))
+                                lic_url = lic_urn + lic_key
+                            else:
+                                license_url = url + lic_key + '.json'
+                                license_text_url = url + lic_key + '.LICENSE'
+                                try:
+                                    json_url = urlopen(license_url)
+                                    data = json.loads(json_url.read())
+                                    license_name = data['name']
+                                    license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
+                                    lic_url = url + data['key'] + '.LICENSE'
+                                except:
+                                    msg = about.about_file_path + u" : Invalid 'license': " + lic_key
+                                    errors.append(Error(ERROR, msg))
+                            captured_license.append(lic_key)
+                            detail_list.append(license_name)
+                            detail_list.append(license_text)
+                            detail_list.append(lic_url)
+                            key_text_dict[lic_key] = detail_list
     return key_text_dict, errors
 
 

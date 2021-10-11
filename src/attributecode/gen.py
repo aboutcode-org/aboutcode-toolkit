@@ -35,6 +35,7 @@ from attributecode.util import invalid_chars
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import unique
+from attributecode.util import load_scancode_json, load_csv, load_json, load_excel
 
 
 def check_duplicated_columns(location):
@@ -114,7 +115,7 @@ def check_about_resource_filename(arp):
 
 
 # TODO: this should be either the CSV or the ABOUT files but not both???
-def load_inventory(location, base_dir, reference_dir=None):
+def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, reference_dir=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files stored in
     the `base_dir`. Return a list of errors and a list of About objects
@@ -125,18 +126,24 @@ def load_inventory(location, base_dir, reference_dir=None):
     """
     errors = []
     abouts = []
-    base_dir = util.to_posix(base_dir)
-    # FIXME: do not mix up CSV and JSON
-    if location.endswith('.csv'):
-        # FIXME: this should not be done here.
-        dup_cols_err = check_duplicated_columns(location)
-        if dup_cols_err:
-            errors.extend(dup_cols_err)
-            return errors, abouts
-        inventory = util.load_csv(location)
+    if base_dir:
+        base_dir = util.to_posix(base_dir)
+    if scancode:
+        inventory = load_scancode_json(location)
     else:
-        inventory = util.load_json(location)
-
+        if location.endswith('.csv'):
+            dup_cols_err = check_duplicated_columns(location)
+            if dup_cols_err:
+                errors.extend(dup_cols_err)
+                return errors, abouts
+            inventory = load_csv(location)
+        elif location.endswith('.xlsx'):
+            dup_cols_err, inventory = load_excel(location)
+            if dup_cols_err:
+                errors.extend(dup_cols_err)
+                return errors, abouts
+        else:
+            inventory = load_json(location)
     try:
         arp_list = []
         errors = []
@@ -182,7 +189,10 @@ def load_inventory(location, base_dir, reference_dir=None):
             continue
         else:
             afp = util.to_posix(afp)
-            loc = join(base_dir, afp)
+            if base_dir:
+                loc = join(base_dir, afp)
+            else:
+                loc = afp
         about = model.About(about_file_path=afp)
         about.location = loc
 
@@ -200,6 +210,7 @@ def load_inventory(location, base_dir, reference_dir=None):
         ld_errors = about.load_dict(
             fields,
             base_dir,
+            from_attrib=from_attrib,
             running_inventory=False,
             reference_dir=reference_dir,
         )
