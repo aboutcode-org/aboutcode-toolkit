@@ -618,9 +618,6 @@ def get_file_text(file_name, reference):
     """
     error = ''
     text = ''
-    print("!!!!!!!!!!!!!!!!!!!!!")
-    print(file_name)
-    print(reference)
     file_path = os.path.join(reference, file_name)
     if not os.path.exists(file_path):
         msg = "The file " + file_path + " does not exist"

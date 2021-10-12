@@ -311,11 +311,17 @@ def validate_template(ctx, param, value):
     type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
     help='Path to an optional YAML configuration file for renaming fields name.')
 
-@click.option('--djc',
-    nargs=2,
+@click.option('--api_url',
+    nargs=1,
     type=click.STRING,
-    metavar='URL KEY',
-    help='URL to DejaCode License Library and the API KEY. (default: https://scancode-licensedb.aboutcode.org/)')
+    metavar='URL',
+    help='URL to DejaCode License Library.')
+
+@click.option('--api_key',
+    nargs=1,
+    type=click.STRING,
+    metavar='KEY',
+    help='API Key for the  DejaCode License Library')
 
 @click.option('--min-license-score',
     type=int,
@@ -354,7 +360,7 @@ def validate_template(ctx, param, value):
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def attrib(input, output, configuration, djc, scancode, min_license_score, reference, template, vartext, quiet, verbose):
+def attrib(input, output, configuration, api_url, api_key, scancode, min_license_score, reference, template, vartext, quiet, verbose):
     """
 Generate an attribution document at OUTPUT using JSON, CSV or Excel or .ABOUT files at INPUT.
 
@@ -394,6 +400,9 @@ OUTPUT: Path where to write the attribution document.
     if input.endswith('.json') or input.endswith('.csv'):
         is_about_input = False
         from_attrib = True
+        if not reference:
+            # Set current directory as the reference dir
+            reference = os.path.dirname(input)
         errors, abouts = load_inventory(
             location=input,
             from_attrib=from_attrib,
@@ -410,9 +419,22 @@ OUTPUT: Path where to write the attribution document.
         sys.exit(1)
 
     if not is_about_input:
-        api_url = ''
-        api_key = ''
-        license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key, djc, scancode, reference)
+        # Check if both api_url and api_key present
+        if api_url or api_key:
+            if not api_url:
+                msg = '"--api_url" is required.'
+                click.echo(msg)
+                sys.exit(1)
+            if not api_key:
+                msg = '"--api_key" is required.'
+                click.echo(msg)
+                sys.exit(1)
+        else:
+            api_url = ''
+            api_key = ''
+        api_url = api_url.strip("'").strip('"')
+        api_key = api_key.strip("'").strip('"')
+        license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key, scancode, reference)
         errors.extend(lic_errors)
         sorted_license_dict = sorted(license_dict)
 
@@ -420,10 +442,9 @@ OUTPUT: Path where to write the attribution document.
         for about in abouts:
             if about.license_file.value or about.notice_file.value:
                 if not reference:
-                    msg = ('"license_file" / "notice_file" field contains value. Use `--reference` to indicate its parent directory. ' +
-                            '\n' + 'Generation halted.')
+                    msg = ('"license_file" / "notice_file" field contains value. Use `--reference` to indicate its parent directory.')
                     click.echo(msg)
-                    sys.exit(1)
+                    #sys.exit(1)
 
     if abouts:
         attrib_errors, rendered = generate_attribution_doc(

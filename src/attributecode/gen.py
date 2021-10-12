@@ -322,12 +322,11 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                 # Write generated LICENSE file
                 license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
-                    for lic_key, lic_name, lic_context, lic_url in license_key_name_context_url_list:
-                        licenses_dict[lic_key] = [lic_name, lic_context, lic_url]
-                        gen_license_name = lic_key + u'.LICENSE'
+                    for lic_key, lic_name, lic_filename, lic_context, lic_url in license_key_name_context_url_list:
+                        licenses_dict[lic_key] = [lic_name, lic_filename, lic_context, lic_url]
                         if not lic_name in about.license_name.value:
                             about.license_name.value.append(lic_name)
-                        about.license_file.value[gen_license_name] = license_dict[lic_key][1]
+                        about.license_file.value[lic_filename] = lic_filename
                         if not lic_url in about.license_url.value:
                             about.license_url.value.append(lic_url)
 

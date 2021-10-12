@@ -726,9 +726,10 @@ class License:
     """
     Represent a License object
     """
-    def __init__(self, key, name, url, text):
+    def __init__(self, key, name, filename, url, text):
         self.key = key
         self.name = name
+        self.filename = filename
         self.url = url
         self.text = text
 
@@ -1117,19 +1118,20 @@ class About(object):
 
         # Group the same license information in a list
         # This `licenses_dict` is a dictionary with license key as the key and the
-        # value is the list of [license_name, license_context, license_url]
+        # value is the list of [license_name, license_filename, license_context, license_url]
         lic_key_copy = license_key[:]
         lic_dict_list = []
         for lic_key in license_key:
             lic_dict = {}
             if licenses_dict and lic_key in licenses_dict:
                 lic_dict['key'] = lic_key
-                lic_name = licenses_dict[lic_key][0]
-                lic_url = licenses_dict[lic_key][2]
-                lic_file = lic_key + '.LICENSE'
+                lic_name, lic_filename, lic_context, lic_url = licenses_dict[lic_key]
+                #lic_name = licenses_dict[lic_key][0]
+                #lic_url = licenses_dict[lic_key][2]
+                #lic_file = lic_key + '.LICENSE'
 
                 lic_dict['name'] = lic_name
-                lic_dict['file'] = lic_file
+                lic_dict['file'] = lic_filename
                 lic_dict['url'] = lic_url
 
                 # Remove the license information if it has been handled
@@ -1138,8 +1140,8 @@ class About(object):
                     license_name.remove(lic_name)
                 if lic_url in license_url:
                     license_url.remove(lic_url)
-                if lic_file in license_file:
-                    license_file.remove(lic_file)
+                if lic_filename in license_file:
+                    license_file.remove(lic_filename)
                 lic_dict_list.append(lic_dict)
 
         # Handle license information that have not been handled.
@@ -1266,20 +1268,18 @@ class About(object):
                 for lic_key in lic_list:
                     try:
                         if license_dict[lic_key]:
-                            """
-                            if not lic_key in self.license_key.value:
-                                self.license_key.value.append(lic_key)
-                            """
                             license_path = posixpath.join(parent, lic_key)
                             license_path += u'.LICENSE'
                             license_path = add_unc(license_path)
-                            license_name, license_context, license_url = license_dict[lic_key]
-                            license_info = (lic_key, license_name, license_context, license_url)
+                            license_name, license_filename, license_context, license_url = license_dict[lic_key]
+                            license_info = (lic_key, license_name, license_filename, license_context, license_url)
                             license_key_name_context_url.append(license_info)
                             with io.open(license_path, mode='w', encoding='utf-8', newline='\n') as lic:
                                 lic.write(license_context)
-                    except:
+                    except Exception as e:
+                        # TODO: it should return error if exception caught
                         pass
+
         return license_key_name_context_url
 
 
@@ -1532,7 +1532,7 @@ def save_as_csv(location, about_dicts, field_names):
     return errors
 
 
-def pre_process_and_fetch_license_dict(abouts, api_url, api_key, djc, scancode, reference=None):
+def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scancode=False, reference=None):
     """
     Return a dictionary containing the license information (key, name, text, url)
     fetched from the ScanCode LicenseDB or DejaCode API.
@@ -1563,8 +1563,8 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key, djc, scancode, 
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
-        if not about.license_file.present:
-            if about.license_expression.present:
+        if not about.license_file.value:
+            if about.license_expression.value:
                 special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
                 if special_char_in_expression:
                     msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
@@ -1575,6 +1575,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key, djc, scancode, 
                         if not lic_key in captured_license:
                             lic_url = ''
                             license_name = ''
+                            license_filename = ''
                             license_text = ''
                             detail_list = []
                             if api_key:
@@ -1582,6 +1583,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key, djc, scancode, 
                                 for severity, message in errs: 
                                     msg = (about.about_file_path + ": " + message)
                                     errors.append(Error(severity, msg))
+                                license_filename = lic_key + '.LICENSE'
                                 lic_url = lic_urn + lic_key
                             else:
                                 license_url = url + lic_key + '.json'
@@ -1591,15 +1593,19 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key, djc, scancode, 
                                     data = json.loads(json_url.read())
                                     license_name = data['name']
                                     license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
-                                    lic_url = url + data['key'] + '.LICENSE'
+                                    license_filename = data['key'] + '.LICENSE'
+                                    lic_url = url + license_filename
                                 except:
                                     msg = about.about_file_path + u" : Invalid 'license': " + lic_key
                                     errors.append(Error(ERROR, msg))
                             captured_license.append(lic_key)
                             detail_list.append(license_name)
+                            detail_list.append(license_filename)
                             detail_list.append(license_text)
                             detail_list.append(lic_url)
                             key_text_dict[lic_key] = detail_list
+                    if not about.license_key.value:
+                        about.license_key.value = lic_list
     return key_text_dict, errors
 
 
