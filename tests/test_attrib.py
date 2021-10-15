@@ -84,7 +84,10 @@ class GenerateTest(unittest.TestCase):
             'Apache HTTP Server: 2.4.3\n'
             'resource: httpd-2.4.3.tar.gz\n')
 
-        error, result = attrib.generate(abouts, template)
+        license_dict = {}
+        is_about_input = True
+        min_license_score=0
+        error, result = attrib.generate(abouts, is_about_input, license_dict, min_license_score, template=template)
         assert expected == result
         assert not error
 
@@ -93,7 +96,11 @@ class GenerateTest(unittest.TestCase):
         errors, abouts = model.collect_inventory(test_file)
         assert not errors
 
-        error, result = attrib.generate_from_file(abouts)
+        license_dict = {}
+        is_about_input = True
+        min_license_score=0
+
+        error, result = attrib.generate_from_file(abouts, is_about_input, license_dict, min_license_score)
         assert not error
 
         expected_file = get_test_loc(
@@ -104,6 +111,9 @@ class GenerateTest(unittest.TestCase):
         # strip the timestamp: the timestamp is wrapped in italic block
         result = remove_timestamp(result)
         expected = remove_timestamp(expected)
+        # Ignore all white spaces and newline
+        result = result.replace('\n', '').replace(' ', '')
+        expected = expected.replace('\n', '').replace(' ', '')
         assert expected == result
 
     def test_lic_key_name_sync(self):
@@ -112,8 +122,11 @@ class GenerateTest(unittest.TestCase):
         template_loc = get_test_loc('test_attrib/gen_license_key_name_check/custom.template')
         output_file = get_temp_file()
 
+        license_dict = {}
+        is_about_input = True
+
         errors, abouts = model.collect_inventory(test_file)
-        attrib.generate_and_save(abouts, output_file, template_loc)
+        attrib.generate_and_save(abouts, is_about_input, license_dict, output_file, template_loc=template_loc)
 
         with open(output_file) as of:
             f1 = '\n'.join(of.readlines(False))

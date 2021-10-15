@@ -78,7 +78,10 @@ def generate(abouts, is_about_input, license_dict, min_license_score, template=N
                 if not captured or not licenses_list:
                     name = lic_name
                     filename = list(about.license_file.value.keys())[index]
-                    url = about.license_url.value[index]
+                    if  about.license_url.value:
+                        url = about.license_url.value[index]
+                    else:
+                        url = ''
                     text = list(about.license_file.value.values())[index]
                     license_object = License(key, name, filename, url, text)
                     licenses_list.append(license_object) 

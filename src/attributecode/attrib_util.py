@@ -15,7 +15,7 @@
 # ============================================================================
 
 from jinja2 import Environment
-from jinja2.filters import environmentfilter
+from jinja2.filters import pass_environment
 from jinja2.filters import make_attrgetter
 from jinja2.filters import ignore_case
 from jinja2.filters import FilterArgumentError
@@ -38,7 +38,7 @@ def get_template(template_text):
     return env.from_string(template_text)
 
 
-@environmentfilter
+@pass_environment
 def multi_sort(environment, value, reverse=False, case_sensitive=False,
                attributes=None):
     """
@@ -72,7 +72,7 @@ def multi_sort(environment, value, reverse=False, case_sensitive=False,
     return sorted(value, key=key, reverse=reverse)
 
 
-@environmentfilter
+@pass_environment
 def unique_together(environment, value, case_sensitive=False, attributes=None):
     """
     Return a list of unique items from an iterable. Unicity is checked when
