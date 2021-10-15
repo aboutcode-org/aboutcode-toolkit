@@ -5,11 +5,11 @@ download_url: https://pypi.python.org/packages/source/m/MarkupSafe/MarkupSafe-0.
 name: MarkupSafe
 homepage_url: https://github.com/mitsuhiko/markupsafe
 
-dje_license: bsd-new
+license_expression: bsd-new
 
 vcs_tool: git
 vcs_repository: https://github.com/mitsuhiko/jinja2.git
-license_text_file: MarkupSafe.LICENSE
+license_file: MarkupSafe.LICENSE
 
 copyright: Copyright (c) 2010 by Armin Ronacher and contributors.
 owner: Armin Ronacher

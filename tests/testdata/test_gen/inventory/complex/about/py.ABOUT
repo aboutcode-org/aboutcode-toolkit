@@ -7,8 +7,8 @@ description: library with cross-python path, ini-parsing, io, code, log faciliti
 homepage_url: http://pylib.readthedocs.org/
 owner: holger krekel, Ronny Pfannschmidt, Benjamin Peterson and others
 contact: pytest-dev@python.org
-dje_license: mit
-license_text_file: py.LICENSE
+license_expression: mit
+license_file: py.LICENSE
 copyright: Holger Krekel and others, 2004-2014
 
 
