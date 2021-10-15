@@ -144,6 +144,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                 return errors, abouts
         else:
             inventory = load_json(location)
+
     try:
         arp_list = []
         errors = []

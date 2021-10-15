@@ -78,7 +78,7 @@ class GenTest(unittest.TestCase):
     def test_load_inventory(self):
         location = get_test_loc('test_gen/inv.csv')
         base_dir = get_temp_dir()
-        errors, abouts = gen.load_inventory(location, base_dir)
+        errors, abouts = gen.load_inventory(location, base_dir=base_dir)
 
         expected_errors = [
             Error(INFO, 'Field custom1 is a custom field.'),
@@ -106,8 +106,7 @@ custom1: |
     def test_load_inventory_with_errors(self):
         location = get_test_loc('test_gen/inv4.csv')
         base_dir = get_temp_dir()
-        errors, abouts = gen.load_inventory(location, base_dir)
-
+        errors, abouts = gen.load_inventory(location, base_dir=base_dir)
         expected_errors = [
             Error(CRITICAL, "Field name: 'confirmed copyright' contains illegal name characters: 0 to 9, a to z, A to Z and _."),
             Error(INFO, 'Field resource is a custom field.'),
