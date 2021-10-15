@@ -70,7 +70,10 @@ def generate(abouts, is_about_input, license_dict, min_license_score, template=N
             # the key and the license text as the value
             index = 0
             for lic_name in about.license_name.value:
-                key = about.license_key.value[index]
+                if about.license_key.value:
+                    key = about.license_key.value[index]
+                else:
+                    key = lic_name
                 captured = False
                 for lic in licenses_list:
                     if key in lic.key:

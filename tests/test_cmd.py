@@ -348,7 +348,7 @@ def check_about_stdout(options, expected_loc, regen=False):
     with open(expected_file, 'r') as ef:
         expected = ef.read()
 
-    assert expected.splitlines(False) == result.output.splitlines(False)
+    assert expected.replace('\n','').replace(' ','') == result.output.replace('\n','').replace(' ','')
 
 
 def test_about_help_text():
