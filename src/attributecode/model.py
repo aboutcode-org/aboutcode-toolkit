@@ -500,7 +500,6 @@ class PathField(ListField):
                     location = None
                     paths[path] = location
                     continue
-
                 if self.reference_dir:
                     location = posixpath.join(self.reference_dir, path)
                 else:
@@ -517,7 +516,8 @@ class PathField(ListField):
                         normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
                         location = posixpath.join(self.base_dir, normalized_arp)
                     else:
-                        location = posixpath.join(self.base_dir, path)
+                        location = posixpath.normpath(posixpath.join(self.base_dir, path))
+                        print(location)
 
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))

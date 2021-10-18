@@ -713,7 +713,7 @@ licenses:
     file: license2.LICENSE
     url: some_url
 '''
-        lic_dict = {u'license1': [u'License1', u'', u'some_url'], u'license2' : [u'License2', u'', u'some_url']}
+        lic_dict = {u'license1': [u'License1', u'license1.LICENSE',u'', u'some_url'], u'license2' : [u'License2', u'license2.LICENSE', u'', u'some_url']}
         assert about.dumps(lic_dict) == expected
 
 
@@ -1068,7 +1068,7 @@ class CollectorTest(unittest.TestCase):
         result = [a.about_file_path for a in abouts]
         assert expected == result
 
-    def test_collect_inventory_return_no_warnings_and_model_can_uuse_relative_paths(self):
+    def test_collect_inventory_return_no_warnings_and_model_can_use_relative_paths(self):
         test_loc = get_test_loc('test_model/rel/allAboutInOneDir')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = []
