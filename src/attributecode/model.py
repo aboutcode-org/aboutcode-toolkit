@@ -508,16 +508,14 @@ class PathField(ListField):
                     # the 'about_file_path' and the 'base_dir
                     if not self.running_inventory and self.about_file_path:
                         # Get the parent directory of the 'about_file_path'
-                        # afp_parent = posixpath.dirname(self.about_file_path)
+                        afp_parent = posixpath.dirname(self.about_file_path)
 
                         # Create a relative 'about_resource' path by joining the
                         # parent of the 'about_file_path' with the value of the
                         # 'about_resource'
-                        #arp = posixpath.join(afp_parent, path)
-                        arp = posixpath.join(self.base_dir, path)
-                        #normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
-                        #location = posixpath.join(self.base_dir, normalized_arp)
-                        location = posixpath.normpath(arp)
+                        arp = posixpath.join(afp_parent, path)
+                        normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
+                        location = posixpath.join(self.base_dir, normalized_arp)
                     else:
                         location = posixpath.join(self.base_dir, path)
 
@@ -1006,7 +1004,7 @@ class About(object):
             """
             running_inventory = True
             data = saneyaml.load(input, allow_duplicate_keys=False)
-            errs = self.load_dict(data, base_dir, running_inventory)
+            errs = self.load_dict(data, base_dir, running_inventory=running_inventory)
             errors.extend(errs)
         except Exception as e:
             trace = traceback.format_exc()

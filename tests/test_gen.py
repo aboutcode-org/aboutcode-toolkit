@@ -80,7 +80,7 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
 
-        expected_num_errors = 28
+        expected_num_errors = 29
         assert len(errors) == expected_num_errors 
 
         expected = (
@@ -143,8 +143,6 @@ custom1: |
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
 
-        if on_windows:
-            base_dir = add_unc(base_dir)
         expected = dict([('.', None)])
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
@@ -264,6 +262,7 @@ licenses:
         errors, abouts = gen.generate(location, base_dir)
 
         lic_dict = {u'public-domain': [u'Public Domain',
+                                       u'public-domain.LICENSE',
                                        u'This component is released to the public domain by the author.',
                                        u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain'
                                        ]}
@@ -294,6 +293,7 @@ licenses:
         errors, abouts = gen.generate(location, base_dir)
 
         lic_dict = {u'public-domain': [u'Public Domain',
+                                       u'public-domain.LICENSE',
                                        u'This component is released to the public domain by the author.',
                                        u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain'
                                        ]}
