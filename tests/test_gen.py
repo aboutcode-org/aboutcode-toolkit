@@ -80,13 +80,8 @@ class GenTest(unittest.TestCase):
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
 
-        expected_errors = [
-            Error(INFO, 'Field custom1 is a custom field.'),
-            Error(INFO, 'Field about_resource: Path')
-        ]
-        for exp, err in zip(expected_errors, errors):
-            assert exp.severity == err.severity
-            assert err.message.startswith(exp.message)
+        expected_num_errors = 28
+        assert len(errors) == expected_num_errors 
 
         expected = (
 '''about_resource: .
@@ -147,6 +142,9 @@ custom1: |
         location = get_test_loc('test_gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
+
+        if on_windows:
+            base_dir = add_unc(base_dir)
         expected = dict([('.', None)])
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
