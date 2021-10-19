@@ -1,0 +1,140 @@
+{
+  "headers": [
+    {
+      "tool_name": "scancode-toolkit",
+      "tool_version": "3.2.1rc2",
+      "options": {
+        "input": [
+          "C:\\Users\\Downloads\\clean-text-0.3.0-mod"
+        ],
+        "--copyright": true,
+        "--email": true,
+        "--info": true,
+        "--json-pp": "C:\\Users\\Downloads\\clean-text-0.3.0-mod-lceupi.json",
+        "--license": true,
+        "--package": true,
+        "--processes": "4",
+        "--url": true
+      },
+      "notice": "Generated with ScanCode and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\nScanCode should be considered or used as legal advice. Consult an Attorney\nfor any legal advice.\nScanCode is a free software code scanning tool from nexB Inc. and others.\nVisit https://github.com/nexB/scancode-toolkit/ for support and download.",
+      "start_timestamp": "2020-12-04T093439.242970",
+      "end_timestamp": "2020-12-04T093541.496173",
+      "duration": 62.25320363044739,
+      "message": null,
+      "errors": [],
+      "extra_data": {
+        "files_count": 9
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "clean-text-0.3.0-mod/cleantext/isc_lic.py",
+      "type": "file",
+      "name": "isc_lic.py",
+      "base_name": "isc_lic",
+      "extension": ".py",
+      "size": 9593,
+      "date": "2020-12-04",
+      "sha1": "ba25c99004d422e98c7f948ce6a7cf7914c69b23",
+      "md5": "b64befb0e9457e941e362bbb2955e5e2",
+      "sha256": "a089501312bc9caed493dd7cdb76f66757d92bab45c9b5861c627e2a20887573",
+      "mime_type": "text/plain",
+      "file_type": "Python script, UTF-8 Unicode text executable",
+      "programming_language": "Python",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": true,
+      "licenses": [
+        {
+          "key": "isc",
+          "score": 99.0,
+          "name": "ISC License",
+          "short_name": "ISC License",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "ISC - Internet Systems Consortium",
+          "homepage_url": "https://www.isc.org/software/license",
+          "text_url": "http://fedoraproject.org/wiki/Licensing:MIT#Old_Style_with_legal_disclaimer_2",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:isc",
+          "spdx_license_key": "ISC",
+          "spdx_url": "https://spdx.org/licenses/ISC",
+          "start_line": 1,
+          "end_line": 1,
+          "matched_rule": {
+            "identifier": "isc_22.RULE",
+            "license_expression": "isc",
+            "licenses": [
+              "isc"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 2,
+            "matched_length": 2,
+            "match_coverage": 100.0,
+            "rule_relevance": 99.0
+          }
+        },
+        {
+          "key": "isc",
+          "score": 100.0,
+          "name": "ISC License",
+          "short_name": "ISC License",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "ISC - Internet Systems Consortium",
+          "homepage_url": "https://www.isc.org/software/license",
+          "text_url": "http://fedoraproject.org/wiki/Licensing:MIT#Old_Style_with_legal_disclaimer_2",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:isc",
+          "spdx_license_key": "ISC",
+          "spdx_url": "https://spdx.org/licenses/ISC",
+          "start_line": 5,
+          "end_line": 15,
+          "matched_rule": {
+            "identifier": "isc.LICENSE",
+            "license_expression": "isc",
+            "licenses": [
+              "isc"
+            ],
+            "is_license_text": true,
+            "is_license_notice": false,
+            "is_license_reference": false,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 112,
+            "matched_length": 112,
+            "match_coverage": 100.0,
+            "rule_relevance": 100
+          }
+        }
+      ],
+      "license_expressions": [
+        "isc",
+        "isc"
+      ],
+      "percentage_of_license_text": 0.24,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "http://ftfy.readthedocs.org/",
+          "start_line": 43,
+          "end_line": 43
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    }
+  ]
+}

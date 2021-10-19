@@ -1563,49 +1563,58 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
-        if not about.license_file.value:
+        #if not about.license_file.value:
+        # FIXME
+        # Scancode returns license_expressions while ABcTK uses license_expression
+        lic_exp = ''
+        if about.license_expression or about.license_expressions:
             if about.license_expression.value:
-                special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
-                if special_char_in_expression:
-                    msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
-                           str(special_char_in_expression))
-                    errors.append(Error(ERROR, msg))
-                else:
-                    for lic_key in lic_list:
-                        if not lic_key in captured_license:
-                            lic_url = ''
-                            license_name = ''
-                            license_filename = ''
-                            license_text = ''
-                            detail_list = []
-                            if api_key:
-                                license_name, _license_key, license_text, errs = api.get_license_details_from_api(url, api_key, lic_key)
-                                for severity, message in errs: 
-                                    msg = (about.about_file_path + ": " + message)
-                                    errors.append(Error(severity, msg))
-                                license_filename = lic_key + '.LICENSE'
-                                lic_url = lic_urn + lic_key
-                            else:
-                                license_url = url + lic_key + '.json'
-                                license_text_url = url + lic_key + '.LICENSE'
-                                try:
-                                    json_url = urlopen(license_url)
-                                    data = json.loads(json_url.read())
-                                    license_name = data['name']
-                                    license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
-                                    license_filename = data['key'] + '.LICENSE'
-                                    lic_url = url + license_filename
-                                except:
-                                    msg = about.about_file_path + u" : Invalid 'license': " + lic_key
-                                    errors.append(Error(ERROR, msg))
-                            captured_license.append(lic_key)
-                            detail_list.append(license_name)
-                            detail_list.append(license_filename)
-                            detail_list.append(license_text)
-                            detail_list.append(lic_url)
-                            key_text_dict[lic_key] = detail_list
-                    if not about.license_key.value:
-                        about.license_key.value = lic_list
+                lic_exp = about.license_expression.value
+            else:
+                lic_exp = about.license_expressions.value
+             
+        if lic_exp:
+            special_char_in_expression, lic_list = parse_license_expression(lic_exp)
+            if special_char_in_expression:
+                msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
+                       str(special_char_in_expression))
+                errors.append(Error(ERROR, msg))
+            else:
+                for lic_key in lic_list:
+                    if not lic_key in captured_license:
+                        lic_url = ''
+                        license_name = ''
+                        license_filename = ''
+                        license_text = ''
+                        detail_list = []
+                        if api_key:
+                            license_name, _license_key, license_text, errs = api.get_license_details_from_api(url, api_key, lic_key)
+                            for severity, message in errs: 
+                                msg = (about.about_file_path + ": " + message)
+                                errors.append(Error(severity, msg))
+                            license_filename = lic_key + '.LICENSE'
+                            lic_url = lic_urn + lic_key
+                        else:
+                            license_url = url + lic_key + '.json'
+                            license_text_url = url + lic_key + '.LICENSE'
+                            try:
+                                json_url = urlopen(license_url)
+                                data = json.loads(json_url.read())
+                                license_name = data['name']
+                                license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
+                                license_filename = data['key'] + '.LICENSE'
+                                lic_url = url + license_filename
+                            except:
+                                msg = about.about_file_path + u" : Invalid 'license': " + lic_key
+                                errors.append(Error(ERROR, msg))
+                        captured_license.append(lic_key)
+                        detail_list.append(license_name)
+                        detail_list.append(license_filename)
+                        detail_list.append(license_text)
+                        detail_list.append(lic_url)
+                        key_text_dict[lic_key] = detail_list
+                if not about.license_key.value:
+                    about.license_key.value = lic_list
     return key_text_dict, errors
 
 

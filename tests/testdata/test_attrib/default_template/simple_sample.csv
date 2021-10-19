@@ -1,0 +1,3 @@
+name,version,license_expression
+cryptohash-sha256,v 0.11.100.1,bsd-new and mit
+some_component,v 0.0.1,mit
