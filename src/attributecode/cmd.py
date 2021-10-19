@@ -430,8 +430,6 @@ OUTPUT: Path where to write the attribution document.
         api_url = api_url.strip("'").strip('"')
         api_key = api_key.strip("'").strip('"')
         license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key, scancode, reference)
-        print("1111111111111111111111111111")
-        print(license_dict)
         errors.extend(lic_errors)
         sorted_license_dict = sorted(license_dict)
 

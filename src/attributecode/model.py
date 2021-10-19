@@ -517,7 +517,6 @@ class PathField(ListField):
                         location = posixpath.join(self.base_dir, normalized_arp)
                     else:
                         location = posixpath.normpath(posixpath.join(self.base_dir, path))
-                        print(location)
 
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
