@@ -8,8 +8,6 @@ Usage: about attrib [OPTIONS] INPUT OUTPUT
   OUTPUT: Path where to write the attribution document.
 
 Options:
-  -c, --configuration FILE     Path to an optional YAML configuration file for
-                               renaming fields name.
   --api_url URL                URL to DejaCode License Library.
   --api_key KEY                API Key for the  DejaCode License Library
   --min-license-score INTEGER  Attribute components that have license score

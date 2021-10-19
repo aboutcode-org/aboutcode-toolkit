@@ -306,11 +306,6 @@ def validate_template(ctx, param, value):
     metavar='OUTPUT',
     type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
-@click.option('-c', '--configuration',
-    metavar='FILE',
-    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an optional YAML configuration file for renaming fields name.')
-
 @click.option('--api_url',
     nargs=1,
     type=click.STRING,
@@ -360,7 +355,7 @@ def validate_template(ctx, param, value):
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def attrib(input, output, configuration, api_url, api_key, scancode, min_license_score, reference, template, vartext, quiet, verbose):
+def attrib(input, output, api_url, api_key, scancode, min_license_score, reference, template, vartext, quiet, verbose):
     """
 Generate an attribution document at OUTPUT using JSON, CSV or Excel or .ABOUT files at INPUT.
 
@@ -435,6 +430,8 @@ OUTPUT: Path where to write the attribution document.
         api_url = api_url.strip("'").strip('"')
         api_key = api_key.strip("'").strip('"')
         license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key, scancode, reference)
+        print("1111111111111111111111111111")
+        print(license_dict)
         errors.extend(lic_errors)
         sorted_license_dict = sorted(license_dict)
 
