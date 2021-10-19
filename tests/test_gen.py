@@ -127,6 +127,43 @@ custom1: |
         result = [a.dumps() for a in abouts]
         assert expected == result[0]
 
+    def test_load_inventory_simple_xlsx(self):
+        location = get_test_loc('test_gen/load/simple_sample.xlsx')
+        base_dir = get_temp_dir()
+        errors, abouts = gen.load_inventory(location, base_dir=base_dir)
+        expected_errors = []
+        result = [(level, e) for level, e in errors if level > INFO]
+        assert expected_errors == result
+
+        assert abouts[0].name.value == 'cryptohash-sha256'
+        assert abouts[1].name.value == 'some_component'
+        
+        assert abouts[0].version.value == 'v 0.11.100.1'
+        assert abouts[1].version.value == 'v 0.0.1'
+
+        assert abouts[0].license_expression.value == 'bsd-new and mit'
+        assert abouts[1].license_expression.value == 'mit'
+
+
+    def test_load_scancode_json(self):
+        location = get_test_loc('test_gen/load/clean-text-0.3.0-lceupi.json')
+        inventory = gen.load_scancode_json(location)
+
+        expected = {'about_resource': 'clean-text-0.3.0', 'type': 'directory',
+                    'name': 'clean-text-0.3.0', 'base_name': 'clean-text-0.3.0',
+                    'extension': '', 'size': 0, 'date': None, 'sha1': None,
+                    'md5': None, 'sha256': None, 'mime_type': None, 'file_type': None,
+                    'programming_language': None, 'is_binary': False, 'is_text': False,
+                    'is_archive': False, 'is_media': False, 'is_source': False,
+                    'is_script': False, 'licenses': [], 'license_expressions': [],
+                    'percentage_of_license_text': 0, 'copyrights': [], 'holders': [],
+                    'authors': [], 'packages': [], 'emails': [], 'urls': [], 'files_count': 9,
+                    'dirs_count': 1, 'size_count': 32826, 'scan_errors': []}
+
+        # We will only check the first element in the inventory list 
+        assert inventory[0] == expected
+
+
     def test_generation_dir_endswith_space(self):
         location = get_test_loc('test_gen/inventory/complex/about_file_path_dir_endswith_space.csv')
         base_dir = get_temp_dir()
