@@ -26,11 +26,9 @@ from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
-from attributecode.model import detect_special_char
 from attributecode.model import parse_license_expression
 from attributecode.model import License
 from attributecode.util import add_unc
-from attributecode.util import convert_object_to_dict
 from attributecode.attrib_util import multi_sort
 
 DEFAULT_TEMPLATE_FILE = os.path.join(
