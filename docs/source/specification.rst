@@ -116,7 +116,7 @@ Fields order and multiple occurrences
 
 The field order does not matter. Multiple occurrences of a field name is not supported.
 
-The tool processing an ABOUT file or CSV/JSON input will issue an error when a field name occurs more than once in the input file.
+The tool processing an ABOUT file or CSV/JSON/Excel input will issue an error when a field name occurs more than once in the input file.
 
 Field referencing a file
 ------------------------

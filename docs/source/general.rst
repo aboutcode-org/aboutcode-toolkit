@@ -19,7 +19,7 @@ AboutCode Toolkit is a tool for your software development team to document your 
 
 -   **inventory**: Generate a Software Inventory list (.csv or .json format) from your codebase based on ABOUT file(s). Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
 
--   **transform**: A command to transform an input CSV/JSON by applying renaming and/or filtering and then output to a new CSV/JSON file.
+-   **transform**: A command to transform an input CSV/JSON/Excel by applying renaming and/or filtering and then output to a new CSV/JSON/Excel file.
 
 Additional AboutCode Toolkit information is available at:
 
@@ -168,11 +168,11 @@ Fields Renaming and Optional Custom Fields
 
 Since your input's field name may not match with the AboutCode Toolkit standard field name, you can use the transform subcommand to do the transformation.
 
-A transform configuration file is used to describe which transformations and validations to apply to a source CSV/JSON file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
+A transform configuration file is used to describe which transformations and validations to apply to a source CSV/JSON/Excel file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
 
 The attributes that can be set in a configuration file are:
 
--   field_renamings: An optional map of source field name to target new field name that is used to rename CSV/JSON fields.
+-   field_renamings: An optional map of source field name to target new field name that is used to rename CSV/JSON/Excel fields.
 
         ..  code-block:: none
 
@@ -184,7 +184,7 @@ The attributes that can be set in a configuration file are:
 The renaming is always applied first before other transforms and checks. All other field names referenced below are AFTER the renaming have been applied.
 For instance with this configuration, the field "Directory/Location" will be renamed to "about_resource" and "foo" to "bar":
 
--   required_fields: An optional list of required field names that must have a value, beyond the standard field names. If a source CSV/JSON does not have such a field or an entry is missing a value for a required field, an error is reported.
+-   required_fields: An optional list of required field names that must have a value, beyond the standard field names. If a source CSV/JSON/Excel does not have such a field or an entry is missing a value for a required field, an error is reported.
 
 For instance with this configuration, an error will be reported if the fields "name" and "version" are missing, or if any entry does not have a value set for these fields:
 

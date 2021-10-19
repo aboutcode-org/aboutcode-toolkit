@@ -37,6 +37,10 @@ from attributecode.model import collect_inventory, get_copy_list
 from attributecode.model import copy_redist_src
 from attributecode.model import pre_process_and_fetch_license_dict
 from attributecode.model import write_output
+from attributecode.transform import transform_csv_to_csv
+from attributecode.transform import transform_json_to_json
+from attributecode.transform import transform_excel_to_excel
+from attributecode.transform import Transformer
 from attributecode.util import extract_zip
 from attributecode.util import filter_errors
 from attributecode.util import get_temp_dir
@@ -527,17 +531,17 @@ def print_config_help(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Transform a CSV/JSON by applying renamings, filters and checks.')
+    short_help='Transform a CSV/JSON/Excel by applying renamings, filters and checks.')
 
 @click.argument('location',
     required=True,
-    callback=partial(validate_extensions, extensions=('.csv', '.json',)),
+    callback=partial(validate_extensions, extensions=('.csv', '.json', '.xlsx',)),
     metavar='LOCATION',
     type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
-    callback=partial(validate_extensions, extensions=('.csv', '.json',)),
+    callback=partial(validate_extensions, extensions=('.csv', '.json', '.xlsx',)),
     metavar='OUTPUT',
     type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
@@ -563,18 +567,14 @@ def print_config_help(ctx, param, value):
 @click.help_option('-h', '--help')
 def transform(location, output, configuration, quiet, verbose):  # NOQA
     """
-Transform the CSV/JSON file at LOCATION by applying renamings, filters and checks
-and then write a new CSV/JSON to OUTPUT (Format for input and output need to be
+Transform the CSV/JSON/Excel file at LOCATION by applying renamings, filters and checks
+and then write a new CSV/JSON/Excel to OUTPUT (Format for input and output need to be
 the same).
 
-LOCATION: Path to a CSV/JSON file.
+LOCATION: Path to a CSV/JSON/Excel file.
 
-OUTPUT: Path to CSV/JSON inventory file to create.
+OUTPUT: Path to CSV/JSON/Excel inventory file to create.
     """
-    from attributecode.transform import transform_csv_to_csv
-    from attributecode.transform import transform_json_to_json
-    from attributecode.transform import Transformer
-
     if not configuration:
         transformer = Transformer.default()
     else:
@@ -584,6 +584,8 @@ OUTPUT: Path to CSV/JSON inventory file to create.
         errors = transform_csv_to_csv(location, output, transformer)
     elif location.endswith('.json') and output.endswith('.json'):
         errors = transform_json_to_json(location, output, transformer)
+    elif location.endswith('.xlsx') and output.endswith('.xlsx'):
+        errors = transform_excel_to_excel(location, output, transformer)
     else:
         msg = 'Extension for the input and output need to be the same.'
         click.echo(msg)

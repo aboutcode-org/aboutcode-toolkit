@@ -34,7 +34,7 @@ Commands
                 gen                 Generate .ABOUT files from an inventory as CSV or JSON.
                 inventory           Collect the inventory of .ABOUT files to a CSV or JSON
                                     file.
-                transform           Transform a CSV/JSON by applying renamings, filters and checks.
+                transform           Transform a CSV/JSON/Excel by applying renamings, filters and checks.
 
 attrib
 ======
@@ -446,8 +446,8 @@ Syntax
 
                 about transform [OPTIONS] LOCATION OUTPUT
                 
-                LOCATION: Path to a CSV/JSON file.
-                OUTPUT: Path to CSV/JSON inventory file to create.
+                LOCATION: Path to a CSV/JSON/Excel file.
+                OUTPUT: Path to CSV/JSON/Excel inventory file to create.
 
 Options
 -------
@@ -464,7 +464,7 @@ Options
 Purpose
 -------
 
-Transform the CSV/JSON file at LOCATION by applying renamings, filters and checks and then write a new CSV/JSON to OUTPUT (Format for input and output need to be the same).
+Transform the CSV/JSON/Excel file at LOCATION by applying renamings, filters and checks and then write a new CSV/JSON/Excel to OUTPUT (Format for input and output need to be the same).
 
 Details
 ^^^^^^^

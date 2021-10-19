@@ -15,10 +15,12 @@
 
 import io
 import json
-from collections import Counter
+from collections import Counter, OrderedDict
 from itertools import zip_longest
 
 import attr
+import itertools
+import openpyxl
 
 from attributecode import CRITICAL
 from attributecode import Error
@@ -48,7 +50,7 @@ def transform_csv_to_csv(location, output, transformer):
         msg = u'Duplicated field name: %(name)s'
         for name in dupes:
             errors.append(Error(CRITICAL, msg % locals()))
-        return field_names, [], errors
+        return errors
 
     # Convert to dicts
     new_data = [dict(zip_longest(field_names, item)) for item in data]
@@ -81,6 +83,31 @@ def transform_json_to_json(location, output, transformer):
         return errors
     else:
         write_json(output, updated_data)
+        return []
+
+
+def transform_excel_to_excel(location, output, transformer):
+    """
+    Read a Excel file at `location` and write a new Excel file at `output`. Apply
+    transformations using the `transformer` Transformer.
+    Return a list of Error objects.
+    """
+    if not transformer:
+        raise ValueError('Cannot transform without Transformer')
+
+    dupes, new_data = read_excel(location)
+    errors = []
+    if dupes:
+        msg = u'Duplicated field name: %(name)s'
+        for name in dupes:
+            errors.append(Error(CRITICAL, msg % locals()))
+        return errors
+
+    _field_names, updated_data, errors = transform_data(new_data, transformer)
+    if errors:
+        return errors
+    else:
+        write_excel(output, updated_data)
         return []
 
 
@@ -385,3 +412,53 @@ def write_json(location, data):
     """
     with open(location, 'w') as jsonfile:
         json.dump(data, jsonfile, indent=3)
+
+def read_excel(location):
+    """
+    Read Excel at `location`, return a list of ordered dictionaries, one
+    for each row.
+    """
+    results = []
+    errors = []
+    sheet_obj = openpyxl.load_workbook(location).active
+    max_col = sheet_obj.max_column
+
+    index = 1
+    col_keys = []
+    mapping_dict = {}
+    while index <= max_col:
+        value = sheet_obj.cell(row=1, column=index).value
+        if value in col_keys:
+            msg = 'Duplicated column name, ' + str(value) + ', detected.' 
+            errors.append(Error(CRITICAL, msg))
+            return errors, results
+        if value in mapping_dict:
+            value = mapping_dict[value]
+        col_keys.append(value)
+        index = index + 1
+
+    for row in sheet_obj.iter_rows(min_row=2, values_only=True):
+        row_dict = OrderedDict()
+        index = 0
+        while index < max_col:
+            value = row[index]
+            if value:
+                row_dict[col_keys[index]] = value
+            else:
+                row_dict[col_keys[index]] = ''
+            index = index + 1
+        results.append(row_dict)
+    return errors, results
+
+
+def write_excel(location, data):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+
+    headers = list(set(itertools.chain.from_iterable(data)))
+    ws.append(headers)
+
+    for elements in data:
+        ws.append([elements.get(h) for h in headers])
+
+    wb.save(location)
