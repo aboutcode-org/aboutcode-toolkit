@@ -655,17 +655,15 @@ def load_scancode_json(location):
     with open(location) as json_file:
         results = json.load(json_file)
     results = results['files']
-    if mapping_dict:
-        for item in results:
-            updated_item = {}
-            for key in item:
-                if key in mapping_dict:
-                    updated_item[mapping_dict[key]] = item[key]
-                else:
-                    updated_item[key] = item[key]
-            updated_results.append(updated_item)
-    else:
-        updated_results = results
+    # Rename the "path" to "about_resource"
+    for item in results:
+        updated_dict = {}
+        for key in item:
+            if key == 'path':
+                updated_dict['about_resource'] = item[key]
+            else:
+                updated_dict[key] = item[key]
+        updated_results.append(updated_dict)
     return updated_results
 
 def load_excel(location):
