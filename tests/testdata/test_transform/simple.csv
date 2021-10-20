@@ -1,0 +1,3 @@
+about_resource,name,license_expression
+/test.c,test.c,mit
+/test2.c,test2.c,mit and apache-2.0
