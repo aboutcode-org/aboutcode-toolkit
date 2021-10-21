@@ -1562,18 +1562,30 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
-        #if not about.license_file.value:
-        # FIXME
+
         # Scancode returns license_expressions while ABcTK uses license_expression
-        lic_exp = ''
-        if about.license_expression or about.license_expressions:
-            if about.license_expression.value:
-                lic_exp = about.license_expression.value
-            else:
-                lic_exp = about.license_expressions.value
-             
-        if lic_exp:
-            special_char_in_expression, lic_list = parse_license_expression(lic_exp)
+        if scancode:
+            lic_exp = ''
+            lic_list = []
+            # Since the model treats license_expressions (from scancode scan) as a custom field
+            # in string format, we need to capture this string to convert to a list
+            # and then use the `AND` condition if multiple licenses exist.
+            # See https://github.com/nexB/aboutcode-toolkit/issues/479#issuecomment-946328428 
+            if about.license_expressions.value:
+                # Stripping '[', ']', quote and spaces
+                converted_lic_exp = about.license_expressions.value.strip("[").strip("]").replace('\'','').replace(' ','')
+                # Convert the updated lic_exp string to list
+                converted_lic_list = converted_lic_exp.split(',')
+            for lic in converted_lic_list:
+                # Only keep unique license keys
+                if not lic in lic_list:
+                    lic_list.append(lic)
+            lic_exp = " AND ".join(lic_list)
+            about.license_expression.value = lic_exp
+            about.license_expression.present = True
+
+        if about.license_expression.value:
+            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
             if special_char_in_expression:
                 msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
                        str(special_char_in_expression))
@@ -1614,6 +1626,8 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                         key_text_dict[lic_key] = detail_list
                 if not about.license_key.value:
                     about.license_key.value = lic_list
+    print("1111111111111111111")
+    print(key_text_dict)
     return key_text_dict, errors
 
 

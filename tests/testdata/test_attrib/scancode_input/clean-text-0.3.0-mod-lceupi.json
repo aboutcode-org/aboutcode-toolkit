@@ -82,25 +82,25 @@
           }
         },
         {
-          "key": "isc",
+          "key": "mit",
           "score": 100.0,
-          "name": "ISC License",
-          "short_name": "ISC License",
+          "name": "MIT License",
+          "short_name": "MIT License",
           "category": "Permissive",
           "is_exception": false,
-          "owner": "ISC - Internet Systems Consortium",
-          "homepage_url": "https://www.isc.org/software/license",
-          "text_url": "http://fedoraproject.org/wiki/Licensing:MIT#Old_Style_with_legal_disclaimer_2",
-          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:isc",
-          "spdx_license_key": "ISC",
-          "spdx_url": "https://spdx.org/licenses/ISC",
+          "owner": "MIT",
+          "homepage_url": "http://opensource.org/licenses/mit-license.php",
+          "text_url": "http://opensource.org/licenses/mit-license.php",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:mit",
+          "spdx_license_key": "MIT",
+          "spdx_url": "https://spdx.org/licenses/MIT",
           "start_line": 5,
           "end_line": 15,
           "matched_rule": {
-            "identifier": "isc.LICENSE",
-            "license_expression": "isc",
+            "identifier": "mit.LICENSE",
+            "license_expression": "mit",
             "licenses": [
-              "isc"
+              "mit"
             ],
             "is_license_text": true,
             "is_license_notice": false,
@@ -116,7 +116,7 @@
       ],
       "license_expressions": [
         "isc",
-        "isc"
+        "mit"
       ],
       "percentage_of_license_text": 0.24,
       "copyrights": [],
