@@ -1284,22 +1284,21 @@ class FetchLicenseTest(unittest.TestCase):
             'Network problem. Please check your Internet connection. '
             'License generation is skipped.')
         expected = ({}, [Error(ERROR, error_msg)])
-        assert model.pre_process_and_fetch_license_dict([], '', '') == expected
+        assert model.pre_process_and_fetch_license_dict([]) == expected
 
         valid_api_url.return_value = True
         expected = ({}, [])
-        assert model.pre_process_and_fetch_license_dict([], '', '') == expected
+        assert model.pre_process_and_fetch_license_dict([]) == expected
 
     @mock.patch('attributecode.util.have_network_connection')
     def test_pre_process_and_fetch_license_dict_licensedb(self, have_network_connection):
         have_network_connection.return_value = False
-        licensedb_url = 'https://scancode-licensedb.aboutcode.org/'
         error_msg = (
             'Network problem. Please check your Internet connection. '
             'License generation is skipped.')
         expected = ({}, [Error(ERROR, error_msg)])
-        assert model.pre_process_and_fetch_license_dict([], None, False) == expected
+        assert model.pre_process_and_fetch_license_dict([]) == expected
 
         have_network_connection.return_value = True
         expected = ({}, [])
-        assert model.pre_process_and_fetch_license_dict([], None, False) == expected
+        assert model.pre_process_and_fetch_license_dict([]) == expected
