@@ -1278,7 +1278,6 @@ class FetchLicenseTest(unittest.TestCase):
     @mock.patch('attributecode.model.valid_api_url')
     def test_pre_process_and_fetch_license_dict_dje(self, have_network_connection, valid_api_url):
         have_network_connection.return_value = True
-
         valid_api_url.return_value = False
         error_msg = (
             'Network problem. Please check your Internet connection. '
@@ -1291,8 +1290,10 @@ class FetchLicenseTest(unittest.TestCase):
         assert model.pre_process_and_fetch_license_dict([]) == expected
 
     @mock.patch('attributecode.util.have_network_connection')
-    def test_pre_process_and_fetch_license_dict_licensedb(self, have_network_connection):
+    @mock.patch('attributecode.model.valid_api_url')
+    def test_pre_process_and_fetch_license_dict_licensedb(self, have_network_connection, valid_api_url):
         have_network_connection.return_value = False
+        valid_api_url.return_value = False
         error_msg = (
             'Network problem. Please check your Internet connection. '
             'License generation is skipped.')
@@ -1300,5 +1301,7 @@ class FetchLicenseTest(unittest.TestCase):
         assert model.pre_process_and_fetch_license_dict([]) == expected
 
         have_network_connection.return_value = True
+        valid_api_url.return_value = True
         expected = ({}, [])
+
         assert model.pre_process_and_fetch_license_dict([]) == expected
