@@ -1626,8 +1626,6 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                         key_text_dict[lic_key] = detail_list
                 if not about.license_key.value:
                     about.license_key.value = lic_list
-    print("1111111111111111111")
-    print(key_text_dict)
     return key_text_dict, errors
 
 
