@@ -455,7 +455,8 @@ def write_excel(location, data):
     wb = openpyxl.Workbook()
     ws = wb.active
 
-    headers = list(set(itertools.chain.from_iterable(data)))
+    # Get the header
+    headers = list(data[0].keys())
     ws.append(headers)
 
     for elements in data:
