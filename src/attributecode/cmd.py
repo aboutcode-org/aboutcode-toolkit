@@ -368,6 +368,7 @@ OUTPUT: Path where to write the attribution document.
 
     rendered = ''
     license_dict = {}
+    errors = []
 
     if not quiet:
         print_version()
@@ -392,7 +393,7 @@ OUTPUT: Path where to write the attribution document.
             click.echo(msg)
             sys.exit(1)
 
-    if input.endswith('.json') or input.endswith('.csv'):
+    if input.endswith('.json') or input.endswith('.csv') or input.endswith('.xlsx'):
         is_about_input = False
         from_attrib = True
         if not reference:
@@ -409,8 +410,12 @@ OUTPUT: Path where to write the attribution document.
         errors, abouts = collect_inventory(input)
 
     if not abouts:
-        msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
-        click.echo(msg)
+        if errors:
+            errors = unique(errors)
+            errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+        else:
+            msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
+            click.echo(msg)
         sys.exit(1)
 
     if not is_about_input:

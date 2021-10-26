@@ -717,7 +717,7 @@ def validate_fields(fields, about_file_path, running_inventory, base_dir,
 def validate_field_name(name):
     if not is_valid_name(name):
         msg = ('Field name: %(name)r contains illegal name characters: '
-               '0 to 9, a to z, A to Z and _. (or empty spaces)')
+               '0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored.')
         return Error(CRITICAL, msg % locals())
 
 
