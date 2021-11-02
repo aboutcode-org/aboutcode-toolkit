@@ -1576,10 +1576,10 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                 converted_lic_exp = about.license_expressions.value.strip("[").strip("]").replace('\'','').replace(' ','')
                 # Convert the updated lic_exp string to list
                 converted_lic_list = converted_lic_exp.split(',')
-            for lic in converted_lic_list:
-                # Only keep unique license keys
-                if not lic in lic_list:
-                    lic_list.append(lic)
+                for lic in converted_lic_list:
+                    # Only keep unique license keys
+                    if not lic in lic_list:
+                        lic_list.append(lic)
             lic_exp = " AND ".join(lic_list)
             about.license_expression.value = lic_exp
             about.license_expression.present = True
