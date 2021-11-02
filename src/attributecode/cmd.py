@@ -370,10 +370,6 @@ OUTPUT: Path where to write the attribution document.
     license_dict = {}
     errors = []
 
-    if not quiet:
-        print_version()
-        click.echo('Generating attribution...')
-
     # accept zipped ABOUT files as input
     if input.lower().endswith('.zip'):
         input = extract_zip(input)
@@ -413,6 +409,8 @@ OUTPUT: Path where to write the attribution document.
         if errors:
             errors = unique(errors)
             errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+            msg = 'Attribution generation halted.'
+            click.echo(msg)
         else:
             msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
             click.echo(msg)
@@ -447,6 +445,9 @@ OUTPUT: Path where to write the attribution document.
                     #sys.exit(1)
 
     if abouts:
+        if not quiet:
+            print_version()
+            click.echo('Generating attribution...')
         attrib_errors, rendered = generate_attribution_doc(
             abouts=abouts,
             is_about_input=is_about_input,
