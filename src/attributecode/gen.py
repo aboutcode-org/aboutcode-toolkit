@@ -226,7 +226,17 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             if not e in errors:
                 errors.extend(ld_errors)
         abouts.append(about)
-
+    # Covert the license_score value from string to list of int
+    # The licesne_score is not in the spec but is specify in the scancode license scan.
+    # This key will be treated as a custom string field. Therefore, we need to
+    # convert back to the list with float type for score.
+    if scancode:
+        for about in abouts:
+            try:
+                score_list = list(map(float, about.license_score.value.replace('[', '').replace(']', '').split(',')))
+                about.license_score.value = score_list
+            except:
+                pass
     return unique(errors), abouts
 
 

@@ -472,6 +472,7 @@ def ungroup_licenses(licenses):
     lic_name = []
     lic_file = []
     lic_url = []
+    lic_score = []
     for lic in licenses:
         if 'key' in lic:
             lic_key.append(lic['key'])
@@ -481,7 +482,9 @@ def ungroup_licenses(licenses):
             lic_file.append(lic['file'])
         if 'url' in lic:
             lic_url.append(lic['url'])
-    return lic_key, lic_name, lic_file, lic_url
+        if 'score' in lic:
+            lic_score.append(lic['score'])
+    return lic_key, lic_name, lic_file, lic_url, lic_score
 
 
 # FIXME: add docstring

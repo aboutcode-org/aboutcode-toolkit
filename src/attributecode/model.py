@@ -1029,7 +1029,7 @@ class About(object):
                 continue
             if key == u'licenses':
                 # FIXME: use a license object instead
-                lic_key, lic_name, lic_file, lic_url = ungroup_licenses(value)
+                lic_key, lic_name, lic_file, lic_url, lic_score = ungroup_licenses(value)
                 if lic_key:
                     fields.append(('license_key', lic_key))
                 if lic_name:
@@ -1038,6 +1038,9 @@ class About(object):
                     fields.append(('license_file', lic_file))
                 if lic_url:
                     fields.append(('license_url', lic_url))
+                # The license score is a key from scancode license scan
+                if lic_score:
+                    fields.append(('license_score', lic_score))
                 # The licenses field has been ungrouped and can be removed.
                 # Otherwise, it will gives the following INFO level error
                 # 'Field licenses is a custom field.'

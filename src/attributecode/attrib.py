@@ -114,6 +114,9 @@ def generate(abouts, is_about_input, license_dict, min_license_score, template=N
             # Add the license name expression string into the about object as a list
             about.license_name_expression = lic_name_expression
 
+    # Sort the license object by key
+    licenses_list = sorted(licenses_list, key=lambda x: x.key)
+
     rendered = template.render(
         abouts=abouts, 
         common_licenses=COMMON_LICENSES,

@@ -1,8 +1,3 @@
-{#
-about object and license dictionary are passed.
-See https://scancode-licensedb.aboutcode.org/
-Read the JSON file to see what information can be extracted from the licenses.
-#}
 <!doctype html>
 <html>
   <head>
