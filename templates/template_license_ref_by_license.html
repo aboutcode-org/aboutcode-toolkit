@@ -1,66 +1,66 @@
 <!doctype html>
 <html>
 <head>
-	<style type="text/css">
-		div.additional-license-text-list {display:block}
-		body {font-family: Helvetica, Arial, sans-serif;}
-		pre {white-space: pre-wrap;}
-		li {font-weight: bold;}
-		#header {font-family: Helvetica; font-style:italic}
-	</style>
-	<title>{{ variables['title'] }}</title>
+    <style type="text/css">
+        div.additional-license-text-list {display:block}
+        body {font-family: Helvetica, Arial, sans-serif;}
+        pre {white-space: pre-wrap;}
+        li {font-weight: bold;}
+        #header {font-family: Helvetica; font-style:italic}
+    </style>
+    <title>{{ variables['title'] }}</title>
 </head>
 <body>
-	<h1>{{ variables['title'] }}</h1>
-	<pre id="header">
+    <h1>{{ variables['title'] }}</h1>
+    <pre id="header">
 
 This document lists the open source and third-party components of a [COMPANY NAME] product with additional information regarding licenses, acknowledgments and required copyright notices for these components.  This document is for internal [COMPANY NAME] use only.
 
-	</pre>
+    </pre>
 
-	<hr>
-	<div class="oss-table-of-contents">
-		{% for license in licenses_list %}
-		<p>
-			<a href="#group_{{ loop.index0 }}">{{ license.name }}
-			</a>
-		</p>
-		{% endfor %}
-		
-	</div>
-	<hr>
+    <hr>
+    <div class="oss-table-of-contents">
+        {% for license in licenses_list %}
+        <p>
+            <a href="#group_{{ loop.index0 }}">{{ license.name }}
+            </a>
+        </p>
+        {% endfor %}
 
-	{% for license in licenses_list %}
-		<div id="group_{{ loop.index0 }}">
-			<h3>{{ license.name }}</h3>
-			<p>This product contains the following open source software packages licensed under the terms of the license: {{license.name}}</p>
-			
-			<div class="oss-component" id="component_{{ loop.index0 }}">
-			{%for about_object in abouts %} 
-				{% if loop.first %}
-					{% if license.url %}
-						<p>License Gallery URL: <a href="{{ license.url }}">{{license.url}}</a> </p>
-					{% endif %}
-				{% endif %}
-				{% if license.key in about_object.license_key.value %}        
-					<li>{{ about_object.name.value }}{% if about_object.version.value %}  - Version  {{ about_object.version.value }}{% endif %}</li>		
-					{% if about_object.copyright.value %}
-						<pre>{{about_object.copyright.value}}</pre>
-					{% endif %}
-					{% if about_object.notice_file.value %}
-						<pre>{{ about_object.notice_file.value }}</pre>
-					{% elif about_object.notice_file.value %}
-						<pre class="component-notice">{{ about_object.notice_text.value }}</pre>
-					{% endif %}
-				{% endif %}
-				{% if loop.last %}
-					<pre>{{license.text}}</pre>
-				{% endif %}
-			{% endfor %}
-			</div>
-		</div>
-	{% endfor %}
-	<hr>
+    </div>
+    <hr>
+
+    {% for license in licenses_list %}
+        <div id="group_{{ loop.index0 }}">
+            <h3>{{ license.name }}</h3>
+            <p>This product contains the following open source software packages licensed under the terms of the license: {{license.name}}</p>
+            
+            <div class="oss-component" id="component_{{ loop.index0 }}">
+            {%for about_object in abouts %} 
+                {% if loop.first %}
+                    {% if license.url %}
+                        <p>License Gallery URL: <a href="{{ license.url }}">{{license.url}}</a> </p>
+                    {% endif %}
+                {% endif %}
+                {% if license.key in about_object.license_key.value %}        
+                    <li>{{ about_object.name.value }}{% if about_object.version.value %}  - Version  {{ about_object.version.value }}{% endif %}</li>       
+                    {% if about_object.copyright.value %}
+                        <pre>{{about_object.copyright.value}}</pre>
+                    {% endif %}
+                    {% if about_object.notice_file.value %}
+                        <pre>{{ about_object.notice_file.value }}</pre>
+                    {% elif about_object.notice_file.value %}
+                        <pre class="component-notice">{{ about_object.notice_text.value }}</pre>
+                    {% endif %}
+                {% endif %}
+                {% if loop.last %}
+                    <pre>{{license.text}}</pre>
+                {% endif %}
+            {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+    <hr>
 <hr> 
 <h3><a id="End">End</a></h3>
 </body>
