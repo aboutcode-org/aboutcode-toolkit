@@ -211,6 +211,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         ld_errors = about.load_dict(
             fields,
             base_dir,
+            scancode=scancode,
             from_attrib=from_attrib,
             running_inventory=False,
             reference_dir=reference_dir,
@@ -237,6 +238,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                 about.license_score.value = score_list
             except:
                 pass
+
     return unique(errors), abouts
 
 

@@ -279,7 +279,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
 def validate_template(ctx, param, value):
     if not value:
-        return DEFAULT_TEMPLATE_FILE
+        return None
 
     with io.open(value, encoding='utf-8') as templatef:
         template_error = check_template(templatef.read())
@@ -383,7 +383,7 @@ OUTPUT: Path where to write the attribution document.
             msg = 'The input file from scancode toolkit needs to be in JSON format.'
             click.echo(msg)
             sys.exit(1)
-        if not min_license_score:
+        if not min_license_score and not min_license_score == 0:
             min_license_score=DEFAULT_LICENSE_SCORE
 
     if min_license_score:
@@ -452,6 +452,7 @@ OUTPUT: Path where to write the attribution document.
             is_about_input=is_about_input,
             license_dict=dict(sorted(license_dict.items())),
             output_location=output,
+            scancode=scancode,
             min_license_score=min_license_score,
             template_loc=template,
             variables=vartext,

@@ -944,7 +944,7 @@ class About(object):
         return errors
 
     def process(self, fields, about_file_path, running_inventory=False,
-                base_dir=None, from_attrib=False, reference_dir=None):
+                base_dir=None, scancode=False, from_attrib=False, reference_dir=None):
         """
         Validate and set as attributes on this About object a sequence of
         `fields` name/value tuples. Return a list of errors.
@@ -961,13 +961,18 @@ class About(object):
             errors.extend(copy_err)
 
         # TODO: why? we validate all fields, not only these hydrated
-        validation_errors = validate_fields(
-            self.all_fields(),
-            about_file_path,
-            running_inventory,
-            self.base_dir,
-            self.reference_dir)
-        errors.extend(validation_errors)
+        # The validate functions does not allow duplicated entry for a list meaning
+        # it will cause problem when using scancode license detection as an input as
+        # it usually returns duplicated license_key and many license have duplicated
+        # score such as 100. We need to handle this scenario using different method.
+        if not scancode:
+            validation_errors = validate_fields(
+                self.all_fields(),
+                about_file_path,
+                running_inventory,
+                self.base_dir,
+                self.reference_dir)
+            errors.extend(validation_errors)
         return errors
 
     def load(self, location):
@@ -1015,7 +1020,7 @@ class About(object):
 
     # FIXME: should be a from_dict class factory instead
     # FIXME: running_inventory: remove this : this should be done in the commands, not here
-    def load_dict(self, fields_dict, base_dir, from_attrib=False, running_inventory=False, reference_dir=None,):
+    def load_dict(self, fields_dict, base_dir, scancode=False, from_attrib=False, running_inventory=False, reference_dir=None,):
         """
         Load this About object file from a `fields_dict` name/value dict.
         Return a list of errors.
@@ -1046,14 +1051,17 @@ class About(object):
                 # 'Field licenses is a custom field.'
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
+
         errors = self.process(
             fields=fields,
             about_file_path=self.about_file_path,
             running_inventory=running_inventory,
             base_dir=base_dir,
+            scancode=scancode,
             from_attrib=from_attrib,
             reference_dir=reference_dir,
         )
+
         self.errors = errors
         return errors
 
@@ -1570,20 +1578,10 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
         if scancode:
             lic_exp = ''
             lic_list = []
-            # Since the model treats license_expressions (from scancode scan) as a custom field
-            # in string format, we need to capture this string to convert to a list
-            # and then use the `AND` condition if multiple licenses exist.
-            # See https://github.com/nexB/aboutcode-toolkit/issues/479#issuecomment-946328428 
+            # The license_expressions return from scancode is a list of license keys.
+            # Therefore, we will combine it with the 'AND' condition
             if about.license_expressions.value:
-                # Stripping '[', ']', quote and spaces
-                converted_lic_exp = about.license_expressions.value.strip("[").strip("]").replace('\'','').replace(' ','')
-                # Convert the updated lic_exp string to list
-                converted_lic_list = converted_lic_exp.split(',')
-                for lic in converted_lic_list:
-                    # Only keep unique license keys
-                    if not lic in lic_list:
-                        lic_list.append(lic)
-            lic_exp = " AND ".join(lic_list)
+                lic_exp = " AND ".join(about.license_expressions.value)
             about.license_expression.value = lic_exp
             about.license_expression.present = True
 

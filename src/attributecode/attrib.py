@@ -34,9 +34,12 @@ from attributecode.attrib_util import multi_sort
 DEFAULT_TEMPLATE_FILE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), '../../templates', 'default_html.template')
 
+DEFAULT_TEMPLATE_SCANCODE_FILE = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), '../../templates', 'scancode_html.template')
+
 DEFAULT_LICENSE_SCORE = 100
 
-def generate(abouts, is_about_input, license_dict, min_license_score, template=None, variables=None):
+def generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=None, variables=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template` template text and a `variables` optional dict of extra
@@ -96,6 +99,54 @@ def generate(abouts, is_about_input, license_dict, min_license_score, template=N
             license_object = License(key, name, filename, url, text)
             licenses_list.append(license_object)
 
+
+    # We need special treatment for scancode input.
+    # Each about_object may have duplicated license key and same/different license score
+    # We will only keep the unique license key with the highest license score.
+    # The process will update the license_key, license_name and license_score.
+    if scancode:
+        meet_score_licenses_list = []
+        for about in abouts:
+            # We will use a dictionary to keep the unique license key
+            # which the dictionary key is the license key and the dictionary value
+            # is (lic_score, lic_name)
+            if about.license_key.value:
+                updated_dict = {}
+                lic_key = about.license_key.value
+                lic_name = about.license_name.value
+                lic_score = about.license_score.value
+                assert len(lic_key) == len(lic_name)
+                assert len(lic_key) == len(lic_score)
+                if lic_key:
+                    index = 0
+                    for key in lic_key:
+                        if key in updated_dict:
+                            previous_score, _name = updated_dict[key]
+                            current_score = lic_score[index]
+                            if current_score > previous_score:
+                                updated_dict[key] = (lic_score[index], lic_name[index])
+                        else:
+                            updated_dict[key] = (lic_score[index], lic_name[index])
+                        index = index + 1
+                updated_lic_key = []
+                updated_lic_name = []
+                updated_lic_score = []
+                for lic in updated_dict:
+                    score, name = updated_dict[lic]
+                    if score >= min_license_score:
+                        updated_lic_key.append(lic)
+                        updated_lic_score.append(score)
+                        updated_lic_name.append(name)
+                        if not lic in meet_score_licenses_list:
+                            meet_score_licenses_list.append(lic)
+                about.license_key.value = updated_lic_key
+                about.license_name.value = updated_lic_name
+                about.license_score.value = updated_lic_score
+
+        for lic in licenses_list:
+            if not lic.key in meet_score_licenses_list:
+                licenses_list.remove(lic)
+
     for about in abouts:
         # Create a license expression with license name
         if about.license_expression.value:
@@ -121,7 +172,6 @@ def generate(abouts, is_about_input, license_dict, min_license_score, template=N
         abouts=abouts, 
         common_licenses=COMMON_LICENSES,
         licenses_list=licenses_list,
-        min_license_score=min_license_score,
         utcnow=utcnow,
         tkversion=__version__,
         variables=variables
@@ -150,7 +200,7 @@ def check_template(template_string):
         return e.lineno, e.message
 
 
-def generate_from_file(abouts, is_about_input, license_dict, min_license_score, template_loc=DEFAULT_TEMPLATE_FILE, variables=None):
+def generate_from_file(abouts, is_about_input, license_dict, scancode, min_license_score, template_loc=None, variables=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template_loc` template file location and a `variables` optional
@@ -159,13 +209,19 @@ def generate_from_file(abouts, is_about_input, license_dict, min_license_score, 
     Return a tuple of (error, attribution text) where error is an Error object
     or None and attribution text is the generated text or None.
     """
-    template_loc = add_unc(template_loc)
+    if not template_loc:
+        if scancode:
+            template_loc = add_unc(DEFAULT_TEMPLATE_SCANCODE_FILE)
+        else:
+            template_loc = add_unc(DEFAULT_TEMPLATE_FILE)
+    else:
+        template_loc = add_unc(template_loc)
     with io.open(template_loc, encoding='utf-8') as tplf:
         tpls = tplf.read()
-    return generate(abouts, is_about_input, license_dict, min_license_score, template=tpls, variables=variables)
+    return generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=tpls, variables=variables)
 
 
-def generate_and_save(abouts, is_about_input, license_dict, output_location, min_license_score=0, template_loc=None, variables=None):
+def generate_and_save(abouts, is_about_input, license_dict, output_location, scancode=False, min_license_score=0, template_loc=None, variables=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
     `template_loc` template file location and a `variables` optional
@@ -187,6 +243,7 @@ def generate_and_save(abouts, is_about_input, license_dict, output_location, min
         abouts,
         is_about_input,
         license_dict,
+        scancode=scancode,
         min_license_score=min_license_score,
         template_loc=template_loc,
         variables=variables,
