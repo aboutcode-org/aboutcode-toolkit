@@ -13,6 +13,7 @@
     * Add Dockerfile to run aboutcode with docker
     * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library
     * Add ability to transform Excel formatted file 
+    * Generate attribution directly from CSV/JSON/Excel file
 
 2021-04-02
     Release 6.0.0
