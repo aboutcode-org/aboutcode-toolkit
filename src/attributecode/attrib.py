@@ -165,6 +165,9 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
             # Add the license name expression string into the about object as a list
             about.license_name_expression = lic_name_expression
 
+    # Sort the about objects by name
+    abouts = sorted(abouts, key=lambda x: x.name.value.lower())
+
     # Sort the license object by key
     licenses_list = sorted(licenses_list, key=lambda x: x.key)
 
