@@ -1612,7 +1612,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                             try:
                                 json_url = urlopen(license_url)
                                 data = json.loads(json_url.read())
-                                license_name = data['name']
+                                license_name = data['short_name']
                                 license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
                                 license_filename = data['key'] + '.LICENSE'
                                 lic_url = url + license_filename
