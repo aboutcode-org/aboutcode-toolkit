@@ -32,9 +32,7 @@
             <p>This component is licensed under {{ about_object.license_expression.value }}</p>
         {% endif %}
         {% if about_object.copyright.value %}
-            <pre>
-                {{about_object.copyright.value}}
-            </pre>
+            <pre>{{about_object.copyright.value}}</pre>
         {% endif %}
         {% if about_object.notice_file.value %}
             {% for notice in about_object.notice_file.value %}
