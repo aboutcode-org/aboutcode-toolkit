@@ -14,7 +14,7 @@
     <h1>{{ variables['title'] }}</h1>
     <pre id="header">
 
-This document lists the open source and third-party components of a [COMPANY NAME] product with additional information regarding licenses, acknowledgments and required copyright notices for these components.  This document is for internal [COMPANY NAME] use only.
+This document lists the open source and third-party components of a {{ variables['company'] }} product with additional information regarding licenses, acknowledgments and required copyright notices for these components.  This document is for internal {{ variables['company'] }} use only.
 
     </pre>
 
