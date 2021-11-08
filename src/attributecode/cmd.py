@@ -726,7 +726,7 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
     messages, severe_errors_count = get_error_messages(errors, quiet, verbose)
     for msg in messages:
         click.echo(msg)
-    if log_file_loc:
+    if log_file_loc and errors:
         log_msgs, _ = get_error_messages(errors, quiet=False, verbose=True)
         with io.open(log_file_loc, 'w', encoding='utf-8') as lf:
             lf.write('\n'.join(log_msgs))
