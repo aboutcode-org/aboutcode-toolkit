@@ -89,7 +89,8 @@ class GenerateTest(unittest.TestCase):
         license_dict = {}
         is_about_input = True
         min_license_score=0
-        error, result = attrib.generate(abouts, is_about_input, license_dict, min_license_score, template=template)
+        scancode = False
+        error, result = attrib.generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=template)
         assert expected == result
         assert not error
 
@@ -101,8 +102,9 @@ class GenerateTest(unittest.TestCase):
         license_dict = {}
         is_about_input = True
         min_license_score=0
+        scancode = False
 
-        error, result = attrib.generate_from_file(abouts, is_about_input, license_dict, min_license_score)
+        error, result = attrib.generate_from_file(abouts, is_about_input, license_dict, scancode, min_license_score)
         assert not error
 
         expected_file = get_test_loc(
@@ -140,9 +142,12 @@ class GenerateTest(unittest.TestCase):
     def test_scancode_input(self):
         test_file = get_test_loc('test_attrib/scancode_input/clean-text-0.3.0-mod-lceupi.json')
         errors, abouts = gen.load_inventory(test_file, scancode=True)
-        expected_errors = [(40, 'Field about_resource: Unable to verify path: isc_lic.py: No base directory provided')]
+        # No validation is done for the scancode input as it usually contains duplicated entry of
+        # detected licenses which is not allow in the current spec.
+        #expected_errors = [(40, 'Field about_resource: Unable to verify path: isc_lic.py: No base directory provided')]
         result = [(level, e) for level, e in errors if level > INFO]
-        assert expected_errors == result
+        #assert expected_errors == result
+        assert result == []
 
         lic_dict = {'isc': ['ISC License',
                             'isc.LICENSE',
@@ -153,7 +158,8 @@ class GenerateTest(unittest.TestCase):
                             'Permission is hereby granted, free of charge, to any person obtaining\na copy of this software and associated documentation files (the\n"Software"), to deal in the Software without restriction, including\nwithout limitation the rights to use, copy, modify, merge, publish,\ndistribute, sublicense, and/or sell copies of the Software, and to\npermit persons to whom the Software is furnished to do so, subject to\nthe following conditions:\n\nThe above copyright notice and this permission notice shall be\nincluded in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\nIN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY\nCLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,\nTORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE\nSOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.',
                             'https://scancode-licensedb.aboutcode.org/mit.LICENSE']}
         is_about_input = False
-        errors, result = attrib.generate_from_file(abouts, is_about_input, lic_dict, min_license_score=0)
+        scancode = True
+        errors, result = attrib.generate_from_file(abouts, is_about_input, lic_dict, scancode, min_license_score=0)
         expected_errors = []
         #result = [(level, e) for level, e in errors if level > INFO]
         #assert expected_errors == result
@@ -171,7 +177,7 @@ class GenerateTest(unittest.TestCase):
         # expected doesn't work well, it works after removed all the newline and spaces
         #assert expected == result
         #assert expected.splitlines(False) == result.splitlines(False)
-        assert expected.replace('\n','').replace(' ','') == result.replace('\n','').replace(' ','')
+        assert expected.replace('\n','').replace(' ','').replace('\t','') == result.replace('\n','').replace(' ','').replace('\t','')
 
     def test_generate_with_csv(self):
         test_file = get_test_loc('test_attrib/default_template/simple_sample.csv')
@@ -182,7 +188,9 @@ class GenerateTest(unittest.TestCase):
                             'Permission to use, copy, modify, and/or distribute this software for any purpose\nwith or without fee is hereby granted, provided that the above copyright notice\nand this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH\nREGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND\nFITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,\nINDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS\nOF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER\nTORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF\nTHIS SOFTWARE.\n',
                             'https://scancode-licensedb.aboutcode.org/isc.LICENSE']}
         is_about_input = False
-        error, result = attrib.generate_from_file(abouts, is_about_input, lic_dict, min_license_score=0)
+        scancode = False
+
+        error, result = attrib.generate_from_file(abouts, is_about_input, lic_dict, scancode, min_license_score=0)
         assert not error
 
         expected_file = get_test_loc(
