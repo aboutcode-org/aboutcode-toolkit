@@ -78,15 +78,10 @@ class GenTest(unittest.TestCase):
     def test_load_inventory(self):
         location = get_test_loc('test_gen/inv.csv')
         base_dir = get_temp_dir()
-        errors, abouts = gen.load_inventory(location, base_dir)
+        errors, abouts = gen.load_inventory(location, base_dir=base_dir)
 
-        expected_errors = [
-            Error(INFO, 'Field custom1 is a custom field.'),
-            Error(INFO, 'Field about_resource: Path')
-        ]
-        for exp, err in zip(expected_errors, errors):
-            assert exp.severity == err.severity
-            assert err.message.startswith(exp.message)
+        expected_num_errors = 29
+        assert len(errors) == expected_num_errors 
 
         expected = (
 '''about_resource: .
@@ -106,8 +101,7 @@ custom1: |
     def test_load_inventory_with_errors(self):
         location = get_test_loc('test_gen/inv4.csv')
         base_dir = get_temp_dir()
-        errors, abouts = gen.load_inventory(location, base_dir)
-
+        errors, abouts = gen.load_inventory(location, base_dir=base_dir)
         expected_errors = [
             Error(CRITICAL, "Field name: 'confirmed copyright' contains illegal name characters: 0 to 9, a to z, A to Z and _."),
             Error(INFO, 'Field resource is a custom field.'),
@@ -133,6 +127,43 @@ custom1: |
         result = [a.dumps() for a in abouts]
         assert expected == result[0]
 
+    def test_load_inventory_simple_xlsx(self):
+        location = get_test_loc('test_gen/load/simple_sample.xlsx')
+        base_dir = get_temp_dir()
+        errors, abouts = gen.load_inventory(location, base_dir=base_dir)
+        expected_errors = []
+        result = [(level, e) for level, e in errors if level > INFO]
+        assert expected_errors == result
+
+        assert abouts[0].name.value == 'cryptohash-sha256'
+        assert abouts[1].name.value == 'some_component'
+        
+        assert abouts[0].version.value == 'v 0.11.100.1'
+        assert abouts[1].version.value == 'v 0.0.1'
+
+        assert abouts[0].license_expression.value == 'bsd-new and mit'
+        assert abouts[1].license_expression.value == 'mit'
+
+
+    def test_load_scancode_json(self):
+        location = get_test_loc('test_gen/load/clean-text-0.3.0-lceupi.json')
+        inventory = gen.load_scancode_json(location)
+
+        expected = {'about_resource': 'clean-text-0.3.0', 'type': 'directory',
+                    'name': 'clean-text-0.3.0', 'base_name': 'clean-text-0.3.0',
+                    'extension': '', 'size': 0, 'date': None, 'sha1': None,
+                    'md5': None, 'sha256': None, 'mime_type': None, 'file_type': None,
+                    'programming_language': None, 'is_binary': False, 'is_text': False,
+                    'is_archive': False, 'is_media': False, 'is_source': False,
+                    'is_script': False, 'licenses': [], 'license_expressions': [],
+                    'percentage_of_license_text': 0, 'copyrights': [], 'holders': [],
+                    'authors': [], 'packages': [], 'emails': [], 'urls': [], 'files_count': 9,
+                    'dirs_count': 1, 'size_count': 32826, 'scan_errors': []}
+
+        # We will only check the first element in the inventory list 
+        assert inventory[0] == expected
+
+
     def test_generation_dir_endswith_space(self):
         location = get_test_loc('test_gen/inventory/complex/about_file_path_dir_endswith_space.csv')
         base_dir = get_temp_dir()
@@ -148,6 +179,7 @@ custom1: |
         location = get_test_loc('test_gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
+
         expected = dict([('.', None)])
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
@@ -267,6 +299,7 @@ licenses:
         errors, abouts = gen.generate(location, base_dir)
 
         lic_dict = {u'public-domain': [u'Public Domain',
+                                       u'public-domain.LICENSE',
                                        u'This component is released to the public domain by the author.',
                                        u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain'
                                        ]}
@@ -297,6 +330,7 @@ licenses:
         errors, abouts = gen.generate(location, base_dir)
 
         lic_dict = {u'public-domain': [u'Public Domain',
+                                       u'public-domain.LICENSE',
                                        u'This component is released to the public domain by the author.',
                                        u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain'
                                        ]}

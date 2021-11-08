@@ -581,7 +581,7 @@ this software and releases the component to Public Domain.
         test_file = get_test_loc('test_model/parse/non_ascii_field_name_value.about')
         a = model.About(test_file)
         expected = [
-            Error(CRITICAL, "Field name: 'mat\xedas' contains illegal name characters: 0 to 9, a to z, A to Z and _. (or empty spaces)")
+            Error(CRITICAL, "Field name: 'mat\xedas' contains illegal name characters: 0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored.")
         ]
         assert expected == a.errors
 
@@ -713,7 +713,7 @@ licenses:
     file: license2.LICENSE
     url: some_url
 '''
-        lic_dict = {u'license1': [u'License1', u'', u'some_url'], u'license2' : [u'License2', u'', u'some_url']}
+        lic_dict = {u'license1': [u'License1', u'license1.LICENSE',u'', u'some_url'], u'license2' : [u'License2', u'license2.LICENSE', u'', u'some_url']}
         assert about.dumps(lic_dict) == expected
 
 
@@ -1068,7 +1068,7 @@ class CollectorTest(unittest.TestCase):
         result = [a.about_file_path for a in abouts]
         assert expected == result
 
-    def test_collect_inventory_return_no_warnings_and_model_can_uuse_relative_paths(self):
+    def test_collect_inventory_return_no_warnings_and_model_can_use_relative_paths(self):
         test_loc = get_test_loc('test_model/rel/allAboutInOneDir')
         errors, _abouts = model.collect_inventory(test_loc)
         expected_errors = []
@@ -1276,16 +1276,32 @@ class FetchLicenseTest(unittest.TestCase):
 
     @mock.patch('attributecode.util.have_network_connection')
     @mock.patch('attributecode.model.valid_api_url')
-    def test_pre_process_and_fetch_license_dict(self, have_network_connection, valid_api_url):
+    def test_pre_process_and_fetch_license_dict_dje(self, have_network_connection, valid_api_url):
         have_network_connection.return_value = True
-
         valid_api_url.return_value = False
         error_msg = (
             'Network problem. Please check your Internet connection. '
             'License generation is skipped.')
         expected = ({}, [Error(ERROR, error_msg)])
-        assert model.pre_process_and_fetch_license_dict([], '', '') == expected
+        assert model.pre_process_and_fetch_license_dict([]) == expected
 
         valid_api_url.return_value = True
         expected = ({}, [])
-        assert model.pre_process_and_fetch_license_dict([], '', '') == expected
+        assert model.pre_process_and_fetch_license_dict([]) == expected
+
+    @mock.patch('attributecode.util.have_network_connection')
+    @mock.patch('attributecode.model.valid_api_url')
+    def test_pre_process_and_fetch_license_dict_licensedb(self, have_network_connection, valid_api_url):
+        have_network_connection.return_value = False
+        valid_api_url.return_value = False
+        error_msg = (
+            'Network problem. Please check your Internet connection. '
+            'License generation is skipped.')
+        expected = ({}, [Error(ERROR, error_msg)])
+        assert model.pre_process_and_fetch_license_dict([]) == expected
+
+        have_network_connection.return_value = True
+        valid_api_url.return_value = True
+        expected = ({}, [])
+
+        assert model.pre_process_and_fetch_license_dict([]) == expected

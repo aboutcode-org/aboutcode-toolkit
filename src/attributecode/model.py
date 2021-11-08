@@ -500,7 +500,6 @@ class PathField(ListField):
                     location = None
                     paths[path] = location
                     continue
-
                 if self.reference_dir:
                     location = posixpath.join(self.reference_dir, path)
                 else:
@@ -517,7 +516,7 @@ class PathField(ListField):
                         normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
                         location = posixpath.join(self.base_dir, normalized_arp)
                     else:
-                        location = posixpath.join(self.base_dir, path)
+                        location = posixpath.normpath(posixpath.join(self.base_dir, path))
 
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
@@ -718,9 +717,20 @@ def validate_fields(fields, about_file_path, running_inventory, base_dir,
 def validate_field_name(name):
     if not is_valid_name(name):
         msg = ('Field name: %(name)r contains illegal name characters: '
-               '0 to 9, a to z, A to Z and _. (or empty spaces)')
+               '0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored.')
         return Error(CRITICAL, msg % locals())
 
+
+class License:
+    """
+    Represent a License object
+    """
+    def __init__(self, key, name, filename, url, text):
+        self.key = key
+        self.name = name
+        self.filename = filename
+        self.url = url
+        self.text = text
 
 class About(object):
     """
@@ -934,7 +944,7 @@ class About(object):
         return errors
 
     def process(self, fields, about_file_path, running_inventory=False,
-                base_dir=None, reference_dir=None):
+                base_dir=None, scancode=False, from_attrib=False, reference_dir=None):
         """
         Validate and set as attributes on this About object a sequence of
         `fields` name/value tuples. Return a list of errors.
@@ -945,19 +955,24 @@ class About(object):
 
         errors = self.hydrate(fields)
         # We want to copy the license_files before the validation
-        if reference_dir:
+        if reference_dir and not from_attrib:
             copy_err = copy_license_notice_files(
                 fields, base_dir, reference_dir, afp)
             errors.extend(copy_err)
 
         # TODO: why? we validate all fields, not only these hydrated
-        validation_errors = validate_fields(
-            self.all_fields(),
-            about_file_path,
-            running_inventory,
-            self.base_dir,
-            self.reference_dir)
-        errors.extend(validation_errors)
+        # The validate functions does not allow duplicated entry for a list meaning
+        # it will cause problem when using scancode license detection as an input as
+        # it usually returns duplicated license_key and many license have duplicated
+        # score such as 100. We need to handle this scenario using different method.
+        if not scancode:
+            validation_errors = validate_fields(
+                self.all_fields(),
+                about_file_path,
+                running_inventory,
+                self.base_dir,
+                self.reference_dir)
+            errors.extend(validation_errors)
         return errors
 
     def load(self, location):
@@ -993,7 +1008,7 @@ class About(object):
             """
             running_inventory = True
             data = saneyaml.load(input, allow_duplicate_keys=False)
-            errs = self.load_dict(data, base_dir, running_inventory)
+            errs = self.load_dict(data, base_dir, running_inventory=running_inventory)
             errors.extend(errs)
         except Exception as e:
             trace = traceback.format_exc()
@@ -1005,7 +1020,7 @@ class About(object):
 
     # FIXME: should be a from_dict class factory instead
     # FIXME: running_inventory: remove this : this should be done in the commands, not here
-    def load_dict(self, fields_dict, base_dir, running_inventory=False, reference_dir=None,):
+    def load_dict(self, fields_dict, base_dir, scancode=False, from_attrib=False, running_inventory=False, reference_dir=None,):
         """
         Load this About object file from a `fields_dict` name/value dict.
         Return a list of errors.
@@ -1019,7 +1034,7 @@ class About(object):
                 continue
             if key == u'licenses':
                 # FIXME: use a license object instead
-                lic_key, lic_name, lic_file, lic_url = ungroup_licenses(value)
+                lic_key, lic_name, lic_file, lic_url, lic_score = ungroup_licenses(value)
                 if lic_key:
                     fields.append(('license_key', lic_key))
                 if lic_name:
@@ -1028,18 +1043,25 @@ class About(object):
                     fields.append(('license_file', lic_file))
                 if lic_url:
                     fields.append(('license_url', lic_url))
+                # The license score is a key from scancode license scan
+                if lic_score:
+                    fields.append(('license_score', lic_score))
                 # The licenses field has been ungrouped and can be removed.
                 # Otherwise, it will gives the following INFO level error
                 # 'Field licenses is a custom field.'
                 licenses_field = (key, value)
                 fields.remove(licenses_field)
+
         errors = self.process(
             fields=fields,
             about_file_path=self.about_file_path,
             running_inventory=running_inventory,
             base_dir=base_dir,
+            scancode=scancode,
+            from_attrib=from_attrib,
             reference_dir=reference_dir,
         )
+
         self.errors = errors
         return errors
 
@@ -1106,19 +1128,20 @@ class About(object):
 
         # Group the same license information in a list
         # This `licenses_dict` is a dictionary with license key as the key and the
-        # value is the list of [license_name, license_context, license_url]
+        # value is the list of [license_name, license_filename, license_context, license_url]
         lic_key_copy = license_key[:]
         lic_dict_list = []
         for lic_key in license_key:
             lic_dict = {}
             if licenses_dict and lic_key in licenses_dict:
                 lic_dict['key'] = lic_key
-                lic_name = licenses_dict[lic_key][0]
-                lic_url = licenses_dict[lic_key][2]
-                lic_file = lic_key + '.LICENSE'
+                lic_name, lic_filename, lic_context, lic_url = licenses_dict[lic_key]
+                #lic_name = licenses_dict[lic_key][0]
+                #lic_url = licenses_dict[lic_key][2]
+                #lic_file = lic_key + '.LICENSE'
 
                 lic_dict['name'] = lic_name
-                lic_dict['file'] = lic_file
+                lic_dict['file'] = lic_filename
                 lic_dict['url'] = lic_url
 
                 # Remove the license information if it has been handled
@@ -1127,8 +1150,8 @@ class About(object):
                     license_name.remove(lic_name)
                 if lic_url in license_url:
                     license_url.remove(lic_url)
-                if lic_file in license_file:
-                    license_file.remove(lic_file)
+                if lic_filename in license_file:
+                    license_file.remove(lic_filename)
                 lic_dict_list.append(lic_dict)
 
         # Handle license information that have not been handled.
@@ -1255,20 +1278,18 @@ class About(object):
                 for lic_key in lic_list:
                     try:
                         if license_dict[lic_key]:
-                            """
-                            if not lic_key in self.license_key.value:
-                                self.license_key.value.append(lic_key)
-                            """
                             license_path = posixpath.join(parent, lic_key)
                             license_path += u'.LICENSE'
                             license_path = add_unc(license_path)
-                            license_name, license_context, license_url = license_dict[lic_key]
-                            license_info = (lic_key, license_name, license_context, license_url)
+                            license_name, license_filename, license_context, license_url = license_dict[lic_key]
+                            license_info = (lic_key, license_name, license_filename, license_context, license_url)
                             license_key_name_context_url.append(license_info)
                             with io.open(license_path, mode='w', encoding='utf-8', newline='\n') as lic:
                                 lic.write(license_context)
-                    except:
+                    except Exception as e:
+                        # TODO: it should return error if exception caught
                         pass
+
         return license_key_name_context_url
 
 
@@ -1521,9 +1542,9 @@ def save_as_csv(location, about_dicts, field_names):
     return errors
 
 
-def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
+def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scancode=False, reference=None):
     """
-    Modify a list of About data dictionaries by adding license information
+    Return a dictionary containing the license information (key, name, text, url)
     fetched from the ScanCode LicenseDB or DejaCode API.
     """
     key_text_dict = {}
@@ -1546,13 +1567,25 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
 
     if errors:
         return key_text_dict, errors
-    
+
     for about in abouts:
         # No need to go through all the about objects if '--api_key' is invalid
         auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
-        if about.license_expression.present:
+
+        # Scancode returns license_expressions while ABcTK uses license_expression
+        if scancode:
+            lic_exp = ''
+            lic_list = []
+            # The license_expressions return from scancode is a list of license keys.
+            # Therefore, we will combine it with the 'AND' condition
+            if about.license_expressions.value:
+                lic_exp = " AND ".join(about.license_expressions.value)
+            about.license_expression.value = lic_exp
+            about.license_expression.present = True
+
+        if about.license_expression.value:
             special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
             if special_char_in_expression:
                 msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
@@ -1562,6 +1595,8 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
                 for lic_key in lic_list:
                     if not lic_key in captured_license:
                         lic_url = ''
+                        license_name = ''
+                        license_filename = ''
                         license_text = ''
                         detail_list = []
                         if api_key:
@@ -1569,6 +1604,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
                             for severity, message in errs: 
                                 msg = (about.about_file_path + ": " + message)
                                 errors.append(Error(severity, msg))
+                            license_filename = lic_key + '.LICENSE'
                             lic_url = lic_urn + lic_key
                         else:
                             license_url = url + lic_key + '.json'
@@ -1578,15 +1614,19 @@ def pre_process_and_fetch_license_dict(abouts, api_url, api_key):
                                 data = json.loads(json_url.read())
                                 license_name = data['name']
                                 license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
-                                lic_url = url + data['key'] + '.LICENSE'
+                                license_filename = data['key'] + '.LICENSE'
+                                lic_url = url + license_filename
                             except:
                                 msg = about.about_file_path + u" : Invalid 'license': " + lic_key
                                 errors.append(Error(ERROR, msg))
                         captured_license.append(lic_key)
                         detail_list.append(license_name)
+                        detail_list.append(license_filename)
                         detail_list.append(license_text)
                         detail_list.append(lic_url)
                         key_text_dict[lic_key] = detail_list
+                if not about.license_key.value:
+                    about.license_key.value = lic_list
     return key_text_dict, errors
 
 

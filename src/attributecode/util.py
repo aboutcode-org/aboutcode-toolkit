@@ -13,10 +13,13 @@
 #  limitations under the License.
 # ============================================================================
 
+from collections import OrderedDict
+
 import codecs
 import csv
 import json
 import ntpath
+import openpyxl
 import os
 import posixpath
 import re
@@ -467,6 +470,7 @@ def ungroup_licenses(licenses):
     lic_name = []
     lic_file = []
     lic_url = []
+    lic_score = []
     for lic in licenses:
         if 'key' in lic:
             lic_key.append(lic['key'])
@@ -476,7 +480,9 @@ def ungroup_licenses(licenses):
             lic_file.append(lic['file'])
         if 'url' in lic:
             lic_url.append(lic['url'])
-    return lic_key, lic_name, lic_file, lic_url
+        if 'score' in lic:
+            lic_score.append(lic['score'])
+    return lic_key, lic_name, lic_file, lic_url, lic_score
 
 
 # FIXME: add docstring
@@ -604,6 +610,99 @@ def build_temp_dir(prefix='attributecode-'):
     location = tempfile.mkdtemp(prefix=prefix)
     create_dir(location)
     return location
+
+def get_file_text(file_name, reference):
+    """
+    Return the file content from the license_file/notice_file field from the
+    given reference directory.
+    """
+    error = ''
+    text = ''
+    file_path = os.path.join(reference, file_name)
+    if not os.path.exists(file_path):
+        msg = "The file " + file_path + " does not exist"
+        error = Error(CRITICAL, msg)
+    else:
+        with codecs.open(file_path, 'rb', encoding='utf-8-sig', errors='replace') as txt:
+        #with io.open(file_path, encoding='utf-8') as txt:
+            text = txt.read()
+    return error, text
+
+def convert_object_to_dict(about):
+    """
+    Convert the list of field object
+        [Field(name='name', value=''), Field(name='version', value='')]
+    to a dictionary
+    """
+    about_dict = {}
+    # Convert all the supported fields into a dictionary
+    fields_dict = getattr(about, 'fields')
+    custom_fields_dict = getattr(about, 'custom_fields')
+    supported_dict = {**fields_dict, **custom_fields_dict}
+    for field in supported_dict:
+        key = supported_dict[field].name
+        value = supported_dict[field].value
+        about_dict[key] = value
+    return about_dict
+
+def load_scancode_json(location):
+    """
+    Read the scancode JSON file at `location` and return a list of dictionaries.
+    """
+    mapping_dict = {}
+    updated_results = []
+
+    with open(location) as json_file:
+        results = json.load(json_file)
+    results = results['files']
+    # Rename the "path" to "about_resource"
+    for item in results:
+        updated_dict = {}
+        for key in item:
+            if key == 'path':
+                updated_dict['about_resource'] = item[key]
+            else:
+                updated_dict[key] = item[key]
+        updated_results.append(updated_dict)
+    return updated_results
+
+def load_excel(location):
+    """
+    Read Excel at `location`, return a list of ordered dictionaries, one
+    for each row.
+    """
+    results = []
+    errors = []
+    sheet_obj = openpyxl.load_workbook(location).active
+    max_col = sheet_obj.max_column
+
+    index = 1
+    col_keys = []
+    mapping_dict = {}
+
+    while index <= max_col:
+        value = sheet_obj.cell(row=1, column=index).value
+        if value in col_keys:
+            msg = 'Duplicated column name, ' + str(value) + ', detected.' 
+            errors.append(Error(CRITICAL, msg))
+            return errors, results
+        if value in mapping_dict:
+            value = mapping_dict[value]
+        col_keys.append(value)
+        index = index + 1
+
+    for row in sheet_obj.iter_rows(min_row=2, values_only=True):
+        row_dict = OrderedDict()
+        index = 0
+        while index < max_col:
+            value = row[index]
+            if value:
+                row_dict[col_keys[index]] = value
+            else:
+                row_dict[col_keys[index]] = ''
+            index = index + 1
+        results.append(row_dict)
+    return errors, results
 
 """
 Return True if a string s  name is safe to use as an attribute name.

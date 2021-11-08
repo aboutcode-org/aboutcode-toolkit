@@ -347,8 +347,7 @@ def check_about_stdout(options, expected_loc, regen=False):
     expected_file = get_test_loc(expected_loc, must_exists=True)
     with open(expected_file, 'r') as ef:
         expected = ef.read()
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(result.output)
+
     assert expected.splitlines(False) == result.output.splitlines(False)
 
 

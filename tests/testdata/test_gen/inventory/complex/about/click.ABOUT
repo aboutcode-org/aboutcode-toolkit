@@ -10,8 +10,8 @@ vcs_repository: https://github.com/mitsuhiko/click.git
 description: |
     A simple wrapper around optparse for 
     powerful command line utilities.
-dje_license: bsd-new
-license_text_file: click.LICENSE
+license_expression: bsd-new
+license_file: click.LICENSE
 notes: |
     Click uses parts of optparse written by Gregory P. Ward and maintained 
     by the Python software foundation.  This is limited to code in the parser.py

@@ -5,8 +5,8 @@ download_url: https://pypi.python.org/packages/source/J/Jinja2/Jinja2-2.7.3.tar.
 name: Jinja2
 homepage_url: http://jinja.pocoo.org/
 
-dje_license: bsd-new
-license_text_file: Jinja2.LICENSE
+license_expression: bsd-new
+license_file: Jinja2.LICENSE
 
 vcs_tool: git
 vcs_repository: https://github.com/mitsuhiko/jinja2.git

@@ -10,5 +10,5 @@ vcs_repository: https://bitbucket.org/pypa/wheel
 copyright: |
     copyright (c) 2012-2014 Daniel Holth <dholth@fastmail.fm> and
     contributors.
-dje_license: mit
-license_text_file: wheel.LICENSE
+license_expression: mit
+license_file: wheel.LICENSE

@@ -6,6 +6,6 @@ name: Yet another query string template tag
 homepage_url: http://djangosnippets.org/snippets/2413/
 
 license_url: http://djangosnippets.org/about/tos/
-license_text_file: ../../thirdparty/django_snippets.LICENSE
+license_file: ../../thirdparty/django_snippets.LICENSE
 notes: This file was modified to include the line "register = Library()" 
  without which the template tag is not registered.

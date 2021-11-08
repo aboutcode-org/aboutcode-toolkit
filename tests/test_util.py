@@ -569,7 +569,7 @@ description: sample
         expected_lic_url = [
             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new']
-        lic_key, lic_name, lic_file, lic_url = util.ungroup_licenses(about)
+        lic_key, lic_name, lic_file, lic_url, lic_score = util.ungroup_licenses(about)
         assert expected_lic_key == lic_key
         assert expected_lic_name == lic_name
         assert expected_lic_file == lic_file

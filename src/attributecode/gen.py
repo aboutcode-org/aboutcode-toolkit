@@ -35,6 +35,7 @@ from attributecode.util import invalid_chars
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import unique
+from attributecode.util import load_scancode_json, load_csv, load_json, load_excel
 
 
 def check_duplicated_columns(location):
@@ -114,7 +115,7 @@ def check_about_resource_filename(arp):
 
 
 # TODO: this should be either the CSV or the ABOUT files but not both???
-def load_inventory(location, base_dir, reference_dir=None):
+def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, reference_dir=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files stored in
     the `base_dir`. Return a list of errors and a list of About objects
@@ -125,17 +126,24 @@ def load_inventory(location, base_dir, reference_dir=None):
     """
     errors = []
     abouts = []
-    base_dir = util.to_posix(base_dir)
-    # FIXME: do not mix up CSV and JSON
-    if location.endswith('.csv'):
-        # FIXME: this should not be done here.
-        dup_cols_err = check_duplicated_columns(location)
-        if dup_cols_err:
-            errors.extend(dup_cols_err)
-            return errors, abouts
-        inventory = util.load_csv(location)
+    if base_dir:
+        base_dir = util.to_posix(base_dir)
+    if scancode:
+        inventory = load_scancode_json(location)
     else:
-        inventory = util.load_json(location)
+        if location.endswith('.csv'):
+            dup_cols_err = check_duplicated_columns(location)
+            if dup_cols_err:
+                errors.extend(dup_cols_err)
+                return errors, abouts
+            inventory = load_csv(location)
+        elif location.endswith('.xlsx'):
+            dup_cols_err, inventory = load_excel(location)
+            if dup_cols_err:
+                errors.extend(dup_cols_err)
+                return errors, abouts
+        else:
+            inventory = load_json(location)
 
     try:
         arp_list = []
@@ -182,7 +190,10 @@ def load_inventory(location, base_dir, reference_dir=None):
             continue
         else:
             afp = util.to_posix(afp)
-            loc = join(base_dir, afp)
+            if base_dir:
+                loc = join(base_dir, afp)
+            else:
+                loc = afp
         about = model.About(about_file_path=afp)
         about.location = loc
 
@@ -200,6 +211,8 @@ def load_inventory(location, base_dir, reference_dir=None):
         ld_errors = about.load_dict(
             fields,
             base_dir,
+            scancode=scancode,
+            from_attrib=from_attrib,
             running_inventory=False,
             reference_dir=reference_dir,
         )
@@ -214,6 +227,17 @@ def load_inventory(location, base_dir, reference_dir=None):
             if not e in errors:
                 errors.extend(ld_errors)
         abouts.append(about)
+    # Covert the license_score value from string to list of int
+    # The licesne_score is not in the spec but is specify in the scancode license scan.
+    # This key will be treated as a custom string field. Therefore, we need to
+    # convert back to the list with float type for score.
+    if scancode:
+        for about in abouts:
+            try:
+                score_list = list(map(float, about.license_score.value.replace('[', '').replace(']', '').split(',')))
+                about.license_score.value = score_list
+            except:
+                pass
 
     return unique(errors), abouts
 
@@ -311,12 +335,11 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                 # Write generated LICENSE file
                 license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
-                    for lic_key, lic_name, lic_context, lic_url in license_key_name_context_url_list:
-                        licenses_dict[lic_key] = [lic_name, lic_context, lic_url]
-                        gen_license_name = lic_key + u'.LICENSE'
+                    for lic_key, lic_name, lic_filename, lic_context, lic_url in license_key_name_context_url_list:
+                        licenses_dict[lic_key] = [lic_name, lic_filename, lic_context, lic_url]
                         if not lic_name in about.license_name.value:
                             about.license_name.value.append(lic_name)
-                        about.license_file.value[gen_license_name] = license_dict[lic_key][1]
+                        about.license_file.value[lic_filename] = lic_filename
                         if not lic_url in about.license_url.value:
                             about.license_url.value.append(lic_url)
 
