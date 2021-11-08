@@ -149,6 +149,8 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
 
     for about in abouts:
         # Create a license expression with license name
+        lic_name_expression = ''
+        lic_name_expression_list = []
         if about.license_expression.value:
             for segment in about.license_expression.value.split():
                 not_lic = True
