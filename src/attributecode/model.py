@@ -49,6 +49,7 @@ from attributecode import api
 from attributecode import Error
 from attributecode import saneyaml
 from attributecode import util
+from attributecode.transform import write_excel
 from attributecode.util import add_unc
 from attributecode.util import boolean_fields
 from attributecode.util import copy_license_notice_files
@@ -986,7 +987,7 @@ class About(object):
         errors = []
         try:
             loc = add_unc(loc)
-            with io.open(loc, encoding='utf-8') as txt:
+            with io.open(loc, encoding='utf-8', errors='replace') as txt:
                 input_text = txt.read()
             # The 'Yes' and 'No' will be converted to 'True' and 'False' in the yaml.load()
             # Therefore, we need to wrap the original value in quote to prevent
@@ -1513,34 +1514,28 @@ def write_output(abouts, location, format):  # NOQA
     about_dicts = about_object_to_list_of_dictionary(abouts)
     location = add_unc(location)
     if format == 'csv':
-        errors = save_as_csv(location, about_dicts, get_field_names(abouts))
+        save_as_csv(location, about_dicts, get_field_names(abouts))
+    elif format == 'json':
+        save_as_json(location, about_dicts)
     else:
-        errors = save_as_json(location, about_dicts)
-    return errors
-
+        save_as_excel(location, about_dicts)
 
 def save_as_json(location, about_dicts):
     with io.open(location, mode='w') as output_file:
         data = util.format_about_dict_for_json_output(about_dicts)
         output_file.write(json.dumps(data, indent=2))
-    return []
-
 
 def save_as_csv(location, about_dicts, field_names):
-    errors = []
     with io.open(location, mode='w', encoding='utf-8', newline='') as output_file:
         writer = csv.DictWriter(output_file, field_names)
         writer.writeheader()
-        csv_formatted_list = util.format_about_dict_for_csv_output(about_dicts)
+        csv_formatted_list = util.format_about_dict_output(about_dicts)
         for row in csv_formatted_list:
-            # See https://github.com/dejacode/about-code-tool/issues/167
-            try:
-                writer.writerow(row)
-            except Exception as e:
-                msg = u'Generation skipped for ' + row['about_file_path'] + u' : ' + str(e)
-                errors.append(Error(CRITICAL, msg))
-    return errors
+            writer.writerow(row)
 
+def save_as_excel(location, about_dicts):
+    formatted_list = util.format_about_dict_output(about_dicts)
+    write_excel(location, formatted_list)
 
 def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scancode=False, reference=None):
     """

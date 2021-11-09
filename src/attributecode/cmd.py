@@ -139,7 +139,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 
 
 @about.command(cls=AboutCommand,
-    short_help='Collect the inventory of .ABOUT files to a CSV or JSON file.')
+    short_help='Collect the inventory of .ABOUT files to a CSV/JSON/Excel file.')
 
 @click.argument('location',
     required=True,
@@ -156,7 +156,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
     is_flag=False,
     default='csv',
     show_default=True,
-    type=click.Choice(['json', 'csv']),
+    type=click.Choice(['json', 'csv', 'excel']),
     help='Set OUTPUT inventory file format.')
 
 @click.option('-q', '--quiet',
@@ -170,11 +170,11 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 @click.help_option('-h', '--help')
 def inventory(location, output, format, quiet, verbose):  # NOQA
     """
-Collect the inventory of ABOUT file data as CSV or JSON.
+Collect the inventory of .ABOUT files to a CSV/JSON/Excel file.
 
 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
-OUTPUT: Path to the JSON or CSV inventory file to create.
+OUTPUT: Path to the CSV/JSON/Excel inventory file to create.
     """
     if not quiet:
         print_version()
@@ -184,8 +184,8 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # accept zipped ABOUT files as input
         location = extract_zip(location)
     errors, abouts = collect_inventory(location)
-    write_errors = write_output(abouts=abouts, location=output, format=format)
-    errors.extend(write_errors)
+    write_output(abouts=abouts, location=output, format=format)
+
     errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:

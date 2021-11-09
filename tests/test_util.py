@@ -330,7 +330,7 @@ class TestCsv(unittest.TestCase):
         result = util.load_csv(test_file)
         assert expected == result
 
-    def test_format_about_dict_for_csv_output(self):
+    def test_format_about_dict_output(self):
         about = [dict([
             (u'about_file_path', u'/input/about1.ABOUT'),
             (u'about_resource', [u'test.c']),
@@ -345,7 +345,7 @@ class TestCsv(unittest.TestCase):
             (u'license_expression', u'mit AND bsd-new'),
             (u'license_key', u'mit\nbsd-new')])]
 
-        output = util.format_about_dict_for_csv_output(about)
+        output = util.format_about_dict_output(about)
         assert output == expected
 
     def test_load_csv_microsoft_utf_8(self):

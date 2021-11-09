@@ -486,8 +486,8 @@ def ungroup_licenses(licenses):
 
 
 # FIXME: add docstring
-def format_about_dict_for_csv_output(about_dictionary_list):
-    csv_formatted_list = []
+def format_about_dict_output(about_dictionary_list):
+    formatted_list = []
     for element in about_dictionary_list:
         row_list = dict()
         for key in element:
@@ -498,8 +498,8 @@ def format_about_dict_for_csv_output(about_dictionary_list):
                     row_list[key] = u'\n'.join((element[key].keys()))
                 else:
                     row_list[key] = element[key]
-        csv_formatted_list.append(row_list)
-    return csv_formatted_list
+        formatted_list.append(row_list)
+    return formatted_list
 
 
 # FIXME: add docstring

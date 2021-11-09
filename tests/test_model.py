@@ -850,14 +850,13 @@ custom1: |
         assert errors == a.errors
         assert 'Copyright (c) 2012, Domen Kožar' == a.copyright.value
 
-    def test_load_has_errors_for_non_unicode(self):
+    def test_load_non_unicode(self):
         test_file = get_test_loc('test_model/unicode/not-unicode.ABOUT')
         a = model.About()
         a.load(test_file)
         err = a.errors[0]
         assert CRITICAL == err.severity
         assert 'Cannot load invalid ABOUT file' in err.message
-        assert 'UnicodeDecodeError' in err.message
 
     def test_as_dict_load_dict_ignores_empties(self):
         test = {
@@ -1206,8 +1205,7 @@ class CollectorTest(unittest.TestCase):
         location = get_test_loc('test_model/crlf/about.ABOUT')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
-        errors2 = model.write_output(abouts, result, format='csv')
-        errors.extend(errors2)
+        model.write_output(abouts, result, format='csv')
         assert all(e.severity == INFO for e in errors)
 
         expected = get_test_loc('test_model/crlf/expected.csv')
