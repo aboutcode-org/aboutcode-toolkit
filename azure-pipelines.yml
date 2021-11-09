@@ -9,14 +9,6 @@ jobs:
 
     - template: etc/ci/azure-posix.yml
       parameters:
-          job_name: ubuntu16_cpython
-          image_name: ubuntu-16.04
-          python_versions: ['3.6', '3.7', '3.8', '3.9']
-          test_suites:
-              all: venv/bin/pytest -vvs
-
-    - template: etc/ci/azure-posix.yml
-      parameters:
           job_name: ubuntu18_cpython
           image_name: ubuntu-18.04
           python_versions: ['3.6', '3.7', '3.8', '3.9']
