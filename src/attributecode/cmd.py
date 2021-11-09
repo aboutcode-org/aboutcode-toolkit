@@ -199,7 +199,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 
 @about.command(cls=AboutCommand,
-    short_help='Generate .ABOUT files from an inventory as CSV or JSON.')
+    short_help='Generate .ABOUT files from an inventory as CSV/JSON/Excel.')
 
 @click.argument('location',
     required=True,
@@ -245,9 +245,9 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 @click.help_option('-h', '--help')
 def gen(location, output, android, fetch_license, fetch_license_djc, reference, quiet, verbose):
     """
-Given a CSV/JSON inventory, generate ABOUT files in the output location.
+Given a CSV/JSON/Excel inventory, generate ABOUT files in the output location.
 
-LOCATION: Path to a JSON or CSV inventory file.
+LOCATION: Path to a JSON/CSV/Excel inventory file.
 
 OUTPUT: Path to a directory where ABOUT files are generated.
     """
@@ -256,8 +256,8 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         click.echo('Generating .ABOUT files...')
 
     # FIXME: This should be checked in the `click`
-    if not location.endswith(('.csv', '.json',)):
-        raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
+    if not location.endswith(('.csv', '.json', '.xlsx')):
+        raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json or .xlsx.')
 
     errors, abouts = generate_about_files(
         location=location,
@@ -297,7 +297,7 @@ def validate_template(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Generate an attribution document from .ABOUT files.')
+    short_help='Generate an attribution document from JSON/CSV/Excel/.ABOUT files.')
 
 @click.argument('input',
     required=True,
