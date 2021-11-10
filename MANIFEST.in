@@ -1,29 +1,15 @@
 graft src
-graft tests
-graft docs
-graft etc
-graft example
-graft thirdparty
 
-prune src/aboutcode_toolkit.egg-info
-
-include about.ABOUT
-include about
-include about.bat
-include about.cfg
-include apache-2.0.LICENSE
-include about.bat
-include apache-2.0.LICENSE
-include configure
-include configure.bat
-include MANIFEST.in
+include *.LICENSE
 include NOTICE
-include README.rst
-include setup.cfg
-include setup.py
-include SPEC
-include USAGE.rst
-include .travis.yml
-include appveyor.yml
+include *.ABOUT
+include *.toml
+include *.yml
+include *.rst
+include setup.*
+include configure*
+include requirements*
+include .git*
 
 global-exclude *.py[co] __pycache__ *.*~
+

@@ -1,0 +1,1603 @@
+{
+  "headers": [
+    {
+      "tool_name": "scancode-toolkit",
+      "tool_version": "3.2.1rc2",
+      "options": {
+        "input": [
+          "C:\\Users\\XYZ\\Downloads\\clean-text-0.3.0"
+        ],
+        "--copyright": true,
+        "--email": true,
+        "--info": true,
+        "--json-pp": "C:\\Users\\XYZ\\Downloads\\clean-text-0.3.0-lceupi.json",
+        "--license": true,
+        "--package": true,
+        "--processes": "4",
+        "--url": true
+      },
+      "notice": "Generated with ScanCode and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\nScanCode should be considered or used as legal advice. Consult an Attorney\nfor any legal advice.\nScanCode is a free software code scanning tool from nexB Inc. and others.\nVisit https://github.com/nexB/scancode-toolkit/ for support and download.",
+      "start_timestamp": "2020-12-04T093439.242970",
+      "end_timestamp": "2020-12-04T093541.496173",
+      "duration": 62.25320363044739,
+      "message": null,
+      "errors": [],
+      "extra_data": {
+        "files_count": 9
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "clean-text-0.3.0",
+      "type": "directory",
+      "name": "clean-text-0.3.0",
+      "base_name": "clean-text-0.3.0",
+      "extension": "",
+      "size": 0,
+      "date": null,
+      "sha1": null,
+      "md5": null,
+      "sha256": null,
+      "mime_type": null,
+      "file_type": null,
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": false,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "licenses": [],
+      "license_expressions": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [],
+      "files_count": 9,
+      "dirs_count": 1,
+      "size_count": 32826,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/LICENSE",
+      "type": "file",
+      "name": "LICENSE",
+      "base_name": "LICENSE",
+      "extension": "",
+      "size": 976,
+      "date": "2020-12-04",
+      "sha1": "0ab588250797da53b428be01d813339db8d5c236",
+      "md5": "6f4dbb7d66bda0d1ae83b99fee451959",
+      "sha256": "1635765fe1ed3ff0b0af49821bd2a2a42a0b5e7334c9d644962f70274b7d4cf7",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "licenses": [],
+      "license_expressions": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [
+        {
+          "value": "Copyright 2016 Chartbeat, Inc.",
+          "start_line": 2,
+          "end_line": 2
+        }
+      ],
+      "holders": [
+        {
+          "value": "Chartbeat, Inc.",
+          "start_line": 2,
+          "end_line": 2
+        }
+      ],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "https://github.com/chartbeat-labs/textacy",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text",
+          "start_line": 8,
+          "end_line": 8
+        },
+        {
+          "url": "http://www.apache.org/licenses/LICENSE-2.0",
+          "start_line": 15,
+          "end_line": 15
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/PKG-INFO",
+      "type": "file",
+      "name": "PKG-INFO",
+      "base_name": "PKG-INFO",
+      "extension": "",
+      "size": 5791,
+      "date": "2020-12-04",
+      "sha1": "c2533b165a04b7ca076c8ac0f90be7cf49611428",
+      "md5": "594cd2f83e551fdeba703e18c823a3d7",
+      "sha256": "ac63571168b11b93951f8f5265df2807e08757e0c283a3e1aae26502bf78b45a",
+      "mime_type": "text/x-script.python",
+      "file_type": "Python script, UTF-8 Unicode text executable, with very long lines",
+      "programming_language": "Objective-C",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": true,
+      "licenses": [
+        {
+          "key": "apache-2.0",
+          "score": 100.0,
+          "name": "Apache License 2.0",
+          "short_name": "Apache 2.0",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "Apache Software Foundation",
+          "homepage_url": "http://www.apache.org/licenses/",
+          "text_url": "http://www.apache.org/licenses/LICENSE-2.0",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:apache-2.0",
+          "spdx_license_key": "Apache-2.0",
+          "spdx_url": "https://spdx.org/licenses/Apache-2.0",
+          "start_line": 5,
+          "end_line": 5,
+          "matched_rule": {
+            "identifier": "apache-2.0_65.RULE",
+            "license_expression": "apache-2.0",
+            "licenses": [
+              "apache-2.0"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": false,
+            "is_license_tag": true,
+            "matcher": "2-aho",
+            "rule_length": 4,
+            "matched_length": 4,
+            "match_coverage": 100.0,
+            "rule_relevance": 100.0
+          }
+        },
+        {
+          "key": "apache-2.0",
+          "score": 99.0,
+          "name": "Apache License 2.0",
+          "short_name": "Apache 2.0",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "Apache Software Foundation",
+          "homepage_url": "http://www.apache.org/licenses/",
+          "text_url": "http://www.apache.org/licenses/LICENSE-2.0",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:apache-2.0",
+          "spdx_license_key": "Apache-2.0",
+          "spdx_url": "https://spdx.org/licenses/Apache-2.0",
+          "start_line": 10,
+          "end_line": 10,
+          "matched_rule": {
+            "identifier": "pypi_apache_software_license.RULE",
+            "license_expression": "apache-2.0",
+            "licenses": [
+              "apache-2.0"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": false,
+            "is_license_tag": true,
+            "matcher": "2-aho",
+            "rule_length": 6,
+            "matched_length": 6,
+            "match_coverage": 100.0,
+            "rule_relevance": 99.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 17,
+          "end_line": 17,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 20,
+          "end_line": 20,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 100.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 46,
+          "end_line": 46,
+          "matched_rule": {
+            "identifier": "gpl-1.0-plus_255.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": true,
+            "is_license_reference": false,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 3,
+            "matched_length": 3,
+            "match_coverage": 100.0,
+            "rule_relevance": 100.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 49,
+          "end_line": 49,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 52,
+          "end_line": 52,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "apache-2.0",
+          "score": 90.0,
+          "name": "Apache License 2.0",
+          "short_name": "Apache 2.0",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "Apache Software Foundation",
+          "homepage_url": "http://www.apache.org/licenses/",
+          "text_url": "http://www.apache.org/licenses/LICENSE-2.0",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:apache-2.0",
+          "spdx_license_key": "Apache-2.0",
+          "spdx_url": "https://spdx.org/licenses/Apache-2.0",
+          "start_line": 125,
+          "end_line": 127,
+          "matched_rule": {
+            "identifier": "apache-2.0_161.RULE",
+            "license_expression": "apache-2.0",
+            "licenses": [
+              "apache-2.0"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": false,
+            "is_license_tag": true,
+            "matcher": "2-aho",
+            "rule_length": 2,
+            "matched_length": 2,
+            "match_coverage": 100.0,
+            "rule_relevance": 90.0
+          }
+        }
+      ],
+      "license_expressions": [
+        "apache-2.0",
+        "apache-2.0",
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "apache-2.0"
+      ],
+      "percentage_of_license_text": 2.38,
+      "copyrights": [],
+      "holders": [],
+      "authors": [
+        {
+          "value": "Johannes Filter Author-email hi@jfilter.de",
+          "start_line": 7,
+          "end_line": 10
+        }
+      ],
+      "packages": [
+        {
+          "type": "pypi",
+          "namespace": null,
+          "name": "clean-text",
+          "version": "0.3.0",
+          "qualifiers": {},
+          "subpath": null,
+          "primary_language": "Python",
+          "description": "# `clean-text` [![Build Status](https://travis-ci.com/jfilter/clean-text.svg?branch=master)](https://travis-ci.com/jfilter/clean-text) [![PyPI](https://img.shields.io/pypi/v/clean-text.svg)](https://pypi.org/project/clean-text/) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/clean-text.svg)](https://pypi.org/project/clean-text/) [![PyPI - Downloads](https://img.shields.io/pypi/dm/clean-text)](https://pypistats.org/packages/clean-text)\n\nUser-generated content on the Web and in social media is often dirty. Preprocess your scraped data with `clean-text` to create a normalized text representation. For instance, turn this corrupted input:\n\n```txt\nA bunch of \\\\u2018new\\\\u2019 references, including [Moana](https://en.wikipedia.org/wiki/Moana_%282016_film%29).\n\n\n\u00c2\u00bbY\u00c3\u00b3\u00c3\u00b9 \u00c3\u00a0r\u00c3\u00a9     r\u00c3\u00afght &lt;3!\u00c2\u00ab\n```\n\ninto this clean output:\n\n```txt\nA bunch of 'new' references, including [moana](<URL>).\n\n\"you are right <3!\"\n```\n\n`clean-text` uses [ftfy](https://github.com/LuminosoInsight/python-ftfy), [unidecode](https://github.com/takluyver/Unidecode) and numerous hand-crafted rules, i.e., RegEx.\n\n## Installation\n\nTo install the GPL-licensed package [unidecode](https://github.com/takluyver/Unidecode) alongside:\n\n```bash\npip install clean-text[gpl]\n```\n\nYou may want to abstain from GPL:\n\n```bash\npip install clean-text\n```\n\nNB: This package is named `clean-text` and not `cleantext`.\n\nIf [unidecode](https://github.com/takluyver/Unidecode) is not available, `clean-text` will resort to Python's [unicodedata.normalize](https://docs.python.org/3.7/library/unicodedata.html#unicodedata.normalize) for [transliteration](https://en.wikipedia.org/wiki/Transliteration).\nTransliteration to closest ASCII symbols involes manually mappings, i.e., `\u00c3\u00aa` to `e`.\n`unidecode`'s mapping is superiour but unicodedata's are sufficent.\nHowever, you may want to disable this feature altogether depending on your data and use case.\n\nTo make it clear: There are **inconsistencies** between processing text with or without `unidecode`.\n\n## Usage\n\n```python\nfrom cleantext import clean\n\nclean(\"some input\",\n    fix_unicode=True,               # fix various unicode errors\n    to_ascii=True,                  # transliterate to closest ASCII representation\n    lower=True,                     # lowercase text\n    no_line_breaks=False,           # fully strip line breaks as opposed to only normalizing them\n    no_urls=False,                  # replace all URLs with a special token\n    no_emails=False,                # replace all email addresses with a special token\n    no_phone_numbers=False,         # replace all phone numbers with a special token\n    no_numbers=False,               # replace all numbers with a special token\n    no_digits=False,                # replace all digits with a special token\n    no_currency_symbols=False,      # replace all currency symbols with a special token\n    no_punct=False,                 # remove punctuations\n    replace_with_punct=\"\",          # instead of removing punctuations you may replace them\n    replace_with_url=\"<URL>\",\n    replace_with_email=\"<EMAIL>\",\n    replace_with_phone_number=\"<PHONE>\",\n    replace_with_number=\"<NUMBER>\",\n    replace_with_digit=\"0\",\n    replace_with_currency_symbol=\"<CUR>\",\n    lang=\"en\"                       # set to 'de' for German special handling\n)\n```\n\nCarefully choose the arguments that fit your task. The default parameters are listed above.\n\nYou may also only use specific functions for cleaning. For this, take a look at the [source code](https://github.com/jfilter/clean-text/blob/master/cleantext/clean.py).\n\nSo far, only English and German are fully supported. It should work for the majority of western languages. If you need some special handling for your language, feel free to contribute. \u00f0\u0178\u2122\u0192\n\n## Development\n\n[Install and use poetry](https://python-poetry.org/).\n\n## Contributing\n\nIf you have a **question**, found a **bug** or want to propose a new **feature**, have a look at the [issues page](https://github.com/jfilter/clean-text/issues).\n\n**Pull requests** are especially welcomed when they fix bugs or improve the code quality.\n\nIf you don't like the output of `clean-text`, consider adding a [test](https://github.com/jfilter/clean-text/tree/master/tests) with your specific input and desired output.\n\n## Related Work\n\n-   https://github.com/pudo/normality\n-   https://github.com/davidmogar/cucco\n-   https://github.com/lyeoni/prenlp\n-   https://github.com/chartbeat-labs/textacy\n-   https://github.com/jbesomi/texthero\n\n## Acknowledgements\n\nBuilt upon the work by [Burton DeWilde](https://github.com/bdewilde) for [Textacy](https://github.com/chartbeat-labs/textacy).\n\n## License\n\nApache\n\n## Sponsoring\n\nThis work was created as part of a [project](https://github.com/jfilter/ptf-kommentare) that was funded by the German [Federal Ministry of Education and Research](https://www.bmbf.de/en/index.html).\n\n<img src=\"./bmbf_funded.svg\">\n\n",
+          "release_date": null,
+          "parties": [
+            {
+              "type": "person",
+              "role": "author",
+              "name": "Johannes Filter",
+              "email": "hi@jfilter.de",
+              "url": null
+            }
+          ],
+          "keywords": [
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9"
+          ],
+          "homepage_url": null,
+          "download_url": null,
+          "size": null,
+          "sha1": null,
+          "md5": null,
+          "sha256": null,
+          "sha512": null,
+          "bug_tracking_url": null,
+          "code_view_url": null,
+          "vcs_url": null,
+          "copyright": null,
+          "license_expression": "apache-2.0",
+          "declared_license": {
+            "license": "Apache-2.0",
+            "classifiers": [
+              "License :: OSI Approved :: Apache Software License"
+            ]
+          },
+          "notice_text": null,
+          "root_path": "clean-text-0.3.0/PKG-INFO",
+          "dependencies": [],
+          "contains_source_code": null,
+          "source_packages": [],
+          "purl": "pkg:pypi/clean-text@0.3.0",
+          "repository_homepage_url": "https://pypi.org/project/clean-text",
+          "repository_download_url": "https://pypi.io/packages/source/c/clean-text/clean-text-0.3.0.tar.gz",
+          "api_data_url": "http://pypi.python.org/pypi/clean-text/0.3.0/json"
+        }
+      ],
+      "emails": [
+        {
+          "email": "hi@jfilter.de",
+          "start_line": 8,
+          "end_line": 8
+        }
+      ],
+      "urls": [
+        {
+          "url": "https://travis-ci.com/jfilter/clean-text.svg?branch=master",
+          "start_line": 23,
+          "end_line": 23
+        },
+        {
+          "url": "https://travis-ci.com/jfilter/clean-text",
+          "start_line": 23,
+          "end_line": 23
+        },
+        {
+          "url": "https://img.shields.io/pypi/v/clean-text.svg",
+          "start_line": 23,
+          "end_line": 23
+        },
+        {
+          "url": "https://pypi.org/project/clean-text",
+          "start_line": 23,
+          "end_line": 23
+        },
+        {
+          "url": "https://img.shields.io/pypi/pyversions/clean-text.svg",
+          "start_line": 23,
+          "end_line": 23
+        },
+        {
+          "url": "https://img.shields.io/pypi/dm/clean-text",
+          "start_line": 23,
+          "end_line": 23
+        },
+        {
+          "url": "https://pypistats.org/packages/clean-text",
+          "start_line": 23,
+          "end_line": 23
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Moana_(2016_film)",
+          "start_line": 28,
+          "end_line": 28
+        },
+        {
+          "url": "https://github.com/LuminosoInsight/python-ftfy",
+          "start_line": 42,
+          "end_line": 42
+        },
+        {
+          "url": "https://github.com/takluyver/Unidecode",
+          "start_line": 42,
+          "end_line": 42
+        },
+        {
+          "url": "https://docs.python.org/3.7/library/unicodedata.html#unicodedata.normalize",
+          "start_line": 60,
+          "end_line": 60
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Transliteration",
+          "start_line": 60,
+          "end_line": 60
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/blob/master/cleantext/clean.py",
+          "start_line": 97,
+          "end_line": 97
+        },
+        {
+          "url": "https://python-poetry.org/",
+          "start_line": 103,
+          "end_line": 103
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/issues",
+          "start_line": 107,
+          "end_line": 107
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/tree/master/tests",
+          "start_line": 111,
+          "end_line": 111
+        },
+        {
+          "url": "https://github.com/pudo/normality",
+          "start_line": 115,
+          "end_line": 115
+        },
+        {
+          "url": "https://github.com/davidmogar/cucco",
+          "start_line": 116,
+          "end_line": 116
+        },
+        {
+          "url": "https://github.com/lyeoni/prenlp",
+          "start_line": 117,
+          "end_line": 117
+        },
+        {
+          "url": "https://github.com/chartbeat-labs/textacy",
+          "start_line": 118,
+          "end_line": 118
+        },
+        {
+          "url": "https://github.com/jbesomi/texthero",
+          "start_line": 119,
+          "end_line": 119
+        },
+        {
+          "url": "https://github.com/bdewilde",
+          "start_line": 123,
+          "end_line": 123
+        },
+        {
+          "url": "https://github.com/jfilter/ptf-kommentare",
+          "start_line": 131,
+          "end_line": 131
+        },
+        {
+          "url": "https://www.bmbf.de/en/index.html",
+          "start_line": 131,
+          "end_line": 131
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/pyproject.toml",
+      "type": "file",
+      "name": "pyproject.toml",
+      "base_name": "pyproject",
+      "extension": ".toml",
+      "size": 1078,
+      "date": "2020-12-04",
+      "sha1": "39007a1ef541a36bb9f6118c0f8d6885d25b641b",
+      "md5": "578cdf84be7f98156c52bca8bee126cc",
+      "sha256": "24ccecd53315fbf5fc786ac1428791156fa91fb055f3d5e510fffae11b9a95c2",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "licenses": [
+        {
+          "key": "apache-2.0",
+          "score": 100.0,
+          "name": "Apache License 2.0",
+          "short_name": "Apache 2.0",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "Apache Software Foundation",
+          "homepage_url": "http://www.apache.org/licenses/",
+          "text_url": "http://www.apache.org/licenses/LICENSE-2.0",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:apache-2.0",
+          "spdx_license_key": "Apache-2.0",
+          "spdx_url": "https://spdx.org/licenses/Apache-2.0",
+          "start_line": 5,
+          "end_line": 5,
+          "matched_rule": {
+            "identifier": "apache-2.0_65.RULE",
+            "license_expression": "apache-2.0",
+            "licenses": [
+              "apache-2.0"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": false,
+            "is_license_tag": true,
+            "matcher": "2-aho",
+            "rule_length": 4,
+            "matched_length": 4,
+            "match_coverage": 100.0,
+            "rule_relevance": 100.0
+          }
+        },
+        {
+          "key": "apache-2.0",
+          "score": 99.0,
+          "name": "Apache License 2.0",
+          "short_name": "Apache 2.0",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "Apache Software Foundation",
+          "homepage_url": "http://www.apache.org/licenses/",
+          "text_url": "http://www.apache.org/licenses/LICENSE-2.0",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:apache-2.0",
+          "spdx_license_key": "Apache-2.0",
+          "spdx_url": "https://spdx.org/licenses/Apache-2.0",
+          "start_line": 14,
+          "end_line": 14,
+          "matched_rule": {
+            "identifier": "pypi_apache_software_license.RULE",
+            "license_expression": "apache-2.0",
+            "licenses": [
+              "apache-2.0"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": false,
+            "is_license_tag": true,
+            "matcher": "2-aho",
+            "rule_length": 6,
+            "matched_length": 6,
+            "match_coverage": 100.0,
+            "rule_relevance": 99.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 35,
+          "end_line": 35,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        }
+      ],
+      "license_expressions": [
+        "apache-2.0",
+        "apache-2.0",
+        "gpl-1.0-plus"
+      ],
+      "percentage_of_license_text": 8.73,
+      "copyrights": [],
+      "holders": [],
+      "authors": [
+        {
+          "value": "Johannes Filter <hi@jfilter.de>",
+          "start_line": 6,
+          "end_line": 8
+        }
+      ],
+      "packages": [],
+      "emails": [
+        {
+          "email": "hi@jfilter.de",
+          "start_line": 6,
+          "end_line": 6
+        }
+      ],
+      "urls": [],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/README.md",
+      "type": "file",
+      "name": "README.md",
+      "base_name": "README",
+      "extension": ".md",
+      "size": 4941,
+      "date": "2020-12-04",
+      "sha1": "270d7c1d78022d10fdeba2259d891746b6c41a43",
+      "md5": "e7b35ff1470cd41118e7c6deedd13cf1",
+      "sha256": "070c675a0ba7b7f7db022ce6b15c54d7a537cbeeafd414905705c2734bf9556c",
+      "mime_type": "text/x-script.python",
+      "file_type": "Python script, UTF-8 Unicode text executable, with very long lines",
+      "programming_language": "Objective-C",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": true,
+      "licenses": [
+        {
+          "key": "gpl-1.0-plus",
+          "score": 100.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 24,
+          "end_line": 24,
+          "matched_rule": {
+            "identifier": "gpl-1.0-plus_255.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": true,
+            "is_license_reference": false,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 3,
+            "matched_length": 3,
+            "match_coverage": 100.0,
+            "rule_relevance": 100.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 27,
+          "end_line": 27,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 30,
+          "end_line": 30,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "apache-2.0",
+          "score": 90.0,
+          "name": "Apache License 2.0",
+          "short_name": "Apache 2.0",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "Apache Software Foundation",
+          "homepage_url": "http://www.apache.org/licenses/",
+          "text_url": "http://www.apache.org/licenses/LICENSE-2.0",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:apache-2.0",
+          "spdx_license_key": "Apache-2.0",
+          "spdx_url": "https://spdx.org/licenses/Apache-2.0",
+          "start_line": 103,
+          "end_line": 105,
+          "matched_rule": {
+            "identifier": "apache-2.0_161.RULE",
+            "license_expression": "apache-2.0",
+            "licenses": [
+              "apache-2.0"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": false,
+            "is_license_tag": true,
+            "matcher": "2-aho",
+            "rule_length": 2,
+            "matched_length": 2,
+            "match_coverage": 100.0,
+            "rule_relevance": 90.0
+          }
+        }
+      ],
+      "license_expressions": [
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "apache-2.0"
+      ],
+      "percentage_of_license_text": 1.03,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "https://travis-ci.com/jfilter/clean-text.svg?branch=master",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "url": "https://travis-ci.com/jfilter/clean-text",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "url": "https://img.shields.io/pypi/v/clean-text.svg",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "url": "https://pypi.org/project/clean-text",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "url": "https://img.shields.io/pypi/pyversions/clean-text.svg",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "url": "https://img.shields.io/pypi/dm/clean-text",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "url": "https://pypistats.org/packages/clean-text",
+          "start_line": 1,
+          "end_line": 1
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Moana_(2016_film)",
+          "start_line": 6,
+          "end_line": 6
+        },
+        {
+          "url": "https://github.com/LuminosoInsight/python-ftfy",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/takluyver/Unidecode",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://docs.python.org/3.7/library/unicodedata.html#unicodedata.normalize",
+          "start_line": 38,
+          "end_line": 38
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Transliteration",
+          "start_line": 38,
+          "end_line": 38
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/blob/master/cleantext/clean.py",
+          "start_line": 75,
+          "end_line": 75
+        },
+        {
+          "url": "https://python-poetry.org/",
+          "start_line": 81,
+          "end_line": 81
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/issues",
+          "start_line": 85,
+          "end_line": 85
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/tree/master/tests",
+          "start_line": 89,
+          "end_line": 89
+        },
+        {
+          "url": "https://github.com/pudo/normality",
+          "start_line": 93,
+          "end_line": 93
+        },
+        {
+          "url": "https://github.com/davidmogar/cucco",
+          "start_line": 94,
+          "end_line": 94
+        },
+        {
+          "url": "https://github.com/lyeoni/prenlp",
+          "start_line": 95,
+          "end_line": 95
+        },
+        {
+          "url": "https://github.com/chartbeat-labs/textacy",
+          "start_line": 96,
+          "end_line": 96
+        },
+        {
+          "url": "https://github.com/jbesomi/texthero",
+          "start_line": 97,
+          "end_line": 97
+        },
+        {
+          "url": "https://github.com/bdewilde",
+          "start_line": 101,
+          "end_line": 101
+        },
+        {
+          "url": "https://github.com/jfilter/ptf-kommentare",
+          "start_line": 109,
+          "end_line": 109
+        },
+        {
+          "url": "https://www.bmbf.de/en/index.html",
+          "start_line": 109,
+          "end_line": 109
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/setup.py",
+      "type": "file",
+      "name": "setup.py",
+      "base_name": "setup",
+      "extension": ".py",
+      "size": 5783,
+      "date": "2020-12-04",
+      "sha1": "54e07aafcf0964a46e7ed590d539f6d54d04789d",
+      "md5": "1f798b06ca13803c93e67572eee2527f",
+      "sha256": "442944712f502093e257222c2f947576ddc6b49347a0ee1baa9ddb35ecc2f9d5",
+      "mime_type": "text/x-script.python",
+      "file_type": "Python script, UTF-8 Unicode text executable, with very long lines",
+      "programming_language": "Python",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": true,
+      "licenses": [
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 14,
+          "end_line": 14,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 100.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 20,
+          "end_line": 20,
+          "matched_rule": {
+            "identifier": "gpl-1.0-plus_255.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": true,
+            "is_license_reference": false,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 3,
+            "matched_length": 3,
+            "match_coverage": 100.0,
+            "rule_relevance": 100.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 20,
+          "end_line": 20,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "gpl-1.0-plus",
+          "score": 50.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 20,
+          "end_line": 20,
+          "matched_rule": {
+            "identifier": "gpl_bare_word_only.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": true,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 1,
+            "matched_length": 1,
+            "match_coverage": 100.0,
+            "rule_relevance": 50.0
+          }
+        },
+        {
+          "key": "apache-2.0",
+          "score": 90.0,
+          "name": "Apache License 2.0",
+          "short_name": "Apache 2.0",
+          "category": "Permissive",
+          "is_exception": false,
+          "owner": "Apache Software Foundation",
+          "homepage_url": "http://www.apache.org/licenses/",
+          "text_url": "http://www.apache.org/licenses/LICENSE-2.0",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:apache-2.0",
+          "spdx_license_key": "Apache-2.0",
+          "spdx_url": "https://spdx.org/licenses/Apache-2.0",
+          "start_line": 20,
+          "end_line": 20,
+          "matched_rule": {
+            "identifier": "apache-2.0_161.RULE",
+            "license_expression": "apache-2.0",
+            "licenses": [
+              "apache-2.0"
+            ],
+            "is_license_text": false,
+            "is_license_notice": false,
+            "is_license_reference": false,
+            "is_license_tag": true,
+            "matcher": "2-aho",
+            "rule_length": 2,
+            "matched_length": 2,
+            "match_coverage": 100.0,
+            "rule_relevance": 90.0
+          }
+        }
+      ],
+      "license_expressions": [
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "gpl-1.0-plus",
+        "apache-2.0"
+      ],
+      "percentage_of_license_text": 1.05,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [
+        {
+          "email": "hi@jfilter.de",
+          "start_line": 22,
+          "end_line": 22
+        }
+      ],
+      "urls": [
+        {
+          "url": "https://travis-ci.com/jfilter/clean-text.svg?branch=master",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://travis-ci.com/jfilter/clean-text",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://img.shields.io/pypi/v/clean-text.svg",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://pypi.org/project/clean-text",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://img.shields.io/pypi/pyversions/clean-text.svg",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://img.shields.io/pypi/dm/clean-text",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://pypistats.org/packages/clean-text",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Moana_(2016_film)",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/LuminosoInsight/python-ftfy",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/takluyver/Unidecode",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://docs.python.org/3.7/library/unicodedata.html#unicodedata.normalize",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Transliteration",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/blob/master/cleantext/clean.py",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://python-poetry.org/",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/issues",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/jfilter/clean-text/tree/master/tests",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/pudo/normality",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/davidmogar/cucco",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/lyeoni/prenlp",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/chartbeat-labs/textacy",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/jbesomi/texthero",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/bdewilde",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://github.com/jfilter/ptf-kommentare",
+          "start_line": 20,
+          "end_line": 20
+        },
+        {
+          "url": "https://www.bmbf.de/en/index.html",
+          "start_line": 20,
+          "end_line": 20
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/cleantext",
+      "type": "directory",
+      "name": "cleantext",
+      "base_name": "cleantext",
+      "extension": "",
+      "size": 0,
+      "date": null,
+      "sha1": null,
+      "md5": null,
+      "sha256": null,
+      "mime_type": null,
+      "file_type": null,
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": false,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "licenses": [],
+      "license_expressions": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [],
+      "files_count": 4,
+      "dirs_count": 0,
+      "size_count": 14257,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/cleantext/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "base_name": "__init__",
+      "extension": ".py",
+      "size": 44,
+      "date": "2020-12-04",
+      "sha1": "5b59015815a0960cab67d63f9e0fd41ce800e4b9",
+      "md5": "c4e0e330b3f5dc1a906400d1b58d14eb",
+      "sha256": "14e1cf97b3e36d38bd88ebd4519693be2910e26839d29a0bc8cd1a8a7ebaec3b",
+      "mime_type": "text/x-script.python",
+      "file_type": "Python script, ASCII text executable",
+      "programming_language": "Python",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": true,
+      "licenses": [],
+      "license_expressions": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/cleantext/clean.py",
+      "type": "file",
+      "name": "clean.py",
+      "base_name": "clean",
+      "extension": ".py",
+      "size": 9593,
+      "date": "2020-12-04",
+      "sha1": "ba25c99004d422e98c7f948ce6a7cf7914c69b23",
+      "md5": "b64befb0e9457e941e362bbb2955e5e2",
+      "sha256": "a089501312bc9caed493dd7cdb76f66757d92bab45c9b5861c627e2a20887573",
+      "mime_type": "text/plain",
+      "file_type": "Python script, UTF-8 Unicode text executable",
+      "programming_language": "Python",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": true,
+      "licenses": [
+        {
+          "key": "gpl-1.0-plus",
+          "score": 100.0,
+          "name": "GNU General Public License 1.0 or later",
+          "short_name": "GPL 1.0 or later",
+          "category": "Copyleft",
+          "is_exception": false,
+          "owner": "Free Software Foundation (FSF)",
+          "homepage_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "text_url": "http://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:gpl-1.0-plus",
+          "spdx_license_key": "GPL-1.0-or-later",
+          "spdx_url": "https://spdx.org/licenses/GPL-1.0-or-later",
+          "start_line": 28,
+          "end_line": 28,
+          "matched_rule": {
+            "identifier": "gpl-1.0-plus_255.RULE",
+            "license_expression": "gpl-1.0-plus",
+            "licenses": [
+              "gpl-1.0-plus"
+            ],
+            "is_license_text": false,
+            "is_license_notice": true,
+            "is_license_reference": false,
+            "is_license_tag": false,
+            "matcher": "2-aho",
+            "rule_length": 3,
+            "matched_length": 3,
+            "match_coverage": 100.0,
+            "rule_relevance": 100.0
+          }
+        }
+      ],
+      "license_expressions": [
+        "gpl-1.0-plus"
+      ],
+      "percentage_of_license_text": 0.24,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "http://ftfy.readthedocs.org/",
+          "start_line": 43,
+          "end_line": 43
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/cleantext/constants.py",
+      "type": "file",
+      "name": "constants.py",
+      "base_name": "constants",
+      "extension": ".py",
+      "size": 3590,
+      "date": "2020-12-04",
+      "sha1": "264bd4af800de52b6a84ea7f18fc30d86a5327d1",
+      "md5": "796b8e4292835bc239d7f97f5c556387",
+      "sha256": "0f346ace474b100f055ed20e99b2a1fb84e9f701429b6e00bed622b66349b5e6",
+      "mime_type": "text/plain",
+      "file_type": "Python script, UTF-8 Unicode text executable",
+      "programming_language": "Python",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": true,
+      "licenses": [],
+      "license_expressions": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "https://github.com/jfilter/clean-text/issues/10",
+          "start_line": 46,
+          "end_line": 46
+        },
+        {
+          "url": "https://gist.github.com/dperini/729294",
+          "start_line": 59,
+          "end_line": 59
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "clean-text-0.3.0/cleantext/specials.py",
+      "type": "file",
+      "name": "specials.py",
+      "base_name": "specials",
+      "extension": ".py",
+      "size": 1030,
+      "date": "2020-12-04",
+      "sha1": "3fb58ec98406168f57b34a25fc66c3eb9bda8ee1",
+      "md5": "966712a27803ab3a76fc140d830ecc13",
+      "sha256": "b6a3bb901351bceac8f854d0cc40b53af6532bd3c56a8a25de23f6fb86765265",
+      "mime_type": "text/x-script.python",
+      "file_type": "Python script, UTF-8 Unicode text executable",
+      "programming_language": "Python",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": true,
+      "licenses": [],
+      "license_expressions": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "packages": [],
+      "emails": [],
+      "urls": [],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    }
+  ]
+}

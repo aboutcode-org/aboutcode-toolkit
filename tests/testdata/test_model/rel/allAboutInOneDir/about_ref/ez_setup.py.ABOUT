@@ -6,7 +6,7 @@ name: setuptools boostrap
 homepage_url: http://pypi.python.org/pypi/setuptools
 author: Phillip J. Eby
 
-dje_license: zpl-2.1
+license_expression: zpl-2.1
 notes: this is not used by default but embedded in virtualenv
 
 about_resource: t1/t2/ez_setup.py

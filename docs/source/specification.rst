@@ -4,9 +4,6 @@
 ABOUT File Specification v3.2.1
 ===============================
 
-.. contents::
-   :depth: 3
-
 Purpose
 =======
 
@@ -29,8 +26,9 @@ A simple and valid ABOUT file named httpd-2.4.3.tar.gz.ABOUT may look like this:
                 license_expression: apache-2.0
                 licenses:
                     -   key: apache-2.0
-                        name: Apache License 2.0
+                        name: Apache 2.0
                         file: apache-2.0.LICENSE
+                        url: https://scancode-licensedb.aboutcode.org/apache-2.0.LICENSE
                 notice_file: httpd.NOTICE
                 copyright: Copyright (c) 2012 The Apache Software Foundation.
 
@@ -119,7 +117,7 @@ Fields order and multiple occurrences
 
 The field order does not matter. Multiple occurrences of a field name is not supported.
 
-The tool processing an ABOUT file or CSV/JSON input will issue an error when a field name occurs more than once in the input file.
+The tool processing an ABOUT file or CSV/JSON/Excel input will issue an error when a field name occurs more than once in the input file.
 
 Field referencing a file
 ------------------------

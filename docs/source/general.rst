@@ -4,25 +4,22 @@
 General
 =======
 
-.. contents::
-   :depth: 3
-
 AboutCode Toolkit Defined
 =========================
 
-AboutCode Toolkit is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. AboutCode Toolkit files have a simple, standard format that identifies components and their associated licenses. The current AboutCode Toolkit subcommands are:
+AboutCode Toolkit is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. ABOUT file(s) have a simple, standard format that identifies components and their associated licenses. The current AboutCode Toolkit subcommands are:
 
--   **attrib**: Generate a Product Attribution notice document (HTML format) from your AboutCode Toolkit files. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template.
+-   **attrib**: Generate a Product Attribution notice document from your ABOUT file(s), JSON, CSV or Excel. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template.
 
--   **check**: A simple command to validate the AboutCode Toolkit files and output errors/warnings if any on the terminal.
+-   **check**: A simple command to validate the ABOUT file(s) and output errors/warnings if any on the terminal.
 
--   **collect_redist_src**: A command to collect and copy sources that have 'redistribute' flagged as 'True' in AboutCode Toolkit files or from an inventory.
+-   **collect_redist_src**: A command to collect and copy sources that have 'redistribute' flagged as 'True' in ABOUT file(s) or from an inventory.
 
--   **gen**: Create AboutCode Toolkit files from a Software Inventory file (.csv or .json format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase. You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes.
+-   **gen**: Create ABOUT file(s) from a Software Inventory file (.csv, .json or .xlsx format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase. You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes.
 
--   **inventory**: Generate a Software Inventory list (.csv or .json format) from your codebase based on your AboutCode Toolkit files. Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
+-   **inventory**: Generate a Software Inventory list (.csv, .json or .xlsx format) from your codebase based on ABOUT file(s). Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
 
--   **transform**: A command to transform an input CSV/JSON by applying renaming and/or filtering and then output to a new CSV/JSON file.
+-   **transform**: A command to transform an input CSV/JSON/Excel by applying renaming and/or filtering and then output to a new CSV/JSON/Excel file.
 
 Additional AboutCode Toolkit information is available at:
 
@@ -38,8 +35,8 @@ Some key terminology that applies to AboutCode Toolkit tool usage:
 
 -   **Product BOM or BOM** - means a subset list of the components in a Development codebase (Software Inventory) that are Deployed on a particular Product Release (a Product Bill of Materials).
 
-Using gen to Generate AboutCode Toolkit Files
-=============================================
+Using gen to Generate ABOUT file(s)
+===================================
 
 Prepare Your Software Inventory for gen Standard Field Names
 ------------------------------------------------------------
@@ -82,10 +79,10 @@ You should start with a software inventory of your codebase in spreadsheet or JS
       - Optional. You can separate each identifier using " OR " and " AND " to document the relationship between multiple license identifiers, such as a choice among multiple licenses.
     * - license_key
       - ScanCode license key for the component.
-      - Optional. gen will obtain license information from DejaCode Enterprise if the --fetch-license option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.
+      - Optional. gen will obtain license information from ScanCode LicenseDB or DejaCode Enterprise if the --fetch-license or --fetch-license-djc option is set, including the license text, in order to create and write the appropriate .LICENSE file in the .ABOUT file target directory.
     * - license_name
       - License name for the component.
-      - Optional. This field will be generated if the --fetch-license option is set.
+      - Optional. This field will be generated if the --fetch-license or --fetch-license-djc option is set.
     * - license file
       - license file name   
       - Optional. gen will look for the file name (if a directory is specified in the --reference option) to copy that file to the .ABOUT file target directory.
@@ -171,11 +168,11 @@ Fields Renaming and Optional Custom Fields
 
 Since your input's field name may not match with the AboutCode Toolkit standard field name, you can use the transform subcommand to do the transformation.
 
-A transform configuration file is used to describe which transformations and validations to apply to a source CSV/JSON file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
+A transform configuration file is used to describe which transformations and validations to apply to a source CSV/JSON/Excel file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
 
 The attributes that can be set in a configuration file are:
 
--   field_renamings: An optional map of source field name to target new field name that is used to rename CSV/JSON fields.
+-   field_renamings: An optional map of source field name to target new field name that is used to rename CSV/JSON/Excel fields.
 
         ..  code-block:: none
 
@@ -187,7 +184,7 @@ The attributes that can be set in a configuration file are:
 The renaming is always applied first before other transforms and checks. All other field names referenced below are AFTER the renaming have been applied.
 For instance with this configuration, the field "Directory/Location" will be renamed to "about_resource" and "foo" to "bar":
 
--   required_fields: An optional list of required field names that must have a value, beyond the standard field names. If a source CSV/JSON does not have such a field or an entry is missing a value for a required field, an error is reported.
+-   required_fields: An optional list of required field names that must have a value, beyond the standard field names. If a source CSV/JSON/Excel does not have such a field or an entry is missing a value for a required field, an error is reported.
 
 For instance with this configuration, an error will be reported if the fields "name" and "version" are missing, or if any entry does not have a value set for these fields:
 
@@ -217,20 +214,20 @@ For instance with this configuration, the target file will not contain the "type
                 - type
                 - temp
 
-Run gen to Generate AboutCode Toolkit Files
--------------------------------------------
+Run gen to Generate ABOUT file(s)
+---------------------------------
 
-When your software inventory is ready, you can save it as a .csv or .json file, and use it as input to run gen to generate your AboutCode Toolkit files. The official gen parameters are defined here: :ref:`reference`
+When your software inventory is ready, you can save it as a .csv, .json or .xlsx file, and use it as input to run gen to generate ABOUT file(s). The official gen parameters are defined here: :ref:`reference`
 
 Here is an example of a gen command:
 
         ..  code-block:: none
 
-                about gen --fetch-license {{your license library api key}} --reference /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+                about gen --fetch-license --reference /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
 
 This gen example command does the following:
 
--   Activates the --fetch-license option to get license text.
+-   Activates the --fetch-license option to get license information from ScanCode LicenseDB.
 
 -   Activates the --reference option to get license text files and notice text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
 
@@ -238,7 +235,7 @@ This gen example command does the following:
 
 -   Specifies a target output directory.
 
-Review your generated AboutCode Toolkit files to determine if they meet your requirements. Here is a simple example of a linux-redhat-7.2.ABOUT file that documents the directory /linux-redhat-7.2/ :
+Review the generated ABOUT file(s) to determine if it meets your requirements. Here is a simple example of a linux-redhat-7.2.ABOUT file that documents the directory /linux-redhat-7.2/ :
 
         ..  code-block:: none
 
@@ -250,30 +247,16 @@ Review your generated AboutCode Toolkit files to determine if they meet your req
                 license_expression: gpl-2.0
                 licenses:
                     -   key: gpl-2.0
-                        name: GNU General Public License 2.0
+                        name: GPL 2.0
                         file: gpl-2.0.LICENSE
+                        url: https://scancode-licensedb.aboutcode.org/gpl-2.0.LICENSE
                 owner: Red Hat
                 redistribute: Y
 
-You can make the appropriate changes to your input software inventory and then run gen as often as necessary to replace the generated AboutCode Toolkit files with the improved output.
+You can make appropriate changes to your input software inventory and then run gen as often as necessary to replace the ABOUT file(s) with the improved version.
 
 Using attrib to Generate a Product Attribution Notice Package
 =============================================================
-
-Prepare a Filtered Product BOM to Use as Input to attrib
---------------------------------------------------------
-
-The Software Inventory that you prepared for gen most likely includes components that do not need to appear in a product attribution notice package; for example:
-
--   Components in your codebase that are not Deployed on the final product (e.g. build tools, testing tools, internal documentation).
-
--   Components in your codebase under licenses that do not require attribution (e.g. proprietary packages, commercial products).
-
-There are two options here:
-
--   Edit the jinja2 template to only include the one that have value in attribute field such as: ``{% if about_object.attribute.value %}``
-
--   You should prepare a filtered version of your software inventory (the one that you used for gen) by removing the rows that identify components which should not be included in a product attribution notice package, and saving that filtered version as your Product BOM.
 
 Prepare an Attribution Template to Use as Input to attrib
 ---------------------------------------------------------
@@ -378,7 +361,7 @@ In summary, you can start with simple, cosmetic customizations to the default_ht
 Run attrib to Generate a Product Attribution Notice Package
 -----------------------------------------------------------
 
-When you have generated the AboutCode Toolkit files by gen, you can then run attrib to generate your product attribution notice package. The official attrib parameters are defined here: :ref:`reference`
+When you have generated ABOUT file(s) by gen, you can then run attrib to generate your product attribution notice package. The official attrib parameters are defined here: :ref:`reference`
 
 Here is an example of a attrib command:
 
@@ -388,7 +371,7 @@ Note that this example attrib command does the following:
 
 -   Activates the --template option to specify a custom output template.
 
--   Specifies the path of the AboutCode Toolkit files needed to generate the output document.
+-   Specifies the path of the ABOUT file(s) that use to generate the output attribution.
 
 -   Specifies the full path (include file name) of the output document to be generated.
 
@@ -397,14 +380,14 @@ A successful execution of attrib will create a .html (or .json depends on the te
 Using inventory to Generate a Software Inventory
 ================================================
 
-Generate a Software Inventory of Your Codebase from AboutCode Toolkit Files
----------------------------------------------------------------------------
+Generate a Software Inventory of Your Codebase from ABOUT file(s)
+-----------------------------------------------------------------
 
-One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually. For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated AboutCode Toolkit files manually.
+One of the major features of the ABOUT File specification is that the .ABOUT files are very simple text files that can be created, viewed and edited using any standard text editor. Your software development and maintenance processes may require or encourage your software developers to maintain .ABOUT files and/or associated text files manually. For example, when a developer addresses a software licensing issue with a component, it is appropriate to adjust the associated ABOUT file(s) manually.
 
-If your organization adopts the practice of manually creating and maintaining AboutCode Toolkit files, you can easily re-create your software inventory from your codebase using inventory. The official inventory parameters are defined here: :ref:`reference`
+If your organization adopts the practice of manually creating and maintaining ABOUT file(s), you can easily re-create your software inventory from your codebase using inventory. The official inventory parameters are defined here: :ref:`reference`
 
-A successful execution of inventory will create a complete software inventory in .csv format or .json format based on defined format.
+A successful execution of inventory will create a complete software inventory in .csv, .json or .xlsx format based on defined format.
 
 
 

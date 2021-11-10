@@ -11,9 +11,9 @@ homepage_url: http://www.elasticsearch.org/
 scm_tool: git
 scm_repository: https://github.com/elasticsearch/elasticsearch.git
 
-dje_license: apache-2.0
+license_expression: apache-2.0
 notice_file: ../../thirdparty/elasticsearch.NOTICE
-license_text_file: ../../thirdparty/elasticsearch.LICENSE
+license_file: ../../thirdparty/elasticsearch.LICENSE
 copyright: Copyright 2009-2011 ElasticSearch and Shay Banon
 
 notes: This a prebuilt version working on all OSes. 

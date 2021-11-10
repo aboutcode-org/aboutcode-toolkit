@@ -4,9 +4,6 @@
 Reference
 =========
 
-.. contents::
-   :depth: 3
-
 about
 =====
 
@@ -30,14 +27,13 @@ Commands
 
         ..  code-block:: none
 
-                attrib              Generate an attribution document from .ABOUT files.
+                attrib              Generate an attribution document from JSON/CSV/Excel/.ABOUT files.
                 check               Validate that the format of .ABOUT files is correct and
                                     report errors and warnings.
-                collect_redist_src  Collect redistributable sources.
-                gen                 Generate .ABOUT files from an inventory as CSV or JSON.
-                inventory           Collect the inventory of .ABOUT files to a CSV or JSON
-                                    file.
-                transform           Transform a CSV/JSON by applying renamings, filters and checks.
+                collect-redist-src  Collect redistributable sources.
+                gen                 Generate .ABOUT files from an inventory as CSV/JSON/Excel.
+                inventory           Collect the inventory of .ABOUT files to a CSV/JSON/Excel file.
+                transform           Transform a CSV/JSON/Excel by applying renamings, filters and checks.
 
 attrib
 ======
@@ -49,9 +45,8 @@ Syntax
 
                 about attrib [OPTIONS] LOCATION OUTPUT
 
-                LOCATION: Path to a file, directory or .zip archive containing .ABOUT
-                files.
-                
+                INPUT: Path to a file (.ABOUT/.csv/.json/.xlsx), directory or .zip archive containing .ABOUT files.
+
                 OUTPUT: Path where to write the attribution document.
 
 Options
@@ -59,41 +54,83 @@ Options
 
         ..  code-block:: none
 
-                --template FILE          Path to an optional custom attribution template to
-                                         generate the attribution document. If not provided
-                                         the default built-in template is used.
-                --vartext <key>=<value>  Add variable text as key=value for use in a custom
-                                         attribution template.
-                -q, --quiet              Do not print error or warning messages.
-                --verbose                Show all error and warning messages.
-                -h, --help               Show this message and exit.
+                --api_url URL                URL to DejaCode License Library.
+                --api_key KEY                API Key for the  DejaCode License Library
+                --min-license-score INTEGER  Attribute components that have license score
+                                             higher than the defined --min-license-score.
+                --scancode                   Indicate the input JSON file is from
+                                             scancode toolkit.
+                --reference DIR              Path to a directory with reference files where
+                                             "license_file" and/or "notice_file" located.
+                --template FILE              Path to an optional custom attribution template to
+                                             generate the attribution document. If not provided
+                                             the default built-in template is used.
+                --vartext <key>=<value>      Add variable text as key=value for use in a custom
+                                             attribution template.
+                -q, --quiet                  Do not print error or warning messages.
+                --verbose                    Show all error and warning messages.
+                -h, --help                   Show this message and exit.
 
 Purpose
 -------
 
-Generate an attribution file which contains the all license information from the LOCATION along with the license text.
+Generate an attribution file which contains license information from the INPUT along with the license text.
 
 Assume the following:
 
         ..  code-block:: none
 
-            '/home/about_files/'** contains all the ABOUT files [LOCATION]
+            '/home/about_files/' contains all the ABOUT files [INPUT]
+            '/home/project/inventory.csv' is a BOM inventory [INPUT]
+            '/home/project/scancode-detection.json' is a detection output from scancode-toolkit[INPUT] 
+            '/home/project/licenses/' contains all the license/notice file references
             '/home/attribution/attribution.html' is the user's output path [OUTPUT]
 
+
+        ..  code-block:: none
+
             $ about attrib /home/about_files/ /home/attribution/attribution.html
+            or
+            $ about attrib /home/project/inventory.csv /home/attribution/attribution.html
+            or
+            $ about attrib --scancode /home/project/scancode-detection.json /home/attribution/attribution.html
 
 Details
 ^^^^^^^
 
         ..  code-block:: none
 
+                --api_url URL --api_key
+
+                    This option let user to define where to get the license information such as
+                    from DJE. If these options are not set, the tool will get the license
+                    information from ScanCode LicenseDB by default
+
+                $ about attrib --api_url <URL> --api_key <KEY> INPUT OUTPUT
+
+                --min-license-score
+
+                    This option is a filter to collect license information where the license score
+                    in the scancode toolkit detection is greater than or equal to the defined
+                    --min-license-score. This option is specifically design for scancode's input
+                    and therefore --scancode is required
+
+                $ about attrib --scancode --min-license-score 85 /home/project/scancode-detection.json OUTPUT
+
+                --reference
+
+                    This option is to define the reference directory where the 'license_file'
+                    or 'notice_file' are stored
+
+                $ about attrib --reference /home/project/licenses/ /home/project/inventory.csv OUTPUT
+
                 --template
-                
+
                     This option allows you to use your own template for attribution generation.
                     For instance, if you have a custom template located at:
                     /home/custom_template/template.html
                 
-                $ about attrib --template /home/custom_template/template.html LOCATION OUTPUT
+                $ about attrib --template /home/custom_template/template.html INPUT OUTPUT
                 
                 --vartext
                 
@@ -110,16 +147,10 @@ Details
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
-*The following data are passed to jinja2 and, therefore, can be used for a custom template:*
-
--   about object: the about objects
--   common_licenses: a common license keys list in licenses.py
--   license_file_key_and_context: a dictionary with license_file_key (It's basically a license_key if it's not a custom license or license file name otherwise) as a key and license text as the value
--   license_file_key_and_license_key: a dictionary with license file key as a key and license key as the value
--   license_file_name_and_license_file_key: a dictionary with license file name as a key and license file key as the value
--   license_key_and_license_file_name: a dictionary with license key as a key and license file name as the value
--   license_key_and_license_name: a dictionary with license key as a key and license name as the value
--   license_name_and_license_key: a dictionary with license name as a key and license key as the value
+The following data are passed to jinja2 and, therefore, can be used for a custom template:
+ * about object: the about objects
+ * common_licenses: a common license keys list in licenses.py
+ * licenses_list: a license object list contains all the licenses found in about objects. It contains the following attribute: key, name, filename, url, text
 
 check
 =====
@@ -138,6 +169,8 @@ Options
 
         ..  code-block:: none
 
+                --djc api_url api_key  Validate license_expression from a DejaCode License
+                                         Library API URL using the API KEY.
                 --verbose                Show all the errors and warning
                 -h, --help               Show this message and exit.
 
@@ -157,6 +190,11 @@ Details
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
                 
                 $ about check --verbose /home/project/about_files/
+
+Special Notes
+-------------
+If no `--djc` option is set, the tool will default to check license_expression from
+ScanCode LicenseDB.
 
 collect_redist_src
 ==================
@@ -242,7 +280,7 @@ Syntax
 
                 about gen [OPTIONS] LOCATION OUTPUT
                 
-                LOCATION: Path to a JSON or CSV inventory file.
+                LOCATION: Path to a JSON/CSV/Excel inventory file.
                 OUTPUT: Path to a directory where ABOUT files are generated.
 
 Options
@@ -253,19 +291,20 @@ Options
                 --android                           Generate MODULE_LICENSE_XXX (XXX will be
                                                     replaced by license key) and NOTICE as the same
                                                     design as from Android.
-                
-                --fetch-license api_url api_key     Fetch licenses data from DejaCode License
+                --fetch-license                     Fetch license data and text files from the
+                                                    ScanCode LicenseDB.
+                --fetch-license-djc api_url api_key Fetch licenses data from DejaCode License
                                                     Library and create <license>.LICENSE
                                                     side-by-side with the generated .ABOUT file.
                                                     The following additional options are required:
-                
+
                                                     api_url - URL to the DejaCode License Library
                                                     API endpoint
-                
+
                                                     api_key - DejaCode API key
                                                     Example syntax:
-                
-                                                    about gen --fetch-license 'api_url' 'api_key'
+
+                                                    about gen --fetch-license-djc api_url api_key
                 --reference PATH                    Path to a directory with reference license
                                                     data and text files.
                 -q, --quiet                         Do not print any error/warning.
@@ -275,7 +314,7 @@ Options
 Purpose
 -------
 
-Given a CSV/JSON inventory, generate ABOUT files in the output location.
+Given a CSV/JSON/Excel inventory, generate ABOUT files in the output location.
 
 Details
 ^^^^^^^
@@ -283,44 +322,53 @@ Details
         ..  code-block:: none
 
                 --android
-                
+
                     Create an empty file named `MODULE_LICENSE_XXX` where `XXX` is the license
                     key and create a NOTICE file which these two files follow the design from
                     Android Open Source Project.
-                
+
                     The input **must** have the license key information as this is needed to
                     create the empty MODULE_LICENSE_XXX
-                
+
                 $ about gen --android LOCATION OUTPUT
-                
+
                 --fetch-license
-                
+
+                    Fetch licenses text and create <license>.LICENSE side-by-side
+                    with the generated .ABOUT file using the data fetched from the the ScanCode LicenseDB.
+
+                    The input needs to have the 'license_expression' field.
+
+                $ about gen --fetch-license LOCATION OUTPUT
+
+                --fetch-license-djc
+
                     Fetch licenses text from a DejaCode API, and create <license>.LICENSE side-by-side
                     with the generated .ABOUT file using the data fetched from the DejaCode License Library.
-                
+
                     This option requires 2 parameters:
                         api_url - URL to the DJE License Library.
                         api_key - Hash key to authenticate yourself in the API.
-                
+
                     In addition, the input needs to have the 'license_expression' field.
                     (Please contact nexB to get the api_* value for this feature)
-                
-                $ about gen --fetch-license 'api_url' 'api_key' LOCATION OUTPUT
-                
+
+                $ about gen --fetch-license-djc 'api_url' 'api_key' LOCATION OUTPUT
+
                 --reference
-                
+
                     Copy the reference files such as 'license_files' and 'notice_files' to the
                     generated location from the specified directory.
-                
+
                     For instance,
                     the specified directory, /home/licenses_notices/, contains all the licenses and notices:
                     /home/licenses_notices/apache2.LICENSE
                     /home/licenses_notices/jquery.js.NOTICE
-                
+
                 $ about gen --reference /home/licenses_notices/ LOCATION OUTPUT
-                
+
                 --verbose
-                
+
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
@@ -335,29 +383,29 @@ Syntax
                 about inventory [OPTIONS] LOCATION OUTPUT
                 
                 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
-                OUTPUT: Path to the JSON or CSV inventory file to create.
+                OUTPUT: Path to the CSV/JSON/Excel inventory file to create.
 
 Options
 -------
 
         ..  code-block:: none
 
-                -f, --format [json|csv]     Set OUTPUT file format.  [default: csv]
-                -q, --quiet                 Do not print any error/warning.
-                --verbose                   Show all the errors and warning.
-                -h, --help                  Show this message and exit.
+                -f, --format [json|csv|excel]   Set OUTPUT file format.  [default: csv]
+                -q, --quiet                     Do not print any error/warning.
+                --verbose                       Show all the errors and warning.
+                -h, --help                      Show this message and exit.
 
 Purpose
 -------
 
-Create a JSON or CSV inventory of components from ABOUT files.
+Create a JSON/CSV/Excel inventory of components from ABOUT files.
 
 Details
 ^^^^^^^
 
         ..  code-block:: none
 
-                -f, --format [json|csv]
+                -f, --format [json|csv|excel]
                 
                     Set OUTPUT file format.  [default: csv]
                 
@@ -433,8 +481,8 @@ Syntax
 
                 about transform [OPTIONS] LOCATION OUTPUT
                 
-                LOCATION: Path to a CSV/JSON file.
-                OUTPUT: Path to CSV/JSON inventory file to create.
+                LOCATION: Path to a CSV/JSON/Excel file.
+                OUTPUT: Path to CSV/JSON/Excel inventory file to create.
 
 Options
 -------
@@ -451,7 +499,7 @@ Options
 Purpose
 -------
 
-Transform the CSV/JSON file at LOCATION by applying renamings, filters and checks and then write a new CSV/JSON to OUTPUT (Format for input and output need to be the same).
+Transform the CSV/JSON/Excel file at LOCATION by applying renamings, filters and checks and then write a new CSV/JSON/Excel to OUTPUT (Format for input and output need to be the same).
 
 Details
 ^^^^^^^

@@ -8,5 +8,5 @@ homepage_url: https://github.com/schematics/schematics
 owner: J2 Labs LLC.
 copyright: Copyright (c) 2013, J2 Labs LLC.
 
-dje_license: bsd-new
-license_text_file: schematics.LICENSE
+license_expression: bsd-new
+license_file: schematics.LICENSE
