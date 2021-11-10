@@ -68,15 +68,15 @@ or on windows:
     configure
 
 
-Activate the virtualenv
+ACTIVATE the VIRTUALENV
 -----------------------
 To activate the virtualenv, run (on posix):
-    source bin/activate
+    source venv/bin/activate
 or on windows:
-    bin\\activate
+    venv\\bin\\activate
 
 
-Deactivate the virtualenv
+DEACTIVATE the VIRTUALENV
 -------------------------
 To deactivate the virtualenv, run (on both posix and windows):
     deactivate
@@ -101,12 +101,20 @@ on aboutcode-toolkit usage.
 TESTS and DEVELOPMENT
 ---------------------
 To install all the needed development dependencies, run (on posix):
-    source configure etc/conf/dev
+    ./configure --dev
 or on windows:
-    configure etc/conf/dev
+    configure --dev
 
 To verify that everything works fine you can run the test suite with:
-    py.test
+    pytest
+
+
+CLEAN BUILD AND INSTALLED FILES
+-------------------------------
+To clean the built and installed files, run (on posix):
+    ./configure --clean
+or on windows:
+    configure --clean
 
 
 HELP and SUPPORT
