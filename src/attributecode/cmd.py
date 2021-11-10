@@ -285,7 +285,7 @@ def validate_template(ctx, param, value):
     if not value:
         return None
 
-    with io.open(value, encoding='utf-8') as templatef:
+    with io.open(value, encoding='utf-8', errors='replace') as templatef:
         template_error = check_template(templatef.read())
 
     if template_error:
@@ -728,7 +728,7 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
         click.echo(msg)
     if log_file_loc and errors:
         log_msgs, _ = get_error_messages(errors, quiet=False, verbose=True)
-        with io.open(log_file_loc, 'w', encoding='utf-8') as lf:
+        with io.open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
             lf.write('\n'.join(log_msgs))
     return severe_errors_count
 

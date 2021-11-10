@@ -282,7 +282,7 @@ class Transformer(object):
         Load and return a Transformer instance from a YAML configuration file at
         `location`.
         """
-        with io.open(location, encoding='utf-8') as conf:
+        with io.open(location, encoding='utf-8', errors='replace') as conf:
             data = saneyaml.load(replace_tab_with_spaces(conf.read()))
         return cls(
             field_renamings=data.get('field_renamings', {}),
@@ -400,7 +400,7 @@ def write_csv(location, data, field_names):  # NOQA
     Write a CSV file at `location` the `data` list of ordered dicts using the
     `field_names`.
     """
-    with io.open(location, 'w', encoding='utf-8', newline='\n') as csvfile:
+    with io.open(location, 'w', encoding='utf-8', newline='\n', errors='replace') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=field_names)
         writer.writeheader()
         writer.writerows(data)

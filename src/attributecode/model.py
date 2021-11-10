@@ -584,7 +584,7 @@ class FileTextField(PathField):
             try:
                 # TODO: we have lots the location by replacing it with a text
                 location = add_unc(location)
-                with io.open(location, encoding='utf-8') as txt:
+                with io.open(location, encoding='utf-8', errors='replace') as txt:
                     text = txt.read()
                 self.value[path] = text
             except Exception as e:
@@ -1207,7 +1207,7 @@ class About(object):
         if on_windows:
             about_file_path = add_unc(about_file_path)
 
-        with io.open(about_file_path, mode='w', encoding='utf-8') as dumped:
+        with io.open(about_file_path, mode='w', encoding='utf-8', errors='replace') as dumped:
             dumped.write(genereated_tk_version)
             dumped.write(self.dumps(lic_dict))
 
@@ -1218,7 +1218,7 @@ class About(object):
         if on_windows:
             path = add_unc(path)
 
-        with io.open(path, mode='w', encoding='utf-8') as dumped:
+        with io.open(path, mode='w', encoding='utf-8', errors='replace') as dumped:
             dumped.write(context)
 
     def android_module_license(self, about_parent_path):
@@ -1285,7 +1285,7 @@ class About(object):
                             license_name, license_filename, license_context, license_url = license_dict[lic_key]
                             license_info = (lic_key, license_name, license_filename, license_context, license_url)
                             license_key_name_context_url.append(license_info)
-                            with io.open(license_path, mode='w', encoding='utf-8', newline='\n') as lic:
+                            with io.open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
                                 lic.write(license_context)
                     except Exception as e:
                         # TODO: it should return error if exception caught
@@ -1526,7 +1526,7 @@ def save_as_json(location, about_dicts):
         output_file.write(json.dumps(data, indent=2))
 
 def save_as_csv(location, about_dicts, field_names):
-    with io.open(location, mode='w', encoding='utf-8', newline='') as output_file:
+    with io.open(location, mode='w', encoding='utf-8', newline='', errors='replace') as output_file:
         writer = csv.DictWriter(output_file, field_names)
         writer.writeheader()
         csv_formatted_list = util.format_about_dict_output(about_dicts)

@@ -221,7 +221,7 @@ def generate_from_file(abouts, is_about_input, license_dict, scancode, min_licen
             template_loc = add_unc(DEFAULT_TEMPLATE_FILE)
     else:
         template_loc = add_unc(template_loc)
-    with io.open(template_loc, encoding='utf-8') as tplf:
+    with io.open(template_loc, encoding='utf-8', errors='replace') as tplf:
         tpls = tplf.read()
     return generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=tpls, variables=variables)
 
@@ -259,7 +259,7 @@ def generate_and_save(abouts, is_about_input, license_dict, output_location, sca
 
     if rendered:
         output_location = add_unc(output_location)
-        with io.open(output_location, 'w', encoding='utf-8') as of:
+        with io.open(output_location, 'w', encoding='utf-8', errors='replace') as of:
             of.write(rendered)
 
     return errors, rendered
