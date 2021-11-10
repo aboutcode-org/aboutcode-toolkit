@@ -1648,6 +1648,8 @@ def detect_special_char(expression):
 
 def valid_api_url(api_url):
     try:
+        import ssl
+        ssl._create_default_https_context = ssl._create_unverified_context
         request = Request(api_url)
         # This will always goes to exception as no key are provided.
         # The purpose of this code is to validate the provided api_url is correct
