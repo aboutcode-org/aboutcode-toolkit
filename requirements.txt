@@ -1,5 +1,6 @@
 attrs==21.2.0
 boolean.py==3.8
+certifi
 click==8.0.1
 colorama==0.4.4
 importlib-metadata==4.8.1
