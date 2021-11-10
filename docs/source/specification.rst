@@ -26,8 +26,9 @@ A simple and valid ABOUT file named httpd-2.4.3.tar.gz.ABOUT may look like this:
                 license_expression: apache-2.0
                 licenses:
                     -   key: apache-2.0
-                        name: Apache License 2.0
+                        name: Apache 2.0
                         file: apache-2.0.LICENSE
+                        url: https://scancode-licensedb.aboutcode.org/apache-2.0.LICENSE
                 notice_file: httpd.NOTICE
                 copyright: Copyright (c) 2012 The Apache Software Foundation.
 

@@ -324,7 +324,7 @@ def validate_template(ctx, param, value):
 
 @click.option('--min-license-score',
     type=int,
-    help='Attribute components that have license score higher than the defined '
+    help='Attribute components that have license score higher than or equal to the defined '
         '--min-license-score.')
 
 @click.option('--scancode',
@@ -363,7 +363,7 @@ def attrib(input, output, api_url, api_key, scancode, min_license_score, referen
     """
 Generate an attribution document at OUTPUT using JSON, CSV or Excel or .ABOUT files at INPUT.
 
-INPUT: Path to a file, directory or .zip archive containing .ABOUT files.
+INPUT: Path to a file (.ABOUT/.csv/.json/.xlsx), directory or .zip archive containing .ABOUT files.
 
 OUTPUT: Path where to write the attribution document.
     """

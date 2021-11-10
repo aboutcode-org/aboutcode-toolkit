@@ -9,15 +9,15 @@ AboutCode Toolkit Defined
 
 AboutCode Toolkit is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. ABOUT file(s) have a simple, standard format that identifies components and their associated licenses. The current AboutCode Toolkit subcommands are:
 
--   **attrib**: Generate a Product Attribution notice document (HTML format) from your ABOUT file(s). You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template.
+-   **attrib**: Generate a Product Attribution notice document from your ABOUT file(s), JSON, CSV or Excel. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template.
 
 -   **check**: A simple command to validate the ABOUT file(s) and output errors/warnings if any on the terminal.
 
 -   **collect_redist_src**: A command to collect and copy sources that have 'redistribute' flagged as 'True' in ABOUT file(s) or from an inventory.
 
--   **gen**: Create ABOUT file(s) from a Software Inventory file (.csv or .json format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase. You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes.
+-   **gen**: Create ABOUT file(s) from a Software Inventory file (.csv, .json or .xlsx format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase. You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes.
 
--   **inventory**: Generate a Software Inventory list (.csv or .json format) from your codebase based on ABOUT file(s). Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
+-   **inventory**: Generate a Software Inventory list (.csv, .json or .xlsx format) from your codebase based on ABOUT file(s). Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
 
 -   **transform**: A command to transform an input CSV/JSON/Excel by applying renaming and/or filtering and then output to a new CSV/JSON/Excel file.
 
@@ -217,7 +217,7 @@ For instance with this configuration, the target file will not contain the "type
 Run gen to Generate ABOUT file(s)
 ---------------------------------
 
-When your software inventory is ready, you can save it as a .csv or .json file, and use it as input to run gen to generate ABOUT file(s). The official gen parameters are defined here: :ref:`reference`
+When your software inventory is ready, you can save it as a .csv, .json or .xlsx file, and use it as input to run gen to generate ABOUT file(s). The official gen parameters are defined here: :ref:`reference`
 
 Here is an example of a gen command:
 
@@ -227,7 +227,7 @@ Here is an example of a gen command:
 
 This gen example command does the following:
 
--   Activates the --fetch-license option to get license information.
+-   Activates the --fetch-license option to get license information from ScanCode LicenseDB.
 
 -   Activates the --reference option to get license text files and notice text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
 
@@ -247,8 +247,9 @@ Review the generated ABOUT file(s) to determine if it meets your requirements. H
                 license_expression: gpl-2.0
                 licenses:
                     -   key: gpl-2.0
-                        name: GNU General Public License 2.0
+                        name: GPL 2.0
                         file: gpl-2.0.LICENSE
+                        url: https://scancode-licensedb.aboutcode.org/gpl-2.0.LICENSE
                 owner: Red Hat
                 redistribute: Y
 
@@ -256,21 +257,6 @@ You can make appropriate changes to your input software inventory and then run g
 
 Using attrib to Generate a Product Attribution Notice Package
 =============================================================
-
-Prepare a Filtered Product BOM to Use as Input to attrib
---------------------------------------------------------
-
-The Software Inventory that you prepared for gen most likely includes components that do not need to appear in a product attribution notice package; for example:
-
--   Components in your codebase that are not Deployed on the final product (e.g. build tools, testing tools, internal documentation).
-
--   Components in your codebase under licenses that do not require attribution (e.g. proprietary packages, commercial products).
-
-There are two options here:
-
--   Edit the jinja2 template to only include the one that have value in attribute field such as: ``{% if about_object.attribute.value %}``
-
--   You should prepare a filtered version of your software inventory (the one that you used for gen) by removing the rows that identify components which should not be included in a product attribution notice package, and saving that filtered version as your Product BOM.
 
 Prepare an Attribution Template to Use as Input to attrib
 ---------------------------------------------------------
@@ -401,7 +387,7 @@ One of the major features of the ABOUT File specification is that the .ABOUT fil
 
 If your organization adopts the practice of manually creating and maintaining ABOUT file(s), you can easily re-create your software inventory from your codebase using inventory. The official inventory parameters are defined here: :ref:`reference`
 
-A successful execution of inventory will create a complete software inventory in .csv format or .json format based on defined format.
+A successful execution of inventory will create a complete software inventory in .csv, .json or .xlsx format based on defined format.
 
 
 

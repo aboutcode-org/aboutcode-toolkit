@@ -3,7 +3,8 @@ Usage: about attrib [OPTIONS] INPUT OUTPUT
   Generate an attribution document at OUTPUT using JSON, CSV or Excel or .ABOUT
   files at INPUT.
 
-  INPUT: Path to a file, directory or .zip archive containing .ABOUT files.
+  INPUT: Path to a file (.ABOUT/.csv/.json/.xlsx), directory or .zip archive
+  containing .ABOUT files.
 
   OUTPUT: Path where to write the attribution document.
 
@@ -11,7 +12,8 @@ Options:
   --api_url URL                URL to DejaCode License Library.
   --api_key KEY                API Key for the  DejaCode License Library
   --min-license-score INTEGER  Attribute components that have license score
-                               higher than the defined --min-license-score.
+                               higher than or equal to the defined --min-
+                               license-score.
   --scancode                   Indicate the input JSON file is from
                                scancode_toolkit.
   --reference DIR              Path to a directory with reference files where
