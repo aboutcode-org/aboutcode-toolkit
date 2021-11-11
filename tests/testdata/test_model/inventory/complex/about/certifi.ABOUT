@@ -7,4 +7,4 @@ contact: me@kennethreitz.com
 homepage_url: http://python-requests.org
 name: certifi
 
-dje_license: mpl-2.0
+license_expression: mpl-2.0

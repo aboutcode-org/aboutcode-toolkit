@@ -16,21 +16,14 @@ p {
     margin-bottom: 10px;
 }
 
-.custom_header_01 {
-    color: #cc0000;
-    font-size: 22px;
-    font-weight: bold;
-    line-height: 50px;
-}
-
 h1, h2, h3, h4, h5, h6 {
     margin-bottom: 10px;
 }
 
-/* h2, h3, h4, h5, h6 {
+h2, h3, h4, h5, h6 {
     margin-top: 20px;
     margin-top: 30px;
-} */
+}
 
 h5 {
     font-size: 17px;
@@ -43,19 +36,17 @@ h5 {
 
 h6 {
     font-size: 16px;
-    font-size: 15px;
     color: #666666;
-    color: #000000;
-    /* color: #999999; */
-    /* color: #778899; */
-    /* color: #009999;
+    color: #999999;
+    color: #778899;
+    color: #009999;
     color: #006666;
     color: #996633;
     color: #009933;
-    color: #661aff; */
+    color: #661aff;
     /* color: #666699; */
 
-    font-style: italic;
+    /* font-style: italic; */
     /* font-weight: normal; */
     margin-bottom: 10px;
 }
@@ -108,6 +99,7 @@ div.custom-admonition-important.admonition {
     color: #000000;
     background: #ffff66;
     background: #ffff99;
+    background: #fff3cd;
     border-radius: 5px 5px 0px 0px;
     border-bottom: solid 1px #e8e8e8;
 }
@@ -126,8 +118,12 @@ div.custom-admonition-caution.admonition {
 /* note */
 .custom-admonition-note  .admonition-title {
     color: #ffffff;
+    /* color: #000000; */
     background: #3399ff;
     background: #006bb3;
+    background: #cce5ff;
+    background: #b3d7ff;
+    background: #2196f3;
     border-radius: 5px 5px 0px 0px;
 }
 div.custom-admonition-note.admonition {
@@ -136,6 +132,8 @@ div.custom-admonition-note.admonition {
     background: #ffffff;
     border: solid 1px #e8e8e8;
     border: solid 1px #cccccc;
+    /* border: solid 1px #80bdff; */
+    /* border: solid 1px #2196f3; */
     border-radius: 5px;
     /* box-shadow: 5px 5px 18px #d8d8d8; */
     box-shadow: 1px 1px 5px 3px #d8d8d8;
@@ -145,9 +143,20 @@ div.custom-admonition-note.admonition {
 /* todo */
 .custom-admonition-todo  .admonition-title {
     color: #000000;
+    color: #cc0000;
     background: #cce6ff;
+    background: #ffcc00;
+    background: #ffeb99;
+    background: #ccffff;
+    background: #ffd9b3;
+    background: #ffffff;
     border-radius: 5px 5px 0px 0px;
     border-bottom: solid 1px #99ccff;
+    border-bottom: solid 1px #ffcc00;
+    border-bottom: solid 1px #ffeb99;
+    border-bottom: solid 1px #e8e8e8;
+    border-bottom: solid 1px #ffd9b3;
+    border-bottom: solid 1px #d8d8d8;
 }
 div.custom-admonition-todo.admonition {
     color: #000000;
@@ -156,6 +165,10 @@ div.custom-admonition-todo.admonition {
     border: solid 1px #e8e8e8;
     border: solid 1px #cccccc;
     border: solid 1px #99ccff;
+    border: solid 1px #ffcc00;
+    border: solid 1px #ffeb99;
+    border: solid 1px #ffd9b3;
+    border: solid 1px #cc0000;
     border-radius: 5px;
     /* box-shadow: 5px 5px 18px #d8d8d8; */
     box-shadow: 1px 1px 5px 3px #d8d8d8;
@@ -203,17 +216,21 @@ div.rst-content {
 .rst-content .guilabel {
     /* border: 1px solid #7fbbe3; */
     /* border: 1px solid #e7f2fa; */
-    border: 1px solid #ffff99;
+    /* border: 1px solid #ffff99; */
     /* border: 1px solid #ccffcc; */
     /* border: 1px solid #f2f2f2; */
     /* border: 1px solid #e6f2ff; */
+    /* border: 1px solid #fff3cd; */
+    border: 1px solid #ccffff;
 
     /* background: #e7f2fa; */
     /* background: #e6ffff; */
-    background: #ffff99;
+    /* background: #ffff99; */
     /* background: #ccffcc; */
     /* background-color: #f2f2f2; */
     /* background: #e6f2ff; */
+    /* background: #fff3cd; */
+    background: #ccffff;
 
     /* font-size: 80%; */
     font-size: 100%;
@@ -302,9 +319,7 @@ div.rst-content {
     /* line-height: 1.5; */
     overflow: visible;
     white-space: pre-wrap;
-    color: #e74c3c;
-    color: #cc0000;
-    /* color: #000000; */
+    /* color: #e74c3c; */
 }
 
 .rst-content pre.literal-block, .rst-content div[class^='highlight'] {
@@ -332,12 +347,10 @@ code, .rst-content tt, .rst-content code {
 }
 
 /* change color of inline code block */
-span.pre {
+/* span.pre {
     color: #e74c3c;
-    color: #cc0000;
-    /* color: #e01e5a; */
-    /* color: #000000; */
-}
+    color: #e01e5a;
+} */
 
 .wy-body-for-nav blockquote {
     margin: 1em 0;
@@ -373,4 +386,32 @@ span.pre {
     margin-bottom: 24px;
     margin-bottom: 0px;
     line-height: 24px;
+}
+
+/* === */
+
+/* this is used by the genindex added via layout.html (see source/_templates/) to sidebar toc */
+.reference.internal.toc-index {
+    color: #d9d9d9;
+}
+
+.reference.internal.toc-index.current {
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: bold;
+}
+
+.toc-index-div {
+    border-top: solid 1px #666666;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+/* The next 2 fix the poor vertical spacing in genindex.html (the alphabetized index) */
+.indextable.genindextable {
+    margin-bottom: 20px;
+}
+
+div.genindex-jumpbox {
+    margin-bottom: 20px;
 }

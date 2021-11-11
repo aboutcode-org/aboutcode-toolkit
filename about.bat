@@ -7,8 +7,11 @@
 set ABOUT_ROOT_DIR=%~dp0
 cd %ABOUT_ROOT_DIR%
 
+# where we create a virtualenv
+set VIRTUALENV_DIR=venv
+
 set CMD_LINE_ARGS= 
-set CONFIGURED_PYTHON=%ABOUT_ROOT_DIR%\Scripts\python.exe
+set CONFIGURED_PYTHON=%ABOUT_ROOT_DIR%\%VIRTUALENV_DIR%\Scripts\python.exe
 
 @rem Collect all command line arguments in a variable
 :collectarg
@@ -28,8 +31,8 @@ goto about
  call %ABOUT_ROOT_DIR%\configure
 
 :about
-call %ABOUT_ROOT_DIR%\Scripts\activate
-echo %ABOUT_ROOT_DIR%\bin\about %CMD_LINE_ARGS%
-%ABOUT_ROOT_DIR%\bin\about %CMD_LINE_ARGS%
+call %ABOUT_ROOT_DIR%\%VIRTUALENV_DIR%\Scripts\activate
+echo %ABOUT_ROOT_DIR%\%VIRTUALENV_DIR%\bin\about %CMD_LINE_ARGS%
+%ABOUT_ROOT_DIR%\%VIRTUALENV_DIR%\bin\about %CMD_LINE_ARGS%
 
 :EOS

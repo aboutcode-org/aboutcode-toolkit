@@ -37,7 +37,7 @@ class ApiTest(unittest.TestCase):
     @mock.patch.object(api, 'request_license_data')
     def test_api_get_license_details_from_api(self, request_license_data):
         license_data = {
-            'name': 'Apache License 2.0',
+            'short_name': 'Apache 2.0',
             'full_text': 'Apache License Version 2.0 ...',
             'key': 'apache-2.0',
         }
@@ -45,7 +45,7 @@ class ApiTest(unittest.TestCase):
         request_license_data.return_value = license_data, errors
 
         expected = (
-            'Apache License 2.0',
+            'Apache 2.0',
             'apache-2.0',
             'Apache License Version 2.0 ...',
             [])

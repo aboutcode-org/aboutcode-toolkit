@@ -54,7 +54,7 @@ html_static_path = ['_static']
 html_context = {
     "display_github": True,
     "github_user": "nexB",
-    "github_repo": "nexb-skeleton",
+    "github_repo": "aboutcode-toolkit",
     "github_version": "develop",  # branch
     "conf_py_path": "/docs/source/",  # path in the checkout to the docs root
     }

@@ -3,6 +3,6 @@ name: csv_serialize
 version: 2013-01-16
 homepage_url: http://djangosnippets.org/snippets/2240/
 license_url: http://djangosnippets.org/about/tos/
-license_text_file: ../../thirdparty/django_snippets.LICENSE
+license_file: ../../thirdparty/django_snippets.LICENSE
 
 about_resource: ../../thirdparty/csv_serialize.py

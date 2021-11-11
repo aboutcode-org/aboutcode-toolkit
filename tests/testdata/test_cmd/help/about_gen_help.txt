@@ -1,19 +1,23 @@
 Usage: about gen [OPTIONS] LOCATION OUTPUT
 
-  Given a CSV/JSON inventory, generate ABOUT files in the output location.
+  Given a CSV/JSON/Excel inventory, generate ABOUT files in the output location.
 
-  LOCATION: Path to a JSON or CSV inventory file.
+  LOCATION: Path to a JSON/CSV/Excel inventory file.
 
   OUTPUT: Path to a directory where ABOUT files are generated.
 
 Options:
-  --android                Generate MODULE_LICENSE_XXX (XXX will be replaced by
-                           license key) and NOTICE as the same design as from
-                           Android.
-  --fetch-license URL KEY  Fetch license data and text files from a DejaCode
-                           License Library API URL using the API KEY.
-  --reference DIR          Path to a directory with reference license data and
-                           text files.
-  -q, --quiet              Do not print error or warning messages.
-  --verbose                Show all error and warning messages.
-  -h, --help               Show this message and exit.
+  --android                       Generate MODULE_LICENSE_XXX (XXX will be
+                                  replaced by license key) and NOTICE as the
+                                  same design as from Android.
+  --fetch-license                 Fetch license data and text files from the
+                                  ScanCode LicenseDB.
+  --fetch-license-djc api_url api_key
+                                  Fetch license data and text files from a
+                                  DejaCode License Library API URL using the API
+                                  KEY.
+  --reference DIR                 Path to a directory with reference license
+                                  data and text files.
+  -q, --quiet                     Do not print error or warning messages.
+  --verbose                       Show all error and warning messages.
+  -h, --help                      Show this message and exit.

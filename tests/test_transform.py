@@ -20,12 +20,12 @@ import unittest
 from testing_utils import get_test_loc
 
 from attributecode.transform import check_duplicate_fields
-from attributecode.transform import read_json
 from attributecode.transform import transform_data
 from attributecode.transform import normalize_dict_data
 from attributecode.transform import strip_trailing_fields_csv
 from attributecode.transform import strip_trailing_fields_json
 from attributecode.transform import Transformer
+from attributecode.transform import read_csv_rows, read_excel, read_json
 
 
 class TransformTest(unittest.TestCase):
@@ -157,3 +157,19 @@ class TransformTest(unittest.TestCase):
         expected = [OrderedDict([(u'about_resource', u'/this.c'), (u'name', u'this.c'), (u'version', u'0.11.0')])]
         result = strip_trailing_fields_json(test)
         assert result == expected
+
+    def test_read_excel(self):
+        test_file = get_test_loc('test_transform/simple.xlsx')
+        error, data = read_excel(test_file)
+        assert not error
+        expected = [OrderedDict([('about_resource', '/test.c'), ('name', 'test.c'), ('license_expression', 'mit')]),
+                    OrderedDict([('about_resource', '/test2.c'), ('name', 'test2.c'), ('license_expression', 'mit and apache-2.0')])]
+        assert data == expected
+
+    def test_read_csv_rows(self):
+        test_file = get_test_loc('test_transform/simple.csv')
+        data = read_csv_rows(test_file)
+        expected = [['about_resource', 'name', 'license_expression'],
+                    ['/test.c', 'test.c', 'mit'],
+                    ['/test2.c', 'test2.c', 'mit and apache-2.0']]
+        assert list(data) == expected

@@ -1,5 +1,5 @@
-2020-xx-xx
-    Release 6.0.0
+2021-xx-xx
+    Release 7.0.0
 
     * Add '@' as a support character for filename #451
     * Add support to collect redistributable sources #22
@@ -7,8 +7,19 @@
     * Remove restriction of python27 only on windows #453
     * Documentation updated
     * Code enhancement
+    * Remove thirdparty/
+    * Update configuration scripts
+    * Use readthedocs for documentation
     * Add Dockerfile to run aboutcode with docker
+    * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library
+    * Add ability to transform Excel formatted file 
+    * Support Excel file format for `inventory`, `gen` and `attrib`
 
+2021-04-02
+    Release 6.0.0
+
+    * This new release has no feature changes.
+    * It has relaxed PyYAML dependencies and drop Python 2 support
 
 2020-09-01
     Release 5.1.0
