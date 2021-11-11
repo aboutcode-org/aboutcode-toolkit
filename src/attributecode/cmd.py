@@ -459,7 +459,7 @@ OUTPUT: Path where to write the attribution document.
             scancode=scancode,
             min_license_score=min_license_score,
             template_loc=template,
-            variables=vartext,
+            vartext=vartext,
         )
         errors.extend(attrib_errors)
 

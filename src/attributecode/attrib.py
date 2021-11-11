@@ -39,10 +39,10 @@ DEFAULT_TEMPLATE_SCANCODE_FILE = os.path.join(
 
 DEFAULT_LICENSE_SCORE = 100
 
-def generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=None, variables=None):
+def generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=None, vartext=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
-    `template` template text and a `variables` optional dict of extra
+    `template` template text and a `vartext` optional dict of extra
     variables.
 
     Return a tuple of (error, attribution text) where error is an Error object
@@ -179,7 +179,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
         licenses_list=licenses_list,
         utcnow=utcnow,
         tkversion=__version__,
-        variables=variables
+        vartext=vartext
     )
     return error, rendered
 
@@ -205,10 +205,10 @@ def check_template(template_string):
         return e.lineno, e.message
 
 
-def generate_from_file(abouts, is_about_input, license_dict, scancode, min_license_score, template_loc=None, variables=None):
+def generate_from_file(abouts, is_about_input, license_dict, scancode, min_license_score, template_loc=None, vartext=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
-    `template_loc` template file location and a `variables` optional
+    `template_loc` template file location and a `vartext` optional
     dict of extra variables.
 
     Return a tuple of (error, attribution text) where error is an Error object
@@ -223,13 +223,13 @@ def generate_from_file(abouts, is_about_input, license_dict, scancode, min_licen
         template_loc = add_unc(template_loc)
     with io.open(template_loc, encoding='utf-8', errors='replace') as tplf:
         tpls = tplf.read()
-    return generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=tpls, variables=variables)
+    return generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=tpls, vartext=vartext)
 
 
-def generate_and_save(abouts, is_about_input, license_dict, output_location, scancode=False, min_license_score=0, template_loc=None, variables=None):
+def generate_and_save(abouts, is_about_input, license_dict, output_location, scancode=False, min_license_score=0, template_loc=None, vartext=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
-    `template_loc` template file location and a `variables` optional
+    `template_loc` template file location and a `vartext` optional
     dict of extra variables. Save the generated attribution text in the
     `output_location` file.
     Return a list of Error objects if any.
@@ -251,7 +251,7 @@ def generate_and_save(abouts, is_about_input, license_dict, output_location, sca
         scancode=scancode,
         min_license_score=min_license_score,
         template_loc=template_loc,
-        variables=variables,
+        vartext=vartext,
     )
 
     if rendering_error:
