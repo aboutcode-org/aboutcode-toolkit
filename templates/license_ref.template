@@ -48,9 +48,11 @@ This document lists the open source and third-party components of a {{ variables
                         <pre>{{about_object.copyright.value}}</pre>
                     {% endif %}
                     {% if about_object.notice_file.value %}
-                        <pre>{{ about_object.notice_file.value }}</pre>
-                    {% elif about_object.notice_file.value %}
-                        <pre class="component-notice">{{ about_object.notice_text.value }}</pre>
+                        {% for notice in about_object.notice_file.value %}
+                            <pre class="component-notice">
+                                {{ about_object.notice_file.value[notice] }}
+                            </pre>
+                        {% endfor %}
                     {% endif %}
                 {% endif %}
                 {% if loop.last %}
