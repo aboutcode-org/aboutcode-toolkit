@@ -23,6 +23,9 @@ import sys
 
 import click
 
+# silence unicode literals warnings
+click.disable_unicode_literals_warning = True
+
 from attributecode import WARNING
 from attributecode.util import unique
 
@@ -30,15 +33,21 @@ from attributecode import __about_spec_version__
 from attributecode import __version__
 from attributecode import severities
 from attributecode.attrib import check_template
-from attributecode.attrib import DEFAULT_TEMPLATE_FILE
+from attributecode.attrib import DEFAULT_TEMPLATE_FILE, DEFAULT_LICENSE_SCORE
 from attributecode.attrib import generate_and_save as generate_attribution_doc
 from attributecode.gen import generate as generate_about_files, load_inventory
 from attributecode.model import collect_inventory, get_copy_list
 from attributecode.model import copy_redist_src
+from attributecode.model import pre_process_and_fetch_license_dict
 from attributecode.model import write_output
+from attributecode.transform import transform_csv_to_csv
+from attributecode.transform import transform_json_to_json
+from attributecode.transform import transform_excel_to_excel
+from attributecode.transform import Transformer
 from attributecode.util import extract_zip
 from attributecode.util import filter_errors
 from attributecode.util import get_temp_dir
+from attributecode.util import get_file_text
 
 __copyright__ = """
     Copyright (c) nexB Inc and others. All rights reserved.
@@ -130,7 +139,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 
 
 @about.command(cls=AboutCommand,
-    short_help='Collect the inventory of .ABOUT files to a CSV or JSON file.')
+    short_help='Collect the inventory of .ABOUT files to a CSV/JSON/Excel file.')
 
 @click.argument('location',
     required=True,
@@ -147,7 +156,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
     is_flag=False,
     default='csv',
     show_default=True,
-    type=click.Choice(['json', 'csv']),
+    type=click.Choice(['json', 'csv', 'excel']),
     help='Set OUTPUT inventory file format.')
 
 @click.option('-q', '--quiet',
@@ -161,11 +170,11 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 @click.help_option('-h', '--help')
 def inventory(location, output, format, quiet, verbose):  # NOQA
     """
-Collect the inventory of ABOUT file data as CSV or JSON.
+Collect the inventory of .ABOUT files to a CSV/JSON/Excel file.
 
 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
-OUTPUT: Path to the JSON or CSV inventory file to create.
+OUTPUT: Path to the CSV/JSON/Excel inventory file to create.
     """
     if not quiet:
         print_version()
@@ -175,8 +184,8 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
         # accept zipped ABOUT files as input
         location = extract_zip(location)
     errors, abouts = collect_inventory(location)
-    write_errors = write_output(abouts=abouts, location=output, format=format)
-    errors.extend(write_errors)
+    write_output(abouts=abouts, location=output, format=format)
+
     errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
@@ -190,7 +199,7 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 
 @about.command(cls=AboutCommand,
-    short_help='Generate .ABOUT files from an inventory as CSV or JSON.')
+    short_help='Generate .ABOUT files from an inventory as CSV/JSON/Excel.')
 
 @click.argument('location',
     required=True,
@@ -210,9 +219,13 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
 
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
 @click.option('--fetch-license',
+    is_flag=True,
+    help='Fetch license data and text files from the ScanCode LicenseDB.')
+
+@click.option('--fetch-license-djc',
     nargs=2,
     type=str,
-    metavar='URL KEY',
+    metavar='api_url api_key',
     help='Fetch license data and text files from a DejaCode License Library '
          'API URL using the API KEY.')
 
@@ -230,11 +243,11 @@ OUTPUT: Path to the JSON or CSV inventory file to create.
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def gen(location, output, android, fetch_license, reference, quiet, verbose):
+def gen(location, output, android, fetch_license, fetch_license_djc, reference, quiet, verbose):
     """
-Given a CSV/JSON inventory, generate ABOUT files in the output location.
+Given a CSV/JSON/Excel inventory, generate ABOUT files in the output location.
 
-LOCATION: Path to a JSON or CSV inventory file.
+LOCATION: Path to a JSON/CSV/Excel inventory file.
 
 OUTPUT: Path to a directory where ABOUT files are generated.
     """
@@ -243,8 +256,8 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         click.echo('Generating .ABOUT files...')
 
     # FIXME: This should be checked in the `click`
-    if not location.endswith(('.csv', '.json',)):
-        raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json.')
+    if not location.endswith(('.csv', '.json', '.xlsx')):
+        raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json or .xlsx.')
 
     errors, abouts = generate_about_files(
         location=location,
@@ -252,6 +265,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         android=android,
         reference_dir=reference,
         fetch_license=fetch_license,
+        fetch_license_djc=fetch_license_djc,
     )
 
     errors = unique(errors)
@@ -269,9 +283,9 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
 def validate_template(ctx, param, value):
     if not value:
-        return DEFAULT_TEMPLATE_FILE
+        return None
 
-    with io.open(value, encoding='utf-8') as templatef:
+    with io.open(value, encoding='utf-8', errors='replace') as templatef:
         template_error = check_template(templatef.read())
 
     if template_error:
@@ -283,11 +297,11 @@ def validate_template(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Generate an attribution document from .ABOUT files.')
+    short_help='Generate an attribution document from JSON/CSV/Excel/.ABOUT files.')
 
-@click.argument('location',
+@click.argument('input',
     required=True,
-    metavar='LOCATION',
+    metavar='INPUT',
     type=click.Path(
         exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
@@ -295,6 +309,33 @@ def validate_template(ctx, param, value):
     required=True,
     metavar='OUTPUT',
     type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
+
+@click.option('--api_url',
+    nargs=1,
+    type=click.STRING,
+    metavar='URL',
+    help='URL to DejaCode License Library.')
+
+@click.option('--api_key',
+    nargs=1,
+    type=click.STRING,
+    metavar='KEY',
+    help='API Key for the  DejaCode License Library')
+
+@click.option('--min-license-score',
+    type=int,
+    help='Attribute components that have license score higher than or equal to the defined '
+        '--min-license-score.')
+
+@click.option('--scancode',
+    is_flag=True,
+    help='Indicate the input JSON file is from scancode_toolkit.')
+
+@click.option('--reference',
+    metavar='DIR',
+    type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
+    help='Path to a directory with reference files where "license_file" and/or "notice_file"' 
+        ' located.')
 
 @click.option('--template',
     metavar='FILE',
@@ -318,35 +359,110 @@ def validate_template(ctx, param, value):
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def attrib(location, output, template, vartext, quiet, verbose):
+def attrib(input, output, api_url, api_key, scancode, min_license_score, reference, template, vartext, quiet, verbose):
     """
-Generate an attribution document at OUTPUT using .ABOUT files at LOCATION.
+Generate an attribution document at OUTPUT using JSON, CSV or Excel or .ABOUT files at INPUT.
 
-LOCATION: Path to a file, directory or .zip archive containing .ABOUT files.
+INPUT: Path to a file (.ABOUT/.csv/.json/.xlsx), directory or .zip archive containing .ABOUT files.
 
 OUTPUT: Path where to write the attribution document.
     """
+    # A variable to define if the input ABOUT file(s)
+    is_about_input = False
+
+    rendered = ''
+    license_dict = {}
+    errors = []
+
     if not quiet:
         print_version()
         click.echo('Generating attribution...')
 
     # accept zipped ABOUT files as input
-    if location.lower().endswith('.zip'):
-        location = extract_zip(location)
+    if input.lower().endswith('.zip'):
+        input = extract_zip(input)
 
-    errors, abouts = collect_inventory(location)
+    if scancode:
+        if not input.endswith('.json'):
+            msg = 'The input file from scancode toolkit needs to be in JSON format.'
+            click.echo(msg)
+            sys.exit(1)
+        if not min_license_score and not min_license_score == 0:
+            min_license_score=DEFAULT_LICENSE_SCORE
+
+    if min_license_score:
+        if not scancode:
+            msg = ('This option requires a JSON file generated by scancode toolkit as the input. ' +
+                    'The "--scancode" option is required.')
+            click.echo(msg)
+            sys.exit(1)
+
+    if input.endswith('.json') or input.endswith('.csv') or input.endswith('.xlsx'):
+        is_about_input = False
+        from_attrib = True
+        if not reference:
+            # Set current directory as the reference dir
+            reference = os.path.dirname(input)
+        errors, abouts = load_inventory(
+            location=input,
+            from_attrib=from_attrib,
+            scancode=scancode,
+            reference_dir=reference
+        )
+    else:
+        is_about_input = True
+        errors, abouts = collect_inventory(input)
 
     if not abouts:
-        msg = 'No ABOUT file is found. Attribution generation halted.'
-        click.echo(msg)
+        if errors:
+            errors = unique(errors)
+            errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+        else:
+            msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
+            click.echo(msg)
         sys.exit(1)
-    attrib_errors, rendered = generate_attribution_doc(
-        abouts=abouts,
-        output_location=output,
-        template_loc=template,
-        variables=vartext,
-    )
-    errors.extend(attrib_errors)
+
+    if not is_about_input:
+        # Check if both api_url and api_key present
+        if api_url or api_key:
+            if not api_url:
+                msg = '"--api_url" is required.'
+                click.echo(msg)
+                sys.exit(1)
+            if not api_key:
+                msg = '"--api_key" is required.'
+                click.echo(msg)
+                sys.exit(1)
+        else:
+            api_url = ''
+            api_key = ''
+        api_url = api_url.strip("'").strip('"')
+        api_key = api_key.strip("'").strip('"')
+        license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key, scancode, reference)
+        errors.extend(lic_errors)
+        sorted_license_dict = sorted(license_dict)
+
+        # Read the license_file and store in a dictionary
+        for about in abouts:
+            if about.license_file.value or about.notice_file.value:
+                if not reference:
+                    msg = ('"license_file" / "notice_file" field contains value. Use `--reference` to indicate its parent directory.')
+                    click.echo(msg)
+                    #sys.exit(1)
+
+    if abouts:
+        attrib_errors, rendered = generate_attribution_doc(
+            abouts=abouts,
+            is_about_input=is_about_input,
+            license_dict=dict(sorted(license_dict.items())),
+            output_location=output,
+            scancode=scancode,
+            min_license_score=min_license_score,
+            template_loc=template,
+            vartext=vartext,
+        )
+        errors.extend(attrib_errors)
+
     errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
 
@@ -469,20 +585,40 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
     type=click.Path(
         exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
+@click.option('--djc',
+    nargs=2,
+    type=str,
+    metavar='api_url api_key',
+    help='Validate license_expression from a DejaCode License Library '
+         'API URL using the API KEY.')
+
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def check(location, verbose):
+def check(location, djc, verbose):
     """
 Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     """
     print_version()
+    api_url = ''
+    api_key = ''
+    if djc:
+        # Strip the ' and " for api_url, and api_key from input
+        api_url = djc[0].strip("'").strip('"')
+        api_key = djc[1].strip("'").strip('"')
     click.echo('Checking ABOUT files...')
-    errors, _abouts = collect_inventory(location)
+    errors, abouts = collect_inventory(location)
+
+
+    # Validate license_expression
+    key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, api_url, api_key)
+    for e in errs:
+        errors.append(e)
+
     errors = unique(errors)
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
     sys.exit(severe_errors_count)
@@ -501,17 +637,17 @@ def print_config_help(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Transform a CSV/JSON by applying renamings, filters and checks.')
+    short_help='Transform a CSV/JSON/Excel by applying renamings, filters and checks.')
 
 @click.argument('location',
     required=True,
-    callback=partial(validate_extensions, extensions=('.csv', '.json',)),
+    callback=partial(validate_extensions, extensions=('.csv', '.json', '.xlsx',)),
     metavar='LOCATION',
     type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True))
 
 @click.argument('output',
     required=True,
-    callback=partial(validate_extensions, extensions=('.csv', '.json',)),
+    callback=partial(validate_extensions, extensions=('.csv', '.json', '.xlsx',)),
     metavar='OUTPUT',
     type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 
@@ -537,18 +673,14 @@ def print_config_help(ctx, param, value):
 @click.help_option('-h', '--help')
 def transform(location, output, configuration, quiet, verbose):  # NOQA
     """
-Transform the CSV/JSON file at LOCATION by applying renamings, filters and checks
-and then write a new CSV/JSON to OUTPUT (Format for input and output need to be
+Transform the CSV/JSON/Excel file at LOCATION by applying renamings, filters and checks
+and then write a new CSV/JSON/Excel to OUTPUT (Format for input and output need to be
 the same).
 
-LOCATION: Path to a CSV/JSON file.
+LOCATION: Path to a CSV/JSON/Excel file.
 
-OUTPUT: Path to CSV/JSON inventory file to create.
+OUTPUT: Path to CSV/JSON/Excel inventory file to create.
     """
-    from attributecode.transform import transform_csv_to_csv
-    from attributecode.transform import transform_json_to_json
-    from attributecode.transform import Transformer
-
     if not configuration:
         transformer = Transformer.default()
     else:
@@ -558,6 +690,8 @@ OUTPUT: Path to CSV/JSON inventory file to create.
         errors = transform_csv_to_csv(location, output, transformer)
     elif location.endswith('.json') and output.endswith('.json'):
         errors = transform_json_to_json(location, output, transformer)
+    elif location.endswith('.xlsx') and output.endswith('.xlsx'):
+        errors = transform_excel_to_excel(location, output, transformer)
     else:
         msg = 'Extension for the input and output need to be the same.'
         click.echo(msg)
@@ -592,9 +726,9 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
     messages, severe_errors_count = get_error_messages(errors, quiet, verbose)
     for msg in messages:
         click.echo(msg)
-    if log_file_loc:
+    if log_file_loc and errors:
         log_msgs, _ = get_error_messages(errors, quiet=False, verbose=True)
-        with io.open(log_file_loc, 'w', encoding='utf-8') as lf:
+        with io.open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
             lf.write('\n'.join(log_msgs))
     return severe_errors_count
 

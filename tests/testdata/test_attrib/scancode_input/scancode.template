@@ -1,0 +1,97 @@
+{#
+about object and license dictionary are passed.
+See https://tdruez.github.io/licenses/
+Read the JSON file to see what information can be extracted from the licenses.
+#}
+<!doctype html>
+<html>
+  <head>
+    <style type="text/css">
+      div.additional-license-text-list {display:block}
+      body {font-family: Helvetica, Arial, sans-serif;}
+      pre {white-space: pre-wrap;}
+    </style>
+    <title>Open Source Software Information</title>
+  </head>
+
+  <body>
+    <h1>OPEN SOURCE SOFTWARE INFORMATION</h1>
+	<h2>{{ vartext['subtitle'] }}</h2>
+    <div>
+      <p>Licenses, acknowledgments and required copyright notices for 
+      open source components:</p>
+    </div>
+
+	<div class="oss-table-of-contents">
+		{% for about_object in abouts %}
+			{% set glob={'handled': True} %}
+			{% set index = loop.index0 %}
+			{% for lic in about_object.licenses if lic.score >= min_license_score %} {# license score condition #}
+				{% if glob['handled'] %}
+					<p><a href="#component_{{ index }}">{{ about_object.name }}{% if about_object.version %} {{ about_object.version }}{% endif %}</a></p>
+					{% set _ = glob.update({'handled':false}) %}
+				{% endif %}
+			{% endfor %}
+		{% endfor %}
+	</div>
+
+    <hr/>
+
+	{% set all_licenses = [] %}
+    {% for about_object in abouts %}
+		{% set component_licenses = [] %}
+		{% set index = loop.index0 %}
+		{% for lic in about_object.licenses if lic.score >= min_license_score %} {# license score condition #}
+			{% if not lic.key in component_licenses %}
+				{{ component_licenses.append(lic.key)|default("", True) }}
+				{{ all_licenses.append(lic.key)|default("", True) }}
+			{% endif %}	
+		{% endfor %}
+	
+		{% if component_licenses %}
+			<div class="oss-component" id="component_{{ index }}">
+				<h3 class="component-name">{{ about_object.name }}
+					{% if about_object.version %}{{ about_object.version }}{% endif %}
+				</h3>
+				<p>This component is licensed under 
+				{% for license_key in component_licenses %}
+					{{ license_key }}
+				{% endfor %}
+				{% if about_object.copyrights %}
+					{% for copyright in about_object.copyrights %}
+						<pre>{{copyright['value']}}</pre>
+					{% endfor %}
+				{% endif %}
+				{% set glob={} %}
+				{% for lic in component_licenses %}
+					{% if not glob[lic] %}
+						{% if lic in license_dict %}
+							<p>Full text of
+								<a class="{{ lic }}" href="#component-license-{{ lic }}">
+								{{ lic }}
+								</a>
+								is available at the end of this document.</p>
+							{% set _ = glob.update({ lic: true }) %}
+						{% endif %}
+					{% endif %}
+				 {% endfor %}
+			</div>
+		{% endif %}
+    {% endfor %}
+
+    <hr/>
+
+    <h3>Licenses Used in This Product</h3>
+    {% for key in license_dict %}
+		{% if key in all_licenses %}
+			<h3 id="component-license-{{ key }}">{{ key }}</h3>
+			<pre>{{ license_dict[key].license_text|e }}</pre>
+			<pre>({{ license_dict[key].homepage_url|e }})</pre>
+		{% endif %}
+    {% endfor %}
+
+    <h3><a id="End">End</a></h3>
+    <i>This file was generated with AttributeCode version: {{ tkversion }} on: {{ utcnow }} (UTC)</i>
+    </body>
+</html>
+
