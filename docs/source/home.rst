@@ -67,6 +67,10 @@ To install all the needed dependencies in a virtualenv, run (on posix):
 or on windows:
     configure
 
+.. note::
+   For MacOS users, it's a known issue the Python36 may case SSL Certificates error if the Certificates is not up to date.
+
+   A solution is to run: `sudo /Applications/Python\\ 3.6/Install\\ Certificates.command` to upgrade the outdated certificates.
 
 ACTIVATE the VIRTUALENV
 -----------------------
