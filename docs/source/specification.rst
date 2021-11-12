@@ -1,7 +1,7 @@
 .. _specification:
 
 ===============================
-ABOUT File Specification v3.2.1
+ABOUT File Specification v3.2.2
 ===============================
 
 Purpose
@@ -29,6 +29,7 @@ A simple and valid ABOUT file named httpd-2.4.3.tar.gz.ABOUT may look like this:
                         name: Apache 2.0
                         file: apache-2.0.LICENSE
                         url: https://scancode-licensedb.aboutcode.org/apache-2.0.LICENSE
+                        spdx_license_key: Apache-2.0
                 notice_file: httpd.NOTICE
                 copyright: Copyright (c) 2012 The Apache Software Foundation.
 
@@ -40,6 +41,7 @@ The meaning of this ABOUT file is:
 -   The file "httpd-2.4.3.tar.gz" was originally downloaded from http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
 -   In the same directory, "apache-2.0.LICENSE" and "httpd.NOTICE" are files that contain respectively the license text and the notice text for this component.
 -   This component is licensed under "apache-2.0"
+-   The license for this component is defined in the SPDX License List at https://spdx.org/licenses/Apache-2.0.html
 
 Specification
 =============
@@ -228,6 +230,7 @@ Optional Licensing fields
 -   license_expression: The DejaCode license expression that apply to the component. You can separate each identifier using " or " and " and " to document the relationship between multiple license identifiers, such as a choice among multiple licenses (No special characters are allowed).
 -   license_name: The DejaCode license short name for the license (No special characters are allowed).
 -   license_key: The DejaCode license key(s) for the component (No special characters are allowed).
+-   spdx_license_key: The ScanCode LicenseDB spdx_license_key defined for the license at https://scancode-licensedb.aboutcode.org/index.html
 
 Optional Boolean flag fields
 ----------------------------
