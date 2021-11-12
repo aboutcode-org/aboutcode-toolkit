@@ -48,6 +48,7 @@ from attributecode.util import extract_zip
 from attributecode.util import filter_errors
 from attributecode.util import get_temp_dir
 from attributecode.util import get_file_text
+from attributecode.util import write_licenses
 
 __copyright__ = """
     Copyright (c) nexB Inc and others. All rights reserved.
@@ -275,6 +276,85 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         msg = '{abouts_count} .ABOUT files generated in {output}.'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
+
+
+######################################################################
+# gen_license subcommand
+######################################################################
+
+@about.command(cls=AboutCommand,
+    short_help='Fetch and save all the licenses in the license_expression field to a directory.')
+
+@click.argument('location',
+    required=True,
+    metavar='LOCATION',
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
+
+@click.argument('output',
+    required=True,
+    metavar='OUTPUT',
+    type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
+
+@click.option('--djc',
+    nargs=2,
+    type=str,
+    metavar='api_url api_key',
+    help='Fetch licenses from a DejaCode License Library.')
+
+@click.option('--verbose',
+    is_flag=True,
+    help='Show all error and warning messages.')
+
+@click.help_option('-h', '--help')
+def gen_license(location, output, djc, verbose):
+    """
+Fetch licenses in the license_expression field and save to the output location.
+
+LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
+
+OUTPUT: Path to a directory where license files are saved.
+    """
+    print_version()
+
+    if location.endswith('.csv') or location.endswith('.json') or location.endswith('.xlsx'):
+        _errors, abouts = load_inventory(
+            location=location
+        )
+    else:
+        _errors, abouts = collect_inventory(location)
+
+
+    log_file_loc = os.path.join(output, 'error.log')
+    api_url = ''
+    api_key = ''
+    errors = []
+    if djc:
+        # Strip the ' and " for api_url, and api_key from input
+        api_url = djc[0].strip("'").strip('"')
+        api_key = djc[1].strip("'").strip('"')
+
+    click.echo('Fetching licenses...')
+    license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key)
+    if lic_errors:
+        errors.extend(lic_errors)
+
+    # A dictionary with license file name as the key and context as the value
+    lic_dict_output = {}
+    for key in license_dict:
+        if not key in lic_dict_output:
+            lic_filename = license_dict[key][1]
+            lic_context = license_dict[key][2]
+            lic_dict_output[lic_filename] = lic_context 
+
+    write_errors = write_licenses(lic_dict_output, output)
+    if write_errors:
+        errors.extend(write_errors)
+
+    errors = unique(errors)
+    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
+    sys.exit(severe_errors_count)
+
 
 ######################################################################
 # attrib subcommand
@@ -741,6 +821,7 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
         log_msgs, _ = get_error_messages(errors, quiet=False, verbose=True)
         with io.open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
             lf.write('\n'.join(log_msgs))
+        click.echo("Error log: " + log_file_loc)
     return severe_errors_count
 
 

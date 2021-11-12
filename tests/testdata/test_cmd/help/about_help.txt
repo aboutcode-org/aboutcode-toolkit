@@ -19,6 +19,8 @@ Commands:
                       report errors and warnings.
   collect-redist-src  Collect redistributable sources.
   gen                 Generate .ABOUT files from an inventory as CSV/JSON/Excel.
+  gen-license         Fetch and save all the licenses in the license_expression
+                      field to a directory.
   inventory           Collect the inventory of .ABOUT files to a CSV/JSON/Excel
                       file.
   transform           Transform a CSV/JSON/Excel by applying renamings, filters

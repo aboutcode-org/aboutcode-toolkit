@@ -707,6 +707,25 @@ def load_excel(location):
         results.append(row_dict)
     return errors, results
 
+def write_licenses(lic_dict, location):
+    import io
+
+    loc = to_posix(location)
+    errors = []
+
+    if not posixpath.exists(loc):
+        os.makedirs(add_unc(loc))
+    try:
+        for lic in lic_dict:
+            output_location = posixpath.join(loc, lic)
+            with io.open(output_location, 'w', encoding='utf-8', errors='replace') as out:
+                out.write(lic_dict[lic])
+    except Exception as e:
+        msg = str(e)
+        errors.append(Error(CRITICAL, msg))
+    return errors
+
+
 """
 Return True if a string s  name is safe to use as an attribute name.
 """

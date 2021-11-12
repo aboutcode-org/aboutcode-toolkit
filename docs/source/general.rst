@@ -17,6 +17,8 @@ AboutCode Toolkit is a tool for your software development team to document your 
 
 -   **gen**: Create ABOUT file(s) from a Software Inventory file (.csv, .json or .xlsx format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase. You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes.
 
+-   **gen_license**: Fetch licenses in the license_expression field and save to the output location.
+
 -   **inventory**: Generate a Software Inventory list (.csv, .json or .xlsx format) from your codebase based on ABOUT file(s). Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
 
 -   **transform**: A command to transform an input CSV/JSON/Excel by applying renaming and/or filtering and then output to a new CSV/JSON/Excel file.

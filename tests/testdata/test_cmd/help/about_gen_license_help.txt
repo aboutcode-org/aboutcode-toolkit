@@ -1,0 +1,13 @@
+Usage: about gen-license [OPTIONS] LOCATION OUTPUT
+
+  Fetch licenses in the license_expression field and save to the output
+  location.
+
+  LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
+
+  OUTPUT: Path to a directory where license files are saved.
+
+Options:
+  --djc api_url api_key  Fetch licenses from a DejaCode License Library.
+  --verbose              Show all error and warning messages.
+  -h, --help             Show this message and exit.

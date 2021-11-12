@@ -367,6 +367,11 @@ def test_about_gen_help_text():
         'test_cmd/help/about_gen_help.txt', regen=False)
 
 
+def test_about_gen_license_help_text():
+    check_about_stdout(
+        ['gen-license', '--help'],
+        'test_cmd/help/about_gen_license_help.txt', regen=False)
+
 def test_about_check_help_text():
     check_about_stdout(
         ['check', '--help'],

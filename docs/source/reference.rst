@@ -185,6 +185,19 @@ Details
 
         ..  code-block:: none
 
+                ---djc
+
+                    Validate license_expression from a DejaCode License.
+
+                    This option requires 2 parameters:
+                        api_url - URL to the DJE License Library.
+                        api_key - Hash key to authenticate yourself in the API.
+
+                    In addition, the input needs to have the 'license_expression' field.
+                    (Please contact nexB to get the api_* value for this feature)
+
+                $ about check --djc 'api_url' 'api_key' /home/project/about_files/
+
                 --log
 
                     This option save the error log to the defined location
@@ -373,6 +386,60 @@ Details
                     /home/licenses_notices/jquery.js.NOTICE
 
                 $ about gen --reference /home/licenses_notices/ LOCATION OUTPUT
+
+                --verbose
+
+                    This option tells the tool to show all errors found.
+                    The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
+
+gen_license
+===========
+
+Syntax
+------
+
+        ..  code-block:: none
+
+                about gen_license [OPTIONS] LOCATION OUTPUT
+
+                LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
+                OUTPUT: Path to a directory where license files are saved.
+
+Options
+-------
+
+        ..  code-block:: none
+
+                --djc api_url api_key   Fetch licenses data from DejaCode License
+                                        Library and create <license>.LICENSE to the
+                                        OUTPUT location.
+
+                 --verbose              Show all the errors and warning.
+                -h, --help              Show this message and exit.
+
+Purpose
+-------
+
+Fetch licenses in the license_expression field and save to the output location.
+
+Details
+^^^^^^^
+
+        ..  code-block:: none
+
+                --djc
+
+                    Fetch licenses text from a DejaCode API, and create <license>.LICENSE to the 
+                    OUTPUT Location using the data fetched from the DejaCode License Library.
+
+                    This option requires 2 parameters:
+                        api_url - URL to the DJE License Library.
+                        api_key - Hash key to authenticate yourself in the API.
+
+                    In addition, the input needs to have the 'license_expression' field.
+                    (Please contact nexB to get the api_* value for this feature)
+
+                $ about gen_license --djc 'api_url' 'api_key' LOCATION OUTPUT
 
                 --verbose
 
