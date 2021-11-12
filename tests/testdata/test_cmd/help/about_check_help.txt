@@ -7,5 +7,6 @@ Usage: about check [OPTIONS] LOCATION
 Options:
   --djc api_url api_key  Validate license_expression from a DejaCode License
                          Library API URL using the API KEY.
+  --log FILE             Path to a file to save the error messages if any.
   --verbose              Show all error and warning messages.
   -h, --help             Show this message and exit.

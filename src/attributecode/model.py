@@ -1607,7 +1607,6 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                             license_data, errs = api.get_license_details_from_api(url, api_key, lic_key)
                             license_name = license_data.get('short_name', '')
                             license_text = license_data.get('full_text', '')
-                            license_key = license_data.get('key', '')
                             spdx_license_key = license_data.get('spdx_license_key', '')
                             for severity, message in errs: 
                                 msg = (about.about_file_path + ": " + message)

@@ -15,6 +15,7 @@
     * Add ability to transform Excel formatted file 
     * Support Excel file format for `inventory`, `gen` and `attrib`
     * Add 'spdx_license_key' support
+    * Add option to save error log in `check` command
 
 2021-04-02
     Release 6.0.0

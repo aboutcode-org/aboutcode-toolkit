@@ -592,18 +592,30 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
     help='Validate license_expression from a DejaCode License Library '
          'API URL using the API KEY.')
 
+@click.option('--log',
+    nargs=1,
+    metavar='FILE',
+    help='Path to a file to save the error messages if any.')
+
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def check(location, djc, verbose):
+def check(location, djc, log, verbose):
     """
 Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     """
     print_version()
+
+    if log:
+        # Check if the error log location exist and create the parent directory if not
+        parent = os.path.dirname(log)
+        if not parent:
+            os.makedirs(parent)
+
     api_url = ''
     api_key = ''
     if djc:
@@ -613,14 +625,13 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     click.echo('Checking ABOUT files...')
     errors, abouts = collect_inventory(location)
 
-
     # Validate license_expression
-    key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, api_url, api_key)
+    _key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, api_url, api_key)
     for e in errs:
         errors.append(e)
 
     errors = unique(errors)
-    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose)
+    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log)
     sys.exit(severe_errors_count)
 
 ######################################################################

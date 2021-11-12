@@ -141,9 +141,9 @@ Details
                     Users can use the following in the template to get the vartext:
                     {{ vartext['title'] }}
                     {{ vartext['header'] }}
-                
+
                 --verbose
-                
+
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
@@ -170,9 +170,10 @@ Options
         ..  code-block:: none
 
                 --djc api_url api_key  Validate license_expression from a DejaCode License
-                                         Library API URL using the API KEY.
-                --verbose                Show all the errors and warning
-                -h, --help               Show this message and exit.
+                                       Library API URL using the API KEY.
+                --log FILE             Path to a file to save the error messages if any.
+                --verbose              Show all error and warning messages.
+                -h, --help             Show this message and exit.
 
 Purpose
 -------
@@ -184,11 +185,17 @@ Details
 
         ..  code-block:: none
 
+                --log
+
+                    This option save the error log to the defined location
+
+                $ about check --log /home/project/error.log /home/project/about_files/
+
                 --verbose
-                
+
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
-                
+
                 $ about check --verbose /home/project/about_files/
 
 Special Notes
