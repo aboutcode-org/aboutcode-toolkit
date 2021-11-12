@@ -301,7 +301,8 @@ licenses:
         lic_dict = {u'public-domain': [u'Public Domain',
                                        u'public-domain.LICENSE',
                                        u'This component is released to the public domain by the author.',
-                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain'
+                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain',
+                                       u''
                                        ]}
         a = abouts[0]
         a.license_key.value.append('public-domain')
@@ -316,6 +317,7 @@ licenses:
     name: Public Domain
     file: public-domain.LICENSE
     url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
+    spdx_license_key:
   - key: custom
     name: custom
     file: custom.txt
@@ -332,7 +334,8 @@ licenses:
         lic_dict = {u'public-domain': [u'Public Domain',
                                        u'public-domain.LICENSE',
                                        u'This component is released to the public domain by the author.',
-                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain'
+                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain',
+                                       u''
                                        ]}
         # The first row from the test file
         a = abouts[0]
@@ -354,6 +357,7 @@ licenses:
     name: Public Domain
     file: public-domain.LICENSE
     url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
+    spdx_license_key:
   - key: custom
     name: custom
     file: custom.txt
@@ -372,6 +376,7 @@ licenses:
     name: Public Domain
     file: public-domain.LICENSE
     url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
+    spdx_license_key:
 '''
         )
         assert expected1 == result1

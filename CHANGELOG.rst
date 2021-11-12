@@ -14,6 +14,7 @@
     * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library
     * Add ability to transform Excel formatted file 
     * Support Excel file format for `inventory`, `gen` and `attrib`
+    * Add 'spdx_license_key' support
 
 2021-04-02
     Release 6.0.0

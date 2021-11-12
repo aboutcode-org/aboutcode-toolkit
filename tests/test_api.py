@@ -44,11 +44,7 @@ class ApiTest(unittest.TestCase):
         errors = []
         request_license_data.return_value = license_data, errors
 
-        expected = (
-            'Apache 2.0',
-            'apache-2.0',
-            'Apache License Version 2.0 ...',
-            [])
+        expected = ({'short_name': 'Apache 2.0', 'full_text': 'Apache License Version 2.0 ...', 'key': 'apache-2.0'}, [])
         result = api.get_license_details_from_api(
             api_url='api_url', api_key='api_key', license_key='license_key')
         assert expected == result

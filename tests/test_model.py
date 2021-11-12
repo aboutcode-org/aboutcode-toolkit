@@ -690,8 +690,8 @@ this software and releases the component to Public Domain.
             'license_expression': 'license1 AND license2',
             'notice_file': 'package1.zip.NOTICE',
             'licenses': [
-                {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE', 'url': 'some_url'},
-                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE', 'url': 'some_url'},
+                {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE', 'url': 'some_url', 'spdx_license_key': 'key'},
+                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE', 'url': 'some_url', 'spdx_license_key': 'key'},
             ],
         }
         about = model.About()
@@ -708,12 +708,14 @@ licenses:
     name: License1
     file: license1.LICENSE
     url: some_url
+    spdx_license_key: key
   - key: license2
     name: License2
     file: license2.LICENSE
     url: some_url
+    spdx_license_key: key
 '''
-        lic_dict = {u'license1': [u'License1', u'license1.LICENSE',u'', u'some_url'], u'license2' : [u'License2', u'license2.LICENSE', u'', u'some_url']}
+        lic_dict = {u'license1': [u'License1', u'license1.LICENSE',u'', u'some_url', 'key'], u'license2' : [u'License2', u'license2.LICENSE', u'', u'some_url', 'key']}
         assert about.dumps(lic_dict) == expected
 
 

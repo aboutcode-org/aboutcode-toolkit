@@ -777,6 +777,7 @@ class About(object):
             ('license_name', ListField()),
             ('license_file', FileTextField()),
             ('license_url', UrlListField()),
+            ('spdx_license_key', ListField()),
             ('copyright', StringField()),
             ('notice_file', FileTextField()),
             ('notice_url', UrlField()),
@@ -1035,7 +1036,7 @@ class About(object):
                 continue
             if key == u'licenses':
                 # FIXME: use a license object instead
-                lic_key, lic_name, lic_file, lic_url, lic_score = ungroup_licenses(value)
+                lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score = ungroup_licenses(value)
                 if lic_key:
                     fields.append(('license_key', lic_key))
                 if lic_name:
@@ -1044,6 +1045,10 @@ class About(object):
                     fields.append(('license_file', lic_file))
                 if lic_url:
                     fields.append(('license_url', lic_url))
+                if lic_url:
+                    fields.append(('license_url', lic_url))
+                if spdx_lic_key:
+                    fields.append(('spdx_license_key', spdx_lic_key))
                 # The license score is a key from scancode license scan
                 if lic_score:
                     fields.append(('license_score', lic_score))
@@ -1085,6 +1090,7 @@ class About(object):
         license_name = []
         license_file = []
         license_url = []
+        spdx_license_key = []
         bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified', 'internal_use_only']
         for field in self.all_fields():
             if not field.value and not field.name in bool_fields:
@@ -1119,6 +1125,8 @@ class About(object):
                     license_file = list(field.value.keys())
             elif field.name == 'license_url' and field.value:
                 license_url = field.value
+            elif field.name == 'spdx_license_key' and field.value:
+                spdx_license_key = field.value
             elif field.name in file_fields and field.value:
                 data[field.name] = field.original_value
             elif field.name in bool_fields and not field.value == None:
@@ -1136,14 +1144,12 @@ class About(object):
             lic_dict = {}
             if licenses_dict and lic_key in licenses_dict:
                 lic_dict['key'] = lic_key
-                lic_name, lic_filename, lic_context, lic_url = licenses_dict[lic_key]
-                #lic_name = licenses_dict[lic_key][0]
-                #lic_url = licenses_dict[lic_key][2]
-                #lic_file = lic_key + '.LICENSE'
+                lic_name, lic_filename, lic_context, lic_url, spdx_lic_key = licenses_dict[lic_key]
 
                 lic_dict['name'] = lic_name
                 lic_dict['file'] = lic_filename
                 lic_dict['url'] = lic_url
+                lic_dict['spdx_license_key'] = spdx_lic_key
 
                 # Remove the license information if it has been handled
                 lic_key_copy.remove(lic_key)
@@ -1156,7 +1162,7 @@ class About(object):
                 lic_dict_list.append(lic_dict)
 
         # Handle license information that have not been handled.
-        license_group = list(zip_longest(lic_key_copy, license_name, license_file, license_url))
+        license_group = list(zip_longest(lic_key_copy, license_name, license_file, license_url, spdx_license_key))
         for lic_group in license_group:
             lic_dict = {}
             if lic_group[0]:
@@ -1171,6 +1177,8 @@ class About(object):
                 lic_dict['file'] = lic_group[2]
             if lic_group[3]:
                 lic_dict['url'] = lic_group[3]
+            if lic_group[4]:
+                lic_dict['spdx_license_key'] = lic_group[4]
             lic_dict_list.append(lic_dict)
 
         # Format the license information in the same order of the license expression
@@ -1267,6 +1275,7 @@ class About(object):
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
         license_key_name_context_url = []
+        err = ''
 
         if not posixpath.exists(parent):
             os.makedirs(add_unc(parent))
@@ -1282,16 +1291,15 @@ class About(object):
                             license_path = posixpath.join(parent, lic_key)
                             license_path += u'.LICENSE'
                             license_path = add_unc(license_path)
-                            license_name, license_filename, license_context, license_url = license_dict[lic_key]
-                            license_info = (lic_key, license_name, license_filename, license_context, license_url)
+                            license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[lic_key]
+                            license_info = (lic_key, license_name, license_filename, license_context, license_url, spdx_license_key)
                             license_key_name_context_url.append(license_info)
                             with io.open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
                                 lic.write(license_context)
                     except Exception as e:
-                        # TODO: it should return error if exception caught
-                        pass
+                        err = str(e)
 
-        return license_key_name_context_url
+        return license_key_name_context_url, err
 
 
 def collect_inventory(location):
@@ -1593,9 +1601,14 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                         license_name = ''
                         license_filename = ''
                         license_text = ''
+                        spdx_license_key = ''
                         detail_list = []
                         if api_key:
-                            license_name, _license_key, license_text, errs = api.get_license_details_from_api(url, api_key, lic_key)
+                            license_data, errs = api.get_license_details_from_api(url, api_key, lic_key)
+                            license_name = license_data.get('short_name', '')
+                            license_text = license_data.get('full_text', '')
+                            license_key = license_data.get('key', '')
+                            spdx_license_key = license_data.get('spdx_license_key', '')
                             for severity, message in errs: 
                                 msg = (about.about_file_path + ": " + message)
                                 errors.append(Error(severity, msg))
@@ -1611,6 +1624,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                                 license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
                                 license_filename = data['key'] + '.LICENSE'
                                 lic_url = url + license_filename
+                                spdx_license_key = data['spdx_license_key']
                             except:
                                 msg = about.about_file_path + u" : Invalid 'license': " + lic_key
                                 errors.append(Error(ERROR, msg))
@@ -1619,6 +1633,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                         detail_list.append(license_filename)
                         detail_list.append(license_text)
                         detail_list.append(lic_url)
+                        detail_list.append(spdx_license_key)
                         key_text_dict[lic_key] = detail_list
                 if not about.license_key.value:
                     about.license_key.value = lic_list

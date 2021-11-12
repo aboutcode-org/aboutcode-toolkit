@@ -333,22 +333,27 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
             licenses_dict = {}
             if gen_license:
                 # Write generated LICENSE file
-                license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
+                license_key_name_context_url_list, err = about.dump_lic(dump_loc, license_dict)
+                if err:
+                    errors.append(err)
                 if license_key_name_context_url_list:
-                    for lic_key, lic_name, lic_filename, lic_context, lic_url in license_key_name_context_url_list:
-                        licenses_dict[lic_key] = [lic_name, lic_filename, lic_context, lic_url]
+                    for lic_key, lic_name, lic_filename, lic_context, lic_url, spdx_lic_key in license_key_name_context_url_list:
+                        licenses_dict[lic_key] = [lic_name, lic_filename, lic_context, lic_url, spdx_lic_key]
                         if not lic_name in about.license_name.value:
                             about.license_name.value.append(lic_name)
                         about.license_file.value[lic_filename] = lic_filename
                         if not lic_url in about.license_url.value:
                             about.license_url.value.append(lic_url)
-
+                        if not spdx_lic_key in about.spdx_license_key.value:
+                            about.spdx_license_key.value.append(spdx_lic_key)
                         if about.license_name.value:
                             about.license_name.present = True
                         if about.license_file.value:
                             about.license_file.present = True
                         if about.license_url.value:
                             about.license_url.present = True
+                        if about.spdx_license_key.value:
+                            about.spdx_license_key.present = True
 
             about.dump(dump_loc, licenses_dict)
 

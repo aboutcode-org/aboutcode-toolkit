@@ -99,7 +99,4 @@ def get_license_details_from_api(api_url, api_key, license_key):
     Missing values are provided as empty strings.
     """
     license_data, errors = request_license_data(api_url, api_key, license_key)
-    license_name = license_data.get('short_name', '')
-    license_text = license_data.get('full_text', '')
-    license_key = license_data.get('key', '')
-    return license_name, license_key, license_text, errors
+    return license_data, errors

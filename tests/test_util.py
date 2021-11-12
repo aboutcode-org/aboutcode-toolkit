@@ -556,12 +556,14 @@ description: sample
                 (u'key', u'mit'),
                 (u'name', u'MIT License'),
                 (u'file', u'mit.LICENSE'),
-                (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit')]),
+                (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit'),
+                (u'spdx_license_key', u'MIT')]),
             dict([
                 (u'key', u'bsd-new'),
                 (u'name', u'BSD-3-Clause'),
                 (u'file', u'bsd-new.LICENSE'),
-                (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new')])
+                (u'url', u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new'),
+                (u'spdx_license_key', u'BSD-3-Clause')])
         ]
         expected_lic_key = [u'mit', u'bsd-new']
         expected_lic_name = [u'MIT License', u'BSD-3-Clause']
@@ -569,11 +571,13 @@ description: sample
         expected_lic_url = [
             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new']
-        lic_key, lic_name, lic_file, lic_url, lic_score = util.ungroup_licenses(about)
+        expected_spdx = [u'MIT', u'BSD-3-Clause']
+        lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score = util.ungroup_licenses(about)
         assert expected_lic_key == lic_key
         assert expected_lic_name == lic_name
         assert expected_lic_file == lic_file
         assert expected_lic_url == lic_url
+        assert expected_spdx == spdx_lic_key
 
     def test_unique_does_deduplicate_and_keep_ordering(self):
         items = ['a', 'b', 'd', 'b', 'c', 'a']
