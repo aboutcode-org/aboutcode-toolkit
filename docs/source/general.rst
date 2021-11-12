@@ -89,6 +89,9 @@ You should start with a software inventory of your codebase in spreadsheet or JS
     * - license_url 
       - URL to the license text for the component
       - Optional
+    * - spdx_license_key 
+      - The ScanCode LicenseDB spdx_license_key defined for the license at https://scancode-licensedb.aboutcode.org/index.html
+      - Optional
     * - copyright
       - copyright statement for the component
       - Optional
@@ -250,6 +253,7 @@ Review the generated ABOUT file(s) to determine if it meets your requirements. H
                         name: GPL 2.0
                         file: gpl-2.0.LICENSE
                         url: https://scancode-licensedb.aboutcode.org/gpl-2.0.LICENSE
+                        spdx_license_key: GPL-2.0-only
                 owner: Red Hat
                 redistribute: Y
 
