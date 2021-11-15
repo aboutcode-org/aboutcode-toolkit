@@ -1603,14 +1603,17 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                         license_text = ''
                         spdx_license_key = ''
                         detail_list = []
+                        captured_license.append(lic_key)
                         if api_key:
                             license_data, errs = api.get_license_details_from_api(url, api_key, lic_key)
-                            license_name = license_data.get('short_name', '')
-                            license_text = license_data.get('full_text', '')
-                            spdx_license_key = license_data.get('spdx_license_key', '')
                             for severity, message in errs: 
                                 msg = (about.about_file_path + ": " + message)
                                 errors.append(Error(severity, msg))
+                            if not license_data:
+                                continue
+                            license_name = license_data.get('short_name', '')
+                            license_text = license_data.get('full_text', '')
+                            spdx_license_key = license_data.get('spdx_license_key', '')
                             license_filename = lic_key + '.LICENSE'
                             lic_url = lic_urn + lic_key
                         else:
@@ -1627,7 +1630,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                             except:
                                 msg = about.about_file_path + u" : Invalid 'license': " + lic_key
                                 errors.append(Error(ERROR, msg))
-                        captured_license.append(lic_key)
+                                continue
                         detail_list.append(license_name)
                         detail_list.append(license_filename)
                         detail_list.append(license_text)
