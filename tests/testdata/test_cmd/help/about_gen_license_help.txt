@@ -9,5 +9,6 @@ Usage: about gen-license [OPTIONS] LOCATION OUTPUT
 
 Options:
   --djc api_url api_key  Fetch licenses from a DejaCode License Library.
+  --scancode             Indicate the input JSON file is from scancode_toolkit.
   --verbose              Show all error and warning messages.
   -h, --help             Show this message and exit.

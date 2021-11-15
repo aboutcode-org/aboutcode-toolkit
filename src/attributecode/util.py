@@ -652,7 +652,6 @@ def load_scancode_json(location):
     """
     Read the scancode JSON file at `location` and return a list of dictionaries.
     """
-    mapping_dict = {}
     updated_results = []
 
     with open(location) as json_file:

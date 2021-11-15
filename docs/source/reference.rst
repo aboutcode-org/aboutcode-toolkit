@@ -413,7 +413,8 @@ Options
                 --djc api_url api_key   Fetch licenses data from DejaCode License
                                         Library and create <license>.LICENSE to the
                                         OUTPUT location.
-
+                --scancode              Indicate the input JSON file is from
+                                        scancode_toolkit.
                  --verbose              Show all the errors and warning.
                 -h, --help              Show this message and exit.
 
@@ -440,6 +441,12 @@ Details
                     (Please contact nexB to get the api_* value for this feature)
 
                 $ about gen_license --djc 'api_url' 'api_key' LOCATION OUTPUT
+
+                --scancode
+
+                    Indicates the JSON input is from scancode toolkit license detection
+
+                $ about gen_license --scancode /home/project/scancode-license-detection.json OUTPUT
 
                 --verbose
 

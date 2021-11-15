@@ -48,6 +48,7 @@ from attributecode import WARNING
 from attributecode import api
 from attributecode import Error
 from attributecode import saneyaml
+from attributecode import gen
 from attributecode import util
 from attributecode.transform import write_excel
 from attributecode.util import add_unc
@@ -1325,6 +1326,60 @@ def collect_inventory(location):
     return unique(errors), abouts
 
 
+def collect_abouts_license_expression(location):
+    """
+    Read the ABOUT files at location and return a list of ABOUT objects without
+    validation. The purpose of this is to speed up the process for `gen_license` command.
+    """
+    lic_key_list = []
+    errors = []
+    input_location = util.get_absolute(location)
+    about_locations = list(util.get_about_locations(input_location))
+    abouts = []
+
+    for loc in about_locations:
+        try:
+            loc = add_unc(loc)
+            with io.open(loc, encoding='utf-8', errors='replace') as txt:
+                input_text = txt.read()
+            # saneyaml.load() will have parsing error if the input has
+            # tab value. Therefore, we should check if the input contains
+            # any tab and then convert it to spaces.
+            input = replace_tab_with_spaces(input_text)
+            data = saneyaml.load(input, allow_duplicate_keys=False)
+            about = About()
+            about.load_dict(data, base_dir='')
+            abouts.append(about)
+        except Exception as e:
+            trace = traceback.format_exc()
+            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s'
+            errors.append(Error(CRITICAL, msg % locals()))
+
+    return errors, abouts
+
+
+def collect_inventory_license_expression(location, scancode=False):
+    """
+    Read the inventory file at location and return a list of  ABOUT objects without
+    validation. The purpose of this is to speed up the process for `gen_license` command.
+    """
+    abouts = []
+    if scancode:
+        inventory = gen.load_scancode_json(location)
+    else:
+        if location.endswith('.csv'):
+            inventory = gen.load_csv(location)
+        elif location.endswith('.xlsx'):
+            _dup_cols_err, inventory = gen.load_excel(location)
+        else:
+            inventory = gen.load_json(location)
+    for data in inventory:
+        about = About()
+        about.load_dict(data, base_dir='', scancode=scancode)
+        abouts.append(about)
+    return abouts
+
+
 def get_field_names(abouts):
     """
     Given a list of About objects, return a list of any field names that exist
@@ -1628,7 +1683,10 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                                 lic_url = url + license_filename
                                 spdx_license_key = data['spdx_license_key']
                             except:
-                                msg = about.about_file_path + u" : Invalid 'license': " + lic_key
+                                try:
+                                    msg = about.about_file_path + u" : Invalid 'license': " + lic_key
+                                except:
+                                    msg = u"Invalid 'license': " + lic_key
                                 errors.append(Error(ERROR, msg))
                                 continue
                         detail_list.append(license_name)

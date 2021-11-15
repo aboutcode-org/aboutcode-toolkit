@@ -36,8 +36,9 @@ from attributecode.attrib import check_template
 from attributecode.attrib import DEFAULT_TEMPLATE_FILE, DEFAULT_LICENSE_SCORE
 from attributecode.attrib import generate_and_save as generate_attribution_doc
 from attributecode.gen import generate as generate_about_files, load_inventory
-from attributecode.model import collect_inventory, get_copy_list
+from attributecode.model import collect_inventory, collect_abouts_license_expression, collect_inventory_license_expression
 from attributecode.model import copy_redist_src
+from attributecode.model import get_copy_list
 from attributecode.model import pre_process_and_fetch_license_dict
 from attributecode.model import write_output
 from attributecode.transform import transform_csv_to_csv
@@ -302,12 +303,16 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     metavar='api_url api_key',
     help='Fetch licenses from a DejaCode License Library.')
 
+@click.option('--scancode',
+    is_flag=True,
+    help='Indicate the input JSON file is from scancode_toolkit.')
+
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def gen_license(location, output, djc, verbose):
+def gen_license(location, output, djc, scancode, verbose):
     """
 Fetch licenses in the license_expression field and save to the output location.
 
@@ -316,26 +321,25 @@ LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
 OUTPUT: Path to a directory where license files are saved.
     """
     print_version()
-
-    if location.endswith('.csv') or location.endswith('.json') or location.endswith('.xlsx'):
-        _errors, abouts = load_inventory(
-            location=location
-        )
-    else:
-        _errors, abouts = collect_inventory(location)
-
-
-    log_file_loc = os.path.join(output, 'error.log')
     api_url = ''
     api_key = ''
     errors = []
+
+    if location.endswith('.csv') or location.endswith('.json') or location.endswith('.xlsx'):
+        abouts = collect_inventory_license_expression(location=location, scancode=scancode)
+    else:
+        #_errors, abouts = collect_inventory(location)
+        errors, abouts = collect_abouts_license_expression(location)
+
+    log_file_loc = os.path.join(output, 'error.log')
     if djc:
         # Strip the ' and " for api_url, and api_key from input
         api_url = djc[0].strip("'").strip('"')
         api_key = djc[1].strip("'").strip('"')
 
     click.echo('Fetching licenses...')
-    license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key)
+    license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key, scancode)
+
     if lic_errors:
         errors.extend(lic_errors)
 
