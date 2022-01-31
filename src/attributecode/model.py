@@ -1298,7 +1298,7 @@ class About(object):
                             with io.open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
                                 lic.write(license_context)
                     except Exception as e:
-                        err = str(e)
+                        err = Error(ERROR, 'Invalid license: ' + str(e))
 
         return license_key_name_context_url, err
 
@@ -1605,6 +1605,8 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
     Return a dictionary containing the license information (key, name, text, url)
     fetched from the ScanCode LicenseDB or DejaCode API.
     """
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(abouts)
     key_text_dict = {}
     captured_license = []
     errors = []
@@ -1697,6 +1699,9 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                         key_text_dict[lic_key] = detail_list
                 if not about.license_key.value:
                     about.license_key.value = lic_list
+    print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+    print(key_text_dict)
+    print(errors)
     return key_text_dict, errors
 
 
