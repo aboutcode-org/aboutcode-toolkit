@@ -1605,8 +1605,6 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
     Return a dictionary containing the license information (key, name, text, url)
     fetched from the ScanCode LicenseDB or DejaCode API.
     """
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(abouts)
     key_text_dict = {}
     captured_license = []
     errors = []
