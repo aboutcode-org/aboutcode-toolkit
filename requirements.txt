@@ -10,7 +10,7 @@ MarkupSafe==2.0.1
 openpyxl
 packageurl-python==0.9.4
 pip==21.2.4
-PyYAML==5.4.1
+PyYAML==6.0
 saneyaml==0.5.2
 setuptools==58.1.0
 typing-extensions==3.10.0.2

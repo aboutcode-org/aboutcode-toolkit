@@ -17,6 +17,7 @@
     * Add 'spdx_license_key' support
     * Add option to save error log in `check` command
     * New `gen_license` option
+    * Bump PyYAML to 6.0
 
 2021-04-02
     Release 6.0.0
