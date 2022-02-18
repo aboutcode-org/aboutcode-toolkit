@@ -45,7 +45,7 @@ This document lists the open source and third-party components of a {{ vartext['
                 {% if license.key in about_object.license_key.value %}        
                     <li>{{ about_object.name.value }}{% if about_object.version.value %}  - Version  {{ about_object.version.value }}{% endif %}</li>       
                     {% if about_object.copyright.value %}
-                        <pre>{{about_object.copyright.value}}</pre>
+                        <pre>Copyright: {{about_object.copyright.value}}</pre>
                     {% endif %}
                     {% if about_object.notice_file.value %}
                         {% for notice in about_object.notice_file.value %}
