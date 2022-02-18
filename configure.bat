@@ -48,15 +48,8 @@ set "CFG_BIN_DIR=%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\Scripts"
 
 @rem ################################
 @rem # Thirdparty package locations and index handling
-<<<<<<< HEAD
 set "PIP_EXTRA_ARGS=--find-links "%CFG_ROOT_DIR%\thirdparty" --find-links https://thirdparty.aboutcode.org/pypi" & %INDEX_ARG%
-=======
-if exist ""%CFG_ROOT_DIR%\thirdparty"" (
-    set "PIP_EXTRA_ARGS=--find-links %CFG_ROOT_DIR%\thirdparty "
-)
 
-set "PIP_EXTRA_ARGS=%PIP_EXTRA_ARGS% --find-links https://thirdparty.aboutcode.org/pypi" & %INDEX_ARG%
->>>>>>> refs/remotes/skeleton/main
 @rem ################################
 
 @rem ################################
@@ -165,11 +158,8 @@ if %ERRORLEVEL% neq 0 (
 if exist "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin" (
     rmdir /s /q "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin"
 )
-<<<<<<< HEAD
+
 mklink /J "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin" "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\Scripts"
-=======
-mklink /J %CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin %CFG_ROOT_DIR%\%VIRTUALENV_DIR%\Scripts
->>>>>>> refs/remotes/skeleton/main
 
 if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
