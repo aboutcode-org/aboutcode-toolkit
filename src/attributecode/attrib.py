@@ -88,7 +88,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
                         url = ''
                     text = list(about.license_file.value.values())[index]
                     license_object = License(key, name, filename, url, text)
-                    licenses_list.append(license_object) 
+                    licenses_list.append(license_object)
                 index = index + 1
     else:
         for key in license_dict:
@@ -163,9 +163,10 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
                     lic_name_expression_list.append(segment)
             # Join the license name expression into a single string
             lic_name_expression = ' '.join(lic_name_expression_list)
-        
+
             # Add the license name expression string into the about object as a list
-            about.license_name_expression = lic_name_expression
+            about.license_name_expression.value = lic_name_expression
+            about.license_name_expression.present = True
 
     # Sort the about objects by name
     abouts = sorted(abouts, key=lambda x: x.name.value.lower())

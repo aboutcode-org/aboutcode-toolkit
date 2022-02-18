@@ -1,7 +1,7 @@
-2021-xx-xx
+2022-xx-xx
     Release 7.0.0
 
-    * Add '@' as a support character for filename #451
+    * Add '@' as a supported character for filename #451
     * Add support to collect redistributable sources #22
     * Handle trailing spaces in field names during `transform` #456
     * Remove restriction of python27 only on windows #453
@@ -18,6 +18,8 @@
     * Add option to save error log in `check` command
     * New `gen_license` option
     * Bump PyYAML to 6.0
+    * Add '%" as a supported character
+    * Update default template
 
 2021-04-02
     Release 6.0.0

@@ -55,7 +55,7 @@ UNC_PREFIX = u'\\\\?\\'
 UNC_PREFIX_POSIX = to_posix(UNC_PREFIX)
 UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
 
-valid_file_chars = string.digits + string.ascii_letters + '_-.+()~[]{}|@' + ' '
+valid_file_chars = string.digits + string.ascii_letters + '_-.+()~[]{}|@%' + ' '
 
 
 def invalid_chars(path):

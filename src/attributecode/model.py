@@ -774,6 +774,7 @@ class About(object):
             ('notes', StringField()),
 
             ('license_expression', StringField()),
+            ('license_name_expression', StringField()),
             ('license_key', ListField()),
             ('license_name', ListField()),
             ('license_file', FileTextField()),

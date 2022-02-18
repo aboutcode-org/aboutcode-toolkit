@@ -42,7 +42,7 @@ This document lists the open source and third-party components of a {{ vartext['
                         <p>License Gallery URL: <a href="{{ license.url }}">{{license.url}}</a> </p>
                     {% endif %}
                 {% endif %}
-                {% if license.key in about_object.license_key.value %}        
+                {% if license.key in about_object.license_key.value %}
                     <li>{{ about_object.name.value }}{% if about_object.version.value %}  - Version  {{ about_object.version.value }}{% endif %}</li>       
                     {% if about_object.copyright.value %}
                         <pre>Copyright: {{about_object.copyright.value}}</pre>
