@@ -816,7 +816,7 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
         if not quiet:
             for msg in log_msgs:
                 click.echo(msg)
-        if log_file_loc:
+        if log_msgs and log_file_loc:
             with io.open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
                 lf.write('\n'.join(log_msgs))
             click.echo("Error log: " + log_file_loc)
