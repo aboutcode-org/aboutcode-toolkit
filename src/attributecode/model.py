@@ -1337,14 +1337,23 @@ def collect_inventory(location):
     name_errors = util.check_file_names(about_locations)
     errors.extend(name_errors)
     abouts = []
+    custom_fields_list = []
     for about_loc in about_locations:
         about_file_path = util.get_relative_path(input_location, about_loc)
         about = About(about_loc, about_file_path)
         # Insert about_file_path reference to the error
         for severity, message in about.errors:
-            msg = (about_file_path + ": " + message)
-            errors.append(Error(severity, msg))
+            if 'is a custom field' in message:
+                field_name = message.replace('Field', '').replace('is a custom field.', '').strip()
+                if not field_name in custom_fields_list:
+                    custom_fields_list.append(field_name)
+            else:
+                msg = (about_file_path + ": " + message)
+                errors.append(Error(severity, msg))
         abouts.append(about)
+    if custom_fields_list:
+        custom_fields_err_msg = 'Field ' + str(custom_fields_list) + ' is a custom field.'
+        errors.append(Error(INFO, custom_fields_err_msg))
     return errors, abouts
 
 

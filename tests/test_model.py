@@ -1031,8 +1031,7 @@ class CollectorTest(unittest.TestCase):
         err_msg1 = 'non-supported_date_format.ABOUT: Field about_resource: Path %s not found' % file_path1
         err_msg2 = 'supported_date_format.ABOUT: Field about_resource: Path %s not found' % file_path2
         expected_errors = [
-            Error(INFO, 'non-supported_date_format.ABOUT: Field date is a custom field.'),
-            Error(INFO, 'supported_date_format.ABOUT: Field date is a custom field.'),
+            Error(INFO, "Field ['date'] is a custom field."),
             Error(INFO, err_msg1),
             Error(INFO, err_msg2)]
         assert sorted(expected_errors) == sorted(errors)
@@ -1105,18 +1104,17 @@ class CollectorTest(unittest.TestCase):
     def test_collect_inventory_always_collects_custom_fieldsg(self):
         test_loc = get_test_loc('test_model/inventory/custom_fields.ABOUT')
         errors, abouts = model.collect_inventory(test_loc)
-        expected_msg1 = 'Field resource is a custom field'
-        assert len(errors) == 2
-        assert expected_msg1 in errors[0].message
-        # The not supported 'resource' value is collected
+        expected_msg = "Field ['resource', 'custom_mapping'] is a custom field."
+        assert len(errors) == 1
+        assert expected_msg in errors[0].message
+        # The value of the custom field: 'resource' is collected
         assert abouts[0].resource.value
 
     def test_collect_inventory_does_not_raise_error_and_maintains_order_on_custom_fields(self):
         test_loc = get_test_loc('test_model/inventory/custom_fields2.ABOUT')
         errors, abouts = model.collect_inventory(test_loc)
         expected_errors = [
-            Error(INFO, 'inventory/custom_fields2.ABOUT: Field resource is a custom field.'),
-            Error(INFO, 'inventory/custom_fields2.ABOUT: Field custom_mapping is a custom field.')
+            Error(INFO, "Field ['resource', 'custom_mapping'] is a custom field.")
         ]
         assert expected_errors == errors
         expected = [u'about_resource: .\nname: test\nresource: .\ncustom_mapping: test\n']

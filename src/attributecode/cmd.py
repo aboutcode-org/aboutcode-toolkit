@@ -842,9 +842,9 @@ def get_error_messages(errors, quiet=False, verbose=False):
         msg = '{sevcode}: {message}'.format(**locals())
         if not quiet:
             if verbose:
-                messages .append(msg)
+                messages.append(msg)
             elif severity >= WARNING:
-                messages .append(msg)
+                messages.append(msg)
     return messages, severe_errors_count
 
 ######################################################################

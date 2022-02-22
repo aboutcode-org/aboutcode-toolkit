@@ -391,5 +391,4 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                 errors.append(Error(ERROR, msg))
             else:
                 about.dump_android_notice(path, notice_dict[path])
-
     return errors, abouts
