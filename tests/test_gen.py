@@ -103,12 +103,12 @@ custom1: |
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
         expected_errors = [
-            Error(CRITICAL, "Field name: 'confirmed copyright' contains illegal name characters: 0 to 9, a to z, A to Z and _."),
             Error(INFO, 'Field resource is a custom field.'),
             Error(INFO, 'Field test is a custom field.'),
+            Error(CRITICAL, "Field name: ['confirmed copyright'] contains illegal name characters: 0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored."),
             Error(INFO, 'Field about_resource: Path')
         ]
-        # assert [] == errors
+
         for exp, err in zip(expected_errors, errors):
             assert exp.severity == err.severity
             assert err.message.startswith(exp.message)
@@ -179,7 +179,6 @@ custom1: |
         location = get_test_loc('test_gen/inv2.csv')
         base_dir = get_temp_dir()
         errors, abouts = gen.generate(location, base_dir)
-
         expected = dict([('.', None)])
         assert abouts[0].about_resource.value == expected
         assert len(errors) == 1
@@ -285,45 +284,13 @@ licenses:
         expected = (
 '''about_resource: test.c
 name: test.c
-license_expression: public-domain AND custom
+license_expression: mit AND custom
 licenses:
   - file: custom.txt
 '''
         )
         assert expected == result
 
-    def test_generate_license_key_with_custom_file_450_with_fetch(self):
-        location = get_test_loc('test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
-        base_dir = get_temp_dir()
-
-        errors, abouts = gen.generate(location, base_dir)
-
-        lic_dict = {u'public-domain': [u'Public Domain',
-                                       u'public-domain.LICENSE',
-                                       u'This component is released to the public domain by the author.',
-                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain',
-                                       u''
-                                       ]}
-        a = abouts[0]
-        a.license_key.value.append('public-domain')
-        a.license_key.value.append('custom')
-        result = a.dumps(lic_dict)
-        expected = (
-'''about_resource: test.c
-name: test.c
-license_expression: public-domain AND custom
-licenses:
-  - key: public-domain
-    name: Public Domain
-    file: public-domain.LICENSE
-    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
-    spdx_license_key:
-  - key: custom
-    name: custom
-    file: custom.txt
-'''
-        )
-        assert expected == result
 
     def test_generate_license_key_with_custom_file_450_with_fetch_with_order(self):
         location = get_test_loc('test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
@@ -331,33 +298,33 @@ licenses:
 
         errors, abouts = gen.generate(location, base_dir)
 
-        lic_dict = {u'public-domain': [u'Public Domain',
-                                       u'public-domain.LICENSE',
-                                       u'This component is released to the public domain by the author.',
-                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain',
-                                       u''
+        lic_dict = {u'mit': [u'MIT License',
+                                       u'mit.LICENSE',
+                                       u'This component is released under MIT License.',
+                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
+                                       u'mit'
                                        ]}
         # The first row from the test file
         a = abouts[0]
-        a.license_key.value.append('public-domain')
+        a.license_key.value.append('mit')
         a.license_key.value.append('custom')
         result1 = a.dumps(lic_dict)
         # The second row from the test file
         b = abouts[1]
         b.license_key.value.append('custom')
-        b.license_key.value.append('public-domain')
+        b.license_key.value.append('mit')
         result2 = b.dumps(lic_dict)
 
         expected1 = (
 '''about_resource: test.c
 name: test.c
-license_expression: public-domain AND custom
+license_expression: mit AND custom
 licenses:
-  - key: public-domain
-    name: Public Domain
-    file: public-domain.LICENSE
-    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
-    spdx_license_key:
+  - key: mit
+    name: MIT License
+    file: mit.LICENSE
+    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit
+    spdx_license_key: mit
   - key: custom
     name: custom
     file: custom.txt
@@ -367,16 +334,16 @@ licenses:
         expected2 = (
 '''about_resource: test.h
 name: test.h
-license_expression: custom AND public-domain
+license_expression: custom AND mit
 licenses:
   - key: custom
     name: custom
     file: custom.txt
-  - key: public-domain
-    name: Public Domain
-    file: public-domain.LICENSE
-    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:public-domain
-    spdx_license_key:
+  - key: mit
+    name: MIT License
+    file: mit.LICENSE
+    url: https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit
+    spdx_license_key: mit
 '''
         )
         assert expected1 == result1

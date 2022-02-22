@@ -581,7 +581,7 @@ this software and releases the component to Public Domain.
         test_file = get_test_loc('test_model/parse/non_ascii_field_name_value.about')
         a = model.About(test_file)
         expected = [
-            Error(CRITICAL, "Field name: 'mat\xedas' contains illegal name characters: 0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored.")
+            Error(CRITICAL, "Field name: ['mat\xedas'] contains illegal name characters: 0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored.")
         ]
         assert expected == a.errors
 
