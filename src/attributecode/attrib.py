@@ -49,7 +49,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
     or None and attribution text is the generated text or None.
     """
     rendered = None
-    error = None
+    errors = []
     template_error = check_template(template)
     if template_error:
         lineno, message = template_error
@@ -57,6 +57,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
             CRITICAL,
             'Template validation error at line: {lineno}: "{message}"'.format(**locals())
         )
+        errors.append(error)
         return error, None
 
     template = jinja2.Template(template)
@@ -79,14 +80,20 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
                 for lic in licenses_list:
                     if key in lic.key:
                         captured = True
+                        break
                 if not captured or not licenses_list:
                     name = lic_name
-                    filename = list(about.license_file.value.keys())[index]
+                    if about.license_file.value.keys():
+                        filename = list(about.license_file.value.keys())[index]
+                        text = list(about.license_file.value.values())[index]
+                    else:
+                        error = Error(CRITICAL, 'No license file found for ' + name)
+                        errors.append(error)
+                        break
                     if  about.license_url.value:
                         url = about.license_url.value[index]
                     else:
                         url = ''
-                    text = list(about.license_file.value.values())[index]
                     license_object = License(key, name, filename, url, text)
                     licenses_list.append(license_object)
                 index = index + 1
@@ -182,8 +189,8 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
         tkversion=__version__,
         vartext=vartext
     )
-    return error, rendered
 
+    return errors, rendered
 
 def get_license_file_key(license_text_name):
     if license_text_name.endswith('.LICENSE'):
@@ -256,7 +263,7 @@ def generate_and_save(abouts, is_about_input, license_dict, output_location, sca
     )
 
     if rendering_error:
-        errors.append(rendering_error)
+        errors.extend(rendering_error)
 
     if rendered:
         output_location = add_unc(output_location)
