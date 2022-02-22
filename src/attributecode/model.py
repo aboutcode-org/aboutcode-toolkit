@@ -879,6 +879,7 @@ class About(object):
         """
         errors = []
         seen_fields = {}
+        illegal_name_list = []
 
         for name, value in fields:
             orig_name = name
@@ -916,10 +917,16 @@ class About(object):
 
             # A custom field
             # is the name valid?
+            if not is_valid_name(name):
+                if not name in illegal_name_list:
+                    illegal_name_list.append(name)
+                continue
+            """
             illegal_name_error = validate_field_name(name)
             if illegal_name_error:
-                errors.append(illegal_name_error)
+                errors.append(illegal_name_list)
                 continue
+            """
 
             msg = 'Field %(orig_name)s is a custom field.'
             errors.append(Error(INFO, msg % locals()))
@@ -945,6 +952,10 @@ class About(object):
                     msg = 'Internal error with custom field: %(name)r: %(value)r.'
                     errors.append(Error(CRITICAL, msg % locals()))
 
+        if illegal_name_list:
+            msg = ('Field name: %(illegal_name_list)r contains illegal name characters: '
+               '0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored.')
+            errors.append(Error(CRITICAL, msg % locals()))
         return errors
 
     def process(self, fields, about_file_path, running_inventory=False,
@@ -1034,7 +1045,7 @@ class About(object):
 
         for key, value in fields:
             if not value:
-                # never return empty or absent fieds
+                # never return empty or absent fields
                 continue
             if key == u'licenses':
                 # FIXME: use a license object instead
@@ -1147,11 +1158,14 @@ class About(object):
             if licenses_dict and lic_key in licenses_dict:
                 lic_dict['key'] = lic_key
                 lic_name, lic_filename, lic_context, lic_url, spdx_lic_key = licenses_dict[lic_key]
-
-                lic_dict['name'] = lic_name
-                lic_dict['file'] = lic_filename
-                lic_dict['url'] = lic_url
-                lic_dict['spdx_license_key'] = spdx_lic_key
+                if lic_name:
+                    lic_dict['name'] = lic_name
+                if lic_filename:
+                    lic_dict['file'] = lic_filename
+                if lic_url:
+                    lic_dict['url'] = lic_url
+                if spdx_lic_key:
+                    lic_dict['spdx_license_key'] = spdx_lic_key
 
                 # Remove the license information if it has been handled
                 lic_key_copy.remove(lic_key)
@@ -1161,6 +1175,8 @@ class About(object):
                     license_url.remove(lic_url)
                 if lic_filename in license_file:
                     license_file.remove(lic_filename)
+                if spdx_lic_key in spdx_license_key:
+                    spdx_license_key.remove(spdx_lic_key)
                 lic_dict_list.append(lic_dict)
 
         # Handle license information that have not been handled.
@@ -1277,7 +1293,6 @@ class About(object):
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
         license_key_name_context_url = []
-        err = ''
 
         if not posixpath.exists(parent):
             os.makedirs(add_unc(parent))
@@ -1288,20 +1303,26 @@ class About(object):
             self.license_key.present = True
             if not special_char_in_expression:
                 for lic_key in lic_list:
-                    try:
-                        if license_dict[lic_key]:
-                            license_path = posixpath.join(parent, lic_key)
-                            license_path += u'.LICENSE'
-                            license_path = add_unc(license_path)
-                            license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[lic_key]
-                            license_info = (lic_key, license_name, license_filename, license_context, license_url, spdx_license_key)
-                            license_key_name_context_url.append(license_info)
-                            with io.open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
-                                lic.write(license_context)
-                    except Exception as e:
-                        err = Error(ERROR, 'Invalid license: ' + str(e))
+                    license_name = ''
+                    license_filename = ''
+                    license_context = ''
+                    license_url = ''
+                    spdx_license_key = ''
+                    if lic_key in license_dict:
+                        license_path = posixpath.join(parent, lic_key)
+                        license_path += u'.LICENSE'
+                        license_path = add_unc(license_path)
+                        license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[lic_key]
+                        license_info = (lic_key, license_name, license_filename, license_context, license_url, spdx_license_key)
+                        license_key_name_context_url.append(license_info)
+                        with io.open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
+                            lic.write(license_context)
+                    else:
+                        # Invalid license issue is already handled
+                        license_info = (lic_key, license_name, license_filename, license_context, license_url, spdx_license_key)
+                        license_key_name_context_url.append(license_info)
 
-        return license_key_name_context_url, err
+        return license_key_name_context_url
 
 
 def collect_inventory(location):
@@ -1324,7 +1345,7 @@ def collect_inventory(location):
             msg = (about_file_path + ": " + message)
             errors.append(Error(severity, msg))
         abouts.append(about)
-    return unique(errors), abouts
+    return errors, abouts
 
 
 def collect_abouts_license_expression(location):

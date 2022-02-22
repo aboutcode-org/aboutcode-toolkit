@@ -70,8 +70,10 @@ def check_duplicated_columns(location):
         dup_msg = u', '.join(dup_msg)
         msg = ('Duplicated column name(s): %(dup_msg)s\n' % locals() +
                'Please correct the input and re-run.')
-        errors.append(Error(ERROR, msg))
-    return unique(errors)
+        err = Error(ERROR, msg)
+        if not err in errors:
+            errors.append(err)
+    return errors
 
 
 def check_duplicated_about_resource(arp, arp_list):
@@ -126,6 +128,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
     """
     errors = []
     abouts = []
+
     if base_dir:
         base_dir = util.to_posix(base_dir)
     if scancode:
@@ -152,16 +155,17 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             arp = component['about_resource']
             dup_err = check_duplicated_about_resource(arp, arp_list)
             if dup_err:
-                errors.append(dup_err)
+                if not dup_err in errors:
+                    errors.append(dup_err)
             else:
                 arp_list.append(arp)
 
             newline_in_file_err = check_newline_in_file_field(component)
-            for err in newline_in_file_err:
-                errors.append(err)
+            if newline_in_file_err:
+                errors.extend(newline_in_file_err)
 
             invalid_about_filename = check_about_resource_filename(arp)
-            if invalid_about_filename:
+            if invalid_about_filename and not invalid_about_filename in errors:
                 errors.append(invalid_about_filename)
         if errors:
             return errors, abouts
@@ -172,7 +176,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         errors.append(Error(CRITICAL, msg))
         return errors, abouts
 
-    for i, fields in enumerate(inventory):
+    for fields in inventory:
         # check does the input contains the required fields
         required_fields = model.About.required_fields
 
@@ -223,9 +227,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             if e.message == 'Field about_resource is required':
                 ld_errors.remove(e)
         """
-        for e in ld_errors:
-            if not e in errors:
-                errors.extend(ld_errors)
+        errors.extend(ld_errors)
         abouts.append(about)
     # Covert the license_score value from string to list of int
     # The licesne_score is not in the spec but is specify in the scancode license scan.
@@ -239,7 +241,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             except:
                 pass
 
-    return unique(errors), abouts
+    return errors, abouts
 
 
 def update_about_resource(self):
@@ -285,6 +287,8 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                     errors.append(e)
 
     for about in abouts:
+        # Strip trailing spaces
+        about.about_file_path = about.about_file_path.strip()
         if about.about_file_path.startswith('/'):
             about.about_file_path = about.about_file_path.lstrip('/')
         dump_loc = join(bdir, about.about_file_path.lstrip('/'))
@@ -328,14 +332,12 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                     msg = (u'Field about_resource: '
                            u'%(path)s '
                            u'does not exist' % locals())
-                    not_exist_errors.append(msg)
+                errors.append(Error(INFO, msg))
 
             licenses_dict = {}
             if gen_license:
                 # Write generated LICENSE file
-                license_key_name_context_url_list, err = about.dump_lic(dump_loc, license_dict)
-                if err:
-                    errors.append(err)
+                license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
                     for lic_key, lic_name, lic_filename, lic_context, lic_url, spdx_lic_key in license_key_name_context_url_list:
                         licenses_dict[lic_key] = [lic_name, lic_filename, lic_context, lic_url, spdx_lic_key]
@@ -372,9 +374,6 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                 else:
                     notice_dict[notice_path] = notice_context
 
-            for e in not_exist_errors:
-                errors.append(Error(INFO, e))
-
         except Exception as e:
             # only keep the first 100 char of the exception
             # TODO: truncated errors are likely making diagnotics harder
@@ -393,4 +392,4 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
             else:
                 about.dump_android_notice(path, notice_dict[path])
 
-    return unique(errors), abouts
+    return errors, abouts
