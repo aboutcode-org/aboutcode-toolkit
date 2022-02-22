@@ -188,7 +188,6 @@ OUTPUT: Path to the CSV/JSON/Excel inventory file to create.
     errors, abouts = collect_inventory(location)
     write_output(abouts=abouts, location=output, format=format)
 
-    errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         msg = 'Inventory collected in {output}.'.format(**locals())
@@ -270,7 +269,6 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         fetch_license_djc=fetch_license_djc,
     )
 
-    errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         abouts_count = len(abouts)
@@ -355,7 +353,6 @@ OUTPUT: Path to a directory where license files are saved.
     if write_errors:
         errors.extend(write_errors)
 
-    errors = unique(errors)
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
     sys.exit(severe_errors_count)
 
@@ -499,12 +496,11 @@ OUTPUT: Path where to write the attribution document.
 
     if not abouts:
         if errors:
-            errors = unique(errors)
             errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
         else:
             msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
             click.echo(msg)
-        sys.exit(1)
+        sys.exit(errors_count)
 
     if not is_about_input:
         # Check if both api_url and api_key present
@@ -547,7 +543,6 @@ OUTPUT: Path where to write the attribution document.
         )
         errors.extend(attrib_errors)
 
-    errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
 
     if not quiet:
@@ -714,7 +709,6 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     for e in errs:
         errors.append(e)
 
-    errors = unique(errors)
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log)
     sys.exit(severe_errors_count)
 
@@ -796,7 +790,6 @@ OUTPUT: Path to CSV/JSON/Excel inventory file to create.
         print_version()
         click.echo('Transforming...')
 
-    errors = unique(errors)
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet and not errors:
         msg = 'Transformed file is written to {output}.'.format(**locals())
@@ -817,7 +810,6 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
     file.
     Return True if there were severe error reported.
     """
-    errors = unique(errors)
     messages, severe_errors_count = get_error_messages(errors, quiet, verbose)
     for msg in messages:
         click.echo(msg)
