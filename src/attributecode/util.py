@@ -574,7 +574,7 @@ def filter_errors(errors, minimum_severity=WARNING):
     Return a list of unique `errors` Error object filtering errors that have a
     severity below `minimum_severity`.
     """
-    return unique([e for e in errors if e.severity >= minimum_severity])
+    return [e for e in errors if e.severity >= minimum_severity]
 
 
 def create_dir(location):

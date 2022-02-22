@@ -810,41 +810,44 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
     file.
     Return True if there were severe error reported.
     """
-    messages, severe_errors_count = get_error_messages(errors, quiet, verbose)
-    for msg in messages:
-        click.echo(msg)
-    if log_file_loc and errors:
-        log_msgs, _ = get_error_messages(errors, quiet=False, verbose=True)
-        with io.open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
-            lf.write('\n'.join(log_msgs))
-        click.echo("Error log: " + log_file_loc)
+    severe_errors_count = 0
+    if errors:
+        log_msgs, severe_errors_count = get_error_messages(errors, verbose)
+        if not quiet:
+            for msg in log_msgs:
+                click.echo(msg)
+        if log_file_loc:
+            with io.open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
+                lf.write('\n'.join(log_msgs))
+            click.echo("Error log: " + log_file_loc)
     return severe_errors_count
 
 
-def get_error_messages(errors, quiet=False, verbose=False):
+def get_error_messages(errors, verbose=False):
     """
     Return a tuple of (list of error message strings to report,
     severe_errors_count) given an `errors` list of Error objects and using the
-    `quiet` and `verbose` flags.
+    `verbose` flags.
     """
-    errors = unique(errors)
-    severe_errors = filter_errors(errors, WARNING)
+    if verbose:
+        severe_errors = errors
+    else:
+        severe_errors = filter_errors(errors, WARNING)
+
+    severe_errors = unique(severe_errors)
     severe_errors_count = len(severe_errors)
 
     messages = []
 
-    if severe_errors and not quiet:
+    if severe_errors:
         error_msg = 'Command completed with {} errors or warnings.'.format(severe_errors_count)
         messages.append(error_msg)
 
-    for severity, message in errors:
+    for severity, message in severe_errors:
         sevcode = severities.get(severity) or 'UNKNOWN'
         msg = '{sevcode}: {message}'.format(**locals())
-        if not quiet:
-            if verbose:
-                messages.append(msg)
-            elif severity >= WARNING:
-                messages.append(msg)
+        messages.append(msg)
+
     return messages, severe_errors_count
 
 ######################################################################

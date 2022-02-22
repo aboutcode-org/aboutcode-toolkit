@@ -430,9 +430,9 @@ class AboutTest(unittest.TestCase):
             'about_resource'])
 
         expected_errors = [
-            Error(INFO, 'Field date is a custom field.'),
-            Error(INFO, 'Field license_spdx is a custom field.'),
-            Error(INFO, 'Field license_text_file is a custom field.')]
+            Error(INFO, 'Custom Field: date'),
+            Error(INFO, 'Custom Field: license_spdx'),
+            Error(INFO, 'Custom Field: license_text_file')]
 
         errors = about.hydrate(fields)
 
@@ -529,9 +529,10 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('test_model/parse/illegal_custom_field.about')
         a = model.About(test_file)
         expected_errors = [
-            Error(INFO, 'Field hydrate is a custom field.'),
+            Error(INFO, 'Custom Field: hydrate'),
             Error(CRITICAL, "Internal error with custom field: 'hydrate': 'illegal name'.")
         ]
+
         assert expected_errors == a.errors
         assert not hasattr(getattr(a, 'hydrate'), 'value')
         field = list(a.custom_fields.values())[0]
@@ -753,8 +754,8 @@ licenses:
         test_file = get_test_loc('test_model/parse/complete2/about.ABOUT')
         a = model.About(test_file)
         expected_error = [
-            Error(INFO, 'Field custom1 is a custom field.'),
-            Error(INFO, 'Field custom2 is a custom field.'),
+            Error(INFO, 'Custom Field: custom1'),
+            Error(INFO, 'Custom Field: custom2'),
             Error(INFO, 'Field custom2 is present but empty.')
         ]
         assert sorted(expected_error) == sorted(a.errors)
@@ -793,8 +794,8 @@ modified: yes
         test_file = get_test_loc('test_model/parse/complete2/about.ABOUT')
         a = model.About(test_file)
         expected_error = [
-            Error(INFO, 'Field custom1 is a custom field.'),
-            Error(INFO, 'Field custom2 is a custom field.'),
+            Error(INFO, 'Custom Field: custom1'),
+            Error(INFO, 'Custom Field: custom2'),
             Error(INFO, 'Field custom2 is present but empty.')
         ]
         assert sorted(expected_error) == sorted(a.errors)
@@ -842,11 +843,11 @@ custom1: |
         file_path = posixpath.join(posixpath.dirname(test_file), 'nose-selecttests-0.3.zip')
         err_msg = 'Field about_resource: Path %s not found' % file_path
         errors = [
-            Error(INFO, 'Field dje_license is a custom field.'),
-            Error(INFO, 'Field license_text_file is a custom field.'),
-            Error(INFO, 'Field scm_tool is a custom field.'),
-            Error(INFO, 'Field scm_repository is a custom field.'),
-            Error(INFO, 'Field test is a custom field.'),
+            Error(INFO, 'Custom Field: dje_license'),
+            Error(INFO, 'Custom Field: license_text_file'),
+            Error(INFO, 'Custom Field: scm_tool'),
+            Error(INFO, 'Custom Field: scm_repository'),
+            Error(INFO, 'Custom Field: test'),
             Error(INFO, err_msg)]
 
         assert errors == a.errors

@@ -103,10 +103,9 @@ custom1: |
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
         expected_errors = [
-            Error(INFO, 'Field resource is a custom field.'),
-            Error(INFO, 'Field test is a custom field.'),
             Error(CRITICAL, "Field name: ['confirmed copyright'] contains illegal name characters: 0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored."),
-            Error(INFO, 'Field about_resource: Path')
+            Error(INFO, 'Field about_resource: Path'),
+            Error(INFO, "Field ['resource', 'test'] is a custom field.")
         ]
 
         for exp, err in zip(expected_errors, errors):
@@ -210,11 +209,12 @@ custom1: |
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
-        msg1 = 'Field custom1 is a custom field.'
-        msg2 = 'Field about_resource'
+        err_msg_list = []
+        for severity, message in errors:
+            err_msg_list.append(message)
+        msg1 = "Field ['custom1'] is a custom field."
 
-        assert msg1 in errors[0].message
-        assert msg2 in errors[1].message
+        assert msg1 in err_msg_list
 
         result = [a.dumps() for a in abouts][0]
         expected = (

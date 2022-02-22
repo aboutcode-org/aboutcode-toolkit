@@ -20,6 +20,7 @@
     * Bump PyYAML to 6.0
     * Add '%" as a supported character
     * Update default template
+    * All errors are logged if and only if the `verbose` option is set. Otherwise, ony 'Critical' and 'Warning' errors will be showed/logged
 
 2021-04-02
     Release 6.0.0

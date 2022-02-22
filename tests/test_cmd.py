@@ -44,10 +44,10 @@ def test_report_errors(capsys):
         Error(NOTSET, 'msg4'),
     ]
     ec = cmd.report_errors(errors, quiet=False, verbose=True, log_file_loc=None)
-    assert 3 == ec
+    assert 6 == ec
     out, err = capsys.readouterr()
     expected_out = [
-        'Command completed with 3 errors or warnings.',
+        'Command completed with 6 errors or warnings.',
         'CRITICAL: msg1',
         'ERROR: msg2',
         'INFO: msg3',
@@ -91,7 +91,7 @@ def test_report_errors_with_quiet_ignores_verbose_flag(capsys):
         Error(WARNING, 'msg4'),
     ]
     severe_errors_count = cmd.report_errors(errors, quiet=True, verbose=True)
-    assert severe_errors_count == 3
+    assert severe_errors_count == 6
     out, err = capsys.readouterr()
     assert '' == out
     assert '' == err
@@ -125,10 +125,10 @@ def test_report_errors_with_verbose_flag(capsys):
         Error(WARNING, 'msg4'),
     ]
     severe_errors_count = cmd.report_errors(errors, quiet=False, verbose=True)
-    assert severe_errors_count == 3
+    assert severe_errors_count == 6
     out, err = capsys.readouterr()
     expected_out = [
-        'Command completed with 3 errors or warnings.',
+        'Command completed with 6 errors or warnings.',
         'CRITICAL: msg1',
         'ERROR: msg2',
         'INFO: msg3',
@@ -136,6 +136,8 @@ def test_report_errors_with_verbose_flag(capsys):
         'DEBUG: msg4',
         'NOTSET: msg4'
     ]
+    print("@@@@@@@@@@@@@@@@@@@@@@@@")
+    print(out.splitlines(False))
     assert expected_out == out.splitlines(False)
     assert '' == err
 
@@ -157,7 +159,7 @@ def test_report_errors_can_write_to_logfile():
     with io.open(result_file, 'r', encoding='utf-8', errors='replace') as rf:
         result = rf.read()
     expected = [
-        'Command completed with 3 errors or warnings.',
+        'Command completed with 6 errors or warnings.',
         'CRITICAL: msg1',
         'ERROR: msg2',
         'INFO: msg3',
@@ -181,7 +183,7 @@ def test_report_errors_does_not_report_duplicate_errors(capsys):
         Error(CRITICAL, 'msg1'),
     ]
     severe_errors_count = cmd.report_errors(errors, quiet=True, verbose=True)
-    assert severe_errors_count == 3
+    assert severe_errors_count == 6
 
 
 def test_get_error_messages():
@@ -205,22 +207,6 @@ def test_get_error_messages():
     assert expected == emsgs
 
 
-def test_get_error_messages_quiet():
-    errors = [
-        Error(CRITICAL, 'msg1'),
-        Error(ERROR, 'msg2'),
-        Error(INFO, 'msg3'),
-        Error(WARNING, 'msg4'),
-        Error(DEBUG, 'msg4'),
-        Error(NOTSET, 'msg4'),
-    ]
-
-    emsgs, ec = cmd.get_error_messages(errors, quiet=True)
-    assert 3 == ec
-    expected = []
-    assert expected == emsgs
-
-
 def test_get_error_messages_verbose():
     errors = [
         Error(CRITICAL, 'msg1'),
@@ -232,9 +218,9 @@ def test_get_error_messages_verbose():
     ]
 
     emsgs, ec = cmd.get_error_messages(errors, verbose=True)
-    assert 3 == ec
+    assert 6 == ec
     expected = [
-        'Command completed with 3 errors or warnings.',
+        'Command completed with 6 errors or warnings.',
         'CRITICAL: msg1',
         'ERROR: msg2',
         'INFO: msg3',

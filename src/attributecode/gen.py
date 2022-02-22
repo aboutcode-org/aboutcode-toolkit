@@ -176,6 +176,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         errors.append(Error(CRITICAL, msg))
         return errors, abouts
 
+    custom_fields_list = []
     for fields in inventory:
         # check does the input contains the required fields
         required_fields = model.About.required_fields
@@ -220,15 +221,19 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             running_inventory=False,
             reference_dir=reference_dir,
         )
-        """
-        # 'about_resource' field will be generated during the process.
-        # No error need to be raise for the missing 'about_resource'.
-        for e in ld_errors:
-            if e.message == 'Field about_resource is required':
-                ld_errors.remove(e)
-        """
-        errors.extend(ld_errors)
+
+        for severity, message in ld_errors:
+            if 'Custom Field' in message:
+                field_name = message.replace('Custom Field: ', '').strip()
+                if not field_name in custom_fields_list:
+                    custom_fields_list.append(field_name)
+            else:
+                errors.append(Error(severity, message))
+
         abouts.append(about)
+    if custom_fields_list:
+        custom_fields_err_msg = 'Field ' + str(custom_fields_list) + ' is a custom field.'
+        errors.append(Error(INFO, custom_fields_err_msg))
     # Covert the license_score value from string to list of int
     # The licesne_score is not in the spec but is specify in the scancode license scan.
     # This key will be treated as a custom string field. Therefore, we need to

@@ -928,7 +928,7 @@ class About(object):
                 continue
             """
 
-            msg = 'Field %(orig_name)s is a custom field.'
+            msg = 'Custom Field: %(orig_name)s'
             errors.append(Error(INFO, msg % locals()))
             # is this a known one?
             custom_field = self.custom_fields.get(name)
@@ -969,6 +969,7 @@ class About(object):
         afp = self.about_file_path
 
         errors = self.hydrate(fields)
+
         # We want to copy the license_files before the validation
         if reference_dir and not from_attrib:
             copy_err = copy_license_notice_files(
@@ -1341,10 +1342,9 @@ def collect_inventory(location):
     for about_loc in about_locations:
         about_file_path = util.get_relative_path(input_location, about_loc)
         about = About(about_loc, about_file_path)
-        # Insert about_file_path reference to the error
         for severity, message in about.errors:
-            if 'is a custom field' in message:
-                field_name = message.replace('Field', '').replace('is a custom field.', '').strip()
+            if 'Custom Field' in message:
+                field_name = message.replace('Custom Field: ', '').strip()
                 if not field_name in custom_fields_list:
                     custom_fields_list.append(field_name)
             else:
