@@ -31,7 +31,7 @@ set "DEV_REQUIREMENTS=--editable .[testing] --constraint requirements.txt --cons
 set "VIRTUALENV_DIR=venv"
 
 @rem # Cleanable files and directories to delete with the --clean option
-set "CLEANABLE=build tmp bin Lib Scripts include venv"
+set "CLEANABLE=build venv"
 
 @rem # extra  arguments passed to pip
 set "PIP_EXTRA_ARGS= "
@@ -46,11 +46,14 @@ set VIRTUALENV_PYZ_URL=https://bootstrap.pypa.io/virtualenv.pyz
 set CFG_ROOT_DIR=%~dp0
 set "CFG_BIN_DIR=%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\Scripts"
 
-@rem ################################
-@rem # Thirdparty package locations and index handling
-set "PIP_EXTRA_ARGS=--find-links "%CFG_ROOT_DIR%\thirdparty" --find-links https://thirdparty.aboutcode.org/pypi" & %INDEX_ARG%
 
 @rem ################################
+@rem # Thirdparty package locations and index handling
+if exist "%CFG_ROOT_DIR%\thirdparty" (
+    set PIP_EXTRA_ARGS=--find-links "%CFG_ROOT_DIR%\thirdparty"
+)
+set "PIP_EXTRA_ARGS=%PIP_EXTRA_ARGS% --find-links https://thirdparty.aboutcode.org/pypi" & %INDEX_ARG%
+
 
 @rem ################################
 @rem # Set the quiet flag to empty if not defined
@@ -81,6 +84,7 @@ if not "%1" == "" (
 )
 
 set "PIP_EXTRA_ARGS=%PIP_EXTRA_ARGS% %NO_INDEX%"
+
 
 @rem ################################
 @rem # find a proper Python to run
@@ -134,7 +138,6 @@ if not exist "%CFG_BIN_DIR%\python.exe" (
     )
 )
 
-
 if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
@@ -158,7 +161,6 @@ if %ERRORLEVEL% neq 0 (
 if exist "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin" (
     rmdir /s /q "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin"
 )
-
 mklink /J "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin" "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\Scripts"
 
 if %ERRORLEVEL% neq 0 (
