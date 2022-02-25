@@ -1004,6 +1004,11 @@ class About(object):
             loc = add_unc(loc)
             with io.open(loc, encoding='utf-8', errors='replace') as txt:
                 input_text = txt.read()
+            if not input_text:
+                msg = 'ABOUT file is empty: %(location)r'
+                errors.append(Error(CRITICAL, msg % locals()))
+                self.errors = errors
+                return errors
             # The 'Yes' and 'No' will be converted to 'True' and 'False' in the yaml.load()
             # Therefore, we need to wrap the original value in quote to prevent
             # the conversion
@@ -1027,8 +1032,11 @@ class About(object):
             errs = self.load_dict(data, base_dir, running_inventory=running_inventory)
             errors.extend(errs)
         except Exception as e:
-            trace = traceback.format_exc()
-            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s'
+            # The trace is good for debugging, but probably not good for user to
+            # see the traceback message
+            #trace = traceback.format_exc()
+            #msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s'
+            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'
             errors.append(Error(CRITICAL, msg % locals()))
 
         self.errors = errors
