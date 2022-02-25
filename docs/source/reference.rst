@@ -421,7 +421,7 @@ Options
 Purpose
 -------
 
-Fetch licenses in the license_expression field and save to the output location.
+Fetch licenses (Default: ScanCode LicenseDB) in the license_expression field and save to the output location.
 
 Details
 ^^^^^^^
@@ -452,6 +452,10 @@ Details
 
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
+
+Special Notes
+-------------
+If no `--djc` option is set, the tool will default to fetch licenses from ScanCode LicenseDB.
 
 inventory
 =========

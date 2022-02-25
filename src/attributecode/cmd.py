@@ -312,7 +312,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 @click.help_option('-h', '--help')
 def gen_license(location, output, djc, scancode, verbose):
     """
-Fetch licenses in the license_expression field and save to the output location.
+Fetch licenses (Default: ScanCode LicenseDB) in the license_expression field and save to the output location.
 
 LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
 

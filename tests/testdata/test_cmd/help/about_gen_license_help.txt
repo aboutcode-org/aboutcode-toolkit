@@ -1,7 +1,7 @@
 Usage: about gen-license [OPTIONS] LOCATION OUTPUT
 
-  Fetch licenses in the license_expression field and save to the output
-  location.
+  Fetch licenses (Default: ScanCode LicenseDB) in the license_expression field
+  and save to the output location.
 
   LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
 
