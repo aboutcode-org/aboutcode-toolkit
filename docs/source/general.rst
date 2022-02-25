@@ -11,9 +11,9 @@ AboutCode Toolkit is a tool for your software development team to document your 
 
 -   **attrib**: Generate a Product Attribution notice document from your ABOUT file(s), JSON, CSV or XLSX. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template.
 
--   **check**: A simple command to validate the ABOUT file(s) and output errors/warnings if any on the terminal.
+-   **check**: A simple command to validate the ABOUT file(s) and output errors/warnings on the terminal.
 
--   **collect_redist_src**: A command to collect and copy sources that have 'redistribute' flagged as 'True' in ABOUT file(s) or from an inventory.
+-   **collect_redist_src**: A command to collect and copy sources that have the 'redistribute' flagged as 'True' in ABOUT file(s) or from an inventory.
 
 -   **gen**: Create ABOUT file(s) from a Software Inventory file (.csv, .json or .xlsx format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase. You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes.
 
@@ -21,7 +21,7 @@ AboutCode Toolkit is a tool for your software development team to document your 
 
 -   **inventory**: Generate a Software Inventory list (.csv, .json or .xlsx format) from your codebase based on ABOUT file(s). Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
 
--   **transform**: A command to transform an input CSV/JSON/XLSX by applying renaming and/or filtering and then output to a new CSV/JSON/Excel file.
+-   **transform**: A command to transform an input CSV/JSON/XLSX by applying renaming and/or filtering and then output to a new CSV/JSON/XLSX file.
 
 Additional AboutCode Toolkit information is available at:
 
@@ -228,7 +228,7 @@ Here is an example of a gen command:
 
         ..  code-block:: none
 
-                about gen --fetch-license --reference /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
+                about gen --fetch-license --reference /Users/harrypotter/myLicenseNoticeFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
 
 This gen example command does the following:
 
@@ -264,16 +264,16 @@ You can make appropriate changes to your input software inventory and then run g
 Using attrib to Generate a Product Attribution Notice Package
 =============================================================
 
-Prepare an Attribution Template to Use as Input to attrib
----------------------------------------------------------
+Prepare an Attribution Template to Use
+--------------------------------------
 
-You can run attrib using the default_html.template (or default_json.template if want JSON output) provided with the AboutCode Toolkit tools:
+You can run attrib using the default_html.template (or default_json.template) provided with the AboutCode Toolkit tools:
 
 https://github.com/nexB/aboutcode-toolkit/blob/develop/templates/default_html.template
 
 If you choose to do that, you will most likely want to edit the generated .html file to provide header information about your own organization and product.
 
-Running attrib with the default_html.template file is probably your best choice when you are still testing your AboutCode Toolkit process. Once you have a good understanding of the generated output, you can customize the template to provide the standard text that you want to see whenever you generate product attribution for your organization. You can also create alternative versions of the template to use attrib to generate other kinds of documents, such as a License Reference.
+Running attrib with the default_html.template file is probably your best choice when you are still testing your AboutCode Toolkit process. Once you have a good understanding of the generated output, you can customize the template to provide the standard text that serve your needs. You can also create alternative versions of the template to use attrib to generate other kinds of documents, such as a License Reference.
 
 Use jinja2 Features to Customize Your Attribution Template
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -306,7 +306,7 @@ If you would prefer something other than a simple space between the component na
 
 The ``if about_object.version.value`` is checking for a component version, and if one exists it generates output text that is either a space followed by the actual version value, or, as in this customized template, it generates output text as " - Version ", followed by the actual version value. You will, of course, want to test your output to get exactly the results that you need.
 
-Note that you can actually use attrib to generate an AboutCode Toolkit-sourced document of any kind for varying business purposes, and you may want to change the grouping/ordering of the data for different reporting purposes. (Here we get into somewhat more complex usage of jinja2 features, and you may wish to consult the jinja2 documentation to reach a more comprehensive understanding of the syntax and features.) The default ordering is by component, but In the following example, which is intended to support a "license reference" rather than an attribution document, the customized template modifies the data grouping to use a custom field called "confirmed license":
+Note that you can actually use attrib to generate an AboutCode Toolkit-sourced document of any kind for varying business purposes, and you may want to change the grouping/ordering of the data for different reporting purposes. (Here we get into somewhat more complex usage of jinja2 features, and you may wish to consult the jinja2 documentation to reach a more comprehensive understanding of the syntax and features.) The default ordering is by component, but In the following example, which is intended to support a "license reference" rather than an attribution document, the customized template modifies the data grouping to use a custom field called "confirmed_license":
 
         ..  code-block:: none
 
@@ -367,7 +367,7 @@ In summary, you can start with simple, cosmetic customizations to the default_ht
 Run attrib to Generate a Product Attribution Notice Package
 -----------------------------------------------------------
 
-When you have generated ABOUT file(s) by gen, you can then run attrib to generate your product attribution notice package. The official attrib parameters are defined here: :ref:`reference`
+You can then run the attrib to generate your product attribution notice package from the generated ABOUT file(s) or from an inventory (.csv/.json/.xlsx). The official attrib parameters are defined here: :ref:`reference`
 
 Here is an example of a attrib command:
 
