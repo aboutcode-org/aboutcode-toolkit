@@ -27,7 +27,7 @@ from attributecode import ERROR
 from attributecode import Error
 from attributecode.licenses import COMMON_LICENSES
 from attributecode.model import parse_license_expression
-from attributecode.model import License
+from attributecode.model import License, StringField
 from attributecode.util import add_unc
 from attributecode.attrib_util import multi_sort
 
@@ -171,9 +171,9 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
             # Join the license name expression into a single string
             lic_name_expression = ' '.join(lic_name_expression_list)
 
-            # Add the license name expression string into the about object as a list
-            about.license_name_expression.value = lic_name_expression
-            about.license_name_expression.present = True
+            # Add the license name expression string into the about object as a custom field
+            custom_field = StringField(name=name, value=lic_name_expression, present=True)
+            setattr(about, 'license_name_expression', custom_field)
 
     # Sort the about objects by name
     abouts = sorted(abouts, key=lambda x: x.name.value.lower())
