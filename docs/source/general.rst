@@ -9,7 +9,7 @@ AboutCode Toolkit Defined
 
 AboutCode Toolkit is a tool for your software development team to document your code inside your codebase, typically in preparation for a product release, side-by-side with the actual code. ABOUT file(s) have a simple, standard format that identifies components and their associated licenses. The current AboutCode Toolkit subcommands are:
 
--   **attrib**: Generate a Product Attribution notice document from your ABOUT file(s), JSON, CSV or Excel. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template.
+-   **attrib**: Generate a Product Attribution notice document from your ABOUT file(s), JSON, CSV or XLSX. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template.
 
 -   **check**: A simple command to validate the ABOUT file(s) and output errors/warnings if any on the terminal.
 
@@ -21,7 +21,7 @@ AboutCode Toolkit is a tool for your software development team to document your 
 
 -   **inventory**: Generate a Software Inventory list (.csv, .json or .xlsx format) from your codebase based on ABOUT file(s). Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
 
--   **transform**: A command to transform an input CSV/JSON/Excel by applying renaming and/or filtering and then output to a new CSV/JSON/Excel file.
+-   **transform**: A command to transform an input CSV/JSON/XLSX by applying renaming and/or filtering and then output to a new CSV/JSON/Excel file.
 
 Additional AboutCode Toolkit information is available at:
 
@@ -173,11 +173,11 @@ Fields Renaming and Optional Custom Fields
 
 Since your input's field name may not match with the AboutCode Toolkit standard field name, you can use the transform subcommand to do the transformation.
 
-A transform configuration file is used to describe which transformations and validations to apply to a source CSV/JSON/Excel file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
+A transform configuration file is used to describe which transformations and validations to apply to a source CSV/JSON/XLSX file. This is a simple text file using YAML format, using the same format as an .ABOUT file.
 
 The attributes that can be set in a configuration file are:
 
--   field_renamings: An optional map of source field name to target new field name that is used to rename CSV/JSON/Excel fields.
+-   field_renamings: An optional map of source field name to target new field name that is used to rename CSV/JSON/XLSX fields.
 
         ..  code-block:: none
 
@@ -189,7 +189,7 @@ The attributes that can be set in a configuration file are:
 The renaming is always applied first before other transforms and checks. All other field names referenced below are AFTER the renaming have been applied.
 For instance with this configuration, the field "Directory/Location" will be renamed to "about_resource" and "foo" to "bar":
 
--   required_fields: An optional list of required field names that must have a value, beyond the standard field names. If a source CSV/JSON/Excel does not have such a field or an entry is missing a value for a required field, an error is reported.
+-   required_fields: An optional list of required field names that must have a value, beyond the standard field names. If a source CSV/JSON/XLSX does not have such a field or an entry is missing a value for a required field, an error is reported.
 
 For instance with this configuration, an error will be reported if the fields "name" and "version" are missing, or if any entry does not have a value set for these fields:
 

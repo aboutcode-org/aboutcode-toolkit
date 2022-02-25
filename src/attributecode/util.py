@@ -670,7 +670,7 @@ def load_scancode_json(location):
 
 def load_excel(location):
     """
-    Read Excel at `location`, return a list of ordered dictionaries, one
+    Read XLSX at `location`, return a list of ordered dictionaries, one
     for each row.
     """
     results = []

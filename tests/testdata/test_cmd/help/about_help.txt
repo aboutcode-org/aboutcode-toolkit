@@ -13,15 +13,15 @@ Options:
   -h, --help  Show this message and exit.
 
 Commands:
-  attrib              Generate an attribution document from
-                      JSON/CSV/Excel/.ABOUT files.
+  attrib              Generate an attribution document from JSON/CSV/XLSX/.ABOUT
+                      files.
   check               Validate that the format of .ABOUT files is correct and
                       report errors and warnings.
   collect-redist-src  Collect redistributable sources.
-  gen                 Generate .ABOUT files from an inventory as CSV/JSON/Excel.
+  gen                 Generate .ABOUT files from an inventory as CSV/JSON/XLSX.
   gen-license         Fetch and save all the licenses in the license_expression
                       field to a directory.
-  inventory           Collect the inventory of .ABOUT files to a CSV/JSON/Excel
+  inventory           Collect the inventory of .ABOUT files to a CSV/JSON/XLSX
                       file.
-  transform           Transform a CSV/JSON/Excel by applying renamings, filters
+  transform           Transform a CSV/JSON/XLSX by applying renamings, filters
                       and checks.

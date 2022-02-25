@@ -13,7 +13,7 @@
     * Add Dockerfile to run aboutcode with docker
     * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library
     * Add ability to transform Excel formatted file 
-    * Support Excel file format for `inventory`, `gen` and `attrib`
+    * Support XLSX file format for `inventory`, `gen` and `attrib`
     * Add 'spdx_license_key' support
     * Add option to save error log in `check` command
     * New `gen_license` option

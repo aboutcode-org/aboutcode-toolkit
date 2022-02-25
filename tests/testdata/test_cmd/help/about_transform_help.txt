@@ -1,12 +1,12 @@
 Usage: about transform [OPTIONS] LOCATION OUTPUT
 
-  Transform the CSV/JSON/Excel file at LOCATION by applying renamings, filters
-  and checks and then write a new CSV/JSON/Excel to OUTPUT (Format for input and
+  Transform the CSV/JSON/XLSX file at LOCATION by applying renamings, filters
+  and checks and then write a new CSV/JSON/XLSX to OUTPUT (Format for input and
   output need to be the same).
 
-  LOCATION: Path to a CSV/JSON/Excel file.
+  LOCATION: Path to a CSV/JSON/XLSX file.
 
-  OUTPUT: Path to CSV/JSON/Excel inventory file to create.
+  OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
 
 Options:
   -c, --configuration FILE  Path to an optional YAML configuration file. See

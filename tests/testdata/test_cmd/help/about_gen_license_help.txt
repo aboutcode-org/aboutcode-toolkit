@@ -3,7 +3,7 @@ Usage: about gen-license [OPTIONS] LOCATION OUTPUT
   Fetch licenses (Default: ScanCode LicenseDB) in the license_expression field
   and save to the output location.
 
-  LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
+  LOCATION: Path to a JSON/CSV/XLSX/.ABOUT file(s)
 
   OUTPUT: Path to a directory where license files are saved.
 

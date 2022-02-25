@@ -27,13 +27,13 @@ Commands
 
         ..  code-block:: none
 
-                attrib              Generate an attribution document from JSON/CSV/Excel/.ABOUT files.
+                attrib              Generate an attribution document from JSON/CSV/XLSX/.ABOUT files.
                 check               Validate that the format of .ABOUT files is correct and
                                     report errors and warnings.
                 collect-redist-src  Collect redistributable sources.
-                gen                 Generate .ABOUT files from an inventory as CSV/JSON/Excel.
-                inventory           Collect the inventory of .ABOUT files to a CSV/JSON/Excel file.
-                transform           Transform a CSV/JSON/Excel by applying renamings, filters and checks.
+                gen                 Generate .ABOUT files from an inventory as CSV/JSON/XLSX.
+                inventory           Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.
+                transform           Transform a CSV/JSON/XLSX by applying renamings, filters and checks.
 
 attrib
 ======
@@ -300,7 +300,7 @@ Syntax
 
                 about gen [OPTIONS] LOCATION OUTPUT
                 
-                LOCATION: Path to a JSON/CSV/Excel inventory file.
+                LOCATION: Path to a JSON/CSV/XLSX inventory file.
                 OUTPUT: Path to a directory where ABOUT files are generated.
 
 Options
@@ -334,7 +334,7 @@ Options
 Purpose
 -------
 
-Given a CSV/JSON/Excel inventory, generate ABOUT files in the output location.
+Given a CSV/JSON/XLSX inventory, generate ABOUT files in the output location.
 
 Details
 ^^^^^^^
@@ -402,7 +402,7 @@ Syntax
 
                 about gen_license [OPTIONS] LOCATION OUTPUT
 
-                LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
+                LOCATION: Path to a JSON/CSV/XLSX/.ABOUT file(s)
                 OUTPUT: Path to a directory where license files are saved.
 
 Options
@@ -468,7 +468,7 @@ Syntax
                 about inventory [OPTIONS] LOCATION OUTPUT
                 
                 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
-                OUTPUT: Path to the CSV/JSON/Excel inventory file to create.
+                OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
 
 Options
 -------
@@ -483,7 +483,7 @@ Options
 Purpose
 -------
 
-Create a JSON/CSV/Excel inventory of components from ABOUT files.
+Create a JSON/CSV/XLSX inventory of components from ABOUT files.
 
 Details
 ^^^^^^^
@@ -566,8 +566,8 @@ Syntax
 
                 about transform [OPTIONS] LOCATION OUTPUT
                 
-                LOCATION: Path to a CSV/JSON/Excel file.
-                OUTPUT: Path to CSV/JSON/Excel inventory file to create.
+                LOCATION: Path to a CSV/JSON/XLSX file.
+                OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
 
 Options
 -------
@@ -584,7 +584,7 @@ Options
 Purpose
 -------
 
-Transform the CSV/JSON/Excel file at LOCATION by applying renamings, filters and checks and then write a new CSV/JSON/Excel to OUTPUT (Format for input and output need to be the same).
+Transform the CSV/JSON/XLSX file at LOCATION by applying renamings, filters and checks and then write a new CSV/JSON/Excel to OUTPUT (Format for input and output need to be the same).
 
 Details
 ^^^^^^^

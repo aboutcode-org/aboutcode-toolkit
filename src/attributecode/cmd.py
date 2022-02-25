@@ -141,7 +141,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 
 
 @about.command(cls=AboutCommand,
-    short_help='Collect the inventory of .ABOUT files to a CSV/JSON/Excel file.')
+    short_help='Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.')
 
 @click.argument('location',
     required=True,
@@ -172,11 +172,11 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 @click.help_option('-h', '--help')
 def inventory(location, output, format, quiet, verbose):  # NOQA
     """
-Collect the inventory of .ABOUT files to a CSV/JSON/Excel file.
+Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.
 
 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
-OUTPUT: Path to the CSV/JSON/Excel inventory file to create.
+OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
     """
     if not quiet:
         print_version()
@@ -200,7 +200,7 @@ OUTPUT: Path to the CSV/JSON/Excel inventory file to create.
 
 
 @about.command(cls=AboutCommand,
-    short_help='Generate .ABOUT files from an inventory as CSV/JSON/Excel.')
+    short_help='Generate .ABOUT files from an inventory as CSV/JSON/XLSX.')
 
 @click.argument('location',
     required=True,
@@ -246,9 +246,9 @@ OUTPUT: Path to the CSV/JSON/Excel inventory file to create.
 @click.help_option('-h', '--help')
 def gen(location, output, android, fetch_license, fetch_license_djc, reference, quiet, verbose):
     """
-Given a CSV/JSON/Excel inventory, generate ABOUT files in the output location.
+Given a CSV/JSON/XLSX inventory, generate ABOUT files in the output location.
 
-LOCATION: Path to a JSON/CSV/Excel inventory file.
+LOCATION: Path to a JSON/CSV/XLSX inventory file.
 
 OUTPUT: Path to a directory where ABOUT files are generated.
     """
@@ -314,7 +314,7 @@ def gen_license(location, output, djc, scancode, verbose):
     """
 Fetch licenses (Default: ScanCode LicenseDB) in the license_expression field and save to the output location.
 
-LOCATION: Path to a JSON/CSV/Excel/.ABOUT file(s)
+LOCATION: Path to a JSON/CSV/XLSX/.ABOUT file(s)
 
 OUTPUT: Path to a directory where license files are saved.
     """
@@ -378,7 +378,7 @@ def validate_template(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Generate an attribution document from JSON/CSV/Excel/.ABOUT files.')
+    short_help='Generate an attribution document from JSON/CSV/XLSX/.ABOUT files.')
 
 @click.argument('input',
     required=True,
@@ -442,7 +442,7 @@ def validate_template(ctx, param, value):
 @click.help_option('-h', '--help')
 def attrib(input, output, api_url, api_key, scancode, min_license_score, reference, template, vartext, quiet, verbose):
     """
-Generate an attribution document at OUTPUT using JSON, CSV or Excel or .ABOUT files at INPUT.
+Generate an attribution document at OUTPUT using JSON, CSV or XLSX or .ABOUT files at INPUT.
 
 INPUT: Path to a file (.ABOUT/.csv/.json/.xlsx), directory or .zip archive containing .ABOUT files.
 
@@ -726,7 +726,7 @@ def print_config_help(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Transform a CSV/JSON/Excel by applying renamings, filters and checks.')
+    short_help='Transform a CSV/JSON/XLSX by applying renamings, filters and checks.')
 
 @click.argument('location',
     required=True,
@@ -762,13 +762,13 @@ def print_config_help(ctx, param, value):
 @click.help_option('-h', '--help')
 def transform(location, output, configuration, quiet, verbose):  # NOQA
     """
-Transform the CSV/JSON/Excel file at LOCATION by applying renamings, filters and checks
-and then write a new CSV/JSON/Excel to OUTPUT (Format for input and output need to be
+Transform the CSV/JSON/XLSX file at LOCATION by applying renamings, filters and checks
+and then write a new CSV/JSON/XLSX to OUTPUT (Format for input and output need to be
 the same).
 
-LOCATION: Path to a CSV/JSON/Excel file.
+LOCATION: Path to a CSV/JSON/XLSX file.
 
-OUTPUT: Path to CSV/JSON/Excel inventory file to create.
+OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
     """
     if not configuration:
         transformer = Transformer.default()

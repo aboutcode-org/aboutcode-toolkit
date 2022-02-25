@@ -1,6 +1,6 @@
 Usage: about attrib [OPTIONS] INPUT OUTPUT
 
-  Generate an attribution document at OUTPUT using JSON, CSV or Excel or .ABOUT
+  Generate an attribution document at OUTPUT using JSON, CSV or XLSX or .ABOUT
   files at INPUT.
 
   INPUT: Path to a file (.ABOUT/.csv/.json/.xlsx), directory or .zip archive

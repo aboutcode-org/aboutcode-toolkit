@@ -88,7 +88,7 @@ def transform_json_to_json(location, output, transformer):
 
 def transform_excel_to_excel(location, output, transformer):
     """
-    Read a Excel file at `location` and write a new Excel file at `output`. Apply
+    Read a XLSX file at `location` and write a new Excel file at `output`. Apply
     transformations using the `transformer` Transformer.
     Return a list of Error objects.
     """
@@ -415,7 +415,7 @@ def write_json(location, data):
 
 def read_excel(location):
     """
-    Read Excel at `location`, return a list of ordered dictionaries, one
+    Read XLSX at `location`, return a list of ordered dictionaries, one
     for each row.
     """
     results = []

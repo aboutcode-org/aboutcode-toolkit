@@ -334,6 +334,10 @@ def check_about_stdout(options, expected_loc, regen=False):
     with open(expected_file, 'r') as ef:
         expected = ef.read()
 
+    print("!!!!!!!!!!!!!!!!!!!!")
+    print(expected.splitlines(False))
+    print("#####################")
+    print(result.output.splitlines(False))
     assert expected.splitlines(False) == result.output.splitlines(False)
 
 
