@@ -103,7 +103,7 @@ custom1: |
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
         expected_errors = [
-            Error(CRITICAL, "Field name: ['confirmed copyright'] contains illegal name characters: 0 to 9, a to z, A to Z and _. (or empty spaces) and is ignored."),
+            Error(CRITICAL, "Field name: ['confirmed copyright'] contains illegal name characters (or empty spaces) and is ignored."),
             Error(INFO, 'Field about_resource: Path'),
             Error(INFO, "Field ['resource', 'test'] is a custom field.")
         ]
