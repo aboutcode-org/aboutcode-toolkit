@@ -675,7 +675,11 @@ def load_excel(location):
     """
     results = []
     errors = []
-    sheet_obj = openpyxl.load_workbook(location).active
+    import warnings
+
+    # This is to prevent showing the: warn("Workbook contains no default style, apply openpyxl's default")
+    with warnings.catch_warnings(record=True):
+        sheet_obj = openpyxl.load_workbook(location).active
     max_col = sheet_obj.max_column
 
     index = 1
