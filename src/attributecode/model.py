@@ -1750,7 +1750,7 @@ def parse_license_expression(lic_expression):
 
 def detect_special_char(expression):
     not_support_char = [
-        '!', '@', '#', '$', '%', '^', '&', '*', '=', '{', '}',
+        '!', '@', '#', '$', '^', '&', '*', '=', '{', '}',
         '|', '[', ']', '\\', ':', ';', '<', '>', '?', ',', '/']
     special_character = []
     for char in not_support_char:
