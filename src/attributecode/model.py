@@ -920,12 +920,6 @@ class About(object):
                 if not name in illegal_name_list:
                     illegal_name_list.append(name)
                 continue
-            """
-            illegal_name_error = validate_field_name(name)
-            if illegal_name_error:
-                errors.append(illegal_name_list)
-                continue
-            """
 
             msg = 'Custom Field: %(orig_name)s'
             errors.append(Error(INFO, msg % locals()))
