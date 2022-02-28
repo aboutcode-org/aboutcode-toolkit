@@ -11,3 +11,4 @@ Welcome to the AboutCode Toolkit's Documentation.
    General <general.rst>
    Specification <specification.rst>
    Reference <reference.rst>
+   Type of Errors <type_of_errors.rst>
