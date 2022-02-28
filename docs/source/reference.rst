@@ -27,13 +27,19 @@ Commands
 
         ..  code-block:: none
 
-                attrib              Generate an attribution document from JSON/CSV/XLSX/.ABOUT files.
-                check               Validate that the format of .ABOUT files is correct and
-                                    report errors and warnings.
-                collect-redist-src  Collect redistributable sources.
-                gen                 Generate .ABOUT files from an inventory as CSV/JSON/XLSX.
-                inventory           Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.
-                transform           Transform a CSV/JSON/XLSX by applying renamings, filters and checks.
+              attrib              Generate an attribution document from
+                                  JSON/CSV/XLSX/.ABOUT files.
+              check               Validate that the format of .ABOUT files is correct and
+                                  report errors and warnings.
+              collect-redist-src  Collect redistributable sources.
+              gen                 Generate .ABOUT files from an inventory as
+                                  CSV/JSON/XLSX.
+              gen-license         Fetch and save all the licenses in the
+                                  license_expression field to a directory.
+              inventory           Collect the inventory of .ABOUT files to a CSV/JSON/XLSX
+                                  file.
+              transform           Transform a CSV/JSON/XLSX by applying renamings, filters
+                                  and checks.
 
 attrib
 ======
@@ -91,7 +97,7 @@ Assume the following:
 
             $ about attrib /home/about_files/ /home/attribution/attribution.html
             or
-            $ about attrib /home/project/inventory.csv /home/attribution/attribution.html
+            $ about attrib /home/project/inventory.csv /home/attribution/attribution.html --reference /home/project/licenses/
             or
             $ about attrib --scancode /home/project/scancode-detection.json /home/attribution/attribution.html
 
