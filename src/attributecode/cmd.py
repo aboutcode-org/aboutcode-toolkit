@@ -504,6 +504,7 @@ OUTPUT: Path where to write the attribution document.
         else:
             msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
             click.echo(msg)
+            errors_count = 1
         sys.exit(errors_count)
 
     if not is_about_input:
