@@ -323,13 +323,17 @@ OUTPUT: Path to a directory where license files are saved.
     api_key = ''
     errors = []
 
+    log_file_loc = os.path.join(output, 'error.log')
+
     if location.endswith('.csv') or location.endswith('.json') or location.endswith('.xlsx'):
-        abouts = collect_inventory_license_expression(location=location, scancode=scancode)
+        errors, abouts = collect_inventory_license_expression(location=location, scancode=scancode)
+        if errors:
+            severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
+            sys.exit(severe_errors_count)
     else:
         #_errors, abouts = collect_inventory(location)
         errors, abouts = collect_abouts_license_expression(location)
 
-    log_file_loc = os.path.join(output, 'error.log')
     if djc:
         # Strip the ' and " for api_url, and api_key from input
         api_url = djc[0].strip("'").strip('"')

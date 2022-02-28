@@ -266,7 +266,7 @@ def load_csv(location):
                      errors='replace') as csvfile:
         for row in csv.DictReader(csvfile):
             # convert all the column keys to lower case
-            updated_row = {key.lower(): value for key, value in row.items()}
+            updated_row = {key.lower().strip(): value for key, value in row.items()}
             results.append(updated_row)
     return results
 

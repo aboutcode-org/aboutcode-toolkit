@@ -1402,8 +1402,14 @@ def collect_inventory_license_expression(location, scancode=False):
     validation. The purpose of this is to speed up the process for `gen_license` command.
     """
     abouts = []
+    errors = []
+
     if scancode:
         inventory = gen.load_scancode_json(location)
+        # ScanCode is using 'license_expressions' whereas we are using 'license_expression'
+        if not 'license_expressions' in inventory[0]:
+            errors.append(Error(CRITICAL, "No 'license_expressions' field in the input."))
+            return errors, abouts
     else:
         if location.endswith('.csv'):
             inventory = gen.load_csv(location)
@@ -1411,11 +1417,16 @@ def collect_inventory_license_expression(location, scancode=False):
             _dup_cols_err, inventory = gen.load_excel(location)
         else:
             inventory = gen.load_json(location)
+        # Check if 'license_expression' field is in the input
+        if not 'license_expression' in inventory[0]:
+            errors.append(Error(CRITICAL, "No 'license_expression' field in the input."))
+            return errors, abouts
+
     for data in inventory:
         about = About()
         about.load_dict(data, base_dir='', scancode=scancode)
         abouts.append(about)
-    return abouts
+    return errors, abouts
 
 
 def get_field_names(abouts):
@@ -1735,6 +1746,7 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                         key_text_dict[lic_key] = detail_list
                 if not about.license_key.value:
                     about.license_key.value = lic_list
+
     return key_text_dict, errors
 
 
