@@ -69,7 +69,7 @@ class GenTest(unittest.TestCase):
         arp2 = '/test/t!est.c'
         msg = ("Invalid characters present in 'about_resource' "
                    "field: " + arp2)
-        expected2 = Error(CRITICAL, msg)
+        expected2 = Error(ERROR, msg)
         result1 = gen.check_about_resource_filename(arp1)
         result2 = gen.check_about_resource_filename(arp2)
         assert result1 == ''
@@ -103,7 +103,7 @@ custom1: |
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
         expected_errors = [
-            Error(CRITICAL, "Field name: ['confirmed copyright'] contains illegal name characters (or empty spaces) and is ignored."),
+            Error(ERROR, "Field name: ['confirmed copyright'] contains illegal name characters (or empty spaces) and is ignored."),
             Error(INFO, 'Field about_resource: Path'),
             Error(INFO, "Field ['resource', 'test'] is a custom field.")
         ]

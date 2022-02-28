@@ -112,7 +112,7 @@ def check_about_resource_filename(arp):
     if invalid_chars(arp):
         msg = ("Invalid characters present in 'about_resource' "
                    "field: " + arp)
-        return (Error(CRITICAL, msg))
+        return (Error(ERROR, msg))
     return ''
 
 
@@ -184,7 +184,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         for f in required_fields:
             if f not in fields:
                 msg = "Required field: %(f)r not found in the <input>" % locals()
-                errors.append(Error(ERROR, msg))
+                errors.append(Error(CRITICAL, msg))
                 return errors, abouts
         afp = fields.get(model.About.ABOUT_RESOURCE_ATTR)
 
