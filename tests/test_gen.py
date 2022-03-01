@@ -98,6 +98,35 @@ custom1: |
         result = [a.dumps() for a in abouts]
         assert expected == result[0]
 
+    def test_load_inventory_without_about_resource(self):
+        location = get_test_loc('test_gen/inv_no_about_resource.csv')
+        base_dir = get_temp_dir()
+        from_attrib = False
+        errors, abouts = gen.load_inventory(location, base_dir=base_dir, from_attrib=from_attrib)
+        expected_error = [Error(CRITICAL,  "The essential field 'about_resource' is not found in the <input>")]
+
+        assert errors == expected_error
+        assert abouts == [] 
+
+    def test_load_inventory_without_about_resource_from_attrib(self):
+        location = get_test_loc('test_gen/inv_no_about_resource.csv')
+        base_dir = get_temp_dir()
+        from_attrib = True
+        errors, abouts = gen.load_inventory(location, base_dir=base_dir, from_attrib=from_attrib)
+
+        expected_num_errors = 0
+        assert len(errors) == expected_num_errors 
+
+        expected = (
+'''about_resource: .
+name: AboutCode
+version: 0.11.0
+license_expression: apache-2.0
+'''
+        )
+        result = [a.dumps() for a in abouts]
+        assert expected == result[0]
+
     def test_load_inventory_with_errors(self):
         location = get_test_loc('test_gen/inv4.csv')
         base_dir = get_temp_dir()

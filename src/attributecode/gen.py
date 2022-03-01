@@ -116,7 +116,6 @@ def check_about_resource_filename(arp):
     return ''
 
 
-# TODO: this should be either the CSV or the ABOUT files but not both???
 def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, reference_dir=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files stored in
@@ -152,24 +151,24 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         arp_list = []
         errors = []
         for component in inventory:
-            arp = component['about_resource']
-            dup_err = check_duplicated_about_resource(arp, arp_list)
-            if dup_err:
-                if not dup_err in errors:
-                    errors.append(dup_err)
-            else:
-                arp_list.append(arp)
+            if not from_attrib:
+                arp = component['about_resource']
+                dup_err = check_duplicated_about_resource(arp, arp_list)
+                if dup_err:
+                    if not dup_err in errors:
+                        errors.append(dup_err)
+                else:
+                    arp_list.append(arp)
+
+                invalid_about_filename = check_about_resource_filename(arp)
+                if invalid_about_filename and not invalid_about_filename in errors:
+                    errors.append(invalid_about_filename)
 
             newline_in_file_err = check_newline_in_file_field(component)
             if newline_in_file_err:
                 errors.extend(newline_in_file_err)
-
-            invalid_about_filename = check_about_resource_filename(arp)
-            if invalid_about_filename and not invalid_about_filename in errors:
-                errors.append(invalid_about_filename)
         if errors:
             return errors, abouts
-
     except Exception as e:
         # TODO: why catch ALL Exception
         msg = "The essential field 'about_resource' is not found in the <input>"
@@ -183,22 +182,32 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
 
         for f in required_fields:
             if f not in fields:
-                msg = "Required field: %(f)r not found in the <input>" % locals()
-                errors.append(Error(CRITICAL, msg))
-                return errors, abouts
-        afp = fields.get(model.About.ABOUT_RESOURCE_ATTR)
+                if from_attrib and f == 'about_resource':
+                    continue
+                else:
+                    msg = "Required field: %(f)r not found in the <input>" % locals()
+                    errors.append(Error(CRITICAL, msg))
+                    return errors, abouts
+        # Set about file path to '' if no 'about_resource' is provided from
+        # the input for `attrib`
+        if not 'about_resource' in fields:
+            afp = ''
+        else:
+            afp = fields.get(model.About.ABOUT_RESOURCE_ATTR)
 
+        """
         # FIXME: this should not be a failure condition
         if not afp or not afp.strip():
             msg = 'Empty column: %(afp)r. Cannot generate .ABOUT file.' % locals()
             errors.append(Error(ERROR, msg))
             continue
         else:
-            afp = util.to_posix(afp)
-            if base_dir:
-                loc = join(base_dir, afp)
-            else:
-                loc = afp
+        """
+        afp = util.to_posix(afp)
+        if base_dir:
+            loc = join(base_dir, afp)
+        else:
+            loc = afp
         about = model.About(about_file_path=afp)
         about.location = loc
 
@@ -212,6 +221,11 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             else:
                 updated_resource_value = basename(resource_path)
             fields['about_resource'] = updated_resource_value
+
+        # Set 'about_resource' to '.' if no 'about_resource' is provided from
+        # the input for `attrib`
+        elif not 'about_resource' in fields and from_attrib:
+            fields['about_resource'] = u'.'
 
         ld_errors = about.load_dict(
             fields,

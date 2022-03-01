@@ -1,4 +1,4 @@
-2022-xx-xx
+2022-03-01
     Release 7.0.0
 
     * Add '@' as a supported character for filename #451
@@ -12,7 +12,7 @@
     * Use readthedocs for documentation
     * Add Dockerfile to run aboutcode with docker
     * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library
-    * Add ability to transform Excel formatted file 
+    * Add ability to transform XLSX file 
     * Support XLSX file format for `inventory`, `gen` and `attrib`
     * Add 'spdx_license_key' support
     * Add option to save error log in `check` command
@@ -21,6 +21,8 @@
     * Add '%" as a supported character
     * Update default template
     * All errors are logged if and only if the `verbose` option is set. Otherwise, ony 'Critical' and 'Warning' errors will be showed/logged
+    * Ability to generate attribution notice directly from an input inventory
+    * Remove the restriction of requiring 'about_resource' field in the input if performing `attrib` from an inventory
 
 2021-04-02
     Release 6.0.0

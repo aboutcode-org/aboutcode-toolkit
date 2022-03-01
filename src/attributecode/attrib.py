@@ -182,7 +182,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
     licenses_list = sorted(licenses_list, key=lambda x: x.key)
 
     rendered = template.render(
-        abouts=abouts, 
+        abouts=abouts,
         common_licenses=COMMON_LICENSES,
         licenses_list=licenses_list,
         utcnow=utcnow,
