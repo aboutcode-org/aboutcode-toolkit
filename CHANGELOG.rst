@@ -1,3 +1,10 @@
+2022-03-21
+    Release 7.0.1
+
+    * Bump openpyxl to 3.0.9
+    * Better handling of invalid API URL
+    * Better formatting for default HTML template
+
 2022-03-01
     Release 7.0.0
 
