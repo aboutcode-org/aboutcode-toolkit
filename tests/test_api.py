@@ -71,3 +71,13 @@ class ApiTest(unittest.TestCase):
             api_url='http://fake.url/', api_key='api_key', license_key='apache-2.0')
         expected = ({}, [Error(ERROR, "Invalid 'license': apache-2.0")])
         assert expected == license_data
+
+    @mock.patch.object(api, 'urlopen')
+    def test_api_request_license_data_with_incorrect_url(self, mock_data):
+        # Some URL that is accessible but not a correct API URL
+        response_content = b'<html></html>'
+        mock_data.return_value = FakeResponse(response_content)
+        license_data = api.request_license_data(
+            api_url='http://fake.url/', api_key='api_key', license_key='apache-2.0')
+        expected = ({}, [Error(ERROR, "Invalid '--api_url'. License generation is skipped.")])
+        assert expected == license_data

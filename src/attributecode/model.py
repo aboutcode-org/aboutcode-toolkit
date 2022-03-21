@@ -1704,6 +1704,12 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                         captured_license.append(lic_key)
                         if api_key:
                             license_data, errs = api.get_license_details_from_api(url, api_key, lic_key)
+                            # Catch incorrect API URL
+                            if errs:
+                                _, msg = errs[0]
+                                if msg == "Invalid '--api_url'. License generation is skipped.":
+                                    errors.extend(errs)
+                                    return key_text_dict, errors
                             for severity, message in errs: 
                                 msg = (about.about_file_path + ": " + message)
                                 errors.append(Error(severity, msg))
