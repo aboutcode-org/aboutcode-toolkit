@@ -49,7 +49,7 @@
                     {% for license in licenses_list %}
                         {% if license_key == license.key %}
                             <h3 id="component-license-{{ license.key }}">{{ license.key }}</h3>
-                            <pre> {{ license.text | e }} </pre>
+                            <pre>{{ license.text | e }}</pre>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
