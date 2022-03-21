@@ -60,7 +60,7 @@ def request_license_data(api_url, api_key, license_key):
         response_content = response.read().decode('utf-8')
         # FIXME: this should be an ordered dict
         license_data = json.loads(response_content)
-        if not license_data['results']:
+        if not license_data.get('results', []):
             msg = u"Invalid 'license': %s" % license_key
             errors.append(Error(ERROR, msg))
     except HTTPError as http_e:
