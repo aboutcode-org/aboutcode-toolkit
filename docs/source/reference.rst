@@ -617,6 +617,115 @@ Details
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
+--help-format
+-------------
+
+        ..  code-block:: none
+
+                A transform configuration file is used to describe which transformations and
+                validations to apply to a source CSV file. This is a simple text file using YAML
+                format, using the same format as an .ABOUT file.
+                
+                The attributes that can be set in a configuration file are:
+                
+                * field_renamings:
+                An optional map of source CSV or JSON field name to target CSV/JSON new field name that
+                is used to rename CSV fields.
+                
+                For instance with this configuration the fields "Directory/Location" will be
+                renamed to "about_resource" and "foo" to "bar":
+                    field_renamings:
+                        about_resource : 'Directory/Location'
+                        bar : foo
+                
+                The renaming is always applied first before other transforms and checks. All
+                other field names referenced below are these that exist AFTER the renamings
+                have been applied to the existing field names.
+                
+                * required_fields:
+                An optional list of required field names that must have a value, beyond the
+                standard fields names. If a source CSV/JSON does not have such a field or a row is
+                missing a value for a required field, an error is reported.
+                
+                For instance with this configuration an error will be reported if the fields
+                "name" and "version" are missing or if any row does not have a value set for
+                these fields:
+                    required_fields:
+                        - name
+                        - version
+                
+                * field_filters:
+                An optional list of field names that should be kept in the transformed CSV/JSON. If
+                this list is provided, all the fields from the source CSV/JSON that should be kept
+                in the target CSV/JSON must be listed regardless of  either standard or required
+                fields. If this list is not provided, all source CSV/JSON fields are kept in the
+                transformed target CSV/JSON.
+                
+                For instance with this configuration the target CSV/JSON will only contains the "name"
+                and "version" fields and no other field:
+                    field_filters:
+                        - name
+                        - version
+                
+                * exclude_fields:
+                An optional list of field names that should be excluded in the transformed CSV/JSON. If
+                this list is provided, all the fields from the source CSV/JSON that should be excluded
+                in the target CSV/JSON must be listed. Excluding standard or required fields will cause
+                an error. If this list is not provided, all source CSV/JSON fields are kept in the
+                transformed target CSV/JSON.
+                
+                For instance with this configuration the target CSV/JSON will not contain the "type"
+                and "temp" fields:
+                    exclude_fields:
+                        - type
+                        - temp
+
+Example
+-------
+
+fields renaming
+^^^^^^^^^^^^^^^
+
+conf.txt
+""""""""
+
+        ..  code-block:: none
+
+                field_renamings:
+                    about_resource : 'Directory / Filename'
+                    name : Component
+                    version: 'Confirmed Version'
+                    license_expression: 'Confirmed License Expression'
+
+
+input.csv
+"""""""""
+
++----------------------+-----------+--------------------+------------------------------+
+| Directory / Filename | Component | Confirmed Version  | Confirmed License Expression |
++======================+===========+====================+==============================+
+| /project/sample/     | sample    | v 1.2.3            | apache-2.0                   |
++----------------------+-----------+--------------------+------------------------------+
+
+
+Command
+"""""""
+
+        ..  code-block:: none
+
+                about transform -c conf.txt input.csv output.csv
+
+The result output will look like the following:
+
+output.csv
+""""""""""
+
++------------------+--------+---------+--------------------+
+| about_resource   | name   | version | license_expression |
++==================+========+=========+====================+
+| /project/sample/ | sample | v 1.2.3 | apache-2.0         |
++------------------+--------+---------+--------------------+
+
 Special Notes
 -------------
 When using the field_filters configuration, all the standard required columns (about_resource and name) and the user defined required_fields need to be included.
