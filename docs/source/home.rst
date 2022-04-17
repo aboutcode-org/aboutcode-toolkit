@@ -1,6 +1,3 @@
-.. _home:
-
-=================
 AboutCode Toolkit
 =================
 
@@ -50,12 +47,16 @@ version may be pre-installed, open a terminal and type:
 
     python --version
 
+.. note::
+    Debian has decided that distutils is not a core python package, so it is not included in the last versions of debian and debian-based OSes.
+
+    A solution is to run: `sudo apt install python3-distutils`
+
 On Windows or Mac, you can download the latest Python here:
     https://www.python.org/downloads/
 
 Download the .msi installer for Windows or the .dmg archive for Mac.
 Open and run the installer using all the default options.
-
 
 INSTALLATION
 ------------
@@ -98,9 +99,9 @@ i.e. MAJOR.MINOR.PATCH format
 
 REFERENCE
 ---------
-See https://github.com/nexB/aboutcode-toolkit/blob/master/REFERENCE.rst for reference
-on aboutcode-toolkit usage.
+See https://aboutcode-toolkit.readthedocs.io/en/latest/ for documentation.
 
+See https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference.
 
 TESTS and DEVELOPMENT
 ---------------------
@@ -141,7 +142,7 @@ The AboutCode Toolkit is available through GitHub. For the latest version visit:
 HACKING
 -------
 We accept pull requests provided under the same license as this tool.
-You agree to the http://developercertificate.org/ 
+You agree to the http://developercertificate.org/
 
 
 LICENSE

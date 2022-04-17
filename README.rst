@@ -23,6 +23,7 @@ with open source licenses conditions.
 This version of the AboutCode Toolkit follows the ABOUT specification version 3.2.3 at:
 https://aboutcode-toolkit.readthedocs.io/en/latest/specification.html
 
+
 Build and tests status
 ----------------------
 
@@ -46,12 +47,16 @@ version may be pre-installed, open a terminal and type:
 
     python --version
 
+.. note::
+    Debian has decided that distutils is not a core python package, so it is not included in the last versions of debian and debian-based OSes.
+
+    A solution is to run: `sudo apt install python3-distutils`
+
 On Windows or Mac, you can download the latest Python here:
     https://www.python.org/downloads/
 
 Download the .msi installer for Windows or the .dmg archive for Mac.
 Open and run the installer using all the default options.
-
 
 INSTALLATION
 ------------
@@ -63,8 +68,12 @@ To install all the needed dependencies in a virtualenv, run (on posix):
 or on windows:
     configure
 
+.. note::
+   For MacOS users, it's a known issue the Python36 may case SSL Certificates error if the Certificates is not up to date.
 
-Activate the virtualenv
+   A solution is to run: `sudo /Applications/Python\\ 3.6/Install\\ Certificates.command` to upgrade the outdated certificates.
+
+ACTIVATE the VIRTUALENV
 -----------------------
 To activate the virtualenv, run (on posix):
     source venv/bin/activate
@@ -72,7 +81,7 @@ or on windows:
     venv\\bin\\activate
 
 
-Deactivate the virtualenv
+DEACTIVATE the VIRTUALENV
 -------------------------
 To deactivate the virtualenv, run (on both posix and windows):
     deactivate
@@ -88,22 +97,29 @@ i.e. MAJOR.MINOR.PATCH format
     3. PATCH version when making backwards compatible bug fixes.
 
 
-DOCUMENTATION and REFERENCE
----------------------------
-See https://aboutcode-toolkit.readthedocs.io/en/latest/ for documentation and
-https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference
-on aboutcode-toolkit usage.
+REFERENCE
+---------
+See https://aboutcode-toolkit.readthedocs.io/en/latest/ for documentation.
 
+See https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference.
 
 TESTS and DEVELOPMENT
 ---------------------
 To install all the needed development dependencies, run (on posix):
-    source configure --dev
+    ./configure --dev
 or on windows:
     configure --dev
 
 To verify that everything works fine you can run the test suite with:
     pytest
+
+
+CLEAN BUILD AND INSTALLED FILES
+-------------------------------
+To clean the built and installed files, run (on posix):
+    ./configure --clean
+or on windows:
+    configure --clean
 
 
 HELP and SUPPORT
@@ -126,7 +142,7 @@ The AboutCode Toolkit is available through GitHub. For the latest version visit:
 HACKING
 -------
 We accept pull requests provided under the same license as this tool.
-You agree to the http://developercertificate.org/ 
+You agree to the http://developercertificate.org/
 
 
 LICENSE
