@@ -47,9 +47,9 @@ version may be pre-installed, open a terminal and type:
 
     python --version
 
-.. note::
+Note
+~~~~
     Debian has decided that distutils is not a core python package, so it is not included in the last versions of debian and debian-based OSes.
-
     A solution is to run: `sudo apt install python3-distutils`
 
 On Windows or Mac, you can download the latest Python here:
@@ -68,9 +68,9 @@ To install all the needed dependencies in a virtualenv, run (on posix):
 or on windows:
     configure
 
-.. note::
+Note
+~~~~
    For MacOS users, it's a known issue the Python36 may case SSL Certificates error if the Certificates is not up to date.
-
    A solution is to run: `sudo /Applications/Python\\ 3.6/Install\\ Certificates.command` to upgrade the outdated certificates.
 
 ACTIVATE the VIRTUALENV
