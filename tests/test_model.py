@@ -20,8 +20,8 @@ import os
 import posixpath
 import shutil
 import unittest
+from unittest import mock
 
-import mock
 import saneyaml
 
 from attributecode import CRITICAL

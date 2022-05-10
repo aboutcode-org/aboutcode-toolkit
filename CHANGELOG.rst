@@ -1,3 +1,14 @@
+==============================
+Changelog
+==============================
+
+2022-03-21
+    Release 7.0.2
+
+    * Relax dependency constraints
+    * Use latest skeleton and settings
+
+
 2022-03-21
     Release 7.0.1
 

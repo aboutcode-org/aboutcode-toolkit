@@ -14,6 +14,8 @@
 @rem # Source this script for initial configuration
 @rem # Use configure --help for details
 
+@rem # NOTE: please keep in sync with POSIX script configure
+
 @rem # This script will search for a virtualenv.pyz app in etc\thirdparty\virtualenv.pyz
 @rem # Otherwise it will download the latest from the VIRTUALENV_PYZ_URL default
 @rem ################################
@@ -26,6 +28,7 @@
 @rem # Requirement arguments passed to pip and used by default or with --dev.
 set "REQUIREMENTS=--editable . --constraint requirements.txt"
 set "DEV_REQUIREMENTS=--editable .[testing] --constraint requirements.txt --constraint requirements-dev.txt"
+set "DOCS_REQUIREMENTS=--editable .[docs] --constraint requirements.txt"
 
 @rem # where we create a virtualenv
 set "VIRTUALENV_DIR=venv"
@@ -49,10 +52,10 @@ set "CFG_BIN_DIR=%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\Scripts"
 
 @rem ################################
 @rem # Thirdparty package locations and index handling
+@rem # Find packages from the local thirdparty directory
 if exist "%CFG_ROOT_DIR%\thirdparty" (
     set PIP_EXTRA_ARGS=--find-links "%CFG_ROOT_DIR%\thirdparty"
 )
-set "PIP_EXTRA_ARGS=%PIP_EXTRA_ARGS% --find-links https://thirdparty.aboutcode.org/pypi" & %INDEX_ARG%
 
 
 @rem ################################
@@ -64,9 +67,7 @@ if not defined CFG_QUIET (
 
 @rem ################################
 @rem # Main command line entry point
-set CFG_DEV_MODE=0
 set "CFG_REQUIREMENTS=%REQUIREMENTS%"
-set "NO_INDEX=--no-index"
 
 :again
 if not "%1" == "" (
@@ -74,20 +75,19 @@ if not "%1" == "" (
     if "%1" EQU "--clean"  (goto clean)
     if "%1" EQU "--dev"    (
         set "CFG_REQUIREMENTS=%DEV_REQUIREMENTS%"
-        set CFG_DEV_MODE=1
     )
-    if "%1" EQU "--init"   (
-        set "NO_INDEX= "
+    if "%1" EQU "--docs"    (
+        set "CFG_REQUIREMENTS=%DOCS_REQUIREMENTS%"
     )
     shift
     goto again
 )
 
-set "PIP_EXTRA_ARGS=%PIP_EXTRA_ARGS% %NO_INDEX%"
+set "PIP_EXTRA_ARGS=%PIP_EXTRA_ARGS%"
 
 
 @rem ################################
-@rem # find a proper Python to run
+@rem # Find a proper Python to run
 @rem # Use environment variables or a file if available.
 @rem # Otherwise the latest Python by default.
 if not defined PYTHON_EXECUTABLE (
@@ -99,6 +99,8 @@ if not defined PYTHON_EXECUTABLE (
     )
 )
 
+
+@rem ################################
 :create_virtualenv
 @rem # create a virtualenv for Python
 @rem # Note: we do not use the bundled Python 3 "venv" because its behavior and
@@ -143,6 +145,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 
+@rem ################################
 :install_packages
 @rem # install requirements in virtualenv
 @rem # note: --no-build-isolation means that pip/wheel/setuptools will not
@@ -157,6 +160,9 @@ if %ERRORLEVEL% neq 0 (
     %PIP_EXTRA_ARGS% ^
     %CFG_REQUIREMENTS%
 
+
+@rem ################################
+:create_bin_junction
 @rem # Create junction to bin to have the same directory between linux and windows
 if exist "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin" (
     rmdir /s /q "%CFG_ROOT_DIR%\%VIRTUALENV_DIR%\bin"
@@ -171,20 +177,15 @@ exit /b 0
 
 
 @rem ################################
-
 :cli_help
     echo An initial configuration script
     echo "  usage: configure [options]"
     echo " "
     echo The default is to configure for regular use. Use --dev for development.
-    echo Use the --init option if starting a new project and the project
-    echo dependencies are not available on thirdparty.aboutcode.org/pypi/
-    echo and requirements.txt and/or requirements-dev.txt has not been generated.
     echo " "
     echo The options are:
     echo " --clean: clean built and installed files and exit."
     echo " --dev:   configure the environment for development."
-    echo " --init:  pull dependencies from PyPI. Used when first setting up a project."
     echo " --help:  display this help message and exit."
     echo " "
     echo By default, the python interpreter version found in the path is used.
@@ -195,6 +196,7 @@ exit /b 0
     exit /b 0
 
 
+@rem ################################
 :clean
 @rem # Remove cleanable file and directories and files from the root dir.
 echo "* Cleaning ..."
