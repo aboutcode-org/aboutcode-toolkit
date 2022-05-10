@@ -31,13 +31,13 @@ jobs:
           test_suites:
               all: venv/bin/pytest -n 2 -vvs
 
-    - template: etc/ci/azure-win.yml
+    - template: etc/ci/azure-posix.yml
       parameters:
-          job_name: win2016_cpython
-          image_name: vs2017-win2016
-          python_versions: ['3.6', '3.7', '3.8', '3.9', '3.10']
+          job_name: macos11_cpython
+          image_name: macos-11
+          python_versions: ['3.7', '3.8', '3.9', '3.10']
           test_suites:
-              all: venv\Scripts\pytest -n 2 -vvs
+              all: venv/bin/pytest -n 2 -vvs
 
     - template: etc/ci/azure-win.yml
       parameters:
@@ -47,3 +47,10 @@ jobs:
           test_suites:
               all: venv\Scripts\pytest -n 2 -vvs
 
+    - template: etc/ci/azure-win.yml
+      parameters:
+          job_name: win2022_cpython
+          image_name: windows-2022
+          python_versions: ['3.7', '3.8', '3.9', '3.10']
+          test_suites:
+              all: venv\Scripts\pytest -n 2 -vvs
