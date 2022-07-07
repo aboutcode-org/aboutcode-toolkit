@@ -86,12 +86,12 @@ You should start with a software inventory of your codebase in spreadsheet or JS
       - License name for the component.
       - Optional. This field will be generated if the --fetch-license or --fetch-license-djc option is set.
     * - license file
-      - license file name   
+      - license file name
       - Optional. gen will look for the file name (if a directory is specified in the --reference option) to copy that file to the .ABOUT file target directory.
-    * - license_url 
+    * - license_url
       - URL to the license text for the component
       - Optional
-    * - spdx_license_key 
+    * - spdx_license_key
       - The ScanCode LicenseDB spdx_license_key defined for the license at https://scancode-licensedb.aboutcode.org/index.html
       - Optional
     * - copyright
@@ -327,13 +327,13 @@ After the table of contents, this example customized template continues with the
 
                 {% for group in abouts | groupby('confirmed_license') %}
                     {% for confirmed_license in group.grouper.value %}
-                
+
                     <div id="group_{{ loop.index0 }}">
                     <h3>{{ confirmed_license }}</h3>
                     <p>This product contains the following open source software packages licensed under the terms of the license: {{confirmed_license}}</p>
-                
+
                     <div class="oss-component" id="component_{{ loop.index0 }}">
-                        {%for about_object in group.list %}         
+                        {%for about_object in group.list %}
                             {% if loop.first %}
                                 {% if about_object.license_url.value %}
                                     {% for lic_url in about_object.license_url.value %}
@@ -343,7 +343,7 @@ After the table of contents, this example customized template continues with the
                                 {% endif %}
                             {% endif %}
                             <li>
-                            {{ about_object.name.value }}{% if about_object.version.value %}  - Version  
+                            {{ about_object.name.value }}{% if about_object.version.value %}  - Version
                             {{ about_object.version.value }}{% endif %}
                             </li>
                             {% if about_object.copyright.value %}<pre>{{about_object.copyright.value}}</pre>{% endif %}

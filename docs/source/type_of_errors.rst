@@ -1,7 +1,7 @@
 .. _type_of_errors:
 
 ==============
-Type of Errors 
+Type of Errors
 ==============
 
 We have 6 type of errors as describe below:
@@ -90,4 +90,4 @@ Trigger:
 
 .. note::
    If `--verbose` is set, all the detected errors will be reported.
-   Otherwise, only "CRITICAL", "ERROR" and 'WARNING" will be reported. 
+   Otherwise, only "CRITICAL", "ERROR" and 'WARNING" will be reported.

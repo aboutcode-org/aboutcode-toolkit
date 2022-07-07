@@ -88,7 +88,7 @@ Assume the following:
 
             '/home/about_files/' contains all the ABOUT files [INPUT]
             '/home/project/inventory.csv' is a BOM inventory [INPUT]
-            '/home/project/scancode-detection.json' is a detection output from scancode-toolkit[INPUT] 
+            '/home/project/scancode-detection.json' is a detection output from scancode-toolkit[INPUT]
             '/home/project/licenses/' contains all the license/notice file references
             '/home/attribution/attribution.html' is the user's output path [OUTPUT]
 
@@ -135,15 +135,15 @@ Details
                     This option allows you to use your own template for attribution generation.
                     For instance, if you have a custom template located at:
                     /home/custom_template/template.html
-                
+
                 $ about attrib --template /home/custom_template/template.html INPUT OUTPUT
-                
+
                 --vartext
-                
+
                     This option allow you to pass variable texts to the attribution template
-                
+
                 $ about attrib --vartext "title=Attribution Notice" --vartext "header=Product 101" LOCATION OUTPUT
-                
+
                     Users can use the following in the template to get the vartext:
                     {{ vartext['title'] }}
                     {{ vartext['header'] }}
@@ -231,10 +231,10 @@ Syntax
         ..  code-block:: none
 
                 about collect_redist_src [OPTIONS] LOCATION OUTPUT
-                
+
                 LOCATION: Path to a directory containing sources that need to be copied
                 (and containing ABOUT files if `inventory` is not provided)
-                
+
                 OUTPUT: Path to a directory or a zip file where sources will be copied to.
 
 Options
@@ -262,37 +262,37 @@ Details
         ..  code-block:: none
 
                 --from-inventory
-                
+
                     Provide an inventory CSV/JSON file with the 'redistribute' field filled as
                     the indication of which files/sources need to be copied.
-                
+
                 $ about collect_redist_src --from-inventory 'path to the inventory' LOCATION OUTPUT
-                
+
                 --with-structures
-                
+
                     Copy the file(s) along with its parent directories
-                
+
                     For instance, assuming we want to copy the following file:
                     /project/work/hello/foo.c
-                
+
                     OUTPUT: /output/
-                
+
                 $ about collect_redist_src --with-structure /project/ /output/
-                
+
                     OUTPUT: /output/work/hello/foo.c
-                
+
                 $ about collect_redist_src /project/ /output/
-                
+
                     OUTPUT: /output/foo.c
-                
+
                 --zip
-                
+
                     Zip the copied sources to the output location
-                
+
                 $ about collect_redist_src --zip /project/ /output/output.zip
-                
+
                 --verbose
-                
+
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
@@ -305,7 +305,7 @@ Syntax
         ..  code-block:: none
 
                 about gen [OPTIONS] LOCATION OUTPUT
-                
+
                 LOCATION: Path to a JSON/CSV/XLSX inventory file.
                 OUTPUT: Path to a directory where ABOUT files are generated.
 
@@ -436,7 +436,7 @@ Details
 
                 --djc
 
-                    Fetch licenses text from a DejaCode API, and create <license>.LICENSE to the 
+                    Fetch licenses text from a DejaCode API, and create <license>.LICENSE to the
                     OUTPUT Location using the data fetched from the DejaCode License Library.
 
                     This option requires 2 parameters:
@@ -472,7 +472,7 @@ Syntax
         ..  code-block:: none
 
                 about inventory [OPTIONS] LOCATION OUTPUT
-                
+
                 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
                 OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
 
@@ -497,13 +497,13 @@ Details
         ..  code-block:: none
 
                 -f, --format [json|csv|excel]
-                
+
                     Set OUTPUT file format.  [default: csv]
-                
+
                 $ about inventory -f json LOCATION OUTPUT
-                
+
                 --verbose
-                
+
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
@@ -571,7 +571,7 @@ Syntax
         ..  code-block:: none
 
                 about transform [OPTIONS] LOCATION OUTPUT
-                
+
                 LOCATION: Path to a CSV/JSON/XLSX file.
                 OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
 
@@ -598,22 +598,22 @@ Details
         ..  code-block:: none
 
                 -c, --configuration
-                
+
                     Path to an optional YAML configuration file. See--help-format for format help.
-                
+
                 $ about transform -c 'path to the YAML configuration file' LOCATION OUTPUT
-                
+
                 --help-format
-                
+
                     Show configuration file format help and exit.
                     This option will print out examples of the the YAML configuration file.
-                
+
                     Keys configuration are: `field_renamings`, `required_fields` and `field_filters`
-                
+
                 $ about transform --help-format
-                
+
                 --verbose
-                
+
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
 
@@ -625,55 +625,55 @@ Details
                 A transform configuration file is used to describe which transformations and
                 validations to apply to a source CSV file. This is a simple text file using YAML
                 format, using the same format as an .ABOUT file.
-                
+
                 The attributes that can be set in a configuration file are:
-                
+
                 * field_renamings:
                 An optional map of source CSV or JSON field name to target CSV/JSON new field name that
                 is used to rename CSV fields.
-                
+
                 For instance with this configuration the fields "Directory/Location" will be
                 renamed to "about_resource" and "foo" to "bar":
                     field_renamings:
                         about_resource : 'Directory/Location'
                         bar : foo
-                
+
                 The renaming is always applied first before other transforms and checks. All
                 other field names referenced below are these that exist AFTER the renamings
                 have been applied to the existing field names.
-                
+
                 * required_fields:
                 An optional list of required field names that must have a value, beyond the
                 standard fields names. If a source CSV/JSON does not have such a field or a row is
                 missing a value for a required field, an error is reported.
-                
+
                 For instance with this configuration an error will be reported if the fields
                 "name" and "version" are missing or if any row does not have a value set for
                 these fields:
                     required_fields:
                         - name
                         - version
-                
+
                 * field_filters:
                 An optional list of field names that should be kept in the transformed CSV/JSON. If
                 this list is provided, all the fields from the source CSV/JSON that should be kept
                 in the target CSV/JSON must be listed regardless of  either standard or required
                 fields. If this list is not provided, all source CSV/JSON fields are kept in the
                 transformed target CSV/JSON.
-                
+
                 For instance with this configuration the target CSV/JSON will only contains the "name"
                 and "version" fields and no other field:
                     field_filters:
                         - name
                         - version
-                
+
                 * exclude_fields:
                 An optional list of field names that should be excluded in the transformed CSV/JSON. If
                 this list is provided, all the fields from the source CSV/JSON that should be excluded
                 in the target CSV/JSON must be listed. Excluding standard or required fields will cause
                 an error. If this list is not provided, all source CSV/JSON fields are kept in the
                 transformed target CSV/JSON.
-                
+
                 For instance with this configuration the target CSV/JSON will not contain the "type"
                 and "temp" fields:
                     exclude_fields:
