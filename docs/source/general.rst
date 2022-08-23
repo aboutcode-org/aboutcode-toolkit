@@ -66,10 +66,11 @@ Prepare Your Software Inventory for gen Standard Field Names
 ------------------------------------------------------------
 
 You should start with a software inventory of your codebase in spreadsheet or JSON format. You need
-to prepare a version of it that will identify the field values that you want to appear in your .ABOUT
-files. Note the following standard field names (defined in the ABOUT File Specification), which gen
-will use to look for the values that it will store in your generated .ABOUT files, as well as any
-additional text files that you identify, which it will copy and store next to the .ABOUT files.
+to prepare a version of it that will identify the field values that you want to appear
+in your .ABOUT files. Note the following standard field names (defined in the ABOUT
+File Specification), which gen will use to look for the values that it will store in your
+generated .ABOUT files, as well as any additional text files that you identify, which
+it will copy and store next to the .ABOUT files.
 
 .. list-table::
     :widths: 10 45 45
@@ -452,7 +453,9 @@ parameters are defined here: :ref:`reference`
 
 Here is an example of a attrib command:
 
-``about attrib --template /Users/harrypotter/myAboutFiles/my_attribution_template_v1.html /Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles/myProject-attribution-document.html``
+``about attrib --template /Users/harrypotter/myAboutFiles/my_attribution_template_v1.html
+/Users/harrypotter/myAboutFiles/ /Users/harrypotter/myAboutFiles
+/myProject-attribution-document.html``
 
 Note that this example attrib command does the following:
 
