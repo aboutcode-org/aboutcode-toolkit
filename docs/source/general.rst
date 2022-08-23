@@ -12,19 +12,33 @@ inside your codebase, typically in preparation for a product release, side-by-si
 actual code. ABOUT file(s) have a simple, standard format that identifies components and their
 associated licenses. The current AboutCode Toolkit subcommands are:
 
--   **attrib**: Generate a Product Attribution notice document from your ABOUT file(s), JSON, CSV or XLSX. You can also generate documents for other purposes (such as a License Reference) by varying your input control file and your template.
+-   **attrib**: Generate a Product Attribution notice document from your ABOUT
+    file(s), JSON, CSV or XLSX. You can also generate documents for other
+    purposes (such as a License Reference) by varying your input control file
+    and your template.
 
--   **check**: A simple command to validate the ABOUT file(s) and output errors/warnings on the terminal.
+-   **check**: A simple command to validate the ABOUT file(s) and output
+    errors/warnings on the terminal.
 
--   **collect_redist_src**: A command to collect and copy sources that have the 'redistribute' flagged as 'True' in ABOUT file(s) or from an inventory.
+-   **collect_redist_src**: A command to collect and copy sources that have
+    the 'redistribute' flagged as 'True' in ABOUT file(s) or from an inventory.
 
--   **gen**: Create ABOUT file(s) from a Software Inventory file (.csv, .json or .xlsx format) which is typically created from a software audit, and insert these AboutCode Toolkit files into your codebase. You can regenerate the AboutCode Toolkit files from a new Software Inventory file whenever you make changes.
+-   **gen**: Create ABOUT file(s) from a Software Inventory file (.csv, .json or .xlsx format)
+    which is typically created from a software audit, and insert these AboutCode Toolkit files
+    into your codebase. You can regenerate the AboutCode Toolkit files from a new
+    Software Inventory file whenever you make changes.
 
--   **gen_license**: Fetch licenses in the license_expression field and save to the output location.
+-   **gen_license**: Fetch licenses in the license_expression field and
+    save to the output location.
 
--   **inventory**: Generate a Software Inventory list (.csv, .json or .xlsx format) from your codebase based on ABOUT file(s). Note that this Software Inventory will only include components that have AboutCode Toolkit data. In another word, if you do not create AboutCode Toolkit files for your own original software components, these components will not show up in the generated inventory.
+-   **inventory**: Generate a Software Inventory list (.csv, .json or .xlsx format)
+    from your codebase based on ABOUT file(s). Note that this Software Inventory will
+    only include components that have AboutCode Toolkit data. In another word, if you do
+    not create AboutCode Toolkit files for your own original software components,
+    these components will not show up in the generated inventory.
 
--   **transform**: A command to transform an input CSV/JSON/XLSX by applying renaming and/or filtering and then output to a new CSV/JSON/XLSX file.
+-   **transform**: A command to transform an input CSV/JSON/XLSX by applying
+    renaming and/or filtering and then output to a new CSV/JSON/XLSX file.
 
 Additional AboutCode Toolkit information is available at:
 
@@ -36,9 +50,14 @@ Key Terminology
 ===============
 Some key terminology that applies to AboutCode Toolkit tool usage:
 
--   **Software Inventory or Inventory** - means a list of all of the components in a Development codebase and the associated data about those components with a focus on software pedigree/provenance- related data for open source and third-party components.
+-   **Software Inventory or Inventory** - means a list of all of the components
+    in a Development codebase and the associated data about those components with a
+    focus on software pedigree/provenance- related data for open source and
+    third-party components.
 
--   **Product BOM or BOM** - means a subset list of the components in a Development codebase (Software Inventory) that are Deployed on a particular Product Release (a Product Bill of Materials).
+-   **Product BOM or BOM** - means a subset list of the components in a Development
+    codebase (Software Inventory) that are Deployed on a particular Product
+    Release (a Product Bill of Materials).
 
 Using gen to Generate ABOUT file(s)
 ===================================
@@ -187,7 +206,8 @@ using the same format as an .ABOUT file.
 
 The attributes that can be set in a configuration file are:
 
--   field_renamings: An optional map of source field name to target new field name that is used to rename CSV/JSON/XLSX fields.
+-   field_renamings: An optional map of source field name to target new field
+    name that is used to rename CSV/JSON/XLSX fields.
 
         ..  code-block:: none
 
@@ -201,7 +221,9 @@ field names referenced below are AFTER the renaming have been applied.
 For instance with this configuration, the field "Directory/Location" will be
 renamed to "about_resource" and "foo" to "bar":
 
--   required_fields: An optional list of required field names that must have a value, beyond the standard field names. If a source CSV/JSON/XLSX does not have such a field or an entry is missing a value for a required field, an error is reported.
+-   required_fields: An optional list of required field names that must have a value,
+    beyond the standard field names. If a source CSV/JSON/XLSX does not have such a field or
+    an entry is missing a value for a required field, an error is reported.
 
 For instance with this configuration, an error will be reported if the fields "name"
 and "version" are missing, or if any entry does not have a value set for these fields:
@@ -212,9 +234,13 @@ and "version" are missing, or if any entry does not have a value set for these f
                 - name
                 - version
 
--   field_filters: An optional list of fields that should be kept in the transformed file. If this list is provided, only the fields that are in the list will be kept. All others will be filtered out even if they are AboutCode Toolkit standard fields. If this list is not provided, all source fields are kept in the transformed target file.
+-   field_filters: An optional list of fields that should be kept in the transformed file.
+    If this list is provided, only the fields that are in the list will be kept. All others will
+    be filtered out even if they are AboutCode Toolkit standard fields. If this list is not
+    provided, all source fields are kept in the transformed target file.
 
-For instance with this configuration, the target file will only contains the "name" and "version" fields:
+For instance with this configuration, the target file will only contains the "name" and
+"version" fields:
 
         ..  code-block:: none
 
@@ -222,7 +248,10 @@ For instance with this configuration, the target file will only contains the "na
                 - name
                 - version
 
--   exclude_fields: An optional list of field names that should be excluded in the transformed file. If this list is provided, all the fields from the source file that should be excluded in the target file must be listed. Excluding required fields will cause an error. If this list is not provided, all source fields are kept in the transformed target file.
+-   exclude_fields: An optional list of field names that should be excluded in the transformed
+    file. If this list is provided, all the fields from the source file that should be
+    excluded in the target file must be listed. Excluding required fields will cause an error.
+    If this list is not provided, all source fields are kept in the transformed target file.
 
 For instance with this configuration, the target file will not contain the "type" and "temp" fields:
 
@@ -249,7 +278,9 @@ This gen example command does the following:
 
 -   Activates the --fetch-license option to get license information from ScanCode LicenseDB.
 
--   Activates the --reference option to get license text files and notice text files that you have specified in your software inventory to be copied next to the associated .ABOUT files when those are created.
+-   Activates the --reference option to get license text files and notice text files that
+    you have specified in your software inventory to be copied next to the
+    associated .ABOUT files when those are created.
 
 -   Specifies the path of the software inventory to control the processing.
 
@@ -431,7 +462,8 @@ Note that this example attrib command does the following:
 
 -   Specifies the full path (include file name) of the output document to be generated.
 
-A successful execution of attrib will create a .html (or .json depends on the template) file that is ready to use to meet your attribution requirements.
+A successful execution of attrib will create a .html (or .json depends on the template)
+file that is ready to use to meet your attribution requirements.
 
 Using inventory to Generate a Software Inventory
 ================================================

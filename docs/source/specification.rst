@@ -44,11 +44,13 @@ A simple and valid ABOUT file named httpd-2.4.3.tar.gz.ABOUT may look like this:
 
 The meaning of this ABOUT file is:
 
--   The file "httpd-2.4.3.tar.gz" is stored in the same directory and side-by-side with the ABOUT file "httpd-2.4.3.tar.gz.ABOUT" that documents it.
+-   The file "httpd-2.4.3.tar.gz" is stored in the same directory and side-by-side with
+    the ABOUT file "httpd-2.4.3.tar.gz.ABOUT" that documents it.
 -   The name of this component is "Apache HTTP Server" with version "2.4.3".
 -   The home URL for this component is http://httpd.apache.org
 -   The file "httpd-2.4.3.tar.gz" was originally downloaded from http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
--   In the same directory, "apache-2.0.LICENSE" and "httpd.NOTICE" are files that contain respectively the license text and the notice text for this component.
+-   In the same directory, "apache-2.0.LICENSE" and "httpd.NOTICE" are files
+    that contain respectively the license text and the notice text for this component.
 -   This component is licensed under "apache-2.0"
 -   The license for this component is defined in the SPDX License List at https://spdx.org/licenses/Apache-2.0.html
 
@@ -70,7 +72,11 @@ A file name can contain only these US-ASCII characters:
 -   digits from 0 to 9
 -   uppercase and lowercase letters from A to Z
 -   the following symbols: ``"_", "-", "+", ".", "(", ")", "~", "[", "]", "{", "}", "@", "%"``
--   The case of a file name is not significant. On case-sensitive file systems (such as on Linux), a tool must report an error if two ABOUT files stored in the same directory have the same lowercase file name. This is to ensure that ABOUT files can be used across file systems. The convention is to use a lowercase file name and an uppercase ABOUT extension.
+-   The case of a file name is not significant. On case-sensitive file systems
+    (such as on Linux), a tool must report an error if two ABOUT files stored in the same
+    directory have the same lowercase file name. This is to ensure that ABOUT files can be
+    used across file systems. The convention is to use a lowercase file name and an uppercase
+    ABOUT extension.
 
 Lines of text
 -------------
@@ -90,8 +96,11 @@ A field name can contain only these US-ASCII characters:
 -   digits from 0 to 9
 -   uppercase and lowercase letters from A to Z
 -   the ``"_"`` underscore sign.
--   Field names are not case sensitive. For example, "HOMEPAGE_URL" and "HomePage_url" represent the same field name.
--   A field name must start at the beginning of a new line. No spaces is allowed in the field name. It can be followed by one or more spaces that must be ignored. These spaces are commonly used to improve the readability of an ABOUT file.
+-   Field names are not case sensitive. For example, "HOMEPAGE_URL" and "HomePage_url"
+    represent the same field name.
+-   A field name must start at the beginning of a new line. No spaces is allowed in
+    the field name. It can be followed by one or more spaces that must be ignored.
+    These spaces are commonly used to improve the readability of an ABOUT file.
 
 Field value
 -----------
@@ -254,10 +263,16 @@ mandatory field are missing.
 Optional Information fields
 ---------------------------
 
--   version: Component or package version. A component or package usually has a version, such as a revision number or hash from a version control system (for a snapshot checked out from VCS such as Subversion or Git). If not available, the version should be the date the component was provisioned, in an ISO date format such as 'YYYY-MM-DD'.
--   spec_version: The version of the ABOUT file format specification used for this file. This is provided as a hint to readers and tools in order to support future versions of this specification.
+-   version: Component or package version. A component or package usually has a version,
+    such as a revision number or hash from a version control system (for a snapshot checked
+    out from VCS such as Subversion or Git). If not available, the version should be the date
+    the component was provisioned, in an ISO date format such as 'YYYY-MM-DD'.
+-   spec_version: The version of the ABOUT file format specification used for this file.
+    This is provided as a hint to readers and tools in order to support future versions
+    of this specification.
 -   description: Component description, as a short text.
--   download_url: A direct URL to download the original file or archive documented by this ABOUT file.
+-   download_url: A direct URL to download the original file or archive documented
+    by this ABOUT file.
 -   homepage_url: URL to the homepage for this component.
 -   changelog_file: Changelog file for the component.
 -   package_url: Package URL for the package.
@@ -266,9 +281,11 @@ Optional Information fields
 Optional Owner and Author fields
 --------------------------------
 
--   owner: The name of the primary organization or person(s) that owns or provides the component.
+-   owner: The name of the primary organization or person(s) that owns or
+    provides the component.
 -   owner_url: URL to the homepage for the owner.
--   contact: Contact information (such as an email address or physical address) for the component owner.
+-   contact: Contact information (such as an email address or physical address)
+    for the component owner.
 -   author: Name of the organization(s) or person(s) that authored the component.
 -   author_file: Author file for the component.
 
@@ -278,21 +295,33 @@ Optional Licensing fields
 -   copyright: Copyright statement for the component.
 -   notice_file: Legal notice or credits for the component.
 -   notice_url: URL to a legal notice for the component.
--   license_file: License file that applies to the component. For example, the name of a license file such as LICENSE or COPYING file extracted from a downloaded archive.
+-   license_file: License file that applies to the component. For example, the
+    name of a license file such as LICENSE or COPYING file extracted from a
+    downloaded archive.
 -   license_url: URL to the license text for the component.
--   license_expression: The DejaCode license expression that apply to the component. You can separate each identifier using " or " and " and " to document the relationship between multiple license identifiers, such as a choice among multiple licenses (No special characters are allowed).
--   license_name: The DejaCode license short name for the license (No special characters are allowed).
--   license_key: The DejaCode license key(s) for the component (No special characters are allowed).
--   spdx_license_key: The ScanCode LicenseDB spdx_license_key defined for the license at https://scancode-licensedb.aboutcode.org/index.html
+-   license_expression: The DejaCode license expression that apply to
+    the component. You can separate each identifier using " or " and " and " to
+    document the relationship between multiple license identifiers, such as a choice
+    among multiple licenses (No special characters are allowed).
+-   license_name: The DejaCode license short name for the license
+    (No special characters are allowed).
+-   license_key: The DejaCode license key(s) for the component
+    (No special characters are allowed).
+-   spdx_license_key: The ScanCode LicenseDB spdx_license_key defined
+    for the license at https://scancode-licensedb.aboutcode.org/index.html
 
 Optional Boolean flag fields
 ----------------------------
 
--   redistribute: Set this flag to yes if the component license requires source code redistribution. Defaults to no when absent.
--   attribute: Set this flag to yes if the component license requires publishing an attribution or credit notice. Defaults to no when absent.
--   track_changes: Set this flag to yes if the component license requires tracking changes made to a the component. Defaults to no when absent.
+-   redistribute: Set this flag to yes if the component license requires source code
+    redistribution. Defaults to no when absent.
+-   attribute: Set this flag to yes if the component license requires publishing an attribution
+    or credit notice. Defaults to no when absent.
+-   track_changes: Set this flag to yes if the component license requires tracking changes made to
+    a the component. Defaults to no when absent.
 -   modified: Set this flag to yes if the component has been modified. Defaults to no when absent.
--   internal_use_only: Set this flag to yes if the component is used internal only. Defaults to no when absent.
+-   internal_use_only: Set this flag to yes if the component is used internal only.
+    Defaults to no when absent.
 
 Optional Extension fields
 -------------------------
@@ -312,8 +341,10 @@ prefix and a few common fields to handle the diversity of ways that VCS
 tools reference files and directories under version control:
 
 -   vcs_tool: VCS tool such as git, svn, cvs, etc.
--   vcs_repository: Typically a URL or some other identifier used by a VCS tool to point to a repository such as an SVN or Git repository URL.
--   vcs_path: Path used by a particular VCS tool to point to a file, directory or module inside a repository.
+-   vcs_repository: Typically a URL or some other identifier used by a
+    VCS tool to point to a repository such as an SVN or Git repository URL.
+-   vcs_path: Path used by a particular VCS tool to point to a file,
+    directory or module inside a repository.
 -   vcs_tag: tag name or path used by a particular VCS tool.
 -   vcs_branch: branch name or path used by a particular VCS tool.
 -   vcs_revision: revision identifier such as a revision hash or version number.
@@ -344,7 +375,8 @@ to verify the integrity of a file documented by an ABOUT file.
 
 -   checksum_md5: MD5 for the file documented by this ABOUT file in the "about_resource" field.
 -   checksum_sha1: SHA1 for the file documented by this ABOUT file in the "about_resource" field.
--   checksum_sha256: SHA256 for the file documented by this ABOUT file in the "about_resource" field.
+-   checksum_sha256: SHA256 for the file documented by this ABOUT file in
+    the "about_resource" field.
 
 Some examples:
 

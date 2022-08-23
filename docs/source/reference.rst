@@ -157,7 +157,8 @@ Details
 The following data are passed to jinja2 and, therefore, can be used for a custom template:
  * about object: the about objects
  * common_licenses: a common license keys list in licenses.py
- * licenses_list: a license object list contains all the licenses found in about objects. It contains the following attribute: key, name, filename, url, text
+ * licenses_list: a license object list contains all the licenses found in about objects.
+   It contains the following attribute: key, name, filename, url, text
 
 check
 =====
