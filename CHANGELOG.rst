@@ -1,6 +1,11 @@
 ==============================
 Changelog
 ==============================
+2022-08-23
+    Release 7.0.3
+
+    * Fixed version mismatch in v7.0.2 (https://github.com/nexB/aboutcode-toolkit/issues/510)
+
 
 2022-03-21
     Release 7.0.2
@@ -30,7 +35,7 @@ Changelog
     * Use readthedocs for documentation
     * Add Dockerfile to run aboutcode with docker
     * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library
-    * Add ability to transform XLSX file 
+    * Add ability to transform XLSX file
     * Support XLSX file format for `inventory`, `gen` and `attrib`
     * Add 'spdx_license_key' support
     * Add option to save error log in `check` command
@@ -158,7 +163,7 @@ Changelog
     Release 3.1.0
 
     * Fixed JSON input from AboutCode manger export and ScanCode output
-    * Added a new option `mapping-file` to support using a custom file for mapping 
+    * Added a new option `mapping-file` to support using a custom file for mapping
     * Change the name of the option `--show-all` to `--verbose`
     * Better error handling for copying file with permission issue
     * Support timestamp in attribution output
@@ -317,7 +322,7 @@ Changelog
 
     Release 1.0.0
 
-    * Some changes in the spec, such as supporting only text in external 
+    * Some changes in the spec, such as supporting only text in external
        files.
     * Several refinements including support for common licenses.
 
@@ -325,5 +330,5 @@ Changelog
 
     Release 0.8.1
 
-    * Initial release with minimal capabilities to read and validate 
+    * Initial release with minimal capabilities to read and validate
       ABOUT files format 0.8.0 and output a CSV inventory.
