@@ -303,12 +303,12 @@ Use jinja2 Features to Customize Your Attribution Template
 
 The attrib tool makes use of the open source python library jinja2
 (http://jinja.pocoo.org/docs/dev/templates/) in order to extend .html capabilities and
-transform AboutCode Toolkit input data into the final format of the generated attribution file.
- ``default_html.template`` file contains text that complies with jinja2 syntax specifications
- in order to support grouping, ordering, formatting and presentation of your AboutCode
- Toolkit data. If your attribution requirements are complex, you may wish to study the jinja2
- documentation to modify the default_html.template logic or create your own template; alternatively,
- here are a few relatively simple concepts that relate to the attribution document domain.
+transform AboutCode Toolkit input data into the final format of the generated attribution
+file. ``default_html.template`` file contains text that complies with jinja2 syntax specifications
+in order to support grouping, ordering, formatting and presentation of your AboutCode
+Toolkit data. If your attribution requirements are complex, you may wish to study the jinja2
+documentation to modify the default_html.template logic or create your own template; alternatively,
+here are a few relatively simple concepts that relate to the attribution document domain.
 
 The simplest modifications to the default_html.template file involve the labels and standard
 text. For example, here is the default template text for the Table of Contents:
@@ -452,6 +452,3 @@ The official inventory parameters are defined here: :ref:`reference`
 
 A successful execution of inventory will create a complete software inventory in .csv,
 .json or .xlsx format based on defined format.
-
-
-
