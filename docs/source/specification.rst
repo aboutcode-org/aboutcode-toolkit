@@ -7,9 +7,18 @@ ABOUT File Specification v3.2.3
 Purpose
 =======
 
-An ABOUT file provides a simple way to document the provenance (origin and license) and other important or interesting information about a software component. An ABOUT file is a small YAML formatted text file stored in the codebase side-by-side with the software component file or archive that it documents. No modification of the documented software is needed.
+An ABOUT file provides a simple way to document the provenance (origin and license)
+and other important or interesting information about a software component.
+An ABOUT file is a small YAML formatted text file stored in the codebase side-by-side
+with the software component file or archive that it documents. No modification
+of the documented software is needed.
 
-The ABOUT format is plain text with field name/value pairs separated by a colon. It is easy to read and create by hand and is designed first for humans, rather than machines. The format is well-defined and structured just enough to make it easy to process with software as well. It contains enough information to fulfill key license requirements such as creating credits or attribution notices, collecting redistributable source code, or providing information about new versions of a software component.
+The ABOUT format is plain text with field name/value pairs separated by a colon.
+It is easy to read and create by hand and is designed first for humans, rather than
+. The format is well-defined and structured just enough to make it easy to process with
+software as well. It contains enough information to fulfill key license requirements
+such as creating credits or attribution notices, collecting redistributable source code,
+or providing information about new versions of a software component.
 
 Getting Started
 ===============
@@ -46,12 +55,15 @@ The meaning of this ABOUT file is:
 Specification
 =============
 
-An ABOUT file is an ASCII YAML formatted text file. Note that while Unicode characters are not supported in an ABOUT file proper, external files can contain UTF-8 Unicode. The key for the licenses field and the license_expression are dejacode license key.
+An ABOUT file is an ASCII YAML formatted text file. Note that while Unicode characters
+are not supported in an ABOUT file proper, external files can contain UTF-8 Unicode.
+The key for the licenses field and the license_expression are dejacode license key.
 
 ABOUT file name
 ---------------
 
-An ABOUT file name can use a limited set of characters and is suffixed with a ".ABOUT" extension using any combination of uppercase and lowercase characters.
+An ABOUT file name can use a limited set of characters and is suffixed with a
+".ABOUT" extension using any combination of uppercase and lowercase characters.
 
 A file name can contain only these US-ASCII characters:
 
@@ -63,7 +75,12 @@ A file name can contain only these US-ASCII characters:
 Lines of text
 -------------
 
-An ABOUT file contains lines of US-ASCII text. Lines contain field names/values pairs. The standard line ending is the LF character. The line ending characters can be any LF, CR or CR/LF and tools must normalize line endings to LF when processing an ABOUT file. Empty lines and lines containing only white spaces that are not part of a field value continuation are ignored. Empty lines are commonly used to improve the readability of an ABOUT file.
+An ABOUT file contains lines of US-ASCII text. Lines contain field names/values pairs.
+The standard line ending is the LF character. The line ending characters can be any LF,
+CR or CR/LF and tools must normalize line endings to LF when processing an ABOUT file.
+Empty lines and lines containing only white spaces that are not part of a field value
+continuation are ignored. Empty lines are commonly used to improve the readability
+of an ABOUT file.
 
 Field name
 ----------
@@ -79,11 +96,15 @@ A field name can contain only these US-ASCII characters:
 Field value
 -----------
 
-The field value is separated from the field name by a ":" colon. The ":" colon can be followed by one or more spaces that must be ignored. This also applies to trailing white spaces: they must be ignored.
+The field value is separated from the field name by a ":" colon. The ":" colon
+can be followed by one or more spaces that must be ignored. This also applies
+to trailing white spaces: they must be ignored.
 
 The field value is composed of one or more lines of plain US-ASCII printable text.
 
-When a field value is a long string, additional continuation lines must start with at least one space. In this case, the first space of an additional continuation line is ignored and should be removed from the field value by tools.
+When a field value is a long string, additional continuation lines must start with
+at least one space. In this case, the first space of an additional continuation
+line is ignored and should be removed from the field value by tools.
 
 For instance:
 
@@ -107,24 +128,41 @@ For instance:
 Fields are mandatory, optional or custom extension
 --------------------------------------------------
 
-A field can be mandatory, optional or custom extension. Tools must report an error for missing mandatory fields.
+A field can be mandatory, optional or custom extension. Tools must
+report an error for missing mandatory fields.
 
 Fields validation
 -----------------
 
-When processing an ABOUT file, tools must report a warning or error if a field is invalid. A field can be invalid for several reasons, such as invalid field name syntax or invalid content. Tools should report additional validation error details. The validation process should check that each field name is syntactically correct and that fields contain correct values according to its concise, common sense definition in this specification. For certain fields, additional and specific validations are relevant such as URL validation, path resolution and verification, and so forth. Tools should report a warning for present fields that do not have any value.
+When processing an ABOUT file, tools must report a warning or error if a field
+is invalid. A field can be invalid for several reasons, such as invalid field
+name syntax or invalid content. Tools should report additional validation error
+details. The validation process should check that each field name is syntactically
+correct and that fields contain correct values according to its concise, common
+sense definition in this specification. For certain fields, additional and specific
+validations are relevant such as URL validation, path resolution and verification,
+and so forth. Tools should report a warning for present fields that do not have any value.
 
 Fields order and multiple occurrences
 -------------------------------------
 
-The field order does not matter. Multiple occurrences of a field name is not supported.
+The field order does not matter. Multiple occurrences of a field name is
+not supported.
 
-The tool processing an ABOUT file or CSV/JSON/XLSX input will issue an error when a field name occurs more than once in the input file.
+The tool processing an ABOUT file or CSV/JSON/XLSX input will issue an error
+when a field name occurs more than once in the input file.
 
 Field referencing a file
 ------------------------
 
-The actual value of some fields may be contained in another file. This is useful for long texts or to reference a common text in multiple ABOUT files such as a common license text. In this case the field name is suffixed with "_file" and the field value must be a path pointing to the file that contains the actual value of the field. This path must be a POSIX path relative to the path of the ABOUT file. The file content must be UTF-8-encoded text. This is in contrast with field values contained directly in an ABOUT file that must be US-ASCII- encoded text and allows to support non-ASCII text content.
+The actual value of some fields may be contained in another file. This is useful
+for long texts or to reference a common text in multiple ABOUT files such as a
+common license text. In this case the field name is suffixed with "_file" and the
+field value must be a path pointing to the file that contains the actual value of the
+field. This path must be a POSIX path relative to the path of the ABOUT file. The file
+content must be UTF-8-encoded text. This is in contrast with field values contained
+directly in an ABOUT file that must be US-ASCII- encoded text and allows to support
+non-ASCII text content.
 
 For example, the full license text for a component is often stored in a separate file named COPYING:
 
@@ -133,14 +171,17 @@ For example, the full license text for a component is often stored in a separate
                 licenses:
                     -   file: linux.COPYING
 
-In this example, the README file is stored in a doc directory, one directory above the ABOUT file directory, using a relative POSIX path:
+In this example, the README file is stored in a doc directory, one directory
+above the ABOUT file directory, using a relative POSIX path:
 
         ..  code-block:: none
 
                 licenses:
                     -   file: ../docs/ruby.README
 
-In addition, there may be cases that a license can have 2 or more referenced license files. If this is the case, a comma ',' is used to identify multiple files For instance:
+In addition, there may be cases that a license can have 2 or more referenced
+license files. If this is the case, a comma ',' is used to identify multiple
+files For instance:
 
         ..  code-block:: none
 
@@ -152,7 +193,11 @@ In addition, there may be cases that a license can have 2 or more referenced lic
 Field referencing a URL
 -----------------------
 
-The value of a field may reference URLs such as a homepage or a download. In this case the field name is suffixed with "_url" and the field value must be a valid absolute URL starting with ftp://, http:// or https://. URLs are informational and the content they may reference is ignored. For example, a download URL is referenced this way:
+The value of a field may reference URLs such as a homepage or a download. In this
+case the field name is suffixed with "_url" and the field value must be a valid
+absolute URL starting with ftp://, http:// or https://. URLs are informational
+and the content they may reference is ignored. For example, a download URL
+is referenced this way:
 
         ..  code-block:: none
 
@@ -161,18 +206,25 @@ The value of a field may reference URLs such as a homepage or a download. In thi
 Flag fields
 -----------
 
-Flag fields have a "true" or "false" value. ``True``, ``T``, ``Yes``, ``Y`` or ``x`` must be interpreted as "true" in any case combination. ``False``, ``F``, ``No`` or ``N`` must be interpreted as "false" in any case combination.
+Flag fields have a "true" or "false" value. ``True``, ``T``, ``Yes``,
+``Y`` or ``x`` must be interpreted as "true" in any case combination.
+``False``, ``F``, ``No`` or ``N`` must be interpreted as "false"
+in any case combination.
 
 Referencing the file or directory documented by an ABOUT file
 -------------------------------------------------------------
 
-An ABOUT file documents one file or directory. The mandatory "about_resource" field reference the documented file or directory. The value of the "about_resource" field is the name or path of the referenced file or directory.
+An ABOUT file documents one file or directory. The mandatory "about_resource"
+field reference the documented file or directory. The value of the "about_resource"
+field is the name or path of the referenced file or directory.
 
 A tool processing an ABOUT file must report an error if this field is missing.
 
-By convention, an ABOUT file is often stored in the same directory side-by-side to the file or directory that it documents, but this is not mandatory.
+By convention, an ABOUT file is often stored in the same directory side-by-side
+to the file or directory that it documents, but this is not mandatory.
 
-For example, a file named django.ABOUT contains the following field to document the django-1.2.3.tar.gz archive stored in the same directory:
+For example, a file named django.ABOUT contains the following field to document
+the django-1.2.3.tar.gz archive stored in the same directory:
 
         ..  code-block:: none
 
@@ -193,7 +245,8 @@ In this example, the ABOUT file documents the current directory, using a "." per
 Other Mandatory fields
 ----------------------
 
-When a tool processes an ABOUT file, it must issue an error if these mandatory field are missing.
+When a tool processes an ABOUT file, it must issue an error if these
+mandatory field are missing.
 
 -   about_resource: The resource this file referencing to.
 -   name: Component name.
@@ -244,11 +297,19 @@ Optional Boolean flag fields
 Optional Extension fields
 -------------------------
 
-You can create extension fields by prefixing them with a short prefix to distinguish these from the standard fields (but this is not necessary).
+You can create extension fields by prefixing them with a short prefix to
+distinguish these from the standard fields (but this is not necessary).
 
 Optional Extension fields to reference files stored in a version control system (VCS)
 -------------------------------------------------------------------------------------
-These fields provide a simple way to reference files stored in a version control system. There are many VCS tools such as CVS, Subversion, Git, ClearCase and GNU Arch. Accurate addressing of a file or directory revision in each tool in a uniform way may not be possible. Some tools may require access control via user/password or certificate and this information should not be stored in an ABOUT file. This extension defines the 'vcs' field extension prefix and a few common fields to handle the diversity of ways that VCS tools reference files and directories under version control:
+These fields provide a simple way to reference files stored in a version
+control system. There are many VCS tools such as CVS, Subversion, Git,
+ClearCase and GNU Arch. Accurate addressing of a file or directory revision
+in each tool in a uniform way may not be possible. Some tools may require access
+control via user/password or certificate and this information should not be
+stored in an ABOUT file. This extension defines the 'vcs' field extension
+prefix and a few common fields to handle the diversity of ways that VCS
+tools reference files and directories under version control:
 
 -   vcs_tool: VCS tool such as git, svn, cvs, etc.
 -   vcs_repository: Typically a URL or some other identifier used by a VCS tool to point to a repository such as an SVN or Git repository URL.
@@ -277,7 +338,9 @@ or:
 
 Optional Extension fields for checksums
 ---------------------------------------
-These fields support checksums (such as SHA1 and MD5)commonly provided with downloaded archives to verify their integrity. A tool can optionally use these to verify the integrity of a file documented by an ABOUT file.
+These fields support checksums (such as SHA1 and MD5)commonly provided with
+downloaded archives to verify their integrity. A tool can optionally use these
+to verify the integrity of a file documented by an ABOUT file.
 
 -   checksum_md5: MD5 for the file documented by this ABOUT file in the "about_resource" field.
 -   checksum_sha1: SHA1 for the file documented by this ABOUT file in the "about_resource" field.

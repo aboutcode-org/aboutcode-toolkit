@@ -48,7 +48,8 @@ version may be pre-installed, open a terminal and type:
     python --version
 
 .. note::
-    Debian has decided that distutils is not a core python package, so it is not included in the last versions of debian and debian-based OSes.
+    Debian has decided that distutils is not a core python package, so it is not included
+    in the last versions of debian and debian-based OSes.
 
     A solution is to run: `sudo apt install python3-distutils`
 
@@ -69,9 +70,11 @@ or on windows:
     configure
 
 .. note::
-   For MacOS users, it's a known issue the Python36 may case SSL Certificates error if the Certificates is not up to date.
+   For MacOS users, it's a known issue the Python36 may case SSL Certificates error
+   if the Certificates is not up to date.
 
-   A solution is to run: `sudo /Applications/Python\\ 3.6/Install\\ Certificates.command` to upgrade the outdated certificates.
+   A solution is to run: `sudo /Applications/Python\\ 3.6/Install\\ Certificates.command`
+   to upgrade the outdated certificates.
 
 ACTIVATE the VIRTUALENV
 -----------------------
@@ -89,7 +92,8 @@ To deactivate the virtualenv, run (on both posix and windows):
 
 VERSIONING SCHEMA
 -----------------
-Starting at AboutCode version 4.0.0, the AboutCode Toolkit will follow SemVer for the versioning schema.
+Starting at AboutCode version 4.0.0, the AboutCode Toolkit will follow SemVer
+for the versioning schema.
 
 i.e. MAJOR.MINOR.PATCH format
     1. MAJOR version when making incompatible API changes,
