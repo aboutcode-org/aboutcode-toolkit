@@ -13,10 +13,10 @@
     <h1>OPEN SOURCE SOFTWARE INFORMATION</h1>
     <h2> {{ vartext['subtitle'] }} </h2>
     <div>
-      <p>Licenses, acknowledgments and required copyright notices for 
+      <p>Licenses, acknowledgments and required copyright notices for
       open source components:</p>
     </div>
-    
+
         <div class="oss-table-of-contents">
             {% for about_object in abouts %}
                 <p><a href="#component_{{ loop.index0 }}">{{ about_object.name.value }}{% if about_object.version.value %} {{ about_object.version.value }}{% endif %}</a></p>
