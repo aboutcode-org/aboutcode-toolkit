@@ -351,7 +351,7 @@ OUTPUT: Path to a directory where license files are saved.
         if not key in lic_dict_output:
             lic_filename = license_dict[key][1]
             lic_context = license_dict[key][2]
-            lic_dict_output[lic_filename] = lic_context 
+            lic_dict_output[lic_filename] = lic_context
 
     write_errors = write_licenses(lic_dict_output, output)
     if write_errors:
@@ -419,7 +419,7 @@ def validate_template(ctx, param, value):
 @click.option('--reference',
     metavar='DIR',
     type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
-    help='Path to a directory with reference files where "license_file" and/or "notice_file"' 
+    help='Path to a directory with reference files where "license_file" and/or "notice_file"'
         ' located.')
 
 @click.option('--template',
@@ -710,7 +710,8 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     errors, abouts = collect_inventory(location)
 
     # Validate license_expression
-    _key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, api_url, api_key)
+    from_check = True
+    _key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, from_check, api_url, api_key)
     for e in errs:
         errors.append(e)
 

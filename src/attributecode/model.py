@@ -1643,7 +1643,7 @@ def save_as_excel(location, about_dicts):
     formatted_list = util.format_about_dict_output(about_dicts)
     write_excel(location, formatted_list)
 
-def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scancode=False, reference=None):
+def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, api_key=None, scancode=False, reference=None):
     """
     Return a dictionary containing the license information (key, name, text, url)
     fetched from the ScanCode LicenseDB or DejaCode API.
@@ -1710,9 +1710,13 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                                 if msg == "Invalid '--api_url'. License generation is skipped.":
                                     errors.extend(errs)
                                     return key_text_dict, errors
-                            for severity, message in errs: 
+                            for severity, message in errs:
                                 msg = (about.about_file_path + ": " + message)
                                 errors.append(Error(severity, msg))
+                            # We don't want to actually get the license information from the
+                            # check utility
+                            if from_check:
+                                continue
                             if not license_data:
                                 continue
                             license_name = license_data.get('short_name', '')
@@ -1725,6 +1729,10 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                             license_text_url = url + lic_key + '.LICENSE'
                             try:
                                 json_url = urlopen(license_url)
+                                # We don't want to actually get the license information from the
+                                # check utility
+                                if from_check:
+                                    continue
                                 data = json.loads(json_url.read())
                                 license_name = data['short_name']
                                 license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
@@ -1738,12 +1746,13 @@ def pre_process_and_fetch_license_dict(abouts, api_url=None, api_key=None, scanc
                                     msg = u"Invalid 'license': " + lic_key
                                 errors.append(Error(ERROR, msg))
                                 continue
-                        detail_list.append(license_name)
-                        detail_list.append(license_filename)
-                        detail_list.append(license_text)
-                        detail_list.append(lic_url)
-                        detail_list.append(spdx_license_key)
-                        key_text_dict[lic_key] = detail_list
+                        if not from_check:
+                            detail_list.append(license_name)
+                            detail_list.append(license_filename)
+                            detail_list.append(license_text)
+                            detail_list.append(lic_url)
+                            detail_list.append(spdx_license_key)
+                            key_text_dict[lic_key] = detail_list
                 if not about.license_key.value:
                     about.license_key.value = lic_list
 
