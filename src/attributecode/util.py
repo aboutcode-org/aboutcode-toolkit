@@ -262,7 +262,7 @@ def load_csv(location):
     for each row.
     """
     results = []
-    with codecs.open(location, mode='rb', encoding='utf-8-sig',
+    with open(location, mode='r', encoding='utf-8-sig',
                      errors='replace') as csvfile:
         for row in csv.DictReader(csvfile):
             # convert all the column keys to lower case
@@ -689,7 +689,7 @@ def load_excel(location):
     while index <= max_col:
         value = sheet_obj.cell(row=1, column=index).value
         if value in col_keys:
-            msg = 'Duplicated column name, ' + str(value) + ', detected.' 
+            msg = 'Duplicated column name, ' + str(value) + ', detected.'
             errors.append(Error(CRITICAL, msg))
             return errors, results
         if value in mapping_dict:
@@ -721,7 +721,7 @@ def write_licenses(lic_dict, location):
     try:
         for lic in lic_dict:
             output_location = posixpath.join(loc, lic)
-            with io.open(output_location, 'w', encoding='utf-8', errors='replace') as out:
+            with open(output_location, 'w', encoding='utf-8', errors='replace') as out:
                 out.write(lic_dict[lic])
     except Exception as e:
         msg = str(e)

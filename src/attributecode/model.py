@@ -585,7 +585,7 @@ class FileTextField(PathField):
             try:
                 # TODO: we have lots the location by replacing it with a text
                 location = add_unc(location)
-                with io.open(location, encoding='utf-8', errors='replace') as txt:
+                with open(location, encoding='utf-8', errors='replace') as txt:
                     text = txt.read()
                 self.value[path] = text
             except Exception as e:
@@ -995,7 +995,7 @@ class About(object):
         errors = []
         try:
             loc = add_unc(loc)
-            with io.open(loc, encoding='utf-8', errors='replace') as txt:
+            with open(loc, encoding='utf-8', errors='replace') as txt:
                 input_text = txt.read()
             if not input_text:
                 msg = 'ABOUT file is empty: %(location)r'
@@ -1235,7 +1235,7 @@ class About(object):
         if on_windows:
             about_file_path = add_unc(about_file_path)
 
-        with io.open(about_file_path, mode='w', encoding='utf-8', errors='replace') as dumped:
+        with open(about_file_path, mode='w', encoding='utf-8', errors='replace') as dumped:
             dumped.write(genereated_tk_version)
             dumped.write(self.dumps(lic_dict))
 
@@ -1246,7 +1246,7 @@ class About(object):
         if on_windows:
             path = add_unc(path)
 
-        with io.open(path, mode='w', encoding='utf-8', errors='replace') as dumped:
+        with open(path, mode='w', encoding='utf-8', errors='replace') as dumped:
             dumped.write(context)
 
     def android_module_license(self, about_parent_path):
@@ -1317,7 +1317,7 @@ class About(object):
                         license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[lic_key]
                         license_info = (lic_key, license_name, license_filename, license_context, license_url, spdx_license_key)
                         license_key_name_context_url.append(license_info)
-                        with io.open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
+                        with open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
                             lic.write(license_context)
                     else:
                         # Invalid license issue is already handled
@@ -1372,7 +1372,7 @@ def collect_abouts_license_expression(location):
     for loc in about_locations:
         try:
             loc = add_unc(loc)
-            with io.open(loc, encoding='utf-8', errors='replace') as txt:
+            with open(loc, encoding='utf-8', errors='replace') as txt:
                 input_text = txt.read()
             # saneyaml.load() will have parsing error if the input has
             # tab value. Therefore, we should check if the input contains
@@ -1627,12 +1627,12 @@ def write_output(abouts, location, format):  # NOQA
         save_as_excel(location, about_dicts)
 
 def save_as_json(location, about_dicts):
-    with io.open(location, mode='w') as output_file:
+    with open(location, mode='w') as output_file:
         data = util.format_about_dict_for_json_output(about_dicts)
         output_file.write(json.dumps(data, indent=2))
 
 def save_as_csv(location, about_dicts, field_names):
-    with io.open(location, mode='w', encoding='utf-8', newline='', errors='replace') as output_file:
+    with open(location, mode='w', encoding='utf-8', newline='', errors='replace') as output_file:
         writer = csv.DictWriter(output_file, field_names)
         writer.writeheader()
         csv_formatted_list = util.format_about_dict_output(about_dicts)

@@ -93,7 +93,7 @@ def get_unicode_content(location):
     """
     Read file at location and return a unicode string.
     """
-    with io.open(location, encoding='utf-8', errors='replace') as doc:
+    with open(location, encoding='utf-8', errors='replace') as doc:
         return doc.read()
 
 

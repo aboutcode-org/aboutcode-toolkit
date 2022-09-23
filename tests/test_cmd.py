@@ -156,7 +156,7 @@ def test_report_errors_can_write_to_logfile():
     result_file = get_temp_file()
     _ec = cmd.report_errors(errors, quiet=False, verbose=True,
                            log_file_loc=result_file)
-    with io.open(result_file, 'r', encoding='utf-8', errors='replace') as rf:
+    with open(result_file, 'r', encoding='utf-8', errors='replace') as rf:
         result = rf.read()
     expected = [
         'Command completed with 6 errors or warnings.',

@@ -340,7 +340,8 @@ OUTPUT: Path to a directory where license files are saved.
         api_key = djc[1].strip("'").strip('"')
 
     click.echo('Fetching licenses...')
-    license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key, scancode)
+    from_check = False
+    license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, from_check, api_url, api_key, scancode)
 
     if lic_errors:
         errors.extend(lic_errors)
@@ -370,7 +371,7 @@ def validate_template(ctx, param, value):
     if not value:
         return None
 
-    with io.open(value, encoding='utf-8', errors='replace') as templatef:
+    with open(value, encoding='utf-8', errors='replace') as templatef:
         template_error = check_template(templatef.read())
 
     if template_error:
@@ -523,7 +524,8 @@ OUTPUT: Path where to write the attribution document.
             api_key = ''
         api_url = api_url.strip("'").strip('"')
         api_key = api_key.strip("'").strip('"')
-        license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, api_url, api_key, scancode, reference)
+        from_check = False
+        license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, from_check, api_url, api_key, scancode, reference)
         errors.extend(lic_errors)
         sorted_license_dict = sorted(license_dict)
 
@@ -823,7 +825,7 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
             for msg in log_msgs:
                 click.echo(msg)
         if log_msgs and log_file_loc:
-            with io.open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
+            with open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
                 lf.write('\n'.join(log_msgs))
             click.echo("Error log: " + log_file_loc)
     return severe_errors_count

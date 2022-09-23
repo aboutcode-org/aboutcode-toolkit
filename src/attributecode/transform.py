@@ -282,7 +282,7 @@ class Transformer(object):
         Load and return a Transformer instance from a YAML configuration file at
         `location`.
         """
-        with io.open(location, encoding='utf-8', errors='replace') as conf:
+        with open(location, encoding='utf-8', errors='replace') as conf:
             data = saneyaml.load(replace_tab_with_spaces(conf.read()))
         return cls(
             field_renamings=data.get('field_renamings', {}),
@@ -381,7 +381,7 @@ def read_csv_rows(location):
     """
     Yield rows (as a list of values) from a CSV file at `location`.
     """
-    with io.open(location, encoding='utf-8', errors='replace') as csvfile:
+    with open(location, encoding='utf-8', errors='replace') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             yield row
@@ -391,7 +391,7 @@ def read_json(location):
     """
     Yield rows (as a list of values) from a CSV file at `location`.
     """
-    with io.open(location, encoding='utf-8', errors='replace') as jsonfile:
+    with open(location, encoding='utf-8', errors='replace') as jsonfile:
         return json.load(jsonfile)
 
 
@@ -400,7 +400,7 @@ def write_csv(location, data, field_names):  # NOQA
     Write a CSV file at `location` the `data` list of ordered dicts using the
     `field_names`.
     """
-    with io.open(location, 'w', encoding='utf-8', newline='\n', errors='replace') as csvfile:
+    with open(location, 'w', encoding='utf-8', newline='\n', errors='replace') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=field_names)
         writer.writeheader()
         writer.writerows(data)
@@ -429,7 +429,7 @@ def read_excel(location):
     while index <= max_col:
         value = sheet_obj.cell(row=1, column=index).value
         if value in col_keys:
-            msg = 'Duplicated column name, ' + str(value) + ', detected.' 
+            msg = 'Duplicated column name, ' + str(value) + ', detected.'
             errors.append(Error(CRITICAL, msg))
             return errors, results
         if value in mapping_dict:

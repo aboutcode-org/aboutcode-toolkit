@@ -44,7 +44,7 @@ def check_duplicated_columns(location):
     at location.
     """
     location = add_unc(location)
-    with codecs.open(location, 'rb', encoding='utf-8-sig', errors='replace') as csvfile:
+    with open(location, mode='r', encoding='utf-8-sig', errors='replace') as csvfile:
         reader = csv.reader(csvfile)
         columns = next(reader)
         columns = [col for col in columns]

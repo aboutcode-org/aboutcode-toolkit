@@ -63,7 +63,7 @@ class TemplateTest(unittest.TestCase):
         builtin_templates_dir = os.path.dirname(attrib.DEFAULT_TEMPLATE_FILE)
         for template in os.listdir(builtin_templates_dir):
             template_loc = os.path.join(builtin_templates_dir, template)
-            with io.open(template_loc, 'r', encoding='utf-8', errors='replace') as tmpl:
+            with open(template_loc, 'r', encoding='utf-8', errors='replace') as tmpl:
                 template = tmpl.read()
             try:
                 assert None == attrib.check_template(template)
