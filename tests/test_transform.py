@@ -26,6 +26,7 @@ from attributecode.transform import strip_trailing_fields_csv
 from attributecode.transform import strip_trailing_fields_json
 from attributecode.transform import Transformer
 from attributecode.transform import read_csv_rows, read_excel, read_json
+from attributecode.transform import transform_csv, transform_excel, transform_json
 
 
 class TransformTest(unittest.TestCase):
@@ -36,16 +37,12 @@ class TransformTest(unittest.TestCase):
         configuration = get_test_loc('test_transform/configuration_new_cols')
         transformer = Transformer.from_file(configuration)
 
-        field_name, data, err = transform_data(data, transformer)
+        data, err = transform_data(data, transformer)
 
-        expect_name = [u'path', u'about_resource', u'name', u'version', u'notes', u'temp']
         expected_data = [dict(OrderedDict([(u'path', u'/tmp/test.c'),
                                            (u'about_resource', u'/tmp/test.c'),
                                            (u'name', u'test.c'), (u'version', u'1'),
                                            (u'notes', u'test'), (u'temp', u'foo')]))]
-        assert len(field_name) == len(expect_name)
-        for name in field_name:
-            assert name in expect_name
         assert len(data) == len(expected_data)
         for d in data:
             assert dict(d) in expected_data
@@ -57,14 +54,11 @@ class TransformTest(unittest.TestCase):
         configuration = get_test_loc('test_transform/configuration')
         transformer = Transformer.from_file(configuration)
 
-        field_name, data, err = transform_data(data, transformer)
+        data, err = transform_data(data, transformer)
 
         expect_name = [u'about_resource', u'name', u'version']
         expected_data = [dict(OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'1')]))]
 
-        assert len(field_name) == len(expect_name)
-        for name in field_name:
-            assert name in expect_name
         assert len(data) == len(expected_data)
         for d in data:
             assert dict(d) in expected_data
@@ -75,15 +69,12 @@ class TransformTest(unittest.TestCase):
         configuration = get_test_loc('test_transform/configuration2')
         transformer = Transformer.from_file(configuration)
 
-        field_name, data, err = transform_data(data, transformer)
+        data, err = transform_data(data, transformer)
 
         expect_name = [u'about_resource', u'name', u'version']
         expected_data = [dict(OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'v0.01')])),
                          dict(OrderedDict([(u'about_resource', u'/tmp/tmp.h'), (u'name', u'tmp.h'), (u'version', None)]))]
 
-        assert len(field_name) == len(expect_name)
-        for name in field_name:
-            assert name in expect_name
         assert len(data) == len(expected_data)
         for d in data:
             assert dict(d) in expected_data
@@ -173,3 +164,30 @@ class TransformTest(unittest.TestCase):
                     ['/test.c', 'test.c', 'mit'],
                     ['/test2.c', 'test2.c', 'mit and apache-2.0']]
         assert list(data) == expected
+
+    def test_transform_csv(self):
+        test_file = get_test_loc('test_transform/input.csv')
+        data, err = transform_csv(test_file)
+        expected = [{'Directory/Filename': '/aboutcode-toolkit/',
+                     'Component': 'AboutCode-toolkit',
+                     'Confirmed Version': '123', 'notes': ''}]
+        assert len(err) == 0
+        assert data == expected
+
+    def test_transform_excel(self):
+        test_file = get_test_loc('test_transform/input.xlsx')
+        data, err = transform_excel(test_file)
+        expected = [OrderedDict([('Directory/Filename', '/aboutcode-toolkit/'),
+                                 ('Component', 'AboutCode-toolkit'),
+                                 ('Confirmed Version', 123), ('notes', '')])]
+        assert len(err) == 0
+        assert data == expected
+
+    def test_transform_json(self):
+        test_file = get_test_loc('test_transform/input.json')
+        data, err = transform_json(test_file)
+        expected = [{'Directory/Filename': '/aboutcode-toolkit/',
+                     'Component': 'AboutCode-toolkit',
+                     'Confirmed Version': '123', 'notes': ''}]
+        assert len(err) == 0
+        assert data == expected

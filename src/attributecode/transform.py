@@ -13,13 +13,11 @@
 #  limitations under the License.
 # ============================================================================
 
-import io
 import json
 from collections import Counter, OrderedDict
 from itertools import zip_longest
 
 import attr
-import itertools
 import openpyxl
 
 from attributecode import CRITICAL
@@ -28,19 +26,13 @@ from attributecode import saneyaml
 from attributecode.util import csv
 from attributecode.util import replace_tab_with_spaces
 
-
-def transform_csv_to_csv(location, output, transformer):
+def transform_csv(location):
     """
-    Read a CSV file at `location` and write a new CSV file at `output`. Apply
-    transformations using the `transformer` Transformer.
-    Return a list of Error objects.
+    Read a CSV file at `location` and convert data into list of dictionaries.
     """
-    if not transformer:
-        raise ValueError('Cannot transform without Transformer')
-
-    rows = read_csv_rows(location)
-
     errors = []
+    new_data = []
+    rows = read_csv_rows(location)
     data = iter(rows)
     names = next(rows)
     field_names = strip_trailing_fields_csv(names)
@@ -50,65 +42,39 @@ def transform_csv_to_csv(location, output, transformer):
         msg = u'Duplicated field name: %(name)s'
         for name in dupes:
             errors.append(Error(CRITICAL, msg % locals()))
-        return errors
 
-    # Convert to dicts
-    new_data = [dict(zip_longest(field_names, item)) for item in data]
+    if not errors:
+        # Convert to dicts
+        new_data = [dict(zip_longest(field_names, item)) for item in data]
 
-    field_names, updated_data, errors = transform_data(new_data, transformer)
-
-    if errors:
-        return errors
-    else:
-        write_csv(output, updated_data, field_names)
-        return []
+    return new_data, errors
 
 
-def transform_json_to_json(location, output, transformer):
+def transform_json(location):
     """
-    Read a JSON file at `location` and write a new JSON file at `output`. Apply
-    transformations using the `transformer` Transformer.
-    Return a list of Error objects.
+    Read a JSON file at `location` and convert data into list of dictionaries.
     """
-    if not transformer:
-        raise ValueError('Cannot transform without Transformer')
-
+    errors = []
+    new_data = []
     items = read_json(location)
     data = normalize_dict_data(items)
     new_data = strip_trailing_fields_json(data)
 
-    _field_names, updated_data, errors = transform_data(new_data, transformer)
-
-    if errors:
-        return errors
-    else:
-        write_json(output, updated_data)
-        return []
+    return new_data, errors
 
 
-def transform_excel_to_excel(location, output, transformer):
+def transform_excel(location):
     """
-    Read a XLSX file at `location` and write a new Excel file at `output`. Apply
-    transformations using the `transformer` Transformer.
-    Return a list of Error objects.
+    Read a XLSX file at `location` and convert data into list of dictionaries.
     """
-    if not transformer:
-        raise ValueError('Cannot transform without Transformer')
-
-    dupes, new_data = read_excel(location)
     errors = []
+    new_data = []
+    dupes, new_data = read_excel(location)
     if dupes:
         msg = u'Duplicated field name: %(name)s'
         for name in dupes:
             errors.append(Error(CRITICAL, msg % locals()))
-        return errors
-
-    _field_names, updated_data, errors = transform_data(new_data, transformer)
-    if errors:
-        return errors
-    else:
-        write_excel(output, updated_data)
-        return []
+    return new_data, errors
 
 
 def strip_trailing_fields_csv(names):
@@ -160,25 +126,18 @@ def transform_data(data, transformer):
     Return a tuple of:
        ([field names...], [transformed ordered dict...], [Error objects..])
     """
-    if not transformer:
-        return data
-
     renamed_field_data = transformer.apply_renamings(data)
-
-    field_names = renamed_field_data[0].keys()
 
     if transformer.field_filters:
         renamed_field_data = list(transformer.filter_fields(renamed_field_data))
-        field_names = [c for c in field_names if c in transformer.field_filters]
 
     if transformer.exclude_fields:
         renamed_field_data = list(transformer.filter_excluded(renamed_field_data))
-        field_names = [c for c in field_names if c not in transformer.exclude_fields]
 
     errors = transformer.check_required_fields(renamed_field_data)
     if errors:
-        return field_names, data, errors
-    return field_names, renamed_field_data, errors
+        return data, errors
+    return renamed_field_data, errors
 
 
 tranformer_config_help = '''
@@ -395,11 +354,11 @@ def read_json(location):
         return json.load(jsonfile)
 
 
-def write_csv(location, data, field_names):  # NOQA
+def write_csv(location, data):
     """
-    Write a CSV file at `location` the `data` list of ordered dicts using the
-    `field_names`.
+    Write a CSV file at `location` with the `data` which is a list of ordered dicts.
     """
+    field_names = list(data[0].keys())
     with open(location, 'w', encoding='utf-8', newline='\n', errors='replace') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=field_names)
         writer.writeheader()

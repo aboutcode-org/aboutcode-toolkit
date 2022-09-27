@@ -6,6 +6,7 @@ Changelog
 
     * Fixed version mismatch (https://github.com/nexB/aboutcode-toolkit/issues/510)
     * Improve `check` performance (https://github.com/nexB/aboutcode-toolkit/issues/511)
+    * Relax the requirement to have the same format for input and output for `transform`
 
 
 2022-03-21

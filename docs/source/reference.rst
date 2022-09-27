@@ -595,8 +595,7 @@ Purpose
 -------
 
 Transform the CSV/JSON/XLSX file at LOCATION by applying renamings,
-filters and checks and then write a new CSV/JSON/Excel to OUTPUT
-(Format for input and output need to be the same).
+filters and checks and then write a new CSV/JSON/Excel to OUTPUT.
 
 Details
 ^^^^^^^
