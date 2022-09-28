@@ -13,10 +13,10 @@
     <h1>OPEN SOURCE SOFTWARE INFORMATION</h1>
     <h2> {{ vartext['subtitle'] }} </h2>
     <div>
-      <p>Licenses, acknowledgments and required copyright notices for 
+      <p>Licenses, acknowledgments and required copyright notices for
       open source components:</p>
     </div>
-    
+
         <div class="oss-table-of-contents">
             {% set index = namespace(value=0) %}
             {% for about_object in abouts %}
@@ -43,10 +43,11 @@
 				{% set _ = captured.update({ about_object.name.value: true }) %}
 				{% set index.value = index.value + 1 %}
 			{% endif %}
-            {% if about_object.copyright.value %}
-                <pre>{{about_object.copyright.value}}</pre>
+            {% if about_object.copyrights.value %}
+				{% for copyright in about_object.copyrights.value %}
+					<pre> {{ copyright['copyright'] }} </pre>
+				{% endfor %}
             {% endif %}
-
 
 			{% for lic_key in about_object.license_key.value %}
 				<p>This component is licensed under {{ lic_key }}</p>
@@ -80,4 +81,3 @@
     <i>This file was generated with AttributeCode version: {{ tkversion }} on: {{ utcnow }} (UTC)</i>
     </body>
 </html>
-
