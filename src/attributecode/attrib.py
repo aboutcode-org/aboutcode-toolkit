@@ -114,41 +114,69 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
     if scancode:
         meet_score_licenses_list = []
         for about in abouts:
+            # See if the input has 'matched_text'
+            matched_text_exist = False
+            try:
+                if about.matched_text:
+                    matched_text_exist = True
+            except:
+                pass
             # We will use a dictionary to keep the unique license key
             # which the dictionary key is the license key and the dictionary value
-            # is (lic_score, lic_name)
+            # is (lic_score, lic_name) or (lic_score, lic_name, matched_text)
             if about.license_key.value:
                 updated_dict = {}
                 lic_key = about.license_key.value
                 lic_name = about.license_name.value
                 lic_score = about.license_score.value
+                if matched_text_exist:
+                    matched_text = about.matched_text.value
+                    assert len(lic_key) == len(matched_text)
                 assert len(lic_key) == len(lic_name)
                 assert len(lic_key) == len(lic_score)
                 if lic_key:
                     index = 0
                     for key in lic_key:
                         if key in updated_dict:
-                            previous_score, _name = updated_dict[key]
+                            if matched_text_exist:
+                                previous_score, _name, _detected_text = updated_dict[key]
+                            else:
+                                previous_score, _name = updated_dict[key]
                             current_score = lic_score[index]
                             if current_score > previous_score:
-                                updated_dict[key] = (lic_score[index], lic_name[index])
+                                if matched_text_exist:
+                                    updated_dict[key] = (lic_score[index], lic_name[index], matched_text[index])
+                                else:
+                                    updated_dict[key] = (lic_score[index], lic_name[index])
                         else:
-                            updated_dict[key] = (lic_score[index], lic_name[index])
+                            if matched_text_exist:
+                                updated_dict[key] = (lic_score[index], lic_name[index], matched_text[index])
+                            else:
+                                updated_dict[key] = (lic_score[index], lic_name[index])
                         index = index + 1
                 updated_lic_key = []
                 updated_lic_name = []
                 updated_lic_score = []
+                if matched_text_exist:
+                    updated_matched_text = []
                 for lic in updated_dict:
-                    score, name = updated_dict[lic]
+                    if matched_text_exist:
+                        score, name, text = updated_dict[lic]
+                    else:
+                        score, name = updated_dict[lic]
                     if score >= min_license_score:
                         updated_lic_key.append(lic)
                         updated_lic_score.append(score)
                         updated_lic_name.append(name)
+                        if matched_text_exist:
+                            updated_matched_text.append(text)
                         if not lic in meet_score_licenses_list:
                             meet_score_licenses_list.append(lic)
                 about.license_key.value = updated_lic_key
                 about.license_name.value = updated_lic_name
                 about.license_score.value = updated_lic_score
+                if matched_text_exist:
+                    about.matched_text.value = updated_matched_text
 
         for lic in licenses_list:
             if not lic.key in meet_score_licenses_list:
@@ -180,7 +208,6 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
 
     # Sort the license object by key
     licenses_list = sorted(licenses_list, key=lambda x: x.key)
-
     rendered = template.render(
         abouts=abouts,
         common_licenses=COMMON_LICENSES,

@@ -1051,7 +1051,7 @@ class About(object):
                 continue
             if key == u'licenses':
                 # FIXME: use a license object instead
-                lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score = ungroup_licenses(value)
+                lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, lic_matched_text = ungroup_licenses(value)
                 if lic_key:
                     fields.append(('license_key', lic_key))
                 if lic_name:
@@ -1067,6 +1067,8 @@ class About(object):
                 # The license score is a key from scancode license scan
                 if lic_score:
                     fields.append(('license_score', lic_score))
+                if lic_matched_text:
+                    fields.append(('matched_text', lic_matched_text))
                 # The licenses field has been ungrouped and can be removed.
                 # Otherwise, it will gives the following INFO level error
                 # 'Field licenses is a custom field.'
@@ -1660,7 +1662,7 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
         url = 'https://scancode-licensedb.aboutcode.org/'
     if util.have_network_connection():
         if not valid_api_url(url):
-            msg = u"URL not reachable. Invalid 'URL'. License generation is skipped."
+            msg = u"URL not reachable. Invalid 'URL. License generation is skipped."
             errors.append(Error(ERROR, msg))
     else:
         msg = u'Network problem. Please check your Internet connection. License generation is skipped.'

@@ -572,7 +572,7 @@ description: sample
             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new']
         expected_spdx = [u'MIT', u'BSD-3-Clause']
-        lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score = util.ungroup_licenses(about)
+        lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, _matched_text = util.ungroup_licenses(about)
         assert expected_lic_key == lic_key
         assert expected_lic_name == lic_name
         assert expected_lic_file == lic_file

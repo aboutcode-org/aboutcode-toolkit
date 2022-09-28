@@ -1,12 +1,13 @@
 ==============================
 Changelog
 ==============================
-2022-09-21
+2022-xx-xx
     Release 7.1.0
 
     * Fixed version mismatch (https://github.com/nexB/aboutcode-toolkit/issues/510)
     * Improve `check` performance (https://github.com/nexB/aboutcode-toolkit/issues/511)
     * Relax the requirement to have the same format for input and output for `transform`
+    * Collect and handle the "matched_text" from the `--license-text` option from the scancode-toolkit
 
 
 2022-03-21
