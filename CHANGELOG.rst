@@ -1,7 +1,7 @@
 ==============================
 Changelog
 ==============================
-2022-xx-xx
+2022-10-24
     Release 7.1.0
 
     * Fixed version mismatch (https://github.com/nexB/aboutcode-toolkit/issues/510)
