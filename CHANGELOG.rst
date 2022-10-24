@@ -1,6 +1,12 @@
 ==============================
 Changelog
 2022-10-24
+    Release 7.2.0
+
+    * Add option to validate `license_expression` in the `check` command
+
+
+2022-10-24
     Release 7.1.1
 
     * This new release has no feature changes.

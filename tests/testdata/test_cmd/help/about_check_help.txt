@@ -5,6 +5,7 @@ Usage: about check [OPTIONS] LOCATION
   LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
 Options:
+  --license              Validate the license_expression value in the input.
   --djc api_url api_key  Validate license_expression from a DejaCode License
                          Library API URL using the API KEY.
   --log FILE             Path to a file to save the error messages if any.

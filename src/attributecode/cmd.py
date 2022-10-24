@@ -675,6 +675,10 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
     type=click.Path(
         exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 
+@click.option('--license',
+    is_flag=True,
+    help='Validate the license_expression value in the input.')
+
 @click.option('--djc',
     nargs=2,
     type=str,
@@ -692,7 +696,7 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def check(location, djc, log, verbose):
+def check(location, license, djc, log, verbose):
     """
 Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
@@ -716,10 +720,11 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     errors, abouts = collect_inventory(location)
 
     # Validate license_expression
-    from_check = True
-    _key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, from_check, api_url, api_key)
-    for e in errs:
-        errors.append(e)
+    if license:
+        from_check = True
+        _key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, from_check, api_url, api_key)
+        for e in errs:
+            errors.append(e)
 
     severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log)
     sys.exit(severe_errors_count)

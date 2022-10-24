@@ -177,6 +177,7 @@ Options
 
         ..  code-block:: none
 
+                --license              Validate the license_expression value in the input.
                 --djc api_url api_key  Validate license_expression from a DejaCode License
                                        Library API URL using the API KEY.
                 --log FILE             Path to a file to save the error messages if any.
@@ -193,6 +194,14 @@ Details
 
         ..  code-block:: none
 
+                --license
+                    Validate the license_expression value in the input.
+
+                    If this option is not flagged, only the basic syntax is checked.
+                    No validation of the license_expression value.
+
+                 $ about check --license /home/project/about_files/
+
                 ---djc
 
                     Validate license_expression from a DejaCode License.
@@ -204,7 +213,7 @@ Details
                     In addition, the input needs to have the 'license_expression' field.
                     (Please contact nexB to get the api_* value for this feature)
 
-                $ about check --djc 'api_url' 'api_key' /home/project/about_files/
+                $ about check --license --djc 'api_url' 'api_key' /home/project/about_files/
 
                 --log
 
