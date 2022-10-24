@@ -15,7 +15,10 @@
 # ============================================================================
 
 from jinja2 import Environment
-from jinja2.filters import pass_environment
+try:
+    from jinja2.filters import pass_environment
+except ImportError:
+    from jinja2.filters import environmentfilter as pass_environment
 from jinja2.filters import make_attrgetter
 from jinja2.filters import ignore_case
 from jinja2.filters import FilterArgumentError
