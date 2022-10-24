@@ -1,6 +1,11 @@
 ==============================
 Changelog
-==============================
+2022-10-24
+    Release 7.1.1
+
+    * This new release has no feature changes.
+
+
 2022-10-24
     Release 7.1.0
 
