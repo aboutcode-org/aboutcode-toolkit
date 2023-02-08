@@ -22,7 +22,7 @@ extractcode-libarchive==3.5.1.210531
 fasteners==0.17.3
 fingerprints==1.0.3
 ftfy==6.0.3
-future==0.18.2
+future==0.18.3
 gemfileparser==0.8.0
 html5lib==1.1
 idna==3.3
