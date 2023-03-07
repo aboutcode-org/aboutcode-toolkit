@@ -239,6 +239,10 @@ OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
     type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
     help='Path to a directory with reference license data and text files.')
 
+@click.option('--worksheet',
+    metavar='name',
+    help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
+
 @click.option('-q', '--quiet',
     is_flag=True,
     help='Do not print error or warning messages.')
@@ -248,7 +252,7 @@ OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def gen(location, output, android, fetch_license, fetch_license_djc, reference, quiet, verbose):
+def gen(location, output, android, fetch_license, fetch_license_djc, reference, worksheet, quiet, verbose):
     """
 Given a CSV/JSON/XLSX inventory, generate ABOUT files in the output location.
 
@@ -264,6 +268,9 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     if not location.endswith(('.csv', '.json', '.xlsx')):
         raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json or .xlsx.')
 
+    if worksheet and not location.endswith('.xlsx'):
+        raise click.UsageError('ERROR: --worksheet option only works with .xlsx input.')
+
     errors, abouts = generate_about_files(
         location=location,
         base_dir=output,
@@ -271,6 +278,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         reference_dir=reference,
         fetch_license=fetch_license,
         fetch_license_djc=fetch_license_djc,
+        worksheet=worksheet
     )
 
     errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
@@ -309,12 +317,16 @@ OUTPUT: Path to a directory where ABOUT files are generated.
     is_flag=True,
     help='Indicate the input JSON file is from scancode_toolkit.')
 
+@click.option('--worksheet',
+    metavar='name',
+    help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
+
 @click.option('--verbose',
     is_flag=True,
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def gen_license(location, output, djc, scancode, verbose):
+def gen_license(location, output, djc, scancode, worksheet, verbose):
     """
 Fetch licenses (Default: ScanCode LicenseDB) in the license_expression field and save to the output location.
 
@@ -327,10 +339,13 @@ OUTPUT: Path to a directory where license files are saved.
     api_key = ''
     errors = []
 
+    if worksheet and not location.endswith('.xlsx'):
+        raise click.UsageError('ERROR: --worksheet option only works with .xlsx input.')
+
     log_file_loc = os.path.join(output, 'error.log')
 
     if location.endswith('.csv') or location.endswith('.json') or location.endswith('.xlsx'):
-        errors, abouts = collect_inventory_license_expression(location=location, scancode=scancode)
+        errors, abouts = collect_inventory_license_expression(location=location, scancode=scancode, worksheet=worksheet)
         if errors:
             severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
             sys.exit(severe_errors_count)
@@ -440,6 +455,10 @@ def validate_template(ctx, param, value):
     metavar='<key>=<value>',
     help='Add variable text as key=value for use in a custom attribution template.')
 
+@click.option('--worksheet',
+    metavar='name',
+    help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
+
 @click.option('-q', '--quiet',
     is_flag=True,
     help='Do not print error or warning messages.')
@@ -449,7 +468,7 @@ def validate_template(ctx, param, value):
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def attrib(input, output, api_url, api_key, scancode, min_license_score, reference, template, vartext, quiet, verbose):
+def attrib(input, output, api_url, api_key, scancode, min_license_score, reference, template, vartext, worksheet, quiet, verbose):
     """
 Generate an attribution document at OUTPUT using JSON, CSV or XLSX or .ABOUT files at INPUT.
 
@@ -463,6 +482,9 @@ OUTPUT: Path where to write the attribution document.
     rendered = ''
     license_dict = {}
     errors = []
+
+    if worksheet and not input.endswith('.xlsx'):
+        raise click.UsageError('ERROR: --worksheet option only works with .xlsx input.')
 
     if not quiet:
         print_version()
@@ -501,7 +523,8 @@ OUTPUT: Path where to write the attribution document.
             location=input,
             from_attrib=from_attrib,
             scancode=scancode,
-            reference_dir=reference
+            reference_dir=reference,
+            worksheet=worksheet
         )
 
     else:
@@ -765,6 +788,10 @@ def print_config_help(ctx, param, value):
     help='Path to an optional YAML configuration file. See --help-format for '
          'format help.')
 
+@click.option('--worksheet',
+    metavar='name',
+    help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
+
 @click.option('--help-format',
     is_flag=True, is_eager=True, expose_value=False,
     callback=print_config_help,
@@ -779,7 +806,7 @@ def print_config_help(ctx, param, value):
     help='Show all error and warning messages.')
 
 @click.help_option('-h', '--help')
-def transform(location, output, configuration, quiet, verbose):  # NOQA
+def transform(location, output, configuration, worksheet, quiet, verbose):  # NOQA
     """
 Transform the CSV/JSON/XLSX file at LOCATION by applying renamings, filters and checks
 and then write a new CSV/JSON/XLSX to OUTPUT.
@@ -788,6 +815,9 @@ LOCATION: Path to a CSV/JSON/XLSX file.
 
 OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
     """
+    if worksheet and not location.endswith('.xlsx'):
+        raise click.UsageError('ERROR: --worksheet option only works with .xlsx input.')
+
     if not configuration:
         transformer = Transformer.default()
     else:
@@ -807,10 +837,15 @@ OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
     elif location.endswith('.json'):
         new_data, errors = transform_json(location)
     elif location.endswith('.xlsx'):
-        new_data, errors = transform_excel(location)
+        new_data, errors = transform_excel(location, worksheet)
 
     if not errors:
         updated_data, errors = transform_data(new_data, transformer)
+
+    if not updated_data:
+        msg = 'The input is empty. Nothing is transformed.'
+        click.echo(msg)
+        sys.exit(0)
 
     if not errors:
         if output.endswith('.csv'):

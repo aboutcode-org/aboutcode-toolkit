@@ -671,7 +671,7 @@ def load_scancode_json(location):
         updated_results.append(updated_dict)
     return updated_results
 
-def load_excel(location):
+def load_excel(location, worksheet=None):
     """
     Read XLSX at `location`, return a list of ordered dictionaries, one
     for each row.
@@ -682,7 +682,11 @@ def load_excel(location):
 
     # This is to prevent showing the: warn("Workbook contains no default style, apply openpyxl's default")
     with warnings.catch_warnings(record=True):
-        sheet_obj = openpyxl.load_workbook(location).active
+        input_bom = openpyxl.load_workbook(location)
+        if worksheet:
+            sheet_obj = input_bom[worksheet]
+        else:
+            sheet_obj = input_bom.active
     max_col = sheet_obj.max_column
 
     index = 1

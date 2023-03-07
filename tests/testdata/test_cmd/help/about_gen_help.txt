@@ -18,6 +18,8 @@ Options:
                                   KEY.
   --reference DIR                 Path to a directory with reference license
                                   data and text files.
+  --worksheet name                The worksheet name from the INPUT. (Default:
+                                  the "active" worksheet)
   -q, --quiet                     Do not print error or warning messages.
   --verbose                       Show all error and warning messages.
   -h, --help                      Show this message and exit.

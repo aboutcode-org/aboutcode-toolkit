@@ -1392,7 +1392,7 @@ def collect_abouts_license_expression(location):
     return errors, abouts
 
 
-def collect_inventory_license_expression(location, scancode=False):
+def collect_inventory_license_expression(location, scancode=False, worksheet=None):
     """
     Read the inventory file at location and return a list of  ABOUT objects without
     validation. The purpose of this is to speed up the process for `gen_license` command.
@@ -1410,11 +1410,11 @@ def collect_inventory_license_expression(location, scancode=False):
         if location.endswith('.csv'):
             inventory = gen.load_csv(location)
         elif location.endswith('.xlsx'):
-            _dup_cols_err, inventory = gen.load_excel(location)
+            _dup_cols_err, inventory = gen.load_excel(location, worksheet)
         else:
             inventory = gen.load_json(location)
         # Check if 'license_expression' field is in the input
-        if not 'license_expression' in inventory[0]:
+        if not inventory or not 'license_expression' in inventory[0]:
             errors.append(Error(CRITICAL, "No 'license_expression' field in the input."))
             return errors, abouts
 

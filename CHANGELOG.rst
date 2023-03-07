@@ -5,6 +5,7 @@ Changelog
 
     * Fixed the transform code for xlsx and json
     * Remove irrelevant error for attrib
+    * Add support to identify worksheet name for XLSX input
 
 
 2022-10-24

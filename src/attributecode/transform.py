@@ -63,13 +63,13 @@ def transform_json(location):
     return new_data, errors
 
 
-def transform_excel(location):
+def transform_excel(location, worksheet=None):
     """
     Read a XLSX file at `location` and convert data into list of dictionaries.
     """
     errors = []
     new_data = []
-    dupes, new_data = read_excel(location)
+    dupes, new_data = read_excel(location, worksheet)
     if dupes:
         msg = u'Duplicated field name: %(name)s'
         for name in dupes:
@@ -268,6 +268,7 @@ class Transformer(object):
             missings = ', '.join(missings)
             msg = 'Row {rn} is missing required values for fields: {missings}'
             errors.append(Error(CRITICAL, msg.format(**locals())))
+
         return errors
 
     def apply_renamings(self, data):
@@ -372,14 +373,18 @@ def write_json(location, data):
     with open(location, 'w') as jsonfile:
         json.dump(data, jsonfile, indent=3)
 
-def read_excel(location):
+def read_excel(location, worksheet=None):
     """
     Read XLSX at `location`, return a list of ordered dictionaries, one
     for each row.
     """
     results = []
     errors = []
-    sheet_obj = openpyxl.load_workbook(location).active
+    input_bom = openpyxl.load_workbook(location)
+    if worksheet:
+        sheet_obj = input_bom[worksheet]
+    else:
+        sheet_obj = input_bom.active
     max_col = sheet_obj.max_column
 
     index = 1

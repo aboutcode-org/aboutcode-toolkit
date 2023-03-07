@@ -116,7 +116,7 @@ def check_about_resource_filename(arp):
     return ''
 
 
-def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, reference_dir=None):
+def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, reference_dir=None, worksheet=None):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files stored in
     the `base_dir`. Return a list of errors and a list of About objects
@@ -140,7 +140,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                 return errors, abouts
             inventory = load_csv(location)
         elif location.endswith('.xlsx'):
-            dup_cols_err, inventory = load_excel(location)
+            dup_cols_err, inventory = load_excel(location, worksheet)
             if dup_cols_err:
                 errors.extend(dup_cols_err)
                 return errors, abouts
@@ -266,7 +266,7 @@ def update_about_resource(self):
     pass
 
 
-def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False, fetch_license_djc=False):
+def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False, fetch_license_djc=False, worksheet=None):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir. Return errors and about objects.
@@ -293,7 +293,8 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
     errors, abouts = load_inventory(
         location=location,
         base_dir=bdir,
-        reference_dir=reference_dir
+        reference_dir=reference_dir,
+        worksheet=worksheet
     )
 
     if gen_license:

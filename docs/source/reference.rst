@@ -63,16 +63,19 @@ Options
                 --api_url URL                URL to DejaCode License Library.
                 --api_key KEY                API Key for the  DejaCode License Library
                 --min-license-score INTEGER  Attribute components that have license score
-                                             higher than the defined --min-license-score.
+                                            higher than or equal to the defined --min-
+                                            license-score.
                 --scancode                   Indicate the input JSON file is from
-                                             scancode toolkit.
+                                            scancode_toolkit.
                 --reference DIR              Path to a directory with reference files where
-                                             "license_file" and/or "notice_file" located.
-                --template FILE              Path to an optional custom attribution template to
-                                             generate the attribution document. If not provided
-                                             the default built-in template is used.
-                --vartext <key>=<value>      Add variable text as key=value for use in a custom
-                                             attribution template.
+                                            "license_file" and/or "notice_file" located.
+                --template FILE              Path to an optional custom attribution template
+                                            to generate the attribution document. If not
+                                            provided the default built-in template is used.
+                --vartext <key>=<value>      Add variable text as key=value for use in a
+                                            custom attribution template.
+                --worksheet name             The worksheet name from the INPUT. (Default:
+                                            the "active" worksheet)
                 -q, --quiet                  Do not print error or warning messages.
                 --verbose                    Show all error and warning messages.
                 -h, --help                   Show this message and exit.
@@ -148,6 +151,13 @@ Details
                     Users can use the following in the template to get the vartext:
                     {{ vartext['title'] }}
                     {{ vartext['header'] }}
+
+                --worksheet
+
+                    This option identify the worksheet name from the XLSX input to work with.
+                    If no worksheet is defined, the "active" worksheet will be used
+
+                $ about attrib --worksheet BOM /home/project/audit.xlsx OUTPUT
 
                 --verbose
 
@@ -326,28 +336,22 @@ Options
 
         ..  code-block:: none
 
-                --android                           Generate MODULE_LICENSE_XXX (XXX will be
-                                                    replaced by license key) and NOTICE as the same
-                                                    design as from Android.
-                --fetch-license                     Fetch license data and text files from the
-                                                    ScanCode LicenseDB.
-                --fetch-license-djc api_url api_key Fetch licenses data from DejaCode License
-                                                    Library and create <license>.LICENSE
-                                                    side-by-side with the generated .ABOUT file.
-                                                    The following additional options are required:
-
-                                                    api_url - URL to the DejaCode License Library
-                                                    API endpoint
-
-                                                    api_key - DejaCode API key
-                                                    Example syntax:
-
-                                                    about gen --fetch-license-djc api_url api_key
-                --reference PATH                    Path to a directory with reference license
-                                                    data and text files.
-                -q, --quiet                         Do not print any error/warning.
-                --verbose                           Show all the errors and warning.
-                -h, --help                          Show this message and exit.
+                --android                       Generate MODULE_LICENSE_XXX (XXX will be
+                                                replaced by license key) and NOTICE as the
+                                                same design as from Android.
+                --fetch-license                 Fetch license data and text files from the
+                                                ScanCode LicenseDB.
+                --fetch-license-djc api_url api_key
+                                                Fetch license data and text files from a
+                                                DejaCode License Library API URL using the
+                                                API KEY.
+                --reference DIR                 Path to a directory with reference license
+                                                data and text files.
+                --worksheet name                The worksheet name from the INPUT. (Default:
+                                                the "active" worksheet)
+                -q, --quiet                     Do not print error or warning messages.
+                --verbose                       Show all error and warning messages.
+                -h, --help                      Show this message and exit.
 
 Purpose
 -------
@@ -405,6 +409,13 @@ Details
 
                 $ about gen --reference /home/licenses_notices/ LOCATION OUTPUT
 
+                --worksheet
+
+                    This option identify the worksheet name from the XLSX input to work with.
+                    If no worksheet is defined, the "active" worksheet will be used
+
+                $ about gen --worksheet BOM LOCATION OUTPUT
+
                 --verbose
 
                     This option tells the tool to show all errors found.
@@ -428,13 +439,13 @@ Options
 
         ..  code-block:: none
 
-                --djc api_url api_key   Fetch licenses data from DejaCode License
-                                        Library and create <license>.LICENSE to the
-                                        OUTPUT location.
-                --scancode              Indicate the input JSON file is from
+                --djc api_url api_key  Fetch licenses from a DejaCode License Library.
+                --scancode             Indicate the input JSON file is from
                                         scancode_toolkit.
-                 --verbose              Show all the errors and warning.
-                -h, --help              Show this message and exit.
+                --worksheet name       The worksheet name from the INPUT. (Default: the
+                                        "active" worksheet)
+                --verbose              Show all error and warning messages.
+                -h, --help             Show this message and exit.
 
 Purpose
 -------
@@ -466,6 +477,13 @@ Details
                     Indicates the JSON input is from scancode toolkit license detection
 
                 $ about gen_license --scancode /home/project/scancode-license-detection.json OUTPUT
+
+                --worksheet
+
+                    This option identify the worksheet name from the XLSX input to work with.
+                    If no worksheet is defined, the "active" worksheet will be used
+
+                $ about gen_license --worksheet BOM /home/project/bom-v0.10.xlsx OUTPUT
 
                 --verbose
 
@@ -594,7 +612,9 @@ Options
         ..  code-block:: none
 
                 -c, --configuration FILE  Path to an optional YAML configuration file. See
-                                          --help-format for format help.
+                                            --help-format for format help.
+                --worksheet name          The worksheet name from the INPUT. (Default: the
+                                            "active" worksheet)
                 --help-format             Show configuration file format help and exit.
                 -q, --quiet               Do not print error or warning messages.
                 --verbose                 Show all error and warning messages.
@@ -616,6 +636,13 @@ Details
                     Path to an optional YAML configuration file. See--help-format for format help.
 
                 $ about transform -c 'path to the YAML configuration file' LOCATION OUTPUT
+
+                --worksheet
+
+                    This option identify the worksheet name from the XLSX input to work with.
+                    If no worksheet is defined, the "active" worksheet will be used
+
+                $ about transform -c 'path to the YAML configuration file' --worksheet BOM /project/bom-v.20.xlsx OUTPUT
 
                 --help-format
 

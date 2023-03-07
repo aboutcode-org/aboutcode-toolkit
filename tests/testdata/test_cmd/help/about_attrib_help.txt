@@ -23,6 +23,8 @@ Options:
                                provided the default built-in template is used.
   --vartext <key>=<value>      Add variable text as key=value for use in a
                                custom attribution template.
+  --worksheet name             The worksheet name from the INPUT. (Default: the
+                               "active" worksheet)
   -q, --quiet                  Do not print error or warning messages.
   --verbose                    Show all error and warning messages.
   -h, --help                   Show this message and exit.
