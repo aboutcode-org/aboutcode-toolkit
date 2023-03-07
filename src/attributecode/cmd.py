@@ -803,9 +803,9 @@ OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
     if location.endswith('.csv'):
         new_data, errors = transform_csv(location)
     elif location.endswith('.json'):
-        errors = transform_json(location)
+        new_data, errors = transform_json(location)
     elif location.endswith('.xlsx'):
-        errors = transform_excel(location)
+        new_data, errors = transform_excel(location)
 
     if not errors:
         updated_data, errors = transform_data(new_data, transformer)

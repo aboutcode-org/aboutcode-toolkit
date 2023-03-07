@@ -1,5 +1,11 @@
 ==============================
 Changelog
+2023-03-07
+    Release 7.2.1
+
+    * Fixed the transform code for xlsx and json
+
+
 2022-10-24
     Release 7.2.0
 
