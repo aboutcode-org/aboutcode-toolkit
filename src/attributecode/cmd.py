@@ -493,23 +493,25 @@ OUTPUT: Path where to write the attribution document.
         if not reference:
             # Set current directory as the reference dir
             reference = os.path.dirname(input)
-        errors, abouts = load_inventory(
+        # Since the errors from load_inventory is only about field formatting or
+        # empty field which is irrelevant for attribtion process,
+        # See https://github.com/nexB/aboutcode-toolkit/issues/524
+        # I believe we do not need to capture these errors in attrib process
+        _errors, abouts = load_inventory(
             location=input,
             from_attrib=from_attrib,
             scancode=scancode,
             reference_dir=reference
         )
+
     else:
         is_about_input = True
-        errors, abouts = collect_inventory(input)
+        _errors, abouts = collect_inventory(input)
 
     if not abouts:
-        if errors:
-            errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
-        else:
-            msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
-            click.echo(msg)
-            errors_count = 1
+        msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
+        click.echo(msg)
+        errors_count = 1
         sys.exit(errors_count)
 
     if not is_about_input:

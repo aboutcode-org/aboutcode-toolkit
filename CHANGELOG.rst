@@ -1,9 +1,10 @@
 ==============================
 Changelog
-2023-03-07
-    Release 7.2.1
+2023-xx-xx
+    Release 7.3.0
 
     * Fixed the transform code for xlsx and json
+    * Remove irrelevant error for attrib
 
 
 2022-10-24
