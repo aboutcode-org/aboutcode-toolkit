@@ -6,7 +6,7 @@
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
-FROM python:3.6-slim-buster 
+FROM python:3.7-slim-buster
 
 RUN apt-get update \
  && apt-get install -y bash bzip2 xz-utils zlib1g libxml2-dev libxslt1-dev libgomp1 libpopt0\
@@ -27,7 +27,7 @@ RUN bash -c "source ./configure"
 # Add aboutcode to path
 #ENV PATH=$HOME/aboutcode-toolkit:$PATH
 
-# Set entrypoint to be the aboutcode command, allows to run the generated docker image directly with the aboutcode arguments: 
+# Set entrypoint to be the aboutcode command, allows to run the generated docker image directly with the aboutcode arguments:
 # `docker run (...) <containername> <about arguments>`
 # Example: docker run --rm --name "aboutcode" -v ${PWD}:/project -v /tmp/result:/result aboutcode-toolkit attrib /project /result/c.html
 ENTRYPOINT ["./bin/about"]

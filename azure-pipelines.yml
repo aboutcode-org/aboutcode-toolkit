@@ -11,7 +11,7 @@ jobs:
       parameters:
           job_name: ubuntu18_cpython
           image_name: ubuntu-18.04
-          python_versions: ['3.6', '3.7', '3.8', '3.9', '3.10']
+          python_versions: ['3.7', '3.8', '3.9', '3.10']
           test_suites:
               all: venv/bin/pytest -n 2 -vvs
 
@@ -19,7 +19,7 @@ jobs:
       parameters:
           job_name: ubuntu20_cpython
           image_name: ubuntu-20.04
-          python_versions: ['3.6', '3.7', '3.8', '3.9', '3.10']
+          python_versions: ['3.7', '3.8', '3.9', '3.10']
           test_suites:
               all: venv/bin/pytest -n 2 -vvs
 
@@ -53,7 +53,7 @@ jobs:
       parameters:
           job_name: win2019_cpython
           image_name: windows-2019
-          python_versions: ['3.6', '3.7', '3.8', '3.9', '3.10']
+          python_versions: ['3.7', '3.8', '3.9', '3.10']
           test_suites:
               all: venv\Scripts\pytest -n 2 -vvs
 

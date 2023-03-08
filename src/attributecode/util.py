@@ -55,7 +55,8 @@ UNC_PREFIX = u'\\\\?\\'
 UNC_PREFIX_POSIX = to_posix(UNC_PREFIX)
 UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
 
-valid_file_chars = string.digits + string.ascii_letters + '_-.+()~[]{}|@%' + ' '
+valid_file_chars = '_-.+()~[]{}@%!$,'
+invalid_file_chars = string.punctuation.translate(str.maketrans("", "", valid_file_chars))
 
 
 def invalid_chars(path):
@@ -65,7 +66,8 @@ def invalid_chars(path):
     path = to_posix(path)
     rname = resource_name(path)
     name = rname.lower()
-    return [c for c in name if c not in valid_file_chars]
+
+    return [c for c in name if c in invalid_file_chars]
 
 
 def check_file_names(paths):
@@ -74,11 +76,6 @@ def check_file_names(paths):
     there are no case-insensitive duplicates in any given directories.
     Return a list of errors.
 
-    From spec :
-        A file name can contain only these US-ASCII characters:
-        - digits from 0 to 9
-        - uppercase and lowercase letters from A to Z
-        - the _ underscore, - dash and . period signs.
     From spec:
      The case of a file name is not significant. On case-sensitive file
      systems (such as Linux), a tool must raise an error if two ABOUT files

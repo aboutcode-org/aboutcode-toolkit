@@ -19,9 +19,10 @@ import unittest
 from testing_utils import get_temp_dir
 from testing_utils import get_test_loc
 
+from attributecode import CRITICAL
 from attributecode import ERROR
 from attributecode import INFO
-from attributecode import CRITICAL
+from attributecode import WARNING
 from attributecode import Error
 from attributecode import gen
 from unittest.case import skip
@@ -66,7 +67,7 @@ class GenTest(unittest.TestCase):
 
     def test_check_about_resource_filename(self):
         arp1 = '/test/t@est.c'
-        arp2 = '/test/t!est.c'
+        arp2 = '/test/t|est.c'
         msg = ("Invalid characters present in 'about_resource' "
                    "field: " + arp2)
         expected2 = Error(ERROR, msg)
@@ -81,7 +82,7 @@ class GenTest(unittest.TestCase):
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
 
         expected_num_errors = 29
-        assert len(errors) == expected_num_errors 
+        assert len(errors) == expected_num_errors
 
         expected = (
 '''about_resource: .
@@ -106,7 +107,7 @@ custom1: |
         expected_error = [Error(CRITICAL,  "The essential field 'about_resource' is not found in the <input>")]
 
         assert errors == expected_error
-        assert abouts == [] 
+        assert abouts == []
 
     def test_load_inventory_without_about_resource_from_attrib(self):
         location = get_test_loc('test_gen/inv_no_about_resource.csv')
@@ -115,7 +116,7 @@ custom1: |
         errors, abouts = gen.load_inventory(location, base_dir=base_dir, from_attrib=from_attrib)
 
         expected_num_errors = 0
-        assert len(errors) == expected_num_errors 
+        assert len(errors) == expected_num_errors
 
         expected = (
 '''about_resource: .
@@ -132,7 +133,7 @@ license_expression: apache-2.0
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
         expected_errors = [
-            Error(ERROR, "Field name: ['confirmed copyright'] contains illegal name characters (or empty spaces) and is ignored."),
+            Error(WARNING, "Field name: ['confirmed copyright'] contains illegal name characters (or empty spaces) and is ignored."),
             Error(INFO, 'Field about_resource: Path'),
             Error(INFO, "Field ['resource', 'test'] is a custom field.")
         ]
@@ -165,7 +166,7 @@ license_expression: apache-2.0
 
         assert abouts[0].name.value == 'cryptohash-sha256'
         assert abouts[1].name.value == 'some_component'
-        
+
         assert abouts[0].version.value == 'v 0.11.100.1'
         assert abouts[1].version.value == 'v 0.0.1'
 
@@ -188,7 +189,7 @@ license_expression: apache-2.0
                     'authors': [], 'packages': [], 'emails': [], 'urls': [], 'files_count': 9,
                     'dirs_count': 1, 'size_count': 32826, 'scan_errors': []}
 
-        # We will only check the first element in the inventory list 
+        # We will only check the first element in the inventory list
         assert inventory[0] == expected
 
 

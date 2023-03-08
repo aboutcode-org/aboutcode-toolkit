@@ -1,11 +1,15 @@
 ==============================
 Changelog
 2023-xx-xx
-    Release 7.3.0
+    Release 8.0.0
 
     * Fixed the transform code for xlsx and json
     * Remove irrelevant error for attrib
     * Add support to identify worksheet name for XLSX input
+    * The severity error level for "contains illegal name characters (or empty spaces) and is ignored" is changed from ERROR to WARNING
+    * Remove the limitation to ASCII only
+    * Drop support for python3.6
+    * Update valid chatacters for file/path name
 
 
 2022-10-24

@@ -1,7 +1,7 @@
 .. _specification:
 
 ===============================
-ABOUT File Specification v3.2.3
+ABOUT File Specification v3.3.0
 ===============================
 
 Purpose
@@ -57,8 +57,7 @@ The meaning of this ABOUT file is:
 Specification
 =============
 
-An ABOUT file is an ASCII YAML formatted text file. Note that while Unicode characters
-are not supported in an ABOUT file proper, external files can contain UTF-8 Unicode.
+An ABOUT file is an YAML formatted text file.
 The key for the licenses field and the license_expression are dejacode license key.
 
 ABOUT file name
@@ -67,11 +66,9 @@ ABOUT file name
 An ABOUT file name can use a limited set of characters and is suffixed with a
 ".ABOUT" extension using any combination of uppercase and lowercase characters.
 
-A file name can contain only these US-ASCII characters:
+A file name can contain any characters and digits with the following exception and condition:
 
--   digits from 0 to 9
--   uppercase and lowercase letters from A to Z
--   the following symbols: ``"_", "-", "+", ".", "(", ")", "~", "[", "]", "{", "}", "@", "%"``
+-   the following symbols are not supported: ``", #, &, ', *, \, :, ;, <, >, =, ?, /, ^, `, |``
 -   The case of a file name is not significant. On case-sensitive file systems
     (such as on Linux), a tool must report an error if two ABOUT files stored in the same
     directory have the same lowercase file name. This is to ensure that ABOUT files can be
@@ -81,7 +78,7 @@ A file name can contain only these US-ASCII characters:
 Lines of text
 -------------
 
-An ABOUT file contains lines of US-ASCII text. Lines contain field names/values pairs.
+An ABOUT file contains lines of text. Lines contain field names/values pairs.
 The standard line ending is the LF character. The line ending characters can be any LF,
 CR or CR/LF and tools must normalize line endings to LF when processing an ABOUT file.
 Empty lines and lines containing only white spaces that are not part of a field value
@@ -109,7 +106,7 @@ The field value is separated from the field name by a ":" colon. The ":" colon
 can be followed by one or more spaces that must be ignored. This also applies
 to trailing white spaces: they must be ignored.
 
-The field value is composed of one or more lines of plain US-ASCII printable text.
+The field value is composed of one or more lines of plain printable text.
 
 When a field value is a long string, additional continuation lines must start with
 at least one space. In this case, the first space of an additional continuation
@@ -169,9 +166,7 @@ for long texts or to reference a common text in multiple ABOUT files such as a
 common license text. In this case the field name is suffixed with "_file" and the
 field value must be a path pointing to the file that contains the actual value of the
 field. This path must be a POSIX path relative to the path of the ABOUT file. The file
-content must be UTF-8-encoded text. This is in contrast with field values contained
-directly in an ABOUT file that must be US-ASCII- encoded text and allows to support
-non-ASCII text content.
+content must be UTF-8-encoded text.
 
 For example, the full license text for a component is often stored in a separate file named COPYING:
 

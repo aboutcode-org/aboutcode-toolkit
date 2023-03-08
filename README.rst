@@ -21,7 +21,7 @@ In addition, this tool is able to generate attribution notices and
 identify redistributable source code used in your project to help you comply
 with open source licenses conditions.
 
-This version of the AboutCode Toolkit follows the ABOUT specification version 3.2.3 at:
+This version of the AboutCode Toolkit follows the ABOUT specification version 3.3.0 at:
 https://aboutcode-toolkit.readthedocs.io/en/latest/specification.html
 
 
@@ -39,7 +39,7 @@ Build and tests status
 
 REQUIREMENTS
 ------------
-The AboutCode Toolkit is tested with Python 3.6.2 or above only on Linux, Mac and Windows.
+The AboutCode Toolkit is tested with Python 3.7 or above only on Linux, Mac and Windows.
 You will need to install a Python interpreter if you do not have one already
 installed.
 
@@ -68,11 +68,6 @@ To install all the needed dependencies in a virtualenv, run (on posix):
     ./configure
 or on windows:
     configure
-
-Note
-~~~~
-   For MacOS users, it's a known issue the Python36 may case SSL Certificates error if the Certificates is not up to date.
-   A solution is to run: `sudo /Applications/Python\\ 3.6/Install\\ Certificates.command` to upgrade the outdated certificates.
 
 ACTIVATE the VIRTUALENV
 -----------------------

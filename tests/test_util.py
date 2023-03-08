@@ -129,7 +129,7 @@ class TestResourcePaths(unittest.TestCase):
         assert expected == result
 
     def test_invalid_chars_with_valid_chars(self):
-        name = string.digits + string.ascii_letters + '_-.+'
+        name = string.digits + string.ascii_letters + '_-.+()~[]{}@%!$,'
         result = util.invalid_chars(name)
         expected = []
         assert expected == result
@@ -147,7 +147,7 @@ class TestResourcePaths(unittest.TestCase):
     def test_invalid_chars_in_file_name(self):
         name = '%657!1351()275612$_$asafg:~|[]{}+-.'
         result = util.invalid_chars(name)
-        expected = ['!', '$', '$', ':']
+        expected = [':', '|']
         assert expected == result
 
     def test_invalid_chars_with_space_is_valid(self):
@@ -191,13 +191,14 @@ class TestResourcePaths(unittest.TestCase):
             'locations/file with space',
             'locations/dir1/dir2/file1',
             'locations/dir2/file1',
-            'Accessibilité/ périmètre'
+            'Accessibilité/ périmètre',
+            'locations/in:valid'
         ]
         import sys
         if sys.version_info[0] < 3:  # python2
             expected = [Error(CRITICAL, b"Invalid characters '\xe9\xe8' in file name at: 'Accessibilit\xe9/ p\xe9rim\xe8tre'")]
         else:
-            expected = [Error(CRITICAL, "Invalid characters 'éè' in file name at: 'Accessibilité/ périmètre'")]
+            expected = [Error(CRITICAL, "Invalid characters ':' in file name at: 'locations/in:valid'")]
         result = util.check_file_names(paths)
 
         assert expected[0].message == result[0].message

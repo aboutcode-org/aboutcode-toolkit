@@ -720,7 +720,7 @@ def validate_field_name(name):
     if not is_valid_name(name):
         msg = ('Field name: %(name)r contains illegal name characters '
                '(or empty spaces) and is ignored.')
-        return Error(ERROR, msg % locals())
+        return Error(WARNING, msg % locals())
 
 
 class License:
@@ -948,7 +948,7 @@ class About(object):
         if illegal_name_list:
             msg = ('Field name: %(illegal_name_list)r contains illegal name characters '
                '(or empty spaces) and is ignored.')
-            errors.append(Error(ERROR, msg % locals()))
+            errors.append(Error(WARNING, msg % locals()))
         return errors
 
     def process(self, fields, about_file_path, running_inventory=False,

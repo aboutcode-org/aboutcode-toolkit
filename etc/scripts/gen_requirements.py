@@ -34,7 +34,7 @@ def gen_requirements():
         type=pathlib.Path,
         required=True,
         metavar="DIR",
-        help="Path to the 'site-packages' directory where wheels are installed such as lib/python3.6/site-packages",
+        help="Path to the 'site-packages' directory where wheels are installed such as lib/python3.7/site-packages",
     )
     parser.add_argument(
         "-r",
