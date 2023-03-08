@@ -10,6 +10,7 @@ Changelog
     * Remove the limitation to ASCII only
     * Drop support for python3.6
     * Update valid chatacters for file/path name
+    * Adopt 3.3.0 specification
 
 
 2022-10-24
