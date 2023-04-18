@@ -34,16 +34,16 @@ This document lists the open source and third-party components of a {{ vartext['
         <div id="group_{{ loop.index0 }}">
             <h3>{{ license.name }}</h3>
             <p>This product contains the following open source software packages licensed under the terms of the license: {{license.name}}</p>
-            
+
             <div class="oss-component" id="component_{{ loop.index0 }}">
-            {%for about_object in abouts %} 
+            {%for about_object in abouts %}
                 {% if loop.first %}
                     {% if license.url %}
                         <p>License Gallery URL: <a href="{{ license.url }}">{{license.url}}</a> </p>
                     {% endif %}
                 {% endif %}
                 {% if license.key in about_object.license_key.value %}
-                    <li>{{ about_object.name.value }}{% if about_object.version.value %}  - Version  {{ about_object.version.value }}{% endif %}</li>       
+                    <li>{{ about_object.name.value }}{% if about_object.version.value %}  - Version  {{ about_object.version.value }}{% endif %}</li>
                     {% if about_object.copyright.value %}
                         <pre>Copyright: {{about_object.copyright.value}}</pre>
                     {% endif %}
@@ -63,7 +63,7 @@ This document lists the open source and third-party components of a {{ vartext['
         </div>
     {% endfor %}
     <hr>
-<hr> 
+<hr>
 <h3><a id="End">End</a></h3>
 </body>
 </html>
