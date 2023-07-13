@@ -1,0 +1,5 @@
+name: elasticsearch-sidecar
+about_resource: elasticsearch-sidecar
+ignored_resources:
+    - elasticsearch-sidecar/plugins/
+    - elasticsearch-sidecar/logs/
