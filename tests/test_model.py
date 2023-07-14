@@ -456,6 +456,17 @@ class AboutTest(unittest.TestCase):
         # this means we have a location
         self.assertNotEqual([], result)
 
+    def test_About_loads_ignored_resources_field(self):
+        # fields in this file are not in the standard order
+        test_file = get_test_loc('test_model/parse/with_ignored_resources.ABOUT')
+        a = model.About(test_file)
+        #assert [] == a.errors
+
+        expected = ['about_resource', 'ignored_resources', 'name']
+        result = [f.name for f in a.all_fields() if f.present]
+        assert expected == result
+
+
     def test_About_has_errors_when_about_resource_is_missing(self):
         test_file = get_test_loc('test_gen/parser_tests/.ABOUT')
         a = model.About(test_file)

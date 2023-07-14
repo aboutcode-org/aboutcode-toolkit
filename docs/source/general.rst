@@ -85,6 +85,9 @@ it will copy and store next to the .ABOUT files.
     * - name
       - Component name
       - Mandatory
+    * - ignored_resources
+      - List of paths ignored from the ``about_resource``
+      - Optional
     * - version
       - Component version
       - Optional
