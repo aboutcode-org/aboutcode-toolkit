@@ -558,6 +558,22 @@ class AboutResourceField(PathField):
         return errors
 
 
+class IgnoredResourcesField(PathField):
+    """
+    Special field for ignored_resources. self.ignored_paths contains a list of
+    path patterns (glob patterns) which are not part of the summarization provided
+    by the ABOUT file. 
+    """
+
+    def __init__(self, *args, ** kwargs):
+        super(AboutResourceField, self).__init__(*args, ** kwargs)
+        self.resolved_paths = []
+
+    def _validate(self, *args, **kwargs):
+        errors = super(AboutResourceField, self)._validate(*args, ** kwargs)
+        return errors
+
+
 class FileTextField(PathField):
     """
     A path field pointing to one or more text files such as license files.
@@ -764,6 +780,7 @@ class About(object):
         """
         self.fields = dict([
             ('about_resource', AboutResourceField(required=True)),
+            ('ignored_resources', AboutResourceField()),
             ('name', SingleLineField(required=True)),
             ('version', SingleLineField()),
 
