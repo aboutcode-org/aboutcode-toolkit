@@ -1,5 +1,13 @@
 ==============================
 Changelog
+
+Next
+    Release 8.0.1
+
+    * Adopt 3.3.1 specification
+    * Introduce ``ignored_resources`` to ABOUT specification
+
+
 2023-03-09
     Release 8.0.0
 

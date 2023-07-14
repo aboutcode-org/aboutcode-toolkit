@@ -1,7 +1,7 @@
 .. _specification:
 
 ===============================
-ABOUT File Specification v3.3.0
+ABOUT File Specification v3.3.1
 ===============================
 
 Purpose
