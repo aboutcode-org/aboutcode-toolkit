@@ -32,10 +32,10 @@ from attributecode.util import add_unc
 from attributecode.attrib_util import multi_sort
 
 DEFAULT_TEMPLATE_FILE = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), '../../templates', 'default_html.template')
+    os.path.dirname(os.path.realpath(__file__)), 'templates', 'default_html.template')
 
 DEFAULT_TEMPLATE_SCANCODE_FILE = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), '../../templates', 'scancode_html.template')
+    os.path.dirname(os.path.realpath(__file__)), 'templates', 'scancode_html.template')
 
 DEFAULT_LICENSE_SCORE = 100
 
