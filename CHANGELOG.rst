@@ -1,8 +1,8 @@
 ==============================
 Changelog
 
-2023-xx-xx
-    Release x.x.x
+2023-07-14
+    Release 9.0.0
 
     * The tool will now show which worksheet (if .xlsx input) is the tool working on
     * Error handling if defined worksheet does not exist
