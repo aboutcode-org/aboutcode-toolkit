@@ -1,5 +1,12 @@
 ==============================
 Changelog
+2023-xx-xx
+    Release x.x.x
+
+    * The tool will now show which worksheet (if .xlsx input) is the tool working on
+    * Error handling if defined worksheet does not exist
+
+
 2023-03-09
     Release 8.0.0
 

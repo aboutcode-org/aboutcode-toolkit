@@ -680,10 +680,16 @@ def load_excel(location, worksheet=None):
     # This is to prevent showing the: warn("Workbook contains no default style, apply openpyxl's default")
     with warnings.catch_warnings(record=True):
         input_bom = openpyxl.load_workbook(location)
+        sheetnames = input_bom.sheetnames
         if worksheet:
+            if worksheet not in sheetnames:
+                import sys
+                print("The input worksheet name does not exist. Exiting.")
+                sys.exit(1)
             sheet_obj = input_bom[worksheet]
         else:
             sheet_obj = input_bom.active
+    print("Working on the " + sheet_obj.title + " worksheet.")
     max_col = sheet_obj.max_column
 
     index = 1
