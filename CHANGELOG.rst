@@ -1,6 +1,11 @@
 ==============================
 Changelog
 
+xxxx-xx-xx
+    Release x.x.x
+
+    * Fixd error in load_json in util.py
+
 2023-07-14
     Release 9.0.0
 
