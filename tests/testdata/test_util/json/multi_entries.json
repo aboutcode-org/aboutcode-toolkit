@@ -1,0 +1,13 @@
+[
+  {
+    "about_file_path": "/load/this.ABOUT",
+    "about_resource": ".",
+    "name": "AboutCode",
+    "version": "0.11.0"
+  },
+  {
+    "about_file_path": "/load/that.ABOUT",
+    "about_resource": ".",
+    "name": "that"
+  }
+]
