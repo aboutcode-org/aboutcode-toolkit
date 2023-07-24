@@ -375,6 +375,21 @@ class TestJson(unittest.TestCase):
         result = util.load_json(test_file)
         assert expected == result
 
+    def test_load_json_multi_entries(self):
+        test_file = get_test_loc('test_util/json/multi_entries.json')
+        expected = [dict([
+            ('about_file_path', '/load/this.ABOUT'),
+            ('about_resource', '.'),
+            ('name', 'AboutCode'),
+            ('version', '0.11.0')]),
+            dict([
+                ('about_file_path', '/load/that.ABOUT'),
+                ('about_resource', '.'),
+                ('name', 'that')])
+        ]
+        result = util.load_json(test_file)
+        assert expected == result
+
     def test_load_json2(self):
         test_file = get_test_loc('test_util/json/expected_need_mapping.json')
         expected = [dict(dict([

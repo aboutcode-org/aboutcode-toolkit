@@ -277,9 +277,8 @@ def load_json(location):
 
     # FIXME: this is too clever and complex... IMHO we should not try to guess the format.
     # instead a command line option should be provided explictly to say what is the format
-    if isinstance(results, list):
-        results = sorted(results)
-    else:
+    if not isinstance(results, list):
+        # FIXME: I think we can remove the support of aboutcode_manager
         if u'aboutcode_manager_notice' in results:
             results = results['components']
         elif u'scancode_notice' in results:
