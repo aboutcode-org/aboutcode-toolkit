@@ -344,7 +344,8 @@ However, if user create .ABOUT file manually, it can also used the individual fi
                 license_url: https://scancode-licensedb.aboutcode.org/apache-2.0.LICENSE
                 spdx_license_key: Apache-2.0
 
-These groupping is only used in the generated .ABOUT files. The output from **gen** will use the individual field name.
+These groupping is only used in the generated .ABOUT files. The output from **gen**
+will use the individual field name.
 
 Optional Boolean flag fields
 ----------------------------
