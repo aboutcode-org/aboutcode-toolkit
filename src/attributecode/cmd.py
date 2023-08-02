@@ -224,6 +224,9 @@ OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
               metavar='api_url api_key',
               help='Fetch license data and text files from a DejaCode License Library '
               'API URL using the API KEY.')
+@click.option('--scancode',
+              is_flag=True,
+              help='Indicate the input JSON file is from scancode_toolkit.')
 @click.option('--reference',
               metavar='DIR',
               type=click.Path(exists=True, file_okay=False,
@@ -239,7 +242,7 @@ OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
               is_flag=True,
               help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
-def gen(location, output, android, fetch_license, fetch_license_djc, reference, worksheet, quiet, verbose):
+def gen(location, output, android, fetch_license, fetch_license_djc, scancode, reference, worksheet, quiet, verbose):
     """
 Given a CSV/JSON/XLSX inventory, generate ABOUT files in the output location.
 
@@ -267,6 +270,7 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         reference_dir=reference,
         fetch_license=fetch_license,
         fetch_license_djc=fetch_license_djc,
+        scancode=scancode,
         worksheet=worksheet
     )
 

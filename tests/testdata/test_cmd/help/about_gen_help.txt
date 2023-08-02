@@ -16,6 +16,8 @@ Options:
                                   Fetch license data and text files from a
                                   DejaCode License Library API URL using the API
                                   KEY.
+  --scancode                      Indicate the input JSON file is from
+                                  scancode_toolkit.
   --reference DIR                 Path to a directory with reference license
                                   data and text files.
   --worksheet name                The worksheet name from the INPUT. (Default:

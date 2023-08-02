@@ -1262,6 +1262,7 @@ class About(object):
         # Handle license information that have not been handled.
         license_group = list(zip_longest(
             lic_key_copy, license_name, license_file, license_url, spdx_license_key))
+
         for lic_group in license_group:
             lic_dict = {}
             if lic_group[0]:

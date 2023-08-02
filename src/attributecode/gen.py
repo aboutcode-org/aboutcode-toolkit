@@ -97,7 +97,7 @@ def check_newline_in_file_field(component):
             try:
                 if '\n' in component[k]:
                     msg = ("New line character detected in '%s' for '%s' which is not supported."
-                            "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
+                           "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
                     errors.append(Error(CRITICAL, msg))
             except:
                 pass
@@ -111,7 +111,7 @@ def check_about_resource_filename(arp):
     """
     if invalid_chars(arp):
         msg = ("Invalid characters present in 'about_resource' "
-                   "field: " + arp)
+               "field: " + arp)
         return (Error(ERROR, msg))
     return ''
 
@@ -185,7 +185,8 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                 if from_attrib and f == 'about_resource':
                     continue
                 else:
-                    msg = "Required field: %(f)r not found in the <input>" % locals()
+                    msg = "Required field: %(f)r not found in the <input>" % locals(
+                    )
                     errors.append(Error(CRITICAL, msg))
                     return errors, abouts
         # Set about file path to '' if no 'about_resource' is provided from
@@ -238,19 +239,9 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
 
         abouts.append(about)
     if custom_fields_list:
-        custom_fields_err_msg = 'Field ' + str(custom_fields_list) + ' is a custom field.'
+        custom_fields_err_msg = 'Field ' + \
+            str(custom_fields_list) + ' is a custom field.'
         errors.append(Error(INFO, custom_fields_err_msg))
-    # Covert the license_score value from string to list of int
-    # The licesne_score is not in the spec but is specify in the scancode license scan.
-    # This key will be treated as a custom string field. Therefore, we need to
-    # convert back to the list with float type for score.
-    if scancode:
-        for about in abouts:
-            try:
-                score_list = list(map(float, about.license_score.value.replace('[', '').replace(']', '').split(',')))
-                about.license_score.value = score_list
-            except:
-                pass
 
     return errors, abouts
 
@@ -259,7 +250,7 @@ def update_about_resource(self):
     pass
 
 
-def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False, fetch_license_djc=False, worksheet=None):
+def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False, fetch_license_djc=False, scancode=False, worksheet=None):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir. Return errors and about objects.
@@ -287,11 +278,13 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
         location=location,
         base_dir=bdir,
         reference_dir=reference_dir,
+        scancode=scancode,
         worksheet=worksheet
     )
 
     if gen_license:
-        license_dict, err = model.pre_process_and_fetch_license_dict(abouts, api_url, api_key)
+        license_dict, err = model.pre_process_and_fetch_license_dict(
+            abouts, api_url, api_key)
         if err:
             for e in err:
                 # Avoid having same error multiple times
@@ -337,7 +330,8 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                 # be validated when creating the about object
                 loc = util.to_posix(dump_loc)
                 about_file_loc = loc
-                path = join(dirname(util.to_posix(about_file_loc)), about_resource_value)
+                path = join(dirname(util.to_posix(about_file_loc)),
+                            about_resource_value)
                 if not exists(path):
                     path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
                     path = normpath(path)
@@ -349,10 +343,12 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
             licenses_dict = {}
             if gen_license:
                 # Write generated LICENSE file
-                license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
+                license_key_name_context_url_list = about.dump_lic(
+                    dump_loc, license_dict)
                 if license_key_name_context_url_list:
                     for lic_key, lic_name, lic_filename, lic_context, lic_url, spdx_lic_key in license_key_name_context_url_list:
-                        licenses_dict[lic_key] = [lic_name, lic_filename, lic_context, lic_url, spdx_lic_key]
+                        licenses_dict[lic_key] = [
+                            lic_name, lic_filename, lic_context, lic_url, spdx_lic_key]
                         if not lic_name in about.license_name.value:
                             about.license_name.value.append(lic_name)
                         about.license_file.value[lic_filename] = lic_filename

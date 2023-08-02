@@ -43,7 +43,8 @@ def test_report_errors(capsys):
         Error(DEBUG, 'msg4'),
         Error(NOTSET, 'msg4'),
     ]
-    ec = cmd.report_errors(errors, quiet=False, verbose=True, log_file_loc=None)
+    ec = cmd.report_errors(errors, quiet=False,
+                           verbose=True, log_file_loc=None)
     assert 6 == ec
     out, err = capsys.readouterr()
     expected_out = [
@@ -67,7 +68,8 @@ def test_report_errors_without_verbose(capsys):
         Error(DEBUG, 'msg4'),
         Error(NOTSET, 'msg4'),
     ]
-    ec = cmd.report_errors(errors, quiet=False, verbose=False, log_file_loc=None)
+    ec = cmd.report_errors(errors, quiet=False,
+                           verbose=False, log_file_loc=None)
     assert 3 == ec
     out, err = capsys.readouterr()
     expected_out = [
@@ -153,7 +155,7 @@ def test_report_errors_can_write_to_logfile():
 
     result_file = get_temp_file()
     _ec = cmd.report_errors(errors, quiet=False, verbose=True,
-                           log_file_loc=result_file)
+                            log_file_loc=result_file)
     with open(result_file, 'r', encoding='utf-8', errors='replace') as rf:
         result = rf.read()
     expected = [
@@ -287,7 +289,7 @@ class TestParseKeyValues(unittest.TestCase):
         expected = {
             'key': 'bar',
             'this': 'THat'
-            }
+        }
         keyvals, errors = cmd.parse_key_values(test)
         assert expected == keyvals
         assert not errors
@@ -332,6 +334,8 @@ def check_about_stdout(options, expected_loc, regen=False):
     with open(expected_file, 'r') as ef:
         expected = ef.read()
 
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(result.output)
     assert expected.splitlines(False) == result.output.splitlines(False)
 
 
@@ -355,6 +359,7 @@ def test_about_gen_license_help_text():
     check_about_stdout(
         ['gen-license', '--help'],
         'test_cmd/help/about_gen_license_help.txt', regen=False)
+
 
 def test_about_check_help_text():
     check_about_stdout(
