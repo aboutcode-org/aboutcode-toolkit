@@ -1,0 +1,83 @@
+{
+  "headers": [
+    {
+      "tool_name": "scancode-toolkit",
+      "tool_version": "v32.0.6-2-g200fb10eb2",
+      "options": {
+        "input": ["C:\\lic\\lic.txt"],
+        "--json-pp": "-",
+        "--license": true,
+        "--processes": "2"
+      },
+      "notice": "Generated with ScanCode and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\nScanCode should be considered or used as legal advice. Consult an Attorney\nfor any legal advice.\nScanCode is a free software code scanning tool from nexB Inc. and others.\nVisit https://github.com/nexB/scancode-toolkit/ for support and download.",
+      "start_timestamp": "2023-07-26T092929.619854",
+      "end_timestamp": "2023-07-26T092935.415721",
+      "output_format_version": "3.0.0",
+      "duration": 5.795867443084717,
+      "message": null,
+      "errors": [],
+      "warnings": [],
+      "extra_data": {
+        "system_environment": {
+          "operating_system": "win",
+          "cpu_architecture": "64",
+          "platform": "Windows-10-10.0.22621-SP0",
+          "platform_version": "10.0.22621",
+          "python_version": "3.9.0 (tags/v3.9.0:9cf6752, Oct  5 2020, 15:34:40) [MSC v.1927 64 bit (AMD64)]"
+        },
+        "spdx_license_list_version": "3.21",
+        "files_count": 1
+      }
+    }
+  ],
+  "license_detections": [
+    {
+      "identifier": "mit_and__bsd_axis_nomod_or_gpl_1_0_plus-47fd20c7-6ad8-d7cb-03b7-4c40fc9f8ded",
+      "license_expression": "mit AND (bsd-axis-nomod OR gpl-1.0-plus)",
+      "detection_count": 1
+    }
+  ],
+  "files": [
+    {
+      "path": "lic.txt",
+      "type": "file",
+      "detected_license_expression": "mit AND (bsd-axis-nomod OR gpl-1.0-plus)",
+      "detected_license_expression_spdx": "MIT AND (LicenseRef-scancode-bsd-axis-nomod OR GPL-1.0-or-later)",
+      "license_detections": [
+        {
+          "license_expression": "mit AND (bsd-axis-nomod OR gpl-1.0-plus)",
+          "matches": [
+            {
+              "score": 100.0,
+              "start_line": 1,
+              "end_line": 5,
+              "matched_length": 161,
+              "match_coverage": 100.0,
+              "matcher": "2-aho",
+              "license_expression": "mit",
+              "rule_identifier": "mit.LICENSE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/mit.LICENSE"
+            },
+            {
+              "score": 47.56,
+              "start_line": 7,
+              "end_line": 9,
+              "matched_length": 39,
+              "match_coverage": 47.56,
+              "matcher": "3-seq",
+              "license_expression": "bsd-axis-nomod OR gpl-1.0-plus",
+              "rule_identifier": "bsd-axis-nomod_or_gpl2.RULE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/bsd-axis-nomod_or_gpl2.RULE"
+            }
+          ],
+          "identifier": "mit_and__bsd_axis_nomod_or_gpl_1_0_plus-47fd20c7-6ad8-d7cb-03b7-4c40fc9f8ded"
+        }
+      ],
+      "license_clues": [],
+      "percentage_of_license_text": 87.34,
+      "scan_errors": []
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "files": [
+    {
+      "path": "samples/JGroups/src/S3_PING.java",
+      "type": "file",
+      "name": "S3_PING.java",
+      "base_name": "S3_PING",
+      "extension": ".java",
+      "size": 122528,
+      "date": "2023-07-26",
+      "sha1": "08dba9986f69719970ead3592dc565465164df0d",
+      "md5": "83d8324f37d0e3f120bc89865cf0bd39",
+      "sha256": "c4d59a8837c6320788c74496201e3ecc0ff2100525ebb727bcae6d855b34c548",
+      "mime_type": "text/x-java",
+      "file_type": "Java source, ASCII text",
+      "programming_language": "Java",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [],
+      "detected_license_expression": "public-domain AND public-domain-disclaimer",
+      "detected_license_expression_spdx": "LicenseRef-scancode-public-domain AND LicenseRef-scancode-public-domain-disclaimer",
+      "license_detections": [
+        {
+          "license_expression": "public-domain",
+          "matches": [
+            {
+              "score": 70.0,
+              "start_line": 1649,
+              "end_line": 1649,
+              "matched_length": 2,
+              "match_coverage": 100.0,
+              "matcher": "2-aho",
+              "license_expression": "public-domain",
+              "rule_identifier": "public-domain_bare_words.RULE",
+              "rule_relevance": 70,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/public-domain_bare_words.RULE"
+            }
+          ],
+          "identifier": "public_domain-3dd945ae-65df-7d90-6467-60f8ecf2eb77"
+        },
+        {
+          "license_expression": "public-domain-disclaimer",
+          "matches": [
+            {
+              "score": 100.0,
+              "start_line": 1692,
+              "end_line": 1694,
+              "matched_length": 30,
+              "match_coverage": 100.0,
+              "matcher": "2-aho",
+              "license_expression": "public-domain-disclaimer",
+              "rule_identifier": "public-domain-disclaimer_77.RULE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/public-domain-disclaimer_77.RULE"
+            }
+          ],
+          "identifier": "public_domain_disclaimer-5765d0b6-4dea-c655-1767-e7e398a296d3"
+        }
+      ],
+      "license_clues": [],
+      "percentage_of_license_text": 0.27,
+      "copyrights": [],
+      "holders": [],
+      "authors": [
+        {
+          "author": "Bela Ban",
+          "start_line": 37,
+          "end_line": 37
+        },
+        {
+          "author": "Robert Harder",
+          "start_line": 1698,
+          "end_line": 1698
+        },
+        {
+          "author": "rob@iharder.net",
+          "start_line": 1699,
+          "end_line": 1699
+        }
+      ],
+      "emails": [
+        {
+          "email": "rob@iharder.net",
+          "start_line": 1699,
+          "end_line": 1699
+        }
+      ],
+      "urls": [
+        {
+          "url": "http://iharder.sourceforge.net/current/java/base64/",
+          "start_line": 1652,
+          "end_line": 1652
+        },
+        {
+          "url": "http://iharder.net/base64",
+          "start_line": 1695,
+          "end_line": 1695
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    }
+  ]
+}

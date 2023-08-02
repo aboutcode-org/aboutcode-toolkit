@@ -14,8 +14,37 @@
 #  limitations under the License.
 # ============================================================================
 
+from attributecode.util import write_licenses
+from attributecode.util import get_file_text
+from attributecode.util import get_temp_dir
+from attributecode.util import filter_errors
+from attributecode.util import extract_zip
+from attributecode.transform import Transformer
+from attributecode.transform import write_excel
+from attributecode.transform import write_json
+from attributecode.transform import write_csv
+from attributecode.transform import transform_excel
+from attributecode.transform import transform_json
+from attributecode.transform import transform_csv
+from attributecode.transform import transform_data
+from attributecode.model import write_output
+from attributecode.model import pre_process_and_fetch_license_dict
+from attributecode.model import get_copy_list
+from attributecode.model import copy_redist_src
+from attributecode.model import collect_inventory, collect_abouts_license_expression, collect_inventory_license_expression
+from attributecode.gen import generate as generate_about_files, load_inventory
+from attributecode.attrib import generate_and_save as generate_attribution_doc
+from attributecode.attrib import DEFAULT_TEMPLATE_FILE, DEFAULT_LICENSE_SCORE
+from attributecode.attrib import check_template
+from attributecode import severities
+from attributecode import __version__
+from attributecode import __about_spec_version__
+from attributecode.util import unique
+from attributecode import WARNING
+
 from collections import defaultdict
 from functools import partial
+
 import io
 import logging
 import os
@@ -26,34 +55,6 @@ import click
 # silence unicode literals warnings
 click.disable_unicode_literals_warning = True
 
-from attributecode import WARNING
-from attributecode.util import unique
-
-from attributecode import __about_spec_version__
-from attributecode import __version__
-from attributecode import severities
-from attributecode.attrib import check_template
-from attributecode.attrib import DEFAULT_TEMPLATE_FILE, DEFAULT_LICENSE_SCORE
-from attributecode.attrib import generate_and_save as generate_attribution_doc
-from attributecode.gen import generate as generate_about_files, load_inventory
-from attributecode.model import collect_inventory, collect_abouts_license_expression, collect_inventory_license_expression
-from attributecode.model import copy_redist_src
-from attributecode.model import get_copy_list
-from attributecode.model import pre_process_and_fetch_license_dict
-from attributecode.model import write_output
-from attributecode.transform import transform_data
-from attributecode.transform import transform_csv
-from attributecode.transform import transform_json
-from attributecode.transform import transform_excel
-from attributecode.transform import write_csv
-from attributecode.transform import write_json
-from attributecode.transform import write_excel
-from attributecode.transform import Transformer
-from attributecode.util import extract_zip
-from attributecode.util import filter_errors
-from attributecode.util import get_temp_dir
-from attributecode.util import get_file_text
-from attributecode.util import write_licenses
 
 __copyright__ = """
     Copyright (c) nexB Inc and others. All rights reserved.
@@ -145,34 +146,28 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 
 
 @about.command(cls=AboutCommand,
-    short_help='Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.')
-
+               short_help='Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.')
 @click.argument('location',
-    required=True,
-    metavar='LOCATION',
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-
+                required=True,
+                metavar='LOCATION',
+                type=click.Path(
+                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 @click.argument('output',
-    required=True,
-    metavar='OUTPUT',
-    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
-
+                required=True,
+                metavar='OUTPUT',
+                type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 @click.option('-f', '--format',
-    is_flag=False,
-    default='csv',
-    show_default=True,
-    type=click.Choice(['json', 'csv', 'excel']),
-    help='Set OUTPUT inventory file format.')
-
+              is_flag=False,
+              default='csv',
+              show_default=True,
+              type=click.Choice(['json', 'csv', 'excel']),
+              help='Set OUTPUT inventory file format.')
 @click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
+              is_flag=True,
+              help='Do not print error or warning messages.')
 @click.option('--verbose',
-    is_flag=True,
-    help='Show all error and warning messages.')
-
+              is_flag=True,
+              help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
 def inventory(location, output, format, quiet, verbose):  # NOQA
     """
@@ -192,7 +187,8 @@ OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
     errors, abouts = collect_inventory(location)
     write_output(abouts=abouts, location=output, format=format)
 
-    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(
+        errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         msg = 'Inventory collected in {output}.'.format(**locals())
         click.echo(msg)
@@ -204,53 +200,44 @@ OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
 
 
 @about.command(cls=AboutCommand,
-    short_help='Generate .ABOUT files from an inventory as CSV/JSON/XLSX.')
-
+               short_help='Generate .ABOUT files from an inventory as CSV/JSON/XLSX.')
 @click.argument('location',
-    required=True,
-    metavar='LOCATION',
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-
+                required=True,
+                metavar='LOCATION',
+                type=click.Path(
+                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 @click.argument('output',
-    required=True,
-    metavar='OUTPUT',
-    type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
-
+                required=True,
+                metavar='OUTPUT',
+                type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
 @click.option('--android',
-    is_flag=True,
-    help='Generate MODULE_LICENSE_XXX (XXX will be replaced by license key) and NOTICE '
-         'as the same design as from Android.')
-
+              is_flag=True,
+              help='Generate MODULE_LICENSE_XXX (XXX will be replaced by license key) and NOTICE '
+              'as the same design as from Android.')
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
 @click.option('--fetch-license',
-    is_flag=True,
-    help='Fetch license data and text files from the ScanCode LicenseDB.')
-
+              is_flag=True,
+              help='Fetch license data and text files from the ScanCode LicenseDB.')
 @click.option('--fetch-license-djc',
-    nargs=2,
-    type=str,
-    metavar='api_url api_key',
-    help='Fetch license data and text files from a DejaCode License Library '
-         'API URL using the API KEY.')
-
+              nargs=2,
+              type=str,
+              metavar='api_url api_key',
+              help='Fetch license data and text files from a DejaCode License Library '
+              'API URL using the API KEY.')
 @click.option('--reference',
-    metavar='DIR',
-    type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
-    help='Path to a directory with reference license data and text files.')
-
+              metavar='DIR',
+              type=click.Path(exists=True, file_okay=False,
+                              readable=True, resolve_path=True),
+              help='Path to a directory with reference license data and text files.')
 @click.option('--worksheet',
-    metavar='name',
-    help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
-
+              metavar='name',
+              help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
 @click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
+              is_flag=True,
+              help='Do not print error or warning messages.')
 @click.option('--verbose',
-    is_flag=True,
-    help='Show all error and warning messages.')
-
+              is_flag=True,
+              help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
 def gen(location, output, android, fetch_license, fetch_license_djc, reference, worksheet, quiet, verbose):
     """
@@ -266,10 +253,12 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 
     # FIXME: This should be checked in the `click`
     if not location.endswith(('.csv', '.json', '.xlsx')):
-        raise click.UsageError('ERROR: Invalid input file extension: must be one .csv or .json or .xlsx.')
+        raise click.UsageError(
+            'ERROR: Invalid input file extension: must be one .csv or .json or .xlsx.')
 
     if worksheet and not location.endswith('.xlsx'):
-        raise click.UsageError('ERROR: --worksheet option only works with .xlsx input.')
+        raise click.UsageError(
+            'ERROR: --worksheet option only works with .xlsx input.')
 
     errors, abouts = generate_about_files(
         location=location,
@@ -281,10 +270,12 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         worksheet=worksheet
     )
 
-    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(
+        errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
         abouts_count = len(abouts)
-        msg = '{abouts_count} .ABOUT files generated in {output}.'.format(**locals())
+        msg = '{abouts_count} .ABOUT files generated in {output}.'.format(
+            **locals())
         click.echo(msg)
     sys.exit(errors_count)
 
@@ -294,37 +285,30 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 ######################################################################
 
 @about.command(cls=AboutCommand,
-    short_help='Fetch and save all the licenses in the license_expression field to a directory.')
-
+               short_help='Fetch and save all the licenses in the license_expression field to a directory.')
 @click.argument('location',
-    required=True,
-    metavar='LOCATION',
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-
+                required=True,
+                metavar='LOCATION',
+                type=click.Path(
+                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 @click.argument('output',
-    required=True,
-    metavar='OUTPUT',
-    type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
-
+                required=True,
+                metavar='OUTPUT',
+                type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
 @click.option('--djc',
-    nargs=2,
-    type=str,
-    metavar='api_url api_key',
-    help='Fetch licenses from a DejaCode License Library.')
-
+              nargs=2,
+              type=str,
+              metavar='api_url api_key',
+              help='Fetch licenses from a DejaCode License Library.')
 @click.option('--scancode',
-    is_flag=True,
-    help='Indicate the input JSON file is from scancode_toolkit.')
-
+              is_flag=True,
+              help='Indicate the input JSON file is from scancode_toolkit.')
 @click.option('--worksheet',
-    metavar='name',
-    help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
-
+              metavar='name',
+              help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
 @click.option('--verbose',
-    is_flag=True,
-    help='Show all error and warning messages.')
-
+              is_flag=True,
+              help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
 def gen_license(location, output, djc, scancode, worksheet, verbose):
     """
@@ -340,17 +324,20 @@ OUTPUT: Path to a directory where license files are saved.
     errors = []
 
     if worksheet and not location.endswith('.xlsx'):
-        raise click.UsageError('ERROR: --worksheet option only works with .xlsx input.')
+        raise click.UsageError(
+            'ERROR: --worksheet option only works with .xlsx input.')
 
     log_file_loc = os.path.join(output, 'error.log')
 
     if location.endswith('.csv') or location.endswith('.json') or location.endswith('.xlsx'):
-        errors, abouts = collect_inventory_license_expression(location=location, scancode=scancode, worksheet=worksheet)
+        errors, abouts = collect_inventory_license_expression(
+            location=location, scancode=scancode, worksheet=worksheet)
         if errors:
-            severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
+            severe_errors_count = report_errors(
+                errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
             sys.exit(severe_errors_count)
     else:
-        #_errors, abouts = collect_inventory(location)
+        # _errors, abouts = collect_inventory(location)
         errors, abouts = collect_abouts_license_expression(location)
 
     if djc:
@@ -360,7 +347,8 @@ OUTPUT: Path to a directory where license files are saved.
 
     click.echo('Fetching licenses...')
     from_check = False
-    license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, from_check, api_url, api_key, scancode)
+    license_dict, lic_errors = pre_process_and_fetch_license_dict(
+        abouts, from_check, api_url, api_key, scancode)
 
     if lic_errors:
         errors.extend(lic_errors)
@@ -377,7 +365,8 @@ OUTPUT: Path to a directory where license files are saved.
     if write_errors:
         errors.extend(write_errors)
 
-    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
+    severe_errors_count = report_errors(
+        errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
     sys.exit(severe_errors_count)
 
 
@@ -402,71 +391,60 @@ def validate_template(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Generate an attribution document from JSON/CSV/XLSX/.ABOUT files.')
-
+               short_help='Generate an attribution document from JSON/CSV/XLSX/.ABOUT files.')
 @click.argument('input',
-    required=True,
-    metavar='INPUT',
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-
+                required=True,
+                metavar='INPUT',
+                type=click.Path(
+                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 @click.argument('output',
-    required=True,
-    metavar='OUTPUT',
-    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
-
+                required=True,
+                metavar='OUTPUT',
+                type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 @click.option('--api_url',
-    nargs=1,
-    type=click.STRING,
-    metavar='URL',
-    help='URL to DejaCode License Library.')
-
+              nargs=1,
+              type=click.STRING,
+              metavar='URL',
+              help='URL to DejaCode License Library.')
 @click.option('--api_key',
-    nargs=1,
-    type=click.STRING,
-    metavar='KEY',
-    help='API Key for the  DejaCode License Library')
-
+              nargs=1,
+              type=click.STRING,
+              metavar='KEY',
+              help='API Key for the  DejaCode License Library')
 @click.option('--min-license-score',
-    type=int,
-    help='Attribute components that have license score higher than or equal to the defined '
-        '--min-license-score.')
-
+              type=int,
+              help='Attribute components that have license score higher than or equal to the defined '
+              '--min-license-score.')
 @click.option('--scancode',
-    is_flag=True,
-    help='Indicate the input JSON file is from scancode_toolkit.')
-
+              is_flag=True,
+              help='Indicate the input JSON file is from scancode_toolkit.')
 @click.option('--reference',
-    metavar='DIR',
-    type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
-    help='Path to a directory with reference files where "license_file" and/or "notice_file"'
-        ' located.')
-
+              metavar='DIR',
+              type=click.Path(exists=True, file_okay=False,
+                              readable=True, resolve_path=True),
+              help='Path to a directory with reference files where "license_file" and/or "notice_file"'
+              ' located.')
 @click.option('--template',
-    metavar='FILE',
-    callback=validate_template,
-    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an optional custom attribution template to generate the '
-         'attribution document. If not provided the default built-in template is used.')
-
+              metavar='FILE',
+              callback=validate_template,
+              type=click.Path(exists=True, dir_okay=False,
+                              readable=True, resolve_path=True),
+              help='Path to an optional custom attribution template to generate the '
+              'attribution document. If not provided the default built-in template is used.')
 @click.option('--vartext',
-    multiple=True,
-    callback=validate_key_values,
-    metavar='<key>=<value>',
-    help='Add variable text as key=value for use in a custom attribution template.')
-
+              multiple=True,
+              callback=validate_key_values,
+              metavar='<key>=<value>',
+              help='Add variable text as key=value for use in a custom attribution template.')
 @click.option('--worksheet',
-    metavar='name',
-    help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
-
+              metavar='name',
+              help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
 @click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
+              is_flag=True,
+              help='Do not print error or warning messages.')
 @click.option('--verbose',
-    is_flag=True,
-    help='Show all error and warning messages.')
-
+              is_flag=True,
+              help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
 def attrib(input, output, api_url, api_key, scancode, min_license_score, reference, template, vartext, worksheet, quiet, verbose):
     """
@@ -484,7 +462,8 @@ OUTPUT: Path where to write the attribution document.
     errors = []
 
     if worksheet and not input.endswith('.xlsx'):
-        raise click.UsageError('ERROR: --worksheet option only works with .xlsx input.')
+        raise click.UsageError(
+            'ERROR: --worksheet option only works with .xlsx input.')
 
     if not quiet:
         print_version()
@@ -500,12 +479,12 @@ OUTPUT: Path where to write the attribution document.
             click.echo(msg)
             sys.exit(1)
         if not min_license_score and not min_license_score == 0:
-            min_license_score=DEFAULT_LICENSE_SCORE
+            min_license_score = DEFAULT_LICENSE_SCORE
 
     if min_license_score:
         if not scancode:
             msg = ('This option requires a JSON file generated by scancode toolkit as the input. ' +
-                    'The "--scancode" option is required.')
+                   'The "--scancode" option is required.')
             click.echo(msg)
             sys.exit(1)
 
@@ -519,13 +498,20 @@ OUTPUT: Path where to write the attribution document.
         # empty field which is irrelevant for attribtion process,
         # See https://github.com/nexB/aboutcode-toolkit/issues/524
         # I believe we do not need to capture these errors in attrib process
-        _errors, abouts = load_inventory(
+        errors, abouts = load_inventory(
             location=input,
             from_attrib=from_attrib,
             scancode=scancode,
             reference_dir=reference,
             worksheet=worksheet
         )
+
+        # Exit if CRITICAL error
+        if errors:
+            for e in errors:
+                if severities[e.severity] == 'CRITICAL':
+                    click.echo(e)
+                    sys.exit(1)
 
     else:
         is_about_input = True
@@ -554,7 +540,8 @@ OUTPUT: Path where to write the attribution document.
         api_url = api_url.strip("'").strip('"')
         api_key = api_key.strip("'").strip('"')
         from_check = False
-        license_dict, lic_errors = pre_process_and_fetch_license_dict(abouts, from_check, api_url, api_key, scancode, reference)
+        license_dict, lic_errors = pre_process_and_fetch_license_dict(
+            abouts, from_check, api_url, api_key, scancode, reference)
         errors.extend(lic_errors)
         sorted_license_dict = sorted(license_dict)
 
@@ -562,9 +549,10 @@ OUTPUT: Path where to write the attribution document.
         for about in abouts:
             if about.license_file.value or about.notice_file.value:
                 if not reference:
-                    msg = ('"license_file" / "notice_file" field contains value. Use `--reference` to indicate its parent directory.')
+                    msg = (
+                        '"license_file" / "notice_file" field contains value. Use `--reference` to indicate its parent directory.')
                     click.echo(msg)
-                    #sys.exit(1)
+                    # sys.exit(1)
 
     if abouts:
         attrib_errors, rendered = generate_attribution_doc(
@@ -579,7 +567,8 @@ OUTPUT: Path where to write the attribution document.
         )
         errors.extend(attrib_errors)
 
-    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(
+        errors, quiet, verbose, log_file_loc=output + '-error.log')
 
     if not quiet:
         if rendered:
@@ -596,40 +585,33 @@ OUTPUT: Path where to write the attribution document.
 
 
 @about.command(cls=AboutCommand,
-    short_help='Collect redistributable sources.')
-
+               short_help='Collect redistributable sources.')
 @click.argument('location',
-    required=True,
-    metavar='LOCATION',
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-
+                required=True,
+                metavar='LOCATION',
+                type=click.Path(
+                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 @click.argument('output',
-    required=True,
-    metavar='OUTPUT')
-
+                required=True,
+                metavar='OUTPUT')
 @click.option('--from-inventory',
-    metavar='FILE',
-    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an inventory CSV/JSON file as the base list for files/directories '
-         'that need to be copied which have the \'redistribute\' flagged.')
-
+              metavar='FILE',
+              type=click.Path(exists=True, dir_okay=False,
+                              readable=True, resolve_path=True),
+              help='Path to an inventory CSV/JSON/XLSX file as the base list for files/directories '
+              'that need to be copied which have the \'redistribute\' flagged.')
 @click.option('--with-structures',
-    is_flag=True,
-    help='Copy sources with directory structure.')
-
+              is_flag=True,
+              help='Copy sources with directory structure.')
 @click.option('--zip',
-    is_flag=True,
-    help='Zip the copied sources to the output location.')
-
+              is_flag=True,
+              help='Zip the copied sources to the output location.')
 @click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
+              is_flag=True,
+              help='Do not print error or warning messages.')
 @click.option('--verbose',
-    is_flag=True,
-    help='Show all error and warning messages.')
-
+              is_flag=True,
+              help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
 def collect_redist_src(location, output, from_inventory, with_structures, zip, quiet, verbose):
     """
@@ -666,7 +648,8 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
         output_location = output
 
     copy_list, copy_list_errors = get_copy_list(abouts, location)
-    copy_errors = copy_redist_src(copy_list, location, output_location, with_structures)
+    copy_errors = copy_redist_src(
+        copy_list, location, output_location, with_structures)
 
     if zip:
         import shutil
@@ -677,9 +660,11 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
 
     errors.extend(copy_list_errors)
     errors.extend(copy_errors)
-    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(
+        errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet:
-        msg = 'Redistributed sources are copied to {output}.'.format(**locals())
+        msg = 'Redistributed sources are copied to {output}.'.format(
+            **locals())
         click.echo(msg)
     sys.exit(errors_count)
 
@@ -691,35 +676,29 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
 
 
 @about.command(cls=AboutCommand,
-    short_help='Validate that the format of .ABOUT files is correct and report '
+               short_help='Validate that the format of .ABOUT files is correct and report '
                'errors and warnings.')
-
 @click.argument('location',
-    required=True,
-    metavar='LOCATION',
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-
+                required=True,
+                metavar='LOCATION',
+                type=click.Path(
+                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 @click.option('--license',
-    is_flag=True,
-    help='Validate the license_expression value in the input.')
-
+              is_flag=True,
+              help='Validate the license_expression value in the input.')
 @click.option('--djc',
-    nargs=2,
-    type=str,
-    metavar='api_url api_key',
-    help='Validate license_expression from a DejaCode License Library '
-         'API URL using the API KEY.')
-
+              nargs=2,
+              type=str,
+              metavar='api_url api_key',
+              help='Validate license_expression from a DejaCode License Library '
+              'API URL using the API KEY.')
 @click.option('--log',
-    nargs=1,
-    metavar='FILE',
-    help='Path to a file to save the error messages if any.')
-
+              nargs=1,
+              metavar='FILE',
+              help='Path to a file to save the error messages if any.')
 @click.option('--verbose',
-    is_flag=True,
-    help='Show all error and warning messages.')
-
+              is_flag=True,
+              help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
 def check(location, license, djc, log, verbose):
     """
@@ -747,11 +726,13 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     # Validate license_expression
     if license:
         from_check = True
-        _key_text_dict, errs = pre_process_and_fetch_license_dict(abouts, from_check, api_url, api_key)
+        _key_text_dict, errs = pre_process_and_fetch_license_dict(
+            abouts, from_check, api_url, api_key)
         for e in errs:
             errors.append(e)
 
-    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log)
+    severe_errors_count = report_errors(
+        errors, quiet=False, verbose=verbose, log_file_loc=log)
     sys.exit(severe_errors_count)
 
 ######################################################################
@@ -768,43 +749,38 @@ def print_config_help(ctx, param, value):
 
 
 @about.command(cls=AboutCommand,
-    short_help='Transform a CSV/JSON/XLSX by applying renamings, filters and checks.')
-
+               short_help='Transform a CSV/JSON/XLSX by applying renamings, filters and checks.')
 @click.argument('location',
-    required=True,
-    callback=partial(validate_extensions, extensions=('.csv', '.json', '.xlsx',)),
-    metavar='LOCATION',
-    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True))
-
+                required=True,
+                callback=partial(validate_extensions, extensions=(
+                    '.csv', '.json', '.xlsx',)),
+                metavar='LOCATION',
+                type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True))
 @click.argument('output',
-    required=True,
-    callback=partial(validate_extensions, extensions=('.csv', '.json', '.xlsx',)),
-    metavar='OUTPUT',
-    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
-
+                required=True,
+                callback=partial(validate_extensions, extensions=(
+                    '.csv', '.json', '.xlsx',)),
+                metavar='OUTPUT',
+                type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
 @click.option('-c', '--configuration',
-    metavar='FILE',
-    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
-    help='Path to an optional YAML configuration file. See --help-format for '
-         'format help.')
-
+              metavar='FILE',
+              type=click.Path(exists=True, dir_okay=False,
+                              readable=True, resolve_path=True),
+              help='Path to an optional YAML configuration file. See --help-format for '
+              'format help.')
 @click.option('--worksheet',
-    metavar='name',
-    help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
-
+              metavar='name',
+              help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
 @click.option('--help-format',
-    is_flag=True, is_eager=True, expose_value=False,
-    callback=print_config_help,
-    help='Show configuration file format help and exit.')
-
+              is_flag=True, is_eager=True, expose_value=False,
+              callback=print_config_help,
+              help='Show configuration file format help and exit.')
 @click.option('-q', '--quiet',
-    is_flag=True,
-    help='Do not print error or warning messages.')
-
+              is_flag=True,
+              help='Do not print error or warning messages.')
 @click.option('--verbose',
-    is_flag=True,
-    help='Show all error and warning messages.')
-
+              is_flag=True,
+              help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
 def transform(location, output, configuration, worksheet, quiet, verbose):  # NOQA
     """
@@ -816,7 +792,8 @@ LOCATION: Path to a CSV/JSON/XLSX file.
 OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
     """
     if worksheet and not location.endswith('.xlsx'):
-        raise click.UsageError('ERROR: --worksheet option only works with .xlsx input.')
+        raise click.UsageError(
+            'ERROR: --worksheet option only works with .xlsx input.')
 
     if not configuration:
         transformer = Transformer.default()
@@ -859,7 +836,8 @@ OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
         print_version()
         click.echo('Transforming...')
 
-    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(
+        errors, quiet, verbose, log_file_loc=output + '-error.log')
     if not quiet and not errors:
         msg = 'Transformed file is written to {output}.'.format(**locals())
         click.echo(msg)
@@ -909,7 +887,8 @@ def get_error_messages(errors, verbose=False):
     messages = []
 
     if severe_errors:
-        error_msg = 'Command completed with {} errors or warnings.'.format(severe_errors_count)
+        error_msg = 'Command completed with {} errors or warnings.'.format(
+            severe_errors_count)
         messages.append(error_msg)
 
     for severity, message in severe_errors:

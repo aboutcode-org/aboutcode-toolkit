@@ -35,35 +35,40 @@
 
     {% set index = namespace(value=0) %}
     {% for about_object in abouts %}
-        {% set captured = {} %}
-        {% if about_object.license_key.value %}
-			{% if not captured[about_object.name.value] %}
-				<div class="oss-component" id="component_{{ index.value }}">
-				<h3 class="component-name">{{ about_object.name.value }} {% if about_object.version.value %}{{ about_object.version.value }}{% endif %} </h3>
-				{% set _ = captured.update({ about_object.name.value: true }) %}
-				{% set index.value = index.value + 1 %}
-			{% endif %}
-            {% if about_object.copyrights.value %}
-				{% for copyright in about_object.copyrights.value %}
-					<pre> {{ copyright['copyright'] }} </pre>
-				{% endfor %}
-            {% endif %}
-
-			{% for lic_key in about_object.license_key.value %}
-				<p>This component is licensed under {{ lic_key }}</p>
-				{% if lic_key in common_licenses %}
-					<p>Full text of <a class="{{ lic_key }}" href="#component-license-{{ lic_key }}"> {{ lic_key }}</a> is available at the end of this document.</p>
-				{% else %}
-					{% for license in licenses_list %}
-						{% if lic_key == license.key %}
-							<h3 id="component-license-{{ license.key }}">{{ license.key }}</h3>
-							<pre> {{ license.text | e }} </pre>
-						{% endif %}
-					{% endfor %}
-				{% endif %}
-			{% endfor %}
+      {% set captured = {} %}
+      {% if about_object.license_key.value %}
+			  {% if not captured[about_object.name.value] %}
+				  <div class="oss-component" id="component_{{ index.value }}">
+				  <h3 class="component-name">{{ about_object.name.value }} {% if about_object.version.value %}{{ about_object.version.value }}{% endif %} </h3>
+				  {% set _ = captured.update({ about_object.name.value: true }) %}
+				  {% set index.value = index.value + 1 %}
+			  {% endif %}
+        {% if about_object.copyrights.value %}
+          {% for copyright in about_object.copyrights.value %}
+            <pre> {{ copyright['copyright'] }} </pre>
+          {% endfor %}
         {% endif %}
-        </div>
+
+        {% for lic_key_exp in about_object.license_key_expression.value %}
+          <p>This component is licensed under {{ lic_key_exp }}</p>
+        {% endfor %}
+
+        {% for lic_key_exp in about_object.license_key.value %}
+          {% for lic_key in lic_key_exp %}
+            {% if lic_key in common_licenses %}
+              <p>Full text of <a class="{{ lic_key }}" href="#component-license-{{ lic_key }}"> {{ lic_key }}</a> is available at the end of this document.</p>
+            {% else %}
+              {% for license in licenses_list %}
+                {% if lic_key == license.key %}
+                  <h3 id="component-license-{{ license.key }}">{{ license.key }}</h3>
+                  <pre> {{ license.text | e }} </pre>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      {% endif %}
+      </div>
     {% endfor %}
 
     <hr/>

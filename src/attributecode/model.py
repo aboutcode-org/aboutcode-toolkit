@@ -65,6 +65,7 @@ from attributecode.util import replace_tab_with_spaces
 from attributecode.util import wrap_boolean_value
 from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
+from attributecode.util import ungroup_licenses_from_sctk
 from attributecode.util import unique
 
 genereated_tk_version = "# Generated with AboutCode Toolkit Version %s \n\n" % __version__
@@ -82,8 +83,9 @@ class Field(object):
         # save this and do not mutate it afterwards
         if isinstance(value, str):
             self.original_value = value
-        elif value:
-            self.original_value = repr(value)
+        # elif value:
+        # Don't convert it to string. Leave the format as-is
+        #    self.original_value = repr(value)
         else:
             self.original_value = value
 
@@ -156,6 +158,9 @@ class Field(object):
         Subclasses should override as needed.
         """
         return []
+
+    def _serialized_value(self):
+        return self.value if self.value else u''
 
     def serialize(self):
         """
@@ -232,7 +237,8 @@ class StringField(Field):
 
     def _validate(self, *args, **kwargs):
         errors = super(StringField, self)._validate(*args, ** kwargs)
-        no_special_char_field = ['license_expression', 'license_key', 'license_name']
+        no_special_char_field = [
+            'license_expression', 'license_key', 'license_name']
         name = self.name
         if name in no_special_char_field:
             val = self.value
@@ -515,10 +521,13 @@ class PathField(ListField):
                         # parent of the 'about_file_path' with the value of the
                         # 'about_resource'
                         arp = posixpath.join(afp_parent, path)
-                        normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
-                        location = posixpath.join(self.base_dir, normalized_arp)
+                        normalized_arp = posixpath.normpath(
+                            arp).strip(posixpath.sep)
+                        location = posixpath.join(
+                            self.base_dir, normalized_arp)
                     else:
-                        location = posixpath.normpath(posixpath.join(self.base_dir, path))
+                        location = posixpath.normpath(
+                            posixpath.join(self.base_dir, path))
 
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
@@ -562,7 +571,7 @@ class IgnoredResourcesField(PathField):
     """
     Special field for ignored_resources. self.ignored_paths contains a list of
     path patterns (glob patterns) which are not part of the summarization provided
-    by the ABOUT file. 
+    by the ABOUT file.
     """
 
     def __init__(self, *args, ** kwargs):
@@ -743,12 +752,14 @@ class License:
     """
     Represent a License object
     """
+
     def __init__(self, key, name, filename, url, text):
         self.key = key
         self.name = name
         self.filename = filename
         self.url = url
         self.text = text
+
 
 class About(object):
     """
@@ -882,7 +893,8 @@ class About(object):
         """
         data = {}
         data[self.ABOUT_FILE_PATH_ATTR] = self.about_file_path
-        with_values = ((fld.name, fld.serialized_value()) for fld in self.all_fields())
+        with_values = ((fld.name, fld.serialized_value())
+                       for fld in self.all_fields())
         non_empty = ((name, value) for name, value in with_values if value)
         data.update(non_empty)
         return data
@@ -949,14 +961,13 @@ class About(object):
                 custom_field.present = True
             else:
                 # A new, unknown custom field
-                # custom fields are always handled as StringFields
-                # FIXME: with yaml we could just set whatever is provided
-                custom_field = StringField(name=name, value=value, present=True)
+                custom_field = Field(name=name, value=value, present=True)
                 self.custom_fields[name] = custom_field
                 # FIXME: why would this ever fail???
                 try:
                     if name in dir(self):
-                        raise Exception('Illegal field: %(name)r: %(value)r.' % locals())
+                        raise Exception(
+                            'Illegal field: %(name)r: %(value)r.' % locals())
                     setattr(self, name, custom_field)
                 except:
                     msg = 'Internal error with custom field: %(name)r: %(value)r.'
@@ -964,7 +975,7 @@ class About(object):
 
         if illegal_name_list:
             msg = ('Field name: %(illegal_name_list)r contains illegal name characters '
-               '(or empty spaces) and is ignored.')
+                   '(or empty spaces) and is ignored.')
             errors.append(Error(WARNING, msg % locals()))
         return errors
 
@@ -1039,13 +1050,14 @@ class About(object):
             """
             running_inventory = True
             data = saneyaml.load(input, allow_duplicate_keys=False)
-            errs = self.load_dict(data, base_dir, running_inventory=running_inventory)
+            errs = self.load_dict(
+                data, base_dir, running_inventory=running_inventory)
             errors.extend(errs)
         except Exception as e:
             # The trace is good for debugging, but probably not good for user to
             # see the traceback message
-            #trace = traceback.format_exc()
-            #msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s'
+            # trace = traceback.format_exc()
+            # msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s'
             msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'
             errors.append(Error(CRITICAL, msg % locals()))
 
@@ -1054,6 +1066,7 @@ class About(object):
 
     # FIXME: should be a from_dict class factory instead
     # FIXME: running_inventory: remove this : this should be done in the commands, not here
+
     def load_dict(self, fields_dict, base_dir, scancode=False, from_attrib=False, running_inventory=False, reference_dir=None,):
         """
         Load this About object file from a `fields_dict` name/value dict.
@@ -1062,35 +1075,80 @@ class About(object):
         # do not keep empty
         fields = list(fields_dict.items())
 
-        for key, value in fields:
-            if not value:
-                # never return empty or absent fields
-                continue
-            if key == u'licenses':
-                # FIXME: use a license object instead
-                lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, lic_matched_text = ungroup_licenses(value)
-                if lic_key:
-                    fields.append(('license_key', lic_key))
-                if lic_name:
-                    fields.append(('license_name', lic_name))
-                if lic_file:
-                    fields.append(('license_file', lic_file))
-                if lic_url:
-                    fields.append(('license_url', lic_url))
-                if lic_url:
-                    fields.append(('license_url', lic_url))
-                if spdx_lic_key:
-                    fields.append(('spdx_license_key', spdx_lic_key))
-                # The license score is a key from scancode license scan
-                if lic_score:
-                    fields.append(('license_score', lic_score))
-                if lic_matched_text:
-                    fields.append(('matched_text', lic_matched_text))
-                # The licenses field has been ungrouped and can be removed.
-                # Otherwise, it will gives the following INFO level error
-                # 'Field licenses is a custom field.'
-                licenses_field = (key, value)
-                fields.remove(licenses_field)
+        if scancode:
+            have_copyright = False
+            for key, value in fields:
+                if not value:
+                    continue
+                if key == u'copyrights':
+                    have_copyright = True
+                elif key == u'license_detections':
+                    lic_list = ungroup_licenses_from_sctk(value)
+                    lic_exp_list = []
+                    for detected_license in value:
+                        if 'license_expression' in detected_license:
+                            lic_exp_list.append(
+                                detected_license['license_expression'])
+                    if lic_exp_list:
+                        fields.append(
+                            ('license_expression', ' AND '.join(lic_exp_list)))
+
+                    lic_key_list = []
+                    lic_key_exp_list = []
+                    lic_score_list = []
+                    for lic in lic_list:
+                        _char, lic_keys = parse_license_expression(
+                            lic['lic_exp'])
+                        lic_key_list.append(lic_keys)
+                        # for lic_key in lic_keys:
+                        #    lic_key_list.append([lic_key])
+
+                    for lic in lic_list:
+                        lic_key_exp_list.append(lic['lic_exp'])
+                        lic_score_list.append(lic['score'])
+                    fields.append(('license_key', lic_key_list))
+                    fields.append(('license_key_expression', lic_key_exp_list))
+                    fields.append(('license_score', lic_score_list))
+
+                    # The licenses field has been ungrouped and can be removed.
+                    # Otherwise, it will gives the following INFO level error
+                    # 'Field licenses is a custom field.'
+                    licenses_field = (key, value)
+                    fields.remove(licenses_field)
+            # Make sure the copyrights is present even is empty to avoid error
+            # when generating with Jinja
+            if not have_copyright:
+                fields.append(('copyrights', ''))
+
+        else:
+            for key, value in fields:
+                if not value:
+                    # never return empty or absent fields
+                    continue
+                if key == u'licenses':
+                    # FIXME: use a license object instead
+                    lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, lic_matched_text = ungroup_licenses(
+                        value)
+                    if lic_key:
+                        fields.append(('license_key', lic_key))
+                    if lic_name:
+                        fields.append(('license_name', lic_name))
+                    if lic_file:
+                        fields.append(('license_file', lic_file))
+                    if lic_url:
+                        fields.append(('license_url', lic_url))
+                    if spdx_lic_key:
+                        fields.append(('spdx_license_key', spdx_lic_key))
+                    # The license score is a key from scancode license scan
+                    if lic_score:
+                        fields.append(('license_score', lic_score))
+                    if lic_matched_text:
+                        fields.append(('matched_text', lic_matched_text))
+                    # The licenses field has been ungrouped and can be removed.
+                    # Otherwise, it will gives the following INFO level error
+                    # 'Field licenses is a custom field.'
+                    licenses_field = (key, value)
+                    fields.remove(licenses_field)
 
         errors = self.process(
             fields=fields,
@@ -1101,7 +1159,6 @@ class About(object):
             from_attrib=from_attrib,
             reference_dir=reference_dir,
         )
-
         self.errors = errors
         return errors
 
@@ -1125,7 +1182,8 @@ class About(object):
         license_file = []
         license_url = []
         spdx_license_key = []
-        bool_fields = ['redistribute', 'attribute', 'track_changes', 'modified', 'internal_use_only']
+        bool_fields = ['redistribute', 'attribute',
+                       'track_changes', 'modified', 'internal_use_only']
         for field in self.all_fields():
             if not field.value and not field.name in bool_fields:
                 continue
@@ -1178,7 +1236,8 @@ class About(object):
             lic_dict = {}
             if licenses_dict and lic_key in licenses_dict:
                 lic_dict['key'] = lic_key
-                lic_name, lic_filename, lic_context, lic_url, spdx_lic_key = licenses_dict[lic_key]
+                lic_name, lic_filename, lic_context, lic_url, spdx_lic_key = licenses_dict[
+                    lic_key]
                 if lic_name:
                     lic_dict['name'] = lic_name
                 if lic_filename:
@@ -1201,7 +1260,8 @@ class About(object):
                 lic_dict_list.append(lic_dict)
 
         # Handle license information that have not been handled.
-        license_group = list(zip_longest(lic_key_copy, license_name, license_file, license_url, spdx_license_key))
+        license_group = list(zip_longest(
+            lic_key_copy, license_name, license_file, license_url, spdx_license_key))
         for lic_group in license_group:
             lic_dict = {}
             if lic_group[0]:
@@ -1275,7 +1335,9 @@ class About(object):
         for lic_key in self.license_key.value:
             # Make uppercase and with dash and spaces and dots replaced by underscore
             # just to look similar and consistent.
-            name = 'MODULE_LICENSE_' + lic_key.replace('.', '_').replace('-', '_').replace(' ', '_').upper()
+            name = 'MODULE_LICENSE_' + \
+                lic_key.replace('.', '_').replace(
+                    '-', '_').replace(' ', '_').upper()
             module_lic_path = os.path.join(about_parent_path, name)
             # Create an empty MODULE_LICESE_XXX file
             open(module_lic_path, 'a').close()
@@ -1319,7 +1381,8 @@ class About(object):
             os.makedirs(add_unc(parent))
 
         if self.license_expression.present:
-            special_char_in_expression, lic_list = parse_license_expression(self.license_expression.value)
+            special_char_in_expression, lic_list = parse_license_expression(
+                self.license_expression.value)
             self.license_key.value = lic_list
             self.license_key.present = True
             if not special_char_in_expression:
@@ -1333,14 +1396,17 @@ class About(object):
                         license_path = posixpath.join(parent, lic_key)
                         license_path += u'.LICENSE'
                         license_path = add_unc(license_path)
-                        license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[lic_key]
-                        license_info = (lic_key, license_name, license_filename, license_context, license_url, spdx_license_key)
+                        license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[
+                            lic_key]
+                        license_info = (lic_key, license_name, license_filename,
+                                        license_context, license_url, spdx_license_key)
                         license_key_name_context_url.append(license_info)
                         with open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
                             lic.write(license_context)
                     else:
                         # Invalid license issue is already handled
-                        license_info = (lic_key, license_name, license_filename, license_context, license_url, spdx_license_key)
+                        license_info = (lic_key, license_name, license_filename,
+                                        license_context, license_url, spdx_license_key)
                         license_key_name_context_url.append(license_info)
 
         return license_key_name_context_url
@@ -1372,7 +1438,8 @@ def collect_inventory(location):
                 errors.append(Error(severity, msg))
         abouts.append(about)
     if custom_fields_list:
-        custom_fields_err_msg = 'Field ' + str(custom_fields_list) + ' is a custom field.'
+        custom_fields_err_msg = 'Field ' + \
+            str(custom_fields_list) + ' is a custom field.'
         errors.append(Error(INFO, custom_fields_err_msg))
     return errors, abouts
 
@@ -1421,7 +1488,8 @@ def collect_inventory_license_expression(location, scancode=False, worksheet=Non
         inventory = gen.load_scancode_json(location)
         # ScanCode is using 'license_expressions' whereas we are using 'license_expression'
         if not 'license_expressions' in inventory[0]:
-            errors.append(Error(CRITICAL, "No 'license_expressions' field in the input."))
+            errors.append(
+                Error(CRITICAL, "No 'license_expressions' field in the input."))
             return errors, abouts
     else:
         if location.endswith('.csv'):
@@ -1432,7 +1500,8 @@ def collect_inventory_license_expression(location, scancode=False, worksheet=Non
             inventory = gen.load_json(location)
         # Check if 'license_expression' field is in the input
         if not inventory or not 'license_expression' in inventory[0]:
-            errors.append(Error(CRITICAL, "No 'license_expression' field in the input."))
+            errors.append(
+                Error(CRITICAL, "No 'license_expression' field in the input."))
             return errors, abouts
 
     for data in inventory:
@@ -1495,7 +1564,8 @@ def copy_redist_src(copy_list, location, output, with_structure):
             relative_from_path = relative_from_path.partition('/')[2]
         # Get the directory name of the output path
         if with_structure:
-            output_dir = os.path.dirname(os.path.join(output, util.norm(relative_from_path)))
+            output_dir = os.path.dirname(os.path.join(
+                output, util.norm(relative_from_path)))
         else:
             output_dir = output
         err = copy_file(from_path, output_dir)
@@ -1538,7 +1608,8 @@ def get_copy_list(abouts, location):
                     else:
                         norm_from_path = os.path.normpath(from_path)
                     # Get the relative path
-                    relative_from_path = norm_from_path.partition(util.norm(location))[2]
+                    relative_from_path = norm_from_path.partition(
+                        util.norm(location))[2]
                     if os.path.isdir(from_path):
                         if not dir_list:
                             dir_list.append(relative_from_path)
@@ -1614,14 +1685,18 @@ def about_object_to_list_of_dictionary(abouts):
                 if 'about_file_path' in ad.keys():
                     afp = ad['about_file_path']
                     afp_parent = posixpath.dirname(afp)
-                    afp_parent = '/' + afp_parent if not afp_parent.startswith('/') else afp_parent
+                    afp_parent = '/' + \
+                        afp_parent if not afp_parent.startswith(
+                            '/') else afp_parent
                     about_resource = ad['about_resource']
                     for resource in about_resource:
-                        updated_about_resource = posixpath.normpath(posixpath.join(afp_parent, resource))
+                        updated_about_resource = posixpath.normpath(
+                            posixpath.join(afp_parent, resource))
                         if resource == u'.':
                             if not updated_about_resource == '/':
                                 updated_about_resource = updated_about_resource + '/'
-                    ad['about_resource'] = dict([(updated_about_resource, None)])
+                    ad['about_resource'] = dict(
+                        [(updated_about_resource, None)])
                     del ad['about_file_path']
                 serialized.append(ad)
         except Exception as e:
@@ -1645,10 +1720,12 @@ def write_output(abouts, location, format):  # NOQA
     else:
         save_as_excel(location, about_dicts)
 
+
 def save_as_json(location, about_dicts):
     with open(location, mode='w') as output_file:
         data = util.format_about_dict_for_json_output(about_dicts)
         output_file.write(json.dumps(data, indent=2))
+
 
 def save_as_csv(location, about_dicts, field_names):
     with open(location, mode='w', encoding='utf-8', newline='', errors='replace') as output_file:
@@ -1658,9 +1735,11 @@ def save_as_csv(location, about_dicts, field_names):
         for row in csv_formatted_list:
             writer.writerow(row)
 
+
 def save_as_excel(location, about_dicts):
     formatted_list = util.format_about_dict_output(about_dicts)
     write_excel(location, formatted_list)
+
 
 def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, api_key=None, scancode=False, reference=None):
     """
@@ -1690,23 +1769,22 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
 
     for about in abouts:
         # No need to go through all the about objects if '--api_key' is invalid
-        auth_error = Error(ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
+        auth_error = Error(
+            ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
         if auth_error in errors:
             break
 
-        # Scancode returns license_expressions while ABcTK uses license_expression
         if scancode:
             lic_exp = ''
             lic_list = []
-            # The license_expressions return from scancode is a list of license keys.
-            # Therefore, we will combine it with the 'AND' condition
-            if about.license_expressions.value:
-                lic_exp = " AND ".join(about.license_expressions.value)
+            if about.detected_license_expression.value:
+                lic_exp = about.detected_license_expression.value
             about.license_expression.value = lic_exp
             about.license_expression.present = True
 
         if about.license_expression.value:
-            special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+            special_char_in_expression, lic_list = parse_license_expression(
+                about.license_expression.value)
             if special_char_in_expression:
                 msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
                        str(special_char_in_expression))
@@ -1722,7 +1800,8 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                         detail_list = []
                         captured_license.append(lic_key)
                         if api_key:
-                            license_data, errs = api.get_license_details_from_api(url, api_key, lic_key)
+                            license_data, errs = api.get_license_details_from_api(
+                                url, api_key, lic_key)
                             # Catch incorrect API URL
                             if errs:
                                 _, msg = errs[0]
@@ -1740,7 +1819,8 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                                 continue
                             license_name = license_data.get('short_name', '')
                             license_text = license_data.get('full_text', '')
-                            spdx_license_key = license_data.get('spdx_license_key', '')
+                            spdx_license_key = license_data.get(
+                                'spdx_license_key', '')
                             license_filename = lic_key + '.LICENSE'
                             lic_url = lic_urn + lic_key
                         else:
@@ -1754,7 +1834,8 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                                     continue
                                 data = json.loads(json_url.read())
                                 license_name = data['short_name']
-                                license_text = urllib.request.urlopen(license_text_url).read().decode('utf-8')
+                                license_text = urllib.request.urlopen(
+                                    license_text_url).read().decode('utf-8')
                                 license_filename = data['key'] + '.LICENSE'
                                 lic_url = url + license_filename
                                 spdx_license_key = data['spdx_license_key']

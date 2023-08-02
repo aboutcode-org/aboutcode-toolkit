@@ -1,0 +1,122 @@
+{
+  "files": [
+    {
+      "path": "samples/zlib/dotzlib/readme.txt",
+      "type": "file",
+      "name": "readme.txt",
+      "base_name": "readme",
+      "extension": ".txt",
+      "size": 2358,
+      "date": "2023-07-26",
+      "sha1": "b1229b826f0096808628474538cea8fec2922a9b",
+      "md5": "1f20f3168ee63d90de033edac2ce383c",
+      "sha256": "d04972a91b1563fb4b7acab4b9ff2b84e57368953cc0596d5f5ea17d97315fd0",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text, with CRLF line terminators",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [],
+      "detected_license_expression": "boost-1.0",
+      "detected_license_expression_spdx": "BSL-1.0",
+      "license_detections": [
+        {
+          "license_expression": "boost-1.0",
+          "matches": [
+            {
+              "score": 100.0,
+              "start_line": 10,
+              "end_line": 10,
+              "matched_length": 6,
+              "match_coverage": 100.0,
+              "matcher": "2-aho",
+              "license_expression": "unknown-license-reference",
+              "rule_identifier": "unknown-license-reference_225.RULE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/unknown-license-reference_225.RULE"
+            },
+            {
+              "score": 100.0,
+              "start_line": 1,
+              "end_line": 23,
+              "matched_length": 211,
+              "match_coverage": 100.0,
+              "matcher": "1-hash",
+              "license_expression": "boost-1.0",
+              "rule_identifier": "boost-1.0.LICENSE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/boost-1.0.LICENSE"
+            }
+          ],
+          "identifier": "boost-1.0-5cff8c89-be8c-7d4a-7989-c20725314b4c",
+          "detection_log": ["unknown-reference-to-local-file"]
+        },
+        {
+          "license_expression": "boost-1.0",
+          "matches": [
+            {
+              "score": 100.0,
+              "start_line": 57,
+              "end_line": 58,
+              "matched_length": 32,
+              "match_coverage": 100.0,
+              "matcher": "2-aho",
+              "license_expression": "boost-1.0",
+              "rule_identifier": "boost-1.0_21.RULE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/boost-1.0_21.RULE"
+            },
+            {
+              "score": 100.0,
+              "start_line": 1,
+              "end_line": 23,
+              "matched_length": 211,
+              "match_coverage": 100.0,
+              "matcher": "1-hash",
+              "license_expression": "boost-1.0",
+              "rule_identifier": "boost-1.0.LICENSE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/boost-1.0.LICENSE"
+            }
+          ],
+          "identifier": "boost-1.0-d2497bb7-4937-90c9-b38e-63d81d1b1d13",
+          "detection_log": ["unknown-reference-to-local-file"]
+        }
+      ],
+      "license_clues": [],
+      "percentage_of_license_text": 11.18,
+      "copyrights": [
+        {
+          "copyright": "Copyright (c) Henrik Ravn 2004",
+          "start_line": 55,
+          "end_line": 55
+        }
+      ],
+      "holders": [
+        {
+          "holder": "Henrik Ravn",
+          "start_line": 55,
+          "end_line": 55
+        }
+      ],
+      "authors": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "http://www.boost.org/LICENSE_1_0.txt",
+          "start_line": 58,
+          "end_line": 58
+        }
+      ],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    }
+  ]
+}

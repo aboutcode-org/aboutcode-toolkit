@@ -195,14 +195,6 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         else:
             afp = fields.get(model.About.ABOUT_RESOURCE_ATTR)
 
-        """
-        # FIXME: this should not be a failure condition
-        if not afp or not afp.strip():
-            msg = 'Empty column: %(afp)r. Cannot generate .ABOUT file.' % locals()
-            errors.append(Error(ERROR, msg))
-            continue
-        else:
-        """
         afp = util.to_posix(afp)
         if base_dir:
             loc = join(base_dir, afp)
@@ -235,6 +227,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             running_inventory=False,
             reference_dir=reference_dir,
         )
+
         for severity, message in ld_errors:
             if 'Custom Field' in message:
                 field_name = message.replace('Custom Field: ', '').strip()

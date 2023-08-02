@@ -404,84 +404,54 @@ class TestJson(unittest.TestCase):
 
     def test_load_non_list_json(self):
         test_file = get_test_loc('test_util/json/not_a_list_need_mapping.json')
-        # FIXME: why this dict nesting??
-        expected = [dict(dict([
-            ('about_resource', '.'),
-            ('name', 'AboutCode'),
-            ('path', '/load/this.ABOUT'),
-            ('version', '0.11.0'),
-        ])
-        )]
+        expected = [{
+            'path': '/load/this.ABOUT',
+            'about_resource': '.',
+            'name': 'AboutCode',
+            'version': '0.11.0'
+            }]
         result = util.load_json(test_file)
         assert expected == result
 
     def test_load_non_list_json2(self):
         test_file = get_test_loc('test_util/json/not_a_list.json')
-        expected = [dict([
-            ('about_file_path', '/load/this.ABOUT'),
-            ('version', '0.11.0'),
-            ('about_resource', '.'),
-            ('name', 'AboutCode'),
-        ])
-        ]
-        result = util.load_json(test_file)
-        assert expected == result
-
-    def test_load_json_from_abc_mgr(self):
-        test_file = get_test_loc('test_util/json/aboutcode_manager_exported.json')
-        expected = [dict(dict([
-            ('license_expression', 'apache-2.0'),
-            ('copyright', 'Copyright (c) 2017 nexB Inc.'),
-            ('licenses', [{'key':'apache-2.0'}]),
-            ('copyrights', [{'statements':['Copyright (c) 2017 nexB Inc.']}]),
-            ('path', 'ScanCode'),
-            ('review_status', 'Analyzed'),
-            ('name', 'ScanCode'),
-            ('version', '2.2.1'),
-            ('owner', 'nexB Inc.'),
-            ('code_type', 'Source'),
-            ('is_modified', False),
-            ('is_deployed', False),
-            ('feature', ''),
-            ('purpose', ''),
-            ('homepage_url', None),
-            ('download_url', None),
-            ('license_url', None),
-            ('notice_url', None),
-            ('programming_language', 'Python'),
-            ('notes', ''),
-            ('fileId', 8458),
-        ]))]
+        expected = [{
+            'about_file_path': '/load/this.ABOUT',
+            'about_resource': '.',
+            'name': 'AboutCode',
+            'version': '0.11.0'
+            }]
         result = util.load_json(test_file)
         assert expected == result
 
     def test_load_json_from_scancode(self):
         test_file = get_test_loc('test_util/json/scancode_info.json')
-        expected = [dict(dict([
-            ('type', 'file'),
-            ('name', 'Api.java'),
-            ('path', 'Api.java'),
-            ('base_name', 'Api'),
-            ('extension', '.java'),
-            ('size', 5074),
-            ('date', '2017-07-15'),
-            ('sha1', 'c3a48ec7e684a35417241dd59507ec61702c508c'),
-            ('md5', '326fb262bbb9c2ce32179f0450e24601'),
-            ('mime_type', 'text/plain'),
-            ('file_type', 'ASCII text'),
-            ('programming_language', 'Java'),
-            ('is_binary', False),
-            ('is_text', True),
-            ('is_archive', False),
-            ('is_media', False),
-            ('is_source', True),
-            ('is_script', False),
-            ('files_count', 0),
-            ('dirs_count', 0),
-            ('size_count', 0),
-            ('scan_errors', []),
-        ]))]
-        result = util.load_json(test_file)
+        expected = [{
+            'about_resource': 'lic.txt',
+            'name': 'lic.txt',
+            'type': 'file',
+            'base_name': 'lic',
+            'extension': '.txt',
+            'size': 1463,
+            'date': '2023-07-26',
+            'sha1': 'bb3f381f9ec25416c0c3b4628f7f6b923ced040f',
+            'md5': '63f9ec8c32874a5d987d78b9a730a6b8',
+            'sha256': 'd71777b3dc333f540a871bf2ef6380e646a10f2ac1f077ce4f34326e16fb6995',
+            'mime_type': 'text/plain',
+            'file_type': 'ASCII text, with very long lines',
+            'programming_language': None,
+            'is_binary': False,
+            'is_text': True,
+            'is_archive': False,
+            'is_media': False,
+            'is_source': False,
+            'is_script': False,
+            'files_count': 0,
+            'dirs_count': 0,
+            'size_count': 0,
+            'scan_errors': []
+            }]
+        result = util.load_scancode_json(test_file)
         assert expected == result
 
     def test_format_about_dict_for_json_output(self):

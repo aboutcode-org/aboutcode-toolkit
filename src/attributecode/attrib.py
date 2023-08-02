@@ -39,6 +39,7 @@ DEFAULT_TEMPLATE_SCANCODE_FILE = os.path.join(
 
 DEFAULT_LICENSE_SCORE = 100
 
+
 def generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=None, vartext=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
@@ -55,7 +56,8 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
         lineno, message = template_error
         error = Error(
             CRITICAL,
-            'Template validation error at line: {lineno}: "{message}"'.format(**locals())
+            'Template validation error at line: {lineno}: "{message}"'.format(
+                **locals())
         )
         errors.append(error)
         return error, None
@@ -87,10 +89,11 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
                         filename = list(about.license_file.value.keys())[index]
                         text = list(about.license_file.value.values())[index]
                     else:
-                        error = Error(CRITICAL, 'No license file found for ' + name)
+                        error = Error(
+                            CRITICAL, 'No license file found for ' + name)
                         errors.append(error)
                         break
-                    if  about.license_url.value:
+                    if about.license_url.value:
                         url = about.license_url.value[index]
                     else:
                         url = ''
@@ -98,6 +101,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
                     licenses_list.append(license_object)
                 index = index + 1
     else:
+        # Create license object
         for key in license_dict:
             name = license_dict[key][0]
             filename = license_dict[key][1]
@@ -106,7 +110,6 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
             license_object = License(key, name, filename, url, text)
             licenses_list.append(license_object)
 
-
     # We need special treatment for scancode input.
     # Each about_object may have duplicated license key and same/different license score
     # We will only keep the unique license key with the highest license score.
@@ -114,73 +117,96 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
     if scancode:
         meet_score_licenses_list = []
         for about in abouts:
-            # See if the input has 'matched_text'
-            matched_text_exist = False
-            try:
-                if about.matched_text:
-                    matched_text_exist = True
-            except:
-                pass
             # We will use a dictionary to keep the unique license key
             # which the dictionary key is the license key and the dictionary value
             # is (lic_score, lic_name) or (lic_score, lic_name, matched_text)
             if about.license_key.value:
                 updated_dict = {}
                 lic_key = about.license_key.value
-                lic_name = about.license_name.value
+                lic_name = []
+                if about.license_name.value:
+                    lic_name = about.license_name.value
+                else:
+                    lic_name = []
+                    for key_list in lic_key:
+                        lic_name_list = []
+                        for k in key_list:
+                            try:
+                                lic_name_list.append(license_dict[k][0])
+                            except:
+                                lic_name_list.append(k)
+                        lic_name.append(lic_name_list)
+                    about.license_name.value = lic_name
+
+                if not lic_name:
+                    lic_name = []
+                    for key in lic_key:
+                        lic_name.append(license_dict[key][0])
                 lic_score = about.license_score.value
-                if matched_text_exist:
-                    matched_text = about.matched_text.value
-                    assert len(lic_key) == len(matched_text)
                 assert len(lic_key) == len(lic_name)
                 assert len(lic_key) == len(lic_score)
-                if lic_key:
-                    index = 0
-                    for key in lic_key:
+
+                lic_key_expression = about.license_key_expression.value
+                if lic_key_expression:
+                    updated_lic_key_expression = []
+                    removed_index = []
+                    for index, key in enumerate(lic_key_expression):
                         if key in updated_dict:
-                            if matched_text_exist:
-                                previous_score, _name, _detected_text = updated_dict[key]
-                            else:
-                                previous_score, _name = updated_dict[key]
+                            previous_score, _name = updated_dict[key]
                             current_score = lic_score[index]
                             if current_score > previous_score:
-                                if matched_text_exist:
-                                    updated_dict[key] = (lic_score[index], lic_name[index], matched_text[index])
-                                else:
-                                    updated_dict[key] = (lic_score[index], lic_name[index])
+                                updated_dict[key] = (
+                                    lic_score[index], lic_name[index])
+                            # Track the duplicated index
+                            removed_index.append(index)
                         else:
-                            if matched_text_exist:
-                                updated_dict[key] = (lic_score[index], lic_name[index], matched_text[index])
-                            else:
-                                updated_dict[key] = (lic_score[index], lic_name[index])
-                        index = index + 1
+                            updated_dict[key] = (
+                                lic_score[index], lic_name[index])
+                            updated_lic_key_expression.append(key)
+                    # Remove the duplication
+                    for index, key in enumerate(about.license_key.value):
+                        if index in removed_index:
+                            del about.license_key.value[index]
+                            del about.license_name.value[index]
+                            del about.license_score.value[index]
+
+                lic_key_expression = updated_lic_key_expression
                 updated_lic_key = []
                 updated_lic_name = []
                 updated_lic_score = []
-                if matched_text_exist:
-                    updated_matched_text = []
-                for lic in updated_dict:
-                    if matched_text_exist:
-                        score, name, text = updated_dict[lic]
-                    else:
-                        score, name = updated_dict[lic]
+                for index, lic in enumerate(updated_dict):
+                    _sp_char, lic_keys = parse_license_expression(lic)
+                    score, name = updated_dict[lic]
                     if score >= min_license_score:
-                        updated_lic_key.append(lic)
-                        updated_lic_score.append(score)
-                        updated_lic_name.append(name)
-                        if matched_text_exist:
-                            updated_matched_text.append(text)
-                        if not lic in meet_score_licenses_list:
-                            meet_score_licenses_list.append(lic)
+                        for lic_key in lic_keys:
+                            if not lic_key in meet_score_licenses_list:
+                                meet_score_licenses_list.append(lic_key)
+
+                    updated_lic_key.append(lic_keys)
+                    updated_lic_name.append(name)
+                    updated_lic_score.append(score)
+
+                # Remove items that don't meet to score
+                for index, score in enumerate(updated_lic_score):
+                    if score < min_license_score:
+                        del updated_lic_key[index]
+                        del updated_lic_name[index]
+                        del updated_lic_score[index]
+                        del lic_key_expression[index]
+
                 about.license_key.value = updated_lic_key
                 about.license_name.value = updated_lic_name
                 about.license_score.value = updated_lic_score
-                if matched_text_exist:
-                    about.matched_text.value = updated_matched_text
+                about.license_key_expression.value = lic_key_expression
 
+        # Remove the license object
+        remove_list = []
         for lic in licenses_list:
             if not lic.key in meet_score_licenses_list:
-                licenses_list.remove(lic)
+                remove_list.append(lic)
+
+        for lic in remove_list:
+            licenses_list.remove(lic)
 
     for about in abouts:
         # Create a license expression with license name
@@ -200,7 +226,8 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
             lic_name_expression = ' '.join(lic_name_expression_list)
 
             # Add the license name expression string into the about object as a custom field
-            custom_field = StringField(name='license_name_expression', value=lic_name_expression, present=True)
+            custom_field = StringField(
+                name='license_name_expression', value=lic_name_expression, present=True)
             setattr(about, 'license_name_expression', custom_field)
 
     # Sort the about objects by name
@@ -208,6 +235,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
 
     # Sort the license object by key
     licenses_list = sorted(licenses_list, key=lambda x: x.key)
+
     rendered = template.render(
         abouts=abouts,
         common_licenses=COMMON_LICENSES,
@@ -218,6 +246,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
     )
 
     return errors, rendered
+
 
 def get_license_file_key(license_text_name):
     if license_text_name.endswith('.LICENSE'):
@@ -274,7 +303,8 @@ def generate_and_save(abouts, is_about_input, license_dict, output_location, sca
     for about in abouts:
         if not about.license_expression.value:
             continue
-        special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+        special_char_in_expression, lic_list = parse_license_expression(
+            about.license_expression.value)
         if special_char_in_expression:
             msg = (u"The following character(s) cannot be in the license_expression: " +
                    str(special_char_in_expression))

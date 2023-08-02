@@ -1,0 +1,87 @@
+{
+  "files": [
+    {
+      "path": "samples/zlib/adler32.c",
+      "type": "file",
+      "name": "adler32.c",
+      "base_name": "adler32",
+      "extension": ".c",
+      "size": 4968,
+      "date": "2023-07-26",
+      "sha1": "0cff4808476ce0b5f6f0ebbc69ee2ab2a0eebe43",
+      "md5": "ae3bbb54820e1d49fb90cbba222e973f",
+      "sha256": "341d49ae2703037d2d10c8486f1a1ca3b65e0f10cc9e5fead6bfbbc0b34564ba",
+      "mime_type": "text/x-c",
+      "file_type": "C source, ASCII text",
+      "programming_language": "C",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [],
+      "detected_license_expression": "zlib",
+      "detected_license_expression_spdx": "Zlib",
+      "license_detections": [
+        {
+          "license_expression": "zlib",
+          "matches": [
+            {
+              "score": 40.0,
+              "start_line": 3,
+              "end_line": 3,
+              "matched_length": 12,
+              "match_coverage": 100.0,
+              "matcher": "2-aho",
+              "license_expression": "zlib",
+              "rule_identifier": "zlib_5.RULE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/zlib_5.RULE"
+            },
+            {
+              "score": 100.0,
+              "start_line": 6,
+              "end_line": 23,
+              "matched_length": 144,
+              "match_coverage": 100.0,
+              "matcher": "2-aho",
+              "license_expression": "zlib",
+              "rule_identifier": "zlib_17.RULE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/zlib_17.RULE"
+            }
+          ],
+          "identifier": "zlib-663c0d51-510f-fca6-b163-671ecb188ff9",
+          "detection_log": [
+            "unknown-reference-to-local-file"
+          ]
+        }
+      ],
+      "license_clues": [],
+      "percentage_of_license_text": 2.06,
+      "copyrights": [
+        {
+          "copyright": "Copyright (c) 1995-2011 Mark Adler",
+          "start_line": 2,
+          "end_line": 2
+        }
+      ],
+      "holders": [
+        {
+          "holder": "Mark Adler",
+          "start_line": 2,
+          "end_line": 2
+        }
+      ],
+      "authors": [],
+      "emails": [],
+      "urls": [],
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    }
+  ]
+}

@@ -275,16 +275,9 @@ def load_json(location):
     with open(location) as json_file:
         results = json.load(json_file)
 
-    # FIXME: this is too clever and complex... IMHO we should not try to guess the format.
-    # instead a command line option should be provided explictly to say what is the format
     if not isinstance(results, list):
-        # FIXME: I think we can remove the support of aboutcode_manager
-        if u'aboutcode_manager_notice' in results:
-            results = results['components']
-        elif u'scancode_notice' in results:
-            results = results['files']
-        else:
-            results = [results]
+        results = [results]
+
     return results
 
 
@@ -456,6 +449,16 @@ def copy_file(from_path, to_path):
         error = Error(CRITICAL, msg)
         return error
 
+def ungroup_licenses_from_sctk(value):
+    # Return a list of dictionary with lic_key and score
+    # extracted from SCTK scan
+    detected_license_list = []
+    for detected_license in value:
+        for lic in detected_license['matches']:
+            lic_exp = lic['license_expression']
+            score = lic['score']
+            detected_license_list.append({'lic_exp': lic_exp, 'score': score})
+    return detected_license_list
 
 # FIXME: we should use a license object instead
 def ungroup_licenses(licenses):
@@ -656,12 +659,13 @@ def load_scancode_json(location):
     with open(location) as json_file:
         results = json.load(json_file)
     results = results['files']
-    # Rename the "path" to "about_resource"
+    # Rename the "path" to "about_resource" and update "name" from path value
     for item in results:
         updated_dict = {}
         for key in item:
             if key == 'path':
                 updated_dict['about_resource'] = item[key]
+                updated_dict['name'] = os.path.basename(item[key])
             else:
                 updated_dict[key] = item[key]
         updated_results.append(updated_dict)

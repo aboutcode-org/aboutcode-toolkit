@@ -263,14 +263,14 @@ Options
 
         ..  code-block:: none
 
-                --from-inventory FILE  Path to an inventory CSV/JSON file as the base list
-                                       for files/directories that need to be copied which
-                                       have the 'redistribute' flagged.
-                --with-structures      Copy sources with directory structure.
-                --zip                  Zip the copied sources to the output location.
-                -q, --quiet            Do not print error or warning messages.
-                --verbose              Show all error and warning messages.
-                -h, --help             Show this message and exit.
+            --from-inventory FILE  Path to an inventory CSV/JSON/XLSX file as the base
+                                    list for files/directories that need to be copied
+                                    which have the 'redistribute' flagged.
+            --with-structures      Copy sources with directory structure.
+            --zip                  Zip the copied sources to the output location.
+            -q, --quiet            Do not print error or warning messages.
+            --verbose              Show all error and warning messages.
+            -h, --help             Show this message and exit.
 
 Purpose
 -------
