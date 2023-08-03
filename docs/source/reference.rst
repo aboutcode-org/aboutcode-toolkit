@@ -775,7 +775,8 @@ need to be included.
 
 Notes
 =====
-The AboutCode Toolkit version 10.0.0 will work with input from Scancode Toolkit version 32.0.0 or later.
-If you are using an earlier version of Scancode Toolkit, specifically version 31 or older,
-it will only be compatible with prior versions of AboutCode Toolkit.
+The AboutCode Toolkit version 10.0.0 will work with input from Scancode Toolkit
+version 32.0.0 or later. If you are using an earlier version of Scancode Toolkit,
+specifically version 31 or older, it will only be compatible with prior versions
+of AboutCode Toolkit.
 
