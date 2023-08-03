@@ -1487,8 +1487,8 @@ def collect_inventory_license_expression(location, scancode=False, worksheet=Non
 
     if scancode:
         inventory = gen.load_scancode_json(location)
-        # ScanCode is using 'license_expressions' whereas we are using 'license_expression'
-        if not 'license_expressions' in inventory[0]:
+        # ScanCode uses 'detected_license_expression'
+        if not 'detected_license_expression' in inventory[0]:
             errors.append(
                 Error(CRITICAL, "No 'license_expressions' field in the input."))
             return errors, abouts

@@ -2,9 +2,13 @@
 Changelog
 
 xxxx-xx-xx
-    Release x.x.x
+    Release 10.0.0
 
     * Fixd error in load_json in util.py
+    * Code cleanup
+    * Work with the SCTK version 32 and later (Drop support for SCTK version 31 and earlier)
+    * Implement `--scancode` option for `gen`
+
 
 2023-07-14
     Release 9.0.0
