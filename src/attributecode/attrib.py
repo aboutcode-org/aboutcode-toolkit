@@ -14,9 +14,7 @@
 #  limitations under the License.
 # ============================================================================
 
-import collections
 import datetime
-import io
 import os
 
 import jinja2

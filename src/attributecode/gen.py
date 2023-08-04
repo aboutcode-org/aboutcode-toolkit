@@ -14,8 +14,6 @@
 #  limitations under the License.
 # ============================================================================
 
-import codecs
-
 from posixpath import basename
 from posixpath import dirname
 from posixpath import exists
@@ -34,7 +32,6 @@ from attributecode.util import file_fields
 from attributecode.util import invalid_chars
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
-from attributecode.util import unique
 from attributecode.util import load_scancode_json, load_csv, load_json, load_excel
 
 

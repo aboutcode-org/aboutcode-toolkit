@@ -15,7 +15,6 @@
 # ============================================================================
 
 from attributecode.util import write_licenses
-from attributecode.util import get_file_text
 from attributecode.util import get_temp_dir
 from attributecode.util import filter_errors
 from attributecode.util import extract_zip
@@ -34,7 +33,7 @@ from attributecode.model import copy_redist_src
 from attributecode.model import collect_inventory, collect_abouts_license_expression, collect_inventory_license_expression
 from attributecode.gen import generate as generate_about_files, load_inventory
 from attributecode.attrib import generate_and_save as generate_attribution_doc
-from attributecode.attrib import DEFAULT_TEMPLATE_FILE, DEFAULT_LICENSE_SCORE
+from attributecode.attrib import DEFAULT_LICENSE_SCORE
 from attributecode.attrib import check_template
 from attributecode import severities
 from attributecode import __version__
@@ -45,8 +44,6 @@ from attributecode import WARNING
 from collections import defaultdict
 from functools import partial
 
-import io
-import logging
 import os
 import sys
 

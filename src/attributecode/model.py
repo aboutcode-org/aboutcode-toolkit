@@ -24,7 +24,6 @@ AboutCode toolkit reads and validates ABOUT files and collect software
 components inventories.
 """
 
-import io
 import json
 import os
 import posixpath
@@ -66,7 +65,6 @@ from attributecode.util import wrap_boolean_value
 from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
 from attributecode.util import ungroup_licenses_from_sctk
-from attributecode.util import unique
 
 genereated_tk_version = "# Generated with AboutCode Toolkit Version %s \n\n" % __version__
 
