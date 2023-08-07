@@ -319,6 +319,34 @@ Optional Licensing fields
 -   spdx_license_key: The ScanCode LicenseDB spdx_license_key defined
     for the license at https://scancode-licensedb.aboutcode.org/index.html
 
+Notes
+^^^^^
+The license_* fields in the generated .ABOUT files are grouped under the "licenses" fields.
+For instance,
+
+        ..  code-block:: none
+
+                licenses:
+                    -   key: apache-2.0
+                        name: Apache 2.0
+                        file: apache-2.0.LICENSE
+                        url: https://scancode-licensedb.aboutcode.org/apache-2.0.LICENSE
+                        spdx_license_key: Apache-2.0
+
+However, if user create .ABOUT file manually, it can also used the individual field name.
+
+
+        ..  code-block:: none
+
+                license_key: apache-2.0
+                license_name: Apache 2.0
+                license_file: apache-2.0.LICENSE
+                license_url: https://scancode-licensedb.aboutcode.org/apache-2.0.LICENSE
+                spdx_license_key: Apache-2.0
+
+These groupping is only used in the generated .ABOUT files. The output from **gen**
+will use the individual field name.
+
 Optional Boolean flag fields
 ----------------------------
 

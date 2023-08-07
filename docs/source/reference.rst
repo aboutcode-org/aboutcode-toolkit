@@ -772,3 +772,11 @@ Special Notes
 When using the field_filters configuration, all the standard required
 columns (about_resource and name) and the user defined required_fields
 need to be included.
+
+Notes
+=====
+The AboutCode Toolkit version 10.0.0 will work with input from Scancode Toolkit
+version 32.0.0 or later. If you are using an earlier version of Scancode Toolkit,
+specifically version 31 or older, it will only be compatible with prior versions
+of AboutCode Toolkit.
+
