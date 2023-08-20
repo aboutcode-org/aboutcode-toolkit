@@ -1,7 +1,7 @@
 ==============================
 Changelog
 
-xxxx-xx-xx
+2023-08-20
     Release 10.0.0
 
     * Fixd error in load_json in util.py

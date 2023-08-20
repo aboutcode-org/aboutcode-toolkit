@@ -113,94 +113,12 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
     # We will only keep the unique license key with the highest license score.
     # The process will update the license_key, license_name and license_score.
     if scancode:
-        meet_score_licenses_list = []
-        for about in abouts:
-            # We will use a dictionary to keep the unique license key
-            # which the dictionary key is the license key and the dictionary value
-            # is (lic_score, lic_name) or (lic_score, lic_name, matched_text)
-            if about.license_key.value:
-                updated_dict = {}
-                lic_key = about.license_key.value
-                lic_name = []
-                if about.license_name.value:
-                    lic_name = about.license_name.value
-                else:
-                    lic_name = []
-                    for key_list in lic_key:
-                        lic_name_list = []
-                        for k in key_list:
-                            try:
-                                lic_name_list.append(license_dict[k][0])
-                            except:
-                                lic_name_list.append(k)
-                        lic_name.append(lic_name_list)
-                    about.license_name.value = lic_name
-
-                if not lic_name:
-                    lic_name = []
-                    for key in lic_key:
-                        lic_name.append(license_dict[key][0])
-                lic_score = about.license_score.value
-                assert len(lic_key) == len(lic_name)
-                assert len(lic_key) == len(lic_score)
-
-                lic_key_expression = about.license_key_expression.value
-                if lic_key_expression:
-                    updated_lic_key_expression = []
-                    removed_index = []
-                    for index, key in enumerate(lic_key_expression):
-                        if key in updated_dict:
-                            previous_score, _name = updated_dict[key]
-                            current_score = lic_score[index]
-                            if current_score > previous_score:
-                                updated_dict[key] = (
-                                    lic_score[index], lic_name[index])
-                            # Track the duplicated index
-                            removed_index.append(index)
-                        else:
-                            updated_dict[key] = (
-                                lic_score[index], lic_name[index])
-                            updated_lic_key_expression.append(key)
-                    # Remove the duplication
-                    for index, key in enumerate(about.license_key.value):
-                        if index in removed_index:
-                            del about.license_key.value[index]
-                            del about.license_name.value[index]
-                            del about.license_score.value[index]
-
-                lic_key_expression = updated_lic_key_expression
-                updated_lic_key = []
-                updated_lic_name = []
-                updated_lic_score = []
-                for index, lic in enumerate(updated_dict):
-                    _sp_char, lic_keys = parse_license_expression(lic)
-                    score, name = updated_dict[lic]
-                    if score >= min_license_score:
-                        for lic_key in lic_keys:
-                            if not lic_key in meet_score_licenses_list:
-                                meet_score_licenses_list.append(lic_key)
-
-                    updated_lic_key.append(lic_keys)
-                    updated_lic_name.append(name)
-                    updated_lic_score.append(score)
-
-                # Remove items that don't meet to score
-                for index, score in enumerate(updated_lic_score):
-                    if score < min_license_score:
-                        del updated_lic_key[index]
-                        del updated_lic_name[index]
-                        del updated_lic_score[index]
-                        del lic_key_expression[index]
-
-                about.license_key.value = updated_lic_key
-                about.license_name.value = updated_lic_name
-                about.license_score.value = updated_lic_score
-                about.license_key_expression.value = lic_key_expression
-
+        abouts, meet_score_licenses_list = generate_sctk_input(
+            abouts, min_license_score, license_dict)
         # Remove the license object
         remove_list = []
         for lic in licenses_list:
-            if not lic.key in meet_score_licenses_list:
+            if lic.key not in meet_score_licenses_list:
                 remove_list.append(lic)
 
         for lic in remove_list:
@@ -244,6 +162,93 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
     )
 
     return errors, rendered
+
+
+def generate_sctk_input(abouts, min_license_score, license_dict):
+    meet_score_licenses_list = []
+    for about in abouts:
+        # We will use a dictionary to keep the unique license key
+        # which the dictionary key is the license key and the dictionary value
+        # is (lic_score, lic_name)
+        if about.license_key.value:
+            updated_dict = {}
+            lic_key = about.license_key.value
+            lic_name = []
+            if about.license_name.value:
+                lic_name = about.license_name.value
+            else:
+                lic_name = []
+                for key_list in lic_key:
+                    lic_name_list = []
+                    for k in key_list:
+                        try:
+                            lic_name_list.append(license_dict[k][0])
+                        except:
+                            lic_name_list.append(k)
+                    lic_name.append(lic_name_list)
+                about.license_name.value = lic_name
+
+            if not lic_name:
+                lic_name = []
+                for key in lic_key:
+                    lic_name.append(license_dict[key][0])
+            lic_score = about.license_score.value
+            assert len(lic_key) == len(lic_name)
+            assert len(lic_key) == len(lic_score)
+
+            lic_key_expression = about.license_key_expression.value
+            if lic_key_expression:
+                updated_lic_key_expression = []
+                removed_index = []
+                for index, key in enumerate(lic_key_expression):
+                    if key in updated_dict:
+                        previous_score, _name = updated_dict[key]
+                        current_score = lic_score[index]
+                        if current_score > previous_score:
+                            updated_dict[key] = (
+                                lic_score[index], lic_name[index])
+                        # Track the duplicated index
+                        removed_index.append(index)
+                    else:
+                        updated_dict[key] = (
+                            lic_score[index], lic_name[index])
+                        updated_lic_key_expression.append(key)
+                # Remove the duplication
+                for index, key in enumerate(about.license_key.value):
+                    if index in removed_index:
+                        del about.license_key.value[index]
+                        del about.license_name.value[index]
+                        del about.license_score.value[index]
+
+            lic_key_expression = updated_lic_key_expression
+            updated_lic_key = []
+            updated_lic_name = []
+            updated_lic_score = []
+            for index, lic in enumerate(updated_dict):
+                _sp_char, lic_keys = parse_license_expression(lic)
+                score, name = updated_dict[lic]
+                if score >= min_license_score:
+                    for lic_key in lic_keys:
+                        if not lic_key in meet_score_licenses_list:
+                            meet_score_licenses_list.append(lic_key)
+
+                updated_lic_key.append(lic_keys)
+                updated_lic_name.append(name)
+                updated_lic_score.append(score)
+
+            # Remove items that don't meet to score
+            for index, score in enumerate(updated_lic_score):
+                if score < min_license_score:
+                    del updated_lic_key[index]
+                    del updated_lic_name[index]
+                    del updated_lic_score[index]
+                    del lic_key_expression[index]
+
+            about.license_key.value = updated_lic_key
+            about.license_name.value = updated_lic_name
+            about.license_score.value = updated_lic_score
+            about.license_key_expression.value = lic_key_expression
+    return abouts, meet_score_licenses_list
 
 
 def get_license_file_key(license_text_name):

@@ -20,7 +20,7 @@ import os
 
 import saneyaml
 
-__version__ = '9.0.0'
+__version__ = '10.0.0'
 
 __about_spec_version__ = '3.3.1'
 
@@ -107,10 +107,10 @@ DEBUG = 10
 NOTSET = 0
 
 severities = {
-    CRITICAL : 'CRITICAL',
-    ERROR : 'ERROR',
-    WARNING : 'WARNING',
-    INFO : 'INFO',
-    DEBUG : 'DEBUG',
-    NOTSET : 'NOTSET'
+    CRITICAL: 'CRITICAL',
+    ERROR: 'ERROR',
+    WARNING: 'WARNING',
+    INFO: 'INFO',
+    DEBUG: 'DEBUG',
+    NOTSET: 'NOTSET'
 }
