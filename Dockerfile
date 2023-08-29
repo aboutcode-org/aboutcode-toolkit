@@ -9,7 +9,7 @@
 FROM python:3.7-slim-buster
 
 RUN apt-get update \
- && apt-get install -y bash bzip2 xz-utils zlib1g libxml2-dev libxslt1-dev libgomp1 libpopt0\
+ && apt-get install -y bash bzip2 xz-utils zlib1g libxml2-dev libxslt1-dev libgomp1 libpopt0 curl\
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
