@@ -26,6 +26,7 @@ from attributecode import saneyaml
 from attributecode.util import csv
 from attributecode.util import replace_tab_with_spaces
 
+
 def transform_csv(location):
     """
     Read a CSV file at `location` and convert data into list of dictionaries.
@@ -109,7 +110,7 @@ def normalize_dict_data(data):
     """
     try:
         # Check if this is a JSON output from scancode-toolkit
-        if(data["headers"][0]["tool_name"] == "scancode-toolkit"):
+        if (data["headers"][0]["tool_name"] == "scancode-toolkit"):
             # only takes data inside "files"
             new_data = data["files"]
     except:
@@ -129,10 +130,12 @@ def transform_data(data, transformer):
     renamed_field_data = transformer.apply_renamings(data)
 
     if transformer.field_filters:
-        renamed_field_data = list(transformer.filter_fields(renamed_field_data))
+        renamed_field_data = list(
+            transformer.filter_fields(renamed_field_data))
 
     if transformer.exclude_fields:
-        renamed_field_data = list(transformer.filter_excluded(renamed_field_data))
+        renamed_field_data = list(
+            transformer.filter_excluded(renamed_field_data))
 
     errors = transformer.check_required_fields(renamed_field_data)
     if errors:
@@ -277,23 +280,26 @@ class Transformer(object):
         based on this Transformer configuration.
         """
         renamings = self.field_renamings
+        renamed_to_list = list(renamings.keys())
+        renamed_from_list = list(renamings.values())
         if not renamings:
             return data
-        renamings = {n: rn for n, rn in renamings.items()}
-
-        renamed_list = []
-        for row in data:
-            renamed = {}
-            for key in row:
-                matched = False
-                for renamed_key in renamings:
-                    if key == renamings[renamed_key]:
-                        renamed[renamed_key] = row[key]
-                        matched = True
-                if not matched:
-                    renamed[key] = row[key]
-            renamed_list.append(renamed)
-        return renamed_list
+        if isinstance(data, dict):
+            renamed_obj = {}
+            for key, value in data.items():
+                if key in renamed_from_list:
+                    for idx, renamed_from_key in enumerate(renamed_from_list):
+                        if key == renamed_from_key:
+                            renamed_key = renamed_to_list[idx]
+                            renamed_obj[renamed_key] = self.apply_renamings(
+                                value)
+                else:
+                    renamed_obj[key] = self.apply_renamings(value)
+            return renamed_obj
+        elif isinstance(data, list):
+            return [self.apply_renamings(item) for item in data]
+        else:
+            return data
 
     """
     def clean_fields(self, field_names):
@@ -324,8 +330,18 @@ class Transformer(object):
         """
         # exclude_fields = set(self.clean_fields(self.exclude_fields))
         exclude_fields = set(self.exclude_fields)
+        filtered_list = []
         for entry in data:
-            yield {k: v for k, v in entry.items() if k not in exclude_fields}
+            result = {}
+            for k, v in entry.items():
+                if type(v) == list:
+                    result[k] = self.filter_excluded(v)
+                elif k not in exclude_fields:
+                    result[k] = v
+            filtered_list.append(result)
+            # yield result
+            # yield {k: v for k, v in entry.items() if k not in exclude_fields}
+        return filtered_list
 
 
 def check_duplicate_fields(field_names):
@@ -372,6 +388,7 @@ def write_json(location, data):
     """
     with open(location, 'w') as jsonfile:
         json.dump(data, jsonfile, indent=3)
+
 
 def read_excel(location, worksheet=None):
     """

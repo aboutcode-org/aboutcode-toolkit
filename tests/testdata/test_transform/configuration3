@@ -1,0 +1,15 @@
+field_renamings:
+    about_resource : 'path'
+	score_renamed : score
+	size_renamed : size
+required_fields:
+	- about_resource
+	- name
+exclude_fields:
+	- sha1
+	- sha256
+	- md5
+	- type
+	- start_line
+	- matched_length
+	- scan_errors
