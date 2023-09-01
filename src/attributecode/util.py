@@ -287,20 +287,24 @@ def load_json(location):
 
 
 # FIXME: rename to is_online: BUT do we really need this at all????
+# This is needed to check for the network connection when user wants to fetch
+# the licenses from DJE/LicenseDB
 def have_network_connection():
     """
     Return True if an HTTP connection to some public web site is possible.
     """
-    import socket
-    import http.client as httplib
+    import requests
 
-    http_connection = httplib.HTTPConnection('dejacode.org', timeout=10)  # NOQA
+    url = "https://scancode-licensedb.aboutcode.org/"
+
     try:
-        http_connection.connect()
-    except socket.error:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+    except requests.exceptions.RequestException:
         return False
-    else:
-        return True
 
 
 def extract_zip(location):
