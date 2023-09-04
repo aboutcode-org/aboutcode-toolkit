@@ -54,9 +54,6 @@ def request_license_data(api_url, api_key, license_key):
     license_data = {}
     errors = []
     try:
-        # request = Request(quoted_url, headers=headers)
-        # response = urlopen(request)
-        # response_content = response.read().decode('utf-8')
         response = get(quoted_url, headers=headers)
         response_content = response.text
         # FIXME: this should be an ordered dict

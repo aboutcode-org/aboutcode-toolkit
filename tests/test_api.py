@@ -75,7 +75,7 @@ class ApiTest(unittest.TestCase):
         expected = ({}, [Error(ERROR, "Invalid 'license': apache-2.0")])
         assert expected == license_data
 
-    @mock.patch.object(api, 'urlopen')
+    @mock.patch.object(api, 'get')
     def test_api_request_license_data_with_incorrect_url(self, mock_data):
         # Some URL that is accessible but not a correct API URL
         response_content = b'<html></html>'

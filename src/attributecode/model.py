@@ -31,12 +31,8 @@ from requests import get
 import traceback
 from itertools import zip_longest
 
-import urllib
 from urllib.parse import urljoin
 from urllib.parse import urlparse
-from urllib.request import urlopen
-from urllib.request import Request
-from urllib.error import HTTPError
 
 from license_expression import Licensing
 from packageurl import PackageURL
@@ -1828,15 +1824,14 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                             license_url = url + lic_key + '.json'
                             license_text_url = url + lic_key + '.LICENSE'
                             try:
-                                json_url = urlopen(license_url)
-                                # We don't want to actually get the license information from the
-                                # check utility
+                                json_url_content = get(license_url).text
+                                # We don't want to actually get the license
+                                # information from the check utility
                                 if from_check:
                                     continue
-                                data = json.loads(json_url.read())
+                                data = json.loads(json_url_content)
                                 license_name = data['short_name']
-                                license_text = urllib.request.urlopen(
-                                    license_text_url).read().decode('utf-8')
+                                license_text = get(license_text_url).text
                                 license_filename = data['key'] + '.LICENSE'
                                 lic_url = url + license_filename
                                 spdx_license_key = data['spdx_license_key']
