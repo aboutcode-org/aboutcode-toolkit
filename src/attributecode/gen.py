@@ -281,7 +281,7 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
 
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(
-            abouts, api_url, api_key)
+            abouts, api_url=api_url, api_key=api_key)
         if err:
             for e in err:
                 # Avoid having same error multiple times

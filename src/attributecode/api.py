@@ -15,11 +15,10 @@
 # ============================================================================
 
 import json
+from requests import get
 
 from urllib.parse import quote
 from urllib.parse import urlencode
-from urllib.request import Request
-from urllib.request import urlopen
 from urllib.error import HTTPError
 
 from attributecode import ERROR
@@ -55,9 +54,11 @@ def request_license_data(api_url, api_key, license_key):
     license_data = {}
     errors = []
     try:
-        request = Request(quoted_url, headers=headers)
-        response = urlopen(request)
-        response_content = response.read().decode('utf-8')
+        # request = Request(quoted_url, headers=headers)
+        # response = urlopen(request)
+        # response_content = response.read().decode('utf-8')
+        response = get(quoted_url, headers=headers)
+        response_content = response.text
         # FIXME: this should be an ordered dict
         license_data = json.loads(response_content)
         if not license_data.get('results', []):

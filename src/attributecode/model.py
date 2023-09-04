@@ -27,8 +27,10 @@ components inventories.
 import json
 import os
 import posixpath
+from requests import get
 import traceback
 from itertools import zip_longest
+
 import urllib
 from urllib.parse import urljoin
 from urllib.parse import urlparse
@@ -1881,17 +1883,13 @@ def detect_special_char(expression):
 
 def valid_api_url(api_url):
     try:
-        request = Request(api_url)
-        # This will always goes to exception as no key are provided.
-        # The purpose of this code is to validate the provided api_url is correct
-        urlopen(request)
-        return True
-    except HTTPError as http_e:
-        # The 403 error code is refer to "Authentication credentials were not provided.".
-        # This is correct as no key are provided.
-        if http_e.code == 403:
+        response = get(api_url)
+        # The 403 error code is expected if the api_url is pointing to DJE as no
+        # API key is provided. The 200 status code represent connection success
+        # to scancode's LicenseDB. All other exception yield to invalid api_url
+        if response.status_code == 403 or response.status_code == 200:
             return True
+        else:
+            return False
     except:
-        # All other exceptions yield to invalid api_url
-        pass
-    return False
+        return False

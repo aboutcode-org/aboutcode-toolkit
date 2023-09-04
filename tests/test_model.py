@@ -168,8 +168,10 @@ class FieldTest(unittest.TestCase):
 
     def test_UrlField_is_valid_url_not_starting_with_www(self):
         assert model.UrlField.is_valid_url('https://nexb.com')
-        assert model.UrlField.is_valid_url('http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz')
-        assert model.UrlField.is_valid_url('http://de.wikipedia.org/wiki/Elf (Begriffsklärung)')
+        assert model.UrlField.is_valid_url(
+            'http://archive.apache.org/dist/httpcomponents/commons-httpclient/2.0/source/commons-httpclient-2.0-alpha2-src.tar.gz')
+        assert model.UrlField.is_valid_url(
+            'http://de.wikipedia.org/wiki/Elf (Begriffsklärung)')
         assert model.UrlField.is_valid_url('http://nothing_here.com')
 
     def test_UrlField_is_valid_url_no_schemes(self):
@@ -228,8 +230,9 @@ class FieldTest(unittest.TestCase):
         field_class = model.PathField
         expected = dict([('string', None)])
         expected_errors = [
-            Error(ERROR, 'Field s: Unable to verify path: string: No base directory provided')
-                          ]
+            Error(
+                ERROR, 'Field s: Unable to verify path: string: No base directory provided')
+        ]
         self.check_validate(field_class, value, expected, expected_errors)
 
     def test_SingleLineField_has_errors_if_multiline(self):
@@ -237,7 +240,8 @@ class FieldTest(unittest.TestCase):
         line2'''
         field_class = model.SingleLineField
         expected = value
-        expected_errors = [Error(ERROR, 'Field s: Cannot span multiple lines: line1\n        line2')]
+        expected_errors = [
+            Error(ERROR, 'Field s: Cannot span multiple lines: line1\n        line2')]
         self.check_validate(field_class, value, expected, expected_errors)
 
 
@@ -304,7 +308,8 @@ class YamlParseTest(unittest.TestCase):
         assert expected == list(result.items())
 
     def test_saneyaml_load_can_parse_verbatim_tab_text_unstripped(self):
-        test = get_test_content('test_model/parse/continuation_verbatim_with_tab.about')
+        test = get_test_content(
+            'test_model/parse/continuation_verbatim_with_tab.about')
         data = replace_tab_with_spaces(test)
         result = saneyaml.load(data)
 
@@ -335,7 +340,8 @@ class YamlParseTest(unittest.TestCase):
         assert expected == list(result.items())
 
     def test_saneyaml_load_accepts_unicode_keys_and_values(self):
-        test = get_test_content('test_model/parse/non_ascii_field_name_value.about')
+        test = get_test_content(
+            'test_model/parse/non_ascii_field_name_value.about')
         result = saneyaml.load(test)
         expected = [
             ('name', 'name'),
@@ -398,8 +404,10 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('test_model/parse/dupe_field_name.ABOUT')
         a = model.About(test_file)
         expected = [
-            Error(WARNING, 'Field About_Resource is a duplicate. Original value: "." replaced with: "new value"'),
-            Error(WARNING, 'Field Name is a duplicate. Original value: "old" replaced with: "new"')
+            Error(
+                WARNING, 'Field About_Resource is a duplicate. Original value: "." replaced with: "new value"'),
+            Error(
+                WARNING, 'Field Name is a duplicate. Original value: "old" replaced with: "new"')
         ]
 
         result = a.errors
@@ -409,10 +417,11 @@ class AboutTest(unittest.TestCase):
         # This test is failing because the YAML does not keep the order when
         # loads the test files. For instance, it treat the 'About_Resource' as the
         # first element and therefore the dup key is 'about_resource'.
-        test_file = get_test_loc('test_model/parse/dupe_field_name_no_new_value.ABOUT')
+        test_file = get_test_loc(
+            'test_model/parse/dupe_field_name_no_new_value.ABOUT')
         a = model.About(test_file)
         expected = [
-]
+        ]
         result = a.errors
         assert sorted(expected) == sorted(result)
 
@@ -442,14 +451,16 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     def test_About_hydrate_normalize_field_names_to_lowercase(self):
-        test_content = get_test_content('test_gen/parser_tests/upper_field_names.ABOUT')
+        test_content = get_test_content(
+            'test_gen/parser_tests/upper_field_names.ABOUT')
         fields = saneyaml.load(test_content).items()
         a = model.About()
         for _ in range(3):
             self.check_About_hydrate(a, fields)
 
     def test_About_with_existing_about_resource_has_no_error(self):
-        test_file = get_test_loc('test_gen/parser_tests/about_resource_field.ABOUT')
+        test_file = get_test_loc(
+            'test_gen/parser_tests/about_resource_field.ABOUT')
         a = model.About(test_file)
         assert [] == a.errors
         result = a.about_resource.value['about_resource.c']
@@ -458,14 +469,14 @@ class AboutTest(unittest.TestCase):
 
     def test_About_loads_ignored_resources_field(self):
         # fields in this file are not in the standard order
-        test_file = get_test_loc('test_model/parse/with_ignored_resources.ABOUT')
+        test_file = get_test_loc(
+            'test_model/parse/with_ignored_resources.ABOUT')
         a = model.About(test_file)
-        #assert [] == a.errors
+        # assert [] == a.errors
 
         expected = ['about_resource', 'ignored_resources', 'name']
         result = [f.name for f in a.all_fields() if f.present]
         assert expected == result
-
 
     def test_About_has_errors_when_about_resource_is_missing(self):
         test_file = get_test_loc('test_gen/parser_tests/.ABOUT')
@@ -475,8 +486,10 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     def test_About_has_errors_when_about_resource_does_not_exist(self):
-        test_file = get_test_loc('test_gen/parser_tests/missing_about_ref.ABOUT')
-        file_path = posixpath.join(posixpath.dirname(test_file), 'about_file_missing.c')
+        test_file = get_test_loc(
+            'test_gen/parser_tests/missing_about_ref.ABOUT')
+        file_path = posixpath.join(posixpath.dirname(
+            test_file), 'about_file_missing.c')
         a = model.About(test_file)
         err_msg = 'Field about_resource: Path %s not found' % file_path
         expected = [Error(INFO, err_msg)]
@@ -512,7 +525,8 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     def test_About_custom_fields_are_never_ignored(self):
-        test_file = get_test_loc('test_model/custom_fields/custom_fields.about')
+        test_file = get_test_loc(
+            'test_model/custom_fields/custom_fields.about')
         a = model.About(test_file)
         result = [(n, f.value) for n, f in a.custom_fields.items()]
         expected = [
@@ -525,7 +539,8 @@ class AboutTest(unittest.TestCase):
         assert expected == result
 
     def test_About_custom_fields_are_not_ignored_and_order_is_preserved(self):
-        test_file = get_test_loc('test_model/custom_fields/custom_fields.about')
+        test_file = get_test_loc(
+            'test_model/custom_fields/custom_fields.about')
         a = model.About(test_file)
         result = [(n, f.value) for n, f in a.custom_fields.items()]
         expected = [
@@ -541,7 +556,8 @@ class AboutTest(unittest.TestCase):
         a = model.About(test_file)
         expected_errors = [
             Error(INFO, 'Custom Field: hydrate'),
-            Error(CRITICAL, "Internal error with custom field: 'hydrate': 'illegal name'.")
+            Error(
+                CRITICAL, "Internal error with custom field: 'hydrate': 'illegal name'.")
         ]
 
         assert expected_errors == a.errors
@@ -551,14 +567,19 @@ class AboutTest(unittest.TestCase):
         assert 'illegal name' == field.value
 
     def test_About_file_fields_are_empty_if_present_and_path_missing(self):
-        test_file = get_test_loc('test_model/parse/missing_notice_license_files.ABOUT')
+        test_file = get_test_loc(
+            'test_model/parse/missing_notice_license_files.ABOUT')
         a = model.About(test_file)
 
-        file_path1 = posixpath.join(posixpath.dirname(test_file), 'test.LICENSE')
-        file_path2 = posixpath.join(posixpath.dirname(test_file), 'test.NOTICE')
+        file_path1 = posixpath.join(
+            posixpath.dirname(test_file), 'test.LICENSE')
+        file_path2 = posixpath.join(
+            posixpath.dirname(test_file), 'test.NOTICE')
 
-        err_msg1 = Error(CRITICAL, 'Field license_file: Path %s not found' % file_path1)
-        err_msg2 = Error(CRITICAL, 'Field notice_file: Path %s not found' % file_path2)
+        err_msg1 = Error(
+            CRITICAL, 'Field license_file: Path %s not found' % file_path1)
+        err_msg2 = Error(
+            CRITICAL, 'Field notice_file: Path %s not found' % file_path2)
 
         expected_errors = [err_msg1, err_msg2]
         assert expected_errors == a.errors
@@ -567,7 +588,8 @@ class AboutTest(unittest.TestCase):
         assert {'test.NOTICE': None} == a.notice_file.value
 
     def test_About_notice_and_license_text_are_loaded_from_file(self):
-        test_file = get_test_loc('test_model/parse/license_file_notice_file.ABOUT')
+        test_file = get_test_loc(
+            'test_model/parse/license_file_notice_file.ABOUT')
         a = model.About(test_file)
 
         expected = '''Tester holds the copyright for test component. Tester relinquishes copyright of
@@ -590,10 +612,12 @@ this software and releases the component to Public Domain.
         assert {} == a.notice_file.value
 
     def test_About_rejects_non_ascii_names_and_accepts_unicode_values(self):
-        test_file = get_test_loc('test_model/parse/non_ascii_field_name_value.about')
+        test_file = get_test_loc(
+            'test_model/parse/non_ascii_field_name_value.about')
         a = model.About(test_file)
         expected = [
-            Error(WARNING, "Field name: ['mat\xedas'] contains illegal name characters (or empty spaces) and is ignored.")
+            Error(
+                WARNING, "Field name: ['mat\xedas'] contains illegal name characters (or empty spaces) and is ignored.")
         ]
         assert expected == a.errors
 
@@ -668,12 +692,12 @@ this software and releases the component to Public Domain.
         a.custom_fields['f'] = model.StringField(name='f', value='1',
                                                  present=True)
         a.custom_fields['cf'] = model.StringField(name='cf', value='1',
-                                                 present=True)
+                                                  present=True)
         b = model.About()
         b.custom_fields['g'] = model.StringField(name='g', value='1',
                                                  present=True)
         b.custom_fields['cf'] = model.StringField(name='cf', value='2',
-                                                 present=True)
+                                                  present=True)
         abouts = [a, b]
         # ensure all fields (including custom fields) and
         # about_resource are collected in the correct order
@@ -683,14 +707,15 @@ this software and releases the component to Public Domain.
             'cf',
             'f',
             'g',
-            ]
+        ]
         result = model.get_field_names(abouts)
         assert expected == result
 
     def test_comma_in_license(self):
         test_file = get_test_loc('test_model/special_char/about.ABOUT')
         a = model.About(test_file)
-        expected = Error(ERROR, "The following character(s) cannot be in the license_key: [',']")
+        expected = Error(
+            ERROR, "The following character(s) cannot be in the license_key: [',']")
         assert a.errors[0] == expected
 
     def test_load_dict_issue_433(self):
@@ -702,8 +727,10 @@ this software and releases the component to Public Domain.
             'license_expression': 'license1 AND license2',
             'notice_file': 'package1.zip.NOTICE',
             'licenses': [
-                {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE', 'url': 'some_url', 'spdx_license_key': 'key'},
-                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE', 'url': 'some_url', 'spdx_license_key': 'key'},
+                {'key': 'license1', 'name': 'License1', 'file': 'license1.LICENSE',
+                    'url': 'some_url', 'spdx_license_key': 'key'},
+                {'key': 'license2', 'name': 'License2', 'file': 'license2.LICENSE',
+                    'url': 'some_url', 'spdx_license_key': 'key'},
             ],
         }
         about = model.About()
@@ -727,7 +754,8 @@ licenses:
     url: some_url
     spdx_license_key: key
 '''
-        lic_dict = {u'license1': [u'License1', u'license1.LICENSE',u'', u'some_url', 'key'], u'license2' : [u'License2', u'license2.LICENSE', u'', u'some_url', 'key']}
+        lic_dict = {u'license1': [u'License1', u'license1.LICENSE', u'', u'some_url', 'key'], u'license2': [
+            u'License2', u'license2.LICENSE', u'', u'some_url', 'key']}
         assert about.dumps(lic_dict) == expected
 
 
@@ -851,7 +879,8 @@ custom1: |
         test_file = get_test_loc('test_model/unicode/nose-selecttests.ABOUT')
         a = model.About()
         a.load(test_file)
-        file_path = posixpath.join(posixpath.dirname(test_file), 'nose-selecttests-0.3.zip')
+        file_path = posixpath.join(posixpath.dirname(
+            test_file), 'nose-selecttests-0.3.zip')
         err_msg = 'Field about_resource: Path %s not found' % file_path
         errors = [
             Error(INFO, 'Custom Field: dje_license'),
@@ -1002,7 +1031,8 @@ custom1: |
 
         parent_dir = get_temp_dir()
         abouts.android_module_license(parent_dir)
-        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_PUBLIC_DOMAIN'))
+        assert os.path.exists(os.path.join(
+            parent_dir, 'MODULE_LICENSE_PUBLIC_DOMAIN'))
 
     def test_android_module_multi_licenses(self):
         path = 'test_model/android/multi_license.c.ABOUT'
@@ -1011,8 +1041,10 @@ custom1: |
 
         parent_dir = get_temp_dir()
         abouts.android_module_license(parent_dir)
-        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_BSD_NEW'))
-        assert os.path.exists(os.path.join(parent_dir, 'MODULE_LICENSE_BSD_SIMPLIFIED'))
+        assert os.path.exists(os.path.join(
+            parent_dir, 'MODULE_LICENSE_BSD_NEW'))
+        assert os.path.exists(os.path.join(
+            parent_dir, 'MODULE_LICENSE_BSD_SIMPLIFIED'))
 
     def test_android_notice(self):
         path = 'test_model/android/single_license.c.ABOUT'
@@ -1073,7 +1105,8 @@ class CollectorTest(unittest.TestCase):
         assert sorted(expected_name) == sorted(result_name)
 
     def test_collect_inventory_can_collect_a_single_file(self):
-        test_loc = get_test_loc('test_model/single_file/django_snippets_2413.ABOUT')
+        test_loc = get_test_loc(
+            'test_model/single_file/django_snippets_2413.ABOUT')
         _errors, abouts = model.collect_inventory(test_loc)
         assert 1 == len(abouts)
         expected = ['single_file/django_snippets_2413.ABOUT']
@@ -1096,7 +1129,8 @@ class CollectorTest(unittest.TestCase):
         assert expected == result
 
     def test_collect_inventory_with_multi_line(self):
-        test_loc = get_test_loc('test_model/parse/multi_line_license_expresion.ABOUT')
+        test_loc = get_test_loc(
+            'test_model/parse/multi_line_license_expresion.ABOUT')
         errors, abouts = model.collect_inventory(test_loc)
         assert [] == errors
         expected_lic_url = [
@@ -1106,7 +1140,8 @@ class CollectorTest(unittest.TestCase):
         assert expected_lic_url == returned_lic_url
 
     def test_collect_inventory_with_license_expression(self):
-        test_loc = get_test_loc('test_model/parse/multi_line_license_expresion.ABOUT')
+        test_loc = get_test_loc(
+            'test_model/parse/multi_line_license_expresion.ABOUT')
         errors, abouts = model.collect_inventory(test_loc)
         assert [] == errors
         expected_lic = 'mit or apache-2.0'
@@ -1126,21 +1161,25 @@ class CollectorTest(unittest.TestCase):
         test_loc = get_test_loc('test_model/inventory/custom_fields2.ABOUT')
         errors, abouts = model.collect_inventory(test_loc)
         expected_errors = [
-            Error(INFO, "Field ['resource', 'custom_mapping'] is a custom field.")
+            Error(
+                INFO, "Field ['resource', 'custom_mapping'] is a custom field.")
         ]
         assert expected_errors == errors
-        expected = [u'about_resource: .\nname: test\nresource: .\ncustom_mapping: test\n']
+        expected = [
+            u'about_resource: .\nname: test\nresource: .\ncustom_mapping: test\n']
         assert expected == [a.dumps() for a in abouts]
 
     def test_parse_license_expression(self):
-        spec_char, returned_lic = model.parse_license_expression('mit or apache-2.0')
+        spec_char, returned_lic = model.parse_license_expression(
+            'mit or apache-2.0')
         expected_lic = ['mit', 'apache-2.0']
         expected_spec_char = []
         assert expected_lic == returned_lic
         assert expected_spec_char == spec_char
 
     def test_parse_license_expression_with_special_chara(self):
-        spec_char, returned_lic = model.parse_license_expression('mit, apache-2.0')
+        spec_char, returned_lic = model.parse_license_expression(
+            'mit, apache-2.0')
         expected_lic = []
         expected_spec_char = [',']
         assert expected_lic == returned_lic
@@ -1179,7 +1218,8 @@ class CollectorTest(unittest.TestCase):
         check_csv(expected, result)
 
     def test_collect_inventory_with_about_resource_path_from_directory(self):
-        location = get_test_loc('test_model/inventory/basic_with_about_resource_path')
+        location = get_test_loc(
+            'test_model/inventory/basic_with_about_resource_path')
         result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
 
@@ -1188,7 +1228,8 @@ class CollectorTest(unittest.TestCase):
         expected_errors = []
         assert expected_errors == errors
 
-        expected = get_test_loc('test_model/inventory/basic_with_about_resource_path/expected.csv')
+        expected = get_test_loc(
+            'test_model/inventory/basic_with_about_resource_path/expected.csv')
         check_csv(expected, result)
 
     def test_collect_inventory_with_no_about_resource_from_directory(self):
@@ -1198,7 +1239,8 @@ class CollectorTest(unittest.TestCase):
 
         model.write_output(abouts, result, format='csv')
 
-        expected_errors = [Error(CRITICAL, 'about/about.ABOUT: Field about_resource is required')]
+        expected_errors = [
+            Error(CRITICAL, 'about/about.ABOUT: Field about_resource is required')]
         assert expected_errors == errors
 
     def test_collect_inventory_complex_from_directory(self):
@@ -1225,13 +1267,15 @@ class CollectorTest(unittest.TestCase):
 
     def test_copy_redist_src_no_structure(self):
         test_loc = get_test_loc('test_model/redistribution/')
-        copy_list = [get_test_loc('test_model/redistribution/this.c'), get_test_loc('test_model/redistribution/test/subdir')]
+        copy_list = [get_test_loc('test_model/redistribution/this.c'),
+                     get_test_loc('test_model/redistribution/test/subdir')]
         output = get_temp_dir()
 
         expected_file = ['this.c', 'subdir']
 
         with_structure = False
-        err = model.copy_redist_src(copy_list, test_loc, output, with_structure)
+        err = model.copy_redist_src(
+            copy_list, test_loc, output, with_structure)
 
         assert err == []
 
@@ -1244,13 +1288,15 @@ class CollectorTest(unittest.TestCase):
 
     def test_copy_redist_src_with_structure(self):
         test_loc = get_test_loc('test_model/redistribution/')
-        copy_list = [get_test_loc('test_model/redistribution/this.c'), get_test_loc('test_model/redistribution/test/subdir')]
+        copy_list = [get_test_loc('test_model/redistribution/this.c'),
+                     get_test_loc('test_model/redistribution/test/subdir')]
         output = get_temp_dir()
 
         expected_file = ['this.c', 'test']
 
         with_structure = True
-        err = model.copy_redist_src(copy_list, test_loc, output, with_structure)
+        err = model.copy_redist_src(
+            copy_list, test_loc, output, with_structure)
 
         assert err == []
 
@@ -1267,7 +1313,8 @@ class CollectorTest(unittest.TestCase):
         errors, abouts = model.collect_inventory(location)
         copy_list, err = model.get_copy_list(abouts, location)
         assert err == []
-        expected = [os.path.join(location, 'this.c'), os.path.join(location, 'test/subdir')]
+        expected = [os.path.join(location, 'this.c'),
+                    os.path.join(location, 'test/subdir')]
         if on_windows:
             norm_list = []
             for c in copy_list:
@@ -1279,7 +1326,7 @@ class CollectorTest(unittest.TestCase):
 
 class FetchLicenseTest(unittest.TestCase):
 
-    @mock.patch.object(model, 'urlopen')
+    @mock.patch.object(model, 'get')
     def test_valid_api_url(self, mock_data):
         mock_data.return_value = ''
         assert model.valid_api_url('non_valid_url') is False
