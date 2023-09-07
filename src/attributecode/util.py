@@ -192,6 +192,50 @@ def norm(p):
     return p
 
 
+def get_spdx_key_and_lic_key_from_licdb():
+    """
+    Return a dictionary list that fetch all licenses from licenseDB. The
+    "spdx_license_key" will be the key of the dictionary and the "license_key"
+    will be the value of the directionary
+    """
+    import requests
+    lic_dict = dict()
+
+    # URL of the license index
+    url = "https://scancode-licensedb.aboutcode.org/index.json"
+
+    """
+    Sample of one of the license in the index.json
+    {
+        "license_key": "bsd-new",
+        "category": "Permissive",
+        "spdx_license_key": "BSD-3-Clause",
+        "other_spdx_license_keys": [
+        "LicenseRef-scancode-libzip"
+        ],
+        "is_exception": false,
+        "is_deprecated": false,
+        "json": "bsd-new.json",
+        "yaml": "bsd-new.yml",
+        "html": "bsd-new.html",
+        "license": "bsd-new.LICENSE"
+    },
+    """
+    response = requests.get(url)
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Retrieve the JSON data from the response
+        licenses_index = response.json()
+
+        for license in licenses_index:
+            lic_dict[license['spdx_license_key']] = license['license_key']
+            if license['other_spdx_license_keys']:
+                for other_spdx in license['other_spdx_license_keys']:
+                    lic_dict[other_spdx] = license['license_key']
+
+    return lic_dict
+
+
 def get_relative_path(base_loc, full_loc):
     """
     Return a posix path for a given full location relative to a base location.
