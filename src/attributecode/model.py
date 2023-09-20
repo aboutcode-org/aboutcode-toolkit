@@ -1224,6 +1224,13 @@ class About(object):
             else:
                 if field.value:
                     data[field.name] = field.value
+        # If there is no license_key value, parse the license_expression
+        # and get the parsed license key
+        if 'license_expression' in data:
+            if not license_key and data['license_expression']:
+                _spec_char, lic_list = parse_license_expression(
+                    data['license_expression'])
+                license_key = lic_list
 
         # Group the same license information in a list
         # This `licenses_dict` is a dictionary with license key as the key and the
@@ -1246,20 +1253,35 @@ class About(object):
                     lic_dict['spdx_license_key'] = spdx_lic_key
 
                 # Remove the license information if it has been handled
-                lic_key_copy.remove(lic_key)
-                if lic_name in license_name:
-                    license_name.remove(lic_name)
-                if lic_url in license_url:
-                    license_url.remove(lic_url)
-                if lic_filename in license_file:
-                    license_file.remove(lic_filename)
-                if spdx_lic_key in spdx_license_key:
-                    spdx_license_key.remove(spdx_lic_key)
-                lic_dict_list.append(lic_dict)
+                # The following condition is to check if license information
+                # has been fetched, the license key is invalid or custom if
+                # no value for lic_name
+                if lic_name:
+                    lic_key_copy.remove(lic_key)
+                    if lic_name in license_name:
+                        license_name.remove(lic_name)
+                    if lic_url in license_url:
+                        license_url.remove(lic_url)
+                    if lic_filename in license_file:
+                        license_file.remove(lic_filename)
+                    if spdx_lic_key in spdx_license_key:
+                        spdx_license_key.remove(spdx_lic_key)
+                    lic_dict_list.append(lic_dict)
 
         # Handle license information that have not been handled.
-        license_group = list(zip_longest(
-            lic_key_copy, license_name, license_file, license_url, spdx_license_key))
+        # If the len of the lic_key is the same as the lic_file, the tool should
+        # assume the lic_file (custom license) is referring this specific lic_key
+        # otherwise, the tool shouldn't group them
+        if len(lic_key_copy) == len(license_file):
+            license_group = list(zip_longest(
+                lic_key_copy, license_name, license_file, license_url, spdx_license_key))
+        else:
+            license_group = list(zip_longest(
+                lic_key_copy, license_name, [], license_url, spdx_license_key))
+            # Add the unhandled_lic_file if any
+            if license_file:
+                for lic_file in license_file:
+                    license_group.append((None, None, lic_file, None, None))
 
         for lic_group in license_group:
             lic_dict = {}
@@ -1280,15 +1302,15 @@ class About(object):
             lic_dict_list.append(lic_dict)
 
         # Format the license information in the same order of the license expression
-        if license_key:
-            for key in license_key:
-                for lic_dict in lic_dict_list:
-                    if key == lic_dict['key']:
-                        data.setdefault('licenses', []).append(lic_dict)
-                        break
-        else:
+        for key in license_key:
             for lic_dict in lic_dict_list:
-                data.setdefault('licenses', []).append(lic_dict)
+                if key == lic_dict['key']:
+                    data.setdefault('licenses', []).append(lic_dict)
+                    lic_dict_list.remove(lic_dict)
+                    break
+
+        for lic_dict in lic_dict_list:
+            data.setdefault('licenses', []).append(lic_dict)
 
         return saneyaml.dump(data)
 
