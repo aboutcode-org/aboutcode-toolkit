@@ -83,8 +83,8 @@ Options
 Purpose
 -------
 
-Generate an attribution file which contains license information
-from the INPUT along with the license text.
+Generate an attribution file which contains license information from the INPUT
+along with the license text.
 
 Assume the following:
 
@@ -420,6 +420,60 @@ Details
 
                     This option tells the tool to show all errors found.
                     The default behavior will only show 'CRITICAL', 'ERROR', and 'WARNING'
+
+Special Notes
+-------------
+If the input contains values for license_file, the tool will attempt to
+associate the license_file with the corresponding license_key.
+
+sample.csv
+
++----------------+------+---------------------+--------------+
+| about_resource | name | license_expression  | license_file |
++================+======+=====================+==============+
+| /project/test.c| test.c | mit AND custom    | custom.txt   |
++----------------+------+---------------------+--------------+
+
+If the user does not utilize the **--fetch-license** option, the input will
+contain two license keys and one license file. In this scenario, the tool cannot
+determine which license key the license file is referencing. As a result, the
+license_file will be saved separately.
+
+i.e.
+
+        ..  code-block:: none
+
+                about_resource: test.c
+                name: test.c
+                license_expression: mit AND custom
+                licenses:
+                  - key: mit
+                    name: mit
+                  - key: custom
+                    name: custom
+                  - file: custom.txt
+
+On the other hand, if the user generates ABOUT files using the
+**--fetch-license** option, the MIT license will be retrieved. This will result
+in having one license key and one license file. In such cases, the tool will
+consider it a successful match.
+
+i.e.
+
+        ..  code-block:: none
+
+                about_resource: test.c
+                name: test.c
+                license_expression: mit AND custom
+                licenses:
+                  - key: mit
+                    name: MIT License
+                    file: mit.LICENSE
+                    url: https://scancode-licensedb.aboutcode.org/mit.LICENSE
+                    spdx_license_key: MIT
+                  - key: custom
+                    name: custom
+                    file: custom.txt
 
 gen_license
 ===========
@@ -780,3 +834,20 @@ version 32.0.0 or later. If you are using an earlier version of Scancode Toolkit
 specifically version 31 or older, it will only be compatible with prior versions
 of AboutCode Toolkit.
 
+
+Configure proxy
+---------------
+The `requests` library is used since AboutCode Toolkit version 10.1.0. To do the
+http request, users can set the standard environment variables **http_proxy**,
+**https_proxy**, **no_proxy**, **all_proxy** with the export statement
+
+i.e.
+
+        ..  code-block:: none
+
+                $ export HTTP_PROXY="http://10.10.1.10:3128"
+                $ export HTTPS_PROXY="http://10.10.1.10:1080"
+                $ export ALL_PROXY="socks5://10.10.1.10:3434"
+
+See https://requests.readthedocs.io/en/latest/user/advanced/#proxies for
+references

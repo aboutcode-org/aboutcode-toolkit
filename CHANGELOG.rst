@@ -2,10 +2,16 @@
 Changelog
 
 2023-xx-xx
-    Release 10.0.1
+    Release 10.1.0
 
     * Fixed `transform` with nested list #531
     * Added curl dependency in Dockerfile #532
+    * Introduce spdx_license_expression
+    * Ability to transform spdx license key from spdx_license_expression to
+      license_expression (i.e. Generate attribution with
+      spdx_license_expression) #513
+    * Ability to configure the proxy settings #533
+    * Fixed licenses issue #534
 
 2023-08-20
     Release 10.0.0

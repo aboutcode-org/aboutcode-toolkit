@@ -55,6 +55,7 @@ from attributecode.util import copy_file
 from attributecode.util import csv
 from attributecode.util import file_fields
 from attributecode.util import filter_errors
+from attributecode.util import get_spdx_key_and_lic_key_from_licdb
 from attributecode.util import is_valid_name
 from attributecode.util import on_windows
 from attributecode.util import norm
@@ -802,6 +803,7 @@ class About(object):
             ('license_name', ListField()),
             ('license_file', FileTextField()),
             ('license_url', UrlListField()),
+            ('spdx_license_expression', StringField()),
             ('spdx_license_key', ListField()),
             ('copyright', StringField()),
             ('notice_file', FileTextField()),
@@ -1222,6 +1224,13 @@ class About(object):
             else:
                 if field.value:
                     data[field.name] = field.value
+        # If there is no license_key value, parse the license_expression
+        # and get the parsed license key
+        if 'license_expression' in data:
+            if not license_key and data['license_expression']:
+                _spec_char, lic_list = parse_license_expression(
+                    data['license_expression'])
+                license_key = lic_list
 
         # Group the same license information in a list
         # This `licenses_dict` is a dictionary with license key as the key and the
@@ -1244,20 +1253,35 @@ class About(object):
                     lic_dict['spdx_license_key'] = spdx_lic_key
 
                 # Remove the license information if it has been handled
-                lic_key_copy.remove(lic_key)
-                if lic_name in license_name:
-                    license_name.remove(lic_name)
-                if lic_url in license_url:
-                    license_url.remove(lic_url)
-                if lic_filename in license_file:
-                    license_file.remove(lic_filename)
-                if spdx_lic_key in spdx_license_key:
-                    spdx_license_key.remove(spdx_lic_key)
-                lic_dict_list.append(lic_dict)
+                # The following condition is to check if license information
+                # has been fetched, the license key is invalid or custom if
+                # no value for lic_name
+                if lic_name:
+                    lic_key_copy.remove(lic_key)
+                    if lic_name in license_name:
+                        license_name.remove(lic_name)
+                    if lic_url in license_url:
+                        license_url.remove(lic_url)
+                    if lic_filename in license_file:
+                        license_file.remove(lic_filename)
+                    if spdx_lic_key in spdx_license_key:
+                        spdx_license_key.remove(spdx_lic_key)
+                    lic_dict_list.append(lic_dict)
 
         # Handle license information that have not been handled.
-        license_group = list(zip_longest(
-            lic_key_copy, license_name, license_file, license_url, spdx_license_key))
+        # If the len of the lic_key is the same as the lic_file, the tool should
+        # assume the lic_file (custom license) is referring this specific lic_key
+        # otherwise, the tool shouldn't group them
+        if len(lic_key_copy) == len(license_file):
+            license_group = list(zip_longest(
+                lic_key_copy, license_name, license_file, license_url, spdx_license_key))
+        else:
+            license_group = list(zip_longest(
+                lic_key_copy, license_name, [], license_url, spdx_license_key))
+            # Add the unhandled_lic_file if any
+            if license_file:
+                for lic_file in license_file:
+                    license_group.append((None, None, lic_file, None, None))
 
         for lic_group in license_group:
             lic_dict = {}
@@ -1278,15 +1302,15 @@ class About(object):
             lic_dict_list.append(lic_dict)
 
         # Format the license information in the same order of the license expression
-        if license_key:
-            for key in license_key:
-                for lic_dict in lic_dict_list:
-                    if key == lic_dict['key']:
-                        data.setdefault('licenses', []).append(lic_dict)
-                        break
-        else:
+        for key in license_key:
             for lic_dict in lic_dict_list:
-                data.setdefault('licenses', []).append(lic_dict)
+                if key == lic_dict['key']:
+                    data.setdefault('licenses', []).append(lic_dict)
+                    lic_dict_list.remove(lic_dict)
+                    break
+
+        for lic_dict in lic_dict_list:
+            data.setdefault('licenses', []).append(lic_dict)
 
         return saneyaml.dump(data)
 
@@ -1764,6 +1788,7 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
     if errors:
         return key_text_dict, errors
 
+    spdx_sclickey_dict = get_spdx_key_and_lic_key_from_licdb()
     for about in abouts:
         # No need to go through all the about objects if '--api_key' is invalid
         auth_error = Error(
@@ -1778,6 +1803,27 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                 lic_exp = about.detected_license_expression.value
             about.license_expression.value = lic_exp
             about.license_expression.present = True
+
+        if not about.license_expression.value and about.spdx_license_expression.value:
+            lic_exp_value = ""
+            special_char_in_expression, lic_list = parse_license_expression(
+                about.spdx_license_expression.value)
+            if special_char_in_expression:
+                msg = (about.about_file_path + u": The following character(s) cannot be in the spdx_license_expression: " +
+                       str(special_char_in_expression))
+                errors.append(Error(ERROR, msg))
+            else:
+                spdx_lic_exp_segment = about.spdx_license_expression.value.split()
+                for spdx_lic_key in spdx_lic_exp_segment:
+                    if lic_exp_value:
+                        lic_exp_value = lic_exp_value + " " + convert_spdx_expression_to_lic_expression(
+                            spdx_lic_key, spdx_sclickey_dict)
+                    else:
+                        lic_exp_value = convert_spdx_expression_to_lic_expression(
+                            spdx_lic_key, spdx_sclickey_dict)
+                if lic_exp_value:
+                    about.license_expression.value = lic_exp_value
+                    about.license_expression.present = True
 
         if about.license_expression.value:
             special_char_in_expression, lic_list = parse_license_expression(
@@ -1853,6 +1899,30 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                     about.license_key.value = lic_list
 
     return key_text_dict, errors
+
+
+def convert_spdx_expression_to_lic_expression(spdx_key, spdx_lic_dict):
+    """
+    Translate the spdx_license_expression to license_expression and return
+    errors if spdx_license_key is not matched
+    """
+    value = ""
+    if spdx_key in spdx_lic_dict:
+        value = spdx_lic_dict[spdx_key]
+    else:
+        if spdx_key.startswith('('):
+            mod_key = spdx_key.partition('(')[2]
+            value = '(' + \
+                convert_spdx_expression_to_lic_expression(
+                    mod_key, spdx_lic_dict)
+        elif spdx_key.endswith(')'):
+            mod_key = spdx_key.rpartition(')')[0]
+            value = convert_spdx_expression_to_lic_expression(
+                mod_key, spdx_lic_dict) + ')'
+        else:
+            # This can be operator or key that don't have match
+            value = spdx_key
+    return value
 
 
 def parse_license_expression(lic_expression):

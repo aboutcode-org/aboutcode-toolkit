@@ -323,7 +323,7 @@ def generate_and_save(abouts, is_about_input, license_dict, output_location, sca
     )
 
     if rendering_error:
-        errors.extend(rendering_error)
+        errors.append(rendering_error)
 
     if rendered:
         output_location = add_unc(output_location)
