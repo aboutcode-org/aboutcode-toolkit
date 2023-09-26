@@ -1,7 +1,7 @@
 ==============================
 Changelog
 
-2023-xx-xx
+2023-09-25
     Release 10.1.0
 
     * Fixed `transform` with nested list #531
