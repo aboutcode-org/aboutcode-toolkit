@@ -551,24 +551,9 @@ class PathField(ListField):
 
 class AboutResourceField(PathField):
     """
-    Special field for about_resource. self.resolved_paths contains a list of
+    Special field for about_resource, which points to the path(s) that the ABOUT
+    file is documenting. self.resolved_paths contains a list of
     the paths resolved relative to the about file path.
-    """
-
-    def __init__(self, *args, ** kwargs):
-        super(AboutResourceField, self).__init__(*args, ** kwargs)
-        self.resolved_paths = []
-
-    def _validate(self, *args, **kwargs):
-        errors = super(AboutResourceField, self)._validate(*args, ** kwargs)
-        return errors
-
-
-class IgnoredResourcesField(PathField):
-    """
-    Special field for ignored_resources. self.ignored_paths contains a list of
-    path patterns (glob patterns) which are not part of the summarization provided
-    by the ABOUT file.
     """
 
     def __init__(self, *args, ** kwargs):
@@ -789,6 +774,7 @@ class About(object):
         self.fields = dict([
             ('about_resource', AboutResourceField(required=True)),
             ('ignored_resources', AboutResourceField()),
+            ('deployed_resource', AboutResourceField()),
             ('name', SingleLineField(required=True)),
             ('version', SingleLineField()),
 
@@ -814,6 +800,8 @@ class About(object):
             ('track_changes', BooleanField()),
             ('modified', BooleanField()),
             ('internal_use_only', BooleanField()),
+
+            ('is_curation', BooleanField()),
 
             ('changelog_file', FileTextField()),
 

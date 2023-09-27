@@ -1,7 +1,7 @@
 .. _specification:
 
 ===============================
-ABOUT File Specification v3.3.1
+ABOUT File Specification v3.3.2
 ===============================
 
 Purpose
@@ -251,6 +251,15 @@ sub-paths under the directory ignored:
                 about_resource: linux-kernel-2.6.23
                 ignored_resources: linux-kernel-2.6.23/Documentation
 
+In this example the ABOUT file is being used to curate resources on the deployed
+side of the code:
+
+        ..  code-block:: none
+
+                about_resource: elasticsearch
+                deployed_resource: elasticsearch-2.3.4.jar
+                is_curated: yes
+
 In this example, the ABOUT file documents the current directory, using a "." period to reference it:
 
         ..  code-block:: none
@@ -272,6 +281,8 @@ Optional Information fields
 -   ignored_resources: A list of paths under the ``about_resource`` path, which are
     not documented in the ABOUT file, and the information in the ABOUT file does not
     apply to these subpaths.
+-   deployed_resource: A single path or a list of paths which point to the resource
+    where the documented resouce is deployed.
 -   version: Component or package version. A component or package usually has a version,
     such as a revision number or hash from a version control system (for a snapshot checked
     out from VCS such as Subversion or Git). If not available, the version should be the date
@@ -359,6 +370,8 @@ Optional Boolean flag fields
 -   modified: Set this flag to yes if the component has been modified. Defaults to no when absent.
 -   internal_use_only: Set this flag to yes if the component is used internal only.
     Defaults to no when absent.
+-   is_curated: Set this flag to yes if the ABOUT file is being used to curate a resource on the
+    deployed code, instead of just plain documenting resources.
 
 Optional Extension fields
 -------------------------

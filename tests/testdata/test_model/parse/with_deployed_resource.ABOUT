@@ -1,0 +1,4 @@
+name: elasticsearch-sidecar
+about_resource: elasticsearch-sidecar
+deployed_resource: elasticsearch-sidecar.jar
+is_curated: yes
