@@ -462,14 +462,31 @@ Here is an example of a attrib command:
 
 Note that this example attrib command does the following:
 
--   Activates the --template option to specify a custom output template.
+-   Activates the ``--template`` option to specify a custom output template.
 
 -   Specifies the path of the ABOUT file(s) that use to generate the output attribution.
 
 -   Specifies the full path (include file name) of the output document to be generated.
 
+Another example:
+
+``about attrib /Users/harrypotter/inventory.xlsx
+/Users/harrypotter/attribution.html --reference /Users/harrypotter/licenses/``
+
+The above command does the following:
+
+- Use the ``inventory.xlsx`` as the input
+
+- Specifies the location of the generated output document
+
+- Specifies the licesen_file or notice_file location that can be found in the
+  ``--reference`` option
+
+
 A successful execution of attrib will create a .html (or .json depends on the template)
 file that is ready to use to meet your attribution requirements.
+
+Please refer to the ``attrib`` section in :ref:`reference` for more information.
 
 Using inventory to Generate a Software Inventory
 ================================================
