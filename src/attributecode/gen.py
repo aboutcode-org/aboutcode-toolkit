@@ -93,8 +93,12 @@ def check_newline_in_file_field(component):
         if k in file_fields:
             try:
                 if '\n' in component[k]:
-                    msg = ("New line character detected in '%s' for '%s' which is not supported."
-                           "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
+                    if k == u'about_resource':
+                        msg = (
+                            "New line character detected in 'about_resource' for '%s' which is not supported.") % component['about_resource']
+                    else:
+                        msg = ("New line character detected in '%s' for '%s' which is not supported."
+                               "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
                     errors.append(Error(CRITICAL, msg))
             except:
                 pass
