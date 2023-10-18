@@ -352,13 +352,17 @@ Optional Boolean flag fields
 
 -   redistribute: Set this flag to yes if the component license requires source code
     redistribution. Defaults to no when absent.
--   attribute: Set this flag to yes if the component license requires publishing an attribution
-    or credit notice. Defaults to no when absent.
 -   track_changes: Set this flag to yes if the component license requires tracking changes made to
     a the component. Defaults to no when absent.
 -   modified: Set this flag to yes if the component has been modified. Defaults to no when absent.
 -   internal_use_only: Set this flag to yes if the component is used internal only.
     Defaults to no when absent.
+
+Optional Boolean and Numberic fields
+------------------------------------
+
+-   attribute: This field can be either in boolean value: ('yes', 'y', 'true',
+    'x', 'no', 'n', 'false') or numeric value field. Defaults to no when absent.
 
 Optional Extension fields
 -------------------------

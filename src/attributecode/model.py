@@ -720,6 +720,108 @@ class BooleanField(SingleLineField):
                 and self.value == other.value)
 
 
+class BooleanAndNumbericField(SingleLineField):
+    """
+    Field with either a boolean value or a numeric value. Validated value is
+    False, True, None or numeric value.
+    """
+
+    def default_value(self):
+        return None
+
+    true_flags = ('yes', 'y', 'true', 'x')
+    false_flags = ('no', 'n', 'false')
+    flag_values = true_flags + false_flags
+
+    def _validate(self, *args, **kwargs):
+        """
+        Check that flag are valid with either boolean value or numeric value. Default flag to
+        False. Return a list of errors.
+        """
+        errors = super(BooleanAndNumbericField,
+                       self)._validate(*args, ** kwargs)
+        self.about_file_path = kwargs.get('about_file_path')
+        flag = self.get_value(self.original_value)
+        if flag is False:
+            name = self.name
+            val = self.original_value
+            about_file_path = self.about_file_path
+            flag_values = self.flag_values
+            msg = (u'Path: %(about_file_path)s - Field %(name)s: Invalid value: %(val)r is not '
+                   u'one of: %(flag_values)s and it is not a numeric value.' % locals())
+            errors.append(Error(ERROR, msg))
+            self.value = None
+        elif flag is None:
+            name = self.name
+            msg = (u'Field %(name)s: field is present but empty. ' % locals())
+            errors.append(Error(INFO, msg))
+            self.value = None
+        else:
+            if flag == u'yes' or flag is True:
+                self.value = True
+            elif flag == u'no':
+                self.value = False
+            else:
+                self.value = flag
+        return errors
+
+    def get_value(self, value):
+        """
+        Return a normalized existing value if found in the list of
+        possible values or None if empty or False if not found or original value
+        if it is not a boolean value
+        """
+        if value is None or value == '':
+            return None
+
+        if isinstance(value, bool):
+            return value
+        else:
+            if isinstance(value, str):
+                value = value.strip()
+                if not value:
+                    return None
+
+                value = value.lower()
+                if value in self.flag_values:
+                    if value in self.true_flags:
+                        return u'yes'
+                    else:
+                        return u'no'
+                else:
+                    if value.isdigit():
+                        return value
+                    else:
+                        return False
+            elif isinstance(value, int):
+                return value
+            else:
+                return False
+
+    @property
+    def has_content(self):
+        """
+        Return true if it has content regardless of what value, False otherwise
+        """
+        if self.original_value:
+            return True
+        return False
+
+    def _serialized_value(self):
+        # default normalized values for serialization
+        if self.value:
+            if isinstance(self.value, bool):
+                return u'yes'
+            else:
+                return self.value
+        elif self.value is False:
+            return u'no'
+        else:
+            # self.value is None
+            # TODO: should we serialize to No for None???
+            return u''
+
+
 def validate_fields(fields, about_file_path, running_inventory, base_dir,
                     reference_dir=None):
     """
@@ -810,7 +912,7 @@ class About(object):
             ('notice_url', UrlField()),
 
             ('redistribute', BooleanField()),
-            ('attribute', BooleanField()),
+            ('attribute', BooleanAndNumbericField()),
             ('track_changes', BooleanField()),
             ('modified', BooleanField()),
             ('internal_use_only', BooleanField()),
