@@ -1,6 +1,13 @@
 ==============================
 Changelog
 
+2023-09-28
+    Release 11.0.0
+
+    * Adopt 3.3.2 specification: introducinf the following fields:
+      - ``deployed_resource``
+      - ``is_curated``
+
 2023-09-25
     Release 10.1.0
 

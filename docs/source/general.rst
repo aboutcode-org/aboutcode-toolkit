@@ -88,6 +88,9 @@ it will copy and store next to the .ABOUT files.
     * - ignored_resources
       - List of paths ignored from the ``about_resource``
       - Optional
+    * - deployed_resource
+      - Path to the resource where the curated resource is deployed
+      - Optional
     * - version
       - Component version
       - Optional
@@ -147,6 +150,9 @@ it will copy and store next to the .ABOUT files.
       - Optional
     * - internal_use_only
       - Yes/No. Is the component internal use only.
+      - Optional
+    * - is_curation
+      - Yes/No. Is the ABOUT file for a curated resource
       - Optional
     * - changelog_file
       - changelog text file name
