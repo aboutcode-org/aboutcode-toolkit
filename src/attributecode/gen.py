@@ -33,6 +33,7 @@ from attributecode.util import invalid_chars
 from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import load_scancode_json, load_csv, load_json, load_excel
+from attributecode.util import strip_inventory_value
 
 
 def check_duplicated_columns(location):
@@ -128,6 +129,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
     """
     errors = []
     abouts = []
+    is_spreadsheet = False
 
     if base_dir:
         base_dir = util.to_posix(base_dir)
@@ -140,8 +142,10 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                 errors.extend(dup_cols_err)
                 return errors, abouts
             inventory = load_csv(location)
+            is_spreadsheet = True
         elif location.endswith('.xlsx'):
             dup_cols_err, inventory = load_excel(location, worksheet)
+            is_spreadsheet = True
             if dup_cols_err:
                 errors.extend(dup_cols_err)
                 return errors, abouts
@@ -151,7 +155,14 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
     try:
         arp_list = []
         errors = []
-        for component in inventory:
+
+        if is_spreadsheet:
+            # Only the .csv and .xlsx may have newline issue
+            stripped_inv = strip_inventory_value(inventory)
+        else:
+            stripped_inv = inventory
+
+        for component in stripped_inv:
             if not from_attrib:
                 arp = component['about_resource']
                 dup_err = check_duplicated_about_resource(arp, arp_list)
@@ -164,11 +175,11 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                 invalid_about_filename = check_about_resource_filename(arp)
                 if invalid_about_filename and not invalid_about_filename in errors:
                     errors.append(invalid_about_filename)
-            """
+
             newline_in_file_err = check_newline_in_file_field(component)
             if newline_in_file_err:
                 errors.extend(newline_in_file_err)
-            """
+
         if errors:
             return errors, abouts
     except Exception as e:
@@ -178,7 +189,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         return errors, abouts
 
     custom_fields_list = []
-    for fields in inventory:
+    for fields in stripped_inv:
         # check does the input contains the required fields
         required_fields = model.About.required_fields
 
