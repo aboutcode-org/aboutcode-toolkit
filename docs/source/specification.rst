@@ -358,11 +358,12 @@ Optional Boolean flag fields
 -   internal_use_only: Set this flag to yes if the component is used internal only.
     Defaults to no when absent.
 
-Optional Boolean and Numberic fields
-------------------------------------
+Optional Boolean and Character fields
+-------------------------------------
 
 -   attribute: This field can be either in boolean value: ('yes', 'y', 'true',
-    'x', 'no', 'n', 'false') or numeric value field. Defaults to no when absent.
+    'x', 'no', 'n', 'false') or a character value field with no more than 2
+    characters. Defaults to no when absent.
 
 Optional Extension fields
 -------------------------

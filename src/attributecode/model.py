@@ -720,10 +720,10 @@ class BooleanField(SingleLineField):
                 and self.value == other.value)
 
 
-class BooleanAndNumbericField(SingleLineField):
+class BooleanAndTwoCharactersField(SingleLineField):
     """
-    Field with either a boolean value or a numeric value. Validated value is
-    False, True, None or numeric value.
+    Field with either a boolean value or character(s) value (at most 2
+    characters). Validated value is False, True, None or character value.
     """
 
     def default_value(self):
@@ -735,10 +735,10 @@ class BooleanAndNumbericField(SingleLineField):
 
     def _validate(self, *args, **kwargs):
         """
-        Check that flag are valid with either boolean value or numeric value. Default flag to
-        False. Return a list of errors.
+        Check that flag are valid with either boolean value or character value.
+        Default flag to False. Return a list of errors.
         """
-        errors = super(BooleanAndNumbericField,
+        errors = super(BooleanAndTwoCharactersField,
                        self)._validate(*args, ** kwargs)
         self.about_file_path = kwargs.get('about_file_path')
         flag = self.get_value(self.original_value)
@@ -748,7 +748,7 @@ class BooleanAndNumbericField(SingleLineField):
             about_file_path = self.about_file_path
             flag_values = self.flag_values
             msg = (u'Path: %(about_file_path)s - Field %(name)s: Invalid value: %(val)r is not '
-                   u'one of: %(flag_values)s and it is not a numeric value.' % locals())
+                   u'one of: %(flag_values)s and it is not a 1 or 2 character value.' % locals())
             errors.append(Error(ERROR, msg))
             self.value = None
         elif flag is None:
@@ -783,18 +783,15 @@ class BooleanAndNumbericField(SingleLineField):
                     return None
 
                 value = value.lower()
-                if value in self.flag_values:
+                if value in self.flag_values or len(value) <= 2:
                     if value in self.true_flags:
                         return u'yes'
-                    else:
+                    elif value in self.false_flags:
                         return u'no'
-                else:
-                    if value.isdigit():
-                        return value
                     else:
-                        return False
-            elif isinstance(value, int):
-                return value
+                        return value
+                else:
+                    return False
             else:
                 return False
 
@@ -912,7 +909,7 @@ class About(object):
             ('notice_url', UrlField()),
 
             ('redistribute', BooleanField()),
-            ('attribute', BooleanAndNumbericField()),
+            ('attribute', BooleanAndTwoCharactersField()),
             ('track_changes', BooleanField()),
             ('modified', BooleanField()),
             ('internal_use_only', BooleanField()),
