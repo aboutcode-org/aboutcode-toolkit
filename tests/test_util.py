@@ -162,7 +162,7 @@ class TestResourcePaths(unittest.TestCase):
             Error(
                 CRITICAL,
                 "Duplicate files: 'some/PAth' and 'some/path' have the same case-insensitive file name")
-            ]
+        ]
         assert expected == result
 
     def test_check_file_names_without_dupes_return_no_error(self):
@@ -196,9 +196,11 @@ class TestResourcePaths(unittest.TestCase):
         ]
         import sys
         if sys.version_info[0] < 3:  # python2
-            expected = [Error(CRITICAL, b"Invalid characters '\xe9\xe8' in file name at: 'Accessibilit\xe9/ p\xe9rim\xe8tre'")]
+            expected = [Error(
+                CRITICAL, b"Invalid characters '\xe9\xe8' in file name at: 'Accessibilit\xe9/ p\xe9rim\xe8tre'")]
         else:
-            expected = [Error(CRITICAL, "Invalid characters ':' in file name at: 'locations/in:valid'")]
+            expected = [
+                Error(CRITICAL, "Invalid characters ':' in file name at: 'locations/in:valid'")]
         result = util.check_file_names(paths)
 
         assert expected[0].message == result[0].message
@@ -272,7 +274,8 @@ class TestGetLocations(unittest.TestCase):
         assert expected == result
 
     def test_get_locations_can_yield_a_single_file(self):
-        test_file = get_test_loc('test_util/about_locations/file with_spaces.ABOUT')
+        test_file = get_test_loc(
+            'test_util/about_locations/file with_spaces.ABOUT')
         result = list(util.get_locations(test_file))
         assert 1 == len(result)
 
@@ -351,13 +354,15 @@ class TestCsv(unittest.TestCase):
 
     def test_load_csv_microsoft_utf_8(self):
         test_file = get_test_loc('test_util/csv/test_ms_utf8.csv')
-        expected = [dict([(u'about_resource', u'/myFile'), (u'name', u'myName')])]
+        expected = [
+            dict([(u'about_resource', u'/myFile'), (u'name', u'myName')])]
         result = util.load_csv(test_file)
         assert expected == result
 
     def test_load_csv_utf_8(self):
         test_file = get_test_loc('test_util/csv/test_utf8.csv')
-        expected = [dict([(u'about_resource', u'/myFile'), (u'name', u'\u540d')])]
+        expected = [
+            dict([(u'about_resource', u'/myFile'), (u'name', u'\u540d')])]
         result = util.load_csv(test_file)
         assert expected == result
 
@@ -409,7 +414,7 @@ class TestJson(unittest.TestCase):
             'about_resource': '.',
             'name': 'AboutCode',
             'version': '0.11.0'
-            }]
+        }]
         result = util.load_json(test_file)
         assert expected == result
 
@@ -420,7 +425,7 @@ class TestJson(unittest.TestCase):
             'about_resource': '.',
             'name': 'AboutCode',
             'version': '0.11.0'
-            }]
+        }]
         result = util.load_json(test_file)
         assert expected == result
 
@@ -450,7 +455,7 @@ class TestJson(unittest.TestCase):
             'dirs_count': 0,
             'size_count': 0,
             'scan_errors': []
-            }]
+        }]
         result = util.load_scancode_json(test_file)
         assert expected == result
 
@@ -497,7 +502,7 @@ notes: dup key here
         try:
             saneyaml.load(test, allow_duplicate_keys=False)
             self.fail('Exception not raised')
-        except saneyaml.UnsupportedYamlFeatureError as e :
+        except saneyaml.UnsupportedYamlFeatureError as e:
             assert 'Duplicate key in YAML source: notes' == str(e)
 
     def test_load_yaml_about_file_raise_exception_on_invalid_yaml_ignore_non_key_line(self):
@@ -532,7 +537,7 @@ description: sample
         try:
             saneyaml.load(test, allow_duplicate_keys=False)
             self.fail('Exception not raised')
-        except saneyaml.UnsupportedYamlFeatureError as e :
+        except saneyaml.UnsupportedYamlFeatureError as e:
             # notes: exceptio is rasied only for the first dupe
             assert 'Duplicate key in YAML source: owner' == str(e)
 
@@ -558,7 +563,8 @@ description: sample
             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:bsd-new']
         expected_spdx = [u'MIT', u'BSD-3-Clause']
-        lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, _matched_text = util.ungroup_licenses(about)
+        lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, _matched_text = util.ungroup_licenses(
+            about)
         assert expected_lic_key == lic_key
         assert expected_lic_name == lic_name
         assert expected_lic_file == lic_file
@@ -648,3 +654,17 @@ description: sample
         assert len(licenses) == len(files_list)
         for license in licenses:
             assert license in files_list
+
+    def test_strip_inventory_value(self):
+        test = [{'about_resource': 'empty_newlines.rpm\n\n', 'name': 'empty_newlines.rpm'},
+                {'about_resource': 'spaces_after.rpm   ',
+                    'name': 'spaces_after.rpm   '},
+                {'about_resource': 'value_after_newline\n123.rpm   ',
+                    'name': 'value_after'}]
+        expected = [{'about_resource': 'empty_newlines.rpm', 'name': 'empty_newlines.rpm'},
+                    {'about_resource': 'spaces_after.rpm',
+                        'name': 'spaces_after.rpm'},
+                    {'about_resource': 'value_after_newline\n123.rpm',
+                    'name': 'value_after'}]
+        stripped_result = util.strip_inventory_value(test)
+        assert stripped_result == expected

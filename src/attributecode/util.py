@@ -803,6 +803,20 @@ def write_licenses(lic_dict, location):
     return errors
 
 
+def strip_inventory_value(inventory):
+    """
+    The inventory is a list of dictionaries. This function will strip the value
+    of the dictionary and return the stripped dictionary to a list
+    """
+    stripped_inventory = []
+    for component in inventory:
+        comp_dict = {}
+        for key in component:
+            comp_dict[key] = component[key].strip()
+        stripped_inventory.append(comp_dict)
+    return stripped_inventory
+
+
 """
 Return True if a string s  name is safe to use as an attribute name.
 """

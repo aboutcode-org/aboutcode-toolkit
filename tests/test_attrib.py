@@ -245,6 +245,8 @@ class GenerateTest(unittest.TestCase):
         test_file = get_test_loc(
             'test_attrib/scancode_input/sc-dup-lic-match.json')
         errors, abouts = gen.load_inventory(test_file, scancode=True)
+        print("############################")
+        print(errors)
         # Check if there is error's level > INFO
         result = [(level, e) for level, e in errors if level > INFO]
         assert result == []
