@@ -1,6 +1,13 @@
 ==============================
 Changelog
 
+20xx-xx-xx
+    Release 10.2.0
+
+    * Add character (at most 2 characters) for `attribute` field
+    * Strip empty newline characters when loading an inventory
+
+
 2023-09-25
     Release 10.1.0
 
