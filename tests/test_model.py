@@ -648,6 +648,53 @@ this software and releases the component to Public Domain.
         assert a.redistribute.value is True
         assert a.track_changes.value is None
 
+    def test_About_boolean_numberic_value(self):
+        test_file = get_test_loc('test_model/parse/boolean_numeric_data.about')
+        a = model.About(test_file)
+        expected_msg = "Field track_changes is present but empty."
+        assert expected_msg in a.errors[0].message
+        # Context of the test file
+        """
+        about_resource: .
+        name: boolean_data
+        attribute: 3
+        modified: true
+        internal_use_only: no
+        redistribute: yes
+        track_changes:
+        """
+        assert a.attribute.value == '3'
+        assert a.modified.value is True
+        assert a.internal_use_only.value is False
+        assert a.redistribute.value is True
+        assert a.track_changes.value is None
+
+    def test_About_boolean_character_value(self):
+        test_file = get_test_loc('test_model/parse/boolean_chara_data.about')
+        a = model.About(test_file)
+        # Context of the test file
+        """
+        about_resource: .
+        name: data
+        attribute: 11
+        """
+        assert a.attribute.value == '11'
+        assert len(a.errors) == 0
+
+    def test_About_boolean_more_than_2_character_value(self):
+        test_file = get_test_loc(
+            'test_model/parse/boolean_more_than_2_chara_data.about')
+        a = model.About(test_file)
+        expected_msg = "Path: None - Field attribute: Invalid value: 'abc' is not one of: ('yes', 'y', 'true', 'x', 'no', 'n', 'false') and it is not a 1 or 2 character value."
+        assert expected_msg in a.errors[0].message
+        # Context of the test file
+        """
+        about_resource: .
+        name: test
+        attribute: abc
+        """
+        assert a.attribute.value is None
+
     def test_About_contains_about_file_path(self):
         test_file = get_test_loc('test_model/serialize/about.ABOUT')
         # TODO: I am not sure this override of the about_file_path makes sense
