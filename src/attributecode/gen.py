@@ -95,7 +95,7 @@ def check_newline_in_file_field(component):
                 if '\n' in component[k]:
                     if k == u'about_resource':
                         msg = (
-                            "New line character detected in 'about_resource' for '%s' which is not supported.") % component['about_resource']
+                            "Multiple lines detected in 'about_resource' for '%s' which is not supported.") % component['about_resource']
                     else:
                         msg = ("New line character detected in '%s' for '%s' which is not supported."
                                "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
@@ -164,10 +164,11 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                 invalid_about_filename = check_about_resource_filename(arp)
                 if invalid_about_filename and not invalid_about_filename in errors:
                     errors.append(invalid_about_filename)
-
+            """
             newline_in_file_err = check_newline_in_file_field(component)
             if newline_in_file_err:
                 errors.extend(newline_in_file_err)
+            """
         if errors:
             return errors, abouts
     except Exception as e:
