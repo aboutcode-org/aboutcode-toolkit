@@ -4,7 +4,7 @@ Changelog
 20xx-xx-xx
     Release 10.2.0
 
-    * Add character (at most 2 characters) for `attribute` field
+    * Add character support (at most 2 characters) for `attribute` field
     * Strip empty newline characters when loading an inventory
 
 
