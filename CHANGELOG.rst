@@ -1,5 +1,13 @@
 ==============================
 Changelog
+20xx-xx-xx
+    Release 7.2.1
+
+    * Fix the syntax for setup's python_requires since newer version of
+      setuptools (with newer packaging) versions do not accept star in the
+      Python version spec.
+
+
 2022-10-24
     Release 7.2.0
 
