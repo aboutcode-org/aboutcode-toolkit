@@ -1194,7 +1194,7 @@ class About(object):
                     lic_key_exp_list = []
                     lic_score_list = []
                     for lic in lic_list:
-                        _char, lic_keys = parse_license_expression(
+                        _char, lic_keys, _invalid_lic_exp = parse_license_expression(
                             lic['lic_exp'])
                         lic_key_list.append(lic_keys)
                         # for lic_key in lic_keys:
@@ -1327,7 +1327,7 @@ class About(object):
         # and get the parsed license key
         if 'license_expression' in data:
             if not license_key and data['license_expression']:
-                _spec_char, lic_list = parse_license_expression(
+                _spec_char, lic_list, _invalid_lic_exp = parse_license_expression(
                     data['license_expression'])
                 license_key = lic_list
 
@@ -1501,11 +1501,11 @@ class About(object):
             os.makedirs(add_unc(parent))
 
         if self.license_expression.present:
-            special_char_in_expression, lic_list = parse_license_expression(
+            special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
                 self.license_expression.value)
             self.license_key.value = lic_list
             self.license_key.present = True
-            if not special_char_in_expression:
+            if not special_char_in_expression and not invalid_lic_exp:
                 for lic_key in lic_list:
                     license_name = ''
                     license_filename = ''
@@ -1905,11 +1905,15 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
 
         if not about.license_expression.value and about.spdx_license_expression.value:
             lic_exp_value = ""
-            special_char_in_expression, lic_list = parse_license_expression(
+            special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
                 about.spdx_license_expression.value)
-            if special_char_in_expression:
-                msg = (about.about_file_path + u": The following character(s) cannot be in the spdx_license_expression: " +
-                       str(special_char_in_expression))
+            if special_char_in_expression or invalid_lic_exp:
+                if special_char_in_expression:
+                    msg = (about.about_file_path + u": The following character(s) cannot be in the spdx_license_expression: " +
+                           str(special_char_in_expression))
+                else:
+                    msg = (about.about_file_path + u": This spdx_license_expression is invalid: " +
+                           str(invalid_lic_exp))
                 errors.append(Error(ERROR, msg))
             else:
                 spdx_lic_exp_segment = about.spdx_license_expression.value.split()
@@ -1925,11 +1929,15 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                     about.license_expression.present = True
 
         if about.license_expression.value:
-            special_char_in_expression, lic_list = parse_license_expression(
+            special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
                 about.license_expression.value)
-            if special_char_in_expression:
-                msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
-                       str(special_char_in_expression))
+            if special_char_in_expression or invalid_lic_exp:
+                if special_char_in_expression:
+                    msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
+                           str(special_char_in_expression))
+                else:
+                    msg = (about.about_file_path + u": This license_expression is invalid: " +
+                           str(invalid_lic_exp))
                 errors.append(Error(ERROR, msg))
             else:
                 for lic_key in lic_list:
@@ -2027,11 +2035,15 @@ def convert_spdx_expression_to_lic_expression(spdx_key, spdx_lic_dict):
 def parse_license_expression(lic_expression):
     licensing = Licensing()
     lic_list = []
+    invalid_lic_exp = ''
     special_char = detect_special_char(lic_expression)
     if not special_char:
         # Parse the license expression and save it into a list
-        lic_list = licensing.license_keys(lic_expression)
-    return special_char, lic_list
+        try:
+            lic_list = licensing.license_keys(lic_expression)
+        except:
+            invalid_lic_exp = lic_expression
+    return special_char, lic_list, invalid_lic_exp
 
 
 def detect_special_char(expression):

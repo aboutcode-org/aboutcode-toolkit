@@ -225,7 +225,8 @@ def generate_sctk_input(abouts, min_license_score, license_dict):
             updated_lic_name = []
             updated_lic_score = []
             for index, lic in enumerate(updated_dict):
-                _sp_char, lic_keys = parse_license_expression(lic)
+                _sp_char, lic_keys, _invalid_lic_exp = parse_license_expression(
+                    lic)
                 score, name = updated_dict[lic]
                 if score >= min_license_score:
                     for lic_key in lic_keys:
@@ -306,12 +307,17 @@ def generate_and_save(abouts, is_about_input, license_dict, output_location, sca
     for about in abouts:
         if not about.license_expression.value:
             continue
-        special_char_in_expression, lic_list = parse_license_expression(
+        special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
             about.license_expression.value)
-        if special_char_in_expression:
-            msg = (u"The following character(s) cannot be in the license_expression: " +
-                   str(special_char_in_expression))
+        if special_char_in_expression or invalid_lic_exp:
+            if special_char_in_expression:
+                msg = (u"The following character(s) cannot be in the license_expression: " +
+                       str(special_char_in_expression))
+            else:
+                msg = (u"This license_expression is invalid: " +
+                       str(invalid_lic_exp))
             errors.append(Error(ERROR, msg))
+
     rendering_error, rendered = generate_from_file(
         abouts,
         is_about_input,
