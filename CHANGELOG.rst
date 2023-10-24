@@ -6,6 +6,8 @@ Changelog
     * Fix the syntax for setup's python_requires since newer version of
       setuptools (with newer packaging) versions do not accept star in the
       Python version spec.
+    * Stipped empty newline/spaces for about_resource fields
+    * Catch invalid license_expression
 
 
 2022-10-24

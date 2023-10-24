@@ -36,8 +36,10 @@ from attributecode import Error
 on_windows = 'win32' in sys.platform
 
 # boolean field name
-boolean_fields = ['redistribute', 'attribute', 'track_change', 'modified', 'internal_use_only']
-file_fields = ['about_resource', 'notice_file', 'changelog_file', 'author_file']
+boolean_fields = ['redistribute', 'attribute',
+                  'track_change', 'modified', 'internal_use_only']
+file_fields = ['about_resource', 'notice_file',
+               'changelog_file', 'author_file']
 
 
 def to_posix(path):
@@ -263,12 +265,14 @@ def load_csv(location):
     """
     results = []
     with open(location, mode='r', encoding='utf-8-sig',
-                     errors='replace') as csvfile:
+              errors='replace') as csvfile:
         for row in csv.DictReader(csvfile):
             # convert all the column keys to lower case
-            updated_row = {key.lower().strip(): value for key, value in row.items()}
+            updated_row = {key.lower().strip(): value for key,
+                           value in row.items()}
             results.append(updated_row)
     return results
+
 
 def load_json(location):
     """
@@ -405,9 +409,11 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
                 continue
 
             for copy_file_name in file_list:
-                from_lic_path = posixpath.join(to_posix(reference_dir), copy_file_name)
+                from_lic_path = posixpath.join(
+                    to_posix(reference_dir), copy_file_name)
                 about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
-                to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
+                to_lic_path = posixpath.join(
+                    to_posix(base_dir), about_file_dir)
                 if not os.path.exists(posixpath.join(to_lic_path, copy_file_name)):
                     err = copy_file(from_lic_path, to_lic_path)
                     if err:
@@ -538,7 +544,8 @@ def format_about_dict_for_json_output(about_dictionary_list):
                     row_list[key] = element[key]
 
         # Group the same license information in a list
-        license_group = list(zip_longest(license_key, license_name, license_file, license_url))
+        license_group = list(zip_longest(
+            license_key, license_name, license_file, license_url))
         if license_group:
             licenses_list = []
             for lic_group in license_group:
@@ -617,6 +624,7 @@ def build_temp_dir(prefix='attributecode-'):
     create_dir(location)
     return location
 
+
 def get_file_text(file_name, reference):
     """
     Return the file content from the license_file/notice_file field from the
@@ -630,9 +638,10 @@ def get_file_text(file_name, reference):
         error = Error(CRITICAL, msg)
     else:
         with codecs.open(file_path, 'rb', encoding='utf-8-sig', errors='replace') as txt:
-        #with io.open(file_path, encoding='utf-8') as txt:
+            # with io.open(file_path, encoding='utf-8') as txt:
             text = txt.read()
     return error, text
+
 
 def convert_object_to_dict(about):
     """
@@ -650,6 +659,7 @@ def convert_object_to_dict(about):
         value = supported_dict[field].value
         about_dict[key] = value
     return about_dict
+
 
 def load_scancode_json(location):
     """
@@ -670,6 +680,7 @@ def load_scancode_json(location):
                 updated_dict[key] = item[key]
         updated_results.append(updated_dict)
     return updated_results
+
 
 def load_excel(location):
     """
@@ -713,6 +724,7 @@ def load_excel(location):
         results.append(row_dict)
     return errors, results
 
+
 def write_licenses(lic_dict, location):
     import io
 
@@ -730,6 +742,20 @@ def write_licenses(lic_dict, location):
         msg = str(e)
         errors.append(Error(CRITICAL, msg))
     return errors
+
+
+def strip_inventory_value(inventory):
+    """
+    The inventory is a list of dictionaries. This function will strip the value
+    of the dictionary and return the stripped dictionary to a list
+    """
+    stripped_inventory = []
+    for component in inventory:
+        comp_dict = {}
+        for key in component:
+            comp_dict[key] = str(component[key]).strip()
+        stripped_inventory.append(comp_dict)
+    return stripped_inventory
 
 
 """

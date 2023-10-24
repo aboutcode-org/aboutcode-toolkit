@@ -39,6 +39,7 @@ DEFAULT_TEMPLATE_SCANCODE_FILE = os.path.join(
 
 DEFAULT_LICENSE_SCORE = 100
 
+
 def generate(abouts, is_about_input, license_dict, scancode, min_license_score, template=None, vartext=None):
     """
     Generate an attribution text from an `abouts` list of About objects, a
@@ -55,7 +56,8 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
         lineno, message = template_error
         error = Error(
             CRITICAL,
-            'Template validation error at line: {lineno}: "{message}"'.format(**locals())
+            'Template validation error at line: {lineno}: "{message}"'.format(
+                **locals())
         )
         errors.append(error)
         return error, None
@@ -87,10 +89,11 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
                         filename = list(about.license_file.value.keys())[index]
                         text = list(about.license_file.value.values())[index]
                     else:
-                        error = Error(CRITICAL, 'No license file found for ' + name)
+                        error = Error(
+                            CRITICAL, 'No license file found for ' + name)
                         errors.append(error)
                         break
-                    if  about.license_url.value:
+                    if about.license_url.value:
                         url = about.license_url.value[index]
                     else:
                         url = ''
@@ -105,7 +108,6 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
             url = license_dict[key][3]
             license_object = License(key, name, filename, url, text)
             licenses_list.append(license_object)
-
 
     # We need special treatment for scancode input.
     # Each about_object may have duplicated license key and same/different license score
@@ -145,14 +147,18 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
                             current_score = lic_score[index]
                             if current_score > previous_score:
                                 if matched_text_exist:
-                                    updated_dict[key] = (lic_score[index], lic_name[index], matched_text[index])
+                                    updated_dict[key] = (
+                                        lic_score[index], lic_name[index], matched_text[index])
                                 else:
-                                    updated_dict[key] = (lic_score[index], lic_name[index])
+                                    updated_dict[key] = (
+                                        lic_score[index], lic_name[index])
                         else:
                             if matched_text_exist:
-                                updated_dict[key] = (lic_score[index], lic_name[index], matched_text[index])
+                                updated_dict[key] = (
+                                    lic_score[index], lic_name[index], matched_text[index])
                             else:
-                                updated_dict[key] = (lic_score[index], lic_name[index])
+                                updated_dict[key] = (
+                                    lic_score[index], lic_name[index])
                         index = index + 1
                 updated_lic_key = []
                 updated_lic_name = []
@@ -200,7 +206,8 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
             lic_name_expression = ' '.join(lic_name_expression_list)
 
             # Add the license name expression string into the about object as a custom field
-            custom_field = StringField(name='license_name_expression', value=lic_name_expression, present=True)
+            custom_field = StringField(
+                name='license_name_expression', value=lic_name_expression, present=True)
             setattr(about, 'license_name_expression', custom_field)
 
     # Sort the about objects by name
@@ -218,6 +225,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
     )
 
     return errors, rendered
+
 
 def get_license_file_key(license_text_name):
     if license_text_name.endswith('.LICENSE'):
@@ -274,10 +282,15 @@ def generate_and_save(abouts, is_about_input, license_dict, output_location, sca
     for about in abouts:
         if not about.license_expression.value:
             continue
-        special_char_in_expression, lic_list = parse_license_expression(about.license_expression.value)
+        special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
+            about.license_expression.value)
         if special_char_in_expression:
             msg = (u"The following character(s) cannot be in the license_expression: " +
                    str(special_char_in_expression))
+            errors.append(Error(ERROR, msg))
+        if invalid_lic_exp:
+            msg = (about.about_file_path + u": The following license_expression is invalid: " +
+                   invalid_lic_exp)
             errors.append(Error(ERROR, msg))
     rendering_error, rendered = generate_from_file(
         abouts,

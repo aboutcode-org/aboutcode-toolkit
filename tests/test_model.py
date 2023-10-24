@@ -1122,14 +1122,14 @@ class CollectorTest(unittest.TestCase):
         assert expected == [a.dumps() for a in abouts]
 
     def test_parse_license_expression(self):
-        spec_char, returned_lic = model.parse_license_expression('mit or apache-2.0')
+        spec_char, returned_lic, _invalid_lic_exp = model.parse_license_expression('mit or apache-2.0')
         expected_lic = ['mit', 'apache-2.0']
         expected_spec_char = []
         assert expected_lic == returned_lic
         assert expected_spec_char == spec_char
 
     def test_parse_license_expression_with_special_chara(self):
-        spec_char, returned_lic = model.parse_license_expression('mit, apache-2.0')
+        spec_char, returned_lic, _invalid_lic_exp = model.parse_license_expression('mit, apache-2.0')
         expected_lic = []
         expected_spec_char = [',']
         assert expected_lic == returned_lic
