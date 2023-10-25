@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -24,7 +24,7 @@ jobs:
         run: chmod +x ./docs/scripts/doc8_style_check.sh
 
       - name: Install Dependencies
-        run:  pip install -e .[docs]
+        run: pip install -e .[docs]
 
       - name: Check Sphinx Documentation build minimally
         working-directory: ./docs
@@ -33,5 +33,3 @@ jobs:
       - name: Check for documentation style errors
         working-directory: ./docs
         run: ./scripts/doc8_style_check.sh
-
-
