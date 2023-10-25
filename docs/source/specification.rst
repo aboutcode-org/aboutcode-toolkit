@@ -15,7 +15,7 @@ of the documented software is needed.
 
 The ABOUT format is plain text with field name/value pairs separated by a colon.
 It is easy to read and create by hand and is designed first for humans, rather than
-. The format is well-defined and structured just enough to make it easy to process with
+machines. The format is well-defined and structured just enough to make it easy to process with
 software as well. It contains enough information to fulfill key license requirements
 such as creating credits or attribution notices, collecting redistributable source code,
 or providing information about new versions of a software component.
