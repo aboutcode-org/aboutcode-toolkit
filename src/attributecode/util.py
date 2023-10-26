@@ -812,7 +812,7 @@ def strip_inventory_value(inventory):
     for component in inventory:
         comp_dict = {}
         for key in component:
-            comp_dict[key] = component[key].strip()
+            comp_dict[key] = str(component[key]).strip()
         stripped_inventory.append(comp_dict)
     return stripped_inventory
 
