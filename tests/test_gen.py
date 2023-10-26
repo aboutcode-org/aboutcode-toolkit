@@ -22,6 +22,7 @@ from testing_utils import get_test_loc
 from attributecode import ERROR
 from attributecode import INFO
 from attributecode import CRITICAL
+from attributecode import WARNING
 from attributecode import Error
 from attributecode import gen
 from unittest.case import skip
@@ -31,13 +32,15 @@ class GenTest(unittest.TestCase):
 
     def test_check_duplicated_columns(self):
         test_file = get_test_loc('test_gen/dup_keys.csv')
-        expected = [Error(ERROR, 'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
+        expected = [Error(
+            ERROR, 'Duplicated column name(s): copyright with copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
     def test_check_duplicated_columns_handles_lower_upper_case(self):
         test_file = get_test_loc('test_gen/dup_keys_with_diff_case.csv')
-        expected = [Error(ERROR, 'Duplicated column name(s): copyright with Copyright\nPlease correct the input and re-run.')]
+        expected = [Error(
+            ERROR, 'Duplicated column name(s): copyright with Copyright\nPlease correct the input and re-run.')]
         result = gen.check_duplicated_columns(test_file)
         assert expected == result
 
@@ -46,15 +49,17 @@ class GenTest(unittest.TestCase):
         arp1 = '/test/test.c'
         arp2 = '/test/tmp/test.c'
         expected = Error(CRITICAL,
-                  "The input has duplicated values in 'about_resource' field: " + arp1)
+                         "The input has duplicated values in 'about_resource' field: " + arp1)
         result1 = gen.check_duplicated_about_resource(arp1, arp_list)
         result2 = gen.check_duplicated_about_resource(arp2, arp_list)
         assert result1 == expected
         assert result2 == ''
 
     def test_check_newline_in_file_field(self):
-        test_dict1 = {'about_resource': '/test/test.c', 'name': 'test.c', 'notice_file': 'NOTICE\nNOTICE2'}
-        test_dict2 = {'about_resource': '/test/test.c', 'name': 'test.c', 'notice_file': 'NOTICE, NOTICE2'}
+        test_dict1 = {'about_resource': '/test/test.c',
+                      'name': 'test.c', 'notice_file': 'NOTICE\nNOTICE2'}
+        test_dict2 = {'about_resource': '/test/test.c',
+                      'name': 'test.c', 'notice_file': 'NOTICE, NOTICE2'}
         expected = [
             Error(CRITICAL,
                   "New line character detected in 'notice_file' for '/test/test.c' which is not supported."
@@ -68,7 +73,7 @@ class GenTest(unittest.TestCase):
         arp1 = '/test/t@est.c'
         arp2 = '/test/t!est.c'
         msg = ("Invalid characters present in 'about_resource' "
-                   "field: " + arp2)
+               "field: " + arp2)
         expected2 = Error(ERROR, msg)
         result1 = gen.check_about_resource_filename(arp1)
         result2 = gen.check_about_resource_filename(arp2)
@@ -81,10 +86,10 @@ class GenTest(unittest.TestCase):
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
 
         expected_num_errors = 29
-        assert len(errors) == expected_num_errors 
+        assert len(errors) == expected_num_errors
 
         expected = (
-'''about_resource: .
+            '''about_resource: .
 name: AboutCode
 version: 0.11.0
 description: |
@@ -102,23 +107,26 @@ custom1: |
         location = get_test_loc('test_gen/inv_no_about_resource.csv')
         base_dir = get_temp_dir()
         from_attrib = False
-        errors, abouts = gen.load_inventory(location, base_dir=base_dir, from_attrib=from_attrib)
-        expected_error = [Error(CRITICAL,  "The essential field 'about_resource' is not found in the <input>")]
+        errors, abouts = gen.load_inventory(
+            location, base_dir=base_dir, from_attrib=from_attrib)
+        expected_error = [Error(
+            CRITICAL,  "The essential field 'about_resource' is not found in the <input>")]
 
         assert errors == expected_error
-        assert abouts == [] 
+        assert abouts == []
 
     def test_load_inventory_without_about_resource_from_attrib(self):
         location = get_test_loc('test_gen/inv_no_about_resource.csv')
         base_dir = get_temp_dir()
         from_attrib = True
-        errors, abouts = gen.load_inventory(location, base_dir=base_dir, from_attrib=from_attrib)
+        errors, abouts = gen.load_inventory(
+            location, base_dir=base_dir, from_attrib=from_attrib)
 
         expected_num_errors = 0
-        assert len(errors) == expected_num_errors 
+        assert len(errors) == expected_num_errors
 
         expected = (
-'''about_resource: .
+            '''about_resource: .
 name: AboutCode
 version: 0.11.0
 license_expression: apache-2.0
@@ -132,7 +140,8 @@ license_expression: apache-2.0
         base_dir = get_temp_dir()
         errors, abouts = gen.load_inventory(location, base_dir=base_dir)
         expected_errors = [
-            Error(ERROR, "Field name: ['confirmed copyright'] contains illegal name characters (or empty spaces) and is ignored."),
+            Error(
+                WARNING, "Field name: ['confirmed copyright'] contains illegal name characters (or empty spaces) and is ignored."),
             Error(INFO, 'Field about_resource: Path'),
             Error(INFO, "Field ['resource', 'test'] is a custom field.")
         ]
@@ -165,13 +174,12 @@ license_expression: apache-2.0
 
         assert abouts[0].name.value == 'cryptohash-sha256'
         assert abouts[1].name.value == 'some_component'
-        
+
         assert abouts[0].version.value == 'v 0.11.100.1'
         assert abouts[1].version.value == 'v 0.0.1'
 
         assert abouts[0].license_expression.value == 'bsd-new and mit'
         assert abouts[1].license_expression.value == 'mit'
-
 
     def test_load_scancode_json(self):
         location = get_test_loc('test_gen/load/clean-text-0.3.0-lceupi.json')
@@ -188,12 +196,12 @@ license_expression: apache-2.0
                     'authors': [], 'packages': [], 'emails': [], 'urls': [], 'files_count': 9,
                     'dirs_count': 1, 'size_count': 32826, 'scan_errors': []}
 
-        # We will only check the first element in the inventory list 
+        # We will only check the first element in the inventory list
         assert inventory[0] == expected
 
-
     def test_generation_dir_endswith_space(self):
-        location = get_test_loc('test_gen/inventory/complex/about_file_path_dir_endswith_space.csv')
+        location = get_test_loc(
+            'test_gen/inventory/complex/about_file_path_dir_endswith_space.csv')
         base_dir = get_temp_dir()
         errors, _abouts = gen.generate(location, base_dir)
         expected_errors_msg1 = 'contains directory name ends with spaces which is not allowed. Generation skipped.'
@@ -247,7 +255,7 @@ license_expression: apache-2.0
 
         result = [a.dumps() for a in abouts][0]
         expected = (
-'''about_resource: .
+            '''about_resource: .
 name: AboutCode
 version: 0.11.0
 description: |
@@ -268,7 +276,7 @@ custom1: |
 
         result = [a.dumps() for a in abouts][0]
         expected = (
-'''about_resource: test
+            '''about_resource: test
 name: test
 version: '1.5'
 licenses:
@@ -293,7 +301,7 @@ licenses:
 
         result = [a.dumps() for a in abouts][0]
         expected = (
-'''about_resource: test.c
+            '''about_resource: test.c
 name: test.c
 licenses:
   - key: License1
@@ -304,14 +312,15 @@ licenses:
         assert expected == result
 
     def test_generate_license_key_with_custom_file_450_no_fetch(self):
-        location = get_test_loc('test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
+        location = get_test_loc(
+            'test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
 
         result = [a.dumps() for a in abouts][0]
         expected = (
-'''about_resource: test.c
+            '''about_resource: test.c
 name: test.c
 license_expression: mit AND custom
 licenses:
@@ -320,19 +329,19 @@ licenses:
         )
         assert expected == result
 
-
     def test_generate_license_key_with_custom_file_450_with_fetch_with_order(self):
-        location = get_test_loc('test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
+        location = get_test_loc(
+            'test_gen/lic_issue_450/custom_and_valid_lic_key_with_file.csv')
         base_dir = get_temp_dir()
 
         errors, abouts = gen.generate(location, base_dir)
 
         lic_dict = {u'mit': [u'MIT License',
-                                       u'mit.LICENSE',
-                                       u'This component is released under MIT License.',
-                                       u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
-                                       u'mit'
-                                       ]}
+                             u'mit.LICENSE',
+                             u'This component is released under MIT License.',
+                             u'https://enterprise.dejacode.com/urn/?urn=urn:dje:license:mit',
+                             u'mit'
+                             ]}
         # The first row from the test file
         a = abouts[0]
         a.license_key.value.append('mit')
@@ -345,7 +354,7 @@ licenses:
         result2 = b.dumps(lic_dict)
 
         expected1 = (
-'''about_resource: test.c
+            '''about_resource: test.c
 name: test.c
 license_expression: mit AND custom
 licenses:
@@ -361,7 +370,7 @@ licenses:
         )
 
         expected2 = (
-'''about_resource: test.h
+            '''about_resource: test.h
 name: test.h
 license_expression: custom AND mit
 licenses:

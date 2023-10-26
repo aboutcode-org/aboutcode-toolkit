@@ -185,8 +185,6 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         if errors:
             return errors, abouts
     except Exception as e:
-        print("!!!!!!!!!!!!!!!!")
-        print(str(e))
         # TODO: why catch ALL Exception
         msg = "The essential field 'about_resource' is not found in the <input>"
         errors.append(Error(CRITICAL, msg))
@@ -253,6 +251,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             running_inventory=False,
             reference_dir=reference_dir,
         )
+
         for severity, message in ld_errors:
             if 'Custom Field' in message:
                 field_name = message.replace('Custom Field: ', '').strip()
