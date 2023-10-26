@@ -58,7 +58,7 @@ Specification
 =============
 
 An ABOUT file is an YAML formatted text file.
-The key for the licenses field and the license_expression are dejacode license key.
+The key for the licenses field and the license_expression are ScanCode license key.
 
 ABOUT file name
 ---------------
@@ -318,13 +318,13 @@ Optional Licensing fields
     name of a license file such as LICENSE or COPYING file extracted from a
     downloaded archive.
 -   license_url: URL to the license text for the component.
--   license_expression: The DejaCode license expression that apply to
+-   license_expression: The ScanCode license expression that apply to
     the component. You can separate each identifier using " or " and " and " to
     document the relationship between multiple license identifiers, such as a choice
     among multiple licenses (No special characters are allowed).
--   license_name: The DejaCode license short name for the license
+-   license_name: The ScanCode license short name for the license
     (No special characters are allowed).
--   license_key: The DejaCode license key(s) for the component
+-   license_key: The ScanCode license key(s) for the component
     (No special characters are allowed).
 -   spdx_license_key: The ScanCode LicenseDB spdx_license_key defined
     for the license at https://scancode-licensedb.aboutcode.org/index.html
