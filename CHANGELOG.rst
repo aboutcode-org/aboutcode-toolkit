@@ -7,6 +7,7 @@ Changelog
     * Add character support (at most 2 characters) for `attribute` field
     * Strip empty newline characters when loading an inventory
     * Catch invalid license_expression
+    * Update the specification to 3.3.2
 
 
 2023-09-25

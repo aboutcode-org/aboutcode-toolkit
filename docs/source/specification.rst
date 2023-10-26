@@ -1,7 +1,7 @@
 .. _specification:
 
 ===============================
-ABOUT File Specification v3.3.1
+ABOUT File Specification v3.3.2
 ===============================
 
 Purpose
@@ -47,12 +47,12 @@ The meaning of this ABOUT file is:
 -   The file "httpd-2.4.3.tar.gz" is stored in the same directory and side-by-side with
     the ABOUT file "httpd-2.4.3.tar.gz.ABOUT" that documents it.
 -   The name of this component is "Apache HTTP Server" with version "2.4.3".
--   The home URL for this component is http://httpd.apache.org
+-   The homepage URL for this component is http://httpd.apache.org
 -   The file "httpd-2.4.3.tar.gz" was originally downloaded from http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
+-   This component is licensed under "apache-2.0"
+-   The licenses section contains the information of this "apache-2.0" license.
 -   In the same directory, "apache-2.0.LICENSE" and "httpd.NOTICE" are files
     that contain respectively the license text and the notice text for this component.
--   This component is licensed under "apache-2.0"
--   The license for this component is defined in the SPDX License List at https://spdx.org/licenses/Apache-2.0.html
 
 Specification
 =============
@@ -68,7 +68,7 @@ An ABOUT file name can use a limited set of characters and is suffixed with a
 
 A file name can contain any characters and digits with the following exception and condition:
 
--   the following symbols are not supported: ``", #, &, ', *, \, :, ;, <, >, =, ?, /, ^, `, |``
+-   the following symbols are not accepted: ``", #, &, ', *, \, :, ;, <, >, =, ?, /, ^, `, |``
 -   The case of a file name is not significant. On case-sensitive file systems
     (such as on Linux), a tool must report an error if two ABOUT files stored in the same
     directory have the same lowercase file name. This is to ensure that ABOUT files can be
@@ -163,17 +163,27 @@ Field referencing a file
 
 The actual value of some fields may be contained in another file. This is useful
 for long texts or to reference a common text in multiple ABOUT files such as a
-common license text. In this case the field name is suffixed with "_file" and the
-field value must be a path pointing to the file that contains the actual value of the
-field. This path must be a POSIX path relative to the path of the ABOUT file. The file
-content must be UTF-8-encoded text.
+common license text. In this case the field name is suffixed with "_file" and
+the field value must be a path pointing to the file that contains the actual
+value of the field. If the field is referencing a license file, a "file" field
+within the "licenses" group can be used. This path must be a POSIX path relative
+to the path of the ABOUT file. The file content must be UTF-8-encoded text.
 
-For example, the full license text for a component is often stored in a separate file named COPYING:
+For example, this example shows the license file for the component is named
+"linux.COPYING" and the notice file is "NOTICE":
+
+        ..  code-block:: none
+
+                license_file: linux.COPYING
+                notice_file: NOTICE
+
+Alternatvely, it can also write as the follow:
 
         ..  code-block:: none
 
                 licenses:
                     -   file: linux.COPYING
+                notice_file: NOTICE
 
 In this example, the README file is stored in a doc directory, one directory
 above the ABOUT file directory, using a relative POSIX path:
@@ -318,6 +328,7 @@ Optional Licensing fields
     (No special characters are allowed).
 -   spdx_license_key: The ScanCode LicenseDB spdx_license_key defined
     for the license at https://scancode-licensedb.aboutcode.org/index.html
+-   spdx_license_expression: The license expression that use spdx_license_key
 
 Notes
 ^^^^^
