@@ -1,6 +1,6 @@
 ==============================
 Changelog
-20xx-xx-xx
+2023-11-02
     Release 7.2.1
 
     * Fix the syntax for setup's python_requires since newer version of
