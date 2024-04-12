@@ -25,7 +25,7 @@ ftfy==6.0.3
 future==0.18.2
 gemfileparser==0.8.0
 html5lib==1.1
-idna==3.3
+idna==3.7
 importlib-metadata==4.8.3
 inflection==0.5.1
 intbitset==3.0.1
