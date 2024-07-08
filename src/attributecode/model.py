@@ -235,7 +235,7 @@ class StringField(Field):
     def _validate(self, *args, **kwargs):
         errors = super(StringField, self)._validate(*args, ** kwargs)
         no_special_char_field = [
-            'license_expression', 'license_key', 'license_name']
+            'license_expression', 'license_key', 'license_name', 'declared_license_expression', 'other_license_expression ']
         name = self.name
         if name in no_special_char_field:
             val = self.value
@@ -904,6 +904,8 @@ class About(object):
             ('license_url', UrlListField()),
             ('spdx_license_expression', SingleLineField()),
             ('spdx_license_key', ListField()),
+            ('declared_license_expression', SingleLineField()),
+            ('other_license_expression', SingleLineField()),
             ('copyright', StringField()),
             ('notice_file', FileTextField()),
             ('notice_url', UrlField()),
@@ -1500,34 +1502,53 @@ class About(object):
         if not posixpath.exists(parent):
             os.makedirs(add_unc(parent))
 
+        licenses_list = []
         if self.license_expression.present:
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
                 self.license_expression.value)
-            self.license_key.value = lic_list
+            if lic_list:
+                for lic in lic_list:
+                    if lic not in licenses_list:
+                        licenses_list.append(lic)
+        if self.declared_license_expression.present:
+            special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
+                self.declared_license_expression.value)
+            if lic_list:
+                for lic in lic_list:
+                    if lic not in licenses_list:
+                        licenses_list.append(lic)
+        if self.other_license_expression.present:
+            special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
+                self.other_license_expression.value)
+            if lic_list:
+                for lic in lic_list:
+                    if lic not in licenses_list:
+                        licenses_list.append(lic)
+        if licenses_list:
+            self.license_key.value = licenses_list
             self.license_key.present = True
-            if not special_char_in_expression and not invalid_lic_exp:
-                for lic_key in lic_list:
-                    license_name = ''
-                    license_filename = ''
-                    license_context = ''
-                    license_url = ''
-                    spdx_license_key = ''
-                    if lic_key in license_dict:
-                        license_path = posixpath.join(parent, lic_key)
-                        license_path += u'.LICENSE'
-                        license_path = add_unc(license_path)
-                        license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[
-                            lic_key]
-                        license_info = (lic_key, license_name, license_filename,
-                                        license_context, license_url, spdx_license_key)
-                        license_key_name_context_url.append(license_info)
-                        with open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
-                            lic.write(license_context)
-                    else:
-                        # Invalid license issue is already handled
-                        license_info = (lic_key, license_name, license_filename,
-                                        license_context, license_url, spdx_license_key)
-                        license_key_name_context_url.append(license_info)
+            for lic_key in licenses_list:
+                license_name = ''
+                license_filename = ''
+                license_context = ''
+                license_url = ''
+                spdx_license_key = ''
+                if lic_key in license_dict:
+                    license_path = posixpath.join(parent, lic_key)
+                    license_path += u'.LICENSE'
+                    license_path = add_unc(license_path)
+                    license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[
+                        lic_key]
+                    license_info = (lic_key, license_name, license_filename,
+                                    license_context, license_url, spdx_license_key)
+                    license_key_name_context_url.append(license_info)
+                    with open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
+                        lic.write(license_context)
+                else:
+                    # Invalid license issue is already handled
+                    license_info = (lic_key, license_name, license_filename,
+                                    license_context, license_url, spdx_license_key)
+                    license_key_name_context_url.append(license_info)
 
         return license_key_name_context_url
 
@@ -1903,17 +1924,29 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
             about.license_expression.value = lic_exp
             about.license_expression.present = True
 
+        afp = ''
+        if about.about_file_path:
+            afp = about.about_file_path
+
         if not about.license_expression.value and about.spdx_license_expression.value:
             lic_exp_value = ""
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
                 about.spdx_license_expression.value)
             if special_char_in_expression or invalid_lic_exp:
                 if special_char_in_expression:
-                    msg = (about.about_file_path + u": The following character(s) cannot be in the spdx_license_expression: " +
-                           str(special_char_in_expression))
+                    if afp:
+                        msg = (afp + u": The following character(s) cannot be in the spdx_license_expression: " +
+                               str(special_char_in_expression))
+                    else:
+                        msg = (u"The following character(s) cannot be in the spdx_license_expression: " +
+                               str(special_char_in_expression))
                 else:
-                    msg = (about.about_file_path + u": This spdx_license_expression is invalid: " +
-                           str(invalid_lic_exp))
+                    if afp:
+                        msg = (afp + u": This spdx_license_expression is invalid: " +
+                               str(invalid_lic_exp))
+                    else:
+                        msg = (u"This spdx_license_expression is invalid: " +
+                               str(invalid_lic_exp))
                 errors.append(Error(ERROR, msg))
             else:
                 spdx_lic_exp_segment = about.spdx_license_expression.value.split()
@@ -1928,83 +1961,139 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                     about.license_expression.value = lic_exp_value
                     about.license_expression.present = True
 
+        lic_exp_list = []
+
+        if about.declared_license_expression.value:
+            special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
+                about.declared_license_expression.value)
+            if special_char_in_expression:
+                if afp:
+                    msg = (afp + u": The following character(s) cannot be in the declared_license_expression: " +
+                           str(special_char_in_expression))
+                else:
+                    msg = (u"The following character(s) cannot be in the declared_license_expression: " +
+                           str(special_char_in_expression))
+                errors.append(Error(ERROR, msg))
+            if invalid_lic_exp:
+                if afp:
+                    msg = (afp + u": This declared_license_expression is invalid: " +
+                           str(invalid_lic_exp))
+                else:
+                    msg = (u"This declared_license_expression is invalid: " +
+                           str(invalid_lic_exp))
+                errors.append(Error(ERROR, msg))
+            if lic_list:
+                lic_exp_list.extend(lic_list)
+
+        if about.other_license_expression.value:
+            special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
+                about.other_license_expression.value)
+            if special_char_in_expression:
+                if afp:
+                    msg = (afp + u": The following character(s) cannot be in the other_license_expression: " +
+                           str(special_char_in_expression))
+                else:
+                    msg = (u"This declared_license_expression is invalid: " +
+                           str(invalid_lic_exp))
+                errors.append(Error(ERROR, msg))
+            if invalid_lic_exp:
+                if afp:
+                    msg = (afp + u": This other_license_expression is invalid: " +
+                           str(invalid_lic_exp))
+                else:
+                    msg = (u"This other_license_expression is invalid: " +
+                           str(invalid_lic_exp))
+                errors.append(Error(ERROR, msg))
+            if lic_list:
+                lic_exp_list.extend(lic_list)
+
         if about.license_expression.value:
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
                 about.license_expression.value)
-            if special_char_in_expression or invalid_lic_exp:
-                if special_char_in_expression:
-                    msg = (about.about_file_path + u": The following character(s) cannot be in the license_expression: " +
+            if special_char_in_expression:
+                if afp:
+                    msg = (afp + u": The following character(s) cannot be in the license_expression: " +
                            str(special_char_in_expression))
                 else:
-                    msg = (about.about_file_path + u": This license_expression is invalid: " +
+                    msg = (u"The following character(s) cannot be in the license_expression: " +
+                           str(special_char_in_expression))
+                errors.append(Error(ERROR, msg))
+            if invalid_lic_exp:
+                if afp:
+                    msg = (afp + u": This license_expression is invalid: " +
+                           str(invalid_lic_exp))
+                else:
+                    msg = (u"This license_expression is invalid: " +
                            str(invalid_lic_exp))
                 errors.append(Error(ERROR, msg))
-            else:
-                for lic_key in lic_list:
-                    if not lic_key in captured_license:
-                        lic_url = ''
-                        license_name = ''
-                        license_filename = ''
-                        license_text = ''
-                        spdx_license_key = ''
-                        detail_list = []
-                        captured_license.append(lic_key)
-                        if api_key:
-                            license_data, errs = api.get_license_details_from_api(
-                                url, api_key, lic_key)
-                            # Catch incorrect API URL
-                            if errs:
-                                _, msg = errs[0]
-                                if msg == "Invalid '--api_url'. License generation is skipped.":
-                                    errors.extend(errs)
-                                    return key_text_dict, errors
-                            for severity, message in errs:
-                                msg = (about.about_file_path + ": " + message)
-                                errors.append(Error(severity, msg))
-                            # We don't want to actually get the license information from the
-                            # check utility
+            if lic_list:
+                lic_exp_list.extend(lic_list)
+            if not about.license_key.value:
+                about.license_key.value = lic_list
+
+        if lic_exp_list:
+            for lic_key in lic_exp_list:
+                if not lic_key in captured_license:
+                    lic_url = ''
+                    license_name = ''
+                    license_filename = ''
+                    license_text = ''
+                    spdx_license_key = ''
+                    detail_list = []
+                    captured_license.append(lic_key)
+                    if api_key:
+                        license_data, errs = api.get_license_details_from_api(
+                            url, api_key, lic_key)
+                        # Catch incorrect API URL
+                        if errs:
+                            _, msg = errs[0]
+                            if msg == "Invalid '--api_url'. License generation is skipped.":
+                                errors.extend(errs)
+                                return key_text_dict, errors
+                        for severity, message in errs:
+                            msg = (afp + ": " + message)
+                            errors.append(Error(severity, msg))
+                        # We don't want to actually get the license information from the
+                        # check utility
+                        if from_check:
+                            continue
+                        if not license_data:
+                            continue
+                        license_name = license_data.get('short_name', '')
+                        license_text = license_data.get('full_text', '')
+                        spdx_license_key = license_data.get(
+                            'spdx_license_key', '')
+                        license_filename = lic_key + '.LICENSE'
+                        lic_url = lic_urn + lic_key
+                    else:
+                        license_url = url + lic_key + '.json'
+                        license_text_url = url + lic_key + '.LICENSE'
+                        try:
+                            json_url_content = get(license_url).text
+                            # We don't want to actually get the license
+                            # information from the check utility
                             if from_check:
                                 continue
-                            if not license_data:
-                                continue
-                            license_name = license_data.get('short_name', '')
-                            license_text = license_data.get('full_text', '')
-                            spdx_license_key = license_data.get(
-                                'spdx_license_key', '')
-                            license_filename = lic_key + '.LICENSE'
-                            lic_url = lic_urn + lic_key
-                        else:
-                            license_url = url + lic_key + '.json'
-                            license_text_url = url + lic_key + '.LICENSE'
-                            try:
-                                json_url_content = get(license_url).text
-                                # We don't want to actually get the license
-                                # information from the check utility
-                                if from_check:
-                                    continue
-                                data = json.loads(json_url_content)
-                                license_name = data['short_name']
-                                license_text = get(license_text_url).text
-                                license_filename = data['key'] + '.LICENSE'
-                                lic_url = url + license_filename
-                                spdx_license_key = data['spdx_license_key']
-                            except:
-                                try:
-                                    msg = about.about_file_path + u" : Invalid 'license': " + lic_key
-                                except:
-                                    msg = u"Invalid 'license': " + lic_key
-                                errors.append(Error(ERROR, msg))
-                                continue
-                        if not from_check:
-                            detail_list.append(license_name)
-                            detail_list.append(license_filename)
-                            detail_list.append(license_text)
-                            detail_list.append(lic_url)
-                            detail_list.append(spdx_license_key)
-                            key_text_dict[lic_key] = detail_list
-                if not about.license_key.value:
-                    about.license_key.value = lic_list
-
+                            data = json.loads(json_url_content)
+                            license_name = data['short_name']
+                            license_text = get(license_text_url).text
+                            license_filename = data['key'] + '.LICENSE'
+                            lic_url = url + license_filename
+                            spdx_license_key = data['spdx_license_key']
+                        except:
+                            if afp:
+                                msg = afp + u" : Invalid 'license': " + lic_key
+                            else:
+                                msg = u"Invalid 'license': " + lic_key
+                            errors.append(Error(ERROR, msg))
+                            continue
+                    if not from_check:
+                        detail_list.append(license_name)
+                        detail_list.append(license_filename)
+                        detail_list.append(license_text)
+                        detail_list.append(lic_url)
+                        detail_list.append(spdx_license_key)
+                        key_text_dict[lic_key] = detail_list
     return key_text_dict, errors
 
 

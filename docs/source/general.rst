@@ -124,6 +124,12 @@ it will copy and store next to the .ABOUT files.
     * - spdx_license_key
       - The ScanCode LicenseDB spdx_license_key defined for the license at https://scancode-licensedb.aboutcode.org/index.html
       - Optional
+    * - declared_license_expression
+      -
+      - Optional. You can separate each identifier using " OR " and " AND " to document the relationship between multiple license identifiers, such as a choice among multiple licenses.
+    * - other_license_expression
+      - 
+      - Optional. You can separate each identifier using " OR " and " AND " to document the relationship between multiple license identifiers, such as a choice among multiple licenses.
     * - copyright
       - copyright statement for the component
       - Optional

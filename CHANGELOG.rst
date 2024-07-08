@@ -8,6 +8,7 @@ Changelog
     * Strip empty newline characters when loading an inventory
     * Catch invalid license_expression
     * Update the specification to 3.3.2
+    * Support declared_license_expression" and "other_license_expression"
 
 
 2023-09-25

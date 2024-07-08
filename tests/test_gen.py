@@ -271,6 +271,33 @@ custom1: |
         )
         assert expected == result
 
+    def test_generate(self):
+        location = get_test_loc('test_gen/inv.csv')
+        base_dir = get_temp_dir()
+
+        errors, abouts = gen.generate(location, base_dir)
+        err_msg_list = []
+        for severity, message in errors:
+            err_msg_list.append(message)
+        msg1 = "Field ['custom1'] is a custom field."
+
+        assert msg1 in err_msg_list
+
+        result = [a.dumps() for a in abouts][0]
+        expected = (
+            '''about_resource: .
+name: AboutCode
+version: 0.11.0
+description: |
+  multi
+  line
+custom1: |
+  multi
+  line
+'''
+        )
+        assert expected == result
+
     def test_generate_multi_lic_issue_443(self):
         location = get_test_loc('test_gen/multi_lic_issue_443/test.csv')
         base_dir = get_temp_dir()
@@ -454,6 +481,27 @@ licenses:
             'version: 0.11.0\n'
             'licenses:\n'
             '    -   file: this.LICENSE\n')
+        assert expected == result
+
+    def test_generate_new_lic_fields_563(self):
+        location = get_test_loc('test_gen/inv7.csv')
+        base_dir = get_temp_dir()
+
+        _errors, abouts = gen.generate(location, base_dir)
+
+        result = [a.dumps() for a in abouts][0]
+        expected = (
+            '''about_resource: test.c
+name: test.c
+license_expression: mit
+declared_license_expression: isc
+other_license_expression: public-domain
+copyright: robot
+licenses:
+  - key: mit
+    name: mit
+'''
+        )
         assert expected == result
 
     def test_boolean_value_not_lost(self):
