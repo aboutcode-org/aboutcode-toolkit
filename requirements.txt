@@ -77,4 +77,4 @@ urlpy==0.5
 wcwidth==0.2.5
 webencodings==0.5.1
 xmltodict==0.12.0
-zipp==3.6.0
+zipp==3.19.1
