@@ -152,18 +152,18 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         else:
             inventory = load_json(location)
 
-    try:
-        arp_list = []
-        errors = []
+    arp_list = []
+    errors = []
 
-        if is_spreadsheet:
-            # Only the .csv and .xlsx may have newline issue
-            stripped_inv = strip_inventory_value(inventory)
-        else:
-            stripped_inv = inventory
+    if is_spreadsheet:
+        # Only the .csv and .xlsx may have newline issue
+        stripped_inv = strip_inventory_value(inventory)
+    else:
+        stripped_inv = inventory
 
-        for component in stripped_inv:
-            if not from_attrib:
+    for component in stripped_inv:
+        if not from_attrib:
+            if 'about_resource' in component:
                 arp = component['about_resource']
                 dup_err = check_duplicated_about_resource(arp, arp_list)
                 if dup_err:
@@ -176,16 +176,11 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                 if invalid_about_filename and not invalid_about_filename in errors:
                     errors.append(invalid_about_filename)
 
-            newline_in_file_err = check_newline_in_file_field(component)
-            if newline_in_file_err:
-                errors.extend(newline_in_file_err)
+        newline_in_file_err = check_newline_in_file_field(component)
+        if newline_in_file_err:
+            errors.extend(newline_in_file_err)
 
-        if errors:
-            return errors, abouts
-    except Exception as e:
-        # TODO: why catch ALL Exception
-        msg = "The essential field 'about_resource' is not found in the <input>"
-        errors.append(Error(CRITICAL, msg))
+    if errors:
         return errors, abouts
 
     custom_fields_list = []
@@ -203,8 +198,8 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                     errors.append(Error(CRITICAL, msg))
                     return errors, abouts
         # Set about file path to '' if no 'about_resource' is provided from
-        # the input for `attrib`
-        if not 'about_resource' in fields:
+        # the input
+        if 'about_resource' not in fields:
             afp = ''
         else:
             afp = fields.get(model.About.ABOUT_RESOURCE_ATTR)
@@ -227,11 +222,6 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
             else:
                 updated_resource_value = basename(resource_path)
             fields['about_resource'] = updated_resource_value
-
-        # Set 'about_resource' to '.' if no 'about_resource' is provided from
-        # the input for `attrib`
-        elif not 'about_resource' in fields and from_attrib:
-            fields['about_resource'] = u'.'
 
         ld_errors = about.load_dict(
             fields,
@@ -268,7 +258,6 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir. Return errors and about objects.
     """
-    not_exist_errors = []
     notice_dict = {}
     api_url = ''
     api_key = ''
@@ -294,7 +283,6 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
         scancode=scancode,
         worksheet=worksheet
     )
-
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(
             abouts, api_url=api_url, api_key=api_key)
@@ -309,6 +297,9 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
         about.about_file_path = about.about_file_path.strip()
         if about.about_file_path.startswith('/'):
             about.about_file_path = about.about_file_path.lstrip('/')
+        # Use the name as the ABOUT file name if about_resource is empty
+        if not about.about_file_path:
+            about.about_file_path = about.name.value
         dump_loc = join(bdir, about.about_file_path.lstrip('/'))
 
         # The following code is to check if there is any directory ends with spaces
@@ -328,30 +319,6 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
             continue
 
         try:
-            # Generate value for 'about_resource' if it does not exist
-            if not about.about_resource.value:
-                about.about_resource.value = dict()
-                about_resource_value = ''
-                if about.about_file_path.endswith('/'):
-                    about_resource_value = u'.'
-                else:
-                    about_resource_value = basename(about.about_file_path)
-                about.about_resource.value[about_resource_value] = None
-                about.about_resource.present = True
-                # Check for the existence of the 'about_resource'
-                # If the input already have the 'about_resource' field, it will
-                # be validated when creating the about object
-                loc = util.to_posix(dump_loc)
-                about_file_loc = loc
-                path = join(dirname(util.to_posix(about_file_loc)),
-                            about_resource_value)
-                if not exists(path):
-                    path = util.to_posix(path.strip(UNC_PREFIX_POSIX))
-                    path = normpath(path)
-                    msg = (u'Field about_resource: '
-                           u'%(path)s '
-                           u'does not exist' % locals())
-                errors.append(Error(INFO, msg))
 
             licenses_dict = {}
             if gen_license:

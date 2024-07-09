@@ -79,12 +79,12 @@ it will copy and store next to the .ABOUT files.
     * - Standard Field Name
       - Description
       - Notes
-    * - about_resource
-      - Name/path of the component resource
-      - Mandatory
     * - name
       - Component name
       - Mandatory
+    * - about_resource
+      - Name/path of the component resource
+      - Optional
     * - ignored_resources
       - List of paths ignored from the ``about_resource``
       - Optional

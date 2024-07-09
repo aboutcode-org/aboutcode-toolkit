@@ -824,7 +824,7 @@ output.csv
 Special Notes
 -------------
 When using the field_filters configuration, all the standard required
-columns (about_resource and name) and the user defined required_fields
+columns (name) and the user defined required_fields
 need to be included.
 
 Notes

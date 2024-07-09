@@ -20,9 +20,9 @@ import os
 
 import saneyaml
 
-__version__ = '10.1.0'
+__version__ = '11.0.0'
 
-__about_spec_version__ = '3.3.2'
+__about_spec_version__ = '4.0.0'
 
 __copyright__ = """
 Copyright (c) nexB Inc. All rights reserved. http://dejacode.org

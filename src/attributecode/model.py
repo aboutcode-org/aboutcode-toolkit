@@ -874,7 +874,7 @@ class About(object):
     ABOUT_RESOURCE_ATTR = 'about_resource'
 
     # Required fields
-    required_fields = ['name', ABOUT_RESOURCE_ATTR]
+    required_fields = ['name']
 
     def get_required_fields(self):
         return [f for f in self.fields if f.required]
@@ -886,7 +886,7 @@ class About(object):
         is simpler.
         """
         self.fields = dict([
-            ('about_resource', AboutResourceField(required=True)),
+            ('about_resource', AboutResourceField()),
             ('ignored_resources', AboutResourceField()),
             ('name', SingleLineField(required=True)),
             ('version', SingleLineField()),

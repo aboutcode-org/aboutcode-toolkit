@@ -1,7 +1,7 @@
 .. _specification:
 
 ===============================
-ABOUT File Specification v3.3.2
+ABOUT File Specification v4.0.0
 ===============================
 
 Purpose
@@ -228,14 +228,11 @@ in any case combination.
 Referencing the file or directory documented by an ABOUT file
 -------------------------------------------------------------
 
-An ABOUT file documents one file or directory. The mandatory ``about_resource``
+An ABOUT file documents one file or directory. The ``about_resource``
 field reference the documented file or directory. The value of the ``about_resource``
 field is the name or path of the referenced file or directory. There is also a
 ``ignored_resources`` field which can be used to ignore a set of subpaths inside the
 directory which is being documented in the ABOUT file.
-
-A tool processing an ABOUT file must report an error if the ``about_resource``
-field is missing.
 
 By convention, an ABOUT file is often stored in the same directory side-by-side
 to the file or directory that it documents, but this is not mandatory.
@@ -267,18 +264,18 @@ In this example, the ABOUT file documents the current directory, using a "." per
 
                 about_resource: .
 
-Other Mandatory fields
+Mandatory fields
 ----------------------
 
-When a tool processes an ABOUT file, it must issue an error if these
-mandatory field are missing.
+When a tool processes an ABOUT file, it must issue an error if the
+mandatory field is missing.
 
--   about_resource: The resource this file referencing to.
 -   name: Component name.
 
 Optional Information fields
 ---------------------------
 
+-   about_resource: The resource this file referencing to.
 -   ignored_resources: A list of paths under the ``about_resource`` path, which are
     not documented in the ABOUT file, and the information in the ABOUT file does not
     apply to these subpaths.

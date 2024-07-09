@@ -478,12 +478,10 @@ class AboutTest(unittest.TestCase):
         result = [f.name for f in a.all_fields() if f.present]
         assert expected == result
 
-    def test_About_has_errors_when_about_resource_is_missing(self):
+    def test_About_has_no_errors_when_about_resource_is_missing(self):
         test_file = get_test_loc('test_gen/parser_tests/.ABOUT')
         a = model.About(test_file)
-        expected = [Error(CRITICAL, 'Field about_resource is required')]
-        result = a.errors
-        assert expected == result
+        assert a.errors == []
 
     def test_About_has_errors_when_about_resource_does_not_exist(self):
         test_file = get_test_loc(
@@ -500,7 +498,6 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('test_model/parse/missing_required.ABOUT')
         a = model.About(test_file)
         expected = [
-            Error(CRITICAL, 'Field about_resource is required'),
             Error(CRITICAL, 'Field name is required'),
         ]
         result = a.errors
@@ -510,7 +507,6 @@ class AboutTest(unittest.TestCase):
         test_file = get_test_loc('test_model/parse/empty_required.ABOUT')
         a = model.About(test_file)
         expected = [
-            Error(CRITICAL, 'Field about_resource is required and empty'),
             Error(CRITICAL, 'Field name is required and empty'),
         ]
         result = a.errors
@@ -728,9 +724,7 @@ this software and releases the component to Public Domain.
         abouts = [a, b]
         # ensure all fields (including custom fields) and
         # about_resource are collected in the correct order
-        expected = [
-            model.About.ABOUT_RESOURCE_ATTR, 'name', 'f', 'g'
-        ]
+        expected = ['name', 'f', 'g']
         result = model.get_field_names(abouts)
         assert expected == result
 
@@ -749,7 +743,6 @@ this software and releases the component to Public Domain.
         # ensure all fields (including custom fields) and
         # about_resource are collected in the correct order
         expected = [
-            'about_resource',
             'name',
             'cf',
             'f',
@@ -1281,14 +1274,8 @@ class CollectorTest(unittest.TestCase):
 
     def test_collect_inventory_with_no_about_resource_from_directory(self):
         location = get_test_loc('test_model/inventory/no_about_resource_key')
-        result = get_temp_file()
         errors, abouts = model.collect_inventory(location)
-
-        model.write_output(abouts, result, format='csv')
-
-        expected_errors = [
-            Error(CRITICAL, 'about/about.ABOUT: Field about_resource is required')]
-        assert expected_errors == errors
+        assert errors == []
 
     def test_collect_inventory_complex_from_directory(self):
         location = get_test_loc('test_model/inventory/complex')
