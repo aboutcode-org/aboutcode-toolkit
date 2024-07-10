@@ -27,7 +27,7 @@ components inventories.
 import json
 import os
 import posixpath
-from requests import get
+import requests
 import traceback
 from itertools import zip_longest
 
@@ -2069,24 +2069,30 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                         license_url = url + lic_key + '.json'
                         license_text_url = url + lic_key + '.LICENSE'
                         try:
-                            json_url_content = get(license_url).text
-                            # We don't want to actually get the license
-                            # information from the check utility
-                            if from_check:
-                                continue
-                            data = json.loads(json_url_content)
-                            license_name = data['short_name']
-                            license_text = get(license_text_url).text
-                            license_filename = data['key'] + '.LICENSE'
-                            lic_url = url + license_filename
-                            spdx_license_key = data['spdx_license_key']
-                        except:
-                            if afp:
-                                msg = afp + u" : Invalid 'license': " + lic_key
+                            response = requests.head(license_url)
+                            if response.status_code < 400:
+                                json_url_content = requests.get(
+                                    license_url).text
+                                # We don't want to actually get the license
+                                # information from the check utility
+                                if from_check:
+                                    continue
+                                data = json.loads(json_url_content)
+                                license_name = data['short_name']
+                                license_text = get(license_text_url).text
+                                license_filename = data['key'] + '.LICENSE'
+                                lic_url = url + license_filename
+                                spdx_license_key = data['spdx_license_key']
                             else:
-                                msg = u"Invalid 'license': " + lic_key
+                                if afp:
+                                    msg = afp + u" : Invalid 'license': " + lic_key
+                                else:
+                                    msg = u"Invalid 'license': " + lic_key
+                                errors.append(Error(ERROR, msg))
+                                continue
+                        except requests.exceptions.RequestException as e:
+                            msg = f"An error occurred while trying to access the URL: {e}"
                             errors.append(Error(ERROR, msg))
-                            continue
                     if not from_check:
                         detail_list.append(license_name)
                         detail_list.append(license_filename)
@@ -2148,7 +2154,7 @@ def detect_special_char(expression):
 
 def valid_api_url(api_url):
     try:
-        response = get(api_url)
+        response = requests.get(api_url)
         # The 403 error code is expected if the api_url is pointing to DJE as no
         # API key is provided. The 200 status code represent connection success
         # to scancode's LicenseDB. All other exception yield to invalid api_url
