@@ -27,7 +27,7 @@ components inventories.
 import json
 import os
 import posixpath
-import requests
+from requests import get, head, exceptions
 import traceback
 from itertools import zip_longest
 
@@ -1819,31 +1819,27 @@ def about_object_to_list_of_dictionary(abouts):
         # TODO: this wholeblock should be under sd_dict()
         ad = about.as_dict()
 
-        # Update the 'about_resource' field with the relative path
-        # from the output location
-        try:
-            if ad['about_resource']:
-                if 'about_file_path' in ad.keys():
-                    afp = ad['about_file_path']
-                    afp_parent = posixpath.dirname(afp)
-                    afp_parent = '/' + \
-                        afp_parent if not afp_parent.startswith(
-                            '/') else afp_parent
-                    about_resource = ad['about_resource']
-                    for resource in about_resource:
-                        updated_about_resource = posixpath.normpath(
-                            posixpath.join(afp_parent, resource))
-                        if resource == u'.':
-                            if not updated_about_resource == '/':
-                                updated_about_resource = updated_about_resource + '/'
-                    ad['about_resource'] = dict(
-                        [(updated_about_resource, None)])
-                    del ad['about_file_path']
-                serialized.append(ad)
-        except Exception as e:
-            # The missing required field, about_resource, has already been checked
-            # and the error has already been logged.
-            pass
+        if 'about_file_path' in ad.keys():
+            afp = ad['about_file_path']
+            afp_parent = posixpath.dirname(afp)
+            afp_parent = '/' + \
+                afp_parent if not afp_parent.startswith(
+                    '/') else afp_parent
+
+            # Update the 'about_resource' field with the relative path
+            # from the output location
+            if 'about_resource' in ad.keys():
+                about_resource = ad['about_resource']
+                for resource in about_resource:
+                    updated_about_resource = posixpath.normpath(
+                        posixpath.join(afp_parent, resource))
+                    if resource == u'.':
+                        if not updated_about_resource == '/':
+                            updated_about_resource = updated_about_resource + '/'
+                ad['about_resource'] = dict(
+                    [(updated_about_resource, None)])
+            del ad['about_file_path']
+        serialized.append(ad)
     return serialized
 
 
@@ -2069,9 +2065,9 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                         license_url = url + lic_key + '.json'
                         license_text_url = url + lic_key + '.LICENSE'
                         try:
-                            response = requests.head(license_url)
+                            response = head(license_url)
                             if response.status_code < 400:
-                                json_url_content = requests.get(
+                                json_url_content = get(
                                     license_url).text
                                 # We don't want to actually get the license
                                 # information from the check utility
@@ -2079,7 +2075,8 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                                     continue
                                 data = json.loads(json_url_content)
                                 license_name = data['short_name']
-                                license_text = get(license_text_url).text
+                                license_text = get(
+                                    license_text_url).text
                                 license_filename = data['key'] + '.LICENSE'
                                 lic_url = url + license_filename
                                 spdx_license_key = data['spdx_license_key']
@@ -2090,7 +2087,7 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                                     msg = u"Invalid 'license': " + lic_key
                                 errors.append(Error(ERROR, msg))
                                 continue
-                        except requests.exceptions.RequestException as e:
+                        except exceptions.RequestException as e:
                             msg = f"An error occurred while trying to access the URL: {e}"
                             errors.append(Error(ERROR, msg))
                     if not from_check:
@@ -2154,7 +2151,7 @@ def detect_special_char(expression):
 
 def valid_api_url(api_url):
     try:
-        response = requests.get(api_url)
+        response = get(api_url)
         # The 403 error code is expected if the api_url is pointing to DJE as no
         # API key is provided. The 200 status code represent connection success
         # to scancode's LicenseDB. All other exception yield to invalid api_url
