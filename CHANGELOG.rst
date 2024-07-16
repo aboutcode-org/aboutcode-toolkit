@@ -1,14 +1,14 @@
 ==============================
 Changelog
 
-2024-xx-xx
+2024-07-15
     Release 11.0.0
 
     * Add character support (at most 2 characters) for `attribute` field
     * Strip empty newline characters when loading an inventory
     * Catch invalid license_expression
     * Update the specification to 3.3.2
-    * Support declared_license_expression" and "other_license_expression"
+    * Support "declared_license_expression" and "other_license_expression"
     * Updated "about_resource" to be an optional field
     * Updated spec to v4.0.0 as moving `about_resource` from mandatory to optional
 
