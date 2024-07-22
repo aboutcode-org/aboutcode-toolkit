@@ -1,6 +1,13 @@
 ==============================
 Changelog
 
+2024-xx-xx
+    Release x.x.xlsx
+
+    * Update doc formatting
+    * Added fields type and types description into the spec
+
+
 2024-07-15
     Release 11.0.0
 
