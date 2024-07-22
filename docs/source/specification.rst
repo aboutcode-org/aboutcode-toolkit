@@ -437,7 +437,8 @@ Some examples:
 Fields Type
 -----------
 
-Following are the types for the supporting fields (All the custom fields will be treated as **StringField**):
+Following are the types for the supporting fields (All the custom fields
+will be treated as **StringField**):
 
 .. list-table::
     :widths: 10 10
