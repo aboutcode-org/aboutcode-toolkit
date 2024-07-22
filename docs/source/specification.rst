@@ -1,7 +1,7 @@
 .. _specification:
 
 ===============================
-ABOUT File Specification v4.0.0
+ABOUT File Specification v4.0.1
 ===============================
 
 Purpose
@@ -433,3 +433,89 @@ Some examples:
         ..  code-block:: none
 
                 checksum_md5: f30b9c173b1f19cf42ffa44f78e4b96c
+
+Fields Type
+-----------
+
+Following are the types for the supporting fields (All the custom fields will be treated as **StringField**):
+
+.. list-table::
+    :widths: 10 10
+    :header-rows: 1
+
+    * - Type
+      - Fields
+    * - AboutResourceField
+      - | about_resource
+        | ignored_resources
+    * - BooleanField
+      - | redistribute
+        | track_changes
+        | modified
+        | internal_use_only
+    * - BooleanAndTwoCharactersField
+      - attribute
+    * - FileTextField
+      - | license_file
+        | notice_file
+        | changelog_file
+        | author_file
+    * - ListField
+      - | license_key
+        | license_name
+        | spdx_license_key
+    * - PackageUrlField
+      - package_url
+    * - SingleLineField
+      - | name
+        | version
+        | license_expression
+        | spdx_license_expression
+        | declared_license_expression
+        | other_license_expression
+        | vcs_tool
+        | vcs_repository
+        | vcs_path
+        | vcs_tag
+        | vcs_branch
+        | vcs_revision
+        | checksum_md5
+        | checksum_sha1
+        | checksum_sha256
+        | spec_version
+    * - StringField
+      - | description
+        | notes
+        | copyright
+        | owner
+        | contact
+        | author
+    * - UrlField
+      - | download_url
+        | homepage_url
+        | notice_url
+        | owner_url
+    * - UrlListField
+      - license_url
+
+Type description
+----------------
+
+-   **AboutResourceField**: Path or list of path to the about resource.
+-   **BooleanField**: An flag field with a boolean value. Validated value is False,
+    True or None.
+-   **BooleanAndTwoCharactersField**: Field with either a boolean value or
+    character(s) value (at most 2 characters). Validated value is False, True,
+    None or character value.
+-   **FileTextField**: A path field pointing to one or more text files such as
+    license files. The validated value is an ordered dict of path->Text or None
+    if no location or text could not be loaded.
+-   **ListField**: A field containing a list of string values, one per line. The
+    validated value is a list.
+-   **PackageUrlField**: A Package URL field. The validated value is a purl
+-   **SingleLineField**: A field containing a string value on a single line. The
+    validated value is a string.
+-   **StringField**: A field containing a string value possibly on multiple lines.
+    The validated value is a string.
+-   **UrlField**: A URL field. The validated value is a URL.
+-   **UrlListField**: A URL field. The validated value is a list of URLs.
