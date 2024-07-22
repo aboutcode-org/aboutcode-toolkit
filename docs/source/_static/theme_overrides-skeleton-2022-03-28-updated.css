@@ -1,0 +1,2142 @@
+body {
+    color: #000000;
+}
+
+html {
+    font-size: 14px;
+}
+
+p {
+    line-height: 24px;
+    line-height: 20px;
+    font-size: 16px;
+    font-size: 14px;
+    margin: 0 0 24px;
+    margin-top: 0px;
+    margin-bottom: 24px;
+    margin-bottom: 0px;
+    margin-bottom: 10px;
+}
+
+.wy-plain-list-disc,
+.rst-content .section ul,
+.rst-content .toctree-wrapper ul,
+article ul {
+    margin-bottom: 10px;
+}
+
+.custom_header_01 {
+    color: #cc0000;
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 50px;
+}
+
+/* custom admonitions */
+/* success */
+.custom-admonition-success .admonition-title {
+    color: #000000;
+    background: #ccffcc;
+    border-radius: 5px 5px 0px 0px;
+}
+
+div.custom-admonition-success.admonition {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #cccccc;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #d8d8d8;
+    margin: 20px 0px 30px 0px;
+}
+
+/* important */
+.custom-admonition-important .admonition-title {
+    color: #000000;
+    background: #ccffcc;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #000000;
+}
+
+div.custom-admonition-important.admonition {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #cccccc;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #d8d8d8;
+    margin: 20px 0px 30px 0px;
+}
+
+/* caution */
+.custom-admonition-caution .admonition-title {
+    color: #000000;
+    background: #ffff99;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #e8e8e8;
+}
+
+div.custom-admonition-caution.admonition {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #cccccc;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #d8d8d8;
+    margin: 20px 0px 30px 0px;
+}
+
+/* note */
+.custom-admonition-note .admonition-title {
+    color: #ffffff;
+    background: #006bb3;
+    border-radius: 5px 5px 0px 0px;
+}
+
+div.custom-admonition-note.admonition {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #cccccc;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #d8d8d8;
+    margin: 20px 0px 30px 0px;
+}
+
+
+
+
+
+/* =============================== */
+
+/* custom-alert-01 */
+.custom-alert-01 .admonition-title {
+    color: #000000;
+    background: #00e673;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #00e673;
+    padding: 10px 10px 7px 10px;
+}
+
+.custom-alert-01 .admonition-title::before {
+    content: "";
+}
+
+div.custom-alert-01.admonition {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #00e673;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #b8b8b8;
+    box-shadow: none;
+    margin: 0px 0px 20px 0px;
+}
+
+div.custom-alert-01.admonition p {
+    font-size: 14px;
+    line-height: 15px;
+    line-height: 20px;
+}
+
+div.custom-alert-01.admonition p.admonition-title {
+    font-size: 16px;
+    font-size: 14px;
+    color: #000000;
+    line-height: 10px;
+}
+
+
+/* custom-alert-02 */
+.custom-alert-02 .admonition-title {
+    color: #000000;
+    color: #ffffff;
+    background: #00e673;
+    background: #008888;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #00e673;
+    border-bottom: solid 1px #008888;
+    padding: 10px 10px 7px 10px;
+}
+
+.custom-alert-02 .admonition-title::before {
+    content: "";
+}
+
+div.custom-alert-02.admonition {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #00e673;
+    border: solid 1px #008888;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #b8b8b8;
+    box-shadow: none;
+    margin: 0px 0px 20px 0px;
+}
+
+div.custom-alert-02.admonition p {
+    font-size: 14px;
+    line-height: 15px;
+    line-height: 20px;
+}
+
+div.custom-alert-02.admonition p.admonition-title {
+    font-size: 16px;
+    font-size: 14px;
+    color: #000000;
+    color: #ffffff;
+    line-height: 10px;
+}
+
+/* ==================================================== */
+
+/* warning */
+.rst-content .warning .admonition-title {
+    color: #000000;
+    background: #ffcccc;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #ff8888;
+}
+
+.rst-content .warning {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #ff8888;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #cccccc;
+    margin: 20px 0px 30px 0px;
+}
+
+
+/* caution */
+.rst-content .caution .admonition-title {
+    color: #000000;
+    background: #ffff66;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #e8e8e8;
+}
+
+.rst-content .caution {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #ffff33;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #cccccc;
+    margin: 20px 0px 30px 0px;
+}
+
+
+/* note */
+.rst-content .note .admonition-title {
+    color: #000000;
+    background: #ccffff;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #00ccff;
+}
+
+.rst-content .note {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #00ccff;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #cccccc;
+    margin: 20px 0px 30px 0px;
+}
+
+
+/* note01 */
+.rst-content .note01 .admonition-title {
+    color: #000000;
+    background: #e8e8e8;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #000000;
+}
+
+.rst-content .note01 {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #000000;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #cccccc;
+    margin: 20px 0px 30px 0px;
+}
+
+
+/* note02 */
+.rst-content .note02 .admonition-title {
+    color: #000000;
+    background: #ffffff;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: solid 1px #000000;
+}
+
+.rst-content .note02 {
+    color: #000000;
+    background: #ffffff;
+    border: solid 1px #000000;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px 3px #cccccc;
+    margin: 20px 0px 30px 0px;
+}
+
+/* ==================================================== */
+
+.wy-nav-content {
+    max-width: 100%;
+    padding-right: 100px;
+    padding-left: 100px;
+    background-color: #f2f2f2;
+}
+
+div.rst-content {
+    background-color: #ffffff;
+    border: solid 1px #e5e5e5;
+    padding: 20px 40px 20px 40px;
+}
+
+.rst-content .guilabel {
+    border: 1px solid #ffff99;
+    background: #ffff99;
+    font-size: 100%;
+    font-weight: normal;
+    border-radius: 4px;
+    padding: 2px 0px;
+    margin: auto 2px;
+    vertical-align: middle;
+}
+
+.rst-content kbd {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", Courier, monospace;
+    border: solid 1px #d8d8d8;
+    background-color: #f5f5f5;
+    padding: 0px 3px;
+    border-radius: 3px;
+}
+
+.wy-nav-content-wrap a {
+    color: #0066ff;
+    text-decoration: none;
+}
+
+.wy-nav-content-wrap a:hover {
+    color: #0066ff;
+    text-decoration: underline;
+}
+
+.wy-nav-top a {
+    color: #ffffff;
+}
+
+/* Based on numerous similar approaches e.g., https://github.com/readthedocs/sphinx_rtd_theme/issues/117 and https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html -- but remove form-factor limits to enable table wrap on full-size and smallest-size form factors */
+.wy-table-responsive table td {
+    white-space: normal !important;
+}
+
+.rst-content table.docutils td,
+.rst-content table.docutils th {
+    padding: 5px 10px 5px 10px;
+}
+
+.rst-content table.docutils td p,
+.rst-content table.docutils th p {
+    font-size: 14px;
+    margin-bottom: 0px;
+}
+
+.rst-content table.docutils td p cite,
+.rst-content table.docutils th p cite {
+    font-size: 14px;
+    background-color: transparent;
+}
+
+.colwidths-given th {
+    border: solid 1px #d8d8d8 !important;
+}
+
+.colwidths-given td {
+    border: solid 1px #d8d8d8 !important;
+}
+
+/*handles single-tick inline code*/
+.wy-body-for-nav cite {
+    background-color: transparent;
+    border: 0;
+    font-style: normal;
+    font-family: Inconsolata, Consolas, Monaco, "Lucida Console", monospace;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 1px 3px 1px 3px;
+}
+
+.rst-content pre.literal-block,
+.rst-content div[class^="highlight"] pre,
+.rst-content .linenodiv pre {
+    font-family: Inconsolata, Consolas, Monaco, "Lucida Console", monospace;
+    font-size: 13px;
+    overflow: visible;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    color: #404040;
+}
+
+.rst-content pre.literal-block,
+.rst-content div[class^='highlight'] {
+    background-color: #f8f8f8;
+    border: solid 1px #e8e8e8;
+}
+
+/* This enables inline code to wrap. */
+code,
+.rst-content tt,
+.rst-content code {
+    white-space: pre-wrap;
+    padding: 2px 3px 1px;
+    border-radius: 2px;
+    font-size: 12px;
+    background-color: #e8e8e8;
+}
+
+.rst-content code,
+.rst-content tt,
+code {
+    font-family: Monaco, Menlo, Consolas, Courier New, monospace;
+    font-size: 12px;
+    border: solid 1px #d8d8d8;
+    border-color: #e8e8e8;
+    background-color: #f9f9f9;
+    padding: 1px 2px 1px 2px;
+    font-weight: 500;
+}
+
+/* use this added class for code blocks attached to bulleted list items */
+.highlight-top-margin {
+    margin-top: 20px !important;
+}
+
+/* change color of inline code block */
+span.pre {
+    color: #cd0000;
+}
+
+.wy-body-for-nav blockquote {
+    margin: 1em 0;
+    padding-left: 1em;
+    border-left: 4px solid #ddd;
+    color: #000000;
+}
+
+.rst-content blockquote {
+    margin-left: 2px;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    border-left: solid 2px #e8e8e8;
+    padding-left: 20px;
+    line-height: 24px;
+}
+
+/* Fix the unwanted top and bottom padding inside a nested bulleted/numbered list */
+.rst-content .section ol p,
+.rst-content .section ul p {
+    margin-bottom: 0px;
+}
+
+/* add spacing between bullets for legibility */
+.rst-content .section ol li,
+.rst-content .section ul li {
+    margin-bottom: 5px;
+}
+
+.rst-content .section ol li:first-child,
+.rst-content .section ul li:first-child {
+    margin-top: 5px;
+}
+
+/* but exclude the toctree bullets */
+.rst-content .toctree-wrapper ul li,
+.rst-content .toctree-wrapper ul li:first-child {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+/* remove extra space at bottom of multine list-table cell */
+.rst-content .line-block {
+    margin-left: 0px;
+    margin-bottom: 0px;
+    line-height: 24px;
+}
+
+/* fix extra vertical spacing in page toctree */
+.rst-content .toctree-wrapper ul li ul,
+article ul li ul {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* this is used by the genindex added via layout.html (see source/_templates/) to sidebar toc */
+.reference.internal.toc-index {
+    color: #d9d9d9;
+}
+
+.reference.internal.toc-index.current {
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: bold;
+}
+
+.toc-index-div {
+    border-top: solid 1px #000000;
+    margin-top: 10px;
+    padding-top: 5px;
+}
+
+.indextable ul li {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+/* The next 2 fix the poor vertical spacing in genindex.html (the alphabetized index) */
+.indextable.genindextable {
+    margin-bottom: 20px;
+}
+
+div.genindex-jumpbox {
+    margin-bottom: 10px;
+}
+
+/* rst image classes */
+
+.clear-both {
+    clear: both;
+    margin-bottom: 0px;
+}
+
+/* add top margin so image source below image has some space between text and image above */
+.float-left {
+    float: left;
+    margin-right: 20px;
+    margin-top: 10px;
+}
+
+/* and for balance: */
+.float-right {
+    float: right;
+    margin-top: 10px;
+}
+
+/* for the nav buttons in breadcrumbs */
+.rst-breadcrumbs-buttons .float-left,
+.rst-breadcrumbs-buttons .float-right {
+    float: right;
+    float: left;
+    margin-top: 10px;
+    margin-top: 0px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-bottom: 0px;
+}
+
+img {
+    border: solid 1px #cccccc;
+    box-shadow: none;
+    margin-top: 20px;
+    margin-bottom: 0px;
+}
+
+.forkme_img {
+    margin-top: 0px;
+}
+
+/* ===== */
+/* These are custom and need to be defined in conf.py to access in all pages, e.g., '.. role:: red' */
+.img-title {
+    color: #000000;
+    /* neither padding nor margin works for vertical spacing bc it's a span -- line-height does, sort of */
+    line-height: 3.0;
+    font-style: italic;
+    font-weight: 600;
+}
+
+.img-title-para {
+    color: #000000;
+    margin-top: 20px;
+    margin-bottom: 0px;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.red {
+    color: red;
+}
+
+/* ===== */
+
+/* 1/13/2022 Thursday 11:32:56 AM. Handles the navigation tree on the left. */
+.wy-menu-vertical li.toctree-l1.current>a.reference.internal.current,
+.wy-menu-vertical li.toctree-l2.current>a.reference.internal.current,
+.wy-menu-vertical li.toctree-l3.current>a.reference.internal.current,
+.wy-menu-vertical li.toctree-l4.current>a.reference.internal.current,
+.wy-menu-vertical li.toctree-l5.current>a.reference.internal.current,
+.wy-menu-vertical li.toctree-l6.current>a.reference.internal.current,
+.wy-menu-vertical li.toctree-l7.current>a.reference.internal.current {
+    background-color: #008888;
+    color: #ffffff;
+    font-weight: 600;
+    padding-top: 8px;
+    border-right: 0;
+    font-size: 13px;
+
+    border: 0;
+    font-weight: 500;
+    background-color: #0066ff;
+    background-color: #008888;
+}
+
+.wy-menu-vertical li.toctree-l1.current>a.reference.internal.current:hover,
+.wy-menu-vertical li.toctree-l2.current>a.reference.internal.current:hover,
+.wy-menu-vertical li.toctree-l3.current>a.reference.internal.current:hover,
+.wy-menu-vertical li.toctree-l4.current>a.reference.internal.current:hover,
+.wy-menu-vertical li.toctree-l5.current>a.reference.internal.current:hover {
+    background-color: #008888;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    border-right: 0;
+    cursor: default;
+
+    font-weight: 500;
+    background-color: #0066ff;
+    background-color: #008888;
+}
+
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
+.wy-menu-vertical li.toctree-l3.current li.toctree-l4>a,
+.wy-menu-vertical li.toctree-l4.current li.toctree-l5>a,
+.wy-menu-vertical li.toctree-l5.current li.toctree-l6>a,
+.wy-menu-vertical li.toctree-l6.current li.toctree-l7>a,
+.wy-menu-vertical li.toctree-l7.current li.toctree-l8>a,
+.wy-menu-vertical li.toctree-l8.current li.toctree-l9>a,
+.wy-menu-vertical li.toctree-l9.current li.toctree-l10>a,
+.wy-menu-vertical li.toctree-l10.current li.toctree-l11>a {
+    display: block;
+    color: #0066ff;
+    color: #0033cc;
+    font-size: 13px;
+    border-right: 0;
+
+    padding-top: 8px;
+}
+
+.wy-menu-vertical li.toctree-l2.current>a,
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
+.wy-menu-vertical li.toctree-l3.current>a,
+.wy-menu-vertical li.toctree-l3.current li.toctree-l4>a {
+    background-color: #ffffff;
+    background-color: #f9f9f9;
+    background-color: #fcfcfc;
+    color: #0066ff;
+    color: #0033cc;
+
+    padding-top: 8px;
+    border-top: solid 1px transparent;
+    border-bottom: solid 1px transparent;
+}
+
+.wy-menu-vertical li.toctree-l1.current>a {
+    border-top: 0;
+    border-bottom: 0;
+    background-color: #ffffff;
+    background-color: #f9f9f9;
+    background-color: #fcfcfc;
+    color: #0066ff;
+    color: #0033cc;
+}
+
+/* non-selected node inside expanded TOC section */
+.wy-menu-vertical li.toctree-l2 a,
+.wy-menu-vertical li.toctree-l3 a,
+.wy-menu-vertical li.toctree-l4 a,
+.wy-menu-vertical li.toctree-l5 a,
+.wy-menu-vertical li.toctree-l6 a,
+.wy-menu-vertical li.toctree-l7 a,
+.wy-menu-vertical li.toctree-l8 a,
+.wy-menu-vertical li.toctree-l9 a,
+.wy-menu-vertical li.toctree-l10 a {
+    background-color: #ffffff;
+    background-color: #f9f9f9;
+    background-color: #fcfcfc;
+    color: #0066ff;
+    color: #0033cc;
+    border-right: 0;
+}
+
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3>a:hover,
+
+.wy-menu-vertical li.toctree-l1>a:hover,
+.wy-menu-vertical li.toctree-l2>a:hover,
+.wy-menu-vertical li.toctree-l3>a:hover,
+.wy-menu-vertical li.toctree-l4>a:hover,
+.wy-menu-vertical li.toctree-l5>a:hover {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3>a:hover,
+.wy-menu-vertical li.toctree-l3.current li.toctree-l4>a:hover,
+.wy-menu-vertical li.toctree-l4.current li.toctree-l5>a:hover,
+.wy-menu-vertical li.toctree-l5.current li.toctree-l6>a:hover,
+.wy-menu-vertical li.toctree-l6.current li.toctree-l7>a:hover,
+.wy-menu-vertical li.toctree-l7.current li.toctree-l8>a:hover,
+.wy-menu-vertical li.toctree-l8.current li.toctree-l9>a:hover,
+.wy-menu-vertical li.toctree-l9.current li.toctree-l10>a:hover,
+.wy-menu-vertical li.toctree-l10.current li.toctree-l11>a:hover {
+    display: block;
+    background-color: #000000;
+    color: #ffffff;
+    font-size: 13px;
+    border-right: 0;
+}
+
+.wy-menu-vertical li.toctree-l1 a button.toctree-expand,
+.wy-menu-vertical li.toctree-l2 a button.toctree-expand,
+.wy-menu-vertical li.toctree-l3 a button.toctree-expand {
+    color: #cccccc;
+}
+
+.wy-menu-vertical li.toctree-l1 a:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l2 a:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l3 a:hover button.toctree-expand {
+    color: #ffffff;
+}
+
+.wy-side-nav-search {
+    display: block;
+    width: 300px;
+    padding: .809em;
+    padding-bottom: 20px;
+    margin-bottom: .809em;
+    z-index: 200;
+    background-color: #202020;
+    background-color: #2980b9;
+    border-bottom: solid 1px #666666;
+    border-bottom: solid 1px #000000;
+    text-align: center;
+    color: #d8d8d8;
+    color: #ffffff;
+}
+
+.wy-side-nav-search a {
+    color: #a8a8a8;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.wy-side-nav-search a:hover {
+    background-color: transparent;
+    color: #a8a8a8;
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.wy-side-nav-search>div.version {
+    margin-top: -.4045em;
+    margin-bottom: .809em;
+    font-weight: 400;
+    color: #cccccc;
+}
+
+.wy-side-nav-search input[type="text"] {
+    border-color: #d8d8d8;
+    background-color: #ffffff;
+    box-shadow: none;
+}
+
+/* From the ansible RTD, which has a nice top navbar */
+
+/*! Override sphinx rtd theme max-with of 800px */
+.wy-nav-content {
+    max-width: 100%
+}
+
+/*! Override sphinx_rtd_theme - keeps left-nav from overwriting Documentation title */
+.wy-nav-side {
+    top: 44px;
+    padding-bottom: 45px;
+    border-right: solid 1px #e8e8e8;
+    border-right-color: #e8e8e8;
+    background-color: #202020;
+    background-color: #343131;
+}
+
+/* What does this do? */
+.DocSite-nav {
+    display: none
+}
+
+.ansibleNav {
+    background: #ffffff;
+    background-color: #ffffff;
+    padding: 0 20px;
+    width: auto;
+    border-bottom: 4px solid #000000;
+    border-top: solid 1px #0066ff;
+    border-top: none;
+    font-size: 14px;
+    z-index: 300;
+    box-shadow: 1px 1px 1px 1px #333333;
+    box-shadow: none;
+}
+
+.ansibleNav ul {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0;
+    padding-top: 0px;
+}
+
+.ansibleNav ul li {
+    padding: 7px 0;
+    border-bottom: 1px solid #444;
+}
+
+.ansibleNav ul li:last-child {
+    border: none
+}
+
+.ansibleNav ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 6px 0;
+}
+
+.ansibleNav ul li a:hover {
+    color: #66ffff;
+    background: 0 0;
+}
+
+@media screen and (min-width:768px) {
+    .DocSite-globalNav {
+        display: block;
+        position: fixed
+    }
+
+    #sideBanner {
+        display: block
+    }
+
+    .DocSite-sideNav {
+        display: none
+    }
+
+    .DocSite-nav {
+        flex: initial;
+        -webkit-flex: initial;
+        display: flex;
+        display: -webkit-flex;
+        flex-direction: row;
+        -webkit-flex-direction: row;
+        justify-content: flex-start;
+        -webkit-justify-content: flex-start;
+        padding: 15px;
+        background-color: #000;
+        text-decoration: none;
+        font-family: "Open Sans", sans-serif
+    }
+
+    .DocSiteNav-logo {
+        width: 28px;
+        height: 28px;
+        margin-right: 8px;
+        margin-top: -6px;
+        position: fixed;
+        z-index: 1
+    }
+
+    .DocSiteNav-title {
+        color: #fff;
+        font-size: 20px;
+        position: fixed;
+        margin-left: 40px;
+        margin-top: -4px;
+        z-index: 1
+    }
+
+    .ansibleNav {
+        height: 45px;
+        width: 100%;
+        font-size: 13px;
+        padding: 0 60px 0 0
+    }
+
+    .ansibleNav ul {
+        float: right;
+        display: flex;
+        flex-wrap: nowrap;
+        margin-top: 13px
+    }
+
+    .ansibleNav ul li {
+        padding: 0;
+        border-bottom: none
+    }
+
+    .ansibleNav ul li a {
+        color: #0066ff;
+        text-decoration: none;
+        padding: 8px 13px;
+    }
+}
+
+@media screen and (min-width:768px) {
+
+    #sideBanner,
+    .DocSite-globalNav {
+        display: block
+    }
+
+    .DocSite-sideNav {
+        display: none
+    }
+
+    .DocSite-nav {
+        flex: initial;
+        -webkit-flex: initial;
+        display: flex;
+        display: -webkit-flex;
+        flex-direction: row;
+        -webkit-flex-direction: row;
+        justify-content: flex-start;
+        -webkit-justify-content: flex-start;
+        padding: 15px;
+        background-color: #000;
+        text-decoration: none;
+        font-family: "Open Sans", sans-serif
+    }
+
+    .DocSiteNav-logo {
+        width: 28px;
+        height: 28px;
+        margin-right: 8px;
+        margin-top: -6px;
+        position: fixed
+    }
+
+    .DocSiteNav-title {
+        color: #0066ff;
+        font-size: 22px;
+        font-family: Arial;
+        position: fixed;
+        /* margin-left:70px; */
+        margin-top: -7px;
+        z-index: 300;
+        background-color: transparent;
+        padding: 0px 5px 2px 5px;
+        border: 0;
+    }
+
+    .DocSiteNav-title:hover {
+        text-decoration: underline;
+        color: #000000;
+    }
+
+    .ansibleNav {
+        height: 45px;
+        font-size: 13px;
+        padding: 0 150px 0 0;
+    }
+
+    .ansibleNav ul {
+        float: right;
+        display: flex;
+        flex-wrap: nowrap;
+        margin-top: 0px;
+    }
+
+    .ansibleNav ul li {
+        padding: 0;
+        border-bottom: none;
+    }
+
+    /* The dropdown content links color is controlled by:
+.dropdown:hover .dropdown-content-button a,
+.dropdown:hover .dropdown-content a {
+*/
+
+    .ansibleNav ul li a {
+        color: #ffffff;
+        text-decoration: none;
+        padding: 3px 10px;
+        padding: 6px 10px;
+    }
+
+    /* .ansibleNav .turnip ul li a { */
+    .ansibleNav ul li .turnip a {
+        padding: 3px 10px 2px 20px;
+        margin-top: -3px;
+    }
+
+    .ansibleNav ul li .turnip a::before {
+        content: "• ";
+        color: #212529;
+    }
+
+}
+
+.dropbtn {
+    display: inline-block;
+    color: #0066ff;
+    background-color: transparent;
+    text-align: center;
+    padding: 13px 15px 7px 15px;
+    text-decoration: none;
+    vertical-align: top;
+    border: 0;
+    font-family: "Lato";
+    font-size: 17px;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #0066ff;
+    background-color: #008888;
+    color: #ffffff;
+    border-bottom: solid 4px #0066ff;
+    border-bottom-color: #000000;
+}
+
+.dropdown:hover .dropbtn:hover {
+    background-color: #0066ff;
+    background-color: #008888;
+}
+
+/* Commenting out these 2 does NOT stop the on-hover dropdown behavior. */
+li.dropdown {
+    display: inline-block;
+}
+
+li.dropdown:hover {
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #000000;
+    min-width: 100px;
+    box-shadow: 0px 8px 16px 0px #a8a8a8;
+    z-index: 1;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border: solid 1px #404040;
+    border-radius: 5px;
+    margin-top: 5px;
+    margin-left: 14px;
+    margin-right: 10px;
+}
+
+.dropdown-content-button {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 200px;
+    max-width: 200px;
+    box-shadow: 0px 8px 16px 0px #a8a8a8;
+    z-index: 1;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border: solid 1px #b8b8b8;
+    border-top: 0;
+    border-radius: 0px;
+    margin-top: 0px;
+    margin-right: 10px;
+    font-size: 13px;
+    overflow-y: auto !important;
+}
+
+.dropdown-content-button a,
+.dropdown-content a {
+    color: black;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content-button a:hover,
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content-button,
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* is this used? */
+.dropdown:hover a {
+    color: #00ff00;
+}
+
+.dropdown:hover .dropdown-content-button a,
+.dropdown:hover .dropdown-content a {
+    color: #212529;
+}
+
+.dropdown:hover .dropdown-content-button a:hover,
+.dropdown:hover .dropdown-content a:hover {
+    background-color: #000000;
+    color: #ffffff !important;
+}
+
+/* Handles nested dropdown entries */
+.dropdown:hover .dropdown-content-button .turnip a,
+.dropdown:hover .dropdown-content .turnip a {
+    color: #212529;
+}
+
+.dropdown:hover .dropdown-content-button .turnip a:hover,
+.dropdown:hover .dropdown-content .turnip a:hover {
+    color: #ffffff !important;
+}
+
+.dropdown:hover .dropdown-content-button .turnip a:hover::before,
+.dropdown:hover .dropdown-content .turnip a:hover::before {
+    color: #ffffff !important;
+}
+
+.dropdown-header {
+    background-color: #c0e6ee;
+    color: #000000;
+    font-weight: 600;
+    padding: 5px 10px 5px 14px;
+}
+
+hr.dropdown {
+    border-top: 0;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+hr.divider {
+    border-top: solid 1px #cccccc;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+hr.divider01 {
+    border-top: solid 1px #000000;
+    border-top: solid 1px #d8d8d8;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.caret {
+    width: 0;
+    height: 0;
+    display: inline-block;
+    border: 10px solid transparent;
+    border: 5px solid transparent;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+}
+
+.caret.down {
+    border-top-color: #0066ff;
+}
+
+.dropdown:hover .caret.down {
+    border-top-color: #ffffff;
+}
+
+.caret.right {
+    border-left-color: black;
+}
+
+.caret.up {
+    border-bottom-color: black;
+}
+
+.caret.left {
+    border-right-color: black;
+}
+
+/* link button */
+.btnLink {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 0px;
+    display: inline-block;
+    color: white;
+    background-color: transparent;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: top;
+    border: 0;
+    font-family: "Lato";
+    font-size: 13px;
+}
+
+.ansibleNav ul li a.btnLink:hover {
+    background-color: #000000;
+}
+
+a.btnLink,
+.ansibleNav ul li a.btnLink {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 15px 16px 14px 16px;
+}
+
+/* ================================================================= */
+
+/* this is the container for the pages */
+.wy-nav-content {
+    max-width: 100%;
+    padding-right: 40px;
+    padding-left: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0px;
+}
+
+.wy-nav-content-wrap {
+    background-color: #ffffff;
+    background-color: #f9f9f9;
+    background-color: #fcfcfc;
+    border-right: solid 1px #e8e8e8;
+}
+
+.wy-nav-content {
+    background-color: #ffffff;
+    background-color: #f9f9f9;
+    background-color: #fcfcfc;
+}
+
+/* this is the page itself */
+div.rst-content {
+    background-color: #ffffff;
+    max-width: 1300px;
+    background-color: #ffffff;
+    background-color: #f9f9f9;
+    background-color: #fcfcfc;
+    box-shadow: none;
+    margin-left: 0px;
+    border: 0;
+    padding: 0px 80px 10px 80px;
+    margin-left: 50px;
+}
+
+/* breadcrumbs */
+.wy-breadcrumbs {
+    height: 10px;
+}
+
+div.rst-breadcrumbs-buttons {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: solid 1px #d8d8d8;
+}
+
+/* section [id] .wy-table-responsive,
+section [id] .contents { */
+section [id] .wy-table-responsive {
+    padding-top: 0;
+    padding-top: 10px;
+    margin-top: 0;
+    margin-top: -10px;
+}
+
+
+
+/* affects bottom padding of page toc */
+.rst-content section ul {
+    list-style: disc;
+    line-height: 24px;
+    margin-bottom: 10px;
+}
+
+/* bullets */
+
+.rst-content section ul li::marker {
+    color: #000000;
+}
+
+.rst-content section ul li a,
+.rst-content section ul li a:first-child,
+.rst-content section ul li a:last-child {
+    color: #0066ff;
+    font-weight: 600;
+    color: #0033cc;
+    font-weight: 500;
+    color: #0066ff;
+}
+
+.rst-content .toctree-wrapper ul li,
+.rst-content .toctree-wrapper ul li:first-child,
+.rst-content .toctree-wrapper ul li:last-child,
+.rst-content section ul li,
+.rst-content section ul li:first-child,
+.rst-content section ul li:last-child {
+    list-style: disc;
+}
+
+.rst-content .toctree-wrapper ul li li,
+.rst-content .toctree-wrapper ul li li:first-child,
+.rst-content .toctree-wrapper ul li li:last-child,
+.rst-content section ul li li,
+.rst-content section ul li li:first-child,
+.rst-content section ul li li:last-child {
+    list-style: square;
+}
+
+.rst-content .toctree-wrapper ul li li::marker,
+.rst-content section ul li li::marker {
+    color: #000000;
+    color: #007777;
+    color: #0066ff;
+    font-weight: 600;
+    /* zzz 3/31/2022 Thursday 5:56:36 PM. */
+    font-weight: 500;
+}
+
+.rst-content .toctree-wrapper ul li li li,
+.rst-content .toctree-wrapper ul li li li:first-child,
+.rst-content .toctree-wrapper ul li li li:last-child,
+.rst-content section ul li li li,
+.rst-content section ul li li li:first-child,
+.rst-content section ul li li li:last-child {
+    list-style: circle;
+}
+
+.rst-content .toctree-wrapper ul li li li::marker,
+.rst-content section ul li li li::marker {
+    color: #000000 !important;
+    color: #007777 !important;
+    color: #0066ff !important;
+    font-weight: 500;
+}
+
+
+
+.rst-content section .toctree-wrapper ul li.toctree-l1 a {
+    color: #0066ff;
+    font-weight: 600;
+    color: #0033cc;
+    font-size: 13px;
+    font-size: 15px;
+    /* 4/1/2022 Friday 9:09:30 AM.  zzz  reduce toc font size */
+    font-size: 14px;
+}
+
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 a {
+    color: #000000;
+    color: #007777;
+    font-weight: 500;
+    color: #0066ff;
+    font-size: 13px;
+    font-size: 15px;
+    /* 4/1/2022 Friday 9:09:30 AM.  zzz  reduce toc font size */
+    font-size: 14px;
+}
+
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 a:hover {
+    color: #000000;
+    color: #007777;
+    font-weight: 500;
+    color: #0066ff;
+    text-decoration: underline;
+    ;
+}
+
+.rst-content section .toctree-wrapper ul li.toctree-l1::marker {
+    color: #0066ff;
+    color: #0033cc;
+    /* zzz 3/31/2022 Thursday 5:50:12 PM. */
+    font-weight: 500;
+    font-weight: 600;
+    font-size: 15px;
+    /* 4/1/2022 Friday 9:09:30 AM.  zzz  reduce toc font size */
+    font-size: 14px;
+}
+
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3 li.toctree-l4::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3 li.toctree-l4 li.toctree-l5::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3 li.toctree-l4 li.toctree-l5 li.toctree-l6::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3 li.toctree-l4 li.toctree-l5 li.toctree-l6 li.toctree-l7::marker {
+    color: #000000;
+    color: #007777;
+    font-weight: 500;
+    color: #0066ff;
+    /* zzz 3/31/2022 Thursday 6:01:44 PM. */
+    font-size: 15px;
+    /* 4/1/2022 Friday 9:09:30 AM.  zzz  reduce toc font size */
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3 li.toctree-l4::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3 li.toctree-l4 li.toctree-l5::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3 li.toctree-l4 li.toctree-l5 li.toctree-l6::marker,
+.rst-content section .toctree-wrapper ul li.toctree-l1 li.toctree-l2 li.toctree-l3 li.toctree-l4 li.toctree-l5 li.toctree-l6 li.toctree-l7::marker {
+    color: #000000;
+    color: #007777;
+    font-weight: 500;
+    color: #0066ff;
+}
+
+.rst-content section ul li li a,
+.rst-content section ul li li a:first-child,
+.rst-content section ul li li a:last-child,
+.rst-content section ul li li li a,
+.rst-content section ul li li li a:first-child,
+.rst-content section ul li li li a:last-child {
+    color: #0066ff;
+    font-weight: 600;
+    color: #0033cc;
+    font-weight: 500;
+    color: #0066ff;
+}
+
+/* the page toc */
+.rst-content section .contents ul li a,
+.rst-content section .contents ul li a:first-child,
+.rst-content section .contents ul li a:last-child {
+    color: #0066ff;
+    font-weight: 600;
+    color: #0033cc;
+    font-size: 13px;
+    font-size: 15px;
+    /* 4/1/2022 Friday 9:09:30 AM.  zzz  reduce toc font size */
+    font-size: 14px;
+}
+
+.rst-content section .contents ul li li a,
+.rst-content section .contents ul li li a:first-child,
+.rst-content section .contents ul li li a:last-child {
+    color: #000000;
+    color: #007777;
+    font-weight: 500;
+    color: #0066ff;
+    font-size: 13px;
+    font-size: 15px;
+    /* 4/1/2022 Friday 9:09:30 AM.  zzz  reduce toc font size */
+    font-size: 14px;
+}
+
+.rst-content section .contents ul li p,
+.rst-content section .contents ul li p:first-child,
+.rst-content section .contents ul li p:last-child {
+    line-height: 15px;
+    /* zzz 3/31/2022 Thursday 6:12:55 PM. */
+    line-height: 17px;
+}
+
+.rst-content section .contents ul li::marker {
+    color: #0066ff;
+    color: #0033cc;
+    font-weight: 500;
+    font-weight: 600;
+    font-size: 13px;
+    font-size: 15px;
+    /* 4/1/2022 Friday 9:09:30 AM.  zzz  reduce toc font size */
+    font-size: 14px;
+}
+
+.rst-content section .contents ul li li::marker {
+    color: #000000;
+    color: #007777;
+    color: #0066ff;
+    font-weight: 500;
+    font-size: 13px;
+    font-size: 15px;
+    /* 4/1/2022 Friday 9:09:30 AM.  zzz  reduce toc font size */
+    font-size: 14px;
+}
+
+.rst-content section .contents ul li li li::marker {
+    color: #000000;
+    color: #007777;
+    font-weight: 500;
+    color: #0066ff;
+}
+
+/* end bullets */
+
+.rst-content section ul.simple li>*,
+.rst-content section ul.simple li ol,
+.rst-content section ul.simple li ul {
+    margin-top: 5px;
+}
+
+.rst-content section ul li>p,
+.rst-content section ul li>p:only-child,
+.rst-content section ul li>p:only-child:last-child {
+    margin-bottom: 5px;
+    /* zzz 3/31/2022 Thursday 6:10:46 PM. */
+    margin-bottom: 0px;
+}
+
+.wy-menu-vertical li.toctree-l1 a button.toctree-expand,
+.wy-menu-vertical li.toctree-l2 a button.toctree-expand,
+.wy-menu-vertical li.toctree-l3 a button.toctree-expand {
+    color: #cccccc;
+}
+
+.wy-menu-vertical li.toctree-l1 a:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l2 a:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l3 a:hover button.toctree-expand {
+    color: #ffffff;
+}
+
+/* Handle selected entry in the sidebar */
+.wy-menu-vertical li.toctree-l1.current a:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l2.current a:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l3.current a:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l4.current a:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l5.current a:hover button.toctree-expand {
+    color: #ffffff;
+}
+
+.wy-menu-vertical li.toctree-l1.current>a.reference.internal.current button.toctree-expand,
+.wy-menu-vertical li.toctree-l2.current>a.reference.internal.current button.toctree-expand,
+.wy-menu-vertical li.toctree-l3.current>a.reference.internal.current button.toctree-expand,
+.wy-menu-vertical li.toctree-l4.current>a.reference.internal.current button.toctree-expand,
+.wy-menu-vertical li.toctree-l5.current>a.reference.internal.current button.toctree-expand,
+.wy-menu-vertical li.toctree-l6.current>a.reference.internal.current button.toctree-expand,
+.wy-menu-vertical li.toctree-l7.current>a.reference.internal.current button.toctree-expand {
+    color: #ffffff;
+}
+
+.wy-menu-vertical li.toctree-l1.current>a.reference.internal.current:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l2.current>a.reference.internal.current:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l3.current>a.reference.internal.current:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l4.current>a.reference.internal.current:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l5.current>a.reference.internal.current:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l6.current>a.reference.internal.current:hover button.toctree-expand,
+.wy-menu-vertical li.toctree-l7.current>a.reference.internal.current:hover button.toctree-expand {
+    color: #ffffff;
+}
+
+/* 3/30/2022 Wednesday 8:41:52 AM.  bullet indent? */
+.rst-content .toctree-wrapper ul li,
+.rst-content section ul li {
+    margin-left: 17px;
+}
+
+
+
+.btn-neutral,
+.btn-neutral:hover,
+.btn-neutral:visited {
+    /* color: #404040 !important; */
+    /* color: #ff0000 !important; */
+
+    color: #e60000 !important;
+    color: #00b359 !important;
+    color: #00994d !important;
+    color: #000000 !important;
+    color: #0066ff !important;
+    /* color: #ffffff !important; */
+
+    /* border: 0 !important; */
+    border-color: #e8e8e8;
+    border-color: #e2e2e2;
+    border-color: #d8d8d8;
+    border-color: #ffcc00;
+    border-color: #000000;
+    /* border-color: #00e673; */
+    border-color: #0066ff;
+    /* border-color: #ff0000; */
+
+    /* border-color: #c8c8c8; */
+    border-radius: 5px;
+
+    box-shadow: none !important;
+    /* box-shadow: 0 0 3px 3px #e8e8e8 !important; */
+    /* box-shadow: 0 0 2px 2px #e8e8e8 !important; */
+
+    background-color: #ffffff !important;
+    /* background-color: #f8f8f8 !important; */
+    /* background-color: #ffc857 !important; */
+    /* background-color: #ffcc00 !important; */
+    /* background-color: #00e673 !important; */
+    /* background-color: #202020 !important; */
+
+    text-decoration: none !important;
+
+    padding: 0px 0px 0px 0px;
+    padding: 5px 5px 4px 5px;
+    /* padding: 5px; */
+}
+
+.btn-neutral:hover {
+    /* color: #000000 !important; */
+    /* color: #ffffff !important; */
+    /* color: #ff0000 !important; */
+
+    color: #e60000 !important;
+    color: #00994d !important;
+    color: #000000 !important;
+    /* color: #0066ff !important; */
+    /* color: #00b359 !important; */
+    /* color: #00994d !important; */
+    /* color: #00e673 !important; */
+
+    border-color: #b8b8b8;
+    border-color: #cccccc;
+    border-color: #ff9999;
+    /* border-color: #ff0000; */
+    border-color: #00994d;
+    border-color: #000000;
+    /* border-color: #0066ff; */
+    /* border-color: #00e673; */
+    /* border-color: #00994d; */
+
+    box-shadow: 0 0 2px 2px #d8d8d8 !important;
+    box-shadow: 0 0 2px 2px #e8e8e8 !important;
+    /* box-shadow: 0 0 3px 3px #f2f2f2 !important; */
+
+    /* background-color: #ff0000 !important; */
+    /* background-color: #00e673 !important; */
+    background-color: #ffffff !important;
+}
+
+.btn-neutral:focus {
+    outline: none !important;
+}
+
+/* heading tags */
+
+/* h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+h5 {
+    font-size: 18px;
+    color: #000000;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+h6 {
+    font-size: 15px;
+    color: #000000;
+    font-style: italic;
+    margin-bottom: 10px;
+} */
+
+
+/* ================================================================= */
+
+h1,
+.rst-content h1 .toc-backref {
+    font-size: 27px;
+    /* font-size: 23px; */
+    font-weight: 500;
+    font-weight: 600;
+    color: #2952a3;
+    color: #0066ff;
+    color: #009933;
+    color: #ff0066;
+    color: #cc0066;
+    color: #ff6666;
+    color: #ff0000;
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    color: #000000;
+}
+
+h2,
+.rst-content h2 .toc-backref {
+    font-size: 26px;
+    font-size: 22px;
+    font-weight: 500;
+    font-weight: 600;
+    color: #990000;
+    color: #cc0000;
+    color: #cc0066;
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    color: #000000;
+}
+
+
+section [id] h2 {
+    border-bottom: solid 5px #e8e8e8;
+    border-bottom: solid 2px #e8e8e8;
+    border-bottom: solid 2px #009999;
+    border-bottom: solid 2px #000000;
+    /* border-bottom: solid 2px #ff3333; */
+    /* border-bottom: solid 2px #009999; */
+    /* border-bottom: solid 2px #009900; */
+
+    padding-bottom: 5px;
+}
+
+h3,
+.rst-content h3 .toc-backref {
+    font-size: 25px;
+    font-size: 21px;
+    font-weight: 500;
+    color: #e60000;
+    color: #e60073;
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    color: #000000;
+}
+
+h4,
+.rst-content h4 .toc-backref {
+    font-size: 22px;
+    font-size: 19px;
+    font-weight: 500;
+    color: #ff0000;
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    color: #000000;
+}
+
+h5,
+.rst-content h5 .toc-backref {
+    font-size: 21px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #ff3333;
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    color: #000000;
+}
+
+h6,
+.rst-content h6 .toc-backref {
+    font-size: 20px;
+    font-size: 17px;
+    font-weight: 500;
+    color: #ff6666;
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    color: #000000;
+}
+
+h7,
+.rst-content h7 .toc-backref {
+    font-size: 19px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ff9999;
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    color: #000000;
+}
+
+
+
+
+
+/* section [id] h1, */
+section [id] h2,
+section [id] h3,
+section [id] h4,
+section [id] h5,
+section [id] h6,
+section [id] h7 {
+    /* padding-top:45px;
+    margin-top:-45px;
+
+    padding-top:50px;
+    margin-top:-50px;
+
+    padding-top:60px;
+    margin-top:-60px;
+    margin-top:-50px;
+
+    padding-top:20px;
+    margin-top:-20px;
+
+    padding-top: 50px;
+    margin-top: -50px; */
+
+    padding-top: 45px;
+    padding-top: 55px;
+    margin-top: -45px;
+
+    /* margin: 0 0 24px; */
+}
+
+section [id] h2 {
+    padding-top: 60px;
+    margin-top: -60px;
+    margin-top: -30px;
+}
+
+
+h1,
+.rst-content h1 .toc-backref {
+    font-family: "Roboto", arial, sans-serif;
+    font-family: arial;
+    color: #009900;
+    color: #b30047;
+    color: #202020;
+    color: #ff2222;
+    color: #009999;
+    color: #009900;
+    color: #000000;
+    /* padding-top: 10px; */
+    padding-top: 10px;
+    font-weight: 600;
+    /* font-weight: 500; */
+}
+
+h2,
+h3,
+h4,
+h5,
+h6,
+h7,
+.rst-content h2 .toc-backref,
+.rst-content h3 .toc-backref,
+.rst-content h4 .toc-backref,
+.rst-content h5 .toc-backref,
+.rst-content h6 .toc-backref,
+.rst-content h7 .toc-backref {
+    font-family: "Roboto", arial, sans-serif;
+    font-family: arial;
+    color: #000000;
+    color: #009900;
+    color: #b30047;
+    color: #202020;
+    color: #ff3333;
+    color: #009999;
+    color: #009900;
+    color: #000000;
+    font-weight: 600;
+    /* font-weight: 500; */
+}
+
+h4,
+.rst-content h4 .toc-backref {
+    color: #cc0000;
+    color: #009900;
+    color: #666666;
+    color: #006666;
+    color: #005555;
+    color: #3366cc;
+    color: #86592d;
+    color: #734d26;
+    color: #006080;
+    color: #336699;
+    color: #2d5986;
+    color: #009900;
+    color: #cd0000;
+    color: #990000;
+    /* color: #ff0000; */
+    /* color: #ff4444; */
+    /* color: #ff3333; */
+    /* color: #007777; */
+    /* color: #666699; */
+    /* color: #993399; */
+    color: #3333cc;
+    color: #000000;
+    color: #555555;
+    color: #3366cc;
+    color: #0066cc;
+    /* color: #006666; */
+    /* color: #336699; */
+    /* color: #666666; */
+
+    font-weight: 500;
+    font-weight: 600;
+    /* font-style: italic; */
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    /* font-style: normal; */
+}
+
+h5,
+h6,
+h7,
+.rst-content h5 .toc-backref,
+.rst-content h6 .toc-backref,
+.rst-content h7 .toc-backref {
+    font-family: "Roboto", arial, sans-serif;
+    font-family: arial;
+    color: #000000;
+    color: #555555;
+    color: #3366cc;
+    color: #0066cc;
+    /* color: #006666; */
+    /* color: #336699; */
+    /* color: #666666; */
+    font-weight: 600;
+    /* font-weight: 500; */
+    /* font-style: italic; */
+    /* 4/6/2022 Wednesday 5:36:07 PM. */
+    /* font-style: normal; */
+}
+
+/* .rst-content h1, .rst-content h2, .rst-content h3, .rst-content h4, .rst-content h5, .rst-content h6, .rst-content h7 {
+    margin-bottom: 24px;
+    margin-bottom: 15px;
+} */
+
+/* .rst-content h2 {
+    margin-bottom: 10px;
+    margin-bottom: 20px;
+} */
+
+
+
+/* 9/17/2021 Friday 7:14:49 PM.  This removes the hover underline from the headers. and every other link on the page!*/
+.wy-nav-content-wrap a:hover {
+    text-decoration: underline;
+    /* text-decoration: none; */
+}
+
+
+
+.wy-nav-content-wrap h1 a:hover,
+.wy-nav-content-wrap h2 a:hover,
+.wy-nav-content-wrap h3 a:hover,
+.wy-nav-content-wrap h4 a:hover,
+.wy-nav-content-wrap h5 a:hover,
+.wy-nav-content-wrap h6 a:hover,
+.wy-nav-content-wrap h7 a:hover,
+/* don't these also need the prefix added above? */
+.rst-content h1 .toc-backref a:hover,
+.rst-content h2 .toc-backref a:hover,
+.rst-content h3 .toc-backref a:hover,
+.rst-content h4 .toc-backref a:hover,
+.rst-content h5 .toc-backref a:hover,
+.rst-content h6 .toc-backref a:hover,
+.rst-content h7 .toc-backref a:hover {
+    text-decoration: none;
+}
+
+
+h6,
+.rst-content h6 .toc-backref {
+    font-weight: 500;
+    font-weight: 600;
+}
+
+h7,
+.rst-content h7 .toc-backref {
+    font-weight: 500;
+    /* font-weight: 600; */
+    /* font-style: italic; */
+
+    /* padding-top: 60px; */
+    /* margin-top: -60px; */
+    /* margin-top: -100px; */
+
+    /* padding-bottom: 0px; */
+    /* margin-bottom: 20px; */
+
+    margin-bottom: 20px;
+}
+
+.rst-content h7 .headerlink {
+    visibility: hidden;
+    font-size: 14px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.rst-content h7 .headerlink:hover {
+    visibility: visible;
+}
+
+
+/* .rst-content .toctree-wrapper > p.caption,  */
+/* .rst-content h1,  */
+/* .rst-content h2,  */
+.rst-content h3,
+.rst-content h4,
+.rst-content h5,
+.rst-content h6 {
+    margin-bottom: 24px;
+    margin-bottom: 10px;
+}
+
+
+/* end heading tags */
+
+/* 4/1/2022 Friday 9:39:02 AM.  Add bottom padding to "Edit on GitHub" link */
+/* .wy-breadcrumbs-aside > .fa::before {
+    padding-bottom: 4px;
+} */
+
+
+/* ========================== footer =========================== */
+
+
+footer {
+    padding-top: 10px;
+    padding-top: 0px;
+    padding-bottom: 10px;
+    padding-bottom: 20px;
+
+    margin-top: 10px;
+    margin-top: 30px;
+    margin-top: 50px;
+    margin-top: 70px;
+
+    border-top: solid 1px #ff0000;
+    border-top: solid 1px #e8e8e8;
+    border-top: solid 1px #d8d8d8;
+
+    font-size: 13px;
+}
+
+footer p {
+    font-size: 13px;
+}
+
+footer>hr {
+    border-top: solid 1px #009900;
+    border-top: solid 1px #e8e8e8;
+    border-top: solid 1px transparent;
+    margin: 0px 0px 0px 0px;
+    margin: 5px 0px 5px 0px;
+}
+
+.rst-footer-buttons {
+    padding-top: 50px;
+    padding: 0px 0px 0px 0px;
+    padding: 0px 0px 10px 0px;
+    padding: 10px 0px 10px 0px;
+
+    font-size: 14px;
+}
+
+
+
+
+
+/* 4/2/2022 Saturday 10:42:26 AM. ================================ consolidate the toc code here */
+
+/* page toc -- 4/2/2022 Saturday 11:44:41 AM. No longer used for page toc */
+.rst-content .topic-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #202020;
+    margin-top: 10px;
+    margin-bottom: 0px;
+    border-bottom: 0;
+    padding: 0px 10px 5px 0px;
+}
+
+/* 4/2/2022 Saturday 1:21:45 PM.  No longer being used */
+.toc {
+    color: #808080;
+    font-size: 18px;
+    font-family: Arial;
+    font-weight: 500;
+    background-color: #00e673;
+}
+
+/* title section of page/section/entire RTD outline */
+.div_page_outline,
+.div_section_outline,
+.div_rtd_outline {
+    font-size: 16px;
+    font-family: Lato, proxima-nova, Helvetica Neue, Arial, sans-serif;
+    border-radius: 5px 5px 0px 0px;
+    border: solid 1px #000000;
+    border-bottom: 0px;
+    color: #000000;
+    /* color: #990000; */
+
+    background: #99ffcc;
+    /* background: #b3ffd9; */
+    /* background: #ccffe6; */
+    background: #0066ff;
+    background: #f8f8f8;
+    /* background: #ffffff; */
+    background: #f5f5f5;
+    background-color: #f8f8f8;
+
+    border-color: #d8d8d8;
+    border-color: #e8e8e8;
+    border-color: #e2e2e2;
+    /* border-color: #0066ff; */
+    /* border-color: #202020; */
+    /* border: 0; */
+
+    padding: 10px 10px 7px 15px;
+    padding: 7px 10px 4px 15px;
+    padding: 7px 10px 4px 5px;
+
+    font-weight: 600;
+    font-weight: 500;
+    line-height: 15px;
+    display: block;
+}
+
+
+/* page outline */
+section [id] .contents,
+.contents {
+    border: solid 1px #cccccc;
+    border-color: #d8d8d8;
+    border-color: #e8e8e8;
+    border-color: #e2e2e2;
+    /* border: 0; */
+
+    border-top: solid 1px #000000;
+    border-top: solid 2px #0066ff;
+    border-top: solid 2px #000000;
+    /* border-top: solid 1px #990000; */
+    border-radius: 0px 0px 5px 5px;
+    background-color: #f8f8f8;
+    /* background-color: #ffffff; */
+    background-color: #f5f5f5;
+    background-color: #f8f8f8;
+    padding: 10px 10px 0px 10px;
+    padding-bottom: -30px;
+    margin-top: -10px;
+    margin-bottom: 30px;
+    box-shadow: #d8d8d8 0px 2px 4px 0px, #d8d8d8 0px 2px 16px 0px;
+    box-shadow: none;
+}
+
+
+/* entire RTD/section outline */
+.toctree-wrapper {
+    background-color: #f8f8f8;
+    /* background-color: #ffffff; */
+    background-color: #f5f5f5;
+    background-color: #f8f8f8;
+    border: solid 1px #cccccc;
+    border-color: #d8d8d8;
+    border-color: #e8e8e8;
+    border-color: #e2e2e2;
+    /* border: 0; */
+
+    border-top: solid 1px #000000;
+    border-top: solid 2px #0066ff;
+    border-top: solid 2px #000000;
+    /* border-top: solid 1px #990000; */
+    border-radius: 0px 0px 5px 5px;
+    padding: 10px;
+    padding-bottom: 0px;
+    margin-top: -10px;
+    margin-bottom: 30px;
+    box-shadow: #d8d8d8 0px 2px 4px 0px, #d8d8d8 0px 2px 16px 0px;
+    box-shadow: none;
+}
+
+.blue-background {
+    background-color: #ccffff;
+    background-color: #b3ffff;
+    color: #000000;
+    padding: 3px 0px 3px 0px;
+}
+
+.green-background {
+    background-color: #ccffcc;
+    color: #000000;
+    padding: 3px 0px 3px 0px;
+}
+
+.yellow-background {
+    background-color: #ffff33;
+    background-color: #ffff99;
+    background-color: #ffffb3;
+    color: #000000;
+    padding: 3px 0px 3px 0px;
+}
+
+.red-background {
+    background-color: #ffcccc;
+    color: #000000;
+    padding: 3px 0px 3px 0px;
+}
