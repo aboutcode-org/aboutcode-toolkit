@@ -254,7 +254,7 @@ def generate_sctk_input(abouts, min_license_score, license_dict):
 
 def get_license_file_key(license_text_name):
     if license_text_name.endswith('.LICENSE'):
-        # See https://github.com/nexB/aboutcode-toolkit/issues/439
+        # See https://github.com/aboutcode-org/aboutcode-toolkit/issues/439
         # for why using split instead of strip
         return license_text_name.rsplit('.', 1)[0]
     else:

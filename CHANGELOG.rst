@@ -1,11 +1,14 @@
 ==============================
 Changelog
 
-2024-xx-xx
-    Release x.x.xlsx
+2024-08-06
+    Release 11.0.1
 
     * Update doc formatting
     * Added fields type and types description into the spec
+    * Update link references of ownership from nexB to aboutcode-org
+
+Signed-off-by: Chin Yeung Li <tli@nexb.com>
 
 
 2024-07-15
