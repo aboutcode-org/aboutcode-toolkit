@@ -1,0 +1,4 @@
+about_resource:
+ - .
+ - multiple_files_expected.csv
+name: multiple_about_resource

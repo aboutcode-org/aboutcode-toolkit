@@ -245,8 +245,6 @@ class GenerateTest(unittest.TestCase):
         test_file = get_test_loc(
             'test_attrib/scancode_input/sc-dup-lic-match.json')
         errors, abouts = gen.load_inventory(test_file, scancode=True)
-        print("############################")
-        print(errors)
         # Check if there is error's level > INFO
         result = [(level, e) for level, e in errors if level > INFO]
         assert result == []
@@ -272,6 +270,10 @@ class GenerateTest(unittest.TestCase):
         # expected doesn't work well, it works after removed all the newline and spaces
         # assert expected == result
         # assert expected.splitlines(False) == result.splitlines(False)
+        with open("C:\\Users\\thoma\\Desktop\\tmp\\AbcTK\\566\\about\\result.html", 'w') as result_file:
+            result_file.write(result)
+        with open("C:\\Users\\thoma\\Desktop\\tmp\\AbcTK\\566\\about\\expected.html", 'w') as expected_file:
+            expected_file.write(expected)
         assert expected.replace('\n', '').replace(' ', '').replace(
             '\t', '') == result.replace('\n', '').replace(' ', '').replace('\t', '')
 

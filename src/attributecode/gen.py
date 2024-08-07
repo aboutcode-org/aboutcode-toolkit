@@ -94,12 +94,12 @@ def check_newline_in_file_field(component):
         if k in file_fields:
             try:
                 if '\n' in component[k]:
-                    if k == u'about_resource':
-                        msg = (
-                            "Multiple lines detected in 'about_resource' for '%s' which is not supported.") % component['about_resource']
-                    else:
-                        msg = ("New line character detected in '%s' for '%s' which is not supported."
-                               "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
+                    # if k == u'about_resource':
+                    #    msg = (
+                    #        "Multiple lines detected in 'about_resource' for '%s' which is not supported.") % component['about_resource']
+                    # else:
+                    msg = ("New line character detected in '%s' for '%s' which is not supported."
+                           "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
                     errors.append(Error(CRITICAL, msg))
             except:
                 pass
@@ -123,9 +123,6 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
     Load the inventory file at `location` for ABOUT and LICENSE files stored in
     the `base_dir`. Return a list of errors and a list of About objects
     validated against the `base_dir`.
-
-    Optionally use `reference_dir` as the directory location of extra reference
-    license and notice files to reuse.
     """
     errors = []
     abouts = []
@@ -164,21 +161,37 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
     for component in stripped_inv:
         if not from_attrib:
             if 'about_resource' in component:
-                arp = component['about_resource']
-                dup_err = check_duplicated_about_resource(arp, arp_list)
-                if dup_err:
-                    if not dup_err in errors:
-                        errors.append(dup_err)
+                if isinstance(component['about_resource'], str):
+                    arp = component['about_resource']
+                    dup_err = check_duplicated_about_resource(arp, arp_list)
+                    if dup_err:
+                        if dup_err not in errors:
+                            errors.append(dup_err)
+                    else:
+                        arp_list.append(arp)
+
+                    invalid_about_filename = check_about_resource_filename(arp)
+                    if invalid_about_filename and invalid_about_filename not in errors:
+                        errors.append(invalid_about_filename)
                 else:
-                    arp_list.append(arp)
+                    for arp in component['about_resource']:
+                        dup_err = check_duplicated_about_resource(
+                            arp, arp_list)
+                        if dup_err:
+                            if dup_err not in errors:
+                                errors.append(dup_err)
+                        else:
+                            arp_list.append(arp)
 
-                invalid_about_filename = check_about_resource_filename(arp)
-                if invalid_about_filename and not invalid_about_filename in errors:
-                    errors.append(invalid_about_filename)
-
+                        invalid_about_filename = check_about_resource_filename(
+                            arp)
+                        if invalid_about_filename and invalid_about_filename not in errors:
+                            errors.append(invalid_about_filename)
+        """
         newline_in_file_err = check_newline_in_file_field(component)
         if newline_in_file_err:
             errors.extend(newline_in_file_err)
+        """
 
     if errors:
         return errors, abouts
@@ -197,56 +210,93 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
                     )
                     errors.append(Error(CRITICAL, msg))
                     return errors, abouts
+
         # Set about file path to '' if no 'about_resource' is provided from
         # the input
         if 'about_resource' not in fields:
             afp = ''
+            about, custom_fields_list, process_errors = process_inventory(afp, fields,
+                                                                          from_attrib, base_dir, scancode, reference_dir)
+            abouts.append(about)
         else:
-            afp = fields.get(model.About.ABOUT_RESOURCE_ATTR)
-
-        afp = util.to_posix(afp)
-        if base_dir:
-            loc = join(base_dir, afp)
-        else:
-            loc = afp
-        about = model.About(about_file_path=afp)
-        about.location = loc
-
-        # Update value for 'about_resource'
-        # keep only the filename or '.' if it's a directory
-        if 'about_resource' in fields:
-            updated_resource_value = u''
-            resource_path = fields['about_resource']
-            if resource_path.endswith(u'/'):
-                updated_resource_value = u'.'
+            if scancode:
+                afp_list = [fields.get(model.About.ABOUT_RESOURCE_ATTR)]
             else:
-                updated_resource_value = basename(resource_path)
-            fields['about_resource'] = updated_resource_value
+                afp_list = fields.get(model.About.ABOUT_RESOURCE_ATTR)
+            for afp in afp_list:
+                about, custom_fields_list, process_errors = process_inventory(afp, fields,
+                                                                              from_attrib, base_dir, scancode, reference_dir)
+                abouts.append(about)
 
-        ld_errors = about.load_dict(
-            fields,
-            base_dir,
-            scancode=scancode,
-            from_attrib=from_attrib,
-            running_inventory=False,
-            reference_dir=reference_dir,
-        )
+    for err in process_errors:
+        errors.append(err)
 
-        for severity, message in ld_errors:
-            if 'Custom Field' in message:
-                field_name = message.replace('Custom Field: ', '').strip()
-                if not field_name in custom_fields_list:
-                    custom_fields_list.append(field_name)
-            else:
-                errors.append(Error(severity, message))
-
-        abouts.append(about)
     if custom_fields_list:
         custom_fields_err_msg = 'Field ' + \
             str(custom_fields_list) + ' is a custom field.'
         errors.append(Error(INFO, custom_fields_err_msg))
 
     return errors, abouts
+
+
+def process_inventory(about_file_path, fields, from_attrib, base_dir, scancode, reference_dir):
+    """
+    Return About object, a list of custom fields and a list of errors and
+    validated against the `base_dir`.
+
+    Optionally use `reference_dir` as the directory location of extra reference
+    license and notice files to reuse.
+    """
+    custom_fields_list = []
+    errors = []
+    afp = util.to_posix(about_file_path)
+    if base_dir:
+        loc = join(base_dir, afp)
+    else:
+        loc = afp
+    about = model.About(about_file_path=afp)
+    about.location = loc
+
+    """
+    # Update value for 'about_resource'
+    # keep only the filename or '.' if it's a directory
+    if 'about_resource' in fields:
+        updated_resource_list = []
+        resource_path_list = fields['about_resource']
+        for resource_path in resource_path_list:
+            if resource_path.endswith(u'/'):
+                updated_resource_list.append('.')
+            else:
+                updated_resource_list.append(basename(resource_path))
+            fields['about_resource'] = updated_resource_list
+    """
+    if 'about_resource' in fields:
+        updated_resource_value = u''
+        resource_path = about.about_file_path
+        if resource_path.endswith(u'/'):
+            updated_resource_value = u'.'
+        else:
+            updated_resource_value = basename(resource_path)
+        fields['about_resource'] = updated_resource_value
+
+    ld_errors = about.load_dict(
+        fields,
+        base_dir,
+        scancode=scancode,
+        from_attrib=from_attrib,
+        running_inventory=False,
+        reference_dir=reference_dir,
+    )
+
+    for severity, message in ld_errors:
+        if 'Custom Field' in message:
+            field_name = message.replace('Custom Field: ', '').strip()
+            if field_name not in custom_fields_list:
+                custom_fields_list.append(field_name)
+        else:
+            errors.append(Error(severity, message))
+
+    return about, custom_fields_list, errors
 
 
 def update_about_resource(self):
@@ -283,6 +333,7 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
         scancode=scancode,
         worksheet=worksheet
     )
+
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(
             abouts, api_url=api_url, api_key=api_key)
@@ -297,7 +348,7 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
         about.about_file_path = about.about_file_path.strip()
         if about.about_file_path.startswith('/'):
             about.about_file_path = about.about_file_path.lstrip('/')
-        # Use the name as the ABOUT file name if about_resource is empty
+        # Use the name as the ABOUT file name if about_file_path field is empty
         if not about.about_file_path:
             about.about_file_path = about.name.value
         dump_loc = join(bdir, about.about_file_path.lstrip('/'))
@@ -319,7 +370,6 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
             continue
 
         try:
-
             licenses_dict = {}
             if gen_license:
                 # Write generated LICENSE file
@@ -344,9 +394,7 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                             about.license_url.present = True
                         if about.spdx_license_key.value:
                             about.spdx_license_key.present = True
-
             about.dump(dump_loc, licenses_dict)
-
             if android:
                 """
                 Create MODULE_LICENSE_XXX and get context to create NOTICE file

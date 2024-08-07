@@ -1830,14 +1830,17 @@ def about_object_to_list_of_dictionary(abouts):
             # from the output location
             if 'about_resource' in ad.keys():
                 about_resource = ad['about_resource']
+                about_resource_dict = {}
                 for resource in about_resource:
                     updated_about_resource = posixpath.normpath(
                         posixpath.join(afp_parent, resource))
                     if resource == u'.':
                         if not updated_about_resource == '/':
                             updated_about_resource = updated_about_resource + '/'
-                ad['about_resource'] = dict(
-                    [(updated_about_resource, None)])
+                    about_resource_dict[updated_about_resource] = None
+                    # about_resource_list.append(updated_about_resource)
+                # ad['about_resource'] = dict([(updated_about_resource, None)])
+                ad['about_resource'] = about_resource_dict
             del ad['about_file_path']
         serialized.append(ad)
     return serialized

@@ -309,9 +309,13 @@ def load_csv(location):
     with open(location, mode='r', encoding='utf-8-sig',
               errors='replace') as csvfile:
         for row in csv.DictReader(csvfile):
-            # convert all the column keys to lower case
-            updated_row = {key.lower().strip(): value for key,
-                           value in row.items()}
+            updated_row = {}
+            for key, value in row.items():
+                formatted_key = key.lower().strip()
+                if formatted_key in file_fields:
+                    updated_row[formatted_key] = value.splitlines()
+                else:
+                    updated_row[formatted_key] = value
             results.append(updated_row)
     return results
 
@@ -545,8 +549,10 @@ def ungroup_licenses(licenses):
     return lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, lic_matched_text
 
 
-# FIXME: add docstring
 def format_about_dict_output(about_dictionary_list):
+    """
+    Format the dictionary list to be able to write to a CSV output
+    """
     formatted_list = []
     for element in about_dictionary_list:
         row_list = dict()
@@ -562,8 +568,10 @@ def format_about_dict_output(about_dictionary_list):
     return formatted_list
 
 
-# FIXME: add docstring
 def format_about_dict_for_json_output(about_dictionary_list):
+    """
+    Format the dictionary list to be able to write to a JSON output
+    """
     licenses = ['license_key', 'license_name', 'license_file', 'license_url']
     json_formatted_list = []
     for element in about_dictionary_list:
@@ -812,7 +820,10 @@ def strip_inventory_value(inventory):
     for component in inventory:
         comp_dict = {}
         for key in component:
-            comp_dict[key] = str(component[key]).strip()
+            if isinstance(component[key], str):
+                comp_dict[key] = component[key].strip()
+            else:
+                comp_dict[key] = component[key]
         stripped_inventory.append(comp_dict)
     return stripped_inventory
 

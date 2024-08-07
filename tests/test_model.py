@@ -1053,6 +1053,18 @@ custom1: |
         expected = get_test_loc('test_model/multiple_files_expected.csv')
         check_csv(expected, result)
 
+    def test_write_output_csv_with_multiple_about_resource(self):
+        path = 'test_model/multiple_about_resource.ABOUT'
+        test_file = get_test_loc(path)
+        abouts = model.About(location=test_file, about_file_path=path)
+
+        result = get_temp_file()
+        model.write_output([abouts], result, format='csv')
+
+        expected = get_test_loc(
+            'test_model/multiple_about_resource_expected.csv')
+        check_csv(expected, result)
+
     def test_write_output_json(self):
         path = 'test_model/this.ABOUT'
         test_file = get_test_loc(path)
