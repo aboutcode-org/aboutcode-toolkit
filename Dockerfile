@@ -30,4 +30,4 @@ RUN bash -c "source ./configure"
 # Set entrypoint to be the aboutcode command, allows to run the generated docker image directly with the aboutcode arguments:
 # `docker run (...) <containername> <about arguments>`
 # Example: docker run --rm --name "aboutcode" -v ${PWD}:/project -v /tmp/result:/result aboutcode-toolkit attrib /project /result/c.html
-ENTRYPOINT ["./bin/about"]
+ENTRYPOINT ["./about"]

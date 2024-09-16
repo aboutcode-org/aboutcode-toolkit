@@ -20,7 +20,7 @@ import os
 
 import saneyaml
 
-__version__ = '11.0.1'
+__version__ = '11.0.2'
 
 __about_spec_version__ = '4.0.0'
 
