@@ -193,8 +193,19 @@ def generate_sctk_input(abouts, min_license_score, license_dict):
                 for key in lic_key:
                     lic_name.append(license_dict[key][0])
             lic_score = about.license_score.value
-            assert len(lic_key) == len(lic_name)
-            assert len(lic_key) == len(lic_score)
+            if len(lic_key) != len(lic_name):
+                raise ValueError(
+                    f"Mismatch in length: 'lic_key' and 'lic_name' must have the same number of elements. "
+                    f"Got lic_key={lic_key} with length {len(lic_key)}, and lic_name={lic_name} with length {len(lic_name)}"
+                )
+
+            if len(lic_key) != len(lic_score):
+                raise ValueError(
+                    f"Mismatch in length: 'lic_key' and 'lic_score' must have the same number of elements. "
+                    f"Got lic_key={lic_key} with length {len(lic_key)}, and lic_score={lic_score} with length {len(lic_score)}"
+                )
+
+
 
             lic_key_expression = about.license_key_expression.value
             if lic_key_expression:
