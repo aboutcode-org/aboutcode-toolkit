@@ -6,7 +6,7 @@
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
-FROM python:3.7-slim-buster
+FROM python:3.9-slim-buster
 
 RUN apt-get update \
  && apt-get install -y bash bzip2 xz-utils zlib1g libxml2-dev libxslt1-dev libgomp1 libpopt0 curl\

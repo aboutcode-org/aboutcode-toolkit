@@ -39,7 +39,7 @@ Build and tests status
 
 REQUIREMENTS
 ------------
-The AboutCode Toolkit is tested with Python 3.7 or above only on Linux, Mac and Windows.
+The AboutCode Toolkit is tested with Python 3.9 or above only on Linux, Mac and Windows.
 You will need to install a Python interpreter if you do not have one already
 installed.
 

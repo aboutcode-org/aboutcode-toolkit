@@ -1,6 +1,12 @@
 ==============================
 Changelog
 
+xxxx-xx-xx
+    Release xx.x.x
+
+    * Drop support for python version earlier than 3.9
+
+
 2024-09-16
     Release 11.0.2
 
