@@ -63,7 +63,7 @@ html_theme_options = {
     "canonical_url": "",
     "analytics_id": "UA-XXXXXXX-1",
     "logo_only": False,
-    "display_version": True,
+    # "display_version": True,
     # 'prev_next_buttons_location': 'bottom',
     # 'prev_next_buttons_location': 'top',
     "prev_next_buttons_location": "both",
