@@ -263,7 +263,8 @@ As the `--exclude` option accepts patterns that may include wildcards, the runni
 expand these patterns into filenames, potentially causing errors. To avoid this,
 ensure the pattern is wrapped in quotes.
 
-On Windows, users can either use `^` to escape the `*` or use `--%` before `--exclude` to prevent shell globbing.
+On Windows, users can either use `^` to escape the `*` or use `--%`
+before `--exclude` to prevent shell globbing.
 
 $ about check /home/project/about_files/ --exclude "tests^*"
 
@@ -682,7 +683,8 @@ As the `--exclude` option accepts patterns that may include wildcards, the runni
 expand these patterns into filenames, potentially causing errors. To avoid this,
 ensure the pattern is wrapped in quotes.
 
-On Windows, users can either use `^` to escape the `*` or use `--%` before `--exclude` to prevent shell globbing.
+On Windows, users can either use `^` to escape the `*` or use `--%`
+before `--exclude` to prevent shell globbing.
 
 $ about check /home/project/about_files/ --exclude "tests^*"
 
