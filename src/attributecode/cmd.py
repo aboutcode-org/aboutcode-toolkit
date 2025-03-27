@@ -153,6 +153,10 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
                 required=True,
                 metavar='OUTPUT',
                 type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
+@click.option('--exclude',
+              multiple=True,
+              metavar='PATTERN',
+              help='Exclude the processing of the specified input pattern (e.g. *tests* or test/).')
 @click.option('-f', '--format',
               is_flag=False,
               default='csv',
@@ -166,7 +170,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
               is_flag=True,
               help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
-def inventory(location, output, format, quiet, verbose):  # NOQA
+def inventory(location, output, exclude, format, quiet, verbose):  # NOQA
     """
 Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.
 
@@ -181,7 +185,7 @@ OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
     if location.lower().endswith('.zip'):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
-    errors, abouts = collect_inventory(location)
+    errors, abouts = collect_inventory(location, exclude)
     write_output(abouts=abouts, location=output, format=format)
 
     errors_count = report_errors(
@@ -675,7 +679,6 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
 
 # FIXME: This is really only a dupe of the Inventory command
 
-
 @about.command(cls=AboutCommand,
                short_help='Validate that the format of .ABOUT files is correct and report '
                'errors and warnings.')
@@ -684,6 +687,10 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
                 metavar='LOCATION',
                 type=click.Path(
                     exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
+@click.option('--exclude',
+              multiple=True,
+              metavar='PATTERN',
+              help='Exclude the processing of the specified input pattern (e.g. *tests* or test/).')
 @click.option('--license',
               is_flag=True,
               help='Validate the license_expression value in the input.')
@@ -701,7 +708,7 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
               is_flag=True,
               help='Show all error and warning messages.')
 @click.help_option('-h', '--help')
-def check(location, license, djc, log, verbose):
+def check(location, exclude, license, djc, log, verbose):
     """
 Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
@@ -722,7 +729,8 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
         api_url = djc[0].strip("'").strip('"')
         api_key = djc[1].strip("'").strip('"')
     click.echo('Checking ABOUT files...')
-    errors, abouts = collect_inventory(location)
+
+    errors, abouts = collect_inventory(location, exclude)
 
     # Validate license_expression
     if license:

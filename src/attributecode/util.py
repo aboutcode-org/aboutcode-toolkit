@@ -33,13 +33,17 @@ from attributecode import CRITICAL
 from attributecode import WARNING
 from attributecode import Error
 
-on_windows = 'win32' in sys.platform
+on_windows = "win32" in sys.platform
 
 # boolean field name
-boolean_fields = ['redistribute', 'attribute',
-                  'track_change', 'modified', 'internal_use_only']
-file_fields = ['about_resource', 'notice_file',
-               'changelog_file', 'author_file']
+boolean_fields = [
+    "redistribute",
+    "attribute",
+    "track_change",
+    "modified",
+    "internal_use_only",
+]
+file_fields = ["about_resource", "notice_file", "changelog_file", "author_file"]
 
 
 def to_posix(path):
@@ -53,13 +57,17 @@ def to_posix(path):
     return path.replace(ntpath.sep, posixpath.sep)
 
 
-UNC_PREFIX = u'\\\\?\\'
+UNC_PREFIX = "\\\\?\\"
 UNC_PREFIX_POSIX = to_posix(UNC_PREFIX)
-UNC_PREFIXES = (UNC_PREFIX_POSIX, UNC_PREFIX,)
+UNC_PREFIXES = (
+    UNC_PREFIX_POSIX,
+    UNC_PREFIX,
+)
 
-valid_file_chars = '_-.+()~[]{}@%!$,'
+valid_file_chars = "_-.+()~[]{}@%!$,"
 invalid_file_chars = string.punctuation.translate(
-    str.maketrans("", "", valid_file_chars))
+    str.maketrans("", "", valid_file_chars)
+)
 
 
 def invalid_chars(path):
@@ -91,9 +99,8 @@ def check_file_names(paths):
         path = orig_path
         invalid = invalid_chars(path)
         if invalid:
-            invalid = ''.join(invalid)
-            msg = ('Invalid characters %(invalid)r in file name at: '
-                   '%(path)r' % locals())
+            invalid = "".join(invalid)
+            msg = "Invalid characters %(invalid)r in file name at: %(path)r" % locals()
             errors.append(Error(CRITICAL, msg))
 
         path = to_posix(orig_path)
@@ -104,8 +111,10 @@ def check_file_names(paths):
         path = posixpath.abspath(path)
         existing = seen.get(path)
         if existing:
-            msg = ('Duplicate files: %(orig_path)r and %(existing)r '
-                   'have the same case-insensitive file name' % locals())
+            msg = (
+                "Duplicate files: %(orig_path)r and %(existing)r "
+                "have the same case-insensitive file name" % locals()
+            )
             errors.append(Error(CRITICAL, msg))
         else:
             seen[path] = orig_path
@@ -113,28 +122,28 @@ def check_file_names(paths):
 
 
 def wrap_boolean_value(context):
-    updated_context = ''
+    updated_context = ""
     for line in context.splitlines():
         """
         wrap the boolean value in quote
         """
-        key = line.partition(':')[0]
-        value = line.partition(':')[2].strip()
+        key = line.partition(":")[0]
+        value = line.partition(":")[2].strip()
         value = '"' + value + '"'
         if key in boolean_fields and not value == "":
-            updated_context += key + ': ' + value + '\n'
+            updated_context += key + ": " + value + "\n"
         else:
-            updated_context += line + '\n'
+            updated_context += line + "\n"
     return updated_context
 
 
 def replace_tab_with_spaces(context):
-    updated_context = ''
+    updated_context = ""
     for line in context.splitlines():
         """
         Replace tab with 4 spaces
         """
-        updated_context += line.replace('\t', '    ') + '\n'
+        updated_context += line.replace("\t", "    ") + "\n"
     return updated_context
 
 
@@ -169,15 +178,43 @@ def get_locations(location):
                 yield posixpath.join(bd, name)
 
 
-def get_about_locations(location):
+def get_about_locations(location, exclude=None):
     """
     Return a list of locations of ABOUT files given the `location` of a
     a file or a directory tree containing ABOUT files.
     File locations are normalized using posix path separators.
     """
+    pattern_characters_list = ["*", "?", "[", "!"]
+    import fnmatch
+
     for loc in get_locations(location):
-        if is_about_file(loc):
-            yield loc
+        exclude_match = False
+        if exclude:
+            for item in exclude:
+                is_pattern = False
+                for character in pattern_characters_list:
+                    if character in item:
+                        is_pattern = True
+                        break
+                exclude_path = posixpath.join(location, item)
+                normalized_excluded_path = posixpath.normpath(
+                    add_unc(exclude_path).replace("\\", "/")
+                )
+                # Since 'normpath' removes the trailing '/', it is necessary
+                # to append the '/' back for proper matching.
+                if not is_pattern and item.endswith("/"):
+                    normalized_excluded_path += "/"
+                if is_pattern:
+                    if fnmatch.fnmatch(loc, normalized_excluded_path):
+                        exclude_match = True
+                        break
+                else:
+                    if normalized_excluded_path in loc:
+                        exclude_match = True
+                        break
+        if not exclude_match:
+            if is_about_file(loc):
+                yield loc
 
 
 def norm(p):
@@ -199,6 +236,7 @@ def get_spdx_key_and_lic_key_from_licdb():
     will be the value of the directionary
     """
     import requests
+
     lic_dict = dict()
 
     # URL of the license index
@@ -228,10 +266,10 @@ def get_spdx_key_and_lic_key_from_licdb():
         licenses_index = response.json()
 
         for license in licenses_index:
-            lic_dict[license['spdx_license_key']] = license['license_key']
-            if license['other_spdx_license_keys']:
-                for other_spdx in license['other_spdx_license_keys']:
-                    lic_dict[other_spdx] = license['license_key']
+            lic_dict[license["spdx_license_key"]] = license["license_key"]
+            if license["other_spdx_license_keys"]:
+                for other_spdx in license["other_spdx_license_keys"]:
+                    lic_dict[other_spdx] = license["license_key"]
 
     return lic_dict
 
@@ -245,9 +283,9 @@ def get_relative_path(base_loc, full_loc):
     base = norm(base_loc)
     path = norm(full_loc)
 
-    assert path.startswith(base), ('Cannot compute relative path: '
-                                   '%(path)r does not start with %(base)r'
-                                   % locals())
+    assert path.startswith(base), (
+        "Cannot compute relative path: %(path)r does not start with %(base)r" % locals()
+    )
     base_name = resource_name(base)
     no_dir = base == base_name
     same_loc = base == path
@@ -262,7 +300,7 @@ def get_relative_path(base_loc, full_loc):
             parent_dir = resource_name(parent_dir)
             relative = posixpath.join(parent_dir, base_name)
     else:
-        relative = path[len(base) + 1:]
+        relative = path[len(base) + 1 :]
         # We don't want to keep the first segment of the root of the returned path.
         # See https://github.com/nexB/attributecode/issues/276
         # relative = posixpath.join(base_name, relative)
@@ -286,7 +324,7 @@ def is_about_file(path):
     """
     if path:
         path = path.lower()
-        return path.endswith('.about') and path != '.about'
+        return path.endswith(".about") and path != ".about"
 
 
 def resource_name(path):
@@ -306,12 +344,10 @@ def load_csv(location):
     for each row.
     """
     results = []
-    with open(location, mode='r', encoding='utf-8-sig',
-              errors='replace') as csvfile:
+    with open(location, mode="r", encoding="utf-8-sig", errors="replace") as csvfile:
         for row in csv.DictReader(csvfile):
             # convert all the column keys to lower case
-            updated_row = {key.lower().strip(): value for key,
-                           value in row.items()}
+            updated_row = {key.lower().strip(): value for key, value in row.items()}
             results.append(updated_row)
     return results
 
@@ -357,10 +393,10 @@ def extract_zip(location):
     import tempfile
 
     if not zipfile.is_zipfile(location):
-        raise Exception('Incorrect zip file %(location)r' % locals())
+        raise Exception("Incorrect zip file %(location)r" % locals())
 
-    archive_base_name = os.path.basename(location).replace('.zip', '')
-    base_dir = tempfile.mkdtemp(prefix='aboutcode-toolkit-extract-')
+    archive_base_name = os.path.basename(location).replace(".zip", "")
+    base_dir = tempfile.mkdtemp(prefix="aboutcode-toolkit-extract-")
     target_dir = os.path.join(base_dir, archive_base_name)
     target_dir = add_unc(target_dir)
     os.makedirs(target_dir)
@@ -386,7 +422,7 @@ def extract_zip(location):
                 if not os.path.exists(target):
                     os.makedirs(add_unc(target))
             if not os.path.exists(target):
-                with open(target, 'wb') as f:
+                with open(target, "wb") as f:
                     f.write(content)
     return target_dir
 
@@ -414,9 +450,9 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
     license_file or notice_file if found in the reference_dir
     """
     errors = []
-    copy_file_name = ''
+    copy_file_name = ""
     for key, value in fields:
-        if key == 'license_file' or key == 'notice_file':
+        if key == "license_file" or key == "notice_file":
             if value:
                 # This is to handle multiple license_file value in CSV format
                 # The following code will construct a list to contain the
@@ -424,8 +460,8 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
                 # Note that *ONLY* license_file field allows \n. Others file
                 # fields that have \n will prompts error at validation stage
                 file_list = []
-                if '\n' in value:
-                    f_list = value.split('\n')
+                if "\n" in value:
+                    f_list = value.split("\n")
                 else:
                     if not isinstance(value, list):
                         f_list = [value]
@@ -434,8 +470,8 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
                 # The following code is to adopt the approach from #404
                 # to use comma for multiple files which refer the same license
                 for item in f_list:
-                    if ',' in item:
-                        item_list = item.split(',')
+                    if "," in item:
+                        item_list = item.split(",")
                         for i in item_list:
                             file_list.append(i.strip())
                     else:
@@ -444,11 +480,9 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
                 continue
 
             for copy_file_name in file_list:
-                from_lic_path = posixpath.join(
-                    to_posix(reference_dir), copy_file_name)
-                about_file_dir = os.path.dirname(to_posix(afp)).lstrip('/')
-                to_lic_path = posixpath.join(
-                    to_posix(base_dir), about_file_dir)
+                from_lic_path = posixpath.join(to_posix(reference_dir), copy_file_name)
+                about_file_dir = os.path.dirname(to_posix(afp)).lstrip("/")
+                to_lic_path = posixpath.join(to_posix(base_dir), about_file_dir)
                 if not os.path.exists(posixpath.join(to_lic_path, copy_file_name)):
                     err = copy_file(from_lic_path, to_lic_path)
                     if err:
@@ -457,7 +491,7 @@ def copy_license_notice_files(fields, base_dir, reference_dir, afp):
 
 
 def copy_file(from_path, to_path):
-    error = ''
+    error = ""
     # Return if the from_path is empty or None.
     if not from_path:
         return
@@ -473,31 +507,33 @@ def copy_file(from_path, to_path):
     to_path = to_path.strip()
     # Errors will be captured when doing the validation
     if not os.path.exists(from_path):
-        return ''
+        return ""
 
     if not posixpath.exists(to_path):
         os.makedirs(to_path)
     try:
         if os.path.isdir(from_path):
             # Copy the whole directory structure
-            if from_path.endswith('/'):
-                from_path = from_path.rpartition('/')[0]
+            if from_path.endswith("/"):
+                from_path = from_path.rpartition("/")[0]
             folder_name = os.path.basename(from_path)
             to_path = os.path.join(to_path, folder_name)
             if os.path.exists(to_path):
-                msg = to_path + ' is already existed and is replaced by ' + from_path
+                msg = to_path + " is already existed and is replaced by " + from_path
                 error = Error(WARNING, msg)
             copy_tree(from_path, to_path)
         else:
             file_name = os.path.basename(from_path)
             to_file_path = os.path.join(to_path, file_name)
             if os.path.exists(to_file_path):
-                msg = to_file_path + ' is already existed and is replaced by ' + from_path
+                msg = (
+                    to_file_path + " is already existed and is replaced by " + from_path
+                )
                 error = Error(WARNING, msg)
             shutil.copy2(from_path, to_path)
         return error
     except Exception as e:
-        msg = 'Cannot copy file at %(from_path)r.' % locals()
+        msg = "Cannot copy file at %(from_path)r." % locals()
         error = Error(CRITICAL, msg)
         return error
 
@@ -507,11 +543,12 @@ def ungroup_licenses_from_sctk(value):
     # extracted from SCTK scan
     detected_license_list = []
     for detected_license in value:
-        for lic in detected_license['matches']:
-            lic_exp = lic['license_expression']
-            score = lic['score']
-            detected_license_list.append({'lic_exp': lic_exp, 'score': score})
+        for lic in detected_license["matches"]:
+            lic_exp = lic["license_expression"]
+            score = lic["score"]
+            detected_license_list.append({"lic_exp": lic_exp, "score": score})
     return detected_license_list
+
 
 # FIXME: we should use a license object instead
 
@@ -528,21 +565,29 @@ def ungroup_licenses(licenses):
     lic_score = []
     lic_matched_text = []
     for lic in licenses:
-        if 'key' in lic:
-            lic_key.append(lic['key'])
-        if 'name' in lic:
-            lic_name.append(lic['name'])
-        if 'file' in lic:
-            lic_file.append(lic['file'])
-        if 'url' in lic:
-            lic_url.append(lic['url'])
-        if 'spdx_license_key' in lic:
-            spdx_lic_key.append(lic['spdx_license_key'])
-        if 'score' in lic:
-            lic_score.append(lic['score'])
-        if 'matched_text' in lic:
-            lic_matched_text.append(lic['matched_text'])
-    return lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, lic_matched_text
+        if "key" in lic:
+            lic_key.append(lic["key"])
+        if "name" in lic:
+            lic_name.append(lic["name"])
+        if "file" in lic:
+            lic_file.append(lic["file"])
+        if "url" in lic:
+            lic_url.append(lic["url"])
+        if "spdx_license_key" in lic:
+            spdx_lic_key.append(lic["spdx_license_key"])
+        if "score" in lic:
+            lic_score.append(lic["score"])
+        if "matched_text" in lic:
+            lic_matched_text.append(lic["matched_text"])
+    return (
+        lic_key,
+        lic_name,
+        lic_file,
+        lic_url,
+        spdx_lic_key,
+        lic_score,
+        lic_matched_text,
+    )
 
 
 # FIXME: add docstring
@@ -553,9 +598,9 @@ def format_about_dict_output(about_dictionary_list):
         for key in element:
             if element[key]:
                 if isinstance(element[key], list):
-                    row_list[key] = u'\n'.join((element[key]))
-                elif key == u'about_resource':
-                    row_list[key] = u'\n'.join((element[key].keys()))
+                    row_list[key] = "\n".join((element[key]))
+                elif key == "about_resource":
+                    row_list[key] = "\n".join((element[key].keys()))
                 else:
                     row_list[key] = element[key]
         formatted_list.append(row_list)
@@ -564,7 +609,7 @@ def format_about_dict_output(about_dictionary_list):
 
 # FIXME: add docstring
 def format_about_dict_for_json_output(about_dictionary_list):
-    licenses = ['license_key', 'license_name', 'license_file', 'license_url']
+    licenses = ["license_key", "license_name", "license_file", "license_url"]
     json_formatted_list = []
     for element in about_dictionary_list:
         row_list = dict()
@@ -577,37 +622,38 @@ def format_about_dict_for_json_output(about_dictionary_list):
         for key in element:
             if element[key]:
                 # The 'about_resource' is an ordered dict
-                if key == 'about_resource':
+                if key == "about_resource":
                     row_list[key] = list(element[key].keys())[0]
                 elif key in licenses:
-                    if key == 'license_key':
+                    if key == "license_key":
                         license_key = element[key]
-                    elif key == 'license_name':
+                    elif key == "license_name":
                         license_name = element[key]
-                    elif key == 'license_file':
+                    elif key == "license_file":
                         license_file = element[key]
-                    elif key == 'license_url':
+                    elif key == "license_url":
                         license_url = element[key]
                 else:
                     row_list[key] = element[key]
 
         # Group the same license information in a list
-        license_group = list(zip_longest(
-            license_key, license_name, license_file, license_url))
+        license_group = list(
+            zip_longest(license_key, license_name, license_file, license_url)
+        )
         if license_group:
             licenses_list = []
             for lic_group in license_group:
                 lic_dict = dict()
                 if lic_group[0]:
-                    lic_dict['key'] = lic_group[0]
+                    lic_dict["key"] = lic_group[0]
                 if lic_group[1]:
-                    lic_dict['name'] = lic_group[1]
+                    lic_dict["name"] = lic_group[1]
                 if lic_group[2]:
-                    lic_dict['file'] = lic_group[2]
+                    lic_dict["file"] = lic_group[2]
                 if lic_group[3]:
-                    lic_dict['url'] = lic_group[3]
+                    lic_dict["url"] = lic_group[3]
                 licenses_list.append(lic_dict)
-            row_list['licenses'] = licenses_list
+            row_list["licenses"] = licenses_list
         json_formatted_list.append(row_list)
     return json_formatted_list
 
@@ -641,10 +687,10 @@ def create_dir(location):
     and writeable.
     """
     import stat
+
     if not os.path.exists(location):
         os.makedirs(location)
-        os.chmod(location, stat.S_IRWXU | stat.S_IRWXG
-                 | stat.S_IROTH | stat.S_IXOTH)
+        os.chmod(location, stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
 
 
 def get_temp_dir(sub_dir_path=None):
@@ -663,11 +709,12 @@ def get_temp_dir(sub_dir_path=None):
     return new_temp_dir
 
 
-def build_temp_dir(prefix='attributecode-'):
+def build_temp_dir(prefix="attributecode-"):
     """
     Create and return a new unique empty directory created in base_dir.
     """
     import tempfile
+
     location = tempfile.mkdtemp(prefix=prefix)
     create_dir(location)
     return location
@@ -678,14 +725,16 @@ def get_file_text(file_name, reference):
     Return the file content from the license_file/notice_file field from the
     given reference directory.
     """
-    error = ''
-    text = ''
+    error = ""
+    text = ""
     file_path = os.path.join(reference, file_name)
     if not os.path.exists(file_path):
         msg = "The file " + file_path + " does not exist"
         error = Error(CRITICAL, msg)
     else:
-        with codecs.open(file_path, 'rb', encoding='utf-8-sig', errors='replace') as txt:
+        with codecs.open(
+            file_path, "rb", encoding="utf-8-sig", errors="replace"
+        ) as txt:
             # with io.open(file_path, encoding='utf-8') as txt:
             text = txt.read()
     return error, text
@@ -699,8 +748,8 @@ def convert_object_to_dict(about):
     """
     about_dict = {}
     # Convert all the supported fields into a dictionary
-    fields_dict = getattr(about, 'fields')
-    custom_fields_dict = getattr(about, 'custom_fields')
+    fields_dict = getattr(about, "fields")
+    custom_fields_dict = getattr(about, "custom_fields")
     supported_dict = {**fields_dict, **custom_fields_dict}
     for field in supported_dict:
         key = supported_dict[field].name
@@ -717,14 +766,14 @@ def load_scancode_json(location):
 
     with open(location) as json_file:
         results = json.load(json_file)
-    results = results['files']
+    results = results["files"]
     # Rename the "path" to "about_resource" and update "name" from path value
     for item in results:
         updated_dict = {}
         for key in item:
-            if key == 'path':
-                updated_dict['about_resource'] = item[key]
-                updated_dict['name'] = os.path.basename(item[key])
+            if key == "path":
+                updated_dict["about_resource"] = item[key]
+                updated_dict["name"] = os.path.basename(item[key])
             else:
                 updated_dict[key] = item[key]
         updated_results.append(updated_dict)
@@ -747,6 +796,7 @@ def load_excel(location, worksheet=None):
         if worksheet:
             if worksheet not in sheetnames:
                 import sys
+
                 print("The input worksheet name does not exist. Exiting.")
                 sys.exit(1)
             sheet_obj = input_bom[worksheet]
@@ -762,7 +812,7 @@ def load_excel(location, worksheet=None):
     while index <= max_col:
         value = sheet_obj.cell(row=1, column=index).value
         if value in col_keys:
-            msg = 'Duplicated column name, ' + str(value) + ', detected.'
+            msg = "Duplicated column name, " + str(value) + ", detected."
             errors.append(Error(CRITICAL, msg))
             return errors, results
         if value in mapping_dict:
@@ -778,7 +828,7 @@ def load_excel(location, worksheet=None):
             if value:
                 row_dict[col_keys[index]] = value
             else:
-                row_dict[col_keys[index]] = ''
+                row_dict[col_keys[index]] = ""
             index = index + 1
         results.append(row_dict)
     return errors, results
@@ -795,7 +845,7 @@ def write_licenses(lic_dict, location):
     try:
         for lic in lic_dict:
             output_location = posixpath.join(loc, lic)
-            with open(output_location, 'w', encoding='utf-8', errors='replace') as out:
+            with open(output_location, "w", encoding="utf-8", errors="replace") as out:
                 out.write(lic_dict[lic])
     except Exception as e:
         msg = str(e)
@@ -820,4 +870,4 @@ def strip_inventory_value(inventory):
 """
 Return True if a string s  name is safe to use as an attribute name.
 """
-is_valid_name = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$').match
+is_valid_name = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$").match

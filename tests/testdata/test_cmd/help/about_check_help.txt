@@ -5,6 +5,8 @@ Usage: about check [OPTIONS] LOCATION
   LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
 Options:
+  --exclude PATTERN      Exclude the processing of the specified input pattern
+                         (e.g. *tests* or test/).
   --license              Validate the license_expression value in the input.
   --djc api_url api_key  Validate license_expression from a DejaCode License
                          Library API URL using the API KEY.

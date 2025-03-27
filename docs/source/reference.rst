@@ -187,6 +187,8 @@ Options
 
         ..  code-block:: none
 
+                --exclude PATTERN      Exclude the processing of the specified input pattern
+                                        (e.g. *tests* or test/).
                 --license              Validate the license_expression value in the input.
                 --djc api_url api_key  Validate license_expression from a DejaCode License
                                        Library API URL using the API KEY.
@@ -203,6 +205,14 @@ Details
 ^^^^^^^
 
         ..  code-block:: none
+
+                --exclude
+                    Exclude the processing of the specified input pattern
+
+                    It takes a pattern or an exact directory as an argument.
+                    Multiple `--exclude` can be used.
+
+                $ about check --exclude ./tests/ --exclude "*sample*" /home/project/about_files/
 
                 --license
                     Validate the license_expression value in the input.
@@ -240,8 +250,24 @@ Details
 
 Special Notes
 -------------
+`--djc`
+^^^^^^^
+
 If no `--djc` option is set, the tool will default to check license_expression from
 ScanCode LicenseDB.
+
+`--exclude`
+^^^^^^^^^^^
+
+As the `--exclude` option accepts patterns that may include wildcards, the running shell could
+expand these patterns into filenames, potentially causing errors. To avoid this,
+ensure the pattern is wrapped in quotes.
+
+On Windows, users can either use `^` to escape the `*` or use `--%` before `--exclude` to prevent shell globbing.
+
+$ about check /home/project/about_files/ --exclude "tests^*"
+
+$ about check /home/project/about_files/ --% --exclude "*tests*"
 
 collect_redist_src
 ==================
@@ -566,6 +592,8 @@ Options
 
         ..  code-block:: none
 
+                --exclude PATTERN               Exclude the processing of the specified input pattern
+                                                (e.g. *tests* or test/).
                 -f, --format [json|csv|excel]   Set OUTPUT file format.  [default: csv]
                 -q, --quiet                     Do not print any error/warning.
                 --verbose                       Show all the errors and warning.
@@ -646,6 +674,19 @@ To support multiple license file for a license, the correct format is to separat
                         file: mit.LICENSE
 
 Note that if license_name is not provided, the license key will be used as the license name.
+
+`--exclude`
+^^^^^^^^^^^
+
+As the `--exclude` option accepts patterns that may include wildcards, the running shell could
+expand these patterns into filenames, potentially causing errors. To avoid this,
+ensure the pattern is wrapped in quotes.
+
+On Windows, users can either use `^` to escape the `*` or use `--%` before `--exclude` to prevent shell globbing.
+
+$ about check /home/project/about_files/ --exclude "tests^*"
+
+$ about check /home/project/about_files/ --% --exclude "*tests*"
 
 transform
 =========

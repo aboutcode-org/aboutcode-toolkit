@@ -273,6 +273,43 @@ class TestGetLocations(unittest.TestCase):
         result = [l.partition('/about_locations/')[-1] for l in result]
         assert expected == result
 
+    def test_get_about_locations_with_exclude(self):
+        test_dir = get_test_loc('test_util/about_locations')
+        exclude1 = ('dir*',)
+        exclude2 = ('*dir2*',)
+        exclude3 = ('*test*',)
+        exclude4 = ('dir1/',)
+        expected1 = sorted([
+            'file with_spaces.ABOUT',
+        ])
+        expected2 = sorted([
+            'file with_spaces.ABOUT',
+            'dir1/file2.aBout',
+        ])
+        expected3 = sorted([
+            'file with_spaces.ABOUT',
+            'dir1/file2.aBout',
+            'dir1/dir2/file1.about',
+        ])
+        expected4 = sorted([
+            'file with_spaces.ABOUT',
+        ])
+
+        result1 = sorted(util.get_about_locations(test_dir, exclude1))
+        result2 = sorted(util.get_about_locations(test_dir, exclude2))
+        result3 = sorted(util.get_about_locations(test_dir, exclude3))
+        result4 = sorted(util.get_about_locations(test_dir, exclude4))
+
+        result1 = [l.partition('/about_locations/')[-1] for l in result1]
+        result2 = [l.partition('/about_locations/')[-1] for l in result2]
+        result3 = [l.partition('/about_locations/')[-1] for l in result3]
+        result4 = [l.partition('/about_locations/')[-1] for l in result4]
+
+        assert expected1 == result1
+        assert expected2 == result2
+        assert expected3 == result3
+        assert expected4 == result4
+
     def test_get_locations_can_yield_a_single_file(self):
         test_file = get_test_loc(
             'test_util/about_locations/file with_spaces.ABOUT')

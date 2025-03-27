@@ -1553,14 +1553,14 @@ class About(object):
         return license_key_name_context_url
 
 
-def collect_inventory(location):
+def collect_inventory(location, exclude=None):
     """
     Collect ABOUT files at location and return a list of errors and a list of
     About objects.
     """
     errors = []
     input_location = util.get_absolute(location)
-    about_locations = list(util.get_about_locations(input_location))
+    about_locations = list(util.get_about_locations(input_location, exclude))
 
     name_errors = util.check_file_names(about_locations)
     errors.extend(name_errors)
@@ -1572,7 +1572,7 @@ def collect_inventory(location):
         for severity, message in about.errors:
             if 'Custom Field' in message:
                 field_name = message.replace('Custom Field: ', '').strip()
-                if not field_name in custom_fields_list:
+                if field_name not in custom_fields_list:
                     custom_fields_list.append(field_name)
             else:
                 msg = (about_file_path + ": " + message)

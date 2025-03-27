@@ -2,10 +2,10 @@
 Changelog
 
 xxxx-xx-xx
-    Release xx.x.x
+    Release 11.1.0
 
     * Drop support for python version earlier than 3.9
-
+    * Add ability to "exclude" path in the check and inventory #583
 
 2024-09-16
     Release 11.0.2

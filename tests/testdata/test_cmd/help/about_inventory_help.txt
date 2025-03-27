@@ -7,6 +7,8 @@ Usage: about inventory [OPTIONS] LOCATION OUTPUT
   OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
 
 Options:
+  --exclude PATTERN              Exclude the processing of the specified input
+                                 pattern (e.g. *tests* or test/).
   -f, --format [json|csv|excel]  Set OUTPUT inventory file format.  [default:
                                  csv]
   -q, --quiet                    Do not print error or warning messages.
