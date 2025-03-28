@@ -1,7 +1,7 @@
 ==============================
 Changelog
 
-xxxx-xx-xx
+2025-03-28
     Release 11.1.0
 
     * Drop support for python version earlier than 3.9
