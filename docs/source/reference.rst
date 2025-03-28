@@ -586,7 +586,9 @@ Syntax
                 about inventory [OPTIONS] LOCATION OUTPUT
 
                 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
-                OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
+                OUTPUT: Path to the CSV/JSON/XLSX inventory file to create, or using '-' to
+                print result on screen/to stdout (Excel-formatted output cannot be used in
+                stdout).
 
 Options
 -------
@@ -603,18 +605,26 @@ Options
 Purpose
 -------
 
-Create a JSON/CSV/XLSX inventory of components from ABOUT files.
+Create a JSON/CSV/XLSX inventory of components from ABOUT files, or use `-` to print result to stdout.
 
 Details
 ^^^^^^^
 
         ..  code-block:: none
 
+                --exclude PATTERN
+
+                    Exclude the processing of the specified input pattern
+
+                $ about inventory --exclude "tests*" LOCATION OUTPUT
+
                 -f, --format [json|csv|excel]
 
                     Set OUTPUT file format.  [default: csv]
 
                 $ about inventory -f json LOCATION OUTPUT
+
+                $ about inventory -f json LOCATION -
 
                 --verbose
 

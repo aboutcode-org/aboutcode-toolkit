@@ -28,6 +28,7 @@ import json
 import os
 import posixpath
 from requests import get, head, exceptions
+import sys
 import traceback
 from itertools import zip_longest
 
@@ -1849,7 +1850,8 @@ def write_output(abouts, location, format):  # NOQA
     Return a list of Error objects.
     """
     about_dicts = about_object_to_list_of_dictionary(abouts)
-    location = add_unc(location)
+    if not location == '-':
+        location = add_unc(location)
     if format == 'csv':
         save_as_csv(location, about_dicts, get_field_names(abouts))
     elif format == 'json':
@@ -1859,21 +1861,40 @@ def write_output(abouts, location, format):  # NOQA
 
 
 def save_as_json(location, about_dicts):
-    with open(location, mode='w') as output_file:
-        data = util.format_about_dict_for_json_output(about_dicts)
-        output_file.write(json.dumps(data, indent=2))
+    """
+    Save the given data as a JSON file or print it to standard output.
+    """
+    data = util.format_about_dict_for_json_output(about_dicts)
+    if location == '-':
+        json.dump(data, sys.stdout, indent=2)
+    else:
+        with open(location, mode='w') as output_file:
+            output_file.write(json.dumps(data, indent=2))
 
 
 def save_as_csv(location, about_dicts, field_names):
-    with open(location, mode='w', encoding='utf-8', newline='', errors='replace') as output_file:
-        writer = csv.DictWriter(output_file, field_names)
+    """
+    Save the given data as a CSV file or print it to standard output.
+    """
+    if location == '-':
+        writer = csv.DictWriter(sys.stdout, field_names)
         writer.writeheader()
         csv_formatted_list = util.format_about_dict_output(about_dicts)
         for row in csv_formatted_list:
             writer.writerow(row)
+    else:
+        with open(location, mode='w', encoding='utf-8', newline='', errors='replace') as output_file:
+            writer = csv.DictWriter(output_file, field_names)
+            writer.writeheader()
+            csv_formatted_list = util.format_about_dict_output(about_dicts)
+            for row in csv_formatted_list:
+                writer.writerow(row)
 
 
 def save_as_excel(location, about_dicts):
+    """
+    Save the given data as a Excel file.
+    """
     formatted_list = util.format_about_dict_output(about_dicts)
     write_excel(location, formatted_list)
 

@@ -143,7 +143,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
 
 
 @about.command(cls=AboutCommand,
-               short_help='Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.')
+               short_help='Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file or stdout.')
 @click.argument('location',
                 required=True,
                 metavar='LOCATION',
@@ -151,8 +151,7 @@ def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',)))
                     exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
 @click.argument('output',
                 required=True,
-                metavar='OUTPUT',
-                type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
+                metavar='OUTPUT')
 @click.option('--exclude',
               multiple=True,
               metavar='PATTERN',
@@ -176,8 +175,25 @@ Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.
 
 LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
-OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
+OUTPUT: Path to the CSV/JSON/XLSX inventory file to create, or
+using '-' to print result on screen/to stdout (Excel-formatted output
+cannot be used in stdout).
     """
+    # We are not using type=click.Path() to validate the output location as
+    # it does not support `-` , which is used to print the result to stdout.
+    if not output == '-':
+        parent_dir = os.path.dirname(output)
+        if not os.path.exists(parent_dir):
+            msg = 'The OUTPUT directory: {parent_dir} does not exist.'.format(**locals())
+            msg += '\nPlease correct and re-run'
+            click.echo(msg)
+            sys.exit(1)
+    else:
+        # Check the format if output is stdout as xlsx format cannot be displayed.
+        if format == 'excel':
+            msg = 'Excel-formatted output cannot be used in stdout.'
+            click.echo(msg)
+            sys.exit(0)
     if not quiet:
         print_version()
         click.echo('Collecting inventory from ABOUT files...')
@@ -188,9 +204,13 @@ OUTPUT: Path to the CSV/JSON/XLSX inventory file to create.
     errors, abouts = collect_inventory(location, exclude)
     write_output(abouts=abouts, location=output, format=format)
 
+    if output == '-':
+        log_file_loc = None
+    else:
+        log_file_loc = output + '-error.log'
     errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc=output + '-error.log')
-    if not quiet:
+        errors, quiet, verbose, log_file_loc)
+    if not quiet and not output == '-':
         msg = 'Inventory collected in {output}.'.format(**locals())
         click.echo(msg)
     sys.exit(errors_count)

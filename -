@@ -1,0 +1,27 @@
+[
+  {
+    "about_resource": "/aboutcode-toolkit/",
+    "name": "AboutCode-toolkit",
+    "version": "11.1.0",
+    "description": "AboutCode Toolkit is a tool to process ABOUT files. An ABOUT file\nprovides a simple way to document the provenance (origin and license)\n'about' a software component. This is a small text file stored in the\ncodebase side-by-side with the documented software component.",
+    "homepage_url": "http://www.nexb.com/community.html",
+    "license_expression": "apache-2.0",
+    "spdx_license_key": [
+      "Apache-2.0"
+    ],
+    "copyright": "Copyright (c) nexB Inc.",
+    "notice_file": "NOTICE",
+    "owner": "nexB Inc.",
+    "author": "Jillian Daguil, Chin Yeung Li, Philippe Ombredanne, Thomas Druez",
+    "vcs_tool": "git",
+    "vcs_repository": "https://github.com/nexB/aboutcode-toolkit.git",
+    "licenses": [
+      {
+        "key": "apache-2.0",
+        "name": "Apache License 2.0",
+        "file": "apache-2.0.LICENSE",
+        "url": "https://enterprise.dejacode.com/urn/?urn=urn:dje:license:apache-2.0"
+      }
+    ]
+  }
+]

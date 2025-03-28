@@ -22,6 +22,6 @@ Commands:
   gen-license         Fetch and save all the licenses in the license_expression
                       field to a directory.
   inventory           Collect the inventory of .ABOUT files to a CSV/JSON/XLSX
-                      file.
+                      file or stdout.
   transform           Transform a CSV/JSON/XLSX by applying renamings, filters
                       and checks.
