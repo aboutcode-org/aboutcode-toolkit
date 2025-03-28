@@ -605,7 +605,8 @@ Options
 Purpose
 -------
 
-Create a JSON/CSV/XLSX inventory of components from ABOUT files, or use `-` to print result to stdout.
+Create a JSON/CSV/XLSX inventory of components from ABOUT files, or
+use `-` to print result to stdout.
 
 Details
 ^^^^^^^
