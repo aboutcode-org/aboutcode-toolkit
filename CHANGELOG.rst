@@ -1,12 +1,21 @@
 ==============================
 Changelog
 
+2025-03-31
+    Release 11.1.1
+
+    * Deleted unused files
+    * Updated AppVeyor configuration to use Python 3.9
+    * Modified the PyPI release script to utilize upload-artifact@v4
+
+
 2025-03-28
     Release 11.1.0
 
     * Drop support for python version earlier than 3.9
     * Add ability to "exclude" path in the check and inventory #583
     * Add support for the special '-' FILE to print to on screen/to stdout in inventory #584
+
 
 2024-09-16
     Release 11.0.2
