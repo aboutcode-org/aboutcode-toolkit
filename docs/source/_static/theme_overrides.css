@@ -201,9 +201,12 @@ div.custom-admonition-examples.admonition {
     /* max-width: 800px; */
     /* max-width: 1200px; */
     max-width: 100%;
-    padding-right: 100px;
-    padding-left: 100px;
-    background-color: #f2f2f2;
+    padding: 0px 40px 0px 0px;
+    margin-top: 0px;
+}
+
+.wy-nav-content-wrap {
+    border-right: solid 1px;
 }
 
 div.rst-content {
