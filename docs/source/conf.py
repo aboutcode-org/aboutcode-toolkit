@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'aboutcode-toolkit'
-copyright = 'nexb Inc.'
-author = 'nexb Inc.'
+copyright = "nexB Inc. and others."
+author = "AboutCode.org authors and contributors"
 
 
 # -- General configuration ---------------------------------------------------
@@ -27,13 +27,30 @@ author = 'nexb Inc.'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.intersphinx"]
+extensions = [
+    "sphinx.ext.intersphinx",
+    "sphinx_reredirects",
+    "sphinx_rtd_theme",
+    "sphinx_rtd_dark_mode",
+    "sphinx.ext.extlinks",
+    "sphinx_copybutton",
+]
 
-master_doc = "index"
+
+# Redirects for olds pages
+# See https://documatt.gitlab.io/sphinx-reredirects/usage.html
+redirects = {}
+
+# This points to aboutcode.readthedocs.io
+# In case of "undefined label" ERRORS check docs on intersphinx to troubleshoot
+# Link was created at commit - https://github.com/aboutcode-org/aboutcode/commit/faea9fcf3248f8f198844fe34d43833224ac4a83
 
 intersphinx_mapping = {
     "aboutcode": ("https://aboutcode.readthedocs.io/en/latest/", None),
-    "scancode-workbench": ("https://scancode-workbench.readthedocs.io/en/develop/", None),
+    "scancode-workbench": (
+        "https://scancode-workbench.readthedocs.io/en/develop/",
+        None,
+    ),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -96,7 +113,7 @@ html_context = {
 }
 
 html_css_files = [
-    "theme_overrides-skeleton-2022-03-28-updated.css"
+    "theme_overrides.css",
 ]
 
 html_js_files = [
@@ -106,50 +123,25 @@ html_js_files = [
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = True
 
-# rst_prolog enables substitutions for all source files
+# Define CSS and HTML abbreviations used in .rst files.  These are examples.
+# .. role:: is used to refer to styles defined in _static/theme_overrides.css
+# and is used like this: :red:`text`
 rst_prolog = """
 .. # define a hard line break for HTML
 .. |br| raw:: html
 
    <br />
 
-.. # define a style for a toctree heading -- see, e.g., the top of index.rst for usage example
-.. role:: toc
+.. role:: red
 
-.. # or replace with:
+.. role:: img-title
 
-.. |div-page-outline| raw:: html
-
-   <div class="div_page_outline">
-   Page outline
-   </div>
-
-
-.. |div-section-outline| raw:: html
-
-   <div class="div_section_outline">
-   Table of contents (this section)
-   </div>
-
-
-.. |div-rtd-outline| raw:: html
-
-   <div class="div_rtd_outline">
-   Table of contents (entire RTD)
-   </div>
-
-.. role:: yellow-background
-
-.. role:: green-background
-
-.. role:: blue-background
-
-.. role:: red-background
+.. role:: img-title-para
 
 """
 
-# Convert a double-dash "--" into a typographical en-dash "–":
-# (Omitting the smartquotes from this conf.py has the same effect as setting it to True)
-# smartquotes = True
-# Do not change the display of a double-dash:
-smartquotes = False
+# -- Options for LaTeX output -------------------------------------------------
+
+latex_elements = {
+    'classoptions': ',openany,oneside'
+}

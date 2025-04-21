@@ -3,7 +3,7 @@
 # Copyright (c) nexB Inc. and others. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 # See http://www.apache.org/licenses/LICENSE-2.0 for the license text.
-# See https://github.com/nexB/ for support or download.
+# See https://github.com/aboutcode-org/ for support or download.
 # See https://aboutcode.org for more information about nexB OSS projects.
 #
 
@@ -29,14 +29,13 @@ CLI_ARGS=$1
 
 # Requirement arguments passed to pip and used by default or with --dev.
 REQUIREMENTS="--editable . --constraint requirements.txt"
-DEV_REQUIREMENTS="--editable .[testing] --constraint requirements.txt --constraint requirements-dev.txt"
-DOCS_REQUIREMENTS="--editable .[docs] --constraint requirements.txt"
+DEV_REQUIREMENTS="--editable .[dev] --constraint requirements.txt --constraint requirements-dev.txt"
 
 # where we create a virtualenv
 VIRTUALENV_DIR=venv
 
 # Cleanable files and directories to delete with the --clean option
-CLEANABLE="build dist venv .cache .eggs"
+CLEANABLE="build dist venv .cache .eggs *.egg-info docs/_build/ pip-selfcheck.json"
 
 # extra  arguments passed to pip
 PIP_EXTRA_ARGS=" "
@@ -168,6 +167,7 @@ clean() {
     for cln in $CLEANABLE;
         do rm -rf "${CFG_ROOT_DIR:?}/${cln:?}";
     done
+    find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
     set +e
     exit
 }
@@ -185,7 +185,6 @@ while getopts :-: optchar; do
                 help  ) cli_help;;
                 clean ) find_python && clean;;
                 dev   ) CFG_REQUIREMENTS="$DEV_REQUIREMENTS";;
-                docs   ) CFG_REQUIREMENTS="$DOCS_REQUIREMENTS";;
             esac;;
     esac
 done
