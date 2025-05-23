@@ -209,7 +209,7 @@ Field referencing a URL
 
 The value of a field may reference URLs such as a homepage or a download. In this
 case the field name is suffixed with "_url" and the field value must be a valid
-absolute URL starting with ftp://, http:// or https://. URLs are informational
+absolute URL starting with ``ftp://``, ``http://`` or ``https://``. URLs are informational
 and the content they may reference is ignored. For example, a download URL
 is referenced this way:
 
