@@ -24,18 +24,6 @@ This version of the AboutCode Toolkit follows the ABOUT specification version 3.
 https://aboutcode-toolkit.readthedocs.io/en/latest/specification.html
 
 
-Build and tests status
-----------------------
-
-+-------+-----------------+--------------+
-|Branch | **Linux/macOS** | **Windows**  |
-+=======+=================+==============+
-|Master | |master-posix|  | |master-win| |
-+-------+-----------------+--------------+
-|Develop| |devel-posix|   | |devel-win|  |
-+-------+-----------------+--------------+
-
-
 REQUIREMENTS
 ------------
 The AboutCode Toolkit is tested with Python 3.9 or above only on Linux, Mac and Windows.
@@ -146,18 +134,3 @@ LICENSE
 -------
 The AboutCode Toolkit is released under the Apache 2.0 license.
 See (of course) the about.ABOUT file for details.
-
-
-.. |master-posix| image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=master
-    :target: https://travis-ci.org/nexB/aboutcode-toolkit
-    :alt: Linux Master branch tests status
-.. |devel-posix| image:: https://api.travis-ci.org/nexB/aboutcode-toolkit.png?branch=develop
-    :target: https://travis-ci.org/nexB/aboutcode-toolkit
-    :alt: Linux Develop branch tests status
-
-.. |master-win| image:: https://ci.appveyor.com/api/projects/status/uwj2gh8i9ga1mqwn/branch/master?png=true
-    :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit
-    :alt: Windows Master branch tests status
-.. |devel-win| image:: https://ci.appveyor.com/api/projects/status/uwj2gh8i9ga1mqwn/branch/develop?png=true
-    :target: https://ci.appveyor.com/project/nexB/aboutcode-toolkit
-    :alt: Windows Develop branch tests status
