@@ -53,9 +53,9 @@ intersphinx_mapping = {
     ),
 }
 
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
-# templates_path = ['../_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -70,44 +70,17 @@ exclude_patterns = []
 #
 html_theme = "sphinx_rtd_theme"
 
-# This adds to the levels displayed in the sidebar but the indent is wrong and expand/collapse doesn't work for the additional nodes.
-# It's a known issue: see https://stackoverflow.com/questions/14477396/how-to-expand-all-the-subsections-on-the-sidebar-toctree-in-sphinx and https://github.com/readthedocs/sphinx_rtd_theme/issues/455
-# html_theme_options = {
-#     'navigation_depth': 6,
-# }
-
-html_theme_options = {
-    "canonical_url": "",
-    "analytics_id": "UA-XXXXXXX-1",
-    "logo_only": False,
-    # "display_version": True,
-    # 'prev_next_buttons_location': 'bottom',
-    # 'prev_next_buttons_location': 'top',
-    "prev_next_buttons_location": "both",
-    # 'style_external_links': False,
-    # 'style_external_links': True,
-    # 'style_nav_header_background': 'white',
-    # Toc options
-    # 'collapse_navigation': True,
-    "collapse_navigation": False,
-    # 'sticky_navigation': True,
-    "sticky_navigation": False,
-    # 'navigation_depth': 4,
-    "navigation_depth": -1,
-    "includehidden": True,
-    "titles_only": False,
-}
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-# html_static_path = ['../_static']
+
+master_doc = "index"
 
 html_context = {
     "display_github": True,
     "github_user": "nexB",
-    "github_repo": "spats",
+    "github_repo": "aboutcode-toolkit",
     "github_version": "develop",  # branch
     "conf_py_path": "/docs/source/",  # path in the checkout to the docs root
 }
@@ -116,9 +89,6 @@ html_css_files = [
     "theme_overrides.css",
 ]
 
-html_js_files = [
-    "js/custom.js",
-]
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = True
@@ -127,6 +97,8 @@ html_show_sphinx = True
 # .. role:: is used to refer to styles defined in _static/theme_overrides.css
 # and is used like this: :red:`text`
 rst_prolog = """
+.. |psf| replace:: Python Software Foundation
+
 .. # define a hard line break for HTML
 .. |br| raw:: html
 
@@ -142,6 +114,4 @@ rst_prolog = """
 
 # -- Options for LaTeX output -------------------------------------------------
 
-latex_elements = {
-    'classoptions': ',openany,oneside'
-}
+latex_elements = {"classoptions": ",openany,oneside"}
