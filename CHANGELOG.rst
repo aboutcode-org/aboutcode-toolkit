@@ -2,6 +2,11 @@
 Changelog
 ==============================
 
+2025-xx-xx
+    Release xx
+
+    * Updated docs format
+
 2025-03-31
     Release 11.1.1
 
