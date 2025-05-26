@@ -1,7 +1,7 @@
 bleach==4.1.0
 build==0.7.0
 commonmark==0.9.1
-docutils==0.18.1
+docutils==0.19
 et-xmlfile==1.1.0
 execnet==1.9.0
 iniconfig==1.1.1

@@ -25,7 +25,7 @@ Getting Started
 
 A simple and valid ABOUT file named httpd-2.4.3.tar.gz.ABOUT may look like this:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: httpd-2.4.3.tar.gz
                 name: Apache HTTP Server
@@ -114,7 +114,7 @@ line is ignored and should be removed from the field value by tools.
 
 For instance:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 description: This is a long description for a
                  software component that additional continuation line is used.
@@ -123,7 +123,7 @@ When a field value contains more than one line of text, a "literal block" (using
 
 For instance:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 description: |
                     This is a long description for a software component that spans
@@ -172,14 +172,14 @@ to the path of the ABOUT file. The file content must be UTF-8-encoded text.
 For example, this example shows the license file for the component is named
 "linux.COPYING" and the notice file is "NOTICE":
 
-        ..  code-block:: none
+        ..  code-block::
 
                 license_file: linux.COPYING
                 notice_file: NOTICE
 
 Alternatvely, it can also write as the follow:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 licenses:
                     -   file: linux.COPYING
@@ -188,7 +188,7 @@ Alternatvely, it can also write as the follow:
 In this example, the README file is stored in a doc directory, one directory
 above the ABOUT file directory, using a relative POSIX path:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 licenses:
                     -   file: ../docs/ruby.README
@@ -197,7 +197,7 @@ In addition, there may be cases that a license can have 2 or more referenced
 license files. If this is the case, a comma ',' is used to identify multiple
 files For instance:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 license_expression: gpl-2.0-plus
                 licenses:
@@ -213,7 +213,7 @@ absolute URL starting with ``ftp://``, ``http://`` or ``https://``. URLs are inf
 and the content they may reference is ignored. For example, a download URL
 is referenced this way:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 download_url: http://www.kernel.org/pub/linux/kernel/v3.0/linux-3.4.20.tar.bz2
 
@@ -240,27 +240,27 @@ to the file or directory that it documents, but this is not mandatory.
 For example, a file named django.ABOUT contains the following field to document
 the django-1.2.3.tar.gz archive stored in the same directory:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: django-1.2.3.tar.gz
 
 In this example, the ABOUT file documents a whole sub-directory:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: linux-kernel-2.6.23
 
 In this example, the ABOUT file documents a whole sub-directory, with some
 sub-paths under the directory ignored:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: linux-kernel-2.6.23
                 ignored_resources: linux-kernel-2.6.23/Documentation
 
 In this example, the ABOUT file documents the current directory, using a "." period to reference it:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: .
 
@@ -332,7 +332,7 @@ Notes
 The license_* fields in the generated .ABOUT files are grouped under the "licenses" fields.
 For instance,
 
-        ..  code-block:: none
+        ..  code-block::
 
                 licenses:
                     -   key: apache-2.0
@@ -344,7 +344,7 @@ For instance,
 However, if user create .ABOUT file manually, it can also used the individual field name.
 
 
-        ..  code-block:: none
+        ..  code-block::
 
                 license_key: apache-2.0
                 license_name: Apache 2.0
@@ -401,7 +401,7 @@ tools reference files and directories under version control:
 
 Some examples for using the vcs_* extension fields include:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 vcs_tool: svn
                 vcs_repository: http://svn.code.sf.net/p/inkscape/code/inkscape_project/
@@ -410,7 +410,7 @@ Some examples for using the vcs_* extension fields include:
 
 or:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 vcs_tool: git
                 vcs_repository: git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
@@ -430,7 +430,7 @@ to verify the integrity of a file documented by an ABOUT file.
 
 Some examples:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 checksum_md5: f30b9c173b1f19cf42ffa44f78e4b96c
 

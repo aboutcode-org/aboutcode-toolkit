@@ -10,14 +10,14 @@ about
 Syntax
 ------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about [OPTIONS] [COMMANDS]
 
 Options
 -------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --version        Show the version and exit.
                 -h, --help       Show this message and exit.
@@ -25,7 +25,7 @@ Options
 Commands
 --------
 
-        ..  code-block:: none
+        ..  code-block::
 
               attrib              Generate an attribution document from
                                   JSON/CSV/XLSX/.ABOUT files.
@@ -47,7 +47,7 @@ attrib
 Syntax
 ------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about attrib [OPTIONS] LOCATION OUTPUT
 
@@ -58,7 +58,7 @@ Syntax
 Options
 -------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --api_url URL                URL to DejaCode License Library.
                 --api_key KEY                API Key for the  DejaCode License Library
@@ -88,7 +88,7 @@ along with the license text.
 
 Assume the following:
 
-        ..  code-block:: none
+        ..  code-block::
 
             '/home/about_files/' contains all the ABOUT files [INPUT]
             '/home/project/inventory.csv' is a BOM inventory [INPUT]
@@ -97,7 +97,7 @@ Assume the following:
             '/home/attribution/attribution.html' is the user's output path [OUTPUT]
 
 
-        ..  code-block:: none
+        ..  code-block::
 
             $ about attrib /home/about_files/ /home/attribution/attribution.html
             or
@@ -108,7 +108,7 @@ Assume the following:
 Details
 ^^^^^^^
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --api_url URL --api_key
 
@@ -176,7 +176,7 @@ check
 Syntax
 ------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about check [OPTIONS] LOCATION
 
@@ -185,7 +185,7 @@ Syntax
 Options
 -------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --exclude PATTERN      Exclude the processing of the specified input pattern
                                         (e.g. *tests* or test/).
@@ -204,7 +204,7 @@ Validating ABOUT files at LOCATION.
 Details
 ^^^^^^^
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --exclude
                     Exclude the processing of the specified input pattern
@@ -276,7 +276,7 @@ collect_redist_src
 Syntax
 ------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about collect_redist_src [OPTIONS] LOCATION OUTPUT
 
@@ -288,7 +288,7 @@ Syntax
 Options
 -------
 
-        ..  code-block:: none
+        ..  code-block::
 
             --from-inventory FILE  Path to an inventory CSV/JSON/XLSX file as the base
                                     list for files/directories that need to be copied
@@ -308,7 +308,7 @@ files or inventory to the output location.
 Details
 ^^^^^^^
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --from-inventory
 
@@ -351,7 +351,7 @@ gen
 Syntax
 ------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about gen [OPTIONS] LOCATION OUTPUT
 
@@ -361,7 +361,7 @@ Syntax
 Options
 -------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --android                       Generate MODULE_LICENSE_XXX (XXX will be
                                                 replaced by license key) and NOTICE as the
@@ -388,7 +388,7 @@ Given a CSV/JSON/XLSX inventory, generate ABOUT files in the output location.
 Details
 ^^^^^^^
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --android
 
@@ -468,7 +468,7 @@ license_file will be saved separately.
 
 i.e.
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: test.c
                 name: test.c
@@ -487,7 +487,7 @@ consider it a successful match.
 
 i.e.
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: test.c
                 name: test.c
@@ -508,7 +508,7 @@ gen_license
 Syntax
 ------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about gen_license [OPTIONS] LOCATION OUTPUT
 
@@ -518,7 +518,7 @@ Syntax
 Options
 -------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --djc api_url api_key  Fetch licenses from a DejaCode License Library.
                 --scancode             Indicate the input JSON file is from
@@ -537,7 +537,7 @@ field and save to the output location.
 Details
 ^^^^^^^
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --djc
 
@@ -581,7 +581,7 @@ inventory
 Syntax
 ------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about inventory [OPTIONS] LOCATION OUTPUT
 
@@ -593,7 +593,7 @@ Syntax
 Options
 -------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --exclude PATTERN               Exclude the processing of the specified input pattern
                                                 (e.g. *tests* or test/).
@@ -611,7 +611,7 @@ use `-` to print result to stdout.
 Details
 ^^^^^^^
 
-        ..  code-block:: none
+        ..  code-block::
 
                 --exclude PATTERN
 
@@ -649,7 +649,7 @@ The multiple licenses support format for CSV files are separated by line break
 
 The multiple licenses support format for ABOUT files are by "grouping" with the keyword "licenses"
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: test.tar.xz
                 name: test
@@ -673,7 +673,7 @@ To support multiple license file for a license, the correct format is to separat
 |                |      | | mit        | | MIT License | | mit.LICENSE       |
 +----------------+------+--------------+---------------+---------------------+
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: test.tar.xz
                 name: test
@@ -707,7 +707,7 @@ transform
 Syntax
 ------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about transform [OPTIONS] LOCATION OUTPUT
 
@@ -717,7 +717,7 @@ Syntax
 Options
 -------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 -c, --configuration FILE  Path to an optional YAML configuration file. See
                                             --help-format for format help.
@@ -737,7 +737,7 @@ filters and checks and then write a new CSV/JSON/Excel to OUTPUT.
 Details
 ^^^^^^^
 
-        ..  code-block:: none
+        ..  code-block::
 
                 -c, --configuration
 
@@ -769,7 +769,7 @@ Details
 --help-format
 -------------
 
-        ..  code-block:: none
+        ..  code-block::
 
                 A transform configuration file is used to describe which transformations and
                 validations to apply to a source CSV file. This is a simple text file using YAML
@@ -838,7 +838,7 @@ fields renaming
 conf.txt
 """"""""
 
-        ..  code-block:: none
+        ..  code-block::
 
                 field_renamings:
                     about_resource : 'Directory / Filename'
@@ -860,7 +860,7 @@ input.csv
 Command
 """""""
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about transform -c conf.txt input.csv output.csv
 
@@ -897,7 +897,7 @@ http request, users can set the standard environment variables **http_proxy**,
 
 i.e.
 
-        ..  code-block:: none
+        ..  code-block::
 
                 $ export HTTP_PROXY="http://10.10.1.10:3128"
                 $ export HTTPS_PROXY="http://10.10.1.10:1080"

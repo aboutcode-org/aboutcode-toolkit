@@ -1,5 +1,6 @@
 ==============================
 Changelog
+==============================
 
 2025-03-31
     Release 11.1.1
@@ -14,7 +15,8 @@ Changelog
 
     * Drop support for python version earlier than 3.9
     * Add ability to "exclude" path in the check and inventory #583
-    * Add support for the special '-' FILE to print to on screen/to stdout in inventory #584
+    * Add support for the special '-' FILE to print to on screen/to stdout
+      in inventory #584
 
 
 2024-09-16
@@ -40,7 +42,8 @@ Changelog
     * Update the specification to 3.3.2
     * Support "declared_license_expression" and "other_license_expression"
     * Updated "about_resource" to be an optional field
-    * Updated spec to v4.0.0 as moving `about_resource` from mandatory to optional
+    * Updated spec to v4.0.0 as moving `about_resource` from mandatory to
+      optional
 
 
 2023-09-25
@@ -60,14 +63,16 @@ Changelog
 
     * Fixd error in load_json in util.py
     * Code cleanup
-    * Work with the SCTK version 32 and later (Drop support for SCTK version 31 and earlier)
+    * Work with the SCTK version 32 and later (Drop support for SCTK
+      version 31 and earlier)
     * Implement `--scancode` option for `gen`
 
 
 2023-07-14
     Release 9.0.0
 
-    * The tool will now show which worksheet (if .xlsx input) is the tool working on
+    * The tool will now show which worksheet (if .xlsx input) is the tool
+      working on
     * Error handling if defined worksheet does not exist
     * Adopt 3.3.1 specification: introduce ``ignored_resources``
 
@@ -78,7 +83,8 @@ Changelog
     * Fixed the transform code for xlsx and json
     * Remove irrelevant error for attrib
     * Add support to identify worksheet name for XLSX input
-    * The severity error level for "contains illegal name characters (or empty spaces) and is ignored" is changed from ERROR to WARNING
+    * The severity error level for "contains illegal name characters (or
+      empty spaces) and is ignored" is changed from ERROR to WARNING
     * Remove the limitation to ASCII only
     * Drop support for python3.6
     * Update valid chatacters for file/path name
@@ -100,10 +106,14 @@ Changelog
 2022-10-24
     Release 7.1.0
 
-    * Fixed version mismatch (https://github.com/nexB/aboutcode-toolkit/issues/510)
-    * Improve `check` performance (https://github.com/nexB/aboutcode-toolkit/issues/511)
-    * Relax the requirement to have the same format for input and output for `transform`
-    * Collect and handle the "matched_text" from the `--license-text` option from the scancode-toolkit
+    * Fixed version mismatch
+      (https://github.com/nexB/aboutcode-toolkit/issues/510)
+    * Improve `check` performance
+      (https://github.com/nexB/aboutcode-toolkit/issues/511)
+    * Relax the requirement to have the same format for input and output
+      for `transform`
+    * Collect and handle the "matched_text" from the `--license-text`
+      option from the scancode-toolkit
 
 
 2022-03-21
@@ -133,7 +143,8 @@ Changelog
     * Update configuration scripts
     * Use readthedocs for documentation
     * Add Dockerfile to run aboutcode with docker
-    * Add new option to choose extract license from ScanCode LicenseDB or DJC License Library
+    * Add new option to choose extract license from ScanCode LicenseDB or
+      DJC License Library
     * Add ability to transform XLSX file
     * Support XLSX file format for `inventory`, `gen` and `attrib`
     * Add 'spdx_license_key' support
@@ -142,9 +153,12 @@ Changelog
     * Bump PyYAML to 6.0
     * Add '%" as a supported character
     * Update default template
-    * All errors are logged if and only if the `verbose` option is set. Otherwise, ony 'Critical' and 'Warning' errors will be showed/logged
-    * Ability to generate attribution notice directly from an input inventory
-    * Remove the restriction of requiring 'about_resource' field in the input if performing `attrib` from an inventory
+    * All errors are logged if and only if the `verbose` option is set.
+      Otherwise, ony 'Critical' and 'Warning' errors will be showed/logged
+    * Ability to generate attribution notice directly from an input
+      inventory
+    * Remove the restriction of requiring 'about_resource' field in the
+      input if performing `attrib` from an inventory
 
 2021-04-02
     Release 6.0.0
@@ -157,17 +171,19 @@ Changelog
 
     * Add support for `package_url` #396
     * Fixed #443 and #444 issue with multiple licenses/license_files
-    * Fixed #442 no special characters allowed for `license_key`, `license_name` and `license_expression`
+    * Fixed #442 no special characters allowed for `license_key`,
+      `license_name` and `license_expression`
     * Fixed #446 Better error handling
 
 2020-08-11
     Release 5.0.0
 
-	* Enhance the `transform` to also work with JSON file
+    * Enhance the `transform` to also work with JSON file
     * Update transform code (See #427 and #428)
     * Fixed #431 - Error handling for empty "_file" fields
     * Fixed #432 - Handled UTF-8 variant invented by Microsoft
-    * Fixed #433 - problem was caused by the different multi-lic file format between json and CSV (CSV with '\n' line break)
+    * Fixed #433 - problem was caused by the different multi-lic file
+      format between json and CSV (CSV with '\n' line break)
     * Fixed #436 - issue about copy with the `--reference` option
     * Fixed #396 - support for alternative output for Android
 
@@ -207,7 +223,8 @@ Changelog
     * New UrlListField introduced for list of urls
     * The UrlField is now only taking single URL value
     * The owner is now a StringField instead of ListField
-    * Format the ordering of the generated ABOUT file (See https://github.com/nexB/aboutcode-toolkit/issues/349#issuecomment-438871444)
+    * Format the ordering of the generated ABOUT file (See
+      https://github.com/nexB/aboutcode-toolkit/issues/349#issuecomment-438871444)
     * '+' and '(' and ')' is now supported in license_expression
     * The key 'about_resource_path' is removed
     * Revert back the requirement of the 'name' field
@@ -242,7 +259,8 @@ Changelog
 
     * New `--vartext` option for `attrib`
     * Add support for `checksum_sha256` and `author_file`
-    * `check` command will not count INFO message as error when `--verbose` is set
+    * `check` command will not count INFO message as error when `--verbose`
+      is set
     * Update `track_change` to `track_changes`
     * New `--filter` and `--mapping-output` options for `inventory`
 
@@ -262,7 +280,8 @@ Changelog
     Release 3.1.0
 
     * Fixed JSON input from AboutCode manger export and ScanCode output
-    * Added a new option `mapping-file` to support using a custom file for mapping
+    * Added a new option `mapping-file` to support using a custom file for
+      mapping
     * Change the name of the option `--show-all` to `--verbose`
     * Better error handling for copying file with permission issue
     * Support timestamp in attribution output
@@ -274,28 +293,27 @@ Changelog
 
     Release 3.0.*
 
-    ABOUT files is now YAML formatted.
-    Supported license expression.
-    Supported JSON input and output format: https://github.com/nexB/aboutcode-toolkit/issues/246 and https://github.com/nexB/aboutcode-toolkit/issues/277
-    Support Python 3: https://github.com/nexB/aboutcode-toolkit/issues/280
-    Refined help texts
-    Refined USAGE texts
-    Refined SPECs
+    ABOUT files is now YAML formatted. Supported license expression.
+    Supported JSON input and output format:
+    https://github.com/nexB/aboutcode-toolkit/issues/246 and
+    https://github.com/nexB/aboutcode-toolkit/issues/277 Support Python 3:
+    https://github.com/nexB/aboutcode-toolkit/issues/280 Refined help texts
+    Refined USAGE texts Refined SPECs
 
     Input key changes:
-    ==================
-    `about_file` is replaced by `about_file_path`
-    `dje_license_key` is replaced by `license_expression`
-    `version` is no longer a required field
-    `home_url` is now `homepage_url`
+
+    `about_file` is replaced by `about_file_path` `dje_license_key` is
+    replaced by `license_expression` `version` is no longer a required
+    field `home_url` is now `homepage_url`
 
     API Updated:
-    ============
-     - Break down the 3 major functions: `inventory`, `genabout` and `genattrib` into 3 subcommands:
-        i.e.
-        `about inventory`, `about generate` and `about attrib`
 
-     - A new `check` subcommand: https://github.com/nexB/aboutcode-toolkit/issues/281
+     - Break down the 3 major functions: `inventory`, `genabout` and
+       `genattrib` into 3 subcommands:
+       i.e. `about inventory`, `about generate` and `about attrib`
+
+     - A new `check` subcommand:
+       https://github.com/nexB/aboutcode-toolkit/issues/281
 
      - Some options changes
         `--extract_license` becomes `--fetch-license`
@@ -388,19 +406,20 @@ Changelog
       * the dje_license field has been renamed to dje_license_key
       * when a dje_license_key is present, a new dje_license_url will be
         reported when fetching data from the DejaCode API.
-      * In genabout, the '--all_in_one' command line option has been removed.
-        It was not well specified and did not work as advertised.
+      * In genabout, the '--all_in_one' command line option has been
+        removed. It was not well specified and did not work as advertised.
 
     * in genattrib:
 
       * the Component List is now optional.
       * there is a new experimental '--verification_location' command line
-        option.  This option will be removed in the future version. Do not use
-        it.
+        option.  This option will be removed in the future version. Do not
+        use it.
     * the '+' character is now supported in file names.
     * several bugs have been fixed.
     * error handling and error and warning reporting have been improved.
-    * New documentation in doc: UsingAboutCodetoDocumentYourSoftwareAssets.pdf
+    * New documentation in doc:
+      UsingAboutCodetoDocumentYourSoftwareAssets.pdf
 
 
 2014-11-05  Philippe Ombredanne <pombredanne@nexb.com>
@@ -429,5 +448,5 @@ Changelog
 
     Release 0.8.1
 
-    * Initial release with minimal capabilities to read and validate
-      ABOUT files format 0.8.0 and output a CSV inventory.
+    * Initial release with minimal capabilities to read and validate ABOUT
+      files format 0.8.0 and output a CSV inventory.

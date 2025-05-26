@@ -50,7 +50,8 @@ version may be pre-installed, open a terminal and type:
 
 Note
 ~~~~
-    Debian has decided that distutils is not a core python package, so it is not included in the last versions of debian and debian-based OSes.
+    Debian has decided that distutils is not a core python package, so it
+    is not included in the last versions of debian and debian-based OSes.
     A solution is to run: `sudo apt install python3-distutils`
 
 On Windows or Mac, you can download the latest Python here:
@@ -85,7 +86,8 @@ To deactivate the virtualenv, run (on both posix and windows):
 
 VERSIONING SCHEMA
 -----------------
-Starting at AboutCode version 4.0.0, the AboutCode Toolkit will follow SemVer for the versioning schema.
+Starting at AboutCode version 4.0.0, the AboutCode Toolkit will follow
+SemVer for the versioning schema.
 
 i.e. MAJOR.MINOR.PATCH format
     1. MAJOR version when making incompatible API changes,

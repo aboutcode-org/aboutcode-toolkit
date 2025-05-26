@@ -219,7 +219,7 @@ The attributes that can be set in a configuration file are:
 -   field_renamings: An optional map of source field name to target new field
     name that is used to rename CSV/JSON/XLSX fields.
 
-        ..  code-block:: none
+        ..  code-block::
 
             field_renamings:
                 about_resource : 'Directory/Location'
@@ -238,7 +238,7 @@ renamed to "about_resource" and "foo" to "bar":
 For instance with this configuration, an error will be reported if the fields "name"
 and "version" are missing, or if any entry does not have a value set for these fields:
 
-        ..  code-block:: none
+        ..  code-block::
 
             required_fields:
                 - name
@@ -252,7 +252,7 @@ and "version" are missing, or if any entry does not have a value set for these f
 For instance with this configuration, the target file will only contains the "name" and
 "version" fields:
 
-        ..  code-block:: none
+        ..  code-block::
 
             field_filters:
                 - name
@@ -265,7 +265,7 @@ For instance with this configuration, the target file will only contains the "na
 
 For instance with this configuration, the target file will not contain the "type" and "temp" fields:
 
-        ..  code-block:: none
+        ..  code-block::
 
             exclude_fields:
                 - type
@@ -280,7 +280,7 @@ are defined here: :ref:`reference`
 
 Here is an example of a gen command:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about gen --fetch-license --reference /Users/harrypotter/myLicenseNoticeFiles/ /Users/harrypotter/myAboutFiles/myProject-bom.csv /Users/harrypotter/myAboutFiles/
 
@@ -299,7 +299,7 @@ This gen example command does the following:
 Review the generated ABOUT file(s) to determine if it meets your requirements. Here is a
 simple example of a linux-redhat-7.2.ABOUT file that documents the directory /linux-redhat-7.2/ :
 
-        ..  code-block:: none
+        ..  code-block::
 
                 about_resource: .
                 name: Linux RedHat
@@ -354,7 +354,7 @@ here are a few relatively simple concepts that relate to the attribution documen
 The simplest modifications to the default_html.template file involve the labels and standard
 text. For example, here is the default template text for the Table of Contents:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 <div class="oss-table-of-contents">
                     {% for about_object in abouts %}
@@ -367,7 +367,7 @@ text. For example, here is the default template text for the Table of Contents:
 If you would prefer something other than a simple space between the component name and
 the component version, you can modify it to something like this:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 <div class="oss-table-of-contents">
                     {% for about_object in abouts %}
@@ -392,7 +392,7 @@ following example, which is intended to support a "license reference" rather tha
 document, the customized template modifies the data grouping to use a custom field
 called "confirmed_license":
 
-        ..  code-block:: none
+        ..  code-block::
 
                 <div class="oss-table-of-contents">
                     {% for group in abouts | groupby('confirmed_license') %}
@@ -410,7 +410,7 @@ using the jinja2 for-loop capabilities. Notice that the variable "group.grouper.
 actually the license name here, and that “License URL” can be any URL that you have chosen
 to store in your .ABOUT files:
 
-        ..  code-block:: none
+        ..  code-block::
 
                 {% for group in abouts | groupby('confirmed_license') %}
                     {% for confirmed_license in group.grouper.value %}
