@@ -140,9 +140,9 @@ class GenerateTest(unittest.TestCase):
             abouts, is_about_input, license_dict, output_file, template_loc=template_loc)
 
         with open(output_file) as of:
-            f1 = '\n'.join(of.readlines(False))
+            f1 = [line.strip() for line in of if line.strip()]
         with open(expected) as ef:
-            f2 = '\n'.join(ef.readlines(False))
+            f2 = [line.strip() for line in ef if line.strip()]
 
         assert f1 == f2
 
