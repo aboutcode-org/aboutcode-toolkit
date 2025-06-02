@@ -23,8 +23,12 @@ import openpyxl
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import saneyaml
-from attributecode.util import csv
-from attributecode.util import replace_tab_with_spaces
+from attributecode.util import (
+    csv,
+    replace_tab_with_spaces,
+    parse_license_expression,  # canonical implementation from util.py
+    detect_special_char,       # canonical implementation from util.py
+)
 
 
 def transform_csv(location):

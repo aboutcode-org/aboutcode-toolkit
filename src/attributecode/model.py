@@ -37,34 +37,26 @@ from urllib.parse import urlparse
 
 from license_expression import Licensing
 from packageurl import PackageURL
-
-from attributecode import __version__
-from attributecode import CRITICAL
-from attributecode import ERROR
-from attributecode import INFO
-from attributecode import WARNING
-from attributecode import api
-from attributecode import Error
-from attributecode import saneyaml
-from attributecode import gen
-from attributecode import util
-from attributecode.transform import write_excel
-from attributecode.util import add_unc
-from attributecode.util import boolean_fields
-from attributecode.util import copy_license_notice_files
-from attributecode.util import copy_file
-from attributecode.util import csv
-from attributecode.util import file_fields
-from attributecode.util import filter_errors
-from attributecode.util import get_spdx_key_and_lic_key_from_licdb
-from attributecode.util import is_valid_name
-from attributecode.util import on_windows
-from attributecode.util import norm
-from attributecode.util import replace_tab_with_spaces
-from attributecode.util import wrap_boolean_value
-from attributecode.util import UNC_PREFIX
-from attributecode.util import ungroup_licenses
-from attributecode.util import ungroup_licenses_from_sctk
+from attributecode.util import (
+    add_unc,
+    boolean_fields,
+    copy_license_notice_files,
+    copy_file,
+    csv,
+    file_fields,
+    filter_errors,
+    get_spdx_key_and_lic_key_from_licdb,
+    is_valid_name,
+    on_windows,
+    norm,
+    replace_tab_with_spaces,
+    wrap_boolean_value,
+    UNC_PREFIX,
+    ungroup_licenses,
+    ungroup_licenses_from_sctk,
+    parse_license_expression,      
+    detect_special_char,           
+)
 
 genereated_tk_version = "# Generated with AboutCode Toolkit Version %s \n\n" % __version__
 
@@ -234,9 +226,10 @@ class StringField(Field):
     """
 
     def _validate(self, *args, **kwargs):
-        errors = super(StringField, self)._validate(*args, ** kwargs)
+        errors = super(StringField, self)._validate(*args, **kwargs)
+       
         no_special_char_field = [
-            'license_expression', 'license_key', 'license_name', 'declared_license_expression', 'other_license_expression ']
+            'license_expression', 'license_key', 'license_name', 'declared_license_expression', 'other_license_expression']
         name = self.name
         if name in no_special_char_field:
             val = self.value
@@ -2145,40 +2138,3 @@ def convert_spdx_expression_to_lic_expression(spdx_key, spdx_lic_dict):
     return value
 
 
-def parse_license_expression(lic_expression):
-    licensing = Licensing()
-    lic_list = []
-    invalid_lic_exp = ''
-    special_char = detect_special_char(lic_expression)
-    if not special_char:
-        # Parse the license expression and save it into a list
-        try:
-            lic_list = licensing.license_keys(lic_expression)
-        except:
-            invalid_lic_exp = lic_expression
-    return special_char, lic_list, invalid_lic_exp
-
-
-def detect_special_char(expression):
-    not_support_char = [
-        '!', '@', '#', '$', '^', '&', '*', '=', '{', '}',
-        '|', '[', ']', '\\', ':', ';', '<', '>', '?', ',', '/']
-    special_character = []
-    for char in not_support_char:
-        if char in expression:
-            special_character.append(char)
-    return special_character
-
-
-def valid_api_url(api_url):
-    try:
-        response = get(api_url)
-        # The 403 error code is expected if the api_url is pointing to DJE as no
-        # API key is provided. The 200 status code represent connection success
-        # to scancode's LicenseDB. All other exception yield to invalid api_url
-        if response.status_code == 403 or response.status_code == 200:
-            return True
-        else:
-            return False
-    except:
-        return False
