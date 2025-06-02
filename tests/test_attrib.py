@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexB.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -175,8 +176,14 @@ class GenerateTest(unittest.TestCase):
         # expected doesn't work well, it works after removed all the newline and spaces
         # assert expected == result
         # assert expected.splitlines(False) == result.splitlines(False)
-        assert expected.replace('\n', '').replace(' ', '').replace(
-            '\t', '') == result.replace('\n', '').replace(' ', '').replace('\t', '')
+        actual = result.replace('\n', '').replace(' ', '').replace('\t', '')
+        exp = expected.replace('\n', '').replace(' ', '').replace('\t', '')
+        if actual != exp:
+            print('---EXPECTED---')
+            print(expected)
+            print('---ACTUAL---')
+            print(result)
+        assert exp == actual
 
     def test_scancode_input_min_score_100(self):
         test_file = get_test_loc(
@@ -207,8 +214,14 @@ class GenerateTest(unittest.TestCase):
         # expected doesn't work well, it works after removed all the newline and spaces
         # assert expected == result
         # assert expected.splitlines(False) == result.splitlines(False)
-        assert expected.replace('\n', '').replace(' ', '').replace(
-            '\t', '') == result.replace('\n', '').replace(' ', '').replace('\t', '')
+        actual = result.replace('\n', '').replace(' ', '').replace('\t', '')
+        exp = expected.replace('\n', '').replace(' ', '').replace('\t', '')
+        if actual != exp:
+            print('---EXPECTED---')
+            print(expected)
+            print('---ACTUAL---')
+            print(result)
+        assert exp == actual
 
     def test_scancode_input_dup_lic(self):
         test_file = get_test_loc('test_attrib/scancode_input/sc-dup-lic.json')
@@ -238,8 +251,14 @@ class GenerateTest(unittest.TestCase):
         # expected doesn't work well, it works after removed all the newline and spaces
         # assert expected == result
         # assert expected.splitlines(False) == result.splitlines(False)
-        assert expected.replace('\n', '').replace(' ', '').replace(
-            '\t', '') == result.replace('\n', '').replace(' ', '').replace('\t', '')
+        actual = result.replace('\n', '').replace(' ', '').replace('\t', '')
+        exp = expected.replace('\n', '').replace(' ', '').replace('\t', '')
+        if actual != exp:
+            print('---EXPECTED---')
+            print(expected)
+            print('---ACTUAL---')
+            print(result)
+        assert exp == actual
 
     def test_scancode_input_dup_lic_match(self):
         test_file = get_test_loc(
@@ -272,8 +291,14 @@ class GenerateTest(unittest.TestCase):
         # expected doesn't work well, it works after removed all the newline and spaces
         # assert expected == result
         # assert expected.splitlines(False) == result.splitlines(False)
-        assert expected.replace('\n', '').replace(' ', '').replace(
-            '\t', '') == result.replace('\n', '').replace(' ', '').replace('\t', '')
+        actual = result.replace('\n', '').replace(' ', '').replace('\t', '')
+        exp = expected.replace('\n', '').replace(' ', '').replace('\t', '')
+        if actual != exp:
+            print('---EXPECTED---')
+            print(expected)
+            print('---ACTUAL---')
+            print(result)
+        assert exp == actual
 
     def test_scancode_input_multi_lic(self):
         test_file = get_test_loc(
@@ -304,8 +329,14 @@ class GenerateTest(unittest.TestCase):
         # expected doesn't work well, it works after removed all the newline and spaces
         # assert expected == result
         # assert expected.splitlines(False) == result.splitlines(False)
-        assert expected.replace('\n', '').replace(' ', '').replace(
-            '\t', '') == result.replace('\n', '').replace(' ', '').replace('\t', '')
+        actual = result.replace('\n', '').replace(' ', '').replace('\t', '')
+        exp = expected.replace('\n', '').replace(' ', '').replace('\t', '')
+        if actual != exp:
+            print('---EXPECTED---')
+            print(expected)
+            print('---ACTUAL---')
+            print(result)
+        assert exp == actual
 
     def test_generate_with_csv(self):
         test_file = get_test_loc(

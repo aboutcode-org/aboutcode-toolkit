@@ -23,7 +23,7 @@ from urllib.error import HTTPError
 
 from attributecode import ERROR
 from attributecode import Error
-
+from attributecode import __version__
 """
 API call helpers
 """

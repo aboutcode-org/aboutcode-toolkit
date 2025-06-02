@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # ============================================================================
-#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexB.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -37,6 +37,9 @@ from urllib.parse import urlparse
 
 from license_expression import Licensing
 from packageurl import PackageURL
+from attributecode import __version__
+from attributecode import util
+from attributecode import Error, CRITICAL, ERROR, WARNING, INFO
 from attributecode.util import (
     add_unc,
     boolean_fields,
@@ -54,9 +57,12 @@ from attributecode.util import (
     UNC_PREFIX,
     ungroup_licenses,
     ungroup_licenses_from_sctk,
-    parse_license_expression,      
-    detect_special_char,           
+    parse_license_expression,
+    detect_special_char,
+    valid_api_url
 )
+
+import saneyaml
 
 genereated_tk_version = "# Generated with AboutCode Toolkit Version %s \n\n" % __version__
 
@@ -227,7 +233,7 @@ class StringField(Field):
 
     def _validate(self, *args, **kwargs):
         errors = super(StringField, self)._validate(*args, **kwargs)
-       
+
         no_special_char_field = [
             'license_expression', 'license_key', 'license_name', 'declared_license_expression', 'other_license_expression']
         name = self.name

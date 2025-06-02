@@ -32,6 +32,8 @@ from itertools import zip_longest
 from attributecode import CRITICAL
 from attributecode import WARNING
 from attributecode import Error
+from attributecode import __version__
+from attributecode import Error
 
 on_windows = "win32" in sys.platform
 
@@ -272,7 +274,7 @@ def get_spdx_key_and_lic_key_from_licdb():
                     lic_dict[other_spdx] = license["license_key"]
 
     return lic_dict
-def detect_special_char(expression):
+
 """
 Canonical implementation of license expression parsing and special character detection.
 Import and use these from util.py everywhere in the codebase to avoid duplication.
