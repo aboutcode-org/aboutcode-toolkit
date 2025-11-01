@@ -167,7 +167,9 @@ def get_locations(location):
     """
     location = add_unc(location)
     location = get_absolute(location)
-    assert os.path.exists(location)
+    if not os.path.exists(location):
+        raise FileNotFoundError(f"Expected path does not exist: {location}")
+
 
     if os.path.isfile(location):
         yield location
@@ -283,9 +285,10 @@ def get_relative_path(base_loc, full_loc):
     base = norm(base_loc)
     path = norm(full_loc)
 
-    assert path.startswith(base), (
-        "Cannot compute relative path: %(path)r does not start with %(base)r" % locals()
-    )
+    if not path.startswith(base):
+        raise ValueError(
+            f"Cannot compute relative path: {path!r} does not start with {base!r}"
+        )
     base_name = resource_name(base)
     no_dir = base == base_name
     same_loc = base == path
