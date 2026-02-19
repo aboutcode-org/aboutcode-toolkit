@@ -32,9 +32,9 @@ handler = logging.StreamHandler()
 handler.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
-TESTDATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'testdata')
+TESTDATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "testdata")
 
-on_windows = 'win32' in sys.platform
+on_windows = "win32" in sys.platform
 on_posix = not on_windows
 
 
@@ -58,11 +58,10 @@ def create_dir(location):
     """
     if not os.path.exists(location):
         os.makedirs(location)
-        os.chmod(location, stat.S_IRWXU | stat.S_IRWXG
-                 | stat.S_IROTH | stat.S_IXOTH)
+        os.chmod(location, stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
 
 
-def build_temp_dir(prefix='test-attributecode-'):
+def build_temp_dir(prefix="test-attributecode-"):
     """
     Create and return a new unique empty directory created in base_dir.
     """
@@ -71,7 +70,7 @@ def build_temp_dir(prefix='test-attributecode-'):
     return location
 
 
-def get_temp_file(file_name='test-attributecode-tempfile'):
+def get_temp_file(file_name="test-attributecode-tempfile"):
     """
     Return a unique new temporary file location to a non-existing
     temporary file that can safely be created without a risk of name
@@ -103,7 +102,7 @@ def extract_zip(location, target_dir):
     Extract a zip archive file at location in the target_dir directory.
     """
     if not os.path.isfile(location) and zipfile.is_zipfile(location):
-        raise Exception('Incorrect zip file %(location)r' % locals())
+        raise Exception("Incorrect zip file %(location)r" % locals())
 
     with zipfile.ZipFile(location) as zipf:
         for info in zipf.infolist():
@@ -118,7 +117,7 @@ def extract_zip(location, target_dir):
                 if not os.path.exists(target):
                     os.makedirs(target)
             if not os.path.exists(target):
-                with open(target, 'wb') as f:
+                with open(target, "wb") as f:
                     f.write(content)
 
 
@@ -144,30 +143,27 @@ def run_about_command_test(options, expected_rc=0):
     On success, return stdout and stderr.
     """
     root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    about_cmd = os.path.join(root_dir, 'about')
+    about_cmd = os.path.join(root_dir, "about")
     args = [about_cmd] + options
     about = subprocess.Popen(
-        args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True if on_windows else False)
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True if on_windows else False
+    )
     stdout, stderr = about.communicate()
     rc = about.poll()
     if rc != expected_rc:
-        opts = ' '.join(args)
+        opts = " ".join(args)
         error = (
-            'Failure to run command: %(opts)s\n'
-            'stdout:\n'
-            '{stdout}\n'
-            '\n'
-            'stderr:\n'
-            '{stderr}\n'
+            "Failure to run command: %(opts)s\nstdout:\n{stdout}\n\nstderr:\n{stderr}\n"
         ).format(**locals())
         assert rc == expected_rc, error
     return stdout, stderr
 
 
-def run_about_command_test_click(options, expected_rc=0, monkeypatch=None,):
+def run_about_command_test_click(
+    options,
+    expected_rc=0,
+    monkeypatch=None,
+):
     """
     Run an "about" command as a Click-controlled subprocess with the `options`
     list of options. Return a click.testing.Result object.
@@ -177,9 +173,17 @@ def run_about_command_test_click(options, expected_rc=0, monkeypatch=None,):
     import click
     from click.testing import CliRunner
     from attributecode import cmd
+
     if monkeypatch:
-        monkeypatch.setattr(click._termui_impl, 'isatty', lambda _: True)
-        monkeypatch.setattr(click , 'get_terminal_size', lambda : (80, 43,))
+        monkeypatch.setattr(click._termui_impl, "isatty", lambda _: True)
+        monkeypatch.setattr(
+            click,
+            "get_terminal_size",
+            lambda: (
+                80,
+                43,
+            ),
+        )
     runner = CliRunner()
 
     result = runner.invoke(cmd.about, options, catch_exceptions=False)
@@ -187,20 +191,20 @@ def run_about_command_test_click(options, expected_rc=0, monkeypatch=None,):
     output = result.output
     if result.exit_code != expected_rc:
         opts = get_opts(options)
-        error = '''
+        error = """
 Failure to run: about %(opts)s
 output:
 %(output)s
-''' % locals()
+""" % locals()
         assert result.exit_code == expected_rc, error
     return result
 
 
 def get_opts(options):
     try:
-        return ' '.join(options)
+        return " ".join(options)
     except:
         try:
-            return b' '.join(options)
+            return b" ".join(options)
         except:
-            return b' '.join(map(repr, options))
+            return b" ".join(map(repr, options))

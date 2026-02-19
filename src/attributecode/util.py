@@ -47,7 +47,7 @@ file_fields = ["about_resource", "notice_file", "changelog_file", "author_file"]
 
 
 def to_posix(path):
-    """
+    r"""
     Return a path using the posix path separator given a path that may contain
     posix or windows separators, converting "\\" to "/". NB: this path will
     still be valid in the windows explorer (except for a UNC or share name). It
@@ -65,9 +65,7 @@ UNC_PREFIXES = (
 )
 
 valid_file_chars = "_-.+()~[]{}@%!$,"
-invalid_file_chars = string.punctuation.translate(
-    str.maketrans("", "", valid_file_chars)
-)
+invalid_file_chars = string.punctuation.translate(str.maketrans("", "", valid_file_chars))
 
 
 def invalid_chars(path):
@@ -169,7 +167,6 @@ def get_locations(location):
     location = get_absolute(location)
     if not os.path.exists(location):
         raise FileNotFoundError(f"Expected path does not exist: {location}")
-
 
     if os.path.isfile(location):
         yield location
@@ -286,9 +283,7 @@ def get_relative_path(base_loc, full_loc):
     path = norm(full_loc)
 
     if not path.startswith(base):
-        raise ValueError(
-            f"Cannot compute relative path: {path!r} does not start with {base!r}"
-        )
+        raise ValueError(f"Cannot compute relative path: {path!r} does not start with {base!r}")
     base_name = resource_name(base)
     no_dir = base == base_name
     same_loc = base == path
@@ -311,7 +306,7 @@ def get_relative_path(base_loc, full_loc):
 
 
 def to_native(path):
-    """
+    r"""
     Return a path using the current OS path separator given a path that may
     contain posix or windows separators, converting "/" to "\\" on windows
     and "\\" to "/" on posix OSes.
@@ -529,9 +524,7 @@ def copy_file(from_path, to_path):
             file_name = os.path.basename(from_path)
             to_file_path = os.path.join(to_path, file_name)
             if os.path.exists(to_file_path):
-                msg = (
-                    to_file_path + " is already existed and is replaced by " + from_path
-                )
+                msg = to_file_path + " is already existed and is replaced by " + from_path
                 error = Error(WARNING, msg)
             shutil.copy2(from_path, to_path)
         return error
@@ -640,9 +633,7 @@ def format_about_dict_for_json_output(about_dictionary_list):
                     row_list[key] = element[key]
 
         # Group the same license information in a list
-        license_group = list(
-            zip_longest(license_key, license_name, license_file, license_url)
-        )
+        license_group = list(zip_longest(license_key, license_name, license_file, license_url))
         if license_group:
             licenses_list = []
             for lic_group in license_group:
@@ -735,9 +726,7 @@ def get_file_text(file_name, reference):
         msg = "The file " + file_path + " does not exist"
         error = Error(CRITICAL, msg)
     else:
-        with codecs.open(
-            file_path, "rb", encoding="utf-8-sig", errors="replace"
-        ) as txt:
+        with codecs.open(file_path, "rb", encoding="utf-8-sig", errors="replace") as txt:
             # with io.open(file_path, encoding='utf-8') as txt:
             text = txt.read()
     return error, text
@@ -858,8 +847,8 @@ def write_licenses(lic_dict, location):
 
 def strip_inventory_value(inventory):
     """
-    The inventory is a list of dictionaries. This function will strip the value
-    of the dictionary and return the stripped dictionary to a list
+    Strip the value of the dictionary and return the stripped dictionary to
+    a list.
     """
     stripped_inventory = []
     for component in inventory:

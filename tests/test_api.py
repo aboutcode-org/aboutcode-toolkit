@@ -35,53 +35,58 @@ class FakeResponse(object):
 
 
 class ApiTest(unittest.TestCase):
-
-    @mock.patch.object(api, 'request_license_data')
+    @mock.patch.object(api, "request_license_data")
     def test_api_get_license_details_from_api(self, request_license_data):
         license_data = {
-            'short_name': 'Apache 2.0',
-            'full_text': 'Apache License Version 2.0 ...',
-            'key': 'apache-2.0',
+            "short_name": "Apache 2.0",
+            "full_text": "Apache License Version 2.0 ...",
+            "key": "apache-2.0",
         }
         errors = []
         request_license_data.return_value = license_data, errors
 
-        expected = ({'short_name': 'Apache 2.0',
-                    'full_text': 'Apache License Version 2.0 ...', 'key': 'apache-2.0'}, [])
+        expected = (
+            {
+                "short_name": "Apache 2.0",
+                "full_text": "Apache License Version 2.0 ...",
+                "key": "apache-2.0",
+            },
+            [],
+        )
         result = api.get_license_details_from_api(
-            api_url='api_url', api_key='api_key', license_key='license_key')
+            api_url="api_url", api_key="api_key", license_key="license_key"
+        )
         assert expected == result
 
-    @mock.patch.object(api, 'get')
+    @mock.patch.object(api, "get")
     def test_api_request_license_data_with_result(self, mock_data):
         response_content = (
             b'{"count":1,"results":[{"name":"Apache 2.0","key":"apache-2.0","text":"Text"}]}'
         )
         mock_data.return_value = FakeResponse(response_content)
         license_data = api.request_license_data(
-            api_url='http://fake.url/', api_key='api_key', license_key='apache-2.0')
-        expected = (
-            {'name': 'Apache 2.0', 'key': 'apache-2.0', 'text': 'Text'},
-            []
+            api_url="http://fake.url/", api_key="api_key", license_key="apache-2.0"
         )
+        expected = ({"name": "Apache 2.0", "key": "apache-2.0", "text": "Text"}, [])
         assert expected == license_data
 
-    @mock.patch.object(api, 'get')
+    @mock.patch.object(api, "get")
     def test_api_request_license_data_without_result(self, mock_data):
         response_content = b'{"count":0,"results":[]}'
         mock_data.return_value = FakeResponse(response_content)
         license_data = api.request_license_data(
-            api_url='http://fake.url/', api_key='api_key', license_key='apache-2.0')
+            api_url="http://fake.url/", api_key="api_key", license_key="apache-2.0"
+        )
         expected = ({}, [Error(ERROR, "Invalid 'license': apache-2.0")])
         assert expected == license_data
 
-    @mock.patch.object(api, 'get')
+    @mock.patch.object(api, "get")
     def test_api_request_license_data_with_incorrect_url(self, mock_data):
         # Some URL that is accessible but not a correct API URL
-        response_content = b'<html></html>'
+        response_content = b"<html></html>"
         mock_data.return_value = FakeResponse(response_content)
         license_data = api.request_license_data(
-            api_url='http://fake.url/', api_key='api_key', license_key='apache-2.0')
-        expected = (
-            {}, [Error(ERROR, "Invalid '--api_url'. License generation is skipped.")])
+            api_url="http://fake.url/", api_key="api_key", license_key="apache-2.0"
+        )
+        expected = ({}, [Error(ERROR, "Invalid '--api_url'. License generation is skipped.")])
         assert expected == license_data

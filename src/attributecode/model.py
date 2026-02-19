@@ -97,7 +97,7 @@ class Field(object):
         self.errors = []
 
     def default_value(self):
-        return ''
+        return ""
 
     def validate(self, *args, **kwargs):
         """
@@ -110,7 +110,7 @@ class Field(object):
         if not self.present:
             # required fields must be present
             if self.required:
-                msg = u'Field %(name)s is required'
+                msg = "Field %(name)s is required"
                 errors.append(Error(CRITICAL, msg % locals()))
                 return errors
         else:
@@ -120,18 +120,17 @@ class Field(object):
             if not name in boolean_fields and not self.has_content:
                 # ... especially if required
                 if self.required:
-                    msg = u'Field %(name)s is required and empty'
+                    msg = "Field %(name)s is required and empty"
                     severity = CRITICAL
                 else:
                     severity = INFO
-                    msg = u'Field %(name)s is present but empty.'
+                    msg = "Field %(name)s is present but empty."
                 errors.append(Error(severity, msg % locals()))
             else:
                 # present fields with content go through validation...
                 # first trim any trailing spaces on each line
                 if isinstance(self.original_value, str):
-                    value = '\n'.join(s.rstrip() for s
-                                      in self.original_value.splitlines(False))
+                    value = "\n".join(s.rstrip() for s in self.original_value.splitlines(False))
                     # then strip leading and trailing spaces
                     value = value.strip()
                 else:
@@ -142,7 +141,7 @@ class Field(object):
                     errors.extend(validation_errors)
                 except Exception as e:
                     emsg = repr(e)
-                    msg = u'Error validating field %(name)s: %(value)r: %(emsg)r'
+                    msg = "Error validating field %(name)s: %(value)r: %(emsg)r"
                     errors.append(Error(CRITICAL, msg % locals()))
                     raise
 
@@ -158,14 +157,14 @@ class Field(object):
         return []
 
     def _serialized_value(self):
-        return self.value if self.value else u''
+        return self.value if self.value else ""
 
     def serialize(self):
         """
         Return a unicode serialization of self in the ABOUT format.
         """
         name = self.name
-        value = self.serialized_value() or u''
+        value = self.serialized_value() or ""
         if self.has_content or self.value:
             value = value.splitlines(True)
             # multi-line
@@ -173,29 +172,29 @@ class Field(object):
                 # This code is used to read the YAML's multi-line format in
                 # ABOUT files
                 # (Test: test_loads_dumps_is_idempotent)
-                if value[0].strip() == u'|' or value[0].strip() == u'>':
-                    value = u' '.join(value)
+                if value[0].strip() == "|" or value[0].strip() == ">":
+                    value = " ".join(value)
                 else:
                     # Insert '|' as the indicator for multi-line follow by a
                     # newline character
-                    value.insert(0, u'|\n')
+                    value.insert(0, "|\n")
                     # insert 4 spaces for newline values
-                    value = u'    '.join(value)
+                    value = "    ".join(value)
             else:
                 # FIXME: See https://github.com/nexB/aboutcode-toolkit/issues/323
                 # The yaml.load() will throw error if the parsed value
                 # contains ': ' character. A work around is to put a pipe, '|'
                 # to indicate the whole value as a string
-                if value and ': ' in value[0]:
-                    value.insert(0, u'|\n')
+                if value and ": " in value[0]:
+                    value.insert(0, "|\n")
                     # insert 4 spaces for newline values
-                    value = u'    '.join(value)
+                    value = "    ".join(value)
                 else:
-                    value = u''.join(value)
+                    value = "".join(value)
 
-        serialized = u'%(name)s:' % locals()
+        serialized = "%(name)s:" % locals()
         if value:
-            serialized += ' ' + '%(value)s' % locals()
+            serialized += " " + "%(value)s" % locals()
         return serialized
 
     def serialized_value(self):
@@ -203,7 +202,7 @@ class Field(object):
         Return a unicode serialization of self in the ABOUT format.
         Does not include a white space for continuations.
         """
-        return self._serialized_value() or u''
+        return self._serialized_value() or ""
 
     @property
     def has_content(self):
@@ -215,16 +214,18 @@ class Field(object):
         required = self.required
         has_content = self.has_content
         present = self.present
-        r = ('Field(name=%(name)r, value=%(value)r, required=%(required)r, present=%(present)r)')
+        r = "Field(name=%(name)r, value=%(value)r, required=%(required)r, present=%(present)r)"
         return r % locals()
 
     def __eq__(self, other):
         """
         Equality based on string content value, ignoring spaces.
         """
-        return (isinstance(other, self.__class__)
-                and self.name == other.name
-                and self.value == other.value)
+        return (
+            isinstance(other, self.__class__)
+            and self.name == other.name
+            and self.value == other.value
+        )
 
 
 class StringField(Field):
@@ -234,28 +235,34 @@ class StringField(Field):
     """
 
     def _validate(self, *args, **kwargs):
-        errors = super(StringField, self)._validate(*args, ** kwargs)
+        errors = super(StringField, self)._validate(*args, **kwargs)
         no_special_char_field = [
-            'license_expression', 'license_key', 'license_name', 'declared_license_expression', 'other_license_expression ']
+            "license_expression",
+            "license_key",
+            "license_name",
+            "declared_license_expression",
+            "other_license_expression ",
+        ]
         name = self.name
         if name in no_special_char_field:
             val = self.value
             special_char = detect_special_char(val)
             if special_char:
-                msg = (u'The following character(s) cannot be in the %(name)s: '
-                       '%(special_char)r' % locals())
+                msg = (
+                    "The following character(s) cannot be in the %(name)s: "
+                    "%(special_char)r" % locals()
+                )
                 errors.append(Error(ERROR, msg))
         return errors
 
     def _serialized_value(self):
-        return self.value if self.value else u''
+        return self.value if self.value else ""
 
     def __eq__(self, other):
         """
         Equality based on string content value, ignoring spaces
         """
-        if not (isinstance(other, self.__class__)
-                and self.name == other.name):
+        if not (isinstance(other, self.__class__) and self.name == other.name):
             return False
 
         if self.value == other.value:
@@ -263,12 +270,12 @@ class StringField(Field):
 
         # compare values stripped from spaces. Empty and None are equal
         if self.value:
-            sval = u''.join(self.value.split())
+            sval = "".join(self.value.split())
         if not sval:
             sval = None
 
         if other.value:
-            oval = u''.join(other.value.split())
+            oval = "".join(other.value.split())
         if not oval:
             oval = None
 
@@ -283,12 +290,11 @@ class SingleLineField(StringField):
     """
 
     def _validate(self, *args, **kwargs):
-        errors = super(SingleLineField, self)._validate(*args, ** kwargs)
-        if self.value and isinstance(self.value, str) and '\n' in self.value:
+        errors = super(SingleLineField, self)._validate(*args, **kwargs)
+        if self.value and isinstance(self.value, str) and "\n" in self.value:
             name = self.name
             value = self.original_value
-            msg = (u'Field %(name)s: Cannot span multiple lines: %(value)s'
-                   % locals())
+            msg = "Field %(name)s: Cannot span multiple lines: %(value)s" % locals()
             errors.append(Error(ERROR, msg))
         return errors
 
@@ -303,7 +309,7 @@ class ListField(StringField):
         return []
 
     def _validate(self, *args, **kwargs):
-        errors = super(ListField, self)._validate(*args, ** kwargs)
+        errors = super(ListField, self)._validate(*args, **kwargs)
 
         # reset
         self.value = []
@@ -320,8 +326,7 @@ class ListField(StringField):
                 val = val.strip()
             if not val:
                 name = self.name
-                msg = (u'Field %(name)s: ignored empty list value'
-                       % locals())
+                msg = "Field %(name)s: ignored empty list value" % locals()
                 errors.append(Error(INFO, msg))
                 continue
             # keep only unique and report error for duplicates
@@ -329,21 +334,19 @@ class ListField(StringField):
                 self.value.append(val)
             else:
                 name = self.name
-                msg = (u'Field %(name)s: ignored duplicated list value: '
-                       '%(val)r' % locals())
+                msg = "Field %(name)s: ignored duplicated list value: %(val)r" % locals()
                 errors.append(Error(WARNING, msg))
         return errors
 
     def _serialized_value(self):
-        return self.value if self.value else u''
+        return self.value if self.value else ""
 
     def __eq__(self, other):
         """
         Equality based on sort-insensitive values
         """
 
-        if not (isinstance(other, self.__class__)
-                and self.name == other.name):
+        if not (isinstance(other, self.__class__) and self.name == other.name):
             return False
 
         if self.value == other.value:
@@ -371,11 +374,11 @@ class PackageUrlField(StringField):
         """
         Check that Package URL is valid. Return a list of errors.
         """
-        errors = super(PackageUrlField, self)._validate(*args, ** kwargs)
+        errors = super(PackageUrlField, self)._validate(*args, **kwargs)
         name = self.name
         val = self.value
         if not self.is_valid_purl(val):
-            msg = (u'Field %(name)s: Invalid Package URL: %(val)s' % locals())
+            msg = "Field %(name)s: Invalid Package URL: %(val)s" % locals()
             errors.append(Error(WARNING, msg))
         return errors
 
@@ -399,12 +402,12 @@ class UrlListField(ListField):
         """
         Check that URLs are valid. Return a list of errors.
         """
-        errors = super(UrlListField, self)._validate(*args, ** kwargs)
+        errors = super(UrlListField, self)._validate(*args, **kwargs)
         name = self.name
         val = self.value
         for url in val:
             if not self.is_valid_url(url):
-                msg = (u'Field %(name)s: Invalid URL: %(val)s' % locals())
+                msg = "Field %(name)s: Invalid URL: %(val)s" % locals()
                 errors.append(Error(WARNING, msg))
         return errors
 
@@ -414,7 +417,7 @@ class UrlListField(ListField):
         Return True if a URL is valid.
         """
         scheme, netloc, _path, _p, _q, _frg = urlparse(url)
-        valid = scheme in ('http', 'https', 'ftp') and netloc
+        valid = scheme in ("http", "https", "ftp") and netloc
         return valid
 
 
@@ -427,11 +430,11 @@ class UrlField(StringField):
         """
         Check that URL is valid. Return a list of errors.
         """
-        errors = super(UrlField, self)._validate(*args, ** kwargs)
+        errors = super(UrlField, self)._validate(*args, **kwargs)
         name = self.name
         val = self.value
         if not self.is_valid_url(val):
-            msg = (u'Field %(name)s: Invalid URL: %(val)s' % locals())
+            msg = "Field %(name)s: Invalid URL: %(val)s" % locals()
             errors.append(Error(WARNING, msg))
         return errors
 
@@ -441,7 +444,7 @@ class UrlField(StringField):
         Return True if a URL is valid.
         """
         scheme, netloc, _path, _p, _q, _frg = urlparse(url)
-        valid = scheme in ('http', 'https', 'ftp') and netloc
+        valid = scheme in ("http", "https", "ftp") and netloc
         return valid
 
 
@@ -463,11 +466,11 @@ class PathField(ListField):
         base_dir is the directory location of the ABOUT file used to resolve
         relative paths to actual file locations.
         """
-        errors = super(PathField, self)._validate(*args, ** kwargs)
-        self.about_file_path = kwargs.get('about_file_path')
-        self.running_inventory = kwargs.get('running_inventory')
-        self.base_dir = kwargs.get('base_dir')
-        self.reference_dir = kwargs.get('reference_dir')
+        errors = super(PathField, self)._validate(*args, **kwargs)
+        self.about_file_path = kwargs.get("about_file_path")
+        self.running_inventory = kwargs.get("running_inventory")
+        self.base_dir = kwargs.get("base_dir")
+        self.reference_dir = kwargs.get("reference_dir")
 
         if self.base_dir:
             self.base_dir = util.to_posix(self.base_dir)
@@ -482,7 +485,7 @@ class PathField(ListField):
         paths = {}
 
         for path_value in self.value:
-            p = path_value.split(',')
+            p = path_value.split(",")
             for path in p:
                 path = path.strip()
                 path = util.to_posix(path)
@@ -490,7 +493,7 @@ class PathField(ListField):
                 # normalize eventual / to .
                 # and a succession of one or more ////// to . too
                 if path.strip() and not path.strip(posixpath.sep):
-                    path = '.'
+                    path = "."
 
                 # removing leading and trailing path separator
                 # path are always relative
@@ -500,8 +503,10 @@ class PathField(ListField):
                 # set from the 'license-text-location' option, so the tool should check
                 # at the 'license-text-location' instead of the 'base_dir'
                 if not (self.base_dir or self.reference_dir):
-                    msg = (u'Field %(name)s: Unable to verify path: %(path)s:'
-                           u' No base directory provided' % locals())
+                    msg = (
+                        "Field %(name)s: Unable to verify path: %(path)s:"
+                        " No base directory provided" % locals()
+                    )
                     errors.append(Error(ERROR, msg))
                     location = None
                     paths[path] = location
@@ -519,13 +524,10 @@ class PathField(ListField):
                         # parent of the 'about_file_path' with the value of the
                         # 'about_resource'
                         arp = posixpath.join(afp_parent, path)
-                        normalized_arp = posixpath.normpath(
-                            arp).strip(posixpath.sep)
-                        location = posixpath.join(
-                            self.base_dir, normalized_arp)
+                        normalized_arp = posixpath.normpath(arp).strip(posixpath.sep)
+                        location = posixpath.join(self.base_dir, normalized_arp)
                     else:
-                        location = posixpath.normpath(
-                            posixpath.join(self.base_dir, path))
+                        location = posixpath.normpath(posixpath.join(self.base_dir, path))
 
                 location = util.to_native(location)
                 location = os.path.abspath(os.path.normpath(location))
@@ -535,10 +537,9 @@ class PathField(ListField):
                 if not os.path.exists(location):
                     # We don't want to show the UNC_PREFIX in the error message
                     location = util.to_posix(location.strip(UNC_PREFIX))
-                    msg = (u'Field %(name)s: Path %(location)s not found'
-                           % locals())
+                    msg = "Field %(name)s: Path %(location)s not found" % locals()
                     # We want to show INFO error for 'about_resource'
-                    if name == u'about_resource':
+                    if name == "about_resource":
                         errors.append(Error(INFO, msg))
                     else:
                         errors.append(Error(CRITICAL, msg))
@@ -556,12 +557,12 @@ class AboutResourceField(PathField):
     the paths resolved relative to the about file path.
     """
 
-    def __init__(self, *args, ** kwargs):
-        super(AboutResourceField, self).__init__(*args, ** kwargs)
+    def __init__(self, *args, **kwargs):
+        super(AboutResourceField, self).__init__(*args, **kwargs)
         self.resolved_paths = []
 
     def _validate(self, *args, **kwargs):
-        errors = super(AboutResourceField, self)._validate(*args, ** kwargs)
+        errors = super(AboutResourceField, self)._validate(*args, **kwargs)
         return errors
 
 
@@ -572,12 +573,12 @@ class IgnoredResourcesField(PathField):
     by the ABOUT file.
     """
 
-    def __init__(self, *args, ** kwargs):
-        super(AboutResourceField, self).__init__(*args, ** kwargs)
+    def __init__(self, *args, **kwargs):
+        super(AboutResourceField, self).__init__(*args, **kwargs)
         self.resolved_paths = []
 
     def _validate(self, *args, **kwargs):
-        errors = super(AboutResourceField, self)._validate(*args, ** kwargs)
+        errors = super(AboutResourceField, self)._validate(*args, **kwargs)
         return errors
 
 
@@ -594,7 +595,7 @@ class FileTextField(PathField):
         of errors. base_dir is the directory used to resolve a file location
         from a path.
         """
-        errors = super(FileTextField, self)._validate(*args, ** kwargs)
+        errors = super(FileTextField, self)._validate(*args, **kwargs)
         # a FileTextField is a PathField
         # self.value is a paths to location ordered dict
         # we will replace the location with the text content
@@ -608,15 +609,17 @@ class FileTextField(PathField):
             try:
                 # TODO: we have lots the location by replacing it with a text
                 location = add_unc(location)
-                with open(location, encoding='utf-8', errors='replace') as txt:
+                with open(location, encoding="utf-8", errors="replace") as txt:
                     text = txt.read()
                 self.value[path] = text
             except Exception as e:
                 # only keep the first 100 char of the exception
                 emsg = repr(e)[:100]
-                msg = (u'Field %(name)s: Failed to load text at path: '
-                       u'%(path)s '
-                       u'with error: %(emsg)s' % locals())
+                msg = (
+                    "Field %(name)s: Failed to load text at path: "
+                    "%(path)s "
+                    "with error: %(emsg)s" % locals()
+                )
                 errors.append(Error(ERROR, msg))
         # set or reset self
         self.errors = errors
@@ -631,8 +634,8 @@ class BooleanField(SingleLineField):
     def default_value(self):
         return None
 
-    true_flags = ('yes', 'y', 'true', 'x')
-    false_flags = ('no', 'n', 'false')
+    true_flags = ("yes", "y", "true", "x")
+    false_flags = ("no", "n", "false")
     flag_values = true_flags + false_flags
 
     def _validate(self, *args, **kwargs):
@@ -640,25 +643,27 @@ class BooleanField(SingleLineField):
         Check that flag are valid. Convert flags to booleans. Default flag to
         False. Return a list of errors.
         """
-        errors = super(BooleanField, self)._validate(*args, ** kwargs)
-        self.about_file_path = kwargs.get('about_file_path')
+        errors = super(BooleanField, self)._validate(*args, **kwargs)
+        self.about_file_path = kwargs.get("about_file_path")
         flag = self.get_flag(self.original_value)
         if flag is False:
             name = self.name
             val = self.original_value
             about_file_path = self.about_file_path
             flag_values = self.flag_values
-            msg = (u'Path: %(about_file_path)s - Field %(name)s: Invalid flag value: %(val)r is not '
-                   u'one of: %(flag_values)s' % locals())
+            msg = (
+                "Path: %(about_file_path)s - Field %(name)s: Invalid flag value: %(val)r is not "
+                "one of: %(flag_values)s" % locals()
+            )
             errors.append(Error(ERROR, msg))
             self.value = None
         elif flag is None:
             name = self.name
-            msg = (u'Field %(name)s: field is present but empty. ' % locals())
+            msg = "Field %(name)s: field is present but empty. " % locals()
             errors.append(Error(INFO, msg))
             self.value = None
         else:
-            if flag == u'yes' or flag is True:
+            if flag == "yes" or flag is True:
                 self.value = True
             else:
                 self.value = False
@@ -670,7 +675,7 @@ class BooleanField(SingleLineField):
         possible values or None if empty or False if not found or original value
         if it is not a boolean value
         """
-        if value is None or value == '':
+        if value is None or value == "":
             return None
 
         if isinstance(value, bool):
@@ -684,9 +689,9 @@ class BooleanField(SingleLineField):
                 value = value.lower()
                 if value in self.flag_values:
                     if value in self.true_flags:
-                        return u'yes'
+                        return "yes"
                     else:
-                        return u'no'
+                        return "no"
                 else:
                     return False
             else:
@@ -704,21 +709,23 @@ class BooleanField(SingleLineField):
     def _serialized_value(self):
         # default normalized values for serialization
         if self.value:
-            return u'yes'
+            return "yes"
         elif self.value is False:
-            return u'no'
+            return "no"
         else:
             # self.value is None
             # TODO: should we serialize to No for None???
-            return u''
+            return ""
 
     def __eq__(self, other):
         """
         Boolean equality
         """
-        return (isinstance(other, self.__class__)
-                and self.name == other.name
-                and self.value == other.value)
+        return (
+            isinstance(other, self.__class__)
+            and self.name == other.name
+            and self.value == other.value
+        )
 
 
 class BooleanAndTwoCharactersField(SingleLineField):
@@ -730,8 +737,8 @@ class BooleanAndTwoCharactersField(SingleLineField):
     def default_value(self):
         return None
 
-    true_flags = ('yes', 'y', 'true', 'x')
-    false_flags = ('no', 'n', 'false')
+    true_flags = ("yes", "y", "true", "x")
+    false_flags = ("no", "n", "false")
     flag_values = true_flags + false_flags
 
     def _validate(self, *args, **kwargs):
@@ -739,28 +746,29 @@ class BooleanAndTwoCharactersField(SingleLineField):
         Check that flag are valid with either boolean value or character value.
         Default flag to False. Return a list of errors.
         """
-        errors = super(BooleanAndTwoCharactersField,
-                       self)._validate(*args, ** kwargs)
-        self.about_file_path = kwargs.get('about_file_path')
+        errors = super(BooleanAndTwoCharactersField, self)._validate(*args, **kwargs)
+        self.about_file_path = kwargs.get("about_file_path")
         flag = self.get_value(self.original_value)
         if flag is False:
             name = self.name
             val = self.original_value
             about_file_path = self.about_file_path
             flag_values = self.flag_values
-            msg = (u'Path: %(about_file_path)s - Field %(name)s: Invalid value: %(val)r is not '
-                   u'one of: %(flag_values)s and it is not a 1 or 2 character value.' % locals())
+            msg = (
+                "Path: %(about_file_path)s - Field %(name)s: Invalid value: %(val)r is not "
+                "one of: %(flag_values)s and it is not a 1 or 2 character value." % locals()
+            )
             errors.append(Error(ERROR, msg))
             self.value = None
         elif flag is None:
             name = self.name
-            msg = (u'Field %(name)s: field is present but empty. ' % locals())
+            msg = "Field %(name)s: field is present but empty. " % locals()
             errors.append(Error(INFO, msg))
             self.value = None
         else:
-            if flag == u'yes' or flag is True:
+            if flag == "yes" or flag is True:
                 self.value = True
-            elif flag == u'no':
+            elif flag == "no":
                 self.value = False
             else:
                 self.value = flag
@@ -772,7 +780,7 @@ class BooleanAndTwoCharactersField(SingleLineField):
         possible values or None if empty or False if not found or original value
         if it is not a boolean value
         """
-        if value is None or value == '':
+        if value is None or value == "":
             return None
 
         if isinstance(value, bool):
@@ -786,9 +794,9 @@ class BooleanAndTwoCharactersField(SingleLineField):
                 value = value.lower()
                 if value in self.flag_values or len(value) <= 2:
                     if value in self.true_flags:
-                        return u'yes'
+                        return "yes"
                     elif value in self.false_flags:
-                        return u'no'
+                        return "no"
                     else:
                         return value
                 else:
@@ -809,19 +817,18 @@ class BooleanAndTwoCharactersField(SingleLineField):
         # default normalized values for serialization
         if self.value:
             if isinstance(self.value, bool):
-                return u'yes'
+                return "yes"
             else:
                 return self.value
         elif self.value is False:
-            return u'no'
+            return "no"
         else:
             # self.value is None
             # TODO: should we serialize to No for None???
-            return u''
+            return ""
 
 
-def validate_fields(fields, about_file_path, running_inventory, base_dir,
-                    reference_dir=None):
+def validate_fields(fields, about_file_path, running_inventory, base_dir, reference_dir=None):
     """
     Validate a sequence of Field objects. Return a list of errors.
     Validation may update the Field objects as needed as a side effect.
@@ -840,8 +847,10 @@ def validate_fields(fields, about_file_path, running_inventory, base_dir,
 
 def validate_field_name(name):
     if not is_valid_name(name):
-        msg = ('Field name: %(name)r contains illegal name characters '
-               '(or empty spaces) and is ignored.')
+        msg = (
+            "Field name: %(name)r contains illegal name characters "
+            "(or empty spaces) and is ignored."
+        )
         return Error(WARNING, msg % locals())
 
 
@@ -862,20 +871,21 @@ class About(object):
     """
     Represent an ABOUT file and functions to parse and validate a file.
     """
+
     # special names, used only when serializing lists of ABOUT files to CSV or
     # similar
 
     # name of the attribute containing the relative ABOUT file path
-    ABOUT_FILE_PATH_ATTR = 'about_file_path'
+    ABOUT_FILE_PATH_ATTR = "about_file_path"
 
     # name of the attribute containing the resolved relative Resources paths
-    about_resource_path_attr = 'about_resource_path'
+    about_resource_path_attr = "about_resource_path"
 
     # name of the attribute containing the resolved relative Resources paths
-    ABOUT_RESOURCE_ATTR = 'about_resource'
+    ABOUT_RESOURCE_ATTR = "about_resource"
 
     # Required fields
-    required_fields = ['name']
+    required_fields = ["name"]
 
     def get_required_fields(self):
         return [f for f in self.fields if f.required]
@@ -886,57 +896,52 @@ class About(object):
         could use a metaclass to track ordering django-like but this approach
         is simpler.
         """
-        self.fields = dict([
-            ('about_resource', AboutResourceField()),
-            ('ignored_resources', AboutResourceField()),
-            ('name', SingleLineField(required=True)),
-            ('version', SingleLineField()),
-
-            ('download_url', UrlField()),
-            ('description', StringField()),
-            ('homepage_url', UrlField()),
-            ('package_url', PackageUrlField()),
-            ('notes', StringField()),
-
-            ('license_expression', SingleLineField()),
-            ('license_key', ListField()),
-            ('license_name', ListField()),
-            ('license_file', FileTextField()),
-            ('license_url', UrlListField()),
-            ('spdx_license_expression', SingleLineField()),
-            ('spdx_license_key', ListField()),
-            ('declared_license_expression', SingleLineField()),
-            ('other_license_expression', SingleLineField()),
-            ('copyright', StringField()),
-            ('notice_file', FileTextField()),
-            ('notice_url', UrlField()),
-
-            ('redistribute', BooleanField()),
-            ('attribute', BooleanAndTwoCharactersField()),
-            ('track_changes', BooleanField()),
-            ('modified', BooleanField()),
-            ('internal_use_only', BooleanField()),
-
-            ('changelog_file', FileTextField()),
-
-            ('owner', StringField()),
-            ('owner_url', UrlField()),
-            ('contact', StringField()),
-            ('author', StringField()),
-            ('author_file', FileTextField()),
-
-            ('vcs_tool', SingleLineField()),
-            ('vcs_repository', SingleLineField()),
-            ('vcs_path', SingleLineField()),
-            ('vcs_tag', SingleLineField()),
-            ('vcs_branch', SingleLineField()),
-            ('vcs_revision', SingleLineField()),
-
-            ('checksum_md5', SingleLineField()),
-            ('checksum_sha1', SingleLineField()),
-            ('checksum_sha256', SingleLineField()),
-            ('spec_version', SingleLineField()),
-        ])
+        self.fields = dict(
+            [
+                ("about_resource", AboutResourceField()),
+                ("ignored_resources", AboutResourceField()),
+                ("name", SingleLineField(required=True)),
+                ("version", SingleLineField()),
+                ("download_url", UrlField()),
+                ("description", StringField()),
+                ("homepage_url", UrlField()),
+                ("package_url", PackageUrlField()),
+                ("notes", StringField()),
+                ("license_expression", SingleLineField()),
+                ("license_key", ListField()),
+                ("license_name", ListField()),
+                ("license_file", FileTextField()),
+                ("license_url", UrlListField()),
+                ("spdx_license_expression", SingleLineField()),
+                ("spdx_license_key", ListField()),
+                ("declared_license_expression", SingleLineField()),
+                ("other_license_expression", SingleLineField()),
+                ("copyright", StringField()),
+                ("notice_file", FileTextField()),
+                ("notice_url", UrlField()),
+                ("redistribute", BooleanField()),
+                ("attribute", BooleanAndTwoCharactersField()),
+                ("track_changes", BooleanField()),
+                ("modified", BooleanField()),
+                ("internal_use_only", BooleanField()),
+                ("changelog_file", FileTextField()),
+                ("owner", StringField()),
+                ("owner_url", UrlField()),
+                ("contact", StringField()),
+                ("author", StringField()),
+                ("author_file", FileTextField()),
+                ("vcs_tool", SingleLineField()),
+                ("vcs_repository", SingleLineField()),
+                ("vcs_path", SingleLineField()),
+                ("vcs_tag", SingleLineField()),
+                ("vcs_branch", SingleLineField()),
+                ("vcs_revision", SingleLineField()),
+                ("checksum_md5", SingleLineField()),
+                ("checksum_sha1", SingleLineField()),
+                ("checksum_sha256", SingleLineField()),
+                ("spec_version", SingleLineField()),
+            ]
+        )
 
         for name, field in self.fields.items():
             # we could have a hack to get the actual field name
@@ -966,7 +971,7 @@ class About(object):
             self.base_dir = os.path.dirname(location)
             self.errors.extend(self.load(location))
             if strict and self.errors and filter_errors(self.errors):
-                msg = '\n'.join(map(str, self.errors))
+                msg = "\n".join(map(str, self.errors))
                 raise Exception(msg)
 
     def __repr__(self):
@@ -976,9 +981,11 @@ class About(object):
         """
         Equality based on fields and custom_fields., i.e. content.
         """
-        return (isinstance(other, self.__class__)
-                and self.fields == other.fields
-                and self.custom_fields == other.custom_fields)
+        return (
+            isinstance(other, self.__class__)
+            and self.fields == other.fields
+            and self.custom_fields == other.custom_fields
+        )
 
     def all_fields(self):
         """
@@ -993,8 +1000,7 @@ class About(object):
         """
         data = {}
         data[self.ABOUT_FILE_PATH_ATTR] = self.about_file_path
-        with_values = ((fld.name, fld.serialized_value())
-                       for fld in self.all_fields())
+        with_values = ((fld.name, fld.serialized_value()) for fld in self.all_fields())
         non_empty = ((name, value) for name, value in with_values if value)
         data.update(non_empty)
         return data
@@ -1027,9 +1033,11 @@ class About(object):
             previous_value = seen_fields.get(name)
             if previous_value:
                 if value != previous_value:
-                    msg = (u'Field %(orig_name)s is a duplicate. '
-                           u'Original value: "%(previous_value)s" '
-                           u'replaced with: "%(value)s"')
+                    msg = (
+                        "Field %(orig_name)s is a duplicate. "
+                        'Original value: "%(previous_value)s" '
+                        'replaced with: "%(value)s"'
+                    )
                     errors.append(Error(WARNING, msg % locals()))
                     continue
 
@@ -1050,7 +1058,7 @@ class About(object):
                     illegal_name_list.append(name)
                 continue
 
-            msg = 'Custom Field: %(orig_name)s'
+            msg = "Custom Field: %(orig_name)s"
             errors.append(Error(INFO, msg % locals()))
             # is this a known one?
             custom_field = self.custom_fields.get(name)
@@ -1066,21 +1074,30 @@ class About(object):
                 # FIXME: why would this ever fail???
                 try:
                     if name in dir(self):
-                        raise Exception(
-                            'Illegal field: %(name)r: %(value)r.' % locals())
+                        raise Exception("Illegal field: %(name)r: %(value)r." % locals())
                     setattr(self, name, custom_field)
                 except:
-                    msg = 'Internal error with custom field: %(name)r: %(value)r.'
+                    msg = "Internal error with custom field: %(name)r: %(value)r."
                     errors.append(Error(CRITICAL, msg % locals()))
 
         if illegal_name_list:
-            msg = ('Field name: %(illegal_name_list)r contains illegal name characters '
-                   '(or empty spaces) and is ignored.')
+            msg = (
+                "Field name: %(illegal_name_list)r contains illegal name characters "
+                "(or empty spaces) and is ignored."
+            )
             errors.append(Error(WARNING, msg % locals()))
         return errors
 
-    def process(self, fields, about_file_path, running_inventory=False,
-                base_dir=None, scancode=False, from_attrib=False, reference_dir=None):
+    def process(
+        self,
+        fields,
+        about_file_path,
+        running_inventory=False,
+        base_dir=None,
+        scancode=False,
+        from_attrib=False,
+        reference_dir=None,
+    ):
         """
         Validate and set as attributes on this About object a sequence of
         `fields` name/value tuples. Return a list of errors.
@@ -1093,8 +1110,7 @@ class About(object):
 
         # We want to copy the license_files before the validation
         if reference_dir and not from_attrib:
-            copy_err = copy_license_notice_files(
-                fields, base_dir, reference_dir, afp)
+            copy_err = copy_license_notice_files(fields, base_dir, reference_dir, afp)
             errors.extend(copy_err)
 
         # TODO: why? we validate all fields, not only these hydrated
@@ -1108,7 +1124,8 @@ class About(object):
                 about_file_path,
                 running_inventory,
                 self.base_dir,
-                self.reference_dir)
+                self.reference_dir,
+            )
             errors.extend(validation_errors)
         return errors
 
@@ -1123,10 +1140,10 @@ class About(object):
         errors = []
         try:
             loc = add_unc(loc)
-            with open(loc, encoding='utf-8', errors='replace') as txt:
+            with open(loc, encoding="utf-8", errors="replace") as txt:
                 input_text = txt.read()
             if not input_text:
-                msg = 'ABOUT file is empty: %(location)r'
+                msg = "ABOUT file is empty: %(location)r"
                 errors.append(Error(CRITICAL, msg % locals()))
                 self.errors = errors
                 return errors
@@ -1150,15 +1167,14 @@ class About(object):
             """
             running_inventory = True
             data = saneyaml.load(input, allow_duplicate_keys=False)
-            errs = self.load_dict(
-                data, base_dir, running_inventory=running_inventory)
+            errs = self.load_dict(data, base_dir, running_inventory=running_inventory)
             errors.extend(errs)
         except Exception as e:
             # The trace is good for debugging, but probably not good for user to
             # see the traceback message
             # trace = traceback.format_exc()
             # msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s'
-            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r'
+            msg = "Cannot load invalid ABOUT file: %(location)r: %(e)r"
             errors.append(Error(CRITICAL, msg % locals()))
 
         self.errors = errors
@@ -1167,7 +1183,15 @@ class About(object):
     # FIXME: should be a from_dict class factory instead
     # FIXME: running_inventory: remove this : this should be done in the commands, not here
 
-    def load_dict(self, fields_dict, base_dir, scancode=False, from_attrib=False, running_inventory=False, reference_dir=None,):
+    def load_dict(
+        self,
+        fields_dict,
+        base_dir,
+        scancode=False,
+        from_attrib=False,
+        running_inventory=False,
+        reference_dir=None,
+    ):
         """
         Load this About object file from a `fields_dict` name/value dict.
         Return a list of errors.
@@ -1180,35 +1204,32 @@ class About(object):
             for key, value in fields:
                 if not value:
                     continue
-                if key == u'copyrights':
+                if key == "copyrights":
                     have_copyright = True
-                elif key == u'license_detections':
+                elif key == "license_detections":
                     lic_list = ungroup_licenses_from_sctk(value)
                     lic_exp_list = []
                     for detected_license in value:
-                        if 'license_expression' in detected_license:
-                            lic_exp_list.append(
-                                detected_license['license_expression'])
+                        if "license_expression" in detected_license:
+                            lic_exp_list.append(detected_license["license_expression"])
                     if lic_exp_list:
-                        fields.append(
-                            ('license_expression', ' AND '.join(lic_exp_list)))
+                        fields.append(("license_expression", " AND ".join(lic_exp_list)))
 
                     lic_key_list = []
                     lic_key_exp_list = []
                     lic_score_list = []
                     for lic in lic_list:
-                        _char, lic_keys, _invalid_lic_exp = parse_license_expression(
-                            lic['lic_exp'])
+                        _char, lic_keys, _invalid_lic_exp = parse_license_expression(lic["lic_exp"])
                         lic_key_list.append(lic_keys)
                         # for lic_key in lic_keys:
                         #    lic_key_list.append([lic_key])
 
                     for lic in lic_list:
-                        lic_key_exp_list.append(lic['lic_exp'])
-                        lic_score_list.append(lic['score'])
-                    fields.append(('license_key', lic_key_list))
-                    fields.append(('license_key_expression', lic_key_exp_list))
-                    fields.append(('license_score', lic_score_list))
+                        lic_key_exp_list.append(lic["lic_exp"])
+                        lic_score_list.append(lic["score"])
+                    fields.append(("license_key", lic_key_list))
+                    fields.append(("license_key_expression", lic_key_exp_list))
+                    fields.append(("license_score", lic_score_list))
 
                     # The licenses field has been ungrouped and can be removed.
                     # Otherwise, it will gives the following INFO level error
@@ -1218,32 +1239,39 @@ class About(object):
             # Make sure the copyrights is present even is empty to avoid error
             # when generating with Jinja
             if not have_copyright:
-                fields.append(('copyrights', ''))
+                fields.append(("copyrights", ""))
 
         else:
             for key, value in fields:
                 if not value:
                     # never return empty or absent fields
                     continue
-                if key == u'licenses':
+                if key == "licenses":
                     # FIXME: use a license object instead
-                    lic_key, lic_name, lic_file, lic_url, spdx_lic_key, lic_score, lic_matched_text = ungroup_licenses(
-                        value)
+                    (
+                        lic_key,
+                        lic_name,
+                        lic_file,
+                        lic_url,
+                        spdx_lic_key,
+                        lic_score,
+                        lic_matched_text,
+                    ) = ungroup_licenses(value)
                     if lic_key:
-                        fields.append(('license_key', lic_key))
+                        fields.append(("license_key", lic_key))
                     if lic_name:
-                        fields.append(('license_name', lic_name))
+                        fields.append(("license_name", lic_name))
                     if lic_file:
-                        fields.append(('license_file', lic_file))
+                        fields.append(("license_file", lic_file))
                     if lic_url:
-                        fields.append(('license_url', lic_url))
+                        fields.append(("license_url", lic_url))
                     if spdx_lic_key:
-                        fields.append(('spdx_license_key', spdx_lic_key))
+                        fields.append(("spdx_license_key", spdx_lic_key))
                     # The license score is a key from scancode license scan
                     if lic_score:
-                        fields.append(('license_score', lic_score))
+                        fields.append(("license_score", lic_score))
                     if lic_matched_text:
-                        fields.append(('matched_text', lic_matched_text))
+                        fields.append(("matched_text", lic_matched_text))
                     # The licenses field has been ungrouped and can be removed.
                     # Otherwise, it will gives the following INFO level error
                     # 'Field licenses is a custom field.'
@@ -1263,7 +1291,7 @@ class About(object):
         return errors
 
     @classmethod
-    def from_dict(cls, about_data, base_dir=''):
+    def from_dict(cls, about_data, base_dir=""):
         """
         Return an About object loaded from a python dict.
         """
@@ -1282,28 +1310,33 @@ class About(object):
         license_file = []
         license_url = []
         spdx_license_key = []
-        bool_fields = ['redistribute', 'attribute',
-                       'track_changes', 'modified', 'internal_use_only']
+        bool_fields = [
+            "redistribute",
+            "attribute",
+            "track_changes",
+            "modified",
+            "internal_use_only",
+        ]
         for field in self.all_fields():
             if not field.value and not field.name in bool_fields:
                 continue
-            if field.name == 'license_key' and field.value:
+            if field.name == "license_key" and field.value:
                 license_key = field.value
-            elif field.name == 'license_name' and field.value:
+            elif field.name == "license_name" and field.value:
                 license_name = field.value
-            elif field.name == 'license_file' and field.value:
+            elif field.name == "license_file" and field.value:
                 # Restore the original_value as it was parsed for
                 # validation purpose
                 if field.original_value:
                     # This line break is for the components that have multiple license
                     # values in CSV format.
-                    if '\n' in field.original_value:
-                        license_file_list = field.original_value.split('\n')
+                    if "\n" in field.original_value:
+                        license_file_list = field.original_value.split("\n")
                         license_file = []
                         # Strip the carriage return character '\r' See #443
                         for lic in license_file_list:
-                            if '\r' in lic:
-                                license_file.append(lic.strip('\r'))
+                            if "\r" in lic:
+                                license_file.append(lic.strip("\r"))
                             else:
                                 license_file.append(lic)
                     else:
@@ -1315,9 +1348,9 @@ class About(object):
                             license_file = [field.original_value]
                 else:
                     license_file = list(field.value.keys())
-            elif field.name == 'license_url' and field.value:
+            elif field.name == "license_url" and field.value:
                 license_url = field.value
-            elif field.name == 'spdx_license_key' and field.value:
+            elif field.name == "spdx_license_key" and field.value:
                 spdx_license_key = field.value
             elif field.name in file_fields and field.value:
                 data[field.name] = field.original_value
@@ -1328,10 +1361,11 @@ class About(object):
                     data[field.name] = field.value
         # If there is no license_key value, parse the license_expression
         # and get the parsed license key
-        if 'license_expression' in data:
-            if not license_key and data['license_expression']:
+        if "license_expression" in data:
+            if not license_key and data["license_expression"]:
                 _spec_char, lic_list, _invalid_lic_exp = parse_license_expression(
-                    data['license_expression'])
+                    data["license_expression"]
+                )
                 license_key = lic_list
 
         # Group the same license information in a list
@@ -1342,17 +1376,16 @@ class About(object):
         for lic_key in license_key:
             lic_dict = {}
             if licenses_dict and lic_key in licenses_dict:
-                lic_dict['key'] = lic_key
-                lic_name, lic_filename, lic_context, lic_url, spdx_lic_key = licenses_dict[
-                    lic_key]
+                lic_dict["key"] = lic_key
+                lic_name, lic_filename, lic_context, lic_url, spdx_lic_key = licenses_dict[lic_key]
                 if lic_name:
-                    lic_dict['name'] = lic_name
+                    lic_dict["name"] = lic_name
                 if lic_filename:
-                    lic_dict['file'] = lic_filename
+                    lic_dict["file"] = lic_filename
                 if lic_url:
-                    lic_dict['url'] = lic_url
+                    lic_dict["url"] = lic_url
                 if spdx_lic_key:
-                    lic_dict['spdx_license_key'] = spdx_lic_key
+                    lic_dict["spdx_license_key"] = spdx_lic_key
 
                 # Remove the license information if it has been handled
                 # The following condition is to check if license information
@@ -1375,11 +1408,13 @@ class About(object):
         # assume the lic_file (custom license) is referring this specific lic_key
         # otherwise, the tool shouldn't group them
         if len(lic_key_copy) == len(license_file):
-            license_group = list(zip_longest(
-                lic_key_copy, license_name, license_file, license_url, spdx_license_key))
+            license_group = list(
+                zip_longest(lic_key_copy, license_name, license_file, license_url, spdx_license_key)
+            )
         else:
-            license_group = list(zip_longest(
-                lic_key_copy, license_name, [], license_url, spdx_license_key))
+            license_group = list(
+                zip_longest(lic_key_copy, license_name, [], license_url, spdx_license_key)
+            )
             # Add the unhandled_lic_file if any
             if license_file:
                 for lic_file in license_file:
@@ -1388,31 +1423,31 @@ class About(object):
         for lic_group in license_group:
             lic_dict = {}
             if lic_group[0]:
-                lic_dict['key'] = lic_group[0]
+                lic_dict["key"] = lic_group[0]
             if lic_group[1]:
-                lic_dict['name'] = lic_group[1]
+                lic_dict["name"] = lic_group[1]
             else:
                 # If no name is given, treat the key as the name
                 if lic_group[0]:
-                    lic_dict['name'] = lic_group[0]
+                    lic_dict["name"] = lic_group[0]
             if lic_group[2]:
-                lic_dict['file'] = lic_group[2]
+                lic_dict["file"] = lic_group[2]
             if lic_group[3]:
-                lic_dict['url'] = lic_group[3]
+                lic_dict["url"] = lic_group[3]
             if lic_group[4]:
-                lic_dict['spdx_license_key'] = lic_group[4]
+                lic_dict["spdx_license_key"] = lic_group[4]
             lic_dict_list.append(lic_dict)
 
         # Format the license information in the same order of the license expression
         for key in license_key:
             for lic_dict in lic_dict_list:
-                if key == lic_dict['key']:
-                    data.setdefault('licenses', []).append(lic_dict)
+                if key == lic_dict["key"]:
+                    data.setdefault("licenses", []).append(lic_dict)
                     lic_dict_list.remove(lic_dict)
                     break
 
         for lic_dict in lic_dict_list:
-            data.setdefault('licenses', []).append(lic_dict)
+            data.setdefault("licenses", []).append(lic_dict)
 
         return saneyaml.dump(data)
 
@@ -1427,17 +1462,16 @@ class About(object):
             os.makedirs(add_unc(parent))
 
         about_file_path = loc
-        if not about_file_path.endswith('.ABOUT'):
+        if not about_file_path.endswith(".ABOUT"):
             # FIXME: we should not infer some location.
-            if about_file_path.endswith('/'):
-                about_file_path = util.to_posix(
-                    os.path.join(parent, os.path.basename(parent)))
-            about_file_path += '.ABOUT'
+            if about_file_path.endswith("/"):
+                about_file_path = util.to_posix(os.path.join(parent, os.path.basename(parent)))
+            about_file_path += ".ABOUT"
 
         if on_windows:
             about_file_path = add_unc(about_file_path)
 
-        with open(about_file_path, mode='w', encoding='utf-8', errors='replace') as dumped:
+        with open(about_file_path, mode="w", encoding="utf-8", errors="replace") as dumped:
             dumped.write(genereated_tk_version)
             dumped.write(self.dumps(lic_dict))
 
@@ -1448,7 +1482,7 @@ class About(object):
         if on_windows:
             path = add_unc(path)
 
-        with open(path, mode='w', encoding='utf-8', errors='replace') as dumped:
+        with open(path, mode="w", encoding="utf-8", errors="replace") as dumped:
             dumped.write(context)
 
     def android_module_license(self, about_parent_path):
@@ -1458,12 +1492,13 @@ class About(object):
         for lic_key in self.license_key.value:
             # Make uppercase and with dash and spaces and dots replaced by underscore
             # just to look similar and consistent.
-            name = 'MODULE_LICENSE_' + \
-                lic_key.replace('.', '_').replace(
-                    '-', '_').replace(' ', '_').upper()
+            name = (
+                "MODULE_LICENSE_"
+                + lic_key.replace(".", "_").replace("-", "_").replace(" ", "_").upper()
+            )
             module_lic_path = os.path.join(about_parent_path, name)
             # Create an empty MODULE_LICESE_XXX file
-            open(module_lic_path, 'a').close()
+            open(module_lic_path, "a").close()
 
     def android_notice(self, about_parent_path):
         """
@@ -1472,8 +1507,8 @@ class About(object):
         """
         # Create NOTICE file with the combination context of copyright,
         # notice_file and license_file
-        notice_path = posixpath.join(about_parent_path, 'NOTICE')
-        notice_context = ''
+        notice_path = posixpath.join(about_parent_path, "NOTICE")
+        notice_context = ""
         if self.copyright.value:
             notice_context += self.copyright.value
         if self.notice_file.value:
@@ -1481,13 +1516,13 @@ class About(object):
             notice_file_key = notice_file_dict.keys()
             for key in notice_file_key:
                 if notice_file_dict[key]:
-                    notice_context += '\n' + notice_file_dict[key] + '\n'
+                    notice_context += "\n" + notice_file_dict[key] + "\n"
         if self.license_file.value:
             lic_file_dict = self.license_file.value
             lic_file_key = lic_file_dict.keys()
             for key in lic_file_key:
                 if lic_file_dict[key]:
-                    notice_context += '\n\n' + lic_file_dict[key] + '\n\n'
+                    notice_context += "\n\n" + lic_file_dict[key] + "\n\n"
         return notice_path, notice_context
 
     def dump_lic(self, location, license_dict):
@@ -1495,7 +1530,7 @@ class About(object):
         Write LICENSE files and return the a list of key, name, context and the url
         as these information are needed for the ABOUT file
         """
-        license_name = license_context = license_url = ''
+        license_name = license_context = license_url = ""
         loc = util.to_posix(location)
         parent = posixpath.dirname(loc)
         license_key_name_context_url = []
@@ -1506,21 +1541,24 @@ class About(object):
         licenses_list = []
         if self.license_expression.present:
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
-                self.license_expression.value)
+                self.license_expression.value
+            )
             if lic_list:
                 for lic in lic_list:
                     if lic not in licenses_list:
                         licenses_list.append(lic)
         if self.declared_license_expression.present:
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
-                self.declared_license_expression.value)
+                self.declared_license_expression.value
+            )
             if lic_list:
                 for lic in lic_list:
                     if lic not in licenses_list:
                         licenses_list.append(lic)
         if self.other_license_expression.present:
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
-                self.other_license_expression.value)
+                self.other_license_expression.value
+            )
             if lic_list:
                 for lic in lic_list:
                     if lic not in licenses_list:
@@ -1529,26 +1567,45 @@ class About(object):
             self.license_key.value = licenses_list
             self.license_key.present = True
             for lic_key in licenses_list:
-                license_name = ''
-                license_filename = ''
-                license_context = ''
-                license_url = ''
-                spdx_license_key = ''
+                license_name = ""
+                license_filename = ""
+                license_context = ""
+                license_url = ""
+                spdx_license_key = ""
                 if lic_key in license_dict:
                     license_path = posixpath.join(parent, lic_key)
-                    license_path += u'.LICENSE'
+                    license_path += ".LICENSE"
                     license_path = add_unc(license_path)
-                    license_name, license_filename, license_context, license_url, spdx_license_key = license_dict[
-                        lic_key]
-                    license_info = (lic_key, license_name, license_filename,
-                                    license_context, license_url, spdx_license_key)
+                    (
+                        license_name,
+                        license_filename,
+                        license_context,
+                        license_url,
+                        spdx_license_key,
+                    ) = license_dict[lic_key]
+                    license_info = (
+                        lic_key,
+                        license_name,
+                        license_filename,
+                        license_context,
+                        license_url,
+                        spdx_license_key,
+                    )
                     license_key_name_context_url.append(license_info)
-                    with open(license_path, mode='w', encoding='utf-8', newline='\n', errors='replace') as lic:
+                    with open(
+                        license_path, mode="w", encoding="utf-8", newline="\n", errors="replace"
+                    ) as lic:
                         lic.write(license_context)
                 else:
                     # Invalid license issue is already handled
-                    license_info = (lic_key, license_name, license_filename,
-                                    license_context, license_url, spdx_license_key)
+                    license_info = (
+                        lic_key,
+                        license_name,
+                        license_filename,
+                        license_context,
+                        license_url,
+                        spdx_license_key,
+                    )
                     license_key_name_context_url.append(license_info)
 
         return license_key_name_context_url
@@ -1571,17 +1628,16 @@ def collect_inventory(location, exclude=None):
         about_file_path = util.get_relative_path(input_location, about_loc)
         about = About(about_loc, about_file_path)
         for severity, message in about.errors:
-            if 'Custom Field' in message:
-                field_name = message.replace('Custom Field: ', '').strip()
+            if "Custom Field" in message:
+                field_name = message.replace("Custom Field: ", "").strip()
                 if field_name not in custom_fields_list:
                     custom_fields_list.append(field_name)
             else:
-                msg = (about_file_path + ": " + message)
+                msg = about_file_path + ": " + message
                 errors.append(Error(severity, msg))
         abouts.append(about)
     if custom_fields_list:
-        custom_fields_err_msg = 'Field ' + \
-            str(custom_fields_list) + ' is a custom field.'
+        custom_fields_err_msg = "Field " + str(custom_fields_list) + " is a custom field."
         errors.append(Error(INFO, custom_fields_err_msg))
     return errors, abouts
 
@@ -1600,7 +1656,7 @@ def collect_abouts_license_expression(location):
     for loc in about_locations:
         try:
             loc = add_unc(loc)
-            with open(loc, encoding='utf-8', errors='replace') as txt:
+            with open(loc, encoding="utf-8", errors="replace") as txt:
                 input_text = txt.read()
             # saneyaml.load() will have parsing error if the input has
             # tab value. Therefore, we should check if the input contains
@@ -1608,11 +1664,11 @@ def collect_abouts_license_expression(location):
             input = replace_tab_with_spaces(input_text)
             data = saneyaml.load(input, allow_duplicate_keys=False)
             about = About()
-            about.load_dict(data, base_dir='')
+            about.load_dict(data, base_dir="")
             abouts.append(about)
         except Exception as e:
             trace = traceback.format_exc()
-            msg = 'Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s'
+            msg = "Cannot load invalid ABOUT file: %(location)r: %(e)r\n%(trace)s"
             errors.append(Error(CRITICAL, msg % locals()))
 
     return errors, abouts
@@ -1629,26 +1685,24 @@ def collect_inventory_license_expression(location, scancode=False, worksheet=Non
     if scancode:
         inventory = gen.load_scancode_json(location)
         # ScanCode uses 'detected_license_expression'
-        if not 'detected_license_expression' in inventory[0]:
-            errors.append(
-                Error(CRITICAL, "No 'license_expressions' field in the input."))
+        if not "detected_license_expression" in inventory[0]:
+            errors.append(Error(CRITICAL, "No 'license_expressions' field in the input."))
             return errors, abouts
     else:
-        if location.endswith('.csv'):
+        if location.endswith(".csv"):
             inventory = gen.load_csv(location)
-        elif location.endswith('.xlsx'):
+        elif location.endswith(".xlsx"):
             _dup_cols_err, inventory = gen.load_excel(location, worksheet)
         else:
             inventory = gen.load_json(location)
         # Check if 'license_expression' field is in the input
-        if not inventory or not 'license_expression' in inventory[0]:
-            errors.append(
-                Error(CRITICAL, "No 'license_expression' field in the input."))
+        if not inventory or not "license_expression" in inventory[0]:
+            errors.append(Error(CRITICAL, "No 'license_expression' field in the input."))
             return errors, abouts
 
     for data in inventory:
         about = About()
-        about.load_dict(data, base_dir='', scancode=scancode)
+        about.load_dict(data, base_dir="", scancode=scancode)
         abouts.append(about)
     return errors, abouts
 
@@ -1702,12 +1756,11 @@ def copy_redist_src(copy_list, location, output, with_structure):
         norm_from_path = norm(from_path)
         relative_from_path = norm_from_path.partition(util.norm(location))[2]
         # Need to strip the '/' to use the join
-        if relative_from_path.startswith('/'):
-            relative_from_path = relative_from_path.partition('/')[2]
+        if relative_from_path.startswith("/"):
+            relative_from_path = relative_from_path.partition("/")[2]
         # Get the directory name of the output path
         if with_structure:
-            output_dir = os.path.dirname(os.path.join(
-                output, util.norm(relative_from_path)))
+            output_dir = os.path.dirname(os.path.join(output, util.norm(relative_from_path)))
         else:
             output_dir = output
         err = copy_file(from_path, output_dir)
@@ -1737,8 +1790,8 @@ def get_copy_list(abouts, location):
         if about.redistribute.value:
             file_exist = True
             for e in about.errors:
-                if 'Field about_resource' in e.message and 'not found' in e.message:
-                    msg = e.message + u' and cannot be copied.'
+                if "Field about_resource" in e.message and "not found" in e.message:
+                    msg = e.message + " and cannot be copied."
                     errors.append(Error(CRITICAL, msg))
                     file_exist = False
                     continue
@@ -1750,8 +1803,7 @@ def get_copy_list(abouts, location):
                     else:
                         norm_from_path = os.path.normpath(from_path)
                     # Get the relative path
-                    relative_from_path = norm_from_path.partition(
-                        util.norm(location))[2]
+                    relative_from_path = norm_from_path.partition(util.norm(location))[2]
                     if os.path.isdir(from_path):
                         if not dir_list:
                             dir_list.append(relative_from_path)
@@ -1774,7 +1826,7 @@ def get_copy_list(abouts, location):
                     else:
                         # Check if the file is from "root"
                         # If the file is at root level, it'll add to the copy_list
-                        if not os.path.dirname(relative_from_path) == '/':
+                        if not os.path.dirname(relative_from_path) == "/":
                             file_list.append(relative_from_path)
                         else:
                             copy_list.append(from_path)
@@ -1785,16 +1837,16 @@ def get_copy_list(abouts, location):
             if dir in f:
                 file_list.remove(f)
                 continue
-        if dir.startswith('/'):
-            dir = dir.partition('/')[2]
+        if dir.startswith("/"):
+            dir = dir.partition("/")[2]
         absolute_path = os.path.join(location, dir)
         if on_windows:
             absolute_path = add_unc(absolute_path)
         copy_list.append(absolute_path)
 
     for f in file_list:
-        if f.startswith('/'):
-            f = f.partition('/')[2]
+        if f.startswith("/"):
+            f = f.partition("/")[2]
         absolute_path = os.path.join(location, f)
         if on_windows:
             absolute_path = add_unc(absolute_path)
@@ -1820,26 +1872,24 @@ def about_object_to_list_of_dictionary(abouts):
         # TODO: this wholeblock should be under sd_dict()
         ad = about.as_dict()
 
-        if 'about_file_path' in ad.keys():
-            afp = ad['about_file_path']
+        if "about_file_path" in ad.keys():
+            afp = ad["about_file_path"]
             afp_parent = posixpath.dirname(afp)
-            afp_parent = '/' + \
-                afp_parent if not afp_parent.startswith(
-                    '/') else afp_parent
+            afp_parent = "/" + afp_parent if not afp_parent.startswith("/") else afp_parent
 
             # Update the 'about_resource' field with the relative path
             # from the output location
-            if 'about_resource' in ad.keys():
-                about_resource = ad['about_resource']
+            if "about_resource" in ad.keys():
+                about_resource = ad["about_resource"]
                 for resource in about_resource:
                     updated_about_resource = posixpath.normpath(
-                        posixpath.join(afp_parent, resource))
-                    if resource == u'.':
-                        if not updated_about_resource == '/':
-                            updated_about_resource = updated_about_resource + '/'
-                ad['about_resource'] = dict(
-                    [(updated_about_resource, None)])
-            del ad['about_file_path']
+                        posixpath.join(afp_parent, resource)
+                    )
+                    if resource == ".":
+                        if not updated_about_resource == "/":
+                            updated_about_resource = updated_about_resource + "/"
+                ad["about_resource"] = dict([(updated_about_resource, None)])
+            del ad["about_file_path"]
         serialized.append(ad)
     return serialized
 
@@ -1850,11 +1900,11 @@ def write_output(abouts, location, format):  # NOQA
     Return a list of Error objects.
     """
     about_dicts = about_object_to_list_of_dictionary(abouts)
-    if not location == '-':
+    if not location == "-":
         location = add_unc(location)
-    if format == 'csv':
+    if format == "csv":
         save_as_csv(location, about_dicts, get_field_names(abouts))
-    elif format == 'json':
+    elif format == "json":
         save_as_json(location, about_dicts)
     else:
         save_as_excel(location, about_dicts)
@@ -1865,10 +1915,10 @@ def save_as_json(location, about_dicts):
     Save the given data as a JSON file or print it to standard output.
     """
     data = util.format_about_dict_for_json_output(about_dicts)
-    if location == '-':
+    if location == "-":
         json.dump(data, sys.stdout, indent=2)
     else:
-        with open(location, mode='w') as output_file:
+        with open(location, mode="w") as output_file:
             output_file.write(json.dumps(data, indent=2))
 
 
@@ -1876,14 +1926,16 @@ def save_as_csv(location, about_dicts, field_names):
     """
     Save the given data as a CSV file or print it to standard output.
     """
-    if location == '-':
+    if location == "-":
         writer = csv.DictWriter(sys.stdout, field_names)
         writer.writeheader()
         csv_formatted_list = util.format_about_dict_output(about_dicts)
         for row in csv_formatted_list:
             writer.writerow(row)
     else:
-        with open(location, mode='w', encoding='utf-8', newline='', errors='replace') as output_file:
+        with open(
+            location, mode="w", encoding="utf-8", newline="", errors="replace"
+        ) as output_file:
             writer = csv.DictWriter(output_file, field_names)
             writer.writeheader()
             csv_formatted_list = util.format_about_dict_output(about_dicts)
@@ -1899,7 +1951,9 @@ def save_as_excel(location, about_dicts):
     write_excel(location, formatted_list)
 
 
-def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, api_key=None, scancode=False, reference=None):
+def pre_process_and_fetch_license_dict(
+    abouts, from_check=False, api_url=None, api_key=None, scancode=False, reference=None
+):
     """
     Return a dictionary containing the license information (key, name, text, url)
     fetched from the ScanCode LicenseDB or DejaCode API.
@@ -1909,17 +1963,19 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
     errors = []
     if api_url:
         dje_uri = urlparse(api_url)
-        domain = '{uri.scheme}://{uri.netloc}/'.format(uri=dje_uri)
-        lic_urn = urljoin(domain, 'urn/?urn=urn:dje:license:')
+        domain = "{uri.scheme}://{uri.netloc}/".format(uri=dje_uri)
+        lic_urn = urljoin(domain, "urn/?urn=urn:dje:license:")
         url = api_url
     else:
-        url = 'https://scancode-licensedb.aboutcode.org/'
+        url = "https://scancode-licensedb.aboutcode.org/"
     if util.have_network_connection():
         if not valid_api_url(url):
-            msg = u"URL not reachable. Invalid 'URL. License generation is skipped."
+            msg = "URL not reachable. Invalid 'URL. License generation is skipped."
             errors.append(Error(ERROR, msg))
     else:
-        msg = u'Network problem. Please check your Internet connection. License generation is skipped.'
+        msg = (
+            "Network problem. Please check your Internet connection. License generation is skipped."
+        )
         errors.append(Error(ERROR, msg))
 
     if errors:
@@ -1929,51 +1985,66 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
     for about in abouts:
         # No need to go through all the about objects if '--api_key' is invalid
         auth_error = Error(
-            ERROR, u"Authorization denied. Invalid '--api_key'. License generation is skipped.")
+            ERROR, "Authorization denied. Invalid '--api_key'. License generation is skipped."
+        )
         if auth_error in errors:
             break
 
         if scancode:
-            lic_exp = ''
+            lic_exp = ""
             lic_list = []
             if about.detected_license_expression.value:
                 lic_exp = about.detected_license_expression.value
             about.license_expression.value = lic_exp
             about.license_expression.present = True
 
-        afp = ''
+        afp = ""
         if about.about_file_path:
             afp = about.about_file_path
 
         if not about.license_expression.value and about.spdx_license_expression.value:
             lic_exp_value = ""
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
-                about.spdx_license_expression.value)
+                about.spdx_license_expression.value
+            )
             if special_char_in_expression or invalid_lic_exp:
                 if special_char_in_expression:
                     if afp:
-                        msg = (afp + u": The following character(s) cannot be in the spdx_license_expression: " +
-                               str(special_char_in_expression))
+                        msg = (
+                            afp
+                            + ": The following character(s) cannot be in the spdx_license_expression: "
+                            + str(special_char_in_expression)
+                        )
                     else:
-                        msg = (u"The following character(s) cannot be in the spdx_license_expression: " +
-                               str(special_char_in_expression))
+                        msg = (
+                            "The following character(s) cannot be in the spdx_license_expression: "
+                            + str(special_char_in_expression)
+                        )
                 else:
                     if afp:
-                        msg = (afp + u": This spdx_license_expression is invalid: " +
-                               str(invalid_lic_exp))
+                        msg = (
+                            afp
+                            + ": This spdx_license_expression is invalid: "
+                            + str(invalid_lic_exp)
+                        )
                     else:
-                        msg = (u"This spdx_license_expression is invalid: " +
-                               str(invalid_lic_exp))
+                        msg = "This spdx_license_expression is invalid: " + str(invalid_lic_exp)
                 errors.append(Error(ERROR, msg))
             else:
                 spdx_lic_exp_segment = about.spdx_license_expression.value.split()
                 for spdx_lic_key in spdx_lic_exp_segment:
                     if lic_exp_value:
-                        lic_exp_value = lic_exp_value + " " + convert_spdx_expression_to_lic_expression(
-                            spdx_lic_key, spdx_sclickey_dict)
+                        lic_exp_value = (
+                            lic_exp_value
+                            + " "
+                            + convert_spdx_expression_to_lic_expression(
+                                spdx_lic_key, spdx_sclickey_dict
+                            )
+                        )
                     else:
                         lic_exp_value = convert_spdx_expression_to_lic_expression(
-                            spdx_lic_key, spdx_sclickey_dict)
+                            spdx_lic_key, spdx_sclickey_dict
+                        )
                 if lic_exp_value:
                     about.license_expression.value = lic_exp_value
                     about.license_expression.present = True
@@ -1982,66 +2053,80 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
 
         if about.declared_license_expression.value:
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
-                about.declared_license_expression.value)
+                about.declared_license_expression.value
+            )
             if special_char_in_expression:
                 if afp:
-                    msg = (afp + u": The following character(s) cannot be in the declared_license_expression: " +
-                           str(special_char_in_expression))
+                    msg = (
+                        afp
+                        + ": The following character(s) cannot be in the declared_license_expression: "
+                        + str(special_char_in_expression)
+                    )
                 else:
-                    msg = (u"The following character(s) cannot be in the declared_license_expression: " +
-                           str(special_char_in_expression))
+                    msg = (
+                        "The following character(s) cannot be in the declared_license_expression: "
+                        + str(special_char_in_expression)
+                    )
                 errors.append(Error(ERROR, msg))
             if invalid_lic_exp:
                 if afp:
-                    msg = (afp + u": This declared_license_expression is invalid: " +
-                           str(invalid_lic_exp))
+                    msg = (
+                        afp
+                        + ": This declared_license_expression is invalid: "
+                        + str(invalid_lic_exp)
+                    )
                 else:
-                    msg = (u"This declared_license_expression is invalid: " +
-                           str(invalid_lic_exp))
+                    msg = "This declared_license_expression is invalid: " + str(invalid_lic_exp)
                 errors.append(Error(ERROR, msg))
             if lic_list:
                 lic_exp_list.extend(lic_list)
 
         if about.other_license_expression.value:
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
-                about.other_license_expression.value)
+                about.other_license_expression.value
+            )
             if special_char_in_expression:
                 if afp:
-                    msg = (afp + u": The following character(s) cannot be in the other_license_expression: " +
-                           str(special_char_in_expression))
+                    msg = (
+                        afp
+                        + ": The following character(s) cannot be in the other_license_expression: "
+                        + str(special_char_in_expression)
+                    )
                 else:
-                    msg = (u"This declared_license_expression is invalid: " +
-                           str(invalid_lic_exp))
+                    msg = "This declared_license_expression is invalid: " + str(invalid_lic_exp)
                 errors.append(Error(ERROR, msg))
             if invalid_lic_exp:
                 if afp:
-                    msg = (afp + u": This other_license_expression is invalid: " +
-                           str(invalid_lic_exp))
+                    msg = (
+                        afp + ": This other_license_expression is invalid: " + str(invalid_lic_exp)
+                    )
                 else:
-                    msg = (u"This other_license_expression is invalid: " +
-                           str(invalid_lic_exp))
+                    msg = "This other_license_expression is invalid: " + str(invalid_lic_exp)
                 errors.append(Error(ERROR, msg))
             if lic_list:
                 lic_exp_list.extend(lic_list)
 
         if about.license_expression.value:
             special_char_in_expression, lic_list, invalid_lic_exp = parse_license_expression(
-                about.license_expression.value)
+                about.license_expression.value
+            )
             if special_char_in_expression:
                 if afp:
-                    msg = (afp + u": The following character(s) cannot be in the license_expression: " +
-                           str(special_char_in_expression))
+                    msg = (
+                        afp
+                        + ": The following character(s) cannot be in the license_expression: "
+                        + str(special_char_in_expression)
+                    )
                 else:
-                    msg = (u"The following character(s) cannot be in the license_expression: " +
-                           str(special_char_in_expression))
+                    msg = "The following character(s) cannot be in the license_expression: " + str(
+                        special_char_in_expression
+                    )
                 errors.append(Error(ERROR, msg))
             if invalid_lic_exp:
                 if afp:
-                    msg = (afp + u": This license_expression is invalid: " +
-                           str(invalid_lic_exp))
+                    msg = afp + ": This license_expression is invalid: " + str(invalid_lic_exp)
                 else:
-                    msg = (u"This license_expression is invalid: " +
-                           str(invalid_lic_exp))
+                    msg = "This license_expression is invalid: " + str(invalid_lic_exp)
                 errors.append(Error(ERROR, msg))
             if lic_list:
                 lic_exp_list.extend(lic_list)
@@ -2051,16 +2136,15 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
         if lic_exp_list:
             for lic_key in lic_exp_list:
                 if not lic_key in captured_license:
-                    lic_url = ''
-                    license_name = ''
-                    license_filename = ''
-                    license_text = ''
-                    spdx_license_key = ''
+                    lic_url = ""
+                    license_name = ""
+                    license_filename = ""
+                    license_text = ""
+                    spdx_license_key = ""
                     detail_list = []
                     captured_license.append(lic_key)
                     if api_key:
-                        license_data, errs = api.get_license_details_from_api(
-                            url, api_key, lic_key)
+                        license_data, errs = api.get_license_details_from_api(url, api_key, lic_key)
                         # Catch incorrect API URL
                         if errs:
                             _, msg = errs[0]
@@ -2068,7 +2152,7 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                                 errors.extend(errs)
                                 return key_text_dict, errors
                         for severity, message in errs:
-                            msg = (afp + ": " + message)
+                            msg = afp + ": " + message
                             errors.append(Error(severity, msg))
                         # We don't want to actually get the license information from the
                         # check utility
@@ -2076,36 +2160,33 @@ def pre_process_and_fetch_license_dict(abouts, from_check=False, api_url=None, a
                             continue
                         if not license_data:
                             continue
-                        license_name = license_data.get('short_name', '')
-                        license_text = license_data.get('full_text', '')
-                        spdx_license_key = license_data.get(
-                            'spdx_license_key', '')
-                        license_filename = lic_key + '.LICENSE'
+                        license_name = license_data.get("short_name", "")
+                        license_text = license_data.get("full_text", "")
+                        spdx_license_key = license_data.get("spdx_license_key", "")
+                        license_filename = lic_key + ".LICENSE"
                         lic_url = lic_urn + lic_key
                     else:
-                        license_url = url + lic_key + '.json'
-                        license_text_url = url + lic_key + '.LICENSE'
+                        license_url = url + lic_key + ".json"
+                        license_text_url = url + lic_key + ".LICENSE"
                         try:
                             response = head(license_url)
                             if response.status_code < 400:
-                                json_url_content = get(
-                                    license_url).text
+                                json_url_content = get(license_url).text
                                 # We don't want to actually get the license
                                 # information from the check utility
                                 if from_check:
                                     continue
                                 data = json.loads(json_url_content)
-                                license_name = data['short_name']
-                                license_text = get(
-                                    license_text_url).text
-                                license_filename = data['key'] + '.LICENSE'
+                                license_name = data["short_name"]
+                                license_text = get(license_text_url).text
+                                license_filename = data["key"] + ".LICENSE"
                                 lic_url = url + license_filename
-                                spdx_license_key = data['spdx_license_key']
+                                spdx_license_key = data["spdx_license_key"]
                             else:
                                 if afp:
-                                    msg = afp + u" : Invalid 'license': " + lic_key
+                                    msg = afp + " : Invalid 'license': " + lic_key
                                 else:
-                                    msg = u"Invalid 'license': " + lic_key
+                                    msg = "Invalid 'license': " + lic_key
                                 errors.append(Error(ERROR, msg))
                                 continue
                         except exceptions.RequestException as e:
@@ -2130,15 +2211,12 @@ def convert_spdx_expression_to_lic_expression(spdx_key, spdx_lic_dict):
     if spdx_key in spdx_lic_dict:
         value = spdx_lic_dict[spdx_key]
     else:
-        if spdx_key.startswith('('):
-            mod_key = spdx_key.partition('(')[2]
-            value = '(' + \
-                convert_spdx_expression_to_lic_expression(
-                    mod_key, spdx_lic_dict)
-        elif spdx_key.endswith(')'):
-            mod_key = spdx_key.rpartition(')')[0]
-            value = convert_spdx_expression_to_lic_expression(
-                mod_key, spdx_lic_dict) + ')'
+        if spdx_key.startswith("("):
+            mod_key = spdx_key.partition("(")[2]
+            value = "(" + convert_spdx_expression_to_lic_expression(mod_key, spdx_lic_dict)
+        elif spdx_key.endswith(")"):
+            mod_key = spdx_key.rpartition(")")[0]
+            value = convert_spdx_expression_to_lic_expression(mod_key, spdx_lic_dict) + ")"
         else:
             # This can be operator or key that don't have match
             value = spdx_key
@@ -2148,7 +2226,7 @@ def convert_spdx_expression_to_lic_expression(spdx_key, spdx_lic_dict):
 def parse_license_expression(lic_expression):
     licensing = Licensing()
     lic_list = []
-    invalid_lic_exp = ''
+    invalid_lic_exp = ""
     special_char = detect_special_char(lic_expression)
     if not special_char:
         # Parse the license expression and save it into a list
@@ -2161,8 +2239,28 @@ def parse_license_expression(lic_expression):
 
 def detect_special_char(expression):
     not_support_char = [
-        '!', '@', '#', '$', '^', '&', '*', '=', '{', '}',
-        '|', '[', ']', '\\', ':', ';', '<', '>', '?', ',', '/']
+        "!",
+        "@",
+        "#",
+        "$",
+        "^",
+        "&",
+        "*",
+        "=",
+        "{",
+        "}",
+        "|",
+        "[",
+        "]",
+        "\\",
+        ":",
+        ";",
+        "<",
+        ">",
+        "?",
+        ",",
+        "/",
+    ]
     special_character = []
     for char in not_support_char:
         if char in expression:

@@ -20,9 +20,9 @@ import os
 
 import saneyaml
 
-__version__ = '11.1.1'
+__version__ = "11.1.1"
 
-__about_spec_version__ = '4.0.0'
+__about_spec_version__ = "4.0.0"
 
 __copyright__ = """
 Copyright (c) nexB Inc. All rights reserved. http://dejacode.org
@@ -38,7 +38,7 @@ limitations under the License.
 """
 
 
-class Error(namedtuple('Error', ['severity', 'message'])):
+class Error(namedtuple("Error", ["severity", "message"])):
     """
     An Error data with a severity and message.
     """
@@ -51,12 +51,11 @@ class Error(namedtuple('Error', ['severity', 'message'])):
                 message = self._clean_string(repr(message))
                 message = message.strip('"')
 
-        return super(Error, self).__new__(
-            Error, severity, message)
+        return super(Error, self).__new__(Error, severity, message)
 
     def __repr__(self, *args, **kwargs):
         sev, msg = self._get_values()
-        return 'Error(%(sev)s,  %(msg)s)' % locals()
+        return "Error(%(sev)s,  %(msg)s)" % locals()
 
     def __eq__(self, other):
         return repr(self) == repr(other)
@@ -68,7 +67,7 @@ class Error(namedtuple('Error', ['severity', 'message'])):
 
     def render(self):
         sev, msg = self._get_values()
-        return '%(sev)s: %(msg)s' % locals()
+        return "%(sev)s: %(msg)s" % locals()
 
     def to_dict(self, *args, **kwargs):
         """
@@ -85,7 +84,7 @@ class Error(namedtuple('Error', ['severity', 'message'])):
         if not s:
             return s
         if s.startswith(('u"', "u'")):
-            s = s.lstrip('u')
+            s = s.lstrip("u")
         s = s.replace('[u"', '["')
         s = s.replace("[u'", "['")
         s = s.replace("(u'", "('")
@@ -107,10 +106,10 @@ DEBUG = 10
 NOTSET = 0
 
 severities = {
-    CRITICAL: 'CRITICAL',
-    ERROR: 'ERROR',
-    WARNING: 'WARNING',
-    INFO: 'INFO',
-    DEBUG: 'DEBUG',
-    NOTSET: 'NOTSET'
+    CRITICAL: "CRITICAL",
+    ERROR: "ERROR",
+    WARNING: "WARNING",
+    INFO: "INFO",
+    DEBUG: "DEBUG",
+    NOTSET: "NOTSET",
 }
