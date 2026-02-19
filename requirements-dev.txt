@@ -21,3 +21,4 @@ rich==12.3.0
 secretstorage==3.3.2
 tomli==1.2.3
 twine==3.8.0
+pbr==5.0.0
