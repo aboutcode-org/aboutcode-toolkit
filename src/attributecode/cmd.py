@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexB.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -40,6 +40,7 @@ from attributecode import __version__
 from attributecode import __about_spec_version__
 from attributecode.util import unique
 from attributecode import WARNING
+from attributecode import Error
 
 from collections import defaultdict
 from functools import partial

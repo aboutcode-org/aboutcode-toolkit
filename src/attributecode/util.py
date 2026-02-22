@@ -32,6 +32,8 @@ from itertools import zip_longest
 from attributecode import CRITICAL
 from attributecode import WARNING
 from attributecode import Error
+from attributecode import __version__
+from attributecode import Error
 
 on_windows = "win32" in sys.platform
 
@@ -274,6 +276,50 @@ def get_spdx_key_and_lic_key_from_licdb():
                     lic_dict[other_spdx] = license["license_key"]
 
     return lic_dict
+
+"""
+Canonical implementation of license expression parsing and special character detection.
+Import and use these from util.py everywhere in the codebase to avoid duplication.
+"""
+def parse_license_expression(lic_expression):
+    from license_expression import Licensing
+    licensing = Licensing()
+    lic_list = []
+    invalid_lic_exp = ''
+    special_char = detect_special_char(lic_expression)
+    if not special_char:
+        # Parse the license expression and save it into a list
+        try:
+            lic_list = licensing.license_keys(lic_expression)
+        except Exception:
+            invalid_lic_exp = lic_expression
+    return special_char, lic_list, invalid_lic_exp
+
+def detect_special_char(expression):
+    not_support_char = [
+        '!', '@', '#', '$', '^', '&', '*', '=', '{', '}',
+        '|', '[', ']', '\\', ':', ';', '<', '>', '?', ',', '/']
+    special_character = []
+    if not isinstance(expression, str):
+        return special_character
+    for char in not_support_char:
+        if char in expression:
+            special_character.append(char)
+    return special_character
+
+
+def valid_api_url(api_url):
+    try:
+        response = get(api_url)
+        # The 403 error code is expected if the api_url is pointing to DJE as no
+        # API key is provided. The 200 status code represent connection success
+        # to scancode's LicenseDB. All other exception yield to invalid api_url
+        if response.status_code == 403 or response.status_code == 200:
+            return True
+        else:
+            return False
+    except:
+        return False
 
 
 def get_relative_path(base_loc, full_loc):

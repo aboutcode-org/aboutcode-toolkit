@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 # ============================================================================
-#  Copyright (c) nexB Inc. http://www.nexb.com/ - All rights reserved.
+#  Copyright (c) nexB Inc. http://www.nexB.com/ - All rights reserved.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -62,7 +62,9 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
 
     template = jinja2.Template(template)
     # Get the current UTC time
-    utcnow = datetime.datetime.utcnow()
+    # utcnow = datetime.datetime.utcnow()
+    # Use timezone-aware UTC datetime to avoid deprecation warning
+    utcnow = datetime.datetime.now(datetime.timezone.utc)
 
     licenses_list = []
     lic_name_expression_list = []
@@ -154,7 +156,7 @@ def generate(abouts, is_about_input, license_dict, scancode, min_license_score, 
 
     rendered = template.render(
         abouts=abouts,
-        common_licenses=COMMON_LICENSES,
+        common_licenses=[lic.key for lic in licenses_list],
         licenses_list=licenses_list,
         utcnow=utcnow,
         tkversion=__version__,

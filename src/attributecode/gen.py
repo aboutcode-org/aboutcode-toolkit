@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ============================================================================
-
+import saneyaml
 from posixpath import basename
 from posixpath import dirname
 from posixpath import exists
@@ -34,7 +34,7 @@ from attributecode.util import to_posix
 from attributecode.util import UNC_PREFIX_POSIX
 from attributecode.util import load_scancode_json, load_csv, load_json, load_excel
 from attributecode.util import strip_inventory_value
-
+from attributecode import __version__
 
 def check_duplicated_columns(location):
     """
