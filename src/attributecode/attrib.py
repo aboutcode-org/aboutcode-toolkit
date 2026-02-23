@@ -361,7 +361,7 @@ def generate_and_save(
     )
 
     if rendering_error:
-        errors.append(rendering_error)
+        errors.extend(rendering_error)
 
     if rendered:
         output_location = add_unc(output_location)
