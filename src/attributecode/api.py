@@ -36,18 +36,14 @@ def request_license_data(api_url, api_key, license_key):
     `license_key`. Send a request to `api_url` authenticating with `api_key`.
     """
     headers = {
-        'Authorization': 'Token %s' % api_key,
+        "Authorization": "Token %s" % api_key,
     }
-    payload = {
-        'api_key': api_key,
-        'key': license_key,
-        'format': 'json'
-    }
+    payload = {"api_key": api_key, "key": license_key, "format": "json"}
 
-    api_url = api_url.rstrip('/')
+    api_url = api_url.rstrip("/")
     payload = urlencode(payload)
 
-    full_url = '%(api_url)s/?%(payload)s' % locals()
+    full_url = "%(api_url)s/?%(payload)s" % locals()
     # handle special characters in URL such as space etc.
     quoted_url = quote(full_url, safe="%/:=&?~#+!$,;'@()*[]")
 
@@ -58,23 +54,21 @@ def request_license_data(api_url, api_key, license_key):
         response_content = response.text
         # FIXME: this should be an ordered dict
         license_data = json.loads(response_content)
-        if not license_data.get('results', []):
-            msg = u"Invalid 'license': %s" % license_key
+        if not license_data.get("results", []):
+            msg = "Invalid 'license': %s" % license_key
             errors.append(Error(ERROR, msg))
     except HTTPError as http_e:
-        msg = (u"Authorization denied. Invalid '--api_key'. "
-               u"License generation is skipped.")
+        msg = "Authorization denied. Invalid '--api_key'. License generation is skipped."
         errors.append(Error(ERROR, msg))
     except Exception as e:
         # Already checked the authorization and accessible of the URL.
         # The only exception left is URL is accessible, but it's not a valid API URL
-        msg = (u"Invalid '--api_url'. "
-               u"License generation is skipped.")
+        msg = "Invalid '--api_url'. License generation is skipped."
         errors.append(Error(ERROR, msg))
 
     finally:
-        if license_data.get('count') == 1:
-            license_data = license_data.get('results')[0]
+        if license_data.get("count") == 1:
+            license_data = license_data.get("results")[0]
         else:
             license_data = {}
 

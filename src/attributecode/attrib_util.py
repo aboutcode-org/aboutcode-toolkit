@@ -15,6 +15,7 @@
 # ============================================================================
 
 from jinja2 import Environment
+
 try:
     from jinja2.filters import pass_environment
 except ImportError:
@@ -35,15 +36,12 @@ def get_template(template_text):
     """
     env = Environment(autoescape=True)
     # register our custom filters
-    env.filters.update(dict(
-        unique_together=unique_together,
-        multi_sort=multi_sort))
+    env.filters.update(dict(unique_together=unique_together, multi_sort=multi_sort))
     return env.from_string(template_text)
 
 
 @pass_environment
-def multi_sort(environment, value, reverse=False, case_sensitive=False,
-               attributes=None):
+def multi_sort(environment, value, reverse=False, case_sensitive=False, attributes=None):
     """
     Sort an iterable using an "attributes" list of attribute names available on
     each iterable item. Sort ascending unless reverse is "true". Ignore the case
@@ -57,9 +55,10 @@ def multi_sort(environment, value, reverse=False, case_sensitive=False,
     """
     if not attributes:
         raise FilterArgumentError(
-            'The multi_sort filter requires a list of attributes as argument, '
-            'such as in: '
-            "for item in iterable|multi_sort(attributes=['date', 'name'])")
+            "The multi_sort filter requires a list of attributes as argument, "
+            "such as in: "
+            "for item in iterable|multi_sort(attributes=['date', 'name'])"
+        )
 
     # build a list of attribute getters, one for each attribute
     do_ignore_case = ignore_case if not case_sensitive else None
@@ -91,9 +90,10 @@ def unique_together(environment, value, case_sensitive=False, attributes=None):
     """
     if not attributes:
         raise FilterArgumentError(
-            'The unique_together filter requires a list of attributes as argument, '
-            'such as in: '
-            "{% for item in iterable|unique_together(attributes=['date', 'name']) %} ")
+            "The unique_together filter requires a list of attributes as argument, "
+            "such as in: "
+            "{% for item in iterable|unique_together(attributes=['date', 'name']) %} "
+        )
 
     # build a list of attribute getters, one for each attribute
     do_ignore_case = ignore_case if not case_sensitive else None

@@ -30,7 +30,11 @@ from attributecode.model import write_output
 from attributecode.model import pre_process_and_fetch_license_dict
 from attributecode.model import get_copy_list
 from attributecode.model import copy_redist_src
-from attributecode.model import collect_inventory, collect_abouts_license_expression, collect_inventory_license_expression
+from attributecode.model import (
+    collect_inventory,
+    collect_abouts_license_expression,
+    collect_inventory_license_expression,
+)
 from attributecode.gen import generate as generate_about_files, load_inventory
 from attributecode.attrib import generate_and_save as generate_attribution_doc
 from attributecode.attrib import DEFAULT_LICENSE_SCORE
@@ -65,17 +69,17 @@ __copyright__ = """
     See the License for the specific language governing permissions and
     limitations under the License."""
 
-prog_name = 'AboutCode-toolkit'
+prog_name = "AboutCode-toolkit"
 
-intro = '''%(prog_name)s version %(__version__)s
+intro = """%(prog_name)s version %(__version__)s
 ABOUT spec version: %(__about_spec_version__)s
 https://aboutcode.org
 %(__copyright__)s
-''' % locals()
+""" % locals()
 
 
 def print_version():
-    click.echo('Running aboutcode-toolkit version ' + __version__)
+    click.echo("Running aboutcode-toolkit version " + __version__)
 
 
 class AboutCommand(click.Command):
@@ -83,28 +87,33 @@ class AboutCommand(click.Command):
     An enhanced click Command working around some Click quirk.
     """
 
-    def main(self, args=None, prog_name=None, complete_var=None,
-             standalone_mode=True, **extra):
+    def main(self, args=None, prog_name=None, complete_var=None, standalone_mode=True, **extra):
         """
         Workaround click bug https://github.com/mitsuhiko/click/issues/365
         """
         return click.Command.main(
-            self, args=args, prog_name=self.name,
-            complete_var=complete_var, standalone_mode=standalone_mode, **extra)
+            self,
+            args=args,
+            prog_name=self.name,
+            complete_var=complete_var,
+            standalone_mode=standalone_mode,
+            **extra,
+        )
 
 
 # we define a main entry command with subcommands
-@click.group(name='about')
+@click.group(name="about")
 @click.version_option(version=__version__, prog_name=prog_name, message=intro)
-@click.help_option('-h', '--help')
+@click.help_option("-h", "--help")
 def about():
     """
-Generate licensing attribution and credit notices from .ABOUT files and inventories.
+    Generate licensing attribution and credit notices from .ABOUT files and inventories.
 
-Read, write and collect provenance and license inventories from .ABOUT files to and from JSON or CSV files.
+    Read, write and collect provenance and license inventories from .ABOUT files to and from JSON or CSV files.
 
-Use about <command> --help for help on a command.
+    Use about <command> --help for help on a command.
     """
+
 
 ######################################################################
 # option validators
@@ -121,168 +130,201 @@ def validate_key_values(ctx, param, value):
 
     kvals, errors = parse_key_values(value)
     if errors:
-        ive = '\n'.join(sorted('  ' + x for x in errors))
-        msg = ('Invalid {param} option(s):\n'
-               '{ive}'.format(**locals()))
+        ive = "\n".join(sorted("  " + x for x in errors))
+        msg = "Invalid {param} option(s):\n{ive}".format(**locals())
         raise click.UsageError(msg)
     return kvals
 
 
-def validate_extensions(ctx, param, value, extensions=tuple(('.csv', '.json',))):
+def validate_extensions(
+    ctx,
+    param,
+    value,
+    extensions=tuple(
+        (
+            ".csv",
+            ".json",
+        )
+    ),
+):
     if not value:
         return
     if not value.endswith(extensions):
-        msg = ' '.join(extensions)
+        msg = " ".join(extensions)
         raise click.UsageError(
-            'Invalid {param} file extension: must be one of: {msg}'.format(**locals()))
+            "Invalid {param} file extension: must be one of: {msg}".format(**locals())
+        )
     return value
+
 
 ######################################################################
 # inventory subcommand
 ######################################################################
 
 
-@about.command(cls=AboutCommand,
-               short_help='Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file or stdout.')
-@click.argument('location',
-                required=True,
-                metavar='LOCATION',
-                type=click.Path(
-                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-@click.argument('output',
-                required=True,
-                metavar='OUTPUT')
-@click.option('--exclude',
-              multiple=True,
-              metavar='PATTERN',
-              help='Exclude the processing of the specified input pattern (e.g. *tests* or test/).')
-@click.option('-f', '--format',
-              is_flag=False,
-              default='csv',
-              show_default=True,
-              type=click.Choice(['json', 'csv', 'excel']),
-              help='Set OUTPUT inventory file format.')
-@click.option('-q', '--quiet',
-              is_flag=True,
-              help='Do not print error or warning messages.')
-@click.option('--verbose',
-              is_flag=True,
-              help='Show all error and warning messages.')
-@click.help_option('-h', '--help')
+@about.command(
+    cls=AboutCommand,
+    short_help="Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file or stdout.",
+)
+@click.argument(
+    "location",
+    required=True,
+    metavar="LOCATION",
+    type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True),
+)
+@click.argument("output", required=True, metavar="OUTPUT")
+@click.option(
+    "--exclude",
+    multiple=True,
+    metavar="PATTERN",
+    help="Exclude the processing of the specified input pattern (e.g. *tests* or test/).",
+)
+@click.option(
+    "-f",
+    "--format",
+    is_flag=False,
+    default="csv",
+    show_default=True,
+    type=click.Choice(["json", "csv", "excel"]),
+    help="Set OUTPUT inventory file format.",
+)
+@click.option("-q", "--quiet", is_flag=True, help="Do not print error or warning messages.")
+@click.option("--verbose", is_flag=True, help="Show all error and warning messages.")
+@click.help_option("-h", "--help")
 def inventory(location, output, exclude, format, quiet, verbose):  # NOQA
     """
-Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.
+    Collect the inventory of .ABOUT files to a CSV/JSON/XLSX file.
 
-LOCATION: Path to an ABOUT file or a directory with ABOUT files.
+    LOCATION: Path to an ABOUT file or a directory with ABOUT files.
 
-OUTPUT: Path to the CSV/JSON/XLSX inventory file to create, or
-using '-' to print result on screen/to stdout (Excel-formatted output
-cannot be used in stdout).
+    OUTPUT: Path to the CSV/JSON/XLSX inventory file to create, or
+    using '-' to print result on screen/to stdout (Excel-formatted output
+    cannot be used in stdout).
     """
     # We are not using type=click.Path() to validate the output location as
     # it does not support `-` , which is used to print the result to stdout.
-    if not output == '-':
+    if not output == "-":
         parent_dir = os.path.dirname(output)
         if not os.path.exists(parent_dir):
-            msg = 'The OUTPUT directory: {parent_dir} does not exist.'.format(**locals())
-            msg += '\nPlease correct and re-run'
+            msg = "The OUTPUT directory: {parent_dir} does not exist.".format(**locals())
+            msg += "\nPlease correct and re-run"
             click.echo(msg)
             sys.exit(1)
     else:
         # Check the format if output is stdout as xlsx format cannot be displayed.
-        if format == 'excel':
-            msg = 'Excel-formatted output cannot be used in stdout.'
+        if format == "excel":
+            msg = "Excel-formatted output cannot be used in stdout."
             click.echo(msg)
             sys.exit(0)
     if not quiet:
         print_version()
-        click.echo('Collecting inventory from ABOUT files...')
+        click.echo("Collecting inventory from ABOUT files...")
 
-    if location.lower().endswith('.zip'):
+    if location.lower().endswith(".zip"):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
     errors, abouts = collect_inventory(location, exclude)
     write_output(abouts=abouts, location=output, format=format)
 
-    if output == '-':
+    if output == "-":
         log_file_loc = None
     else:
-        log_file_loc = output + '-error.log'
-    errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc)
-    if not quiet and not output == '-':
-        msg = 'Inventory collected in {output}.'.format(**locals())
+        log_file_loc = output + "-error.log"
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc)
+    if not quiet and not output == "-":
+        msg = "Inventory collected in {output}.".format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
+
 
 ######################################################################
 # gen subcommand
 ######################################################################
 
 
-@about.command(cls=AboutCommand,
-               short_help='Generate .ABOUT files from an inventory as CSV/JSON/XLSX.')
-@click.argument('location',
-                required=True,
-                metavar='LOCATION',
-                type=click.Path(
-                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-@click.argument('output',
-                required=True,
-                metavar='OUTPUT',
-                type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
-@click.option('--android',
-              is_flag=True,
-              help='Generate MODULE_LICENSE_XXX (XXX will be replaced by license key) and NOTICE '
-              'as the same design as from Android.')
+@about.command(
+    cls=AboutCommand, short_help="Generate .ABOUT files from an inventory as CSV/JSON/XLSX."
+)
+@click.argument(
+    "location",
+    required=True,
+    metavar="LOCATION",
+    type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True),
+)
+@click.argument(
+    "output",
+    required=True,
+    metavar="OUTPUT",
+    type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True),
+)
+@click.option(
+    "--android",
+    is_flag=True,
+    help="Generate MODULE_LICENSE_XXX (XXX will be replaced by license key) and NOTICE "
+    "as the same design as from Android.",
+)
 # FIXME: the CLI UX should be improved with two separate options for API key and URL
-@click.option('--fetch-license',
-              is_flag=True,
-              help='Fetch license data and text files from the ScanCode LicenseDB.')
-@click.option('--fetch-license-djc',
-              nargs=2,
-              type=str,
-              metavar='api_url api_key',
-              help='Fetch license data and text files from a DejaCode License Library '
-              'API URL using the API KEY.')
-@click.option('--scancode',
-              is_flag=True,
-              help='Indicate the input JSON file is from scancode_toolkit.')
-@click.option('--reference',
-              metavar='DIR',
-              type=click.Path(exists=True, file_okay=False,
-                              readable=True, resolve_path=True),
-              help='Path to a directory with reference license data and text files.')
-@click.option('--worksheet',
-              metavar='name',
-              help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
-@click.option('-q', '--quiet',
-              is_flag=True,
-              help='Do not print error or warning messages.')
-@click.option('--verbose',
-              is_flag=True,
-              help='Show all error and warning messages.')
-@click.help_option('-h', '--help')
-def gen(location, output, android, fetch_license, fetch_license_djc, scancode, reference, worksheet, quiet, verbose):
+@click.option(
+    "--fetch-license",
+    is_flag=True,
+    help="Fetch license data and text files from the ScanCode LicenseDB.",
+)
+@click.option(
+    "--fetch-license-djc",
+    nargs=2,
+    type=str,
+    metavar="api_url api_key",
+    help="Fetch license data and text files from a DejaCode License Library "
+    "API URL using the API KEY.",
+)
+@click.option(
+    "--scancode", is_flag=True, help="Indicate the input JSON file is from scancode_toolkit."
+)
+@click.option(
+    "--reference",
+    metavar="DIR",
+    type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
+    help="Path to a directory with reference license data and text files.",
+)
+@click.option(
+    "--worksheet",
+    metavar="name",
+    help='The worksheet name from the INPUT. (Default: the "active" worksheet)',
+)
+@click.option("-q", "--quiet", is_flag=True, help="Do not print error or warning messages.")
+@click.option("--verbose", is_flag=True, help="Show all error and warning messages.")
+@click.help_option("-h", "--help")
+def gen(
+    location,
+    output,
+    android,
+    fetch_license,
+    fetch_license_djc,
+    scancode,
+    reference,
+    worksheet,
+    quiet,
+    verbose,
+):
     """
-Given a CSV/JSON/XLSX inventory, generate ABOUT files in the output location.
+    Given a CSV/JSON/XLSX inventory, generate ABOUT files in the output location.
 
-LOCATION: Path to a JSON/CSV/XLSX inventory file.
+    LOCATION: Path to a JSON/CSV/XLSX inventory file.
 
-OUTPUT: Path to a directory where ABOUT files are generated.
+    OUTPUT: Path to a directory where ABOUT files are generated.
     """
     if not quiet:
         print_version()
-        click.echo('Generating .ABOUT files...')
+        click.echo("Generating .ABOUT files...")
 
     # FIXME: This should be checked in the `click`
-    if not location.endswith(('.csv', '.json', '.xlsx')):
+    if not location.endswith((".csv", ".json", ".xlsx")):
         raise click.UsageError(
-            'ERROR: Invalid input file extension: must be one .csv or .json or .xlsx.')
+            "ERROR: Invalid input file extension: must be one .csv or .json or .xlsx."
+        )
 
-    if worksheet and not location.endswith('.xlsx'):
-        raise click.UsageError(
-            'ERROR: --worksheet option only works with .xlsx input.')
+    if worksheet and not location.endswith(".xlsx"):
+        raise click.UsageError("ERROR: --worksheet option only works with .xlsx input.")
 
     errors, abouts = generate_about_files(
         location=location,
@@ -292,15 +334,13 @@ OUTPUT: Path to a directory where ABOUT files are generated.
         fetch_license=fetch_license,
         fetch_license_djc=fetch_license_djc,
         scancode=scancode,
-        worksheet=worksheet
+        worksheet=worksheet,
     )
 
-    errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + "-error.log")
     if not quiet:
         abouts_count = len(abouts)
-        msg = '{abouts_count} .ABOUT files generated in {output}.'.format(
-            **locals())
+        msg = "{abouts_count} .ABOUT files generated in {output}.".format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
 
@@ -309,57 +349,66 @@ OUTPUT: Path to a directory where ABOUT files are generated.
 # gen_license subcommand
 ######################################################################
 
-@about.command(cls=AboutCommand,
-               short_help='Fetch and save all the licenses in the license_expression field to a directory.')
-@click.argument('location',
-                required=True,
-                metavar='LOCATION',
-                type=click.Path(
-                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-@click.argument('output',
-                required=True,
-                metavar='OUTPUT',
-                type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True))
-@click.option('--djc',
-              nargs=2,
-              type=str,
-              metavar='api_url api_key',
-              help='Fetch licenses from a DejaCode License Library.')
-@click.option('--scancode',
-              is_flag=True,
-              help='Indicate the input JSON file is from scancode_toolkit.')
-@click.option('--worksheet',
-              metavar='name',
-              help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
-@click.option('--verbose',
-              is_flag=True,
-              help='Show all error and warning messages.')
-@click.help_option('-h', '--help')
+
+@about.command(
+    cls=AboutCommand,
+    short_help="Fetch and save all the licenses in the license_expression field to a directory.",
+)
+@click.argument(
+    "location",
+    required=True,
+    metavar="LOCATION",
+    type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True),
+)
+@click.argument(
+    "output",
+    required=True,
+    metavar="OUTPUT",
+    type=click.Path(exists=True, file_okay=False, writable=True, resolve_path=True),
+)
+@click.option(
+    "--djc",
+    nargs=2,
+    type=str,
+    metavar="api_url api_key",
+    help="Fetch licenses from a DejaCode License Library.",
+)
+@click.option(
+    "--scancode", is_flag=True, help="Indicate the input JSON file is from scancode_toolkit."
+)
+@click.option(
+    "--worksheet",
+    metavar="name",
+    help='The worksheet name from the INPUT. (Default: the "active" worksheet)',
+)
+@click.option("--verbose", is_flag=True, help="Show all error and warning messages.")
+@click.help_option("-h", "--help")
 def gen_license(location, output, djc, scancode, worksheet, verbose):
     """
-Fetch licenses (Default: ScanCode LicenseDB) in the license_expression field and save to the output location.
+    Fetch licenses (Default: ScanCode LicenseDB) in the license_expression field and save to the output location.
 
-LOCATION: Path to a JSON/CSV/XLSX/.ABOUT file(s)
+    LOCATION: Path to a JSON/CSV/XLSX/.ABOUT file(s)
 
-OUTPUT: Path to a directory where license files are saved.
+    OUTPUT: Path to a directory where license files are saved.
     """
     print_version()
-    api_url = ''
-    api_key = ''
+    api_url = ""
+    api_key = ""
     errors = []
 
-    if worksheet and not location.endswith('.xlsx'):
-        raise click.UsageError(
-            'ERROR: --worksheet option only works with .xlsx input.')
+    if worksheet and not location.endswith(".xlsx"):
+        raise click.UsageError("ERROR: --worksheet option only works with .xlsx input.")
 
-    log_file_loc = os.path.join(output, 'error.log')
+    log_file_loc = os.path.join(output, "error.log")
 
-    if location.endswith('.csv') or location.endswith('.json') or location.endswith('.xlsx'):
+    if location.endswith(".csv") or location.endswith(".json") or location.endswith(".xlsx"):
         errors, abouts = collect_inventory_license_expression(
-            location=location, scancode=scancode, worksheet=worksheet)
+            location=location, scancode=scancode, worksheet=worksheet
+        )
         if errors:
             severe_errors_count = report_errors(
-                errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
+                errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc
+            )
             sys.exit(severe_errors_count)
     else:
         # _errors, abouts = collect_inventory(location)
@@ -370,10 +419,11 @@ OUTPUT: Path to a directory where license files are saved.
         api_url = djc[0].strip("'").strip('"')
         api_key = djc[1].strip("'").strip('"')
 
-    click.echo('Fetching licenses...')
+    click.echo("Fetching licenses...")
     from_check = False
     license_dict, lic_errors = pre_process_and_fetch_license_dict(
-        abouts, from_check, api_url, api_key, scancode)
+        abouts, from_check, api_url, api_key, scancode
+    )
 
     if lic_errors:
         errors.extend(lic_errors)
@@ -391,7 +441,8 @@ OUTPUT: Path to a directory where license files are saved.
         errors.extend(write_errors)
 
     severe_errors_count = report_errors(
-        errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc)
+        errors, quiet=False, verbose=verbose, log_file_loc=log_file_loc
+    )
     sys.exit(severe_errors_count)
 
 
@@ -404,103 +455,123 @@ def validate_template(ctx, param, value):
     if not value:
         return None
 
-    with open(value, encoding='utf-8', errors='replace') as templatef:
+    with open(value, encoding="utf-8", errors="replace") as templatef:
         template_error = check_template(templatef.read())
 
     if template_error:
         lineno, message = template_error
         raise click.UsageError(
-            'Template syntax error at line: '
-            '{lineno}: "{message}"'.format(**locals()))
+            'Template syntax error at line: {lineno}: "{message}"'.format(**locals())
+        )
     return value
 
 
-@about.command(cls=AboutCommand,
-               short_help='Generate an attribution document from JSON/CSV/XLSX/.ABOUT files.')
-@click.argument('input',
-                required=True,
-                metavar='INPUT',
-                type=click.Path(
-                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-@click.argument('output',
-                required=True,
-                metavar='OUTPUT',
-                type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
-@click.option('--api_url',
-              nargs=1,
-              type=click.STRING,
-              metavar='URL',
-              help='URL to DejaCode License Library.')
-@click.option('--api_key',
-              nargs=1,
-              type=click.STRING,
-              metavar='KEY',
-              help='API Key for the  DejaCode License Library')
-@click.option('--min-license-score',
-              type=int,
-              help='Attribute components that have license score higher than or equal to the defined '
-              '--min-license-score.')
-@click.option('--scancode',
-              is_flag=True,
-              help='Indicate the input JSON file is from scancode_toolkit.')
-@click.option('--reference',
-              metavar='DIR',
-              type=click.Path(exists=True, file_okay=False,
-                              readable=True, resolve_path=True),
-              help='Path to a directory with reference files where "license_file" and/or "notice_file"'
-              ' located.')
-@click.option('--template',
-              metavar='FILE',
-              callback=validate_template,
-              type=click.Path(exists=True, dir_okay=False,
-                              readable=True, resolve_path=True),
-              help='Path to an optional custom attribution template to generate the '
-              'attribution document. If not provided the default built-in template is used.')
-@click.option('--vartext',
-              multiple=True,
-              callback=validate_key_values,
-              metavar='<key>=<value>',
-              help='Add variable text as key=value for use in a custom attribution template.')
-@click.option('--worksheet',
-              metavar='name',
-              help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
-@click.option('-q', '--quiet',
-              is_flag=True,
-              help='Do not print error or warning messages.')
-@click.option('--verbose',
-              is_flag=True,
-              help='Show all error and warning messages.')
-@click.help_option('-h', '--help')
-def attrib(input, output, api_url, api_key, scancode, min_license_score, reference, template, vartext, worksheet, quiet, verbose):
+@about.command(
+    cls=AboutCommand, short_help="Generate an attribution document from JSON/CSV/XLSX/.ABOUT files."
+)
+@click.argument(
+    "input",
+    required=True,
+    metavar="INPUT",
+    type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True),
+)
+@click.argument(
+    "output",
+    required=True,
+    metavar="OUTPUT",
+    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True),
+)
+@click.option(
+    "--api_url", nargs=1, type=click.STRING, metavar="URL", help="URL to DejaCode License Library."
+)
+@click.option(
+    "--api_key",
+    nargs=1,
+    type=click.STRING,
+    metavar="KEY",
+    help="API Key for the  DejaCode License Library",
+)
+@click.option(
+    "--min-license-score",
+    type=int,
+    help="Attribute components that have license score higher than or equal to the defined "
+    "--min-license-score.",
+)
+@click.option(
+    "--scancode", is_flag=True, help="Indicate the input JSON file is from scancode_toolkit."
+)
+@click.option(
+    "--reference",
+    metavar="DIR",
+    type=click.Path(exists=True, file_okay=False, readable=True, resolve_path=True),
+    help='Path to a directory with reference files where "license_file" and/or "notice_file"'
+    " located.",
+)
+@click.option(
+    "--template",
+    metavar="FILE",
+    callback=validate_template,
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help="Path to an optional custom attribution template to generate the "
+    "attribution document. If not provided the default built-in template is used.",
+)
+@click.option(
+    "--vartext",
+    multiple=True,
+    callback=validate_key_values,
+    metavar="<key>=<value>",
+    help="Add variable text as key=value for use in a custom attribution template.",
+)
+@click.option(
+    "--worksheet",
+    metavar="name",
+    help='The worksheet name from the INPUT. (Default: the "active" worksheet)',
+)
+@click.option("-q", "--quiet", is_flag=True, help="Do not print error or warning messages.")
+@click.option("--verbose", is_flag=True, help="Show all error and warning messages.")
+@click.help_option("-h", "--help")
+def attrib(
+    input,
+    output,
+    api_url,
+    api_key,
+    scancode,
+    min_license_score,
+    reference,
+    template,
+    vartext,
+    worksheet,
+    quiet,
+    verbose,
+):
     """
-Generate an attribution document at OUTPUT using JSON, CSV or XLSX or .ABOUT files at INPUT.
+    Generate an attribution document at OUTPUT using JSON, CSV or XLSX or .ABOUT files at INPUT.
 
-INPUT: Path to a file (.ABOUT/.csv/.json/.xlsx), directory or .zip archive containing .ABOUT files.
+    INPUT: Path to a file (.ABOUT/.csv/.json/.xlsx), directory or .zip archive containing .ABOUT files.
 
-OUTPUT: Path where to write the attribution document.
+    OUTPUT: Path where to write the attribution document.
     """
     # A variable to define if the input ABOUT file(s)
     is_about_input = False
 
-    rendered = ''
+    rendered = ""
     license_dict = {}
     errors = []
 
-    if worksheet and not input.endswith('.xlsx'):
-        raise click.UsageError(
-            'ERROR: --worksheet option only works with .xlsx input.')
+    if worksheet and not input.endswith(".xlsx"):
+        raise click.UsageError("ERROR: --worksheet option only works with .xlsx input.")
 
     if not quiet:
         print_version()
-        click.echo('Generating attribution...')
+        click.echo("Generating attribution...")
 
     # accept zipped ABOUT files as input
-    if input.lower().endswith('.zip'):
+    if input.lower().endswith(".zip"):
         input = extract_zip(input)
 
     if scancode:
-        if not input.endswith('.json'):
-            msg = 'The input file from scancode toolkit needs to be in JSON format.'
+        if not input.endswith(".json"):
+            msg = "The input file from scancode toolkit needs to be in JSON format."
             click.echo(msg)
             sys.exit(1)
         if not min_license_score and not min_license_score == 0:
@@ -508,12 +579,14 @@ OUTPUT: Path where to write the attribution document.
 
     if min_license_score:
         if not scancode:
-            msg = ('This option requires a JSON file generated by scancode toolkit as the input. ' +
-                   'The "--scancode" option is required.')
+            msg = (
+                "This option requires a JSON file generated by scancode toolkit as the input. "
+                + 'The "--scancode" option is required.'
+            )
             click.echo(msg)
             sys.exit(1)
 
-    if input.endswith('.json') or input.endswith('.csv') or input.endswith('.xlsx'):
+    if input.endswith(".json") or input.endswith(".csv") or input.endswith(".xlsx"):
         is_about_input = False
         from_attrib = True
         if not reference:
@@ -528,13 +601,13 @@ OUTPUT: Path where to write the attribution document.
             from_attrib=from_attrib,
             scancode=scancode,
             reference_dir=reference,
-            worksheet=worksheet
+            worksheet=worksheet,
         )
 
         # Exit if CRITICAL error
         if errors:
             for e in errors:
-                if severities[e.severity] == 'CRITICAL':
+                if severities[e.severity] == "CRITICAL":
                     click.echo(e)
                     sys.exit(1)
 
@@ -543,7 +616,7 @@ OUTPUT: Path where to write the attribution document.
         _errors, abouts = collect_inventory(input)
 
     if not abouts:
-        msg = 'No ABOUT file or reference is found from the input. Attribution generation halted.'
+        msg = "No ABOUT file or reference is found from the input. Attribution generation halted."
         click.echo(msg)
         errors_count = 1
         sys.exit(errors_count)
@@ -560,13 +633,14 @@ OUTPUT: Path where to write the attribution document.
                 click.echo(msg)
                 sys.exit(1)
         else:
-            api_url = ''
-            api_key = ''
+            api_url = ""
+            api_key = ""
         api_url = api_url.strip("'").strip('"')
         api_key = api_key.strip("'").strip('"')
         from_check = False
         license_dict, lic_errors = pre_process_and_fetch_license_dict(
-            abouts, from_check, api_url, api_key, scancode, reference)
+            abouts, from_check, api_url, api_key, scancode, reference
+        )
         errors.extend(lic_errors)
         sorted_license_dict = sorted(license_dict)
 
@@ -574,8 +648,7 @@ OUTPUT: Path where to write the attribution document.
         for about in abouts:
             if about.license_file.value or about.notice_file.value:
                 if not reference:
-                    msg = (
-                        '"license_file" / "notice_file" field contains value. Use `--reference` to indicate its parent directory.')
+                    msg = '"license_file" / "notice_file" field contains value. Use `--reference` to indicate its parent directory.'
                     click.echo(msg)
                     # sys.exit(1)
 
@@ -592,72 +665,63 @@ OUTPUT: Path where to write the attribution document.
         )
         errors.extend(attrib_errors)
 
-    errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + "-error.log")
 
     if not quiet:
         if rendered:
-            msg = 'Attribution generated in: {output}'.format(**locals())
+            msg = "Attribution generated in: {output}".format(**locals())
             click.echo(msg)
         else:
-            msg = 'Attribution generation failed.'
+            msg = "Attribution generation failed."
             click.echo(msg)
     sys.exit(errors_count)
+
 
 ######################################################################
 # collect_redist_src subcommand
 ######################################################################
 
 
-@about.command(cls=AboutCommand,
-               short_help='Collect redistributable sources.')
-@click.argument('location',
-                required=True,
-                metavar='LOCATION',
-                type=click.Path(
-                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-@click.argument('output',
-                required=True,
-                metavar='OUTPUT')
-@click.option('--from-inventory',
-              metavar='FILE',
-              type=click.Path(exists=True, dir_okay=False,
-                              readable=True, resolve_path=True),
-              help='Path to an inventory CSV/JSON/XLSX file as the base list for files/directories '
-              'that need to be copied which have the \'redistribute\' flagged.')
-@click.option('--with-structures',
-              is_flag=True,
-              help='Copy sources with directory structure.')
-@click.option('--zip',
-              is_flag=True,
-              help='Zip the copied sources to the output location.')
-@click.option('-q', '--quiet',
-              is_flag=True,
-              help='Do not print error or warning messages.')
-@click.option('--verbose',
-              is_flag=True,
-              help='Show all error and warning messages.')
-@click.help_option('-h', '--help')
+@about.command(cls=AboutCommand, short_help="Collect redistributable sources.")
+@click.argument(
+    "location",
+    required=True,
+    metavar="LOCATION",
+    type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True),
+)
+@click.argument("output", required=True, metavar="OUTPUT")
+@click.option(
+    "--from-inventory",
+    metavar="FILE",
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help="Path to an inventory CSV/JSON/XLSX file as the base list for files/directories "
+    "that need to be copied which have the 'redistribute' flagged.",
+)
+@click.option("--with-structures", is_flag=True, help="Copy sources with directory structure.")
+@click.option("--zip", is_flag=True, help="Zip the copied sources to the output location.")
+@click.option("-q", "--quiet", is_flag=True, help="Do not print error or warning messages.")
+@click.option("--verbose", is_flag=True, help="Show all error and warning messages.")
+@click.help_option("-h", "--help")
 def collect_redist_src(location, output, from_inventory, with_structures, zip, quiet, verbose):
     """
-Collect sources that have 'redistribute' flagged as 'True' in .ABOUT files or inventory
-to the output location.
+    Collect sources that have 'redistribute' flagged as 'True' in .ABOUT files or inventory
+    to the output location.
 
-LOCATION: Path to a directory containing sources that need to be copied
-(and containing ABOUT files if `inventory` is not provided)
+    LOCATION: Path to a directory containing sources that need to be copied
+    (and containing ABOUT files if `inventory` is not provided)
 
-OUTPUT: Path to a directory or a zip file where sources will be copied to.
+    OUTPUT: Path to a directory or a zip file where sources will be copied to.
     """
     if zip:
-        if not output.endswith('.zip'):
-            click.echo('The output needs to be a zip file.')
+        if not output.endswith(".zip"):
+            click.echo("The output needs to be a zip file.")
             sys.exit()
 
     if not quiet:
         print_version()
-        click.echo('Collecting inventory from ABOUT files...')
+        click.echo("Collecting inventory from ABOUT files...")
 
-    if location.lower().endswith('.zip'):
+    if location.lower().endswith(".zip"):
         # accept zipped ABOUT files as input
         location = extract_zip(location)
 
@@ -673,25 +737,24 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
         output_location = output
 
     copy_list, copy_list_errors = get_copy_list(abouts, location)
-    copy_errors = copy_redist_src(
-        copy_list, location, output_location, with_structures)
+    copy_errors = copy_redist_src(copy_list, location, output_location, with_structures)
 
     if zip:
         import shutil
+
         # Stripped the .zip extension as the `shutil.make_archive` will
         # append the .zip extension
-        output_no_extension = output.rsplit('.', 1)[0]
-        shutil.make_archive(output_no_extension, 'zip', output_location)
+        output_no_extension = output.rsplit(".", 1)[0]
+        shutil.make_archive(output_no_extension, "zip", output_location)
 
     errors.extend(copy_list_errors)
     errors.extend(copy_errors)
-    errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + "-error.log")
     if not quiet:
-        msg = 'Redistributed sources are copied to {output}.'.format(
-            **locals())
+        msg = "Redistributed sources are copied to {output}.".format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
+
 
 ######################################################################
 # check subcommand
@@ -699,40 +762,42 @@ OUTPUT: Path to a directory or a zip file where sources will be copied to.
 
 # FIXME: This is really only a dupe of the Inventory command
 
-@about.command(cls=AboutCommand,
-               short_help='Validate that the format of .ABOUT files is correct and report '
-               'errors and warnings.')
-@click.argument('location',
-                required=True,
-                metavar='LOCATION',
-                type=click.Path(
-                    exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True))
-@click.option('--exclude',
-              multiple=True,
-              metavar='PATTERN',
-              help='Exclude the processing of the specified input pattern (e.g. *tests* or test/).')
-@click.option('--license',
-              is_flag=True,
-              help='Validate the license_expression value in the input.')
-@click.option('--djc',
-              nargs=2,
-              type=str,
-              metavar='api_url api_key',
-              help='Validate license_expression from a DejaCode License Library '
-              'API URL using the API KEY.')
-@click.option('--log',
-              nargs=1,
-              metavar='FILE',
-              help='Path to a file to save the error messages if any.')
-@click.option('--verbose',
-              is_flag=True,
-              help='Show all error and warning messages.')
-@click.help_option('-h', '--help')
+
+@about.command(
+    cls=AboutCommand,
+    short_help="Validate that the format of .ABOUT files is correct and report "
+    "errors and warnings.",
+)
+@click.argument(
+    "location",
+    required=True,
+    metavar="LOCATION",
+    type=click.Path(exists=True, file_okay=True, dir_okay=True, readable=True, resolve_path=True),
+)
+@click.option(
+    "--exclude",
+    multiple=True,
+    metavar="PATTERN",
+    help="Exclude the processing of the specified input pattern (e.g. *tests* or test/).",
+)
+@click.option("--license", is_flag=True, help="Validate the license_expression value in the input.")
+@click.option(
+    "--djc",
+    nargs=2,
+    type=str,
+    metavar="api_url api_key",
+    help="Validate license_expression from a DejaCode License Library API URL using the API KEY.",
+)
+@click.option(
+    "--log", nargs=1, metavar="FILE", help="Path to a file to save the error messages if any."
+)
+@click.option("--verbose", is_flag=True, help="Show all error and warning messages.")
+@click.help_option("-h", "--help")
 def check(location, exclude, license, djc, log, verbose):
     """
-Check .ABOUT file(s) at LOCATION for validity and print error messages.
+    Check .ABOUT file(s) at LOCATION for validity and print error messages.
 
-LOCATION: Path to an ABOUT file or a directory with ABOUT files.
+    LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     """
     print_version()
 
@@ -742,13 +807,13 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
         if not parent:
             os.makedirs(parent)
 
-    api_url = ''
-    api_key = ''
+    api_url = ""
+    api_key = ""
     if djc:
         # Strip the ' and " for api_url, and api_key from input
         api_url = djc[0].strip("'").strip('"')
         api_key = djc[1].strip("'").strip('"')
-    click.echo('Checking ABOUT files...')
+    click.echo("Checking ABOUT files...")
 
     errors, abouts = collect_inventory(location, exclude)
 
@@ -756,13 +821,14 @@ LOCATION: Path to an ABOUT file or a directory with ABOUT files.
     if license:
         from_check = True
         _key_text_dict, errs = pre_process_and_fetch_license_dict(
-            abouts, from_check, api_url, api_key)
+            abouts, from_check, api_url, api_key
+        )
         for e in errs:
             errors.append(e)
 
-    severe_errors_count = report_errors(
-        errors, quiet=False, verbose=verbose, log_file_loc=log)
+    severe_errors_count = report_errors(errors, quiet=False, verbose=verbose, log_file_loc=log)
     sys.exit(severe_errors_count)
+
 
 ######################################################################
 # transform subcommand
@@ -773,56 +839,77 @@ def print_config_help(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     from attributecode.transform import tranformer_config_help
+
     click.echo(tranformer_config_help)
     ctx.exit()
 
 
-@about.command(cls=AboutCommand,
-               short_help='Transform a CSV/JSON/XLSX by applying renamings, filters and checks.')
-@click.argument('location',
-                required=True,
-                callback=partial(validate_extensions, extensions=(
-                    '.csv', '.json', '.xlsx',)),
-                metavar='LOCATION',
-                type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True))
-@click.argument('output',
-                required=True,
-                callback=partial(validate_extensions, extensions=(
-                    '.csv', '.json', '.xlsx',)),
-                metavar='OUTPUT',
-                type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True))
-@click.option('-c', '--configuration',
-              metavar='FILE',
-              type=click.Path(exists=True, dir_okay=False,
-                              readable=True, resolve_path=True),
-              help='Path to an optional YAML configuration file. See --help-format for '
-              'format help.')
-@click.option('--worksheet',
-              metavar='name',
-              help='The worksheet name from the INPUT. (Default: the "active" worksheet)')
-@click.option('--help-format',
-              is_flag=True, is_eager=True, expose_value=False,
-              callback=print_config_help,
-              help='Show configuration file format help and exit.')
-@click.option('-q', '--quiet',
-              is_flag=True,
-              help='Do not print error or warning messages.')
-@click.option('--verbose',
-              is_flag=True,
-              help='Show all error and warning messages.')
-@click.help_option('-h', '--help')
+@about.command(
+    cls=AboutCommand,
+    short_help="Transform a CSV/JSON/XLSX by applying renamings, filters and checks.",
+)
+@click.argument(
+    "location",
+    required=True,
+    callback=partial(
+        validate_extensions,
+        extensions=(
+            ".csv",
+            ".json",
+            ".xlsx",
+        ),
+    ),
+    metavar="LOCATION",
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+)
+@click.argument(
+    "output",
+    required=True,
+    callback=partial(
+        validate_extensions,
+        extensions=(
+            ".csv",
+            ".json",
+            ".xlsx",
+        ),
+    ),
+    metavar="OUTPUT",
+    type=click.Path(exists=False, dir_okay=False, writable=True, resolve_path=True),
+)
+@click.option(
+    "-c",
+    "--configuration",
+    metavar="FILE",
+    type=click.Path(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    help="Path to an optional YAML configuration file. See --help-format for format help.",
+)
+@click.option(
+    "--worksheet",
+    metavar="name",
+    help='The worksheet name from the INPUT. (Default: the "active" worksheet)',
+)
+@click.option(
+    "--help-format",
+    is_flag=True,
+    is_eager=True,
+    expose_value=False,
+    callback=print_config_help,
+    help="Show configuration file format help and exit.",
+)
+@click.option("-q", "--quiet", is_flag=True, help="Do not print error or warning messages.")
+@click.option("--verbose", is_flag=True, help="Show all error and warning messages.")
+@click.help_option("-h", "--help")
 def transform(location, output, configuration, worksheet, quiet, verbose):  # NOQA
     """
-Transform the CSV/JSON/XLSX file at LOCATION by applying renamings, filters and checks
-and then write a new CSV/JSON/XLSX to OUTPUT.
+    Transform the CSV/JSON/XLSX file at LOCATION by applying renamings, filters and checks
+    and then write a new CSV/JSON/XLSX to OUTPUT.
 
-LOCATION: Path to a CSV/JSON/XLSX file.
+    LOCATION: Path to a CSV/JSON/XLSX file.
 
-OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
+    OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
     """
-    if worksheet and not location.endswith('.xlsx'):
-        raise click.UsageError(
-            'ERROR: --worksheet option only works with .xlsx input.')
+    if worksheet and not location.endswith(".xlsx"):
+        raise click.UsageError("ERROR: --worksheet option only works with .xlsx input.")
 
     if not configuration:
         transformer = Transformer.default()
@@ -830,7 +917,7 @@ OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
         transformer = Transformer.from_file(configuration)
 
     if not transformer:
-        msg = 'Cannot transform without Transformer'
+        msg = "Cannot transform without Transformer"
         click.echo(msg)
         sys.exit(1)
 
@@ -838,11 +925,11 @@ OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
     updated_data = []
     new_data = []
 
-    if location.endswith('.csv'):
+    if location.endswith(".csv"):
         new_data, errors = transform_csv(location)
-    elif location.endswith('.json'):
+    elif location.endswith(".json"):
         new_data, errors = transform_json(location)
-    elif location.endswith('.xlsx'):
+    elif location.endswith(".xlsx"):
         new_data, errors = transform_excel(location, worksheet)
 
     data_keys = new_data[0].keys() if new_data else []
@@ -862,28 +949,28 @@ OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
         updated_data, errors = transform_data(new_data, transformer)
 
     if not updated_data:
-        msg = 'The input is empty. Nothing is transformed.'
+        msg = "The input is empty. Nothing is transformed."
         click.echo(msg)
         sys.exit(0)
 
     if not errors:
-        if output.endswith('.csv'):
+        if output.endswith(".csv"):
             write_csv(output, updated_data)
-        elif output.endswith('.json'):
+        elif output.endswith(".json"):
             write_json(output, updated_data)
         else:
             write_excel(output, updated_data)
 
     if not quiet:
         print_version()
-        click.echo('Transforming...')
+        click.echo("Transforming...")
 
-    errors_count = report_errors(
-        errors, quiet, verbose, log_file_loc=output + '-error.log')
+    errors_count = report_errors(errors, quiet, verbose, log_file_loc=output + "-error.log")
     if not quiet and not errors:
-        msg = 'Transformed file is written to {output}.'.format(**locals())
+        msg = "Transformed file is written to {output}.".format(**locals())
         click.echo(msg)
     sys.exit(errors_count)
+
 
 ######################################################################
 # Error management
@@ -906,8 +993,8 @@ def report_errors(errors, quiet, verbose, log_file_loc=None):
             for msg in log_msgs:
                 click.echo(msg)
         if log_msgs and log_file_loc:
-            with open(log_file_loc, 'w', encoding='utf-8', errors='replace') as lf:
-                lf.write('\n'.join(log_msgs))
+            with open(log_file_loc, "w", encoding="utf-8", errors="replace") as lf:
+                lf.write("\n".join(log_msgs))
             click.echo("Error log: " + log_file_loc)
     return severe_errors_count
 
@@ -929,16 +1016,16 @@ def get_error_messages(errors, verbose=False):
     messages = []
 
     if severe_errors:
-        error_msg = 'Command completed with {} errors or warnings.'.format(
-            severe_errors_count)
+        error_msg = "Command completed with {} errors or warnings.".format(severe_errors_count)
         messages.append(error_msg)
 
     for severity, message in severe_errors:
-        sevcode = severities.get(severity) or 'UNKNOWN'
-        msg = '{sevcode}: {message}'.format(**locals())
+        sevcode = severities.get(severity) or "UNKNOWN"
+        msg = "{sevcode}: {message}".format(**locals())
         messages.append(msg)
 
     return messages, severe_errors_count
+
 
 ######################################################################
 # Misc
@@ -958,7 +1045,7 @@ def parse_key_values(key_values):
     errors = set()
     parsed_key_values = defaultdict(list)
     for key_value in key_values:
-        key, _, value = key_value.partition('=')
+        key, _, value = key_value.partition("=")
 
         key = key.strip().lower()
         if not key:
@@ -975,5 +1062,5 @@ def parse_key_values(key_values):
     return dict(parsed_key_values), sorted(errors)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     about()

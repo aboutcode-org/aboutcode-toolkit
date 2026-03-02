@@ -44,7 +44,7 @@ Additional AboutCode Toolkit information is available at:
 
 - See :ref:`specification` for an overview and a link to the ABOUT File specification.
 
-- https://github.com/nexB/aboutcode-toolkit/ for the AboutCode Toolkit tools.
+- https://github.com/aboutcode-org/aboutcode-toolkit/ for the AboutCode Toolkit tools.
 
 Key Terminology
 ===============
@@ -328,7 +328,7 @@ Prepare an Attribution Template to Use
 You can run attrib using the default_html.template (or default_json.template)
 provided with the AboutCode Toolkit tools:
 
-https://github.com/nexB/aboutcode-toolkit/blob/develop/src/attributecode/templates/default_html.template
+https://github.com/aboutcode-org/aboutcode-toolkit/blob/develop/src/attributecode/templates/default_html.template
 
 If you choose to do that, you will most likely want to edit the generated .html
 file to provide header information about your own organization and product.

@@ -30,230 +30,502 @@ from attributecode.transform import transform_csv, transform_excel, transform_js
 
 
 class TransformTest(unittest.TestCase):
-
     def test_transform_data_new_col(self):
-        data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'), (u'Component', u'test.c'),
-                             (u'version', '1'), (u'notes', u'test'), (u'temp', u'foo')])]
-        configuration = get_test_loc('test_transform/configuration_new_cols')
+        data = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/tmp/test.c"),
+                    ("Component", "test.c"),
+                    ("version", "1"),
+                    ("notes", "test"),
+                    ("temp", "foo"),
+                ]
+            )
+        ]
+        configuration = get_test_loc("test_transform/configuration_new_cols")
         transformer = Transformer.from_file(configuration)
 
         data, err = transform_data(data, transformer)
 
-        expected_data = [dict(OrderedDict([(u'path', u'/tmp/test.c'),
-                                           (u'about_resource', u'/tmp/test.c'),
-                                           (u'name', u'test.c'), (u'version', u'1'),
-                                           (u'notes', u'test'), (u'temp', u'foo')]))]
+        expected_data = [
+            dict(
+                OrderedDict(
+                    [
+                        ("path", "/tmp/test.c"),
+                        ("about_resource", "/tmp/test.c"),
+                        ("name", "test.c"),
+                        ("version", "1"),
+                        ("notes", "test"),
+                        ("temp", "foo"),
+                    ]
+                )
+            )
+        ]
         assert len(data) == len(expected_data)
         for d in data:
             assert dict(d) in expected_data
 
     def test_transform_data(self):
-        data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'),
-                             (u'Component', u'test.c'), (u'version', u'1'),
-                             (u'notes', u'test'), (u'temp', u'foo')])]
-        configuration = get_test_loc('test_transform/configuration')
+        data = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/tmp/test.c"),
+                    ("Component", "test.c"),
+                    ("version", "1"),
+                    ("notes", "test"),
+                    ("temp", "foo"),
+                ]
+            )
+        ]
+        configuration = get_test_loc("test_transform/configuration")
         transformer = Transformer.from_file(configuration)
 
         data, err = transform_data(data, transformer)
 
-        expect_name = [u'about_resource', u'name', u'version']
-        expected_data = [dict(OrderedDict(
-            [(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'1')]))]
+        expect_name = ["about_resource", "name", "version"]
+        expected_data = [
+            dict(
+                OrderedDict(
+                    [("about_resource", "/tmp/test.c"), ("name", "test.c"), ("version", "1")]
+                )
+            )
+        ]
 
         assert len(data) == len(expected_data)
         for d in data:
             assert dict(d) in expected_data
 
     def test_transform_data_mutli_rows(self):
-        data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'), (u'Component', u'test.c'), (u'Confirmed Version', u'v0.01')]),
-                OrderedDict([(u'Directory/Filename', u'/tmp/tmp.h'), (u'Component', u'tmp.h'), (u'Confirmed Version', None)])]
-        configuration = get_test_loc('test_transform/configuration2')
+        data = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/tmp/test.c"),
+                    ("Component", "test.c"),
+                    ("Confirmed Version", "v0.01"),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/tmp/tmp.h"),
+                    ("Component", "tmp.h"),
+                    ("Confirmed Version", None),
+                ]
+            ),
+        ]
+        configuration = get_test_loc("test_transform/configuration2")
         transformer = Transformer.from_file(configuration)
 
         data, err = transform_data(data, transformer)
 
-        expect_name = [u'about_resource', u'name', u'version']
-        expected_data = [dict(OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name', u'test.c'), (u'version', u'v0.01')])),
-                         dict(OrderedDict([(u'about_resource', u'/tmp/tmp.h'), (u'name', u'tmp.h'), (u'version', None)]))]
+        expect_name = ["about_resource", "name", "version"]
+        expected_data = [
+            dict(
+                OrderedDict(
+                    [("about_resource", "/tmp/test.c"), ("name", "test.c"), ("version", "v0.01")]
+                )
+            ),
+            dict(
+                OrderedDict(
+                    [("about_resource", "/tmp/tmp.h"), ("name", "tmp.h"), ("version", None)]
+                )
+            ),
+        ]
 
         assert len(data) == len(expected_data)
         for d in data:
             assert dict(d) in expected_data
 
     def test_normalize_dict_data_scancode(self):
-        test_file = get_test_loc('test_transform/input_scancode.json')
+        test_file = get_test_loc("test_transform/input_scancode.json")
         json_data = read_json(test_file)
         data = normalize_dict_data(json_data)
-        expected_data = [OrderedDict([(u'path', u'samples'),
-                                      (u'type', u'directory'),
-                                      (u'name', u'samples'),
-                                      (u'base_name', u'samples'),
-                                      (u'extension', u''), (u'size', 0),
-                                      (u'date', None), (u'sha1',
-                                                        None), (u'md5', None),
-                                      (u'mime_type', None), (u'file_type', None),
-                                      (u'programming_language', None),
-                                      (u'is_binary', False), (u'is_text', False),
-                                      (u'is_archive', False), (u'is_media', False),
-                                      (u'is_source', False), (u'is_script', False),
-                                      (u'licenses', []), (u'license_expressions', []),
-                                      (u'copyrights', []), (u'holders', []),
-                                      (u'authors', []), (u'packages', []),
-                                      (u'emails', []), (u'urls', []),
-                                      (u'files_count', 33), (u'dirs_count', 10),
-                                      (u'size_count', 1161083), (u'scan_errors', [])])]
+        expected_data = [
+            OrderedDict(
+                [
+                    ("path", "samples"),
+                    ("type", "directory"),
+                    ("name", "samples"),
+                    ("base_name", "samples"),
+                    ("extension", ""),
+                    ("size", 0),
+                    ("date", None),
+                    ("sha1", None),
+                    ("md5", None),
+                    ("mime_type", None),
+                    ("file_type", None),
+                    ("programming_language", None),
+                    ("is_binary", False),
+                    ("is_text", False),
+                    ("is_archive", False),
+                    ("is_media", False),
+                    ("is_source", False),
+                    ("is_script", False),
+                    ("licenses", []),
+                    ("license_expressions", []),
+                    ("copyrights", []),
+                    ("holders", []),
+                    ("authors", []),
+                    ("packages", []),
+                    ("emails", []),
+                    ("urls", []),
+                    ("files_count", 33),
+                    ("dirs_count", 10),
+                    ("size_count", 1161083),
+                    ("scan_errors", []),
+                ]
+            )
+        ]
         assert data == expected_data
 
     def test_normalize_dict_data_json(self):
-        json_data = OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit/'),
-                                 (u'Component', u'AboutCode-toolkit'),
-                                 (u'version', u'1.2.3'), (u'note', u'test'),
-                                 (u'temp', u'foo')])
+        json_data = OrderedDict(
+            [
+                ("Directory/Filename", "/aboutcode-toolkit/"),
+                ("Component", "AboutCode-toolkit"),
+                ("version", "1.2.3"),
+                ("note", "test"),
+                ("temp", "foo"),
+            ]
+        )
         data = normalize_dict_data(json_data)
-        expected_data = [OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit/'),
-                                      (u'Component', u'AboutCode-toolkit'),
-                                      (u'version', u'1.2.3'), (u'note', u'test'),
-                                      (u'temp', u'foo')])]
+        expected_data = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/aboutcode-toolkit/"),
+                    ("Component", "AboutCode-toolkit"),
+                    ("version", "1.2.3"),
+                    ("note", "test"),
+                    ("temp", "foo"),
+                ]
+            )
+        ]
         assert data == expected_data
 
     def test_normalize_dict_data_json_array(self):
-        json_data = [OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit/'),
-                                  (u'Component', u'AboutCode-toolkit'),
-                                  (u'version', u'1.0'), (u'temp', u'fpp')]),
-                     OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit1/'),
-                                  (u'Component', u'AboutCode-toolkit1'),
-                                  (u'version', u'1.1'), (u'temp', u'foo')])]
+        json_data = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/aboutcode-toolkit/"),
+                    ("Component", "AboutCode-toolkit"),
+                    ("version", "1.0"),
+                    ("temp", "fpp"),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/aboutcode-toolkit1/"),
+                    ("Component", "AboutCode-toolkit1"),
+                    ("version", "1.1"),
+                    ("temp", "foo"),
+                ]
+            ),
+        ]
         data = normalize_dict_data(json_data)
-        expected_data = [OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit/'),
-                                      (u'Component', u'AboutCode-toolkit'),
-                                      (u'version', u'1.0'), (u'temp', u'fpp')]),
-                         OrderedDict([(u'Directory/Filename', u'/aboutcode-toolkit1/'),
-                                      (u'Component', u'AboutCode-toolkit1'),
-                                      (u'version', u'1.1'),
-                                      (u'temp', u'foo')])]
+        expected_data = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/aboutcode-toolkit/"),
+                    ("Component", "AboutCode-toolkit"),
+                    ("version", "1.0"),
+                    ("temp", "fpp"),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/aboutcode-toolkit1/"),
+                    ("Component", "AboutCode-toolkit1"),
+                    ("version", "1.1"),
+                    ("temp", "foo"),
+                ]
+            ),
+        ]
         assert data == expected_data
 
     def test_check_duplicate_fields(self):
-        field_name = ['path', 'name', 'path', 'version']
-        expected = ['path']
+        field_name = ["path", "name", "path", "version"]
+        expected = ["path"]
         dups = check_duplicate_fields(field_name)
         assert dups == expected
 
     def test_strip_trailing_fields_csv(self):
-        test = [u'about_resource', u'name ', u' version ']
-        expected = [u'about_resource', u'name', u'version']
+        test = ["about_resource", "name ", " version "]
+        expected = ["about_resource", "name", "version"]
         result = strip_trailing_fields_csv(test)
         assert result == expected
 
     def test_strip_trailing_fields_json(self):
-        test = [OrderedDict([(u'about_resource', u'/this.c'),
-                            (u'name ', u'this.c'), (u' version ', u'0.11.0')])]
-        expected = [OrderedDict(
-            [(u'about_resource', u'/this.c'), (u'name', u'this.c'), (u'version', u'0.11.0')])]
+        test = [
+            OrderedDict(
+                [("about_resource", "/this.c"), ("name ", "this.c"), (" version ", "0.11.0")]
+            )
+        ]
+        expected = [
+            OrderedDict([("about_resource", "/this.c"), ("name", "this.c"), ("version", "0.11.0")])
+        ]
         result = strip_trailing_fields_json(test)
         assert result == expected
 
     def test_read_excel(self):
-        test_file = get_test_loc('test_transform/simple.xlsx')
+        test_file = get_test_loc("test_transform/simple.xlsx")
         error, data = read_excel(test_file)
         assert not error
-        expected = [OrderedDict([('about_resource', '/test.c'), ('name', 'test.c'), ('license_expression', 'mit')]),
-                    OrderedDict([('about_resource', '/test2.c'), ('name', 'test2.c'), ('license_expression', 'mit and apache-2.0')])]
+        expected = [
+            OrderedDict(
+                [("about_resource", "/test.c"), ("name", "test.c"), ("license_expression", "mit")]
+            ),
+            OrderedDict(
+                [
+                    ("about_resource", "/test2.c"),
+                    ("name", "test2.c"),
+                    ("license_expression", "mit and apache-2.0"),
+                ]
+            ),
+        ]
         assert data == expected
 
     def test_read_csv_rows(self):
-        test_file = get_test_loc('test_transform/simple.csv')
+        test_file = get_test_loc("test_transform/simple.csv")
         data = read_csv_rows(test_file)
-        expected = [['about_resource', 'name', 'license_expression'],
-                    ['/test.c', 'test.c', 'mit'],
-                    ['/test2.c', 'test2.c', 'mit and apache-2.0']]
+        expected = [
+            ["about_resource", "name", "license_expression"],
+            ["/test.c", "test.c", "mit"],
+            ["/test2.c", "test2.c", "mit and apache-2.0"],
+        ]
         assert list(data) == expected
 
     def test_transform_csv(self):
-        test_file = get_test_loc('test_transform/input.csv')
+        test_file = get_test_loc("test_transform/input.csv")
         data, err = transform_csv(test_file)
-        expected = [{'Directory/Filename': '/aboutcode-toolkit/',
-                     'Component': 'AboutCode-toolkit',
-                     'Confirmed Version': '123', 'notes': ''}]
+        expected = [
+            {
+                "Directory/Filename": "/aboutcode-toolkit/",
+                "Component": "AboutCode-toolkit",
+                "Confirmed Version": "123",
+                "notes": "",
+            }
+        ]
         assert len(err) == 0
         assert data == expected
 
     def test_transform_excel(self):
-        test_file = get_test_loc('test_transform/input.xlsx')
+        test_file = get_test_loc("test_transform/input.xlsx")
         data, err = transform_excel(test_file)
-        expected = [OrderedDict([('Directory/Filename', '/aboutcode-toolkit/'),
-                                 ('Component', 'AboutCode-toolkit'),
-                                 ('Confirmed Version', 123), ('notes', '')])]
+        expected = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/aboutcode-toolkit/"),
+                    ("Component", "AboutCode-toolkit"),
+                    ("Confirmed Version", 123),
+                    ("notes", ""),
+                ]
+            )
+        ]
         assert len(err) == 0
         assert data == expected
 
     def test_transform_json(self):
-        test_file = get_test_loc('test_transform/input.json')
+        test_file = get_test_loc("test_transform/input.json")
         data, err = transform_json(test_file)
-        expected = [{'Directory/Filename': '/aboutcode-toolkit/',
-                     'Component': 'AboutCode-toolkit',
-                     'Confirmed Version': '123', 'notes': ''}]
+        expected = [
+            {
+                "Directory/Filename": "/aboutcode-toolkit/",
+                "Component": "AboutCode-toolkit",
+                "Confirmed Version": "123",
+                "notes": "",
+            }
+        ]
         assert len(err) == 0
         assert data == expected
 
     def test_apply_renamings(self):
-        data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'),
-                             (u'Component', u'test.c'), (u'version', u'1'),
-                             (u'notes', u'test'), (u'temp', u'foo')])]
-        configuration = get_test_loc('test_transform/configuration')
+        data = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/tmp/test.c"),
+                    ("Component", "test.c"),
+                    ("version", "1"),
+                    ("notes", "test"),
+                    ("temp", "foo"),
+                ]
+            )
+        ]
+        configuration = get_test_loc("test_transform/configuration")
         transformer = Transformer.from_file(configuration)
 
-        expected = [OrderedDict([(u'about_resource', u'/tmp/test.c'), (u'name',
-                                 u'test.c'), (u'version', u'1'), (u'notes', u'test'), (u'temp', u'foo')])]
+        expected = [
+            OrderedDict(
+                [
+                    ("about_resource", "/tmp/test.c"),
+                    ("name", "test.c"),
+                    ("version", "1"),
+                    ("notes", "test"),
+                    ("temp", "foo"),
+                ]
+            )
+        ]
         renamed_field_data = transformer.apply_renamings(data)
         assert renamed_field_data == expected
 
     def test_apply_renamings_nested_list(self):
-        data = [{'path': 'samples/JGroups-error.log', 'name': 'JGroups-error.log', 'license_detections': [{'license_expression': 'apache-1.1 AND apache-2.0', 'matches': [
-            {'score': 90.0, 'start_line': 4, 'end_line': 4, 'license_expression': 'apache-1.1'}, {'score': 100.0, 'start_line': 5, 'end_line': 5, 'license_expression': 'apache-2.0'}]}]}]
-        configuration = get_test_loc('test_transform/configuration3')
+        data = [
+            {
+                "path": "samples/JGroups-error.log",
+                "name": "JGroups-error.log",
+                "license_detections": [
+                    {
+                        "license_expression": "apache-1.1 AND apache-2.0",
+                        "matches": [
+                            {
+                                "score": 90.0,
+                                "start_line": 4,
+                                "end_line": 4,
+                                "license_expression": "apache-1.1",
+                            },
+                            {
+                                "score": 100.0,
+                                "start_line": 5,
+                                "end_line": 5,
+                                "license_expression": "apache-2.0",
+                            },
+                        ],
+                    }
+                ],
+            }
+        ]
+        configuration = get_test_loc("test_transform/configuration3")
         transformer = Transformer.from_file(configuration)
 
-        expected = [{'about_resource': 'samples/JGroups-error.log', 'name': 'JGroups-error.log', 'license_detections': [{'license_expression': 'apache-1.1 AND apache-2.0', 'matches': [
-            {'score_renamed': 90.0, 'start_line': 4, 'end_line': 4, 'license_expression': 'apache-1.1'}, {'score_renamed': 100.0, 'start_line': 5, 'end_line': 5, 'license_expression': 'apache-2.0'}]}]}]
+        expected = [
+            {
+                "about_resource": "samples/JGroups-error.log",
+                "name": "JGroups-error.log",
+                "license_detections": [
+                    {
+                        "license_expression": "apache-1.1 AND apache-2.0",
+                        "matches": [
+                            {
+                                "score_renamed": 90.0,
+                                "start_line": 4,
+                                "end_line": 4,
+                                "license_expression": "apache-1.1",
+                            },
+                            {
+                                "score_renamed": 100.0,
+                                "start_line": 5,
+                                "end_line": 5,
+                                "license_expression": "apache-2.0",
+                            },
+                        ],
+                    }
+                ],
+            }
+        ]
         updated_data = transformer.apply_renamings(data)
         assert updated_data == expected
 
     def test_filter_excluded(self):
-        data = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'),
-                             (u'Component', u'test.c'), (u'version', u'1'),
-                             (u'notes', u'test'), (u'temp', u'foo')])]
-        configuration = get_test_loc('test_transform/configuration')
+        data = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/tmp/test.c"),
+                    ("Component", "test.c"),
+                    ("version", "1"),
+                    ("notes", "test"),
+                    ("temp", "foo"),
+                ]
+            )
+        ]
+        configuration = get_test_loc("test_transform/configuration")
         transformer = Transformer.from_file(configuration)
 
-        expected = [OrderedDict([(u'Directory/Filename', u'/tmp/test.c'), (u'Component',
-                                 u'test.c'), (u'version', u'1'), (u'notes', u'test')])]
+        expected = [
+            OrderedDict(
+                [
+                    ("Directory/Filename", "/tmp/test.c"),
+                    ("Component", "test.c"),
+                    ("version", "1"),
+                    ("notes", "test"),
+                ]
+            )
+        ]
         updated_data = transformer.filter_excluded(data)
         assert updated_data == expected
 
     def test_filter_excluded_nested_list(self):
-        data = [{'path': 'samples/JGroups-error.log', 'type': 'file', 'name': 'JGroups-error.log', 'license_detections': [{'license_expression': 'apache-1.1 AND apache-2.0', 'matches': [
-            {'score': 90.0, 'start_line': 4, 'end_line': 4, 'license_expression': 'apache-1.1'}, {'score': 100.0, 'start_line': 5, 'end_line': 5, 'license_expression': 'apache-2.0'}]}]}]
-        configuration = get_test_loc('test_transform/configuration3')
+        data = [
+            {
+                "path": "samples/JGroups-error.log",
+                "type": "file",
+                "name": "JGroups-error.log",
+                "license_detections": [
+                    {
+                        "license_expression": "apache-1.1 AND apache-2.0",
+                        "matches": [
+                            {
+                                "score": 90.0,
+                                "start_line": 4,
+                                "end_line": 4,
+                                "license_expression": "apache-1.1",
+                            },
+                            {
+                                "score": 100.0,
+                                "start_line": 5,
+                                "end_line": 5,
+                                "license_expression": "apache-2.0",
+                            },
+                        ],
+                    }
+                ],
+            }
+        ]
+        configuration = get_test_loc("test_transform/configuration3")
         transformer = Transformer.from_file(configuration)
 
-        expected = [{'path': 'samples/JGroups-error.log', 'name': 'JGroups-error.log', 'license_detections': [{'license_expression': 'apache-1.1 AND apache-2.0', 'matches': [
-            {'score': 90.0, 'end_line': 4, 'license_expression': 'apache-1.1'}, {'score': 100.0, 'end_line': 5, 'license_expression': 'apache-2.0'}]}]}]
+        expected = [
+            {
+                "path": "samples/JGroups-error.log",
+                "name": "JGroups-error.log",
+                "license_detections": [
+                    {
+                        "license_expression": "apache-1.1 AND apache-2.0",
+                        "matches": [
+                            {"score": 90.0, "end_line": 4, "license_expression": "apache-1.1"},
+                            {"score": 100.0, "end_line": 5, "license_expression": "apache-2.0"},
+                        ],
+                    }
+                ],
+            }
+        ]
         updated_data = transformer.filter_excluded(data)
         assert updated_data == expected
 
     def test_filter_fields(self):
-        data = [OrderedDict([(u'about_resource', u'/tmp/test.c'),
-                             (u'name', u'test.c'), (u'version', u'1'),
-                             (u'notes', u'test'), (u'temp', u'foo')])]
-        configuration = get_test_loc('test_transform/configuration')
+        data = [
+            OrderedDict(
+                [
+                    ("about_resource", "/tmp/test.c"),
+                    ("name", "test.c"),
+                    ("version", "1"),
+                    ("notes", "test"),
+                    ("temp", "foo"),
+                ]
+            )
+        ]
+        configuration = get_test_loc("test_transform/configuration")
         transformer = Transformer.from_file(configuration)
 
         updated_data = transformer.filter_fields(data)
 
-        expected = [OrderedDict([(u'about_resource', u'/tmp/test.c'),
-                                 (u'name', u'test.c'), (u'version', u'1'),
-                                 (u'temp', u'foo')])]
+        expected = [
+            OrderedDict(
+                [
+                    ("about_resource", "/tmp/test.c"),
+                    ("name", "test.c"),
+                    ("version", "1"),
+                    ("temp", "foo"),
+                ]
+            )
+        ]
 
         for d in updated_data:
             assert dict(d) in expected

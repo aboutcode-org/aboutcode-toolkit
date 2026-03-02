@@ -47,8 +47,9 @@ The meaning of this ABOUT file is:
 -   The file "httpd-2.4.3.tar.gz" is stored in the same directory and side-by-side with
     the ABOUT file "httpd-2.4.3.tar.gz.ABOUT" that documents it.
 -   The name of this component is "Apache HTTP Server" with version "2.4.3".
--   The homepage URL for this component is http://httpd.apache.org
--   The file "httpd-2.4.3.tar.gz" was originally downloaded from http://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
+-   The homepage URL for this component is https://httpd.apache.org
+-   The file "httpd-2.4.3.tar.gz" was originally downloaded from
+    https://archive.apache.org/dist/httpd/httpd-2.4.3.tar.gz
 -   This component is licensed under "apache-2.0"
 -   The licenses section contains the information of this "apache-2.0" license.
 -   In the same directory, "apache-2.0.LICENSE" and "httpd.NOTICE" are files

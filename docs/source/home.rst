@@ -21,7 +21,7 @@ identify redistributable source code used in your project to help you comply
 with open source licenses conditions.
 
 This version of the AboutCode Toolkit follows the ABOUT specification version 3.3.2 at:
-https://aboutcode-toolkit.readthedocs.io/en/latest/specification.html
+https://aboutcode.readthedocs.io/projects/aboutcode-toolkit/en/latest/specification.html
 
 
 REQUIREMENTS
@@ -50,7 +50,7 @@ Open and run the installer using all the default options.
 INSTALLATION
 ------------
 Checkout or download and extract the AboutCode Toolkit from:
-    https://github.com/nexB/aboutcode-toolkit/
+    https://github.com/aboutcode-org/aboutcode-toolkit/
 
 To install all the needed dependencies in a virtualenv, run (on posix):
     ./configure
@@ -84,9 +84,12 @@ i.e. MAJOR.MINOR.PATCH format
 
 REFERENCE
 ---------
-See https://aboutcode-toolkit.readthedocs.io/en/latest/ for documentation.
+See https://aboutcode.readthedocs.io/projects/aboutcode-toolkit/en/latest/
+for documentation.
 
-See https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference.
+See
+https://aboutcode.readthedocs.io/projects/aboutcode-toolkit/en/latest/reference.html
+for reference.
 
 TESTS and DEVELOPMENT
 ---------------------
@@ -111,23 +114,24 @@ HELP and SUPPORT
 ----------------
 If you have a question or find a bug, enter a ticket at:
 
-    https://github.com/nexB/aboutcode-toolkit
+    https://github.com/aboutcode-org/aboutcode-toolkit
 
 For issues, you can use:
 
-    https://github.com/nexB/aboutcode-toolkit/issues
+    https://github.com/aboutcode-org/aboutcode-toolkit/issues
 
 
 SOURCE CODE
 -----------
 The AboutCode Toolkit is available through GitHub. For the latest version visit:
-    https://github.com/nexB/aboutcode-toolkit
+
+    https://github.com/aboutcode-org/aboutcode-toolkit
 
 
 HACKING
 -------
 We accept pull requests provided under the same license as this tool.
-You agree to the http://developercertificate.org/
+You agree to the https://developercertificate.org/
 
 
 LICENSE

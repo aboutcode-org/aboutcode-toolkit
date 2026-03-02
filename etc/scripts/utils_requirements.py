@@ -15,7 +15,7 @@ import subprocess
 """
 Utilities to manage requirements files and call pip.
 NOTE: this should use ONLY the standard library and not import anything else
-because this is used for boostrapping with no requirements installed.
+because this is used for bootstrapping with no requirements installed.
 """
 
 
@@ -31,7 +31,7 @@ def load_requirements(requirements_file="requirements.txt", with_unpinned=False)
 
 def get_required_name_versions(requirement_lines, with_unpinned=False):
     """
-    Yield required (name, version) tuples given a`requirement_lines` iterable of
+    Yield required (name, version) tuples given a `requirement_lines` iterable of
     requirement text lines. Only accept requirements pinned to an exact version.
     """
 
@@ -47,7 +47,7 @@ def get_required_name_versions(requirement_lines, with_unpinned=False):
 
 def get_required_name_version(requirement, with_unpinned=False):
     """
-    Return a (name, version) tuple given a`requirement` specifier string.
+    Return a (name, version) tuple given a `requirement` specifier string.
     Requirement version must be pinned. If ``with_unpinned`` is True, unpinned
     requirements are accepted and only the name portion is returned.
 

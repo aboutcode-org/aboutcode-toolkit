@@ -42,7 +42,7 @@ def check_duplicated_columns(location):
     at location.
     """
     location = add_unc(location)
-    with open(location, mode='r', encoding='utf-8-sig', errors='replace') as csvfile:
+    with open(location, mode="r", encoding="utf-8-sig", errors="replace") as csvfile:
         reader = csv.reader(csvfile)
         columns = next(reader)
         columns = [col for col in columns]
@@ -62,12 +62,14 @@ def check_duplicated_columns(location):
     if dupes:
         dup_msg = []
         for name, names in dupes.items():
-            names = u', '.join(names)
-            msg = '%(name)s with %(names)s' % locals()
+            names = ", ".join(names)
+            msg = "%(name)s with %(names)s" % locals()
             dup_msg.append(msg)
-        dup_msg = u', '.join(dup_msg)
-        msg = ('Duplicated column name(s): %(dup_msg)s\n' % locals() +
-               'Please correct the input and re-run.')
+        dup_msg = ", ".join(dup_msg)
+        msg = (
+            "Duplicated column name(s): %(dup_msg)s\n" % locals()
+            + "Please correct the input and re-run."
+        )
         err = Error(ERROR, msg)
         if not err in errors:
             errors.append(err)
@@ -79,10 +81,9 @@ def check_duplicated_about_resource(arp, arp_list):
     Return error for duplicated about_resource.
     """
     if arp in arp_list:
-        msg = ("The input has duplicated values in 'about_resource' "
-               "field: " + arp)
+        msg = "The input has duplicated values in 'about_resource' field: " + arp
         return Error(CRITICAL, msg)
-    return ''
+    return ""
 
 
 def check_newline_in_file_field(component):
@@ -93,13 +94,16 @@ def check_newline_in_file_field(component):
     for k in component.keys():
         if k in file_fields:
             try:
-                if '\n' in component[k]:
-                    if k == u'about_resource':
+                if "\n" in component[k]:
+                    if k == "about_resource":
                         msg = (
-                            "Multiple lines detected in 'about_resource' for '%s' which is not supported.") % component['about_resource']
+                            "Multiple lines detected in 'about_resource' for '%s' which is not supported."
+                        ) % component["about_resource"]
                     else:
-                        msg = ("New line character detected in '%s' for '%s' which is not supported."
-                               "\nPlease use ',' to declare multiple files.") % (k, component['about_resource'])
+                        msg = (
+                            "New line character detected in '%s' for '%s' which is not supported."
+                            "\nPlease use ',' to declare multiple files."
+                        ) % (k, component["about_resource"])
                     errors.append(Error(CRITICAL, msg))
             except:
                 pass
@@ -112,13 +116,14 @@ def check_about_resource_filename(arp):
     empty string if no error is found.
     """
     if invalid_chars(arp):
-        msg = ("Invalid characters present in 'about_resource' "
-               "field: " + arp)
-        return (Error(ERROR, msg))
-    return ''
+        msg = "Invalid characters present in 'about_resource' field: " + arp
+        return Error(ERROR, msg)
+    return ""
 
 
-def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, reference_dir=None, worksheet=None):
+def load_inventory(
+    location, from_attrib=False, base_dir=None, scancode=False, reference_dir=None, worksheet=None
+):
     """
     Load the inventory file at `location` for ABOUT and LICENSE files stored in
     the `base_dir`. Return a list of errors and a list of About objects
@@ -136,14 +141,14 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
     if scancode:
         inventory = load_scancode_json(location)
     else:
-        if location.endswith('.csv'):
+        if location.endswith(".csv"):
             dup_cols_err = check_duplicated_columns(location)
             if dup_cols_err:
                 errors.extend(dup_cols_err)
                 return errors, abouts
             inventory = load_csv(location)
             is_spreadsheet = True
-        elif location.endswith('.xlsx'):
+        elif location.endswith(".xlsx"):
             dup_cols_err, inventory = load_excel(location, worksheet)
             is_spreadsheet = True
             if dup_cols_err:
@@ -163,8 +168,8 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
 
     for component in stripped_inv:
         if not from_attrib:
-            if 'about_resource' in component:
-                arp = component['about_resource']
+            if "about_resource" in component:
+                arp = component["about_resource"]
                 dup_err = check_duplicated_about_resource(arp, arp_list)
                 if dup_err:
                     if not dup_err in errors:
@@ -190,17 +195,16 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
 
         for f in required_fields:
             if f not in fields:
-                if from_attrib and f == 'about_resource':
+                if from_attrib and f == "about_resource":
                     continue
                 else:
-                    msg = "Required field: %(f)r not found in the <input>" % locals(
-                    )
+                    msg = "Required field: %(f)r not found in the <input>" % locals()
                     errors.append(Error(CRITICAL, msg))
                     return errors, abouts
         # Set about file path to '' if no 'about_resource' is provided from
         # the input
-        if 'about_resource' not in fields:
-            afp = ''
+        if "about_resource" not in fields:
+            afp = ""
         else:
             afp = fields.get(model.About.ABOUT_RESOURCE_ATTR)
 
@@ -214,14 +218,14 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
 
         # Update value for 'about_resource'
         # keep only the filename or '.' if it's a directory
-        if 'about_resource' in fields:
-            updated_resource_value = u''
-            resource_path = fields['about_resource']
-            if resource_path.endswith(u'/'):
-                updated_resource_value = u'.'
+        if "about_resource" in fields:
+            updated_resource_value = ""
+            resource_path = fields["about_resource"]
+            if resource_path.endswith("/"):
+                updated_resource_value = "."
             else:
                 updated_resource_value = basename(resource_path)
-            fields['about_resource'] = updated_resource_value
+            fields["about_resource"] = updated_resource_value
 
         ld_errors = about.load_dict(
             fields,
@@ -233,8 +237,8 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
         )
 
         for severity, message in ld_errors:
-            if 'Custom Field' in message:
-                field_name = message.replace('Custom Field: ', '').strip()
+            if "Custom Field" in message:
+                field_name = message.replace("Custom Field: ", "").strip()
                 if not field_name in custom_fields_list:
                     custom_fields_list.append(field_name)
             else:
@@ -242,8 +246,7 @@ def load_inventory(location, from_attrib=False, base_dir=None, scancode=False, r
 
         abouts.append(about)
     if custom_fields_list:
-        custom_fields_err_msg = 'Field ' + \
-            str(custom_fields_list) + ' is a custom field.'
+        custom_fields_err_msg = "Field " + str(custom_fields_list) + " is a custom field."
         errors.append(Error(INFO, custom_fields_err_msg))
 
     return errors, abouts
@@ -253,14 +256,23 @@ def update_about_resource(self):
     pass
 
 
-def generate(location, base_dir, android=None, reference_dir=None, fetch_license=False, fetch_license_djc=False, scancode=False, worksheet=None):
+def generate(
+    location,
+    base_dir,
+    android=None,
+    reference_dir=None,
+    fetch_license=False,
+    fetch_license_djc=False,
+    scancode=False,
+    worksheet=None,
+):
     """
     Load ABOUT data from a CSV inventory at `location`. Write ABOUT files to
     base_dir. Return errors and about objects.
     """
     notice_dict = {}
-    api_url = ''
-    api_key = ''
+    api_url = ""
+    api_key = ""
     gen_license = False
     # FIXME: use two different arguments: key and url
     # Check if the fetch_license contains valid argument
@@ -281,11 +293,12 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
         base_dir=bdir,
         reference_dir=reference_dir,
         scancode=scancode,
-        worksheet=worksheet
+        worksheet=worksheet,
     )
     if gen_license:
         license_dict, err = model.pre_process_and_fetch_license_dict(
-            abouts, api_url=api_url, api_key=api_key)
+            abouts, api_url=api_url, api_key=api_key
+        )
         if err:
             for e in err:
                 # Avoid having same error multiple times
@@ -295,22 +308,24 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
     for about in abouts:
         # Strip trailing spaces
         about.about_file_path = about.about_file_path.strip()
-        if about.about_file_path.startswith('/'):
-            about.about_file_path = about.about_file_path.lstrip('/')
+        if about.about_file_path.startswith("/"):
+            about.about_file_path = about.about_file_path.lstrip("/")
         # Use the name as the ABOUT file name if about_resource is empty
         if not about.about_file_path:
             about.about_file_path = about.name.value
-        dump_loc = join(bdir, about.about_file_path.lstrip('/'))
+        dump_loc = join(bdir, about.about_file_path.lstrip("/"))
 
         # The following code is to check if there is any directory ends with spaces
-        split_path = about.about_file_path.split('/')
+        split_path = about.about_file_path.split("/")
         dir_endswith_space = False
         for segment in split_path:
-            if segment.endswith(' '):
-                msg = (u'File path : '
-                       u'%(dump_loc)s '
-                       u'contains directory name ends with spaces which is not '
-                       u'allowed. Generation skipped.' % locals())
+            if segment.endswith(" "):
+                msg = (
+                    "File path : "
+                    "%(dump_loc)s "
+                    "contains directory name ends with spaces which is not "
+                    "allowed. Generation skipped." % locals()
+                )
                 errors.append(Error(ERROR, msg))
                 dir_endswith_space = True
                 break
@@ -319,16 +334,26 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
             continue
 
         try:
-
             licenses_dict = {}
             if gen_license:
                 # Write generated LICENSE file
-                license_key_name_context_url_list = about.dump_lic(
-                    dump_loc, license_dict)
+                license_key_name_context_url_list = about.dump_lic(dump_loc, license_dict)
                 if license_key_name_context_url_list:
-                    for lic_key, lic_name, lic_filename, lic_context, lic_url, spdx_lic_key in license_key_name_context_url_list:
+                    for (
+                        lic_key,
+                        lic_name,
+                        lic_filename,
+                        lic_context,
+                        lic_url,
+                        spdx_lic_key,
+                    ) in license_key_name_context_url_list:
                         licenses_dict[lic_key] = [
-                            lic_name, lic_filename, lic_context, lic_url, spdx_lic_key]
+                            lic_name,
+                            lic_filename,
+                            lic_context,
+                            lic_url,
+                            spdx_lic_key,
+                        ]
                         if not lic_name in about.license_name.value:
                             about.license_name.value.append(lic_name)
                         about.license_file.value[lic_filename] = lic_filename
@@ -353,12 +378,13 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
                 follow the standard from Android Open Source Project
                 """
                 import os
+
                 parent_path = os.path.dirname(util.to_posix(dump_loc))
 
                 about.android_module_license(parent_path)
                 notice_path, notice_context = about.android_notice(parent_path)
                 if notice_path in notice_dict.keys():
-                    notice_dict[notice_path] += '\n\n' + notice_context
+                    notice_dict[notice_path] += "\n\n" + notice_context
                 else:
                     notice_dict[notice_path] = notice_context
 
@@ -366,16 +392,14 @@ def generate(location, base_dir, android=None, reference_dir=None, fetch_license
             # only keep the first 100 char of the exception
             # TODO: truncated errors are likely making diagnotics harder
             emsg = repr(e)[:100]
-            msg = (u'Failed to write .ABOUT file at : '
-                   u'%(dump_loc)s '
-                   u'with error: %(emsg)s' % locals())
+            msg = "Failed to write .ABOUT file at : %(dump_loc)s with error: %(emsg)s" % locals()
             errors.append(Error(ERROR, msg))
 
     if android:
         # Check if there is already a NOTICE file present
         for path in notice_dict.keys():
             if os.path.exists(path):
-                msg = (u'NOTICE file already exist at: %s' % path)
+                msg = "NOTICE file already exist at: %s" % path
                 errors.append(Error(ERROR, msg))
             else:
                 about.dump_android_notice(path, notice_dict[path])

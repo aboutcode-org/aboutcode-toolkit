@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'aboutcode-toolkit'
+project = "aboutcode-toolkit"
 copyright = "nexB Inc. and others."
 author = "AboutCode.org authors and contributors"
 

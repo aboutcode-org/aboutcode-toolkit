@@ -22,7 +22,7 @@ identify redistributable source code used in your project to help you comply
 with open source licenses conditions.
 
 This version of the AboutCode Toolkit follows the ABOUT specification version 3.3.2 at:
-https://aboutcode-toolkit.readthedocs.io/en/latest/specification.html
+https://aboutcode.readthedocs.io/projects/aboutcode-toolkit/en/latest/specification.html
 
 
 Build and tests status
@@ -97,9 +97,12 @@ i.e. MAJOR.MINOR.PATCH format
 
 REFERENCE
 ---------
-See https://aboutcode-toolkit.readthedocs.io/en/latest/ for documentation.
+See https://aboutcode.readthedocs.io/projects/aboutcode-toolkit/en/latest/
+for documentation.
 
-See https://aboutcode-toolkit.readthedocs.io/en/latest/reference.html for reference.
+See
+https://aboutcode.readthedocs.io/projects/aboutcode-toolkit/en/latest/reference.html
+for reference.
 
 TESTS and DEVELOPMENT
 ---------------------

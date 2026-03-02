@@ -40,7 +40,7 @@ def transform_csv(location):
     dupes = check_duplicate_fields(field_names)
 
     if dupes:
-        msg = u'Duplicated field name: %(name)s'
+        msg = "Duplicated field name: %(name)s"
         for name in dupes:
             errors.append(Error(CRITICAL, msg % locals()))
 
@@ -72,7 +72,7 @@ def transform_excel(location, worksheet=None):
     new_data = []
     dupes, new_data = read_excel(location, worksheet)
     if dupes:
-        msg = u'Duplicated field name: %(name)s'
+        msg = "Duplicated field name: %(name)s"
         for name in dupes:
             errors.append(Error(CRITICAL, msg % locals()))
     return new_data, errors
@@ -110,7 +110,7 @@ def normalize_dict_data(data):
     """
     try:
         # Check if this is a JSON output from scancode-toolkit
-        if (data["headers"][0]["tool_name"] == "scancode-toolkit"):
+        if data["headers"][0]["tool_name"] == "scancode-toolkit":
             # only takes data inside "files"
             new_data = data["files"]
     except:
@@ -130,12 +130,10 @@ def transform_data(data, transformer):
     renamed_field_data = transformer.apply_renamings(data)
 
     if transformer.field_filters:
-        renamed_field_data = list(
-            transformer.filter_fields(renamed_field_data))
+        renamed_field_data = list(transformer.filter_fields(renamed_field_data))
 
     if transformer.exclude_fields:
-        renamed_field_data = list(
-            transformer.filter_excluded(renamed_field_data))
+        renamed_field_data = list(transformer.filter_excluded(renamed_field_data))
 
     errors = transformer.check_required_fields(renamed_field_data)
     if errors:
@@ -143,7 +141,7 @@ def transform_data(data, transformer):
     return renamed_field_data, errors
 
 
-tranformer_config_help = '''
+tranformer_config_help = """
 A transform configuration file is used to describe which transformations and
 validations to apply to a source CSV file. This is a simple text file using YAML
 format, using the same format as an .ABOUT file.
@@ -201,7 +199,7 @@ and "temp" fields:
     exclude_fields:
         - type
         - temp
-'''
+"""
 
 
 @attr.attributes
@@ -222,6 +220,7 @@ class Transformer(object):
     # called by attr after the __init__()
     def __attrs_post_init__(self, *args, **kwargs):
         from attributecode.model import About
+
         about = About()
         self.essential_fields = list(about.required_fields)
         self.standard_fields = [f.name for f in about.all_fields()]
@@ -244,13 +243,13 @@ class Transformer(object):
         Load and return a Transformer instance from a YAML configuration file at
         `location`.
         """
-        with open(location, encoding='utf-8', errors='replace') as conf:
+        with open(location, encoding="utf-8", errors="replace") as conf:
             data = saneyaml.load(replace_tab_with_spaces(conf.read()))
         return cls(
-            field_renamings=data.get('field_renamings', {}),
-            required_fields=data.get('required_fields', []),
-            field_filters=data.get('field_filters', []),
-            exclude_fields=data.get('exclude_fields', []),
+            field_renamings=data.get("field_renamings", {}),
+            required_fields=data.get("required_fields", []),
+            field_filters=data.get("field_filters", []),
+            exclude_fields=data.get("exclude_fields", []),
         )
 
     def check_required_fields(self, data):
@@ -268,8 +267,8 @@ class Transformer(object):
             if not missings:
                 continue
 
-            missings = ', '.join(missings)
-            msg = 'Row {rn} is missing required values for fields: {missings}'
+            missings = ", ".join(missings)
+            msg = "Row {rn} is missing required values for fields: {missings}"
             errors.append(Error(CRITICAL, msg.format(**locals())))
 
         return errors
@@ -291,8 +290,7 @@ class Transformer(object):
                     for idx, renamed_from_key in enumerate(renamed_from_list):
                         if key == renamed_from_key:
                             renamed_key = renamed_to_list[idx]
-                            renamed_obj[renamed_key] = self.apply_renamings(
-                                value)
+                            renamed_obj[renamed_key] = self.apply_renamings(value)
                 else:
                     renamed_obj[key] = self.apply_renamings(value)
             return renamed_obj
@@ -357,7 +355,7 @@ def read_csv_rows(location):
     """
     Yield rows (as a list of values) from a CSV file at `location`.
     """
-    with open(location, encoding='utf-8', errors='replace') as csvfile:
+    with open(location, encoding="utf-8", errors="replace") as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             yield row
@@ -367,7 +365,7 @@ def read_json(location):
     """
     Yield rows (as a list of values) from a CSV file at `location`.
     """
-    with open(location, encoding='utf-8', errors='replace') as jsonfile:
+    with open(location, encoding="utf-8", errors="replace") as jsonfile:
         return json.load(jsonfile)
 
 
@@ -376,7 +374,7 @@ def write_csv(location, data):
     Write a CSV file at `location` with the `data` which is a list of ordered dicts.
     """
     field_names = list(data[0].keys())
-    with open(location, 'w', encoding='utf-8', newline='\n', errors='replace') as csvfile:
+    with open(location, "w", encoding="utf-8", newline="\n", errors="replace") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=field_names)
         writer.writeheader()
         writer.writerows(data)
@@ -386,7 +384,7 @@ def write_json(location, data):
     """
     Write a JSON file at `location` the `data` list of ordered dicts.
     """
-    with open(location, 'w') as jsonfile:
+    with open(location, "w") as jsonfile:
         json.dump(data, jsonfile, indent=3)
 
 
@@ -410,7 +408,7 @@ def read_excel(location, worksheet=None):
     while index <= max_col:
         value = sheet_obj.cell(row=1, column=index).value
         if value in col_keys:
-            msg = 'Duplicated column name, ' + str(value) + ', detected.'
+            msg = "Duplicated column name, " + str(value) + ", detected."
             errors.append(Error(CRITICAL, msg))
             return errors, results
         if value in mapping_dict:
@@ -426,7 +424,7 @@ def read_excel(location, worksheet=None):
             if value:
                 row_dict[col_keys[index]] = value
             else:
-                row_dict[col_keys[index]] = ''
+                row_dict[col_keys[index]] = ""
             index = index + 1
         results.append(row_dict)
     return errors, results

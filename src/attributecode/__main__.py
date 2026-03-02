@@ -14,6 +14,7 @@
 #  limitations under the License.
 # ============================================================================
 
-if __name__ == '__main__':  # pragma: nocover
+if __name__ == "__main__":  # pragma: nocover
     from attributecode import cmd
+
     cmd.about()

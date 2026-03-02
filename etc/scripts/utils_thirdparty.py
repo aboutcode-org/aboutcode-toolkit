@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) nexB Inc. and others. All rights reserved.
 # ScanCode is a trademark of nexB Inc.
@@ -24,12 +25,13 @@ import license_expression
 import packageurl
 import requests
 import saneyaml
-import utils_pip_compatibility_tags
 from commoncode import fileutils
 from commoncode.hash import multi_checksums
 from commoncode.text import python_safe_name
 from packvers import tags as packaging_tags
 from packvers import version as packaging_version
+
+import utils_pip_compatibility_tags
 
 """
 Utilities to manage Python thirparty libraries source, binaries and metadata in
@@ -91,8 +93,7 @@ Wheel downloader
 
 - parse requirement file
 - create a TODO queue of requirements to process
-- done: create an empty map of processed binary requirements as
-  {package name: (list of versions/tags}
+- done: create an empty map of processed binary requirements as {package name: (list of versions/tags}
 
 
 - while we have package reqs in TODO queue, process one requirement:
@@ -114,12 +115,15 @@ TRACE_DEEP = False
 TRACE_ULTRA_DEEP = False
 
 # Supported environments
-PYTHON_VERSIONS = "39", "310", "311"
+PYTHON_VERSIONS = "39", "310", "311", "312", "313", "314"
 
 PYTHON_DOT_VERSIONS_BY_VER = {
     "39": "3.9",
     "310": "3.10",
     "311": "3.11",
+    "312": "3.12",
+    "313": "3.13",
+    "314": "3.14",
 }
 
 
@@ -131,10 +135,12 @@ def get_python_dot_version(version):
 
 
 ABIS_BY_PYTHON_VERSION = {
-    "37": ["cp37", "cp37m", "abi3"],
-    "38": ["cp38", "cp38m", "abi3"],
     "39": ["cp39", "cp39m", "abi3"],
     "310": ["cp310", "cp310m", "abi3"],
+    "311": ["cp311", "cp311m", "abi3"],
+    "312": ["cp312", "cp312m", "abi3"],
+    "313": ["cp313", "cp313m", "abi3"],
+    "314": ["cp314", "cp314m", "abi3"],
 }
 
 PLATFORMS_BY_OS = {
@@ -552,8 +558,7 @@ class Distribution(NameVer):
         Download this distribution into `dest_dir` directory.
         Return the fetched filename.
         """
-        if not self.filename:
-            raise ValueError(f"self.filename has no value but is required: {self.filename!r}")
+        assert self.filename
         if TRACE_DEEP:
             print(
                 f"Fetching distribution of {self.name}=={self.version}:",
@@ -821,9 +826,9 @@ class Distribution(NameVer):
         """
         urls = LinksRepository.from_url(use_cached_index=use_cached_index).links
         errors = []
-        extra_lic_names = [lic.get("file") for lic in self.extra_data.get("licenses", {})]
+        extra_lic_names = [l.get("file") for l in self.extra_data.get("licenses", {})]
         extra_lic_names += [self.extra_data.get("license_file")]
-        extra_lic_names = [eln for eln in extra_lic_names if eln]
+        extra_lic_names = [ln for ln in extra_lic_names if ln]
         lic_names = [f"{key}.LICENSE" for key in self.get_license_keys()]
         for filename in lic_names + extra_lic_names:
             floc = os.path.join(dest_dir, filename)
@@ -843,7 +848,7 @@ class Distribution(NameVer):
                 if TRACE:
                     print(f"Fetched license from remote: {lic_url}")
 
-            except Exception:
+            except:
                 try:
                     # try licensedb second
                     lic_url = f"{LICENSEDB_API_URL}/{filename}"
@@ -856,9 +861,8 @@ class Distribution(NameVer):
                     if TRACE:
                         print(f"Fetched license from licensedb: {lic_url}")
 
-                except Exception:
-                    msg = f"No text for license {filename} in expression "
-                    f"{self.license_expression!r} from {self}"
+                except:
+                    msg = f'No text for license {filename} in expression "{self.license_expression}" from {self}'
                     print(msg)
                     errors.append(msg)
 
@@ -998,7 +1002,7 @@ def get_license_link_for_filename(filename, urls):
     exception if no link is found or if there are more than one link for that
     file name.
     """
-    path_or_url = [url for url in urls if url.endswith(f"/{filename}")]
+    path_or_url = [l for l in urls if l.endswith(f"/{filename}")]
     if not path_or_url:
         raise Exception(f"Missing link to file: {filename}")
     if not len(path_or_url) == 1:
@@ -1287,7 +1291,7 @@ class Wheel(Distribution):
 def is_pure_wheel(filename):
     try:
         return Wheel.from_filename(filename).is_pure()
-    except Exception:
+    except:
         return False
 
 
@@ -1483,7 +1487,8 @@ class PypiPackage(NameVer):
         """
         if self.sdist:
             yield self.sdist
-        yield from self.wheels
+        for wheel in self.wheels:
+            yield wheel
 
     def get_url_for_filename(self, filename):
         """
@@ -1612,8 +1617,7 @@ class PypiSimpleRepository:
         type=dict,
         default=attr.Factory(lambda: defaultdict(dict)),
         metadata=dict(
-            help="Mapping of {name: {version: PypiPackage, version: PypiPackage, etc} "
-            "available in this repo"
+            help="Mapping of {name: {version: PypiPackage, version: PypiPackage, etc} available in this repo"
         ),
     )
 
@@ -1627,8 +1631,7 @@ class PypiSimpleRepository:
         type=bool,
         default=False,
         metadata=dict(
-            help="If True, use any existing on-disk cached PyPI index files. "
-            "Otherwise, fetch and cache."
+            help="If True, use any existing on-disk cached PyPI index files. Otherwise, fetch and cache."
         ),
     )
 
@@ -1637,8 +1640,7 @@ class PypiSimpleRepository:
         Return a mapping of all available PypiPackage version for this package name.
         The mapping may be empty. It is ordered by version from oldest to newest
         """
-        if not name:
-            raise ValueError(f"name is required: {name!r}")
+        assert name
         normalized_name = NameVer.normalize_name(name)
         versions = self.packages[normalized_name]
         if not versions and normalized_name not in self.fetched_package_normalized_names:
@@ -1693,7 +1695,7 @@ class PypiSimpleRepository:
         )
         links = collect_urls(text)
         # TODO: keep sha256
-        links = [link.partition("#sha256=") for link in links]
+        links = [l.partition("#sha256=") for l in links]
         links = [url for url, _, _sha256 in links]
         return links
 
@@ -1914,7 +1916,7 @@ def get_remote_file_content(
     # several redirects and that we can ignore content there. A HEAD request may
     # not get us this last header
     print(f"    DOWNLOADING: {url}")
-    with requests.get(url, allow_redirects=True, stream=True, headers=headers) as response:  # noqa: S113
+    with requests.get(url, allow_redirects=True, stream=True, headers=headers) as response:
         status = response.status_code
         if status != requests.codes.ok:  # NOQA
             if status == 429 and _delay < 20:
@@ -2133,7 +2135,7 @@ def call(args, verbose=TRACE):
     """
     if TRACE_DEEP:
         print("Calling:", " ".join(args))
-    with subprocess.Popen(  # noqa: S603
+    with subprocess.Popen(
         args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
     ) as process:
         stdouts = []
@@ -2198,7 +2200,7 @@ def download_wheels_with_pip(
         cli_args.extend(["--requirement", req_file])
 
     if TRACE:
-        print("Downloading wheels using command:", " ".join(cli_args))
+        print(f"Downloading wheels using command:", " ".join(cli_args))
 
     existing = set(os.listdir(dest_dir))
     error = False
@@ -2231,7 +2233,7 @@ def download_wheels_with_pip(
 
 def check_about(dest_dir=THIRDPARTY_DIR):
     try:
-        subprocess.check_output(f"venv/bin/about check {dest_dir}".split())  # noqa: S603
+        subprocess.check_output(f"venv/bin/about check {dest_dir}".split())
     except subprocess.CalledProcessError as cpe:
         print()
         print("Invalid ABOUT files:")
@@ -2282,5 +2284,5 @@ def get_license_expression(declared_licenses):
         return get_only_expression_from_extracted_license(declared_licenses)
     except ImportError:
         # Scancode is not installed, clean and join all the licenses
-        lics = [python_safe_name(lic).lower() for lic in declared_licenses]
+        lics = [python_safe_name(l).lower() for l in declared_licenses]
         return " AND ".join(lics).lower()
