@@ -941,7 +941,9 @@ def transform(location, output, configuration, worksheet, quiet, verbose):  # NO
             dup_keys.append(key)
 
     if dup_keys:
-        msg = 'The following field(s) in the input data are duplicated in the transformer field renamings: {dup_keys}.\nPlease correct and re-run.'.format(**locals())
+        msg = "The following field(s) in the input data are duplicated in the transformer field renamings: {dup_keys}.\nPlease correct and re-run.".format(
+            **locals()
+        )
         click.echo(msg)
         sys.exit(1)
 
