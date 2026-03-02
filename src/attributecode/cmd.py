@@ -845,6 +845,19 @@ OUTPUT: Path to CSV/JSON/XLSX inventory file to create.
     elif location.endswith('.xlsx'):
         new_data, errors = transform_excel(location, worksheet)
 
+    data_keys = new_data[0].keys() if new_data else []
+    transformer_keys = transformer.field_renamings.keys()
+    dup_keys = []
+
+    for key in transformer_keys:
+        if key in data_keys:
+            dup_keys.append(key)
+
+    if dup_keys:
+        msg = 'The following field(s) in the input data are duplicated in the transformer field renamings: {dup_keys}.\nPlease correct and re-run.'.format(**locals())
+        click.echo(msg)
+        sys.exit(1)
+
     if not errors:
         updated_data, errors = transform_data(new_data, transformer)
 
