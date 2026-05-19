@@ -20,7 +20,7 @@ packageurl-python==0.17.6
 packaging==25.0
 pluggy==1.6.0
 pycparser==2.23
-Pygments==2.15.0
+Pygments==2.20.0
 PyYAML==6.0.3
 requests==2.33.0
 saneyaml==0.6.1
