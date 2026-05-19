@@ -24,5 +24,5 @@ Pygments==2.20.0
 PyYAML==6.0.3
 requests==2.33.0
 saneyaml==0.6.1
-urllib3==2.6.3
+urllib3==2.7.0
 zipp==3.23.0
