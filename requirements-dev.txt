@@ -1,5 +1,5 @@
 alabaster==0.7.16
-anyio==4.6.0
+anyio==4.14.2
 backports.tarfile==1.2.0
 babel==2.15.0
 doc8==1.1.2
