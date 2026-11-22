@@ -13,29 +13,28 @@
 #  limitations under the License.
 # ============================================================================
 
-import json
-from collections import Counter, OrderedDict
+
+from collections import Counter
 from itertools import zip_longest
 
 import attr
-import openpyxl
 
 from attributecode import CRITICAL
 from attributecode import Error
 from attributecode import saneyaml
-from attributecode.util import csv
+from attributecode import io
 from attributecode.util import replace_tab_with_spaces
+
 
 
 def transform_csv(location):
     """
-    Read a CSV file at `location` and convert data into list of dictionaries.
+    Read a CSV file and convert data into a list of dictionaries.
     """
     errors = []
-    new_data = []
-    rows = read_csv_rows(location)
-    data = iter(rows)
-    names = next(rows)
+    rows = iter(io.read_csv_rows(location))
+    names = next(rows, [])
+
     field_names = strip_trailing_fields_csv(names)
     dupes = check_duplicate_fields(field_names)
 
@@ -44,37 +43,30 @@ def transform_csv(location):
         for name in dupes:
             errors.append(Error(CRITICAL, msg % locals()))
 
+    new_data = []
     if not errors:
-        # Convert to dicts
-        new_data = [dict(zip_longest(field_names, item)) for item in data]
+        new_data = [dict(zip_longest(field_names, item)) for item in rows]
 
     return new_data, errors
+
 
 
 def transform_json(location):
     """
-    Read a JSON file at `location` and convert data into list of dictionaries.
+    Read a JSON file and convert data into a list of dictionaries.
     """
-    errors = []
-    new_data = []
-    items = read_json(location)
+    items = io.read_json(location)
     data = normalize_dict_data(items)
     new_data = strip_trailing_fields_json(data)
 
-    return new_data, errors
+    return new_data, []
 
 
 def transform_excel(location, worksheet=None):
     """
-    Read a XLSX file at `location` and convert data into list of dictionaries.
+    Read an XLSX file and convert data into a list of dictionaries.
     """
-    errors = []
-    new_data = []
-    dupes, new_data = read_excel(location, worksheet)
-    if dupes:
-        msg = "Duplicated field name: %(name)s"
-        for name in dupes:
-            errors.append(Error(CRITICAL, msg % locals()))
+    errors, new_data = io.read_excel(location, worksheet)
     return new_data, errors
 
 
@@ -360,85 +352,3 @@ def read_csv_rows(location):
         for row in reader:
             yield row
 
-
-def read_json(location):
-    """
-    Yield rows (as a list of values) from a CSV file at `location`.
-    """
-    with open(location, encoding="utf-8", errors="replace") as jsonfile:
-        return json.load(jsonfile)
-
-
-def write_csv(location, data):
-    """
-    Write a CSV file at `location` with the `data` which is a list of ordered dicts.
-    """
-    field_names = list(data[0].keys())
-    with open(location, "w", encoding="utf-8", newline="\n", errors="replace") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=field_names)
-        writer.writeheader()
-        writer.writerows(data)
-
-
-def write_json(location, data):
-    """
-    Write a JSON file at `location` the `data` list of ordered dicts.
-    """
-    with open(location, "w") as jsonfile:
-        json.dump(data, jsonfile, indent=3)
-
-
-def read_excel(location, worksheet=None):
-    """
-    Read XLSX at `location`, return a list of ordered dictionaries, one
-    for each row.
-    """
-    results = []
-    errors = []
-    input_bom = openpyxl.load_workbook(location)
-    if worksheet:
-        sheet_obj = input_bom[worksheet]
-    else:
-        sheet_obj = input_bom.active
-    max_col = sheet_obj.max_column
-
-    index = 1
-    col_keys = []
-    mapping_dict = {}
-    while index <= max_col:
-        value = sheet_obj.cell(row=1, column=index).value
-        if value in col_keys:
-            msg = "Duplicated column name, " + str(value) + ", detected."
-            errors.append(Error(CRITICAL, msg))
-            return errors, results
-        if value in mapping_dict:
-            value = mapping_dict[value]
-        col_keys.append(value)
-        index = index + 1
-
-    for row in sheet_obj.iter_rows(min_row=2, values_only=True):
-        row_dict = OrderedDict()
-        index = 0
-        while index < max_col:
-            value = row[index]
-            if value:
-                row_dict[col_keys[index]] = value
-            else:
-                row_dict[col_keys[index]] = ""
-            index = index + 1
-        results.append(row_dict)
-    return errors, results
-
-
-def write_excel(location, data):
-    wb = openpyxl.Workbook()
-    ws = wb.active
-
-    # Get the header
-    headers = list(data[0].keys())
-    ws.append(headers)
-
-    for elements in data:
-        ws.append([elements.get(h) for h in headers])
-
-    wb.save(location)

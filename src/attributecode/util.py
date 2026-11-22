@@ -19,7 +19,6 @@ import codecs
 import csv
 import json
 import ntpath
-import openpyxl
 import os
 import posixpath
 import re
@@ -336,27 +335,18 @@ def resource_name(path):
     return right.strip()
 
 
-def load_csv(location):
-    """
-    Read CSV at `location`, return a list of ordered dictionaries, one
-    for each row.
-    """
-    results = []
-    with open(location, mode="r", encoding="utf-8-sig", errors="replace") as csvfile:
-        for row in csv.DictReader(csvfile):
-            # convert all the column keys to lower case
-            updated_row = {key.lower().strip(): value for key, value in row.items()}
-            results.append(updated_row)
-    return results
 
+def load_csv(location):
+    """Read CSV and return rows as dictionaries."""
+    from attributecode.io import read_csv_dicts
+
+    return read_csv_dicts(location)
 
 def load_json(location):
-    """
-    Read JSON file at `location` and return a list of ordered dicts, one for
-    each entry.
-    """
-    with open(location) as json_file:
-        results = json.load(json_file)
+    """Read JSON and return a list of dictionaries."""
+    from attributecode.io import read_json
+
+    results = read_json(location)
 
     if not isinstance(results, list):
         results = [results]
@@ -772,58 +762,13 @@ def load_scancode_json(location):
     return updated_results
 
 
+
 def load_excel(location, worksheet=None):
-    """
-    Read XLSX at `location`, return a list of ordered dictionaries, one
-    for each row.
-    """
-    results = []
-    errors = []
-    import warnings
+    """Read XLSX and return errors and rows."""
+    from attributecode.io import read_excel
 
-    # This is to prevent showing the: warn("Workbook contains no default style, apply openpyxl's default")
-    with warnings.catch_warnings(record=True):
-        input_bom = openpyxl.load_workbook(location)
-        sheetnames = input_bom.sheetnames
-        if worksheet:
-            if worksheet not in sheetnames:
-                import sys
+    return read_excel(location, worksheet)
 
-                print("The input worksheet name does not exist. Exiting.")
-                sys.exit(1)
-            sheet_obj = input_bom[worksheet]
-        else:
-            sheet_obj = input_bom.active
-    print("Working on the " + sheet_obj.title + " worksheet.")
-    max_col = sheet_obj.max_column
-
-    index = 1
-    col_keys = []
-    mapping_dict = {}
-
-    while index <= max_col:
-        value = sheet_obj.cell(row=1, column=index).value
-        if value in col_keys:
-            msg = "Duplicated column name, " + str(value) + ", detected."
-            errors.append(Error(CRITICAL, msg))
-            return errors, results
-        if value in mapping_dict:
-            value = mapping_dict[value]
-        col_keys.append(value)
-        index = index + 1
-
-    for row in sheet_obj.iter_rows(min_row=2, values_only=True):
-        row_dict = OrderedDict()
-        index = 0
-        while index < max_col:
-            value = row[index]
-            if value:
-                row_dict[col_keys[index]] = value
-            else:
-                row_dict[col_keys[index]] = ""
-            index = index + 1
-        results.append(row_dict)
-    return errors, results
 
 
 def write_licenses(lic_dict, location):
