@@ -48,12 +48,10 @@ from attributecode import Error
 from attributecode import saneyaml
 from attributecode import gen
 from attributecode import util
-from attributecode.transform import write_excel
 from attributecode.util import add_unc
 from attributecode.util import boolean_fields
 from attributecode.util import copy_license_notice_files
 from attributecode.util import copy_file
-from attributecode.util import csv
 from attributecode.util import file_fields
 from attributecode.util import filter_errors
 from attributecode.util import get_spdx_key_and_lic_key_from_licdb
@@ -65,6 +63,7 @@ from attributecode.util import wrap_boolean_value
 from attributecode.util import UNC_PREFIX
 from attributecode.util import ungroup_licenses
 from attributecode.util import ungroup_licenses_from_sctk
+from attributecode import io
 
 genereated_tk_version = "# Generated with AboutCode Toolkit Version %s \n\n" % __version__
 
@@ -1915,40 +1914,27 @@ def save_as_json(location, about_dicts):
     Save the given data as a JSON file or print it to standard output.
     """
     data = util.format_about_dict_for_json_output(about_dicts)
-    if location == "-":
-        json.dump(data, sys.stdout, indent=2)
-    else:
-        with open(location, mode="w") as output_file:
-            output_file.write(json.dumps(data, indent=2))
+    output = sys.stdout if location == "-" else location
+
+    io.write_json(output, data, indent=2)
 
 
 def save_as_csv(location, about_dicts, field_names):
     """
     Save the given data as a CSV file or print it to standard output.
     """
-    if location == "-":
-        writer = csv.DictWriter(sys.stdout, field_names)
-        writer.writeheader()
-        csv_formatted_list = util.format_about_dict_output(about_dicts)
-        for row in csv_formatted_list:
-            writer.writerow(row)
-    else:
-        with open(
-            location, mode="w", encoding="utf-8", newline="", errors="replace"
-        ) as output_file:
-            writer = csv.DictWriter(output_file, field_names)
-            writer.writeheader()
-            csv_formatted_list = util.format_about_dict_output(about_dicts)
-            for row in csv_formatted_list:
-                writer.writerow(row)
+    csv_formatted_list = util.format_about_dict_output(about_dicts)
+    output = sys.stdout if location == "-" else location
+
+    io.write_csv(output, csv_formatted_list, field_names)
 
 
 def save_as_excel(location, about_dicts):
     """
-    Save the given data as a Excel file.
+    Save the given data as an Excel file.
     """
     formatted_list = util.format_about_dict_output(about_dicts)
-    write_excel(location, formatted_list)
+    io.write_excel(location, formatted_list)
 
 
 def pre_process_and_fetch_license_dict(
